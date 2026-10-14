@@ -10,6 +10,9 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
       { path: 'health/live', method: RequestMethod.GET },
       { path: 'health/ready', method: RequestMethod.GET },
       { path: 'metrics', method: RequestMethod.GET },
+      // Operator dashboard (Bull Board): not part of the versioned REST API.
+      { path: 'admin/queues', method: RequestMethod.ALL },
+      { path: 'admin/queues/{*path}', method: RequestMethod.ALL },
     ],
   });
   app.use(helmet());

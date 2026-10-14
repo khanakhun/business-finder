@@ -1,8 +1,9 @@
-import { type ApiEnv, apiEnv, loadEnvOrExit } from '@bf/config';
+import { type ApiEnv, apiEnv, loadEnvOrExit, type WorkerEnv, workerEnv } from '@bf/config';
 
 /** DI token for the validated, frozen environment (`@bf/config` apiEnv). */
 export const APP_ENV = Symbol('APP_ENV');
-export type AppEnv = ApiEnv;
+/** What shared modules see: the fields both process types have. Entrypoints get their exact type. */
+export type AppEnv = ApiEnv | WorkerEnv;
 
 /** How the process runs; decides which modules/providers are wired (ADR-0005). */
 export type AppMode = 'http' | 'worker' | 'openapi';
@@ -32,14 +33,16 @@ export class ProductionWithoutAuthError extends Error {
   }
 }
 
+export function loadAppEnv(mode: 'worker', source?: Record<string, string | undefined>): WorkerEnv;
+export function loadAppEnv(mode: 'http' | 'openapi', source?: Record<string, string | undefined>): ApiEnv;
 export function loadAppEnv(mode: AppMode, source?: Record<string, string | undefined>): AppEnv {
+  const from = source ? { env: source, files: [] } : {};
   const env =
     mode === 'openapi'
       ? apiEnv.parse(OPENAPI_ENV)
-      : loadEnvOrExit(apiEnv, {
-          label: mode === 'worker' ? 'worker' : 'api',
-          ...(source ? { env: source, files: [] } : {}),
-        });
+      : mode === 'worker'
+        ? loadEnvOrExit(workerEnv, { label: 'worker', ...from })
+        : loadEnvOrExit(apiEnv, { label: 'api', ...from });
   // DECISION(BF-006): every /v1 route is open until BF-010 adds auth, so production boots are blocked outright.
   if (env.NODE_ENV === 'production') throw new ProductionWithoutAuthError();
   return env;

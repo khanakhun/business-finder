@@ -1,6 +1,46 @@
 {
   "components": {
     "schemas": {
+      "PingJobsAccepted": {
+        "additionalProperties": false,
+        "description": "Ids of the enqueued jobs.",
+        "properties": {
+          "jobIds": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "jobIds"
+        ],
+        "type": "object"
+      },
+      "PingJobsRequest": {
+        "additionalProperties": false,
+        "description": "Enqueue system.ping jobs (smoke test for the queue pipeline).",
+        "properties": {
+          "count": {
+            "default": 1,
+            "description": "How many ping jobs to enqueue.",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotencyKey": {
+            "description": "Re-sending the same key enqueues nothing new.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
       "ProblemDetails": {
         "additionalProperties": false,
         "description": "RFC 9457 problem details (application/problem+json).",
@@ -152,6 +192,58 @@
           }
         },
         "summary": "Build and runtime information",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/system/ping-jobs": {
+      "post": {
+        "operationId": "enqueuePingJobs",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PingJobsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingJobsAccepted"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Enqueue system.ping jobs (queue smoke test)",
         "tags": [
           "system"
         ]

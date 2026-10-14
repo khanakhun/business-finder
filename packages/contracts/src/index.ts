@@ -92,5 +92,6 @@ export {
   PingJobsRequestSchema,
   type SystemInfo,
   SystemInfoSchema,
+  SystemPingJob,
 } from './system.ts';
 export { type Clock, fixedClock, type IsoDateTime, IsoDateTimeSchema, systemClock } from './time.ts';

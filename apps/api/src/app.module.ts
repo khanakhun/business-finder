@@ -1,6 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
+import { QueueModule } from './modules/platform/queue/queue.module.ts';
 import { SystemModule } from './modules/system/system.module.ts';
 
 /** Composition root. Each process type gets the same domain modules wired for its role (ADR-0005). */
@@ -20,6 +21,14 @@ export class AppModule {
   }
 
   private static build(env: AppEnv, mode: AppMode): DynamicModule {
-    return { module: AppModule, imports: [PlatformModule.forRoot(env, mode), SystemModule.forRoot(mode)] };
+    return {
+      module: AppModule,
+      imports: [
+        PlatformModule.forRoot(env, mode),
+        // Creating queues connects to Valkey, which OpenAPI generation must never do.
+        ...(mode === 'openapi' ? [] : [QueueModule.forRoot(env, mode)]),
+        SystemModule.forRoot(mode),
+      ],
+    };
   }
 }

@@ -97,7 +97,10 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
+| `BULL_BOARD_USER` | App-specific | api | no |  |  | Basic-auth user for the queue dashboard (/admin/queues). Unset = dashboard off. |
+| `BULL_BOARD_PASSWORD` | App-specific | api | no |  | yes | Basic-auth password for the queue dashboard, ≥ 12 chars. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
+| `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |
 | `WEB_PORT` | App-specific | web | no | `3000` |  | HTTP port of apps/web. Set by infra:up from BF_PORT_OFFSET. |
 | `NEXT_PUBLIC_API_URL` | App-specific | web | no | `http://localhost:4000` |  | API base URL used by the browser. |
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |

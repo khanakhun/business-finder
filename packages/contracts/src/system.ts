@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { defineJob } from './jobs.ts';
 import { IsoDateTimeSchema } from './time.ts';
 
 /** `GET /v1/system/info` (reference module, BF-006). */
@@ -34,3 +35,8 @@ export const PingJobsAcceptedSchema = z
   .object({ jobIds: z.array(z.string()).min(1) })
   .meta({ id: 'PingJobsAccepted', description: 'Ids of the enqueued jobs.' });
 export type PingJobsAccepted = z.infer<typeof PingJobsAcceptedSchema>;
+
+/** `system.ping` job: proves the queue pipeline end to end (producer → worker, trace, idempotency, metrics). */
+export const SystemPingJob = defineJob('system', 'ping', {
+  sequence: z.number().int().min(0).describe('Position within the request that enqueued it.'),
+});

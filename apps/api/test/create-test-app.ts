@@ -2,8 +2,9 @@ import 'reflect-metadata';
 import { type Clock, fixedClock } from '@bf/contracts';
 import { createIsolatedDatabase } from '@bf/testing/db';
 import { testValkeyUrl } from '@bf/testing/valkey';
-import type { INestApplication, Type } from '@nestjs/common';
+import type { INestApplication, INestApplicationContext, Type } from '@nestjs/common';
 import { Module } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.ts';
@@ -31,7 +32,7 @@ export interface TestAppOptions {
   readonly controllers?: readonly Type[];
   /** Valkey database index (0–15); give each test file its own so rate limits do not interfere. */
   readonly valkeyDb?: number;
-  readonly env?: Partial<Record<keyof AppEnv, string>>;
+  readonly env?: Partial<Record<string, string>>;
 }
 
 export interface TestApp {
@@ -73,4 +74,17 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
       await database.drop();
     },
   };
+}
+
+/** A worker process (processors only) on the same database/Valkey as a test app. Close it before the app. */
+export async function createTestWorker(app: TestApp): Promise<INestApplicationContext> {
+  const env = loadAppEnv('worker', {
+    ...TEST_ENV,
+    DATABASE_URL: app.env.DATABASE_URL,
+    VALKEY_URL: app.env.VALKEY_URL,
+  });
+  const { AppModule: Module_ } = await import('../src/app.module.ts');
+  const worker = await NestFactory.createApplicationContext(Module_.forWorker(env), { logger: false });
+  await worker.init();
+  return worker;
 }

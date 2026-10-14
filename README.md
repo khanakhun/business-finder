@@ -90,13 +90,28 @@ pnpm verify                          # lint + typecheck + unit tests across the 
 
 Commits must follow Conventional Commits; `feat`, `fix`, `refactor` and `perf` subjects must reference their ticket, e.g. `feat(repo): bootstrap toolchain (BF-001)`. The pre-commit hook formats staged files.
 
-Coming with BF-002 (local infrastructure) and the app tickets:
+### Local infrastructure
+
+Requires Docker with Compose v2.
 
 ```bash
-cp .env.example .env                 # fill in API keys you have; everything else has local defaults
-pnpm infra:up                        # postgres(+postgis+pgvector), valkey, minio, mailpit, …
-pnpm db:migrate && pnpm db:seed
-pnpm dev                             # web :3000, api :4000, sites :3100, intel :8000
+cp .env.example .env                 # then add the three generated secrets (see docs/ENVIRONMENT.md)
+pnpm infra:up                        # postgres (PostGIS + pgvector), valkey, S3 (RustFS), mailpit — waits until healthy
+pnpm infra:up --profile scraper --profile verify --profile observability   # optional services
+pnpm infra:status                    # services, health and URLs
+pnpm env:check api                   # validate the environment of one app (api | worker | web | sites | intel)
+pnpm infra:down                      # stop (keeps data) · pnpm infra:reset --yes  deletes the volumes
+```
+
+`pnpm infra:up` writes `.env.generated` with connection URLs for the running stack. Ports are 127.0.0.1-only;
+if a port is taken, or to run several checkouts at once, set `BF_PORT_OFFSET=10` (20, …, 70) and a distinct
+`COMPOSE_PROJECT_NAME` in `.env`. All variables: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+
+Coming with the app tickets:
+
+```bash
+pnpm db:migrate && pnpm db:seed      # BF-003
+pnpm dev                             # web :3000, api :4000, sites :3100, intel :8000 (+ offset)
 ```
 
 ## Status

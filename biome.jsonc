@@ -88,7 +88,15 @@
                     "message": "Apps must not import from other apps. Move shared code to a package in packages/."
                   },
                   {
-                    "group": ["**/apps/**"],
+                    // Relative paths that climb out of the app; a bare `**/apps/**` would also match
+                    // folders that happen to be called `apps` inside a workspace.
+                    "group": [
+                      "../../apps/**",
+                      "../../../apps/**",
+                      "../../../../apps/**",
+                      "../../../../../apps/**",
+                      "../../../../../../apps/**"
+                    ],
                     "message": "Apps must not import from other apps. Move shared code to a package in packages/."
                   }
                 ]
@@ -116,7 +124,11 @@
                       "@bf/api/**",
                       "@bf/sites",
                       "@bf/sites/**",
-                      "**/apps/**"
+                      "../../apps/**",
+                      "../../../apps/**",
+                      "../../../../apps/**",
+                      "../../../../../apps/**",
+                      "../../../../../../apps/**"
                     ],
                     "message": "Packages must not depend on apps."
                   }

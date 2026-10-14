@@ -33,8 +33,12 @@
     "typecheck": {
       "dependsOn": ["transit"]
     },
+    // Unit tests for root scripts (node:test); package `test` tasks depend on it like `lint` on `//#lint:root`.
+    "//#test:root": {
+      "inputs": ["scripts/**"]
+    },
     "test": {
-      "dependsOn": ["transit"],
+      "dependsOn": ["transit", "//#test:root"],
       "outputs": ["coverage/**", "reports/**"]
     },
     // Integration and E2E tests talk to containers/browsers whose state Turborepo cannot hash.

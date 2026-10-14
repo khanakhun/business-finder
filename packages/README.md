@@ -67,3 +67,4 @@ yet, to keep a single linter; add it (scoped to that one rule) if reviews find p
 |---|---|---|
 | `@bf/tsconfig` | TypeScript presets: `base`, `library`, `nestjs`, `nextjs`, `node-script` | BF-001 |
 | `@bf/testing` | Vitest config factory, seeded `faker`; DB/container helpers come in BF-003 | BF-001 |
+| `@bf/config` | Env schemas per app, `loadEnv` with redacted reports, feature flags, `env:*` CLIs | BF-002 |

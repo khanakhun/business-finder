@@ -2,13 +2,10 @@
 
 import { shouldRetry } from '@bf/api-client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import dynamic from 'next/dynamic';
 import { ThemeProvider } from 'next-themes';
 import * as React from 'react';
 import { CommandRegistryProvider } from '@/lib/commands.tsx';
-
-// Toasts are never needed for first paint; the renderer loads after hydration.
-const Toaster = dynamic(() => import('@bf/ui/components/sonner').then((m) => m.Toaster), { ssr: false });
+import { ToastHost } from '@/lib/toast.tsx';
 
 const ReactQueryDevtools =
   process.env.NODE_ENV === 'development'
@@ -44,7 +41,7 @@ export function Providers({
     >
       <QueryClientProvider client={queryClient}>
         <CommandRegistryProvider>{children}</CommandRegistryProvider>
-        <Toaster position="bottom-right" />
+        <ToastHost position="bottom-right" />
         <React.Suspense>
           <ReactQueryDevtools />
         </React.Suspense>

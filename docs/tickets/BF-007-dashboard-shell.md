@@ -121,5 +121,11 @@ light/dark and EN/FR in the PR.
   render → navigation cancelled); hydration mismatch of the theme icon; section-wide `loading.tsx` turned 404 into 200.
 - **Bundle**: palette, shortcuts dialog, mobile nav, toaster and top-bar menus load on intent; deep `@bf/ui/...` imports
   (the barrel defeated tree-shaking); native `title` instead of Radix Tooltip in the collapsed sidebar.
-  **Open**: the shell sits at ~195–215 kB gzip; the 200 kB e2e budget passes most runs but not all — see follow-ups.
+  The toast viewport mounts on the first toast (`getToast()` in `lib/toast.tsx`): sonner was ~11 kB loaded right after
+  hydration, the timing-dependent part of the old 195–215 kB spread. Shell now **186 kB gzip** in 15 files, stable.
+  Not done: scoping `NextIntlClientProvider` messages — they are ~3 kB of HTML (not JS), and root-level
+  `useTranslations()` in client components would need key-level picking; revisit when messages grow.
+- **E2E flakiness traced to the API**: with Valkey down, every request waited ~10 s in ioredis's offline queue before
+  the throttler failed open (fixed in BF-006's throttler, see its notes). E2E: 17/17 in 3 consecutive runs, with infra
+  down and with infra up.
 - `next-env.d.ts` is generated (git-ignored, excluded from Biome); `typecheck` runs `next typegen` first.

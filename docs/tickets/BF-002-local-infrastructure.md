@@ -123,7 +123,8 @@ different COMPOSE_PROJECT_NAME; paste the outputs in the PR.
   RustFS is S3-compatible (Apache-2.0), same ports, supports bucket versioning. Services are named `s3` / `s3-init`.
 - **Alpine + source-built pgvector.** The Debian `17-3.5` tag is still on bullseye whose PGDG apt repo was retired.
 - **`00-roles.sh`, not `.sql`**: the read-only password comes from the environment. `bf_sites_ro` has
-  `default_transaction_read_only=on` *and* only SELECT grants (+ default privileges for future tables).
+  `default_transaction_read_only=on`, CONNECT and schema USAGE only — no table privileges: per ADR-0004 it reads
+  only publication/version tables, which BF-035's migration grants explicitly.
 - **No dotenv dependency**: Node 24's `util.parseEnv` parses `.env` files in both `infra.mjs` and `@bf/config`.
 - **Ports bind to 127.0.0.1.** `infra:up` pre-checks ports and suggests a `BF_PORT_OFFSET` on conflict; it waits
   for healthchecks (`--wait`) and for `s3-init` to exit 0. Scraper and OTel collector images have no HTTP client,

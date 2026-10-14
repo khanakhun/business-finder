@@ -56,15 +56,33 @@ function detectRepo() {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function gh(method, path, body) {
+const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
+// Retries: rate limits (request rejected, safe to repeat for any method) wait ≥ 1 minute as GitHub recommends;
+// 5xx errors are retried only for idempotent methods so a POST can never create a duplicate issue.
+function gh(method, path, body, attempt = 0) {
   const ghArgs = ['api', '-X', method, `repos/${REPO}${path}`, '-H', 'Accept: application/vnd.github+json'];
   if (body !== undefined) ghArgs.push('--input', '-');
-  const out = execFileSync('gh', ghArgs, {
-    input: body !== undefined ? JSON.stringify(body) : undefined,
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  return out.trim() ? JSON.parse(out) : null;
+  try {
+    const out = execFileSync('gh', ghArgs, {
+      input: body !== undefined ? JSON.stringify(body) : undefined,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return out.trim() ? JSON.parse(out) : null;
+  } catch (err) {
+    const msg = `${err.stderr ?? ''} ${err.stdout ?? ''} ${err.message ?? ''}`;
+    const rateLimited = /rate limit|HTTP 429/i.test(msg);
+    const serverError = /HTTP 50[0234]/.test(msg) && method !== 'POST';
+    if ((rateLimited || serverError) && attempt < 5) {
+      const waitMs = rateLimited ? 60_000 * (attempt + 1) : 5_000 * (attempt + 1);
+      console.warn(`! ${method} ${path}: ${rateLimited ? 'rate limited' : 'server error'}; retrying in ${waitMs / 1000}s`);
+      sleepSync(waitMs);
+      return gh(method, path, body, attempt + 1);
+    }
+    throw err;
+  }
 }
 
 function ghPaginate(path) {
@@ -105,7 +123,7 @@ function parseTicket(file) {
   meta.blocks ??= [];
   meta.areas ??= [];
   // Body without the H1 title line (the issue title carries it).
-  const body = m[2].replace(/^#\s+.*\n+/, '');
+  const body = m[2].replace(/^\s*#\s+.*\n+/, '');
   return { file, meta, body };
 }
 
@@ -176,7 +194,7 @@ async function main() {
     console.log(`+ label ${name}`);
     if (!DRY) {
       gh('POST', '/labels', { name, color: colorFor(name) });
-      await sleep(300);
+      await sleep(WRITE_DELAY_MS);
     }
   }
 
@@ -188,7 +206,7 @@ async function main() {
     if (!DRY) {
       const created = gh('POST', '/milestones', { title, description: MILESTONES[title] ?? '' });
       milestones[title] = created.number;
-      await sleep(300);
+      await sleep(WRITE_DELAY_MS);
     }
   }
 

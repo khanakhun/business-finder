@@ -38,6 +38,9 @@ infra/compose/data/
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# drizzle drift check scratch (packages/db/src/cli/kit.ts)
+.drift-check/
+
 # agent workspaces
 .claude/settings.local.json
 tmp/

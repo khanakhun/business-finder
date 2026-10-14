@@ -80,12 +80,12 @@ packages/testing/src/db/{global-setup.ts, isolated-db.ts, rollback.ts}
 - Performance smoke: creating an isolated database per file < 3 s.
 
 ## Acceptance criteria
-- [ ] `pnpm db:migrate` on a fresh local DB succeeds; all extensions installed; `f_unaccent` and `set_updated_at` exist.
-- [ ] Custom types round-trip correctly in integration tests (point, multipolygon, vector, tsvector, ltree, citext).
-- [ ] `runInTransaction` + `getExecutor` give ambient transactions; tests prove rollback/commit behaviour.
-- [ ] `@bf/testing/db` provides isolated databases from a migrated template; CI-friendly image override via env.
-- [ ] `pnpm db:check` detects drift (demonstrated in the PR by a deliberate temporary change).
-- [ ] `packages/db/README.md` documents conventions and the expand/contract recipe.
+- [x] `pnpm db:migrate` on a fresh local DB succeeds; all extensions installed; `f_unaccent` and `set_updated_at` exist.
+- [x] Custom types round-trip correctly in integration tests (point, multipolygon, vector, tsvector, ltree, citext).
+- [x] `runInTransaction` + `getExecutor` give ambient transactions; tests prove rollback/commit behaviour.
+- [x] `@bf/testing/db` provides isolated databases from a migrated template; CI-friendly image override via env.
+- [x] `pnpm db:check` detects drift (demonstrated in the PR by a deliberate temporary change).
+- [x] `packages/db/README.md` documents conventions and the expand/contract recipe.
 
 ## Agent prompt
 ```text
@@ -109,3 +109,25 @@ Verify: pnpm verify && pnpm test:int; pnpm infra:up && pnpm db:migrate && pnpm d
 - docs/ARCHITECTURE.md §6 · ADR-0003 · ADR-0004 · docs/conventions/testing.md §3
 - Drizzle custom types: https://orm.drizzle.team/docs/custom-types · PostGIS guide: https://orm.drizzle.team/docs/guides/postgis-geometry-point · pgvector guide: https://orm.drizzle.team/docs/guides/vector-similarity-search
 - Testcontainers for Node: https://node.testcontainers.org/
+
+## Implementation notes
+- **Versions**: drizzle-orm 0.45.4 / drizzle-kit 0.31.11 (1.0 is still beta), postgres.js 3.4.9,
+  testcontainers 12.2.1, uuid 14 (`v7`, replaced by `newId()` in BF-004 — `TODO(BF-004)` in `columns.ts`).
+- **`casing: 'snake_case'`** in the client and Drizzle Kit: schema properties are camelCase, columns snake_case.
+- **Geography reads** parse PostGIS hex EWKB in `fromDriver` (`types/wkb.ts`: Point, Polygon, MultiPolygon;
+  Z/M dropped) so selects stay plain column reads; writes use `ST_MakePoint(lng, lat)` / `ST_GeomFromGeoJSON`.
+- **`vector(dimensions)` is a factory**, because Drizzle's `toDriver` never sees the column config and writes
+  must be checked against the declared dimension.
+- **`withRollback` lives in `@bf/db/testing`**, not `@bf/testing/db`: it needs the transaction context, and
+  `@bf/testing` → `@bf/db` would form a dependency cycle (`@bf/db` dev-depends on `@bf/testing`).
+  `@bf/testing/db` has the container global setup, `createIsolatedDatabase()` and `truncateAll()`.
+- **Seed modules receive the transaction** (`run(tx)`): an integration test caught that passing the root client
+  let a failing module's writes survive.
+- **`db:check` = `drizzle-kit check` + drift probe**: generates into a scratch copy of `migrations/` and fails
+  (printing the SQL) if a new migration would be produced. drizzle-kit exits 0 even when it crashes, so only a
+  recognised outcome counts as success; it also mangles absolute `out` paths, so the scratch dir is package-relative.
+- **Coverage**: DB-bound files (client, tx, migrate, seed runner, CLIs, container setup) are excluded from *unit*
+  coverage via the new `coverageExclude` option and covered by the 27 integration tests.
+- **Migration 0000** also re-grants schema USAGE to `bf_sites_ro` (if the role exists) because `db:reset`
+  recreates `public`. BF-002's init script was narrowed to CONNECT + USAGE (ADR-0004 least privilege).
+- Timings: integration suite cold start (image build cached) 21.7 s; warm 10 s; isolated database < 3 s (asserted).

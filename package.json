@@ -27,7 +27,13 @@
     "infra:status": "node scripts/infra.mjs status",
     "env:check": "node packages/config/src/cli/check.ts",
     "env:doc": "node packages/config/src/cli/generate.ts doc",
-    "env:example": "node packages/config/src/cli/generate.ts example"
+    "env:example": "node packages/config/src/cli/generate.ts example",
+    "db:generate": "node packages/db/src/cli/kit.ts generate",
+    "db:migrate": "node packages/db/src/cli/migrate.ts",
+    "db:check": "node packages/db/src/cli/kit.ts check",
+    "db:seed": "node packages/db/src/cli/seed.ts",
+    "db:studio": "node packages/db/src/cli/kit.ts studio",
+    "db:reset": "node packages/db/src/cli/reset.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

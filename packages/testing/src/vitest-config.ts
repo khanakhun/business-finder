@@ -8,6 +8,13 @@ export interface VitestConfigOptions {
   readonly type: VitestConfigType;
   /** Package-specific setup files, run after the shared `@bf/testing/setup`. */
   readonly setupFiles?: readonly string[];
+  /**
+   * Extra globs kept out of unit coverage — only for code that needs real infrastructure and is exercised by the
+   * package's integration tests (DB clients, CLIs). Not a way to skip testing.
+   */
+  readonly coverageExclude?: readonly string[];
+  /** Vitest global setup files, e.g. `PG_GLOBAL_SETUP` for integration tests that need Postgres. */
+  readonly globalSetup?: readonly string[];
   /** Adds machine-readable reports for CI. Defaults to the `CI` environment variable. */
   readonly ci?: boolean;
 }
@@ -22,6 +29,9 @@ export const UNIT_COVERAGE_THRESHOLDS = {
 /** Absolute path of the shared setup file (seeds faker per test). */
 export const SETUP_FILE = fileURLToPath(new URL('./setup.ts', import.meta.url));
 
+/** Global setup that starts the test Postgres and migrates the template database (`@bf/testing/db`). */
+export const PG_GLOBAL_SETUP = fileURLToPath(new URL('./db/global-setup.ts', import.meta.url));
+
 const UNIT_TESTS = 'src/**/*.test.{ts,tsx}';
 const INT_TESTS = 'src/**/*.int.test.{ts,tsx}';
 const INT_TESTS_ANYWHERE = '**/*.int.test.{ts,tsx}';
@@ -34,7 +44,13 @@ const INT_TESTS_ANYWHERE = '**/*.int.test.{ts,tsx}';
  * ```
  */
 export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig {
-  const { type, setupFiles = [], ci = process.env.CI === 'true' } = options;
+  const {
+    type,
+    setupFiles = [],
+    globalSetup = [],
+    coverageExclude = [],
+    ci = process.env.CI === 'true',
+  } = options;
   const isUnit = type === 'unit';
 
   return defineConfig({
@@ -44,6 +60,7 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
       // A misconfigured glob must fail loudly instead of reporting green with zero tests.
       passWithNoTests: false,
       setupFiles: [SETUP_FILE, ...setupFiles],
+      ...(globalSetup.length > 0 ? { globalSetup: [...globalSetup] } : {}),
       reporters: ci ? ['default', 'junit'] : ['default'],
       ...(ci ? { outputFile: { junit: `reports/junit.${type}.xml` } } : {}),
       // Integration tests start Postgres/Valkey containers in hooks.
@@ -55,7 +72,7 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
         provider: 'v8',
         // Listing sources makes untested files count as 0% instead of being silently skipped.
         include: ['src/**/*.{ts,tsx}'],
-        exclude: ['**/*.test.{ts,tsx}', '**/__fixtures__/**', '**/*.d.ts'],
+        exclude: ['**/*.test.{ts,tsx}', '**/__fixtures__/**', '**/*.d.ts', ...coverageExclude],
         reporter: ['text-summary', 'json-summary', 'lcov'],
         ...(isUnit ? { thresholds: UNIT_COVERAGE_THRESHOLDS } : {}),
       },

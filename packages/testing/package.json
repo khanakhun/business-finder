@@ -7,7 +7,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./vitest-config": "./src/vitest-config.ts",
-    "./setup": "./src/setup.ts"
+    "./setup": "./src/setup.ts",
+    "./db": "./src/db/index.ts",
+    "./db/global-setup": "./src/db/global-setup.ts"
   },
   "scripts": {
     "lint": "biome check .",
@@ -15,7 +17,10 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "@faker-js/faker": "catalog:"
+    "@faker-js/faker": "catalog:",
+    "drizzle-orm": "catalog:",
+    "postgres": "catalog:",
+    "testcontainers": "catalog:"
   },
   "peerDependencies": {
     "@vitest/coverage-v8": "catalog:",

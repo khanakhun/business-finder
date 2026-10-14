@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Library (packages/*)",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // TypeScript 6 no longer auto-includes every @types package; Node globals must be opted into.
+    "types": ["node"]
+  }
+}

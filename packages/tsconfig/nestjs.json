@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "NestJS (apps/api)",
+  "extends": "./library.json",
+  // Inherits `noEmit`: apps/api's build config (BF-006) must set `"noEmit": false` or bundle with SWC, and
+  // Vitest needs an SWC transform there because esbuild does not emit decorator metadata.
+  "compilerOptions": {
+    // NestJS dependency injection relies on legacy decorators and their emitted parameter metadata.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

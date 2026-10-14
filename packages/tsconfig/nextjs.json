@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Next.js (apps/web, apps/sites)",
+  "extends": "./base.json",
+  "compilerOptions": {
+    // Next.js bundles the code, so bundler resolution and DOM types apply.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    // Next.js config and some generated files are JavaScript.
+    "allowJs": true,
+    "incremental": true,
+    "types": ["node"],
+    "plugins": [{ "name": "next" }]
+  }
+}

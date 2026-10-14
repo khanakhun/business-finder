@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Base",
+  "compilerOptions": {
+    // Required by coding-standards.md §1.
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // Every file is a module, even without imports (avoids accidental global scripts).
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    // Type-check our code, not third-party declaration files (faster; their types are their problem).
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // Packages are consumed as source and bundled by apps; tsc only type-checks (packages/README.md).
+    "noEmit": true,
+    // Relative imports name the real `.ts` file, which Vite, Next.js and Node's type stripping all resolve.
+    "allowImportingTsExtensions": true
+  }
+}

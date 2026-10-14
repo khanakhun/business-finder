@@ -1,0 +1,12 @@
+pre-commit:
+  commands:
+    biome:
+      glob: '*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc}'
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      # Re-stage files Biome fixed so the commit contains the formatted version.
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

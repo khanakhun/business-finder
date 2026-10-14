@@ -1,0 +1,53 @@
+{
+  "$schema": "./node_modules/turbo/schema.json",
+  // Plain prefixed logs: readable in CI and when agents capture output (the TUI is not).
+  "ui": "stream",
+  // Root config files that change how every package is linted or run.
+  "globalDependencies": ["biome.jsonc", ".nvmrc"],
+  // Env vars that change task output; anything else must be declared per task.
+  "globalEnv": ["NODE_ENV", "CI"],
+  "tasks": {
+    // Internal packages are consumed as TypeScript source (packages/README.md), so a dependency's
+    // source change must invalidate dependents' typecheck/test caches. `transit` has no script; it only
+    // links task hashes across the graph without forcing a build first.
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!**/*.test.tsx", "!**/__fixtures__/**"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    // Lints root-level files (configs, scripts) once; package lint tasks depend on it so
+    // `turbo run lint` covers the whole repo.
+    "//#lint:root": {
+      "inputs": ["*.json", "*.jsonc", "*.mjs", ".vscode/**", "scripts/**"]
+    },
+    "lint": {
+      "dependsOn": ["//#lint:root"]
+    },
+    "typecheck": {
+      "dependsOn": ["transit"]
+    },
+    "test": {
+      "dependsOn": ["transit"],
+      "outputs": ["coverage/**", "reports/**"]
+    },
+    // Integration and E2E tests talk to containers/browsers whose state Turborepo cannot hash.
+    "test:int": {
+      "dependsOn": ["transit"],
+      "cache": false
+    },
+    "e2e": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

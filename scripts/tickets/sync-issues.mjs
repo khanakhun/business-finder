@@ -8,8 +8,8 @@
 // Idempotent: existing issues (from docs/tickets/issue-map.json or matched by title) are updated, not duplicated.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -18,12 +18,17 @@ const MAP_FILE = join(TICKETS_DIR, 'issue-map.json');
 const WRITE_DELAY_MS = 1100; // stay well under GitHub's content-creation secondary rate limit
 
 const MILESTONES = {
-  'M0 Foundations': 'Monorepo, infrastructure, database, contracts, observability, API/web/intel skeletons, CI.',
-  'M1 Find & List': 'Accounts & workspaces, business graph, discovery providers, AI search, listing UI, CRM basics, staging.',
+  'M0 Foundations':
+    'Monorepo, infrastructure, database, contracts, observability, API/web/intel skeletons, CI.',
+  'M1 Find & List':
+    'Accounts & workspaces, business graph, discovery providers, AI search, listing UI, CRM basics, staging.',
   'M2 Understand': 'Website intelligence, enrichment, email verification, review mining, audits, scoring.',
-  'M3 Build': 'Website platform (SiteSpec, blocks, renderer, editor) and one-click AI site generation with multiple engines.',
-  'M4 Reach': 'Compliance engine, mailboxes, AI drafting, one-click send, sequences, reply triage, deliverability.',
-  'M5 Learn & Scale': 'Analytics, outcome-trained scoring, security hardening, production operations, live sites with custom domains and client handover.',
+  'M3 Build':
+    'Website platform (SiteSpec, blocks, renderer, editor) and one-click AI site generation with multiple engines.',
+  'M4 Reach':
+    'Compliance engine, mailboxes, AI drafting, one-click send, sequences, reply triage, deliverability.',
+  'M5 Learn & Scale':
+    'Analytics, outcome-trained scoring, security hardening, production operations, live sites with custom domains and client handover.',
 };
 
 const LABEL_COLORS = {
@@ -43,7 +48,9 @@ const opt = (name) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const DRY = flag('--dry-run');
-const ONLY = opt('--only')?.split(',').map((s) => s.trim());
+const ONLY = opt('--only')
+  ?.split(',')
+  .map((s) => s.trim());
 const REFRESH_READY = flag('--refresh-ready');
 const REPO = opt('--repo') ?? detectRepo();
 
@@ -77,7 +84,9 @@ function gh(method, path, body, attempt = 0) {
     const serverError = /HTTP 50[0234]/.test(msg) && method !== 'POST';
     if ((rateLimited || serverError) && attempt < 5) {
       const waitMs = rateLimited ? 60_000 * (attempt + 1) : 5_000 * (attempt + 1);
-      console.warn(`! ${method} ${path}: ${rateLimited ? 'rate limited' : 'server error'}; retrying in ${waitMs / 1000}s`);
+      console.warn(
+        `! ${method} ${path}: ${rateLimited ? 'rate limited' : 'server error'}; retrying in ${waitMs / 1000}s`,
+      );
       sleepSync(waitMs);
       return gh(method, path, body, attempt + 1);
     }
@@ -128,7 +137,13 @@ function parseTicket(file) {
 }
 
 function labelsFor(meta, ready) {
-  const labels = ['ticket', `epic:${meta.epic}`, `priority:${meta.priority}`, `size:${meta.size}`, `type:${meta.type}`];
+  const labels = [
+    'ticket',
+    `epic:${meta.epic}`,
+    `priority:${meta.priority}`,
+    `size:${meta.size}`,
+    `type:${meta.type}`,
+  ];
   for (const a of meta.areas) labels.push(`area:${a}`);
   if (ready) labels.push('agent:ready');
   return labels;
@@ -146,7 +161,9 @@ function linkify(text, map) {
     .map((part) =>
       part.startsWith('```')
         ? part
-        : part.replace(/\bBF-(\d{3})\b(?! \(#)/g, (whole) => (map[whole] ? `${whole} (#${map[whole]})` : whole)),
+        : part.replace(/\bBF-(\d{3})\b(?! \(#)/g, (whole) =>
+            map[whole] ? `${whole} (#${map[whole]})` : whole,
+          ),
     )
     .join('');
 }

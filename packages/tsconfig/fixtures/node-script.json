@@ -1,0 +1,4 @@
+{
+  "extends": "../node-script.json",
+  "files": ["./sample.ts"]
+}

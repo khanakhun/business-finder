@@ -1,0 +1,131 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    // Reuse .gitignore instead of duplicating ignore lists.
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "files": {
+    // Markdown, YAML, Python, … are not Biome's job; don't report them as errors.
+    "ignoreUnknown": true,
+    // Lockfiles and generated artifacts are owned by their tools.
+    "includes": ["**", "!pnpm-lock.yaml", "!**/coverage", "!**/dist", "!**/.next", "!**/.turbo"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    // Wider than the 80 default: TypeScript generics and Zod chains wrap too eagerly at 80.
+    "lineWidth": 110
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all"
+    }
+  },
+  "json": {
+    "parser": {
+      // turbo.json, tsconfig and VS Code settings are JSONC; comments explain non-default settings.
+      "allowComments": true
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended",
+      "suspicious": {
+        // Escalated from warn: coding-standards.md §1 bans `any`.
+        "noExplicitAny": "error"
+      },
+      "style": {
+        // Escalated from warn: named exports only (overrides below for framework-mandated defaults).
+        "noDefaultExport": "error",
+        "useImportType": "error",
+        "useExportType": "error"
+      },
+      "nursery": {
+        // Uses Biome's own type inference (no tsc); catches the common cases, see packages/README.md.
+        "noFloatingPromises": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      // Tools load these through a default export.
+      "includes": ["**/*.config.{ts,mts,js,mjs,cjs}"],
+      "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
+    },
+    {
+      // Next.js App Router conventions require default exports.
+      "includes": [
+        "apps/*/src/app/**/{page,layout,template,loading,error,global-error,not-found,default}.tsx",
+        "apps/*/src/app/**/{opengraph-image,twitter-image,icon,apple-icon,sitemap,robots,manifest}.{ts,tsx}",
+        "apps/*/src/{middleware,instrumentation}.ts"
+      ],
+      "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
+    },
+    {
+      // AGENTS.md §3: apps never import from another app. Relative cross-app paths are caught
+      // by the boundaries check in CI (BF-009).
+      "includes": ["apps/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@bf/web", "@bf/web/**", "@bf/api", "@bf/api/**", "@bf/sites", "@bf/sites/**"],
+                    "message": "Apps must not import from other apps. Move shared code to a package in packages/."
+                  },
+                  {
+                    "group": ["**/apps/**"],
+                    "message": "Apps must not import from other apps. Move shared code to a package in packages/."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      // AGENTS.md §3: packages never import from apps.
+      "includes": ["packages/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@bf/web",
+                      "@bf/web/**",
+                      "@bf/api",
+                      "@bf/api/**",
+                      "@bf/sites",
+                      "@bf/sites/**",
+                      "**/apps/**"
+                    ],
+                    "message": "Packages must not depend on apps."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

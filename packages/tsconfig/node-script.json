@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node script (run directly by Node's type stripping)",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // Node strips types without transforming, so TS-only runtime syntax
+    // (enums, namespaces, parameter properties) must be rejected at type-check time.
+    "erasableSyntaxOnly": true
+  }
+}

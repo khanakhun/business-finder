@@ -50,6 +50,15 @@ export {
   pickLocale,
 } from './i18n.ts';
 export { BusinessId, EventId, type Id, idSchema, isUuidV7, newId, OrgId, SiteId, UserId } from './ids.ts';
+export { type EchoRequest, EchoRequestSchema, type EchoResponse, EchoResponseSchema } from './intel.ts';
+export {
+  canonicalString,
+  INTERNAL_AUTH_MAX_SKEW_SECONDS,
+  INTERNAL_AUTH_NONCE_PATTERN,
+  type InternalRequest,
+  type SignInternalRequestOptions,
+  signInternalRequest,
+} from './internal-auth.ts';
 export { defineJob, getJobDefinition, type JobDefinition, JobPayloadBase } from './jobs.ts';
 export {
   type CursorData,

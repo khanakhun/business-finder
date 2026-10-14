@@ -1,0 +1,49 @@
+{
+  "codes": {
+    "BUDGET_EXCEEDED": {
+      "status": 402,
+      "title": "Budget exceeded"
+    },
+    "CONFLICT": {
+      "status": 409,
+      "title": "Conflict"
+    },
+    "EXTERNAL_SERVICE_FAILED": {
+      "status": 502,
+      "title": "External service failed"
+    },
+    "FORBIDDEN": {
+      "status": 403,
+      "title": "Forbidden"
+    },
+    "IDEMPOTENCY_KEY_REUSED": {
+      "status": 409,
+      "title": "Idempotency key reused with a different request"
+    },
+    "INTERNAL": {
+      "status": 500,
+      "title": "Internal error"
+    },
+    "INVALID_STATE_TRANSITION": {
+      "status": 409,
+      "title": "Invalid state transition"
+    },
+    "NOT_FOUND": {
+      "status": 404,
+      "title": "Not found"
+    },
+    "RATE_LIMITED": {
+      "status": 429,
+      "title": "Too many requests"
+    },
+    "UNAUTHENTICATED": {
+      "status": 401,
+      "title": "Authentication required"
+    },
+    "VALIDATION_FAILED": {
+      "status": 422,
+      "title": "Validation failed"
+    }
+  },
+  "typeBase": "https://errors.business-finder.dev/"
+}

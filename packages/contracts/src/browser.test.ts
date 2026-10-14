@@ -11,5 +11,10 @@ describe('in a browser environment', () => {
     const cursor = await contracts.encodeCursor({ sort: ['é'], id }, { secret: 'k' });
     expect(await contracts.decodeCursor(cursor, { secret: 'k' })).toEqual({ sort: ['é'], id });
     expect(contracts.can('viewer', 'business:read')).toBe(true);
+    const auth = await contracts.signInternalRequest(
+      { method: 'POST', path: '/v1/echo', body: '{}' },
+      { secret: 'k' },
+    );
+    expect(auth).toMatch(/^Bearer \d+\.[\w-]{22}\.[0-9a-f]{64}$/);
   });
 });

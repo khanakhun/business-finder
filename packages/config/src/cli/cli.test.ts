@@ -33,7 +33,13 @@ describe('generated docs', () => {
     const names = variables.map((v) => v.name);
     expect(new Set(names).size).toBe(names.length);
     expect(variables.find((v) => v.name === 'DATABASE_URL')?.apps).toEqual(['api', 'worker']);
-    expect(variables.find((v) => v.name === 'NODE_ENV')?.apps).toEqual(['api', 'worker', 'web', 'sites']);
+    expect(variables.find((v) => v.name === 'NODE_ENV')?.apps).toEqual([
+      'api',
+      'worker',
+      'web',
+      'sites',
+      'intel',
+    ]);
   });
 
   it('renders a table row per variable and never a secret default', () => {

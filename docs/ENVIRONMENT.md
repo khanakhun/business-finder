@@ -64,12 +64,12 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 
 | Variable | Group | Apps | Required | Default | Secret | Description |
 |---|---|---|---|---|---|---|
-| `NODE_ENV` | Core | api, worker, web, sites | no | `development` |  | Runtime mode. Production enables secure cookies, JSON logs and stricter checks. |
+| `NODE_ENV` | Core | api, worker, web, sites, intel | no | `development` |  | Runtime mode. Production enables secure cookies, JSON logs and stricter checks. |
 | `LOG_LEVEL` | Core | api, worker, web, sites, intel | no | `info` |  | Minimum log level. |
 | `APP_URL` | Core | api, worker, web, sites | no | `http://localhost:3000` |  | Public URL of the dashboard (apps/web). |
 | `API_URL` | Core | api, worker, web, sites | no | `http://localhost:4000` |  | Public URL of the API (apps/api). |
 | `SITES_BASE_DOMAIN` | Core | api, worker, sites | no | `sites.localhost` |  | Previews are served at https://<slug>.<SITES_BASE_DOMAIN> (no scheme, no port). |
-| `APP_VERSION` | Core | api, worker, sites | no | `0.0.0-dev` |  | Release version, set by the build/deploy pipeline. |
+| `APP_VERSION` | Core | api, worker, sites, intel | no | `0.0.0-dev` |  | Release version, set by the build/deploy pipeline. |
 | `GIT_COMMIT` | Core | api, worker, sites | no |  |  | Git commit SHA of the running build, set by the build/deploy pipeline. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Core | api, worker, sites, intel | no |  |  | OTLP/HTTP endpoint for traces/metrics/logs (BF-005). Unset disables export. |
 | `DATABASE_URL` | Database | api, worker | yes (infra:up) |  | yes | Read-write connection string (owner role; migrations and apps/api). Written by infra:up. |
@@ -105,6 +105,12 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NEXT_PUBLIC_API_URL` | App-specific | web | no | `http://localhost:4000` |  | API base URL used by the browser. |
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |
 | `SITES_PORT` | App-specific | sites | no | `3100` |  | HTTP port of apps/sites. Set by infra:up from BF_PORT_OFFSET. |
+| `INTEL_HOST` | App-specific | intel | no | `127.0.0.1` |  | Interface services/intel binds to (0.0.0.0 inside its container). |
 | `INTEL_PORT` | App-specific | intel | no | `8000` |  | HTTP port of services/intel. Set by infra:up from BF_PORT_OFFSET. |
+| `INTEL_WORKERS` | App-specific | intel | no | `1` |  | Uvicorn worker processes. Prefer more replicas: metrics and the nonce cache are per process. |
+| `INTEL_CPU_WORKERS` | App-specific | intel | no |  |  | Process-pool size for CPU-bound work (default: CPU count). |
+| `INTEL_MAX_REQUEST_BYTES` | App-specific | intel | no | `1048576` |  | Largest request body accepted on /v1, checked before authentication (bytes). |
+| `INTEL_FETCH_TIMEOUT_SECONDS` | App-specific | intel | no | `20` |  | Total time budget of one safe_fetch call, redirects included. |
+| `INTEL_FETCH_MAX_BYTES` | App-specific | intel | no | `10485760` |  | Largest response body safe_fetch accepts after decompression (bytes). |
 
 <!-- env:end -->

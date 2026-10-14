@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ProblemDetailsSchema } from './errors.ts';
 import { LatLngSchema } from './geo.ts';
+import { EchoRequestSchema, EchoResponseSchema } from './intel.ts';
 
 /** Languages schemas can be exported to. `python` → services/intel Pydantic models (BF-008). */
 export const EXPORT_TARGETS = ['python'] as const;
@@ -33,6 +34,17 @@ exportSchema(LatLngSchema, {
   id: 'LatLng',
   exportTo: ['python'],
   description: 'WGS84 coordinates in decimal degrees.',
+});
+
+exportSchema(EchoRequestSchema, {
+  id: 'EchoRequest',
+  exportTo: ['python'],
+  description: 'POST /v1/echo request on services/intel.',
+});
+exportSchema(EchoResponseSchema, {
+  id: 'EchoResponse',
+  exportTo: ['python'],
+  description: 'POST /v1/echo response on services/intel.',
 });
 
 export const JSON_SCHEMA_BASE = 'https://schemas.business-finder.dev/';

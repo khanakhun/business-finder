@@ -1,0 +1,55 @@
+{
+  "description": "Cross-language vectors for signInternalRequest (TS) and internal_auth.py (Python). Bodies are UTF-8. Do not edit by hand: change both implementations and regenerate.",
+  "secret": "bf-test-vector-secret-not-for-production-0001",
+  "vectors": [
+    {
+      "name": "GET with query, no body",
+      "method": "GET",
+      "path": "/v1/echo?probe=1",
+      "timestamp": 1760000000,
+      "nonce": "AAAAAAAAAAAAAAAAAAAAAA",
+      "canonical": "1760000000|AAAAAAAAAAAAAAAAAAAAAA|GET|/v1/echo?probe=1|e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "authorization": "Bearer 1760000000.AAAAAAAAAAAAAAAAAAAAAA.1a13f5732f849b0b3b54199bb887e706e5d082e7c598d8a343ae2f02ac9334d8"
+    },
+    {
+      "name": "POST JSON body",
+      "method": "POST",
+      "path": "/v1/echo",
+      "body": "{\"message\":\"hello\"}",
+      "timestamp": 1760000001,
+      "nonce": "n0nce-For_Vector-0002",
+      "canonical": "1760000001|n0nce-For_Vector-0002|POST|/v1/echo|9b2d43affbf49a367028df2e1414f84c0e099ac98c3d54a8a80157fd7771af25",
+      "authorization": "Bearer 1760000001.n0nce-For_Vector-0002.b40b706f32d63fdefebded2ed036008cb2b2b429808d10d2395176ab3e1ea09e"
+    },
+    {
+      "name": "UTF-8 body",
+      "method": "POST",
+      "path": "/v1/echo",
+      "body": "{\"message\":\"Saint-Barthélemy ☀\"}",
+      "timestamp": 1760000002,
+      "nonce": "bm9uY2UtdmVjdG9yLTAwMDM",
+      "canonical": "1760000002|bm9uY2UtdmVjdG9yLTAwMDM|POST|/v1/echo|0815fffebbfdbef0d24a182dda1905df260a7f85778303f86c75969de7b62897",
+      "authorization": "Bearer 1760000002.bm9uY2UtdmVjdG9yLTAwMDM.f06ca9cf182e1949d6604a68e91330546b5ae6800f431a2881148249e83595d9"
+    },
+    {
+      "name": "lower-case method is signed upper-cased",
+      "method": "post",
+      "path": "/v1/echo",
+      "body": "{}",
+      "timestamp": 1760000003,
+      "nonce": "abcdefghijklmnopqrstuv",
+      "canonical": "1760000003|abcdefghijklmnopqrstuv|POST|/v1/echo|44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "authorization": "Bearer 1760000003.abcdefghijklmnopqrstuv.c630bc984ad299afc97923c8889caebe8347005b80328cb3c85eaf88e444704a"
+    },
+    {
+      "name": "percent-encoded query",
+      "method": "POST",
+      "path": "/v1/site-intel?url=https%3A%2F%2Fexample.com%2F&depth=2",
+      "body": "",
+      "timestamp": 1760000004,
+      "nonce": "0123456789_-ABCDEFabcdef",
+      "canonical": "1760000004|0123456789_-ABCDEFabcdef|POST|/v1/site-intel?url=https%3A%2F%2Fexample.com%2F&depth=2|e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "authorization": "Bearer 1760000004.0123456789_-ABCDEFabcdef.92bffd7d05fa6d0fa0ca68952cf94f60d13790133fa1dba88c82f0e0686600d2"
+    }
+  ]
+}

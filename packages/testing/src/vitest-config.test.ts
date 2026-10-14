@@ -73,6 +73,11 @@ describe('defineVitestConfig', () => {
     expect(test?.setupFiles).toEqual([SETUP_FILE, './src/test-setup.ts']);
   });
 
+  it('lets apps narrow unit coverage to their logic layers', () => {
+    const { test } = defineVitestConfig({ type: 'unit', coverageInclude: ['src/modules/*/domain/**'] });
+    expect(test?.coverage?.include).toEqual(['src/modules/*/domain/**']);
+  });
+
   it('appends package-specific coverage exclusions', () => {
     const { test } = defineVitestConfig({ type: 'unit', coverageExclude: ['src/cli/**'] });
     expect(test?.coverage?.exclude).toEqual(expect.arrayContaining(['**/*.test.{ts,tsx}', 'src/cli/**']));

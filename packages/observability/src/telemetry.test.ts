@@ -123,6 +123,14 @@ describe('logs inside spans', () => {
 });
 
 describe('initTelemetry validation', () => {
+  it('registers a real provider even with exporter none and no processors', async () => {
+    const quiet = initTelemetry({ serviceName: 'quiet', exporter: 'none', autoInstrument: false });
+    await startSpan('quiet.op', {}, async (span) => {
+      expect(span.spanContext().traceId).not.toMatch(/^0+$/);
+    });
+    await quiet.shutdown();
+  });
+
   it('rejects bad options', () => {
     expect(() => initTelemetry({ serviceName: 'x', exporter: 'none', samplingRatio: 2 })).toThrow(
       /samplingRatio/,

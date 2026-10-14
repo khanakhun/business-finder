@@ -34,7 +34,8 @@
     "db:seed": "node packages/db/src/cli/seed.ts",
     "db:studio": "node packages/db/src/cli/kit.ts studio",
     "db:reset": "node packages/db/src/cli/reset.ts",
-    "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts"
+    "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts",
+    "api:openapi": "pnpm --filter @bf/api openapi"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

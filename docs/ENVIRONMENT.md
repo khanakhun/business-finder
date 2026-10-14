@@ -69,6 +69,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `APP_URL` | Core | api, worker, web, sites | no | `http://localhost:3000` |  | Public URL of the dashboard (apps/web). |
 | `API_URL` | Core | api, worker, web, sites | no | `http://localhost:4000` |  | Public URL of the API (apps/api). |
 | `SITES_BASE_DOMAIN` | Core | api, worker, sites | no | `sites.localhost` |  | Previews are served at https://<slug>.<SITES_BASE_DOMAIN> (no scheme, no port). |
+| `APP_VERSION` | Core | api, worker, sites | no | `0.0.0-dev` |  | Release version, set by the build/deploy pipeline. |
+| `GIT_COMMIT` | Core | api, worker, sites | no |  |  | Git commit SHA of the running build, set by the build/deploy pipeline. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Core | api, worker, sites, intel | no |  |  | OTLP/HTTP endpoint for traces/metrics/logs (BF-005). Unset disables export. |
 | `DATABASE_URL` | Database | api, worker | yes (infra:up) |  | yes | Read-write connection string (owner role; migrations and apps/api). Written by infra:up. |
 | `DB_POOL_MAX` | Database | api, worker | no | `10` |  | Max connections per process. |

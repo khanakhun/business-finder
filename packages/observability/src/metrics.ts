@@ -1,8 +1,8 @@
-import client, { type Counter, type Gauge, type Histogram, Registry } from 'prom-client';
+import { Counter, collectDefaultMetrics, Gauge, Histogram, Registry } from '@prometheus-io/client';
 
 /** One registry per process; `/metrics` serves it. */
 export const registry = new Registry();
-client.collectDefaultMetrics({ register: registry });
+collectDefaultMetrics({ register: registry });
 
 /** Seconds; covers fast cache hits to slow provider calls (HTTP, jobs, external APIs). */
 export const LATENCY_BUCKETS_SECONDS = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60];
@@ -33,7 +33,7 @@ export const metrics = {
     return getOrCreate(
       options.name,
       () =>
-        new client.Counter({
+        new Counter({
           ...options,
           labelNames: [...(options.labelNames ?? [])],
           registers: [registry],
@@ -47,7 +47,7 @@ export const metrics = {
     return getOrCreate(
       options.name,
       () =>
-        new client.Histogram({
+        new Histogram({
           ...options,
           labelNames: [...(options.labelNames ?? [])],
           buckets: [...(options.buckets ?? LATENCY_BUCKETS_SECONDS)],
@@ -59,8 +59,7 @@ export const metrics = {
     checkName(options.name, 'gauge');
     return getOrCreate(
       options.name,
-      () =>
-        new client.Gauge({ ...options, labelNames: [...(options.labelNames ?? [])], registers: [registry] }),
+      () => new Gauge({ ...options, labelNames: [...(options.labelNames ?? [])], registers: [registry] }),
     );
   },
 };

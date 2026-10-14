@@ -13,7 +13,7 @@ Work flows across HTTP requests, queues, a Python service, sandboxes and LLM pro
 - **Logs**: structured JSON — pino in TypeScript, structlog in Python — with `traceId`, `spanId`, `requestId`, `orgId`, `userId`, `jobId`, `queue` fields; redaction list for secrets and PII (emails are hashed in logs except in the dedicated outreach audit trail).
 - **Traces**: OpenTelemetry SDK in api, worker and intel with auto-instrumentation (HTTP, undici/fetch, pg, ioredis) plus manual spans for jobs (`job.process <queue>`) propagating context through job data (`traceparent`). OTLP export to a collector; backend is deployment-specific (Grafana Tempo, Jaeger, or a vendor).
 - **LLM observability**: AI SDK telemetry spans exported to **Langfuse** (self-hosted or cloud) with prompt version, model, tokens, cost; local `llm_calls` ledger for budgets.
-- **Metrics**: Prometheus format at `/metrics` on api/worker/intel (prom-client / prometheus-client): HTTP RED metrics, queue depth & oldest-job age, job outcomes, provider quota usage, mailbox sends/bounces, LLM spend.
+- **Metrics**: Prometheus format at `/metrics` on api/worker/intel (`@prometheus-io/client` — formerly prom-client — / prometheus-client): HTTP RED metrics, queue depth & oldest-job age, job outcomes, provider quota usage, mailbox sends/bounces, LLM spend.
 - **Errors**: Sentry SDKs (optional via DSN) in web, api, worker, sites, intel with release tags.
 - **Health**: `/health/live` and `/health/ready` (dependencies) on every service.
 

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { trace } from '@opentelemetry/api';
+import { isSpanContextValid, trace } from '@opentelemetry/api';
 import pino, { type DestinationStream, type Logger } from 'pino';
 import { getLogContext } from './log-context.ts';
 
@@ -95,7 +95,8 @@ export function createLogger(options: CreateLoggerOptions): Logger {
     },
     mixin: () => {
       const span = trace.getActiveSpan()?.spanContext();
-      return { ...getLogContext(), ...(span ? { traceId: span.traceId, spanId: span.spanId } : {}) };
+      const valid = span && isSpanContextValid(span);
+      return { ...getLogContext(), ...(valid ? { traceId: span.traceId, spanId: span.spanId } : {}) };
     },
   };
   if (options.destination) return pino(config, options.destination);

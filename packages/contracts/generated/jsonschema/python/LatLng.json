@@ -15,7 +15,10 @@
       "type": "number"
     }
   },
-  "required": ["lat", "lng"],
+  "required": [
+    "lat",
+    "lng"
+  ],
   "title": "LatLng",
   "type": "object"
 }

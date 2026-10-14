@@ -1,0 +1,10 @@
+{
+  "extends": "@bf/tsconfig/library.json",
+  "compilerOptions": {
+    // Browser/edge-safe package (no Node APIs at runtime); DOM types cover TextEncoder, atob, crypto.subtle.
+    "lib": ["ES2023", "DOM"],
+    // The CLI runs directly under Node type stripping.
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src", "*.config.ts"]
+}

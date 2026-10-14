@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@bf/config": "workspace:*",
+    "@bf/contracts": "workspace:*",
     "drizzle-orm": "catalog:",
     "postgres": "catalog:",
-    "uuid": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

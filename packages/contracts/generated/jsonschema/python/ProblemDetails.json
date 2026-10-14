@@ -1,0 +1,67 @@
+{
+  "$id": "https://schemas.business-finder.dev/ProblemDetails.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "RFC 9457 problem details (application/problem+json).",
+  "properties": {
+    "code": {
+      "enum": [
+        "VALIDATION_FAILED",
+        "UNAUTHENTICATED",
+        "FORBIDDEN",
+        "NOT_FOUND",
+        "CONFLICT",
+        "IDEMPOTENCY_KEY_REUSED",
+        "INVALID_STATE_TRANSITION",
+        "RATE_LIMITED",
+        "BUDGET_EXCEEDED",
+        "EXTERNAL_SERVICE_FAILED",
+        "INTERNAL"
+      ],
+      "type": "string"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "errors": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "items": {
+              "type": ["string", "number"]
+            },
+            "type": "array"
+          }
+        },
+        "required": ["path", "message"],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "instance": {
+      "type": "string"
+    },
+    "status": {
+      "maximum": 599,
+      "minimum": 400,
+      "type": "integer"
+    },
+    "title": {
+      "type": "string"
+    },
+    "traceId": {
+      "type": "string"
+    },
+    "type": {
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": ["type", "title", "status", "code"],
+  "title": "ProblemDetails",
+  "type": "object"
+}

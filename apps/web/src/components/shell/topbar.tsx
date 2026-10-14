@@ -1,28 +1,34 @@
 'use client';
 
 import { Button } from '@bf/ui/components/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@bf/ui/components/dropdown-menu';
 import { KeyboardShortcut } from '@bf/ui/components/keyboard-shortcut';
-import { Popover, PopoverContent, PopoverTrigger } from '@bf/ui/components/popover';
-import { BellIcon, ChevronsUpDownIcon, MenuIcon, SearchIcon, UserIcon } from 'lucide-react';
+import {
+  BellIcon,
+  ChevronsUpDownIcon,
+  LanguagesIcon,
+  MenuIcon,
+  MoonIcon,
+  SearchIcon,
+  SunIcon,
+  UserIcon,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { activeNavItem } from '@/lib/navigation.ts';
-import { LanguageMenu, ThemeMenu } from './preferences.tsx';
+import { LazyMenu } from './lazy-menu.tsx';
+
+const menus = () => import('./topbar-menus.tsx');
 
 export interface TopbarProps {
   readonly onOpenPalette: () => void;
   readonly onOpenMobileNav: () => void;
+  /** Hover/focus on the search button: start loading the palette before it is opened. */
+  readonly onPalettePrefetch: () => void;
 }
 
-export function Topbar({ onOpenPalette, onOpenMobileNav }: TopbarProps) {
+export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: TopbarProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const current = activeNavItem(usePathname());
 
   return (
@@ -38,22 +44,18 @@ export function Topbar({ onOpenPalette, onOpenMobileNav }: TopbarProps) {
       </Button>
 
       {/* Workspace switcher: real workspaces arrive with BF-010. */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 font-medium"
-            aria-label={t('topbar.switchWorkspace')}
-          >
-            {t('topbar.workspace')}
-            <ChevronsUpDownIcon aria-hidden className="text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem disabled>{t('topbar.workspace')}</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <LazyMenu
+        load={() => menus().then((m) => m.WorkspaceMenu)}
+        trigger={{
+          variant: 'ghost',
+          size: 'sm',
+          className: 'gap-1.5 font-medium',
+          'aria-label': t('topbar.switchWorkspace'),
+        }}
+      >
+        {t('topbar.workspace')}
+        <ChevronsUpDownIcon aria-hidden className="text-muted-foreground" />
+      </LazyMenu>
 
       {current ? (
         <p className="hidden truncate text-muted-foreground sm:block">
@@ -68,6 +70,8 @@ export function Topbar({ onOpenPalette, onOpenMobileNav }: TopbarProps) {
         <button
           type="button"
           onClick={onOpenPalette}
+          onPointerEnter={onPalettePrefetch}
+          onFocus={onPalettePrefetch}
           className="hidden h-8 min-w-64 items-center gap-2 whitespace-nowrap rounded-md border bg-surface px-2.5 text-sm text-muted-foreground hover:border-line-strong md:flex"
         >
           <SearchIcon aria-hidden className="size-4" />
@@ -85,40 +89,53 @@ export function Topbar({ onOpenPalette, onOpenMobileNav }: TopbarProps) {
         </Button>
         {/* On phones these live in Settings and the command palette, so the bar never overflows. */}
         <div className="hidden items-center gap-1 sm:flex">
-          <LanguageMenu />
-          <ThemeMenu />
+          <LazyMenu
+            load={() => menus().then((m) => m.LanguageMenu)}
+            trigger={{
+              variant: 'ghost',
+              size: 'sm',
+              className: 'gap-1.5 text-muted-foreground',
+              'aria-label': t('language.label'),
+            }}
+          >
+            <LanguagesIcon aria-hidden />
+            <span>{locale.toUpperCase()}</span>
+          </LazyMenu>
+          <LazyMenu
+            load={() => menus().then((m) => m.ThemeMenu)}
+            trigger={{
+              variant: 'ghost',
+              size: 'icon',
+              className: 'text-muted-foreground',
+              'aria-label': t('theme.label'),
+            }}
+          >
+            <SunIcon aria-hidden className="dark:hidden" />
+            <MoonIcon aria-hidden className="hidden dark:block" />
+          </LazyMenu>
         </div>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('topbar.notifications')}
-              className="text-muted-foreground"
-            >
-              <BellIcon aria-hidden />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-72 text-sm text-muted-foreground">
-            {t('topbar.noNotifications')}
-          </PopoverContent>
-        </Popover>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('topbar.account')}
-              className="text-muted-foreground"
-            >
-              <UserIcon aria-hidden />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{t('topbar.account')}</DropdownMenuLabel>
-            <DropdownMenuItem disabled>{t('topbar.signedOut')}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LazyMenu
+          load={() => menus().then((m) => m.NotificationsMenu)}
+          trigger={{
+            variant: 'ghost',
+            size: 'icon',
+            className: 'text-muted-foreground',
+            'aria-label': t('topbar.notifications'),
+          }}
+        >
+          <BellIcon aria-hidden />
+        </LazyMenu>
+        <LazyMenu
+          load={() => menus().then((m) => m.AccountMenu)}
+          trigger={{
+            variant: 'ghost',
+            size: 'icon',
+            className: 'text-muted-foreground',
+            'aria-label': t('topbar.account'),
+          }}
+        >
+          <UserIcon aria-hidden />
+        </LazyMenu>
       </div>
     </header>
   );

@@ -1,12 +1,14 @@
 'use client';
 
 import { shouldRetry } from '@bf/api-client';
-import { Toaster } from '@bf/ui/components/sonner';
-import { TooltipProvider } from '@bf/ui/components/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { ThemeProvider } from 'next-themes';
 import * as React from 'react';
 import { CommandRegistryProvider } from '@/lib/commands.tsx';
+
+// Toasts are never needed for first paint; the renderer loads after hydration.
+const Toaster = dynamic(() => import('@bf/ui/components/sonner').then((m) => m.Toaster), { ssr: false });
 
 const ReactQueryDevtools =
   process.env.NODE_ENV === 'development'
@@ -41,9 +43,7 @@ export function Providers({
       {...(nonce ? { nonce } : {})}
     >
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={300}>
-          <CommandRegistryProvider>{children}</CommandRegistryProvider>
-        </TooltipProvider>
+        <CommandRegistryProvider>{children}</CommandRegistryProvider>
         <Toaster position="bottom-right" />
         <React.Suspense>
           <ReactQueryDevtools />

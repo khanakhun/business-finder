@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@bf/ui';
-import { Sheet, SheetContent, SheetTitle } from '@bf/ui/components/sheet';
+import { cn } from '@bf/ui/lib/utils';
 import { KeyboardIcon, LanguagesIcon, MonitorIcon, MoonIcon, PanelLeftIcon, SunIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
@@ -11,13 +11,19 @@ import { LOCALES } from '@/i18n/locales.ts';
 import { type Command, useCommandRegistry, useRegisterCommands } from '@/lib/commands.tsx';
 import { isModKey, isTypingTarget } from '@/lib/keyboard.ts';
 import { NAV_ITEMS } from '@/lib/navigation.ts';
-import { CommandPalette } from './command-palette.tsx';
-import { useChangeLocale } from './preferences.tsx';
-import { ShortcutsDialog } from './shortcuts-dialog.tsx';
 import { Sidebar } from './sidebar.tsx';
 import { Topbar } from './topbar.tsx';
+import { useChangeLocale } from './use-change-locale.ts';
 
 const COLLAPSED_KEY = 'bf.sidebar.collapsed';
+
+// Not needed for first paint: loaded on first open, keeping the shell's JavaScript budget (< 200 kB gzip).
+const loadPalette = () => import('./command-palette.tsx');
+const CommandPalette = dynamic(() => loadPalette().then((m) => m.CommandPalette), { ssr: false });
+const ShortcutsDialog = dynamic(() => import('./shortcuts-dialog.tsx').then((m) => m.ShortcutsDialog), {
+  ssr: false,
+});
+const MobileNav = dynamic(() => import('./mobile-nav.tsx').then((m) => m.MobileNav), { ssr: false });
 
 function readCollapsed(): boolean {
   try {
@@ -53,6 +59,8 @@ export function AppShell({ children }: { readonly children: React.ReactNode }) {
 
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // ⌘/Ctrl pressed: the palette is likely next — start fetching it before K arrives.
+      if (event.key === 'Meta' || event.key === 'Control') void loadPalette();
       if (isModKey(event) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPalette((open) => !open);
@@ -146,20 +154,19 @@ export function AppShell({ children }: { readonly children: React.ReactNode }) {
       >
         <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
       </aside>
-      <Sheet open={mobileNav} onOpenChange={setMobileNav}>
-        <SheetContent side="left" className="w-64 p-0">
-          <SheetTitle className="sr-only">{t('nav.label')}</SheetTitle>
-          <Sidebar collapsed={false} onNavigate={() => setMobileNav(false)} />
-        </SheetContent>
-      </Sheet>
+      {mobileNav ? <MobileNav open={mobileNav} onOpenChange={setMobileNav} /> : null}
       <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onOpenPalette={() => setPalette(true)} onOpenMobileNav={() => setMobileNav(true)} />
+        <Topbar
+          onOpenPalette={() => setPalette(true)}
+          onOpenMobileNav={() => setMobileNav(true)}
+          onPalettePrefetch={() => void loadPalette()}
+        />
         <main id="content" tabIndex={-1} className="w-full max-w-6xl flex-1 px-4 py-8 outline-none sm:px-8">
           {children}
         </main>
       </div>
-      <CommandPalette open={palette} onOpenChange={setPalette} commands={commands} />
-      <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />
+      {palette ? <CommandPalette open={palette} onOpenChange={setPalette} commands={commands} /> : null}
+      {shortcuts ? <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} /> : null}
     </div>
   );
 }

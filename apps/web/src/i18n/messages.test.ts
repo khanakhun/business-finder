@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import en from './messages/en.json';
 import fr from './messages/fr.json';
@@ -40,19 +41,28 @@ function sources(dir: string): string[] {
 }
 
 describe('user-facing strings', () => {
-  // Pragmatic check from the ticket: JSX text between tags must not contain words; everything goes through next-intl.
+  // The ticket's guard: copy in JSX must come from next-intl. Parsing with TypeScript (not a regex) means only real
+  // JSX text nodes count — generics like Promise<void> or ternaries between tags cannot cause false positives.
   const ALLOWED = new Set(['/']);
   it('are never hard-coded in JSX text', () => {
     const root = join(import.meta.dirname, '..');
     const offenders: string[] = [];
     for (const file of [...sources(join(root, 'app')), ...sources(join(root, 'components'))]) {
-      const text = readFileSync(file, 'utf8');
-      for (const match of text.matchAll(/>\s*([^<>{}\n]*[A-Za-zÀ-ÿ][^<>{}\n]*?)\s*</g)) {
-        const literal = match[1]?.trim() ?? '';
-        // Fragments with code punctuation are JSX expressions between tags (ternaries, &&), not copy.
-        const isCode = /[()=?:&|;]/.test(literal) || literal.startsWith('//');
-        if (literal && !ALLOWED.has(literal) && !isCode) offenders.push(`${file}: "${literal}"`);
-      }
+      const source = ts.createSourceFile(
+        file,
+        readFileSync(file, 'utf8'),
+        ts.ScriptTarget.Latest,
+        true,
+        ts.ScriptKind.TSX,
+      );
+      const visit = (node: ts.Node): void => {
+        if (ts.isJsxText(node)) {
+          const text = node.text.trim();
+          if (/[A-Za-zÀ-ÿ]/.test(text) && !ALLOWED.has(text)) offenders.push(`${file}: "${text}"`);
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
     }
     expect(offenders).toEqual([]);
   });

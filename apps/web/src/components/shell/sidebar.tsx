@@ -1,7 +1,6 @@
 'use client';
 
-import { cn } from '@bf/ui';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@bf/ui/components/tooltip';
+import { cn } from '@bf/ui/lib/utils';
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -46,6 +45,8 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps) {
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
                     {...(onNavigate ? { onClick: onNavigate } : {})}
+                    // Collapsed: icon only. The visually hidden label serves screen readers; title shows on hover.
+                    {...(collapsed ? { title: label } : {})}
                     className={cn(
                       'relative flex h-8 items-center gap-2.5 rounded-md px-2.5 text-base text-muted-foreground transition-colors hover:bg-surface-sunken hover:text-foreground',
                       isActive &&
@@ -61,18 +62,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps) {
                     )}
                   </Link>
                 );
-                return (
-                  <li key={item.key}>
-                    {collapsed ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>{link}</TooltipTrigger>
-                        <TooltipContent side="right">{label}</TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      link
-                    )}
-                  </li>
-                );
+                return <li key={item.key}>{link}</li>;
               })}
             </ul>
           </div>

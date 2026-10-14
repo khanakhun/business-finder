@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
+import * as React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { negotiateLocale } from '../i18n/locales.ts';
 import { buildCsp } from '../proxy.ts';
@@ -43,9 +44,9 @@ describe('negotiateLocale', () => {
 describe('buildCsp', () => {
   const csp = buildCsp('abc123', { dev: false, apiOrigin: 'https://api.example', https: true });
 
-  it('uses the nonce for scripts and style elements, never unsafe-inline scripts', () => {
+  it('uses the nonce for scripts, never unsafe-inline scripts', () => {
     expect(csp).toContain("script-src 'self' 'nonce-abc123' 'strict-dynamic'");
-    expect(csp).toContain("style-src-elem 'self' 'nonce-abc123'");
+    expect(csp).toContain("style-src 'self' 'unsafe-inline'");
     expect(csp).not.toMatch(/script-src[^;]*unsafe-inline/);
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain('connect-src https://api.example'.replace('connect-src ', "connect-src 'self' "));
@@ -125,5 +126,24 @@ describe('command registry', () => {
   it('requires the provider', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     expect(() => act(() => void render(<List />))).toThrow(/CommandRegistryProvider/);
+  });
+});
+
+describe('shell command registration', () => {
+  it('settles: a stable command list does not re-register on every render', async () => {
+    let renders = 0;
+    function Feature() {
+      renders++;
+      const commands = React.useMemo(() => [{ id: 'x', label: 'x', group: 'g', run: () => undefined }], []);
+      useRegisterCommands(commands);
+      return null;
+    }
+    render(
+      <CommandRegistryProvider>
+        <Feature />
+      </CommandRegistryProvider>,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(renders).toBeLessThan(5);
   });
 });

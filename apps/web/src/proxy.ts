@@ -1,10 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 /**
- * Per-request Content-Security-Policy with a nonce (security.md §8). Next.js reads the nonce from the request's CSP
- * header and applies it to its own scripts; next-themes receives it through the layout.
- * Styles: elements need the nonce, but Radix positions popovers with inline style *attributes*, which a nonce cannot
- * cover — `style-src-attr 'unsafe-inline'` allows only those (attributes cannot run script).
+ * Per-request Content-Security-Policy (security.md §8: nonce-based for scripts). Next.js reads the nonce from the
+ * request's CSP header and applies it to its own scripts; next-themes receives it through the layout.
+ *
+ * DECISION(BF-007): styles allow 'unsafe-inline'. UI libraries inject <style> elements at runtime (sonner's CSS) and
+ * Radix positions popovers with style attributes; neither can carry our nonce, and the e2e CSP check showed both
+ * blocked. Styles cannot execute code; scripts stay nonce + 'strict-dynamic' only.
  */
 export function buildCsp(
   nonce: string,
@@ -13,9 +15,7 @@ export function buildCsp(
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${options.dev ? " 'unsafe-eval'" : ''}`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    `style-src-elem 'self' 'nonce-${nonce}'`,
-    "style-src-attr 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
     `connect-src 'self' ${options.apiOrigin}${options.dev ? ' ws:' : ''}`,

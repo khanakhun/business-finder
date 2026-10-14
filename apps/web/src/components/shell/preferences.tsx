@@ -10,30 +10,17 @@ import {
   DropdownMenuTrigger,
 } from '@bf/ui/components/dropdown-menu';
 import { LanguagesIcon, MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
-import { useTransition } from 'react';
-import { setLocale } from '@/i18n/actions.ts';
 import { LOCALES } from '@/i18n/locales.ts';
+import { useChangeLocale } from './use-change-locale.ts';
 
-/** Changes the dashboard language (cookie) and re-renders server components in it. */
-export function useChangeLocale(): (locale: string) => void {
-  const router = useRouter();
-  const [, startTransition] = useTransition();
-  return (locale) =>
-    startTransition(async () => {
-      await setLocale(locale);
-      router.refresh();
-    });
-}
-
-export function LanguageMenu() {
+export function LanguageMenu({ defaultOpen = false }: { readonly defaultOpen?: boolean }) {
   const t = useTranslations('language');
   const locale = useLocale();
   const changeLocale = useChangeLocale();
   return (
-    <DropdownMenu>
+    <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" aria-label={t('label')} className="gap-1.5 text-muted-foreground">
           <LanguagesIcon aria-hidden />
@@ -54,15 +41,16 @@ export function LanguageMenu() {
   );
 }
 
-export function ThemeMenu() {
+export function ThemeMenu({ defaultOpen = false }: { readonly defaultOpen?: boolean }) {
   const t = useTranslations('theme');
-  const { theme = 'system', setTheme, resolvedTheme } = useTheme();
-  const Icon = resolvedTheme === 'dark' ? MoonIcon : SunIcon;
+  const { theme = 'system', setTheme } = useTheme();
   return (
-    <DropdownMenu>
+    <DropdownMenu defaultOpen={defaultOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" aria-label={t('label')} className="text-muted-foreground">
-          <Icon aria-hidden />
+          {/* Both icons, CSS picks one: the server cannot know the resolved theme, so a JS choice would mismatch. */}
+          <SunIcon aria-hidden className="dark:hidden" />
+          <MoonIcon aria-hidden className="hidden dark:block" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

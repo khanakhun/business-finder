@@ -68,11 +68,11 @@ packages/observability/src/
 - Metrics: counter increments appear in `metricsHandler()` output with correct names.
 
 ## Acceptance criteria
-- [ ] Logger redacts all configured paths (tests prove it), adds trace/log-context fields.
-- [ ] Trace context survives a simulated queue hop (tests prove it).
-- [ ] Metrics endpoint helper outputs Prometheus text with default process metrics.
-- [ ] `observability` compose profile shows a demo trace in Jaeger (script `pnpm --filter @bf/observability demo:trace` documented in PR).
-- [ ] `docs/OBSERVABILITY.md` written.
+- [x] Logger redacts all configured paths (tests prove it), adds trace/log-context fields.
+- [x] Trace context survives a simulated queue hop (tests prove it).
+- [x] Metrics endpoint helper outputs Prometheus text with default process metrics.
+- [x] `observability` compose profile shows a demo trace in Jaeger (script `pnpm --filter @bf/observability demo:trace` documented in PR).
+- [x] `docs/OBSERVABILITY.md` written.
 
 ## Agent prompt
 ```text
@@ -94,3 +94,22 @@ screenshot or the Jaeger trace JSON to the PR.
 ## References
 - ADR-0015 · docs/ARCHITECTURE.md §14 · docs/conventions/security.md §7
 - OpenTelemetry JS: https://opentelemetry.io/docs/languages/js/ · pino redaction: https://getpino.io/#/docs/redaction · prom-client: https://github.com/siimon/prom-client
+
+## Implementation notes
+- **Versions**: pino 10.4.0, prom-client 15.1.3, @opentelemetry/api 1.9.1, sdk-node / exporter-trace-otlp-http /
+  instrumentation-http 0.223.0, sdk-trace-base / resources / core 2.12.0, instrumentation-undici 0.33.0,
+  instrumentation-ioredis 0.71.0, semantic-conventions 1.43.0.
+- **postgres.js has no OpenTelemetry instrumentation** (`instrumentation-pg` is for `pg`); DB spans are manual.
+  Valkey/BullMQ go through ioredis, which is instrumented. Only http, undici and ioredis instrumentations are
+  installed instead of the ~40-package auto-instrumentations bundle.
+- **Deep redaction**: pino `redact` paths cannot express "any depth", so sensitive key names are also removed
+  recursively in the log formatter (arrays, cycles, depth limit). Errors keep `type`/`message`/`stack` (a
+  test-first case caught that the formatter otherwise erased them).
+- **`exporter: 'none'` makes zero network calls**: span/log/metric processor lists are passed explicitly so
+  the SDK never falls back to `OTEL_*` env exporters.
+- **`forceFlush()`** on the telemetry handle: SDK 2.x processors export asynchronously after resource detection,
+  so tests and short-lived scripts must flush.
+- Queue hop: consumer span is a CONSUMER child of the extracted context (same trace) plus a link to the producer;
+  Jaeger shows it as `FOLLOWS_FROM demo.enqueue` in the same trace.
+- Sentry helper not added (not in the in-scope list); each app ticket wires its own DSN init.
+- Collector config was delivered with BF-002 (`infra/compose/otel-collector.yaml`).

@@ -11,10 +11,10 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "lint:root": "biome check ./*.json ./*.jsonc ./*.mjs ./.vscode ./scripts",
+    "lint:root": "biome check ./*.json ./*.jsonc ./*.mjs ./.vscode ./scripts ./tools",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:root": "node --test 'scripts/**/*.test.mjs'",
+    "test:root": "node --test 'scripts/**/*.test.mjs' 'tools/**/*.test.mjs'",
     "test:int": "turbo run test:int",
     "e2e": "turbo run e2e",
     "verify": "turbo run lint typecheck test",
@@ -35,7 +35,9 @@
     "db:studio": "node packages/db/src/cli/kit.ts studio",
     "db:reset": "node packages/db/src/cli/reset.ts",
     "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts",
-    "api:openapi": "pnpm --filter @bf/api openapi"
+    "api:openapi": "pnpm --filter @bf/api openapi",
+    "gen:module": "node tools/generators/module/cli.mjs",
+    "gen:module:check": "node tools/generators/module/check.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

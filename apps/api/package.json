@@ -5,7 +5,7 @@
   "description": "NestJS modular monolith: HTTP API (src/main.ts) and worker (src/worker.ts).",
   "type": "module",
   "scripts": {
-    "dev": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/main.ts",
+    "dev": "node scripts/dev.mjs",
     "start": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/main.ts",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,8 @@
     "test:int": "vitest run --config vitest.int.config.ts",
     "openapi": "node --import @swc-node/register/esm-register src/openapi.ts",
     "dev:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/worker.ts",
-    "start:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/worker.ts"
+    "start:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/worker.ts",
+    "dev:api": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/main.ts"
   },
   "dependencies": {
     "@bf/config": "workspace:*",

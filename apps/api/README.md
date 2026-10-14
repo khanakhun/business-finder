@@ -1,0 +1,107 @@
+# @bf/api
+
+NestJS 12 modular monolith (ADR-0005) with two process types sharing one codebase:
+
+| Process | Entrypoint | What it runs |
+|---|---|---|
+| HTTP API | `src/main.ts` | REST under `/v1`, `/health/*`, `/metrics`, `/docs` (non-production), `/admin/queues` |
+| Worker | `src/worker.ts` | BullMQ processors; `/metrics` and `/health/live` on `WORKER_METRICS_PORT` |
+| OpenAPI | `src/openapi.ts` | Builds `packages/api-client/openapi.json` with no env and no infrastructure |
+
+```bash
+pnpm infra:up                         # Postgres, Valkey, … (see the root README)
+pnpm db:migrate
+pnpm --filter @bf/api dev             # HTTP (API_PORT, 4000 + offset) and worker together, watch mode
+pnpm --filter @bf/api dev:api         # or just one of them: dev:api / dev:worker
+pnpm api:openapi                      # regenerate the OpenAPI document (a test fails if it is stale)
+pnpm gen:module <context>             # scaffold a new module (see below)
+```
+
+Code runs through the SWC loader (`@swc-node/register`): NestJS needs decorator metadata, which Node's type
+stripping and esbuild do not emit. `src/instrumentation.ts` is preloaded so OpenTelemetry patches modules before
+they load. Until BF-010 adds authentication, the app **refuses to start with `NODE_ENV=production`**.
+
+## Layout
+
+```
+src/
+├── main.ts · worker.ts · openapi.ts · instrumentation.ts · http.ts
+├── app.module.ts                 # AppModule.forHttp() / forWorker() / forOpenApi()
+└── modules/
+    ├── platform/                 # shared kernel (below)
+    └── system/                   # reference module: copy its shape
+        ├── domain/               # pure TypeScript: entities, value objects, rules
+        ├── application/          # use cases (*.command.ts / *.query.ts), ports (interfaces + DI tokens)
+        ├── infrastructure/       # adapters implementing ports (Drizzle, BullMQ, HTTP clients)
+        ├── interface/            # controllers, processors: parse → (authorise) → delegate
+        └── system.module.ts      # wiring per mode
+test/create-test-app.ts           # boots the real app on an isolated DB + test Valkey
+```
+
+Dependency direction: `interface → application → domain`; `infrastructure` implements `application` ports.
+Domain code imports no framework. Each mode wires only what it needs — controllers for HTTP, processors for the
+worker, and no queue connections in OpenAPI mode.
+
+### Platform (shared kernel)
+
+| Concern | Where | Notes |
+|---|---|---|
+| Config | `config/` | `loadAppEnv(mode)` validates `@bf/config` (`apiEnv` / `workerEnv`); token `APP_ENV` |
+| Database | `db/` | `DB_CLIENT` (lazy postgres.js pool), `@Transactional()` over `runInTransaction` |
+| Valkey | `valkey/` | `VALKEY` shared connection, fails fast; BullMQ opens its own (blocking for workers) |
+| Clock | `clock/` | `CLOCK` token; tests override it with `fixedClock()` |
+| Request context | `context/` | `x-request-id` (echoed or generated), ALS context + log context |
+| Validation | `validation/` | `zodDto(schema)` parameter classes + global `ZodValidationPipe`; `@ApiRoute` |
+| Errors | `errors/` | Global filter → RFC 9457 `application/problem+json`; 5xx never leak internals |
+| Resilience | `resilience/` | `@WithResilience('policy')`: timeout, retry with jitter, circuit breaker (cockatiel) |
+| Security | `security/` | helmet, CORS (APP_URL), throttling 300/min/user · 60/min/IP on Valkey (fails open) |
+| Health/metrics | `health/`, `metrics/` | `/health/live`, `/health/ready` (DB + Valkey), Prometheus `/metrics` |
+| Queues | `queue/` | BullMQ registration, `TypedProcessor`, Bull Board (basic auth until BF-010) |
+| OpenAPI | `openapi/` | OpenAPI 3.1 from Nest routes + Zod schemas (`.meta({ id })` → components) |
+
+## Adding things
+
+**A module.** `pnpm gen:module lead-capture` writes contracts, all four layers, a Drizzle repository stub, a
+controller, module wiring and tests, and registers it in `AppModule` and the contracts index. Then: add the
+table in `packages/db` (`pnpm db:generate`), implement the repository with `getExecutor(this.db)` plus an
+integration test, and run `pnpm api:openapi`. `pnpm gen:module:check` proves the templates still compile.
+
+**An endpoint.** Define the request/response schemas in `@bf/contracts` (with `.meta({ id })`), add a use case,
+then in the controller:
+
+```ts
+class CreateThingBody extends zodDto(CreateThingRequestSchema) {}
+
+@Post()
+@ApiRoute({ summary: 'Create a thing', body: CreateThingBody, response: { status: 201, schema: ThingSchema }, errors: [409] })
+create(@Body() body: CreateThingBody) {
+  return this.createThing.execute(body);
+}
+```
+
+Validation (422), the OpenAPI entry and the response contract check (dev/test) all come from those declarations.
+Throw `DomainError` subclasses from use cases; never build HTTP responses by hand.
+
+**A job.** Declare it in `@bf/contracts` (`defineJob('queue', 'name', shape)`), add the queue to `QUEUES` in
+`@bf/queue`, produce through a port whose adapter wraps `TypedProducer`, and process with:
+
+```ts
+@Processor(QUEUES.enrichment.name, { concurrency: QUEUES.enrichment.concurrency })
+export class EnrichProcessor extends TypedProcessor<typeof EnrichBusinessJob, void> {
+  protected readonly definition = EnrichBusinessJob;
+  async handle(payload, context) {
+    await this.enrichBusiness.execute(payload, context.signal); // pass the AbortSignal through
+  }
+}
+```
+
+`TypedProcessor` validates the payload (invalid → failed, no retry), enforces idempotency on
+`idempotencyKey`, continues the producer's trace, sets log context, aborts `context.signal` on cancellation
+(`requestCancellation()` from `@bf/queue`) and records `bf_jobs_processed_total` / `bf_job_duration_seconds`.
+
+## Tests
+
+- `pnpm --filter @bf/api test` — unit tests (SWC transform for decorators). Coverage is measured on the logic
+  layers (`domain/`, `application/`, pure platform helpers); framework wiring is proven by integration tests.
+- `pnpm --filter @bf/api test:int` — boots the real app per file with `createTestApp()` (isolated database cloned
+  from the migrated template, test Valkey) and, for jobs, `createTestWorker()`.

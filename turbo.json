@@ -25,7 +25,7 @@
     // Lints root-level files (configs, scripts) once; package lint tasks depend on it so
     // `turbo run lint` covers the whole repo.
     "//#lint:root": {
-      "inputs": ["*.json", "*.jsonc", "*.mjs", ".vscode/**", "scripts/**"]
+      "inputs": ["*.json", "*.jsonc", "*.mjs", ".vscode/**", "scripts/**", "tools/**"]
     },
     "lint": {
       "dependsOn": ["//#lint:root"]
@@ -35,7 +35,7 @@
     },
     // Unit tests for root scripts (node:test); package `test` tasks depend on it like `lint` on `//#lint:root`.
     "//#test:root": {
-      "inputs": ["scripts/**"]
+      "inputs": ["scripts/**", "tools/**"]
     },
     "test": {
       "dependsOn": ["transit", "//#test:root"],

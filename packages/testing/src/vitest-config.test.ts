@@ -68,6 +68,13 @@ describe('defineVitestConfig', () => {
     });
   });
 
+  it('runs in node unless a DOM environment is asked for', () => {
+    expect(defineVitestConfig({ type: 'unit' }).test?.environment).toBe('node');
+    expect(defineVitestConfig({ type: 'unit', environment: 'happy-dom' }).test?.environment).toBe(
+      'happy-dom',
+    );
+  });
+
   it('appends package-specific setup files after the shared one', () => {
     const { test } = defineVitestConfig({ type: 'unit', setupFiles: ['./src/test-setup.ts'] });
     expect(test?.setupFiles).toEqual([SETUP_FILE, './src/test-setup.ts']);

@@ -20,6 +20,7 @@
       "!**/.turbo",
       // Generated and checked by their own tests (`api:openapi`, `contracts:jsonschema`).
       "!packages/api-client/openapi.json",
+      "!packages/api-client/src/schema.d.ts",
       "!packages/contracts/generated"
     ]
   },
@@ -37,6 +38,12 @@
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "all"
+    }
+  },
+  "css": {
+    "parser": {
+      // Tailwind v4 directives (@theme, @custom-variant, @apply, @source) in the design system's CSS.
+      "tailwindDirectives": true
     }
   },
   "json": {

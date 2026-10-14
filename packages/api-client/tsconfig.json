@@ -1,0 +1,8 @@
+{
+  "extends": "@bf/tsconfig/library.json",
+  "compilerOptions": {
+    // Runs in the browser (apps/web): fetch, Response and Headers come from the DOM lib.
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": ["src", "*.config.ts"]
+}

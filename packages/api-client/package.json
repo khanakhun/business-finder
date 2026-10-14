@@ -1,0 +1,30 @@
+{
+  "name": "@bf/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Typed client for the Business Finder API, generated from apps/api's OpenAPI document.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "codegen": "node scripts/codegen.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "openapi-fetch": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "openapi-typescript": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

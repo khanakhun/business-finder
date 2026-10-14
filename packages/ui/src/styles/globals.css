@@ -1,0 +1,165 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Scan the design system's own components for class names (apps also scan their sources). */
+@source "../";
+
+/* Dark mode follows the `.dark` class that next-themes sets on <html>. */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Business Finder tokens. Colour comes from the harbour and the nautical chart rather than generic SaaS blue:
+ * cool chart-paper greys, slate-blue ink, lagoon teal for action and focus, buoy amber only for things that need
+ * attention. The signature is the lagoon "waterline" — a 2px teal rule marking where you are (active nav, focus,
+ * selected rows). Spend colour nowhere else.
+ */
+:root {
+  --paper: #f4f6f5;
+  --surface: #ffffff;
+  --surface-sunken: #eceff0;
+  --ink: #14232b;
+  --ink-muted: #5a6b73;
+  --line: #d9e1e0;
+  --line-strong: #c3cdcc;
+  --lagoon: #0b7480;
+  --lagoon-ink: #ffffff;
+  --lagoon-wash: #e1f0f1;
+  --buoy: #c98a04;
+  --buoy-wash: #fbf1d9;
+  --reef: #b42318;
+  --reef-wash: #fde9e7;
+  --kelp: #2f7d4f;
+
+  /* shadcn semantic aliases */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--lagoon);
+  --primary-foreground: var(--lagoon-ink);
+  --secondary: var(--surface-sunken);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-sunken);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--lagoon-wash);
+  --accent-foreground: var(--ink);
+  --destructive: var(--reef);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--lagoon);
+  --radius: 0.5rem;
+
+  --sidebar: #edf1f0;
+  --sidebar-foreground: var(--ink);
+  --sidebar-border: var(--line);
+}
+
+.dark {
+  --paper: #0e191e;
+  --surface: #13222a;
+  --surface-sunken: #0b1418;
+  --ink: #e5eded;
+  --ink-muted: #8ea0a7;
+  --line: #23343c;
+  --line-strong: #2f444d;
+  --lagoon: #3cb4bd;
+  --lagoon-ink: #06181b;
+  --lagoon-wash: #12333a;
+  --buoy: #e8b33a;
+  --buoy-wash: #3a2e0f;
+  --reef: #f2766b;
+  --reef-wash: #3c1714;
+  --kelp: #5fbf86;
+
+  --sidebar: #0b1519;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-wash: var(--lagoon-wash);
+  --color-buoy: var(--buoy);
+  --color-buoy-wash: var(--buoy-wash);
+  --color-reef: var(--reef);
+  --color-reef-wash: var(--reef-wash);
+  --color-kelp: var(--kelp);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --radius-sm: calc(var(--radius) - 3px);
+  --radius-md: calc(var(--radius) - 1px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Apps set --font-sans via next/font (Atkinson Hyperlegible Next). */
+  --font-sans: var(--font-app), ui-sans-serif, system-ui, sans-serif;
+
+  /* A calm UI scale: 13px dense text, 14px default, larger steps reserved for page titles. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.1rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+
+  html {
+    /* No layout shift when the scrollbar appears between pages. */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-base antialiased;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* The waterline: one visible, consistent focus treatment everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--lagoon);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: reduced motion must override every component's own timing. */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: as above. */
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

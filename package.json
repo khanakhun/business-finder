@@ -36,6 +36,7 @@
     "db:reset": "node packages/db/src/cli/reset.ts",
     "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts",
     "api:openapi": "pnpm --filter @bf/api openapi",
+    "api:codegen": "pnpm api:openapi && pnpm --filter @bf/api-client codegen",
     "gen:module": "node tools/generators/module/cli.mjs",
     "gen:module:check": "node tools/generators/module/check.mjs"
   },

@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnpm-store/
+.venv/
+__pycache__/
+*.pyc
+
+# builds & caches
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.tsbuildinfo
+playwright-report/
+test-results/
+blob-report/
+.lighthouseci/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# local data
+infra/compose/data/
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# agent workspaces
+.claude/settings.local.json
+tmp/

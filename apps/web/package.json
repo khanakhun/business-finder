@@ -1,0 +1,49 @@
+{
+  "name": "@bf/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Dashboard (Next.js App Router): a client of the API only.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/next.mjs dev",
+    "build": "node scripts/next.mjs build",
+    "start": "node scripts/next.mjs start",
+    "lint": "biome check .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --coverage",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@bf/api-client": "workspace:*",
+    "@bf/config": "workspace:*",
+    "@bf/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "next-intl": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "catalog:",
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@playwright/test": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "happy-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

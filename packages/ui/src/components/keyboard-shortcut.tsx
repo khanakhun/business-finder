@@ -30,7 +30,7 @@ export function KeyboardShortcut({ keys, className }: KeyboardShortcutProps) {
       {formatShortcut(keys, apple).map((key) => (
         <kbd
           key={key}
-          className="min-w-5 rounded border border-line-strong bg-surface px-1 text-center text-xs text-muted-foreground"
+          className="min-w-5 rounded border border-line-strong bg-surface px-1 text-center font-sans text-xs text-muted-foreground"
         >
           {key}
         </kbd>

@@ -1,0 +1,8 @@
+{
+  "extends": "@bf/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["next-env.d.ts", "src", "e2e", "*.config.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,4 @@
+@import "@bf/ui/styles.css";
+
+/* Scan the dashboard's own sources for Tailwind classes. */
+@source "../";

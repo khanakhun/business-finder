@@ -17,6 +17,9 @@ end
 return { hits, ttl, blockTtl }
 `;
 
+// Connection states in which no command can be sent right now ('wait' is lazy-connect: the first command connects).
+const UNAVAILABLE = new Set(['reconnecting', 'close', 'end']);
+
 const ALLOW: ThrottlerStorageRecord = {
   totalHits: 0,
   timeToExpire: 0,
@@ -32,6 +35,8 @@ const ALLOW: ThrottlerStorageRecord = {
  * than every request failing; readiness reports the outage.
  */
 export class ValkeyThrottlerStorage implements ThrottlerStorage {
+  private degraded = false;
+
   constructor(
     private readonly valkey: Redis,
     private readonly logger?: Logger,
@@ -46,6 +51,8 @@ export class ValkeyThrottlerStorage implements ThrottlerStorage {
     throttlerName: string,
   ): Promise<ThrottlerStorageRecord> {
     const base = `${this.prefix}${throttlerName}:${key}`;
+    // While ioredis is reconnecting, a command would only wait in its offline queue: allow without the round-trip.
+    if (UNAVAILABLE.has(this.valkey.status)) return this.allow(new Error(`valkey ${this.valkey.status}`));
     let reply: [number, number, number];
     try {
       reply = (await this.valkey.eval(
@@ -58,8 +65,11 @@ export class ValkeyThrottlerStorage implements ThrottlerStorage {
         String(blockDuration > 0 ? blockDuration : ttl),
       )) as [number, number, number];
     } catch (error) {
-      this.logger?.warn({ err: error }, 'rate limiter unavailable, allowing request');
-      return ALLOW;
+      return this.allow(error);
+    }
+    if (this.degraded) {
+      this.degraded = false;
+      this.logger?.info('rate limiter available again');
     }
     const [hits, ttlMs, blockMs] = reply;
     const blocked = blockMs > 0;
@@ -69,5 +79,14 @@ export class ValkeyThrottlerStorage implements ThrottlerStorage {
       isBlocked: blocked,
       timeToBlockExpire: blocked ? Math.ceil(blockMs / 1000) : 0,
     };
+  }
+
+  /** Fails open; warns once per outage rather than on every request. */
+  private allow(error: unknown): ThrottlerStorageRecord {
+    if (!this.degraded) {
+      this.degraded = true;
+      this.logger?.warn({ err: error }, 'rate limiter unavailable, allowing requests');
+    }
+    return ALLOW;
   }
 }

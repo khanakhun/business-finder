@@ -143,9 +143,13 @@ describe('Valkey outage on the request path', () => {
   it('fails open: requests are served (not rate limited) and do not hang', async () => {
     const outage = await createTestApp({ env: { VALKEY_URL: 'redis://127.0.0.1:1' } });
     try {
-      const started = performance.now();
-      await outage.http.get('/v1/system/info').expect(200);
-      expect(performance.now() - started).toBeLessThan(2_000);
+      // Several requests: the first fails fast on "connection refused", later ones used to wait in ioredis's
+      // offline queue while it reconnected (~10 s each).
+      for (let i = 0; i < 5; i++) {
+        const started = performance.now();
+        await outage.http.get('/v1/system/info').expect(200);
+        expect(performance.now() - started).toBeLessThan(1_000);
+      }
     } finally {
       await outage.close();
     }

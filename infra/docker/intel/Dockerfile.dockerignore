@@ -1,0 +1,6 @@
+# Build context is the repository root; send only what the image needs.
+*
+!services/intel/pyproject.toml
+!services/intel/uv.lock
+!services/intel/app/**
+**/__pycache__

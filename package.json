@@ -35,6 +35,8 @@
     "db:studio": "node packages/db/src/cli/kit.ts studio",
     "db:reset": "node packages/db/src/cli/reset.ts",
     "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts",
+    "contracts:py": "pnpm contracts:jsonschema && pnpm --filter @bf/intel contracts",
+    "contracts:check": "node packages/contracts/src/cli/jsonschema.ts --check && pnpm --filter @bf/intel contracts --check",
     "api:openapi": "pnpm --filter @bf/api openapi",
     "api:codegen": "pnpm api:openapi && pnpm --filter @bf/api-client codegen",
     "gen:module": "node tools/generators/module/cli.mjs",

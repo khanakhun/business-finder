@@ -17,6 +17,8 @@ reports/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.coverage
+.hypothesis/
 *.tsbuildinfo
 playwright-report/
 test-results/

@@ -2,7 +2,7 @@
 // Local infrastructure wrapper around infra/compose/docker-compose.yml.
 //
 // Usage (via root scripts):
-//   pnpm infra:up [--profile scraper|verify|observability]...   start and wait until healthy
+//   pnpm infra:up [--profile scraper|verify|observability|apps]...   start and wait until healthy
 //   pnpm infra:down                                              stop all services (keeps volumes)
 //   pnpm infra:reset --yes                                       stop and delete all volumes
 //   pnpm infra:logs [service...]                                 follow logs

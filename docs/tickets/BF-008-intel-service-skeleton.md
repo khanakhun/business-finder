@@ -74,11 +74,11 @@ A production-ready FastAPI service skeleton with settings, structured logging, t
 - Container: `docker build` succeeds; container healthcheck passes (documented in PR).
 
 ## Acceptance criteria
-- [ ] `pnpm verify` runs ruff, mypy and pytest for `services/intel` and passes.
-- [ ] Signed requests from the TS signer are accepted by the service (cross-language test vectors).
-- [ ] `safe_fetch` blocks all listed SSRF cases (tests).
-- [ ] `pnpm contracts:py` regenerates models deterministically.
-- [ ] Docker image builds, runs as non-root and passes its healthcheck.
+- [x] `pnpm verify` runs ruff, mypy and pytest for `services/intel` and passes.
+- [x] Signed requests from the TS signer are accepted by the service (cross-language test vectors).
+- [x] `safe_fetch` blocks all listed SSRF cases (tests).
+- [x] `pnpm contracts:py` regenerates models deterministically.
+- [x] Docker image builds, runs as non-root and passes its healthcheck.
 
 ## Agent prompt
 ```text
@@ -101,3 +101,39 @@ run the container and curl /health/ready; show a signed request succeeding and a
 ## References
 - ADR-0002 · docs/conventions/security.md §4 · docs/conventions/coding-standards.md §4
 - FastAPI: https://fastapi.tiangolo.com/ · uv: https://docs.astral.sh/uv/ · datamodel-code-generator: https://koxudaxi.github.io/datamodel-code-generator/ · OWASP SSRF prevention: https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+
+## Implementation notes
+- **Versions**: Python 3.13.12 (uv 0.10), FastAPI 0.143.1 (Starlette 1.8), pydantic 2.14 / pydantic-settings 2.16,
+  structlog 26.1, OpenTelemetry 1.45.1 / instrumentation 0.66b1, prometheus-client 0.26, httpx 0.28.1,
+  uvicorn 0.54, datamodel-code-generator 0.83, Playwright 1.64 (Chromium 156), ruff 0.17, mypy 2.4, pytest 9.1.
+  Starlette's TestClient now wants `httpx2` (dev dependency only); `safe_fetch` stays on httpx as the ticket says.
+- **Auth before routing**: a pure-ASGI `InternalAuthMiddleware` caps the body (`INTEL_MAX_REQUEST_BYTES`) and
+  verifies the signature before FastAPI parses anything (a router dependency would run *after* JSON decoding,
+  leaking 422s with schema paths to unsigned callers — found in review). `require_internal_auth` stays on `/v1`
+  routers as a fail-closed guard. Signed string: `ts|nonce|METHOD|raw path?query|hex(sha256(body))`.
+- **Cross-language vectors**: `packages/contracts/fixtures/internal-auth-vectors.json` (5 cases incl. UTF-8 body,
+  percent-encoded query, lower-case method); Vitest and pytest both assert them, and Python's stdlib was used to
+  check them independently. Live check: TS-signed request → 200, replay → 401, unsigned → 401 problem+json.
+- **safe_fetch**: validation per hop (scheme, port, no userinfo, LDH hostname after IDNA), resolve once, every
+  record must pass `ip_policy`, connect to the IP with `Host` + `sni_hostname` (httpcore verifies the cert against
+  it), manual redirects (max 5; cross-origin drops caller headers and refuses to resend a body), one `asyncio`
+  deadline, body cap counted on raw and inflated bytes (only gzip/deflate requested, inflated with `max_length`),
+  no env proxies, no keep-alive across hostnames, query strings kept out of logs/spans. Hypothesis covers the
+  address classes; libc-resolved forms (`2130706433`, `0x7f000001`, `127.1`, `0177.0.0.1`) are tested too.
+- **Contracts codegen**: one module per schema (snake_case), offline `$ref`s, fixed header, ruff-formatted; Zod's
+  regex next to `format` is dropped (Pydantic rejects `pattern` on datetimes) — Python therefore accepts any UTC
+  offset where Zod demands `Z` (DECISION in `scripts/gen_contracts.py`). `pnpm contracts:jsonschema` now also writes
+  `generated/error-codes.json` (`typeBase` + codes), generated into `app/contracts/error_codes.py`.
+  `pnpm contracts:check` fails on drift; a pytest test runs the same check.
+- **Observability parity**: same log fields/order/redaction as pino (`[redacted]`, any depth), `traceId`/`spanId`,
+  `requestId` from `x-request-id`; `bf_http_requests_total` / `bf_http_request_duration_seconds` with the shared
+  buckets (unknown methods → `OTHER`); handled 5xx errors are logged and recorded on the span; probes untraced.
+- **Config**: all variables declared in `@bf/config` (`apps/intel.ts`; added `NODE_ENV`, `APP_VERSION`, `INTEL_HOST`,
+  `INTEL_WORKERS`, `INTEL_CPU_WORKERS`, `INTEL_MAX_REQUEST_BYTES`, `INTEL_FETCH_*`); a pytest test fails if
+  `app/settings.py` and `.env.example` disagree. Empty values count as unset, as in `@bf/config`.
+- **Image**: `python:3.13-slim` (trixie) + uv + `playwright install --with-deps --only-shell chromium`, both base
+  images pinned by digest, uid 10001, healthcheck on `/health/ready`. **956 MB** (321 MB with
+  `INSTALL_BROWSERS=false`). Cold start to first `/health/live`: **0.64 s** in the container. Compose profile
+  `apps` runs it read-only with `cap_drop: [ALL]` and `no-new-privileges` (Chromium and the forkserver pool work).
+- **Tests**: 154 pytest tests, 97 % coverage (gate 85 %); +8 Vitest tests for the signer.
+

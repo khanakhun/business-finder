@@ -34,6 +34,8 @@ export const PORT_SERVICES = Object.freeze({
   BF_JAEGER_UI_PORT: 'jaeger',
   BF_OTLP_GRPC_PORT: 'otel-collector',
   BF_OTLP_HTTP_PORT: 'otel-collector',
+  // Profile `apps` runs services/intel in a container; without it, `pnpm --filter @bf/intel dev` uses the port.
+  INTEL_PORT: 'intel',
 });
 
 export const DEFAULT_SERVICES = Object.freeze(['postgres', 'valkey', 's3', 's3-init', 'mailpit']);
@@ -42,6 +44,7 @@ export const PROFILE_SERVICES = Object.freeze({
   scraper: ['gmaps-scraper'],
   verify: ['reacher'],
   observability: ['otel-collector', 'jaeger'],
+  apps: ['intel'],
 });
 
 export const MAX_OFFSET = 70;

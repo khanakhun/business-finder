@@ -42,6 +42,14 @@ export const QUEUES = {
     concurrency: 4,
   },
   discoveryIngest: { name: 'discovery-ingest', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  /**
+   * Enrichment (BF-027): run starts and the nightly refresh, and the steps themselves. Step retries are the
+   * engine's (per step, with backoff, recorded on the step row); BullMQ's only cover infrastructure failures.
+   */
+  enrichmentRun: { name: 'enrichment-run', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  enrichmentStep: { name: 'enrichment-step', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 8 },
+  /** The nightly refresh: one job per UTC day. */
+  enrichmentRefresh: { name: 'enrichment-refresh', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   /** Listing search (BF-022): business embeddings, re-computed when their text or the model changes. */
   search: {
     name: 'search',

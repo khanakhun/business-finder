@@ -70,6 +70,7 @@ export class UpdateSettingsCommand {
       ...(body.features ? { features: { ...current.features, ...body.features } } : {}),
       // Discovery choices merge too: sending only the Google tier keeps the provider order.
       ...(body.discovery ? { discovery: { ...current.discovery, ...definedOnly(body.discovery) } } : {}),
+      ...(body.enrichment ? { enrichment: { ...current.enrichment, ...definedOnly(body.enrichment) } } : {}),
     } as OrgSettingsPatch;
     const saved = await this.settings.upsert(orgId, patch, auth.userId);
     await this.audit.record({
@@ -81,6 +82,7 @@ export class UpdateSettingsCommand {
         changed: Object.keys(sent).sort(),
         ...(body.features ? { features: body.features } : {}),
         ...(body.discovery ? { discovery: Object.keys(definedOnly(body.discovery)).sort() } : {}),
+        ...(body.enrichment ? { enrichment: Object.keys(definedOnly(body.enrichment)).sort() } : {}),
       },
     });
     return toOrgSettings(saved, this.env);

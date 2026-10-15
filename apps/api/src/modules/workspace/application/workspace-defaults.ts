@@ -1,8 +1,13 @@
-import { type DiscoverySettings, resolveDiscoverySettings } from '@bf/contracts';
+import {
+  type DiscoverySettings,
+  type EnrichmentSettings,
+  resolveDiscoverySettings,
+  resolveEnrichmentSettings,
+} from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { ORG_SETTINGS_REPOSITORY, type OrgSettingsRepository } from './ports.ts';
 
-/** Workspace defaults other modules need (public surface): location hint, discovery choices. */
+/** Workspace defaults other modules need (public surface): location hint, discovery and enrichment choices. */
 @Injectable()
 export class WorkspaceDefaults {
   constructor(@Inject(ORG_SETTINGS_REPOSITORY) private readonly settings: OrgSettingsRepository) {}
@@ -16,5 +21,10 @@ export class WorkspaceDefaults {
   /** Discovery choices (provider order, disabled providers, Google field tier, monthly budget) over defaults. */
   async discoverySettings(organizationId: string): Promise<DiscoverySettings> {
     return resolveDiscoverySettings((await this.settings.find(organizationId))?.discovery);
+  }
+
+  /** Enrichment choices (monthly budget, nightly refresh cap) over defaults. */
+  async enrichmentSettings(organizationId: string): Promise<EnrichmentSettings> {
+    return resolveEnrichmentSettings((await this.settings.find(organizationId))?.enrichment);
   }
 }

@@ -56,6 +56,19 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /**
+   * Website crawls in intel (BF-026/BF-027): intel's own deadline is the request's `timeoutSeconds` (90 s), so it
+   * answers first. No retry here: the enrichment engine retries the step (with backoff) and keeps the breaker
+   * open across steps while intel is down.
+   */
+  'intel-site': {
+    timeoutMs: 120_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,

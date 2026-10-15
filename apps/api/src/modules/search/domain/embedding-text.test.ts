@@ -56,4 +56,24 @@ describe('composeEmbeddingText', () => {
       }),
     ).toBe('Pizzeria Lulu');
   });
+
+  it('adds what the website says (BF-027): description and online tools, sorted', () => {
+    const crawled = {
+      ...source,
+      website: {
+        description: '  Pizzas   au feu de bois ',
+        booking: ['Zenchef', 'TheFork'],
+        ordering: ['Uber Eats'],
+      },
+    };
+    expect(composeEmbeddingText(crawled).split('\n').slice(-2)).toEqual([
+      'Website: Pizzas au feu de bois',
+      'Online: booking (TheFork, Zenchef); ordering (Uber Eats)',
+    ]);
+    // Not crawled, or nothing said: the text (and its hash) does not change.
+    expect(composeEmbeddingText({ ...source, website: null })).toBe(composeEmbeddingText(source));
+    expect(
+      composeEmbeddingText({ ...source, website: { description: null, booking: [], ordering: [] } }),
+    ).toBe(composeEmbeddingText(source));
+  });
 });

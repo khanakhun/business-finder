@@ -2,6 +2,7 @@ import type {
   AuditActorType,
   AuditLogQuery,
   DiscoverySettings,
+  EnrichmentSettings,
   FeatureFlags,
   Locale,
   PostalAddress,
@@ -24,6 +25,7 @@ export interface OrgSettingsRecord {
   readonly defaultCountryCode: string | null;
   readonly senderDefaults: SenderDefaults;
   readonly discovery: Partial<DiscoverySettings>;
+  readonly enrichment: Partial<EnrichmentSettings>;
   readonly features: FeatureFlags;
   readonly updatedAt: Date | null;
 }

@@ -43,13 +43,38 @@ export function useCommandRegistry(): CommandRegistry {
   return registry;
 }
 
-/** Registers commands for as long as the calling component is mounted. */
+/**
+ * Registers commands for as long as the calling component is mounted. Callers may pass a new array on every render:
+ * commands are re-registered only when what the palette shows changes (ids, labels, groups), and `run` always
+ * calls the latest version. (Re-registering on every render looped: registering re-renders every consumer.)
+ */
 export function useRegisterCommands(commands: readonly Command[]): void {
   const { register } = useCommandRegistry();
+  const latest = React.useRef(commands);
+  React.useLayoutEffect(() => {
+    latest.current = commands;
+  });
+  const signature = commands
+    .map((command) =>
+      [
+        command.id,
+        command.label,
+        command.group,
+        ...(command.keywords ?? []),
+        ...(command.shortcut ?? []),
+      ].join('\u0000'),
+    )
+    .join('\u0001');
+  // `signature` stands for `commands` (see above); `latest` is a ref.
   React.useEffect(() => {
-    const unregister = commands.map((command) => register(command));
+    const unregister = latest.current.map((command) =>
+      register({
+        ...command,
+        run: () => (latest.current.find((c) => c.id === command.id) ?? command).run(),
+      }),
+    );
     return () => {
       for (const fn of unregister) fn();
     };
-  }, [commands, register]);
+  }, [signature, register]);
 }

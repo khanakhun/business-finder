@@ -159,4 +159,36 @@ describe('shell command registration', () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(renders).toBeLessThan(5);
   });
+
+  it('settles with a new array on every render, and runs the latest version of a command', async () => {
+    let renders = 0;
+    const calls: string[] = [];
+    function Inline({ version }: { version: string }) {
+      renders++;
+      // A fresh array (and closure) on every render, as pages naturally write it.
+      useRegisterCommands([{ id: 'inline', label: 'Inline', group: 'g', run: () => calls.push(version) }]);
+      return null;
+    }
+    let registry: ReturnType<typeof useCommandRegistry> | undefined;
+    function Capture() {
+      registry = useCommandRegistry();
+      return null;
+    }
+    const { rerender } = render(
+      <CommandRegistryProvider>
+        <Inline version="v1" />
+        <Capture />
+      </CommandRegistryProvider>,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(renders).toBeLessThan(5);
+    rerender(
+      <CommandRegistryProvider>
+        <Inline version="v2" />
+        <Capture />
+      </CommandRegistryProvider>,
+    );
+    act(() => registry?.commands.find((c) => c.id === 'inline')?.run());
+    expect(calls).toEqual(['v2']);
+  });
 });

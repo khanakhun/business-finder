@@ -261,6 +261,24 @@ export class DrizzleResolutionRepository implements ResolutionRepository {
     return rows.length;
   }
 
+  async mergedInto(businessId: string): Promise<string | null | undefined> {
+    const [row] = await getExecutor(this.db)
+      .select({ mergedIntoId: businesses.mergedIntoId })
+      .from(businesses)
+      .where(eq(businesses.id, businessId));
+    return row ? row.mergedIntoId : undefined;
+  }
+
+  async trackedOnlyBy(organizationId: string, businessIds: readonly string[]): Promise<Set<string>> {
+    if (businessIds.length === 0) return new Set();
+    const rows = await getExecutor(this.db).execute<{ business_id: string }>(sql`
+      SELECT business_id FROM org_businesses
+      WHERE business_id = ANY(${arrayOf([...businessIds], 'text')}::uuid[])
+      GROUP BY business_id
+      HAVING bool_and(organization_id = ${organizationId}) AND bool_or(organization_id = ${organizationId})`);
+    return new Set(rows.map((r) => r.business_id));
+  }
+
   async recordPossibleDuplicate(businessA: string, businessB: string, score: MatchScore): Promise<void> {
     if (businessA === businessB) return;
     const [a, b] = businessA < businessB ? [businessA, businessB] : [businessB, businessA];

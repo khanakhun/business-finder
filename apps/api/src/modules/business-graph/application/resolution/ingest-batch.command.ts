@@ -50,12 +50,14 @@ export class IngestBatchCommand {
           counts.failed++;
           const code = error instanceof DomainError ? error.code : 'INTERNAL';
           const providerRef = String((record as { providerRef?: unknown }).providerRef ?? '').slice(0, 300);
+          // Never the error itself: database errors quote the query parameters (names, phones, emails).
           this.logger.warn(
             {
               provider: (record as { provider?: unknown }).provider,
               providerRef,
               code,
-              err: error instanceof DomainError ? undefined : error,
+              errorName: error instanceof Error ? error.name : typeof error,
+              dbCode: (error as { cause?: { code?: unknown } }).cause?.code,
             },
             'source record ingestion failed',
           );

@@ -1,7 +1,7 @@
 import { type SourceRecordInput, SourceRecordSchema } from '@bf/contracts';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { blockingLockKeys, namePrefix } from './blocking.ts';
+import { blockingLockKeys, businessLockKeys, namePrefix } from './blocking.ts';
 import { decideMatch } from './decision.ts';
 import {
   addressTokens,
@@ -90,9 +90,14 @@ describe('blocking', () => {
     const keys = blockingLockKeys(norm());
     expect(keys).toContain('phone:+590590270001');
     expect(keys).toContain('site:le-tamarin.com');
-    expect(keys.filter((k) => k.startsWith('cell:') && k.endsWith(':ta'))).toHaveLength(9);
+    expect(keys.filter((k) => k.startsWith('cell:'))).toHaveLength(9);
+    expect(keys).toContain('name:le tamarin');
     expect(keys).toEqual([...keys].sort());
     expect(blockingLockKeys(norm({ location: undefined }))).toContain('name:le tamarin');
+    // Name variants of one place in the same area share their cell locks.
+    const variant = blockingLockKeys(norm({ name: 'Paul Restaurant', phones: [], website: undefined }));
+    expect(variant.filter((k) => keys.includes(k) && k.startsWith('cell:'))).toHaveLength(9);
+    expect(businessLockKeys(['b', 'a', 'b'])).toEqual(['business:a', 'business:b']);
   });
 
   it('gives decorated variants of a name the same prefix', () => {

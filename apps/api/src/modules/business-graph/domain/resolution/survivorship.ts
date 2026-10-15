@@ -77,6 +77,8 @@ export interface GoldenContact {
   readonly sourceUrl: string | null;
   readonly publishedOnSite: boolean;
   readonly confidence: number;
+  /** Set for manual contacts: the workspace that entered them. */
+  readonly submittedByOrgId: string | null;
 }
 
 export interface GoldenCategory {
@@ -159,6 +161,7 @@ export function unionContacts(sources: readonly NormalizedSource[]): GoldenConta
           sourceUrl,
           publishedOnSite: fromSite,
           confidence: source.confidence,
+          submittedByOrgId: source.provider === 'manual' ? (source.submittedByOrgId ?? null) : null,
         });
       } else {
         contacts.set(key, {

@@ -20,7 +20,13 @@ import {
 import { GoldenRecordWriter } from './application/resolution/golden-record.writer.ts';
 import { IngestBatchCommand } from './application/resolution/ingest-batch.command.ts';
 import { IngestSourceRecordCommand } from './application/resolution/ingest-source-record.command.ts';
-import { RESOLUTION_REPOSITORY } from './application/resolution/ports.ts';
+import {
+  ListPossibleDuplicatesQuery,
+  MergeBusinessesCommand,
+  ResolvePossibleDuplicateCommand,
+  SplitBusinessCommand,
+} from './application/resolution/merge.commands.ts';
+import { MERGE_REPOSITORY, RESOLUTION_REPOSITORY } from './application/resolution/ports.ts';
 import { CategoryCandidateSearch } from './application/taxonomy/category-candidates.ts';
 import { CategoryClassifier } from './application/taxonomy/category-classifier.ts';
 import { CategoryEmbedder } from './application/taxonomy/category-embedder.ts';
@@ -37,10 +43,12 @@ import { DrizzleBusinessReadModel } from './infrastructure/drizzle-business-read
 import { DrizzleContactRepository } from './infrastructure/drizzle-contact.repository.ts';
 import { DrizzleOrgBusinessRepository } from './infrastructure/drizzle-org-business.repository.ts';
 import { DrizzleSourceRecordRepository } from './infrastructure/drizzle-source-record.repository.ts';
+import { DrizzleMergeRepository } from './infrastructure/resolution/drizzle-merge.repository.ts';
 import { DrizzleResolutionRepository } from './infrastructure/resolution/drizzle-resolution.repository.ts';
 import { DrizzleTaxonomyRepository } from './infrastructure/taxonomy/drizzle-taxonomy.repository.ts';
 import { TaxonomyEmbedScheduler } from './infrastructure/taxonomy/taxonomy-embed.scheduler.ts';
 import { BusinessesController } from './interface/businesses.controller.ts';
+import { ResolutionController } from './interface/resolution.controller.ts';
 import { CategoriesController } from './interface/taxonomy/categories.controller.ts';
 import { TaxonomyEmbedProcessor } from './interface/taxonomy/taxonomy-embed.processor.ts';
 
@@ -54,7 +62,9 @@ export class BusinessGraphModule {
   static forRoot(mode: AppMode): DynamicModule {
     return {
       module: BusinessGraphModule,
-      controllers: mode === 'worker' ? [] : [BusinessesController, CategoriesController],
+      // ResolutionController first: its static paths (`possible-duplicates`, `merge`) must win over `:id`.
+      controllers:
+        mode === 'worker' ? [] : [ResolutionController, BusinessesController, CategoriesController],
       providers: [
         GetBusinessDetailQuery,
         ListTrackedBusinessesQuery,
@@ -73,6 +83,11 @@ export class BusinessGraphModule {
         GoldenRecordWriter,
         IngestSourceRecordCommand,
         IngestBatchCommand,
+        { provide: MERGE_REPOSITORY, useClass: DrizzleMergeRepository },
+        MergeBusinessesCommand,
+        SplitBusinessCommand,
+        ListPossibleDuplicatesQuery,
+        ResolvePossibleDuplicateCommand,
         // Taxonomy (BF-015)
         { provide: TAXONOMY_REPOSITORY, useClass: DrizzleTaxonomyRepository },
         TaxonomyCache,

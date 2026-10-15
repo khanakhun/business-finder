@@ -23,20 +23,26 @@ export function namePrefix(normalizedName: string): string {
 }
 
 /**
- * Lock keys covering every way this record can match: its phones, its site (match key), and its geohash cell plus
- * neighbours combined with a name prefix. Sorted, so concurrent transactions lock in the same order (no deadlocks).
+ * Lock keys covering every candidate branch (a superset, so two concurrent ingestions of one place always share a
+ * key): its phones, its site, its geohash cell and neighbours (whole cells: name variants can differ in every
+ * token), and its normalized name (unlocated records match same-named businesses anywhere). Sorted, so
+ * transactions lock in the same order.
+ *
+ * Lock protocol (ingestion, merge, split): blocking keys first, then `business:<id>` keys — each phase sorted, so
+ * no two transactions can wait on each other in a cycle.
  */
 export function blockingLockKeys(source: NormalizedSource): string[] {
   const keys = new Set<string>();
   for (const phone of source.phones) keys.add(`phone:${phone.e164}`);
   if (source.website) keys.add(`site:${source.website.matchKey}`);
   if (source.location) {
-    const prefix = namePrefix(source.name.normalized);
     for (const cell of geohashWithNeighbours(source.location.lat, source.location.lng))
-      keys.add(`cell:${cell}:${prefix}`);
-  } else {
-    // Without coordinates, the name is the only shared handle.
-    keys.add(`name:${source.name.normalized}`);
+      keys.add(`cell:${cell}`);
   }
+  keys.add(`name:${source.name.normalized}`);
   return [...keys].sort();
 }
+
+/** `business:<id>` lock keys (second phase of the lock protocol). */
+export const businessLockKeys = (ids: readonly string[]): string[] =>
+  [...new Set(ids)].map((id) => `business:${id}`).sort();

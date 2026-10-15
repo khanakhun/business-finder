@@ -1,0 +1,1 @@
+CREATE INDEX "idx_possible_duplicates__status_created_at" ON "possible_duplicates" USING btree ("status","created_at" DESC NULLS LAST,"id" DESC NULLS LAST);

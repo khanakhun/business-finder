@@ -15,7 +15,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { APP_ENV, type AppEnv } from '../../../platform/config/app-env.ts';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import { LOGGER } from '../../../platform/logging/logger.ts';
-import { BLOCKING, blockingLockKeys } from '../../domain/resolution/blocking.ts';
+import { BLOCKING, blockingLockKeys, businessLockKeys } from '../../domain/resolution/blocking.ts';
 import {
   DEFAULT_THRESHOLDS,
   decideMatch,
@@ -123,14 +123,22 @@ export class IngestSourceRecordCommand {
     }
     const record = parsed.data;
     const result = await startSpan('ingest.record', { 'bf.provider': record.provider }, async (span) => {
-      const hash = contentHash({ ...record, fetchedAt: undefined, expiresAt: undefined });
+      // Same content and same normalization rules → nothing to do (fetch times excluded).
+      const hash = contentHash({
+        record: { ...record, fetchedAt: undefined, expiresAt: undefined },
+        normalizer: NORMALIZER_VERSION,
+        defaultRegion: options.defaultRegion ?? null,
+      });
       const unchanged = await this.unchanged(record, hash);
       if (unchanged) return unchanged;
       const classification = await startSpan('ingest.classify', {}, () => this.classify(record, options));
-      const normalized = normalizeSource(record, {
-        classification,
-        ...(options.defaultRegion ? { defaultRegion: options.defaultRegion } : {}),
-      });
+      const normalized: NormalizedSource = {
+        ...normalizeSource(record, {
+          classification,
+          ...(options.defaultRegion ? { defaultRegion: options.defaultRegion } : {}),
+        }),
+        ...(record.provider === 'manual' ? { submittedByOrgId: options.orgId ?? null } : {}),
+      };
       const resolved = await runInTransaction(this.db, () => this.resolve(record, normalized, hash, options));
       span.setAttribute('bf.ingest.outcome', resolved.outcome);
       return resolved;
@@ -187,6 +195,7 @@ export class IngestSourceRecordCommand {
     hash: string,
     options: IngestOptions,
   ): Promise<IngestResult> {
+    // Lock protocol, phase 1: blocking keys (see blocking.ts).
     await this.resolution.lockKeys(blockingLockKeys(normalized));
     // Another worker may have ingested the same record while we waited for the locks.
     const raced = await this.unchanged(record, hash);
@@ -194,33 +203,37 @@ export class IngestSourceRecordCommand {
 
     const existing = await this.resolution.findSource(record.provider, record.providerRef);
     const manual = record.provider === 'manual';
+    const linkedBy = manual ? 'manual' : 'auto';
     const { record: stored } = await this.sources.upsert({
       id: existing?.id ?? options.sourceId ?? newId(),
       businessId: existing?.businessId ?? null,
       provider: record.provider,
       providerRef: record.providerRef,
-      payload: record.raw ?? { ...record, raw: undefined },
+      payload: storablePayload(record),
       normalized: normalized as unknown as Record<string, unknown>,
       contentHash: hash,
       fetchedAt: new Date(record.fetchedAt),
       expiresAt: record.expiresAt ? new Date(record.expiresAt) : null,
       matchConfidence: null,
-      linkedBy: manual ? 'manual' : 'auto',
+      linkedBy,
       submittedByOrgId: manual ? (options.orgId ?? null) : null,
     });
 
     if (stored.businessId) {
-      // A known record with new content: recompute its business.
-      await this.recompute(stored.businessId, options);
-      return {
-        outcome: 'merged',
-        businessId: stored.businessId,
-        sourceId: stored.id,
-        possibleDuplicates: [],
-      };
+      // A known record with new content: recompute its (live) business. Re-linking a record whose content moved to
+      // another business is a manual split (see the ticket notes).
+      const businessId = await this.lockLive(stored.businessId);
+      await this.recompute(businessId);
+      return { outcome: 'merged', businessId, sourceId: stored.id, possibleDuplicates: [] };
     }
 
-    const candidateIds = await this.resolution.findCandidateIds(normalized, BLOCKING.maxCandidates);
+    let candidateIds = await this.resolution.findCandidateIds(normalized, BLOCKING.maxCandidates);
+    if (manual && options.orgId) {
+      // A workspace's manual add may only join records it alone tracks: its manual values win survivorship, and
+      // must not rewrite facts other workspaces rely on (ADR-0008). Elsewhere it creates its own record.
+      const own = await this.resolution.trackedOnlyBy(options.orgId, candidateIds);
+      candidateIds = candidateIds.filter((id) => own.has(id));
+    }
     const profiles = await this.resolution.loadProfiles(candidateIds);
     const snapshot = await this.taxonomy.get();
     const categoryPath = normalized.categories?.primary
@@ -235,28 +248,21 @@ export class IngestSourceRecordCommand {
     let businessId: string;
     let outcome: IngestResult['outcome'];
     if (decision.kind === 'match') {
-      businessId = decision.businessId;
       outcome = 'merged';
-      await this.resolution.linkSource(
-        stored.id,
-        businessId,
-        decision.score.total,
-        manual ? 'manual' : 'auto',
-      );
-      await this.recompute(businessId, options);
+      businessId = await this.lockLive(decision.businessId);
+      await this.resolution.linkSource(stored.id, businessId, decision.score.total, linkedBy);
+      await this.recompute(businessId);
     } else {
       businessId = newId();
       outcome = decision.possible.length > 0 ? 'possible_duplicate' : 'created';
-      await this.writer.write(businessId, [normalized], {
-        create: true,
-        submittedByOrgId: options.orgId ?? null,
-      });
-      await this.resolution.linkSource(stored.id, businessId, 1, manual ? 'manual' : 'auto');
+      await this.writer.write(businessId, [normalized], { create: true });
+      await this.resolution.linkSource(stored.id, businessId, 1, linkedBy);
     }
     for (const other of decision.possible) {
       await this.resolution.recordPossibleDuplicate(businessId, other.businessId, other.score);
+      // Scores only: reasons can quote phone numbers (security.md §7).
       this.logger.debug(
-        { businessId, otherId: other.businessId, score: other.score.total, reasons: other.score.reasons },
+        { businessId, otherId: other.businessId, score: other.score.total },
         'possible duplicate',
       );
     }
@@ -269,12 +275,45 @@ export class IngestSourceRecordCommand {
     };
   }
 
-  private async recompute(businessId: string, options: IngestOptions): Promise<void> {
+  /**
+   * Lock protocol, phase 2: `business:<id>`, then follow merges — a concurrent merge may have retired the business
+   * between candidate selection and the lock. Returns the live business to write to.
+   */
+  private async lockLive(businessId: string): Promise<string> {
+    let current = businessId;
+    for (let hop = 0; hop < 5; hop++) {
+      await this.resolution.lockKeys(businessLockKeys([current]));
+      const mergedInto = await this.resolution.mergedInto(current);
+      if (mergedInto === undefined) throw new Error(`Business ${current} vanished during ingestion`);
+      if (mergedInto === null) return current;
+      current = mergedInto;
+    }
+    throw new Error(`Merge chain too long from business ${businessId}`);
+  }
+
+  private async recompute(businessId: string): Promise<void> {
     const linked = await this.resolution.listLinkedSources(businessId);
     await this.writer.write(
       businessId,
       linked.map((s) => s.normalized),
-      { create: false, submittedByOrgId: options.orgId ?? null },
+      { create: false },
     );
   }
+}
+
+/** Bumped when normalization changes, so stored records are re-normalized on their next fetch. */
+export const NORMALIZER_VERSION = 1;
+
+const MAX_PAYLOAD_BYTES = 256 * 1024;
+
+/**
+ * The provider payload as stored: NUL characters removed (Postgres text cannot hold them) and capped in size
+ * (an oversized payload keeps only the normalized view).
+ */
+export function storablePayload(record: SourceRecord): unknown {
+  const raw = record.raw ?? { ...record, raw: undefined };
+  const json = JSON.stringify(raw)?.replaceAll('\\u0000', '');
+  if (!json) return {};
+  if (Buffer.byteLength(json) > MAX_PAYLOAD_BYTES) return { truncated: true, bytes: Buffer.byteLength(json) };
+  return JSON.parse(json);
 }

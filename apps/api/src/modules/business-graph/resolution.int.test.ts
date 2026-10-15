@@ -237,6 +237,36 @@ describe('ingestion', () => {
   });
 });
 
+describe('concurrency', () => {
+  it('serializes concurrent name variants of one place that share no phone or site', async () => {
+    for (let n = 0; n < 5; n++) {
+      const lat = 17.95 + n * 0.01;
+      const base = { fetchedAt: '2026-10-01T10:00:00.000Z', providerCategories: [] };
+      // Longest name tokens differ ("exotiques" / "fleurs"): the old prefix locks missed this pair.
+      const results = await Promise.all([
+        ingest.execute({
+          ...base,
+          provider: 'google_places',
+          providerRef: `var-g-${n}`,
+          name: `Marie ${n} Fleurs Exotiques`,
+          location: { lat, lng: -62.8 },
+        }),
+        ingest.execute({
+          ...base,
+          provider: 'osm',
+          providerRef: `var-n-${n}`,
+          name: `Marie ${n} Fleurs`,
+          location: { lat: lat + 0.0001, lng: -62.8 },
+        }),
+      ]);
+      // Whatever the interleaving, the second sees the first: matched or flagged, never blind.
+      const [first, second] = results;
+      const flagged = (first?.possibleDuplicates.length ?? 0) + (second?.possibleDuplicates.length ?? 0) > 0;
+      expect(first?.businessId === second?.businessId || flagged).toBe(true);
+    }
+  });
+});
+
 describe('IngestBatchCommand', () => {
   it('isolates failing records and counts outcomes', async () => {
     const { google, overture } = place(6);

@@ -399,6 +399,12 @@ export const possibleDuplicates = pgTable(
       table.businessBId,
     ),
     index('idx_possible_duplicates__business_b_id').on(table.businessBId),
+    // Duplicates queue by status, newest first (keyset on created_at, id).
+    index('idx_possible_duplicates__status_created_at').on(
+      table.status,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
     index('idx_possible_duplicates__open').on(table.createdAt).where(sql`${table.status} = 'open'`),
     check('ck_possible_duplicates__ordered_pair', sql`${table.businessAId} < ${table.businessBId}`),
     check('ck_possible_duplicates__status', sql`${table.status} IN (${inList(DUPLICATE_STATUS_VALUES)})`),

@@ -38,7 +38,7 @@ export class GoldenRecordWriter {
   async write(
     businessId: string,
     sources: readonly NormalizedSource[],
-    options: { readonly create: boolean; readonly submittedByOrgId?: string | null },
+    options: { readonly create: boolean },
   ): Promise<Business> {
     const golden = computeGolden(sources);
     const name = golden.fields.find((f) => f.value.field === 'displayName');
@@ -106,7 +106,7 @@ export class GoldenRecordWriter {
         sourceUrl: contact.sourceUrl,
         publishedOnSite: contact.publishedOnSite,
         confidence: contact.confidence,
-        ...(contact.source === 'manual' ? { submittedByOrgId: options.submittedByOrgId ?? null } : {}),
+        submittedByOrgId: contact.submittedByOrgId,
       });
     }
 

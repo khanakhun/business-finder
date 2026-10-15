@@ -15,6 +15,9 @@
 | **Provider** | An adapter that returns source records for a search (category × area). Has capabilities, cost model, rate limits and licensing rules. |
 | **Provenance** | For each golden-record field: which source, which source id, confidence, observed-at. |
 | **Entity resolution** | Normalize → block → match → merge pipeline that maps source records to golden records. |
+| **Survivorship** | Rules choosing each golden field's value among a business's sources: manual first, then a per-field provider priority, confidence, recency (`SURVIVORSHIP_PRIORITY` in @bf/contracts). Golden records are recomputed from all linked sources, so they never depend on ingestion order. |
+| **Match score** | Explainable 0–1 score that a source record describes a golden record (name, distance, phone, website, category, address; conflicts subtract). ≥ 0.85 merges, 0.60–0.85 creates a new record flagged as a **possible duplicate** for review. |
+| **Merge / split** | Manual tools: merge moves sources, contacts and workspace links into a survivor (the others become read-only); split moves sources to a new golden record. |
 | **Category / Taxonomy** | Our hierarchical category tree (EN/FR labels). Provider categories map onto it. |
 | **Area** | A geographic scope: polygon (island, town, postcode, ZIP) or point + radius. |
 | **Search intent** | Structured interpretation of a natural-language prompt: categories, area, filters, keywords, mode (`listings` or `discover`), sort. Always shown to the user as editable chips. |

@@ -56,6 +56,8 @@ export interface NormalizedSource {
   readonly categories: CategoryClassificationSnapshot | null;
   /** Kinds of values dropped as invalid (`phone`, `website`…), for metrics — never the values themselves. */
   readonly dropped: readonly string[];
+  /** The workspace that entered a `manual` record (attribution of the contacts it brings). */
+  readonly submittedByOrgId?: string | null;
 }
 
 const attempt = <T>(dropped: string[], kind: string, parse: () => T): T | null => {

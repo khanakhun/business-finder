@@ -143,6 +143,9 @@ report; otherwise attach the fake-gateway report and note it.
 - **Evals**: `pnpm eval --task <name> [--model] [--limit] [--replay|--record]`, reports in `evals/reports/`.
   No provider keys were available locally, so the demo fixtures are hand-written and the attached report is the
   replay run; `.github/workflows/evals.yml` runs real models nightly/on demand and skips without secrets.
-- **Tests**: `@bf/ai` 35 unit (93% lines), API 209 unit / 92 integration (ledger, workspace vs global keys, cache,
+- **Security review** (fixed): vision URL policy + no SDK-side downloads, image limits, billed tokens of failed
+  attempts recorded, unpriced-model warning, single-pass rendering, tag characters/NFKC in `untrusted()`, AI span
+  bodies masked before every exporter, eval `--task` validation.
+- **Tests**: `@bf/ai` 37 unit (95% lines), API 209 unit / 92 integration (ledger, workspace vs global keys, cache,
   usage aggregates + permissions, soft event once + hard block).
 

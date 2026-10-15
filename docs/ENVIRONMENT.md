@@ -124,6 +124,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
 | `FAKE_DISCOVERY_PROVIDER` | Feature flags | api, worker | no | `false` |  | Register the fixture discovery provider (tests and E2E only; refused in production). |
+| `FAKE_DISCOVERY_SYNTHETIC` | Feature flags | api, worker | no | `false` |  | The fixture discovery provider generates grid records instead of fixtures (benchmarks, tiling tests). |
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |

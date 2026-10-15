@@ -242,14 +242,17 @@ test('enriches a business: Enrich now → live status → Website tab facts (BF-
   await expect(page.getByRole('cell', { name: email }).first()).toBeVisible();
   const row = page.getByRole('row').filter({ hasText: email });
   await expect(row.getByText('Shared mailbox')).toBeVisible();
+  await expect(row.getByText('Business domain')).toBeVisible();
   await expect(row.getByRole('link', { name: 'Found on the contact page' })).toBeVisible();
   await expect(page.getByTestId(`verification-${email}`)).toHaveText('Valid');
   await page.getByTestId(`verification-${email}`).focus();
   await expect(page.getByRole('tooltip')).toContainText('The mailbox exists');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('tooltip')).toBeHidden();
+  // A run starts (the address was only found by this crawl), or says the verdict is recent; no address is
+  // asked twice within 60 days either way (the verdict cache).
   await row.getByRole('button', { name: `Verify ${email}` }).click();
-  await expect(page.getByText('Verification started')).toBeVisible();
+  await expect(page.getByText(/^(Verification started|Already verified recently)$/)).toBeVisible();
   const contactsA11y = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa'])
     .exclude('[data-sonner-toaster]')

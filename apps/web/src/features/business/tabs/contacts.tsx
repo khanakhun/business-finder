@@ -47,7 +47,7 @@ function EmailKind({ contact }: { readonly contact: Contact }) {
     ) : null;
   }
   const subtype = EMAIL_SUBTYPES.has(contact.subtype) ? contact.subtype : null;
-  if (!subtype && !contact.isFreeMail) return null;
+  if (!subtype && !contact.isFreeMail && !contact.isDisposable && !contact.onWebsiteDomain) return null;
   return (
     <div className="mt-1 flex flex-wrap gap-1">
       {subtype ? (
@@ -58,6 +58,16 @@ function EmailKind({ contact }: { readonly contact: Contact }) {
       {contact.isFreeMail ? (
         <Badge variant="outline" className="font-normal">
           {t('freeMail')}
+        </Badge>
+      ) : null}
+      {contact.isDisposable ? (
+        <Badge variant="outline" className="font-normal">
+          {t('disposable')}
+        </Badge>
+      ) : null}
+      {contact.onWebsiteDomain ? (
+        <Badge variant="outline" className="font-normal">
+          {t('ownDomain')}
         </Badge>
       ) : null}
     </div>
@@ -152,7 +162,15 @@ export function ContactsTab({ business }: BusinessTabProps) {
     business.id,
     async (contactId: string) =>
       (await apiClient().POST('/v1/contacts/{id}/verify', { params: { path: { id: contactId } } })).data,
-    { success: () => t('verifyStarted') },
+    {
+      // A recent verdict is not checked again (each address at most once per 60 days): say so.
+      success: (run) =>
+        run?.steps.some(
+          (s) => s.step === 'email_verify' && s.status === 'skipped' && s.skipReason === 'fresh',
+        )
+          ? t('verifiedRecently')
+          : t('verifyStarted'),
+    },
   );
   const valueId = React.useId();
 

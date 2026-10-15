@@ -1120,7 +1120,10 @@
         "role": "Boîte partagée (fonction)",
         "noMx": "Le domaine ne reçoit pas d’e-mails",
         "provider": "Messagerie : {provider}"
-      }
+      },
+      "disposable": "Jetable",
+      "ownDomain": "Domaine de l’entreprise",
+      "verifiedRecently": "Déjà vérifiée récemment"
     },
     "contactTypes": {
       "email": "E-mail",

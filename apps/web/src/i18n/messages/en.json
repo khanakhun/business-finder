@@ -1120,7 +1120,10 @@
         "role": "A shared role mailbox",
         "noMx": "The domain receives no mail",
         "provider": "Mail provider: {provider}"
-      }
+      },
+      "disposable": "Disposable",
+      "ownDomain": "Business domain",
+      "verifiedRecently": "Already verified recently"
     },
     "contactTypes": {
       "email": "Email",

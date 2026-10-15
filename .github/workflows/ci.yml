@@ -6,7 +6,8 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    # TEMPORARY(BF-009): run on this branch while PRs cannot be opened; reverted after the verification runs.
+    branches: [main, bf-009-ci-pipeline]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

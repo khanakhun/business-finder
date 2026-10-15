@@ -1,4 +1,4 @@
-import type { Activity, PipelineStatus, TaskQuery } from '@bf/contracts';
+import type { Activity, PipelineStatus, ScoreTier, TaskQuery } from '@bf/contracts';
 
 export interface CrmRecord {
   readonly businessId: string;
@@ -65,6 +65,8 @@ export interface BoardCard
 }
 
 export interface CrmRepository {
+  /** Locks the workspace's row of a business until the transaction ends (serialises counters and tags). */
+  lock(organizationId: string, businessId: string): Promise<void>;
   /** The workspace's state for a business it tracks. */
   get(organizationId: string, businessId: string): Promise<CrmRecord | undefined>;
   getMany(organizationId: string, businessIds: readonly string[]): Promise<CrmRecord[]>;
@@ -105,6 +107,7 @@ export interface CrmRepository {
       readonly due: TaskQuery['due'];
       readonly status: TaskQuery['status'];
       readonly now: Date;
+      readonly timeZone: string;
       readonly businessId?: string;
     },
     page: { readonly limit: number; readonly after?: { readonly key: string; readonly id: string } },
@@ -138,7 +141,7 @@ export interface CrmRepository {
       readonly ownerUserId?: string;
       readonly tag?: string;
       readonly categoryId?: string;
-      readonly tier?: string;
+      readonly tier?: ScoreTier;
       readonly limit: number;
     },
   ): Promise<Array<{ readonly status: PipelineStatus; readonly count: number; readonly cards: BoardCard[] }>>;

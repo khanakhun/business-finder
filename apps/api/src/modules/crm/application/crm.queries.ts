@@ -78,6 +78,7 @@ export class CrmQueries {
         due: query.due,
         status: query.status,
         now: this.clock.now(),
+        timeZone: query.tz,
         ...(businessId ? { businessId } : {}),
       },
       { limit: query.limit + 1, ...(after ? { after } : {}) },

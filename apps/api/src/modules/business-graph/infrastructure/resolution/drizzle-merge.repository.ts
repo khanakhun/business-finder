@@ -88,7 +88,10 @@ export class DrizzleMergeRepository implements MergeRepository {
     await executor.delete(businessHours).where(eq(businessHours.businessId, fromId));
   }
 
-  async mergeOrgLinks(fromId: string, toId: string): Promise<void> {
+  async mergeOrgLinks(
+    fromId: string,
+    toId: string,
+  ): Promise<ReadonlyArray<{ readonly organizationId: string; readonly reason: string | null }>> {
     const executor = getExecutor(this.db);
     // Built from the constant table above (no user input).
     const rank = (column: string) =>
@@ -97,14 +100,33 @@ export class DrizzleMergeRepository implements MergeRepository {
           .map(([status, value]) => `WHEN '${status}' THEN ${value}`)
           .join(' ')} END`,
       );
-    // Workspaces tracking both: keep the more advanced status and any do-not-contact.
-    await executor.execute(sql`
+    // Workspaces tracking both: keep the more advanced status (with its reasons and date), any do-not-contact
+    // (with its reason), every tag and the survivor's owner (else the merged one's). Counters are refreshed by the
+    // CRM when it re-points notes and tasks (BF-024).
+    const further = sql`${rank('f.pipeline_status')} > ${rank('s.pipeline_status')}`;
+    const suppressed = await executor.execute<{
+      organization_id: string;
+      reason: string | null;
+      newly: boolean;
+    }>(sql`
+      WITH before AS (
+        SELECT organization_id, do_not_contact AS was FROM org_businesses WHERE business_id = ${toId}
+      )
       UPDATE org_businesses s SET
-        pipeline_status = CASE WHEN ${rank('f.pipeline_status')} > ${rank('s.pipeline_status')} THEN f.pipeline_status ELSE s.pipeline_status END,
+        pipeline_status = CASE WHEN ${further} THEN f.pipeline_status ELSE s.pipeline_status END,
+        status_changed_at = CASE WHEN ${further} THEN f.status_changed_at ELSE s.status_changed_at END,
+        lost_reason = CASE WHEN ${further} THEN f.lost_reason ELSE s.lost_reason END,
+        disqualified_reason = CASE WHEN ${further} THEN f.disqualified_reason ELSE s.disqualified_reason END,
         do_not_contact = s.do_not_contact OR f.do_not_contact,
+        do_not_contact_reason = CASE WHEN s.do_not_contact THEN s.do_not_contact_reason
+          WHEN f.do_not_contact THEN f.do_not_contact_reason END,
+        owner_user_id = COALESCE(s.owner_user_id, f.owner_user_id),
+        tags = ARRAY(SELECT DISTINCT t FROM unnest(s.tags || f.tags) AS t ORDER BY t),
         created_at = LEAST(s.created_at, f.created_at)
-      FROM org_businesses f
-      WHERE s.business_id = ${toId} AND f.business_id = ${fromId} AND f.organization_id = s.organization_id`);
+      FROM org_businesses f, before b
+      WHERE s.business_id = ${toId} AND f.business_id = ${fromId} AND f.organization_id = s.organization_id
+        AND b.organization_id = s.organization_id
+      RETURNING s.organization_id, f.do_not_contact_reason AS reason, (f.do_not_contact AND NOT b.was) AS newly`);
     await executor.execute(sql`
       DELETE FROM org_businesses f
       WHERE f.business_id = ${fromId}
@@ -113,12 +135,17 @@ export class DrizzleMergeRepository implements MergeRepository {
       .update(orgBusinesses)
       .set({ businessId: toId })
       .where(eq(orgBusinesses.businessId, fromId));
+    return [...suppressed]
+      .filter((row) => row.newly)
+      .map((row) => ({ organizationId: row.organization_id, reason: row.reason }));
   }
 
   async copyOrgLinks(fromId: string, toId: string): Promise<void> {
     await getExecutor(this.db).execute(sql`
-      INSERT INTO org_businesses (organization_id, business_id, pipeline_status, added_via, added_ref, do_not_contact)
-      SELECT organization_id, ${toId}, pipeline_status, added_via, added_ref, do_not_contact
+      INSERT INTO org_businesses (organization_id, business_id, pipeline_status, added_via, added_ref, do_not_contact,
+        do_not_contact_reason, owner_user_id, tags, status_changed_at, lost_reason, disqualified_reason)
+      SELECT organization_id, ${toId}, pipeline_status, added_via, added_ref, do_not_contact,
+        do_not_contact_reason, owner_user_id, tags, status_changed_at, lost_reason, disqualified_reason
       FROM org_businesses WHERE business_id = ${fromId}
       ON CONFLICT DO NOTHING`);
   }
@@ -190,6 +217,12 @@ export class DrizzleMergeRepository implements MergeRepository {
           // Only pairs the workspace can see entirely: it tracks both businesses.
           tracked(possibleDuplicates.businessAId),
           tracked(possibleDuplicates.businessBId),
+          filter.businessId
+            ? or(
+                eq(possibleDuplicates.businessAId, filter.businessId),
+                eq(possibleDuplicates.businessBId, filter.businessId),
+              )
+            : undefined,
           filter.before
             ? sql`(${possibleDuplicates.createdAt}, ${possibleDuplicates.id}) < (${filter.before.createdAt}::timestamptz, ${filter.before.id}::uuid)`
             : undefined,

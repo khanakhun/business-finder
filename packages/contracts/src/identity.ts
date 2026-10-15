@@ -50,6 +50,14 @@ export const MemberSchema = z
   .meta({ id: 'Member' });
 export type Member = z.infer<typeof MemberSchema>;
 
+/** A workspace member as their teammates see them (owner and assignee pickers): no email, no role. */
+export const TeammateSchema = z
+  .object({ userId: z.uuid(), name: z.string(), image: z.string().nullable() })
+  .meta({ id: 'Teammate' });
+export type Teammate = z.infer<typeof TeammateSchema>;
+export const TeammateListSchema = z.object({ items: z.array(TeammateSchema) }).meta({ id: 'TeammateList' });
+export type TeammateList = z.infer<typeof TeammateListSchema>;
+
 export const InvitationSchema = z
   .object({
     id: z.uuid(),

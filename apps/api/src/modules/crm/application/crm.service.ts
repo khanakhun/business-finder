@@ -170,6 +170,7 @@ export class CrmService {
     if (record.ownerUserId !== request.ownerUserId) {
       await this.repository.setOwner(organizationId, businessId, request.ownerUserId);
       await this.events.record(OrgBusinessOwnerChanged, {
+        orgId: organizationId,
         payload: { businessId: businessId as never, ownerUserId: request.ownerUserId },
       });
     }
@@ -188,6 +189,7 @@ export class CrmService {
     add: readonly string[],
     remove: readonly string[],
   ): Promise<boolean> {
+    await this.repository.lock(organizationId, businessId);
     const record = await this.tracked(organizationId, businessId);
     const removing = new Set(remove.map((t) => t.toLowerCase()));
     const kept = record.tags.filter((t) => !removing.has(t.toLowerCase()));
@@ -226,6 +228,7 @@ export class CrmService {
     if (record.doNotContact !== request.doNotContact || record.doNotContactReason !== reason) {
       await this.repository.setDoNotContact(organizationId, businessId, request.doNotContact, reason);
       await this.events.record(DoNotContactSet, {
+        orgId: organizationId,
         payload: { businessId: businessId as never, doNotContact: request.doNotContact, reason },
       });
     }
@@ -290,6 +293,7 @@ export class CrmService {
   async addNote(auth: AuthContext, businessId: string, request: CreateNoteRequest): Promise<Note> {
     const organizationId = workspaceOf(auth);
     await this.tracked(organizationId, businessId);
+    await this.repository.lock(organizationId, businessId);
     const now = this.clock.now();
     const note: NoteRecord = {
       id: newId(),
@@ -302,7 +306,10 @@ export class CrmService {
     };
     await this.repository.insertNote({ ...note, organizationId });
     await this.repository.refreshCounters(organizationId, businessId);
-    await this.events.record(NoteAdded, { payload: { businessId: businessId as never, noteId: note.id } });
+    await this.events.record(NoteAdded, {
+      orgId: organizationId,
+      payload: { businessId: businessId as never, noteId: note.id },
+    });
     return toNote(note);
   }
 
@@ -323,6 +330,7 @@ export class CrmService {
   @Transactional()
   async deleteNote(auth: AuthContext, noteId: string): Promise<void> {
     const note = await this.ownNote(auth, noteId);
+    await this.repository.lock(workspaceOf(auth), note.businessId);
     await this.repository.deleteNote(workspaceOf(auth), noteId, this.clock.now());
     await this.repository.refreshCounters(workspaceOf(auth), note.businessId);
   }
@@ -333,6 +341,7 @@ export class CrmService {
   async addTask(auth: AuthContext, businessId: string, request: CreateTaskRequest): Promise<Task> {
     const organizationId = workspaceOf(auth);
     await this.tracked(organizationId, businessId);
+    await this.repository.lock(organizationId, businessId);
     const assigneeId = request.assigneeId ?? auth.userId;
     if (assigneeId) await this.member(organizationId, assigneeId, 'assigneeId');
     const id = newId();
@@ -351,6 +360,7 @@ export class CrmService {
     await this.repository.refreshCounters(organizationId, businessId);
     const task = (await this.repository.getTask(organizationId, id)) as TaskRecord;
     await this.events.record(TaskCreated, {
+      orgId: organizationId,
       payload: {
         businessId: businessId as never,
         taskId: id,
@@ -366,6 +376,7 @@ export class CrmService {
     const organizationId = workspaceOf(auth);
     const task = await this.repository.getTask(organizationId, taskId);
     if (!task) throw new NotFoundError('Task', taskId);
+    await this.repository.lock(organizationId, task.businessId);
     if (request.assigneeId) await this.member(organizationId, request.assigneeId, 'assigneeId');
     const completing = request.status === 'done' && task.status !== 'done';
     await this.repository.updateTask(organizationId, taskId, {
@@ -373,13 +384,15 @@ export class CrmService {
       ...(request.title !== undefined ? { title: request.title } : {}),
       ...(request.dueAt !== undefined ? { dueAt: request.dueAt ? new Date(request.dueAt) : null } : {}),
       ...(request.assigneeId !== undefined ? { assigneeId: request.assigneeId } : {}),
-      ...(request.status !== undefined
-        ? { status: request.status, completedAt: request.status === 'done' ? this.clock.now() : null }
+      // Completion time is when it was first marked done; re-sending "done" keeps it.
+      ...(request.status !== undefined && request.status !== task.status
+        ? { status: request.status, completedAt: completing ? this.clock.now() : null }
         : {}),
     });
     await this.repository.refreshCounters(organizationId, task.businessId);
     if (completing) {
       await this.events.record(TaskCompleted, {
+        orgId: organizationId,
         payload: { businessId: task.businessId as never, taskId, title: request.title ?? task.title },
       });
     }

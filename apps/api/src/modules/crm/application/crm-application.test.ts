@@ -70,6 +70,7 @@ class FakeRepository implements CrmRepository {
   readonly activities: Array<{ type: string; organizationId: string; sourceEventId: string | null }> = [];
   readonly repointed: Array<[string, string]> = [];
   lose = false;
+  lock = vi.fn(async () => {});
 
   async get(organizationId: string, businessId: string) {
     return organizationId === ORG ? this.records.get(businessId) : undefined;
@@ -331,7 +332,8 @@ describe('CrmService notes and tasks', () => {
     expect(noUser.assigneeId).toBeNull();
     const done = await crm.updateTask(auth(), task.id, { status: 'done', title: 'Called' });
     expect(done).toMatchObject({ status: 'done', completedAt: NOW.toISOString(), title: 'Called' });
-    await crm.updateTask(auth(), task.id, { status: 'done' });
+    const again = await crm.updateTask(auth(), task.id, { status: 'done' });
+    expect(again.completedAt).toBe(NOW.toISOString()); // unchanged, no second event
     const reopened = await crm.updateTask(auth(), task.id, { status: 'open', dueAt: null, type: 'email' });
     expect(reopened).toMatchObject({ status: 'open', completedAt: null, dueAt: null, type: 'email' });
     await crm.updateTask(auth(), task.id, { assigneeId: OTHER });
@@ -373,7 +375,7 @@ describe('CrmQueries', () => {
     expect(page.items).toHaveLength(2);
     expect(repository.listTasks).toHaveBeenLastCalledWith(
       ORG,
-      { assigneeId: USER, due: 'all', status: 'open', now: NOW },
+      { assigneeId: USER, due: 'all', status: 'open', now: NOW, timeZone: 'UTC' },
       { limit: 3 },
     );
     await queries.tasks(auth(), TaskQuerySchema.parse({ cursor: page.nextCursor, assignee: OTHER }));
@@ -469,6 +471,16 @@ describe('ActivitySubscriber', () => {
       'task.created',
       'task.completed',
       'business.tracked',
+    ]);
+  });
+
+  it('notes updated facts in every tracking workspace', async () => {
+    const repository = new FakeRepository();
+    const subscriber = new ActivitySubscriber(repository, { publish: async () => {} } as never);
+    await subscriber.updated(event('business.updated', { businessId: id(1), fields: ['websiteUrl'] }, null));
+    expect(repository.activities.map((a) => [a.organizationId, a.type])).toEqual([
+      [ORG, 'business.updated'],
+      [OTHER, 'business.updated'],
     ]);
   });
 

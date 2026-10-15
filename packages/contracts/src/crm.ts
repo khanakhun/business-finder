@@ -125,6 +125,8 @@ export const TASK_TYPES = ['call', 'email', 'visit', 'follow_up', 'other'] as co
 export const CRM_TASK_STATUSES = ['open', 'done', 'cancelled'] as const;
 export const TaskTypeSchema = z.enum(TASK_TYPES);
 export const CrmTaskStatusSchema = z.enum(CRM_TASK_STATUSES);
+export type TaskType = z.infer<typeof TaskTypeSchema>;
+export type CrmTaskStatus = z.infer<typeof CrmTaskStatusSchema>;
 
 export const TaskSchema = z
   .object({
@@ -165,11 +167,28 @@ export const UpdateTaskRequestSchema = z
   .refine((r) => Object.keys(r).length > 0, { message: 'Nothing to update' });
 export type UpdateTaskRequest = z.output<typeof UpdateTaskRequestSchema>;
 
+/** IANA names only (`Area/City`, `UTC`): Postgres reads offset strings like `+01:00` with the sign flipped. */
+const isTimeZone = (value: string): boolean => {
+  if (value !== 'UTC' && !/^[A-Za-z]+(?:\/[A-Za-z0-9_+-]+)+$/.test(value)) return false;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const TASK_DUE_FILTERS = ['today', 'overdue', 'upcoming', 'all'] as const;
 export const TaskQuerySchema = CursorPageRequestSchema.extend({
   assignee: z.union([z.literal('me'), z.uuid()]).default('me'),
   due: z.enum(TASK_DUE_FILTERS).default('all'),
   status: CrmTaskStatusSchema.default('open'),
+  tz: z
+    .string()
+    .max(64)
+    .refine(isTimeZone, { message: 'Unknown time zone' })
+    .default('UTC')
+    .describe('IANA time zone that decides what "today" means.'),
 });
 export type TaskQuery = z.output<typeof TaskQuerySchema>;
 
@@ -186,6 +205,7 @@ export const ACTIVITY_TYPES = [
   'task.created',
   'task.completed',
   'business.merged',
+  'business.updated',
 ] as const;
 
 export const ActivitySchema = z

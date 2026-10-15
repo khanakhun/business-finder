@@ -1,6 +1,7 @@
 import {
   BusinessCreated,
   BusinessMerged,
+  BusinessUpdated,
   CRM_ACTIVITY_CREATED,
   type DomainEvent,
   DoNotContactSet,
@@ -78,6 +79,14 @@ export class ActivitySubscriber {
     if (!map) return;
     const { type, data } = map(payload);
     await this.add(event.orgId, String(payload.businessId), type, data, event);
+  }
+
+  /** Facts of the business changed (enrichment, a provider refresh): global, so every tracking workspace sees it. */
+  @OnDomainEvent(BusinessUpdated, { id: 'crm.business-updated' })
+  async updated(event: AnyDomainEvent): Promise<void> {
+    const { businessId, fields } = event.payload as { businessId: string; fields: string[] };
+    for (const organizationId of await this.repository.workspacesTracking(businessId))
+      await this.add(organizationId, businessId, 'business.updated', { fields }, event);
   }
 
   @OnDomainEvent(BusinessMerged, { id: 'crm.merge-repoint' })

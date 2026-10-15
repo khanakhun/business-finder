@@ -48,6 +48,7 @@ export type PossibleDuplicate = z.infer<typeof PossibleDuplicateSchema>;
 
 export const PossibleDuplicateQuerySchema = z.object({
   status: DuplicateStatusSchema.default('open'),
+  businessId: BusinessId.optional().describe('Only pairs involving this business (its detail page).'),
   limit: z.coerce.number().int().min(1).max(200).default(50),
   cursor: z.string().min(1).optional(),
 });

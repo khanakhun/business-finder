@@ -53,7 +53,7 @@
             "type": "string"
           },
           "type": {
-            "description": "Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged; later tickets add more.",
+            "description": "Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated; later tickets add more.",
             "type": "string"
           }
         },
@@ -7073,6 +7073,46 @@
         ],
         "type": "object"
       },
+      "Teammate": {
+        "additionalProperties": false,
+        "properties": {
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "name",
+          "image"
+        ],
+        "type": "object"
+      },
+      "TeammateList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Teammate"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
       "TestNotificationAccepted": {
         "additionalProperties": false,
         "description": "The domain event that will produce the notification.",
@@ -9628,6 +9668,17 @@
           },
           {
             "in": "query",
+            "name": "businessId",
+            "required": false,
+            "schema": {
+              "description": "Only pairs involving this business (its detail page).",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
@@ -11145,6 +11196,17 @@
                 "done",
                 "cancelled"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tz",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "description": "IANA time zone that decides what \"today\" means.",
+              "maxLength": 64,
               "type": "string"
             }
           }
@@ -16166,6 +16228,17 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "tz",
+            "required": false,
+            "schema": {
+              "default": "UTC",
+              "description": "IANA time zone that decides what \"today\" means.",
+              "maxLength": 64,
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -16373,6 +16446,58 @@
         "summary": "Edit, reassign, complete or cancel a task",
         "tags": [
           "crm"
+        ]
+      }
+    },
+    "/v1/teammates": {
+      "get": {
+        "operationId": "listTeammates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeammateList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Members of the active workspace by name (owner and assignee pickers)",
+        "tags": [
+          "identity"
         ]
       }
     },

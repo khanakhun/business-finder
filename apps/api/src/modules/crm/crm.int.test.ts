@@ -55,7 +55,7 @@ async function timeline(client: Browser, id: string, count: number): Promise<{ t
 const userId = async (client: Browser) => (await client.get('/v1/me').expect(200)).body.user.id as string;
 
 beforeAll(async () => {
-  t = await createTestApp({ mailer, valkeyDb: 6 });
+  t = await createTestApp({ mailer, valkeyDb: 3 });
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, { mailer });
   owner = await signUpVerified(t, mailer, 'owner@crm.test', 'Olga Owner');
@@ -250,6 +250,14 @@ describe('notes and tasks', () => {
     expect(await titles(owner, 'due=overdue')).toEqual(['Call back']);
     expect(await titles(owner, 'due=today')).toEqual(['Visit']);
     expect(await titles(owner, 'due=upcoming')).toEqual(['Someday']);
+    // In Saint-Barthélemy (UTC-4) it is 08:00 on the 14th: 16:00Z is still today, and so is 02:00Z on the 15th.
+    const late = await owner
+      .post(`/v1/businesses/${id}/tasks`, { title: 'Late tonight', dueAt: '2026-10-15T02:00:00Z' })
+      .expect(201);
+    expect(await titles(owner, 'due=today&tz=America/St_Barthelemy')).toEqual(['Visit', 'Late tonight']);
+    expect(await titles(owner, 'due=today')).toEqual(['Visit']);
+    await owner.get('/v1/tasks?tz=Mars/Olympus').expect(422);
+    await owner.patch(`/v1/tasks/${late.body.id}`, { status: 'cancelled' }).expect(200);
     expect(await titles(member, '')).toEqual(['For member']);
     expect(await titles(owner, `assignee=${memberId}`)).toEqual(['For member']);
     expect(await titles(outsider, '')).toEqual([]);
@@ -360,11 +368,36 @@ describe('merges', () => {
     const merged = await track({ displayName: 'Duplicate' });
     await owner.post(`/v1/businesses/${merged}/notes`, { bodyMarkdown: 'Moved note' }).expect(201);
     await owner.post(`/v1/businesses/${merged}/tasks`, { title: 'Moved task' }).expect(201);
+    // The duplicate went further: lost (with a reason), do-not-contact, owned and tagged.
+    await owner.post(`/v1/businesses/${merged}/tags`, { add: ['from-duplicate'] }).expect(200);
+    await owner.post(`/v1/businesses/${survivor}/tags`, { add: ['kept'] }).expect(200);
+    await owner.put(`/v1/businesses/${merged}/owner`, { ownerUserId: memberId }).expect(200);
+    for (const status of ['qualified', 'contacted']) {
+      await owner.post(`/v1/businesses/${merged}/status`, { status }).expect(200);
+    }
+    await owner
+      .post(`/v1/businesses/${merged}/status`, { status: 'lost', reason: 'Chose a cousin' })
+      .expect(200);
+    await owner
+      .put(`/v1/businesses/${merged}/do-not-contact`, { doNotContact: true, reason: 'Asked by phone' })
+      .expect(200);
     await timeline(owner, merged, 2);
     await owner.post('/v1/businesses/merge', { survivorId: survivor, mergedIds: [merged] }).expect(200);
 
     const items = await timeline(owner, survivor, 3);
-    expect(items[0]).toMatchObject({ type: 'business.merged', data: { mergedId: merged } });
+    expect(items.map((a) => a.type)).toEqual(expect.arrayContaining(['business.merged']));
+    expect((await owner.get(`/v1/businesses/${survivor}/crm`).expect(200)).body).toMatchObject({
+      pipelineStatus: 'lost',
+      lostReason: 'Chose a cousin',
+      ownerUserId: memberId,
+      tags: ['from-duplicate', 'kept'],
+      doNotContact: true,
+      doNotContactReason: 'Asked by phone',
+    });
+    // Compliance hears that the survivor is now do-not-contact (BF-049 subscribes to this event).
+    await expect
+      .poll(async () => (await timeline(owner, survivor, 1)).map((a) => a.type))
+      .toContain('do_not_contact.changed');
     const notes = (await owner.get(`/v1/businesses/${survivor}/notes`).expect(200)).body.items;
     expect(notes.map((n: { bodyMarkdown: string }) => n.bodyMarkdown)).toEqual(['Moved note']);
     await expect
@@ -390,8 +423,51 @@ describe('authorization and validation', () => {
     expect(row[0]?.status).toBe('new');
   });
 
+  it('lists teammates by name to every role, without emails', async () => {
+    const teammates = (await viewer.get('/v1/teammates').expect(200)).body.items;
+    expect(teammates).toHaveLength(3);
+    expect(teammates.map((m: { userId: string }) => m.userId)).toEqual(
+      expect.arrayContaining([ownerId, memberId]),
+    );
+    expect(Object.keys(teammates[0]).sort()).toEqual(['image', 'name', 'userId']);
+    const theirs = (await outsider.get('/v1/teammates').expect(200)).body.items;
+    expect(theirs.map((m: { userId: string }) => m.userId)).toEqual([outsiderId]);
+  });
+
+  it('refuses every change to a viewer', async () => {
+    const id = await track();
+    await viewer.post(`/v1/businesses/${id}/status`, { status: 'qualified' }).expect(403);
+    await viewer.put(`/v1/businesses/${id}/owner`, { ownerUserId: null }).expect(403);
+    await viewer.post(`/v1/businesses/${id}/tags`, { add: ['x'] }).expect(403);
+    await viewer.put(`/v1/businesses/${id}/do-not-contact`, { doNotContact: false }).expect(403);
+    await viewer.post(`/v1/businesses/${id}/notes`, { bodyMarkdown: 'x' }).expect(403);
+    await viewer.post(`/v1/businesses/${id}/tasks`, { title: 'x' }).expect(403);
+    await viewer.post('/v1/businesses/bulk/tags', { businessIds: [id], add: ['x'] }).expect(403);
+  });
+
+  it('keeps counters right under concurrent changes', async () => {
+    const id = await track();
+    await Promise.all(
+      Array.from({ length: 6 }, (_, i) =>
+        (i % 2 ? member : owner).post(`/v1/businesses/${id}/tasks`, { title: `Parallel ${i}` }).expect(201),
+      ),
+    );
+    await Promise.all(
+      Array.from({ length: 4 }, (_, i) =>
+        owner.post(`/v1/businesses/${id}/notes`, { bodyMarkdown: `Parallel ${i}` }).expect(201),
+      ),
+    );
+    await Promise.all(
+      ['a', 'b', 'c', 'd'].map((tag) => member.post(`/v1/businesses/${id}/tags`, { add: [tag] }).expect(200)),
+    );
+    const state = (await owner.get(`/v1/businesses/${id}/crm`).expect(200)).body;
+    expect(state).toMatchObject({ openTasksCount: 6, notesCount: 4 });
+    expect([...state.tags].sort()).toEqual(['a', 'b', 'c', 'd']);
+  });
+
   it('requires a session', async () => {
     await t.http.get('/v1/pipeline').expect(401);
     await t.http.get('/v1/tasks').expect(401);
+    await t.http.get('/v1/teammates').expect(401);
   });
 });

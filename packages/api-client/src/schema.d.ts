@@ -1208,6 +1208,23 @@ export type paths = {
         patch: operations["updateTask"];
         trace?: never;
     };
+    "/v1/teammates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Members of the active workspace by name (owner and assignee pickers) */
+        get: operations["listTeammates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspace/logo": {
         parameters: {
             query?: never;
@@ -1319,7 +1336,7 @@ export type components = {
             id: string;
             /** Format: date-time */
             occurredAt: string;
-            /** @description Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged; later tickets add more. */
+            /** @description Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated; later tickets add more. */
             type: string;
         };
         ActivityPage: {
@@ -2775,6 +2792,15 @@ export type components = {
             items: components["schemas"]["Task"][];
             nextCursor: string | null;
             totalEstimate?: number;
+        };
+        Teammate: {
+            image: string | null;
+            name: string;
+            /** Format: uuid */
+            userId: string;
+        };
+        TeammateList: {
+            items: components["schemas"]["Teammate"][];
         };
         /** @description The domain event that will produce the notification. */
         TestNotificationAccepted: {
@@ -4263,6 +4289,7 @@ export interface operations {
                 due?: "today" | "overdue" | "upcoming" | "all";
                 limit?: number;
                 status?: "open" | "done" | "cancelled";
+                tz?: string;
             };
             header?: never;
             path: {
@@ -4928,6 +4955,7 @@ export interface operations {
     listPossibleDuplicates: {
         parameters: {
             query?: {
+                businessId?: string;
                 cursor?: string;
                 limit?: number;
                 status?: "open" | "merged" | "dismissed";
@@ -8651,6 +8679,7 @@ export interface operations {
                 due?: "today" | "overdue" | "upcoming" | "all";
                 limit?: number;
                 status?: "open" | "done" | "cancelled";
+                tz?: string;
             };
             header?: never;
             path?: never;
@@ -8775,6 +8804,53 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listTeammates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeammateList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

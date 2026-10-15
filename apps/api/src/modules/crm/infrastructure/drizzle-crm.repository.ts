@@ -1,7 +1,15 @@
-import type { Activity, PipelineStatus } from '@bf/contracts';
+import type { Activity, PipelineStatus, ScoreTier } from '@bf/contracts';
 import { PIPELINE_STATUSES } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
-import { activities, businesses, categories, notes, orgBusinesses, tasks } from '@bf/db/schema';
+import {
+  activities,
+  businessCategories,
+  businesses,
+  categories,
+  notes,
+  orgBusinesses,
+  tasks,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, isNull, type SQL, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
@@ -48,6 +56,11 @@ export class DrizzleCrmRepository implements CrmRepository {
 
   private get x() {
     return getExecutor(this.db);
+  }
+
+  async lock(organizationId: string, businessId: string): Promise<void> {
+    await this.x.execute(sql`SELECT 1 FROM ${orgBusinesses}
+      WHERE organization_id = ${organizationId} AND business_id = ${businessId} FOR UPDATE`);
   }
 
   async get(organizationId: string, businessId: string): Promise<CrmRecord | undefined> {
@@ -150,6 +163,7 @@ export class DrizzleCrmRepository implements CrmRepository {
     noteId: string,
     patch: { bodyMarkdown?: string | undefined; pinned?: boolean | undefined },
   ): Promise<void> {
+    if (Object.values(patch).every((value) => value === undefined)) return;
     await this.x
       .update(notes)
       .set(patch)
@@ -199,6 +213,7 @@ export class DrizzleCrmRepository implements CrmRepository {
     taskId: string,
     patch: Partial<Pick<TaskRecord, 'type' | 'title' | 'dueAt' | 'assigneeId' | 'status' | 'completedAt'>>,
   ): Promise<void> {
+    if (Object.values(patch).every((value) => value === undefined)) return;
     await this.x
       .update(tasks)
       .set(patch)
@@ -212,12 +227,14 @@ export class DrizzleCrmRepository implements CrmRepository {
       readonly due: 'today' | 'overdue' | 'upcoming' | 'all';
       readonly status: 'open' | 'done' | 'cancelled';
       readonly now: Date;
+      readonly timeZone: string;
       readonly businessId?: string;
     },
     page: { readonly limit: number; readonly after?: { readonly key: string; readonly id: string } },
   ) {
     const now = filter.now.toISOString();
-    const startOfTomorrow = sql`date_trunc('day', ${now}::timestamptz) + interval '1 day'`;
+    // Midnight after `now` in the caller's time zone ("today" is the user's day, not UTC's).
+    const startOfTomorrow = sql`((date_trunc('day', ${now}::timestamptz AT TIME ZONE ${filter.timeZone}) + interval '1 day') AT TIME ZONE ${filter.timeZone})`;
     const due: Record<typeof filter.due, SQL | undefined> = {
       all: undefined,
       overdue: sql`${tasks.dueAt} < ${now}::timestamptz`,
@@ -277,7 +294,7 @@ export class DrizzleCrmRepository implements CrmRepository {
         occurredAt: activity.occurredAt,
         sourceEventId: activity.sourceEventId,
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: [activities.sourceEventId, activities.organizationId] })
       .returning({ id: activities.id });
     return inserted.length > 0;
   }
@@ -338,7 +355,7 @@ export class DrizzleCrmRepository implements CrmRepository {
       readonly ownerUserId?: string;
       readonly tag?: string;
       readonly categoryId?: string;
-      readonly tier?: string;
+      readonly tier?: ScoreTier;
       readonly limit: number;
     },
   ) {
@@ -347,9 +364,9 @@ export class DrizzleCrmRepository implements CrmRepository {
       sql`${businesses.mergedIntoId} IS NULL`,
       filter.ownerUserId ? eq(orgBusinesses.ownerUserId, filter.ownerUserId) : undefined,
       filter.tag ? sql`${orgBusinesses.tags} @> ARRAY[${filter.tag}]::text[]` : undefined,
-      filter.tier ? eq(orgBusinesses.tier, filter.tier as 'A') : undefined,
+      filter.tier ? eq(orgBusinesses.tier, filter.tier) : undefined,
       filter.categoryId
-        ? sql`EXISTS (SELECT 1 FROM business_categories bc JOIN ${categories} c ON c.id = bc.category_id
+        ? sql`EXISTS (SELECT 1 FROM ${businessCategories} bc JOIN ${categories} c ON c.id = bc.category_id
             WHERE bc.business_id = ${businesses.id}
               AND c.path <@ (SELECT sel.path FROM ${categories} sel WHERE sel.id = ${filter.categoryId}))`
         : undefined,

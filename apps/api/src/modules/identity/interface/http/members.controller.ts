@@ -7,6 +7,8 @@ import {
   MemberSchema,
   type MembersOverview,
   MembersOverviewSchema,
+  type TeammateList,
+  TeammateListSchema,
   TransferOwnershipRequestSchema,
 } from '@bf/contracts';
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
@@ -20,7 +22,7 @@ import {
   ResendInvitationCommand,
   RevokeInvitationCommand,
 } from '../../application/invitations.commands.ts';
-import { ListMembersQuery } from '../../application/members.query.ts';
+import { ListMembersQuery, ListTeammatesQuery } from '../../application/members.query.ts';
 import {
   ChangeMemberRoleCommand,
   RemoveMemberCommand,
@@ -46,7 +48,20 @@ export class MembersController {
     private readonly changeRole: ChangeMemberRoleCommand,
     private readonly removeMember: RemoveMemberCommand,
     private readonly transferOwnership: TransferOwnershipCommand,
+    private readonly listTeammates: ListTeammatesQuery,
   ) {}
+
+  @Get('teammates')
+  @RequirePermission('business:read')
+  @ApiRoute({
+    summary: 'Members of the active workspace by name (owner and assignee pickers)',
+    operationId: 'listTeammates',
+    response: { status: 200, schema: TeammateListSchema },
+    errors: [401, 403],
+  })
+  teammates(@Ctx() auth: OrgAuth): Promise<TeammateList> {
+    return this.listTeammates.execute(auth);
+  }
 
   @Get('members')
   @RequirePermission('members:manage')

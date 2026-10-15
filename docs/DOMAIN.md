@@ -116,6 +116,11 @@ stateDiagram-v2
   running --> cancelled
 ```
 
+Ending reasons: `budget` / `monthly_budget` (stopped at a cap → `partially_completed`), `tasks_failed` (some
+tasks failed → `partially_completed`; all failed → `failed`), `cancelled`, `no_providers`. A task's call starts
+only after reserving its estimated cost against the run budget; tasks are `queued → running → done | failed |
+skipped`, and a saturated tile spawns child tiles (quadtree) while the run is running (BF-020).
+
 ### 3.3 Generation job
 
 ```mermaid

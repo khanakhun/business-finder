@@ -101,6 +101,15 @@ catalog:
   '@swc/core': 1.16.18
   '@swc-node/register': 1.12.1
   unplugin-swc: 2.0.0
+  # identity (BF-010)
+  better-auth: 1.7.8
+  '@better-auth/api-key': 1.7.8
+  # Better Auth CLI (schema generation); the package is named `auth`.
+  auth: 1.7.8
+  nodemailer: 10.1.1
+  '@react-email/components': 1.0.12
+  '@react-email/render': 2.1.0
+  otplib: 13.5.0
 
 # lefthook's postinstall only copies a binary that pnpm already installs from its optional platform
 # package; `pnpm prepare` installs the git hooks. Everything else stays blocked (pnpm 10 default).

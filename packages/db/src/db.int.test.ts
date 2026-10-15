@@ -1,10 +1,12 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createIsolatedDatabase, type IsolatedDatabase, truncateAll } from '@bf/testing/db';
 import { asc, eq, sql } from 'drizzle-orm';
 import { pgTable, text } from 'drizzle-orm/pg-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeDb, createDb, type DbClient } from './client.ts';
 import { id, timestamps } from './columns.ts';
-import { runMigrations } from './migrate.ts';
+import { MIGRATIONS_DIR, runMigrations } from './migrate.ts';
 import { runSeeds, type SeedModule } from './seed/runner.ts';
 import { withRollback } from './testing.ts';
 import { getExecutor, isInTransaction, NestedIsolationLevelError, runInTransaction } from './tx.ts';
@@ -108,7 +110,11 @@ describe('migration 0000', () => {
     const [row] = await db.execute<{ n: number }>(
       sql`SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations`,
     );
-    expect(row?.n).toBe(1);
+    // Every journal entry applied exactly once, nothing more.
+    const journal = JSON.parse(readFileSync(join(MIGRATIONS_DIR, 'meta/_journal.json'), 'utf8')) as {
+      entries: unknown[];
+    };
+    expect(row?.n).toBe(journal.entries.length);
   });
 });
 

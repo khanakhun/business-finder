@@ -10,5 +10,7 @@ export default defineVitestConfig({
     'src/migrate.ts',
     'src/seed/**',
     'src/cli/{migrate,seed,reset,kit}.ts',
+    // Table declarations: no logic of their own, exercised by the integration tests of their packages.
+    'src/schema/**',
   ],
 });

@@ -1,0 +1,36 @@
+{
+  "name": "@bf/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Better Auth configuration (organizations, 2FA, API keys) and the typed client for the dashboard.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./roles": "./src/roles.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:int": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@better-auth/api-key": "catalog:",
+    "@bf/contracts": "workspace:*",
+    "@bf/db": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "auth": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -124,6 +124,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
+| `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
+| `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

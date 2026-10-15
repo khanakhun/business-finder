@@ -8,6 +8,16 @@ export {
   type SourceRecordRepository,
 } from './application/ports.ts';
 export {
+  IngestBatchCommand,
+  type IngestBatchCounts,
+  type IngestBatchResult,
+} from './application/resolution/ingest-batch.command.ts';
+export {
+  type IngestOptions,
+  type IngestResult,
+  IngestSourceRecordCommand,
+} from './application/resolution/ingest-source-record.command.ts';
+export {
   type CategoryCandidate,
   CategoryCandidateSearch,
 } from './application/taxonomy/category-candidates.ts';

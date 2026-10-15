@@ -17,6 +17,10 @@ import {
   ORG_BUSINESS_REPOSITORY,
   SOURCE_RECORD_REPOSITORY,
 } from './application/ports.ts';
+import { GoldenRecordWriter } from './application/resolution/golden-record.writer.ts';
+import { IngestBatchCommand } from './application/resolution/ingest-batch.command.ts';
+import { IngestSourceRecordCommand } from './application/resolution/ingest-source-record.command.ts';
+import { RESOLUTION_REPOSITORY } from './application/resolution/ports.ts';
 import { CategoryCandidateSearch } from './application/taxonomy/category-candidates.ts';
 import { CategoryClassifier } from './application/taxonomy/category-classifier.ts';
 import { CategoryEmbedder } from './application/taxonomy/category-embedder.ts';
@@ -33,6 +37,7 @@ import { DrizzleBusinessReadModel } from './infrastructure/drizzle-business-read
 import { DrizzleContactRepository } from './infrastructure/drizzle-contact.repository.ts';
 import { DrizzleOrgBusinessRepository } from './infrastructure/drizzle-org-business.repository.ts';
 import { DrizzleSourceRecordRepository } from './infrastructure/drizzle-source-record.repository.ts';
+import { DrizzleResolutionRepository } from './infrastructure/resolution/drizzle-resolution.repository.ts';
 import { DrizzleTaxonomyRepository } from './infrastructure/taxonomy/drizzle-taxonomy.repository.ts';
 import { TaxonomyEmbedScheduler } from './infrastructure/taxonomy/taxonomy-embed.scheduler.ts';
 import { BusinessesController } from './interface/businesses.controller.ts';
@@ -63,6 +68,11 @@ export class BusinessGraphModule {
         { provide: SOURCE_RECORD_REPOSITORY, useClass: DrizzleSourceRecordRepository },
         { provide: ORG_BUSINESS_REPOSITORY, useClass: DrizzleOrgBusinessRepository },
         { provide: BUSINESS_READ_MODEL, useClass: DrizzleBusinessReadModel },
+        // Entity resolution (BF-016)
+        { provide: RESOLUTION_REPOSITORY, useClass: DrizzleResolutionRepository },
+        GoldenRecordWriter,
+        IngestSourceRecordCommand,
+        IngestBatchCommand,
         // Taxonomy (BF-015)
         { provide: TAXONOMY_REPOSITORY, useClass: DrizzleTaxonomyRepository },
         TaxonomyCache,
@@ -81,6 +91,8 @@ export class BusinessGraphModule {
         ORG_BUSINESS_REPOSITORY,
         CategoryClassifier,
         CategoryCandidateSearch,
+        IngestSourceRecordCommand,
+        IngestBatchCommand,
       ],
     };
   }

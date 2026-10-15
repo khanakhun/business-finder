@@ -383,7 +383,8 @@
       "openai": "OpenAI",
       "foursquare": "Foursquare",
       "huggingface": "Hugging Face",
-      "unsplash": "Unsplash"
+      "unsplash": "Unsplash",
+      "zerobounce": "ZeroBounce"
     },
     "secrets": {
       "google_places": "Google Places API key",
@@ -392,7 +393,8 @@
       "openai": "OpenAI API key",
       "foursquare": "Foursquare API key",
       "huggingface": "Hugging Face token",
-      "unsplash": "Unsplash access key"
+      "unsplash": "Unsplash access key",
+      "zerobounce": "ZeroBounce API key"
     },
     "statusWorkspace": "Set for this workspace",
     "statusGlobal": "Using the platform key",
@@ -448,6 +450,43 @@
         "loadFailed": "The scraper status could not be loaded.",
         "retry": "Retry"
       }
+    },
+    "emailVerification": {
+      "title": "E-mail verification",
+      "description": "Verifiers are tried in this order until one gives a clear answer. Each address is checked at most once every 60 days.",
+      "orderLabel": "Verifiers, in the order they are tried",
+      "verifiers": {
+        "reacher": {
+          "label": "Reacher",
+          "hint": "Asks the mail server directly. Free; needs outbound port 25 and a Reacher service on this deployment."
+        },
+        "zerobounce": {
+          "label": "ZeroBounce",
+          "hint": "Paid per clear answer; works where port 25 is blocked. Needs a ZeroBounce key."
+        },
+        "dns": {
+          "label": "DNS only",
+          "hint": "Checks that the domain receives mail. Free, but cannot tell whether the mailbox exists."
+        }
+      },
+      "moveUp": "Move {verifier} up",
+      "moveDown": "Move {verifier} down",
+      "use": "Use {verifier}",
+      "lastOne": "Keep at least one verifier.",
+      "saved": "E-mail verification saved",
+      "portTitle": "Mail server port",
+      "portDescription": "Reacher needs to reach mail servers on port 25, which many hosting providers block.",
+      "portCheck": "Check port 25",
+      "portOpen": "Port 25 is open ({host}, {latency} ms): Reacher can check mailboxes.",
+      "portBlocked": "Port 25 is blocked ({error}): use ZeroBounce for mailbox checks.",
+      "portErrors": {
+        "timeout": "timed out",
+        "refused": "refused",
+        "unreachable": "no route",
+        "dns": "mail server not found",
+        "other": "connection failed"
+      },
+      "reacherMissing": "No Reacher service is configured on this deployment: Reacher is skipped."
     }
   },
   "features": {
@@ -471,6 +510,10 @@
       "semanticSearch": {
         "label": "Semantic search",
         "description": "Search businesses by meaning, not only by keywords."
+      },
+      "emailPatternGuessing": {
+        "label": "Guess e-mail addresses from names",
+        "description": "Checks first@, first.last@ and f.last@ on the business's domain when a person's name is known. Guessed addresses are never stored as contacts or mailed: only use where personal addresses may be contacted."
       }
     }
   },
@@ -1041,7 +1084,43 @@
       "added": "Contact added",
       "addTitle": "Add a contact",
       "add": "Add contact",
-      "addHint": "Only contact points the business publishes itself. Keep people's names in notes."
+      "addHint": "Only contact points the business publishes itself. Keep people's names in notes.",
+      "subtypes": {
+        "generic": "Shared mailbox",
+        "personal": "Person",
+        "department": "Department"
+      },
+      "freeMail": "Webmail",
+      "pageKinds": {
+        "contact": "contact page",
+        "home": "home page",
+        "footer": "footer",
+        "legal": "legal notice",
+        "other": "website"
+      },
+      "publishedOn": "Found on the {page}",
+      "verify": "Verify",
+      "verifyLabel": "Verify {value}",
+      "verifyStarted": "Verification started",
+      "details": {
+        "checked": "Checked {date} via {verifier}",
+        "verifiers": {
+          "reacher": "Reacher (mail server check)",
+          "zerobounce": "ZeroBounce",
+          "dns": "DNS only",
+          "classification": "the address itself"
+        },
+        "mailbox": {
+          "safe": "The mailbox exists",
+          "risky": "The mailbox may exist",
+          "invalid": "The mailbox does not exist",
+          "unknown": "The mail server would not say"
+        },
+        "catchAll": "The domain accepts any address (catch-all)",
+        "role": "A shared role mailbox",
+        "noMx": "The domain receives no mail",
+        "provider": "Mail provider: {provider}"
+      }
     },
     "contactTypes": {
       "email": "Email",

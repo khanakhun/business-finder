@@ -23,10 +23,19 @@ import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { ConfirmDialog } from './confirm-dialog.tsx';
 import { DiscoverySources } from './discovery-sources.tsx';
+import { EmailVerificationSettings } from './email-verification-settings.tsx';
 import { Forbidden } from './forbidden.tsx';
 import { SettingsSection } from './section.tsx';
 
-const PROVIDERS = ['google', 'anthropic', 'openai', 'foursquare', 'huggingface', 'unsplash'] as const;
+const PROVIDERS = [
+  'google',
+  'anthropic',
+  'openai',
+  'foursquare',
+  'huggingface',
+  'zerobounce',
+  'unsplash',
+] as const;
 type Provider = (typeof PROVIDERS)[number];
 
 export function IntegrationsSettings() {
@@ -56,6 +65,7 @@ export function IntegrationsSettings() {
   return (
     <div className="grid gap-6">
       <DiscoverySources />
+      <EmailVerificationSettings />
       {groups.map((group) => (
         <SettingsSection
           key={group.provider}

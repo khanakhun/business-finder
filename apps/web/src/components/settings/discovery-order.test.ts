@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { moveProvider } from './discovery-order.ts';
+import { moveProvider, verifierRows } from './discovery-order.ts';
 
 describe('moveProvider', () => {
   const order = ['overture', 'foursquare', 'osm', 'google_places'] as const;
@@ -13,5 +13,16 @@ describe('moveProvider', () => {
     expect(moveProvider(order, 0, -1)).toEqual([...order]);
     expect(moveProvider(order, 3, 1)).toEqual([...order]);
     expect(order[0]).toBe('overture');
+  });
+});
+
+describe('verifierRows', () => {
+  it('lists the chain in order, then the verifiers it does not use', () => {
+    expect(verifierRows(['dns', 'reacher'])).toEqual([
+      { id: 'dns', used: true },
+      { id: 'reacher', used: true },
+      { id: 'zerobounce', used: false },
+    ]);
+    expect(moveProvider(['reacher', 'zerobounce', 'dns'], 2, -1)).toEqual(['reacher', 'dns', 'zerobounce']);
   });
 });

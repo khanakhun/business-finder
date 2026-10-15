@@ -236,7 +236,23 @@ test('enriches a business: Enrich now → live status → Website tab facts (BF-
     .exclude('[data-sonner-toaster]')
     .analyze();
   expect(results.violations).toEqual([]);
-  // The e-mail joined the golden record, with the page that shows it.
+  // The e-mail joined the golden record, with the page that shows it, classified and verified (BF-028).
   await page.getByRole('tab', { name: 'Contacts' }).click();
-  await expect(page.getByRole('cell', { name: `hello@salon-enrich-${run}.com` })).toBeVisible();
+  const email = `hello@salon-enrich-${run}.com`;
+  await expect(page.getByRole('cell', { name: email }).first()).toBeVisible();
+  const row = page.getByRole('row').filter({ hasText: email });
+  await expect(row.getByText('Shared mailbox')).toBeVisible();
+  await expect(row.getByRole('link', { name: 'Found on the contact page' })).toBeVisible();
+  await expect(page.getByTestId(`verification-${email}`)).toHaveText('Valid');
+  await page.getByTestId(`verification-${email}`).focus();
+  await expect(page.getByRole('tooltip')).toContainText('The mailbox exists');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('tooltip')).toBeHidden();
+  await row.getByRole('button', { name: `Verify ${email}` }).click();
+  await expect(page.getByText('Verification started')).toBeVisible();
+  const contactsA11y = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa'])
+    .exclude('[data-sonner-toaster]')
+    .analyze();
+  expect(contactsA11y.violations).toEqual([]);
 });

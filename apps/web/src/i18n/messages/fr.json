@@ -383,7 +383,8 @@
       "openai": "OpenAI",
       "foursquare": "Foursquare",
       "huggingface": "Hugging Face",
-      "unsplash": "Unsplash"
+      "unsplash": "Unsplash",
+      "zerobounce": "ZeroBounce"
     },
     "secrets": {
       "google_places": "Clé API Google Places",
@@ -392,7 +393,8 @@
       "openai": "Clé API OpenAI",
       "foursquare": "Clé API Foursquare",
       "huggingface": "Jeton Hugging Face",
-      "unsplash": "Clé d'accès Unsplash"
+      "unsplash": "Clé d'accès Unsplash",
+      "zerobounce": "Clé API ZeroBounce"
     },
     "statusWorkspace": "Définie pour cet espace",
     "statusGlobal": "Clé de la plateforme utilisée",
@@ -448,6 +450,43 @@
         "loadFailed": "Impossible de charger l’état du scraper.",
         "retry": "Réessayer"
       }
+    },
+    "emailVerification": {
+      "title": "Vérification des e-mails",
+      "description": "Les vérificateurs sont essayés dans cet ordre jusqu’à obtenir une réponse claire. Chaque adresse est vérifiée au plus une fois tous les 60 jours.",
+      "orderLabel": "Vérificateurs, dans l’ordre où ils sont essayés",
+      "verifiers": {
+        "reacher": {
+          "label": "Reacher",
+          "hint": "Interroge directement le serveur de messagerie. Gratuit ; nécessite le port 25 sortant et un service Reacher sur ce déploiement."
+        },
+        "zerobounce": {
+          "label": "ZeroBounce",
+          "hint": "Payant à chaque réponse claire ; fonctionne quand le port 25 est bloqué. Nécessite une clé ZeroBounce."
+        },
+        "dns": {
+          "label": "DNS seulement",
+          "hint": "Vérifie que le domaine reçoit des e-mails. Gratuit, mais ne dit pas si la boîte existe."
+        }
+      },
+      "moveUp": "Monter {verifier}",
+      "moveDown": "Descendre {verifier}",
+      "use": "Utiliser {verifier}",
+      "lastOne": "Gardez au moins un vérificateur.",
+      "saved": "Vérification des e-mails enregistrée",
+      "portTitle": "Port du serveur de messagerie",
+      "portDescription": "Reacher doit joindre les serveurs de messagerie sur le port 25, que beaucoup d’hébergeurs bloquent.",
+      "portCheck": "Tester le port 25",
+      "portOpen": "Le port 25 est ouvert ({host}, {latency} ms) : Reacher peut vérifier les boîtes.",
+      "portBlocked": "Le port 25 est bloqué ({error}) : utilisez ZeroBounce pour vérifier les boîtes.",
+      "portErrors": {
+        "timeout": "délai dépassé",
+        "refused": "refusé",
+        "unreachable": "aucune route",
+        "dns": "serveur introuvable",
+        "other": "échec de connexion"
+      },
+      "reacherMissing": "Aucun service Reacher n’est configuré sur ce déploiement : Reacher est ignoré."
     }
   },
   "features": {
@@ -471,6 +510,10 @@
       "semanticSearch": {
         "label": "Recherche sémantique",
         "description": "Rechercher des entreprises par le sens, pas seulement par mots-clés."
+      },
+      "emailPatternGuessing": {
+        "label": "Deviner les e-mails à partir des noms",
+        "description": "Vérifie prenom@, prenom.nom@ et p.nom@ sur le domaine de l’entreprise quand le nom d’une personne est connu. Les adresses devinées ne sont jamais enregistrées comme contacts ni utilisées pour écrire : à n’activer que là où les adresses personnelles peuvent être contactées."
       }
     }
   },
@@ -1041,7 +1084,43 @@
       "added": "Contact ajouté",
       "addTitle": "Ajouter un contact",
       "add": "Ajouter le contact",
-      "addHint": "Uniquement les coordonnées publiées par l’entreprise. Notez les noms des personnes dans les notes."
+      "addHint": "Uniquement les coordonnées publiées par l’entreprise. Notez les noms des personnes dans les notes.",
+      "subtypes": {
+        "generic": "Boîte générique",
+        "personal": "Personne",
+        "department": "Service"
+      },
+      "freeMail": "Webmail",
+      "pageKinds": {
+        "contact": "page contact",
+        "home": "page d’accueil",
+        "footer": "pied de page",
+        "legal": "mentions légales",
+        "other": "site"
+      },
+      "publishedOn": "Trouvée sur : {page}",
+      "verify": "Vérifier",
+      "verifyLabel": "Vérifier {value}",
+      "verifyStarted": "Vérification lancée",
+      "details": {
+        "checked": "Vérifiée le {date} via {verifier}",
+        "verifiers": {
+          "reacher": "Reacher (serveur de messagerie)",
+          "zerobounce": "ZeroBounce",
+          "dns": "DNS seulement",
+          "classification": "l’adresse elle-même"
+        },
+        "mailbox": {
+          "safe": "La boîte existe",
+          "risky": "La boîte existe peut-être",
+          "invalid": "La boîte n’existe pas",
+          "unknown": "Le serveur n’a pas répondu"
+        },
+        "catchAll": "Le domaine accepte toutes les adresses (catch-all)",
+        "role": "Boîte partagée (fonction)",
+        "noMx": "Le domaine ne reçoit pas d’e-mails",
+        "provider": "Messagerie : {provider}"
+      }
     },
     "contactTypes": {
       "email": "E-mail",

@@ -6,4 +6,5 @@ export * from './discovery.ts';
 export * from './geo.ts';
 export * from './platform.ts';
 export * from './realtime.ts';
+export * from './search.ts';
 export * from './workspace.ts';

@@ -38,6 +38,7 @@ export type PainSignal = z.infer<typeof PainSignalSchema>;
 
 export const SCORE_TIERS = ['A', 'B', 'C', 'X'] as const;
 export const ScoreTierSchema = z.enum(SCORE_TIERS);
+export type ScoreTier = z.infer<typeof ScoreTierSchema>;
 
 export const SEARCH_SORT_FIELDS = ['relevance', 'score', 'rating', 'reviews', 'distance', 'recent'] as const;
 

@@ -5,17 +5,19 @@ import * as React from 'react';
 type Toast = typeof import('@bf/ui/components/sonner').toast;
 
 const loadSonner = () => import('@bf/ui/components/sonner');
-const Toaster = React.lazy(() => loadSonner().then((m) => ({ default: m.Toaster })));
+type ToasterComponent = Awaited<ReturnType<typeof loadSonner>>['Toaster'];
 
 // The host registers itself here; `getToast` asks it to mount and waits until the toaster is subscribed.
 let requestMount: (() => Promise<void>) | undefined;
 
 /**
  * Toast viewport that renders only once something is toasted: sonner is ~11 kB gzip that the shell's first load
- * does not need (it counts against the 200 kB budget in e2e/performance.spec.ts).
+ * does not need (it counts against the 200 kB budget in e2e/performance.spec.ts). The module is loaded explicitly
+ * and rendered once loaded — not through React.lazy/Suspense, whose retry could stay pending behind a page's
+ * long-running transitions (seen on /search, BF-023), leaving every toast unshown.
  */
-export function ToastHost(props: React.ComponentProps<typeof Toaster>) {
-  const [mounted, setMounted] = React.useState(false);
+export function ToastHost(props: React.ComponentProps<ToasterComponent>) {
+  const [Toaster, setToaster] = React.useState<ToasterComponent | null>(null);
   const resolveMounted = React.useRef<() => void>(undefined);
 
   React.useEffect(() => {
@@ -23,7 +25,14 @@ export function ToastHost(props: React.ComponentProps<typeof Toaster>) {
     requestMount = () => {
       pending ??= new Promise<void>((resolve) => {
         resolveMounted.current = resolve;
-        setMounted(true);
+        loadSonner().then(
+          (m) => setToaster(() => m.Toaster),
+          (error: unknown) => {
+            // The chunk failed (offline, deploy in progress): let the next toast try again.
+            pending = undefined;
+            console.error('Toast viewport could not load', error);
+          },
+        );
       });
       return pending;
     };
@@ -32,13 +41,13 @@ export function ToastHost(props: React.ComponentProps<typeof Toaster>) {
     };
   }, []);
 
-  if (!mounted) return null;
+  if (!Toaster) return null;
   return (
-    <React.Suspense fallback={null}>
+    <>
       <Toaster {...props} />
       {/* Effects run in tree order, so this fires after the Toaster has subscribed to new toasts. */}
       <OnMount callback={resolveMounted.current} />
-    </React.Suspense>
+    </>
   );
 }
 

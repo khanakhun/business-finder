@@ -143,6 +143,8 @@ export class DrizzleBusinessSearchRepository implements BusinessSearchRepository
           SELECT ${businesses.id} AS id, ${businesses.embedding} <=> ${literal} AS distance
           FROM ${orgBusinesses} JOIN ${businesses} ON ${businesses.id} = ${orgBusinesses.businessId}
           WHERE ${filterSql(spec)} AND ${businesses.embedding} IS NOT NULL
+            -- Vectors from another model are not comparable: they wait for pnpm search:reindex.
+            AND ${businesses.embeddingModel} = ${this.env.AI_EMBEDDING_MODEL}
           ORDER BY distance
           LIMIT ${limit}
         )

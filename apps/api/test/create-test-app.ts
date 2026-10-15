@@ -110,6 +110,8 @@ export async function createTestWorker(
     readonly env?: Partial<Record<string, string>>;
     /** Worker clock (default: the system clock). */
     readonly clock?: Clock;
+    /** Provider overrides, as for `createTestApp` (e.g. a fake AI gateway). */
+    readonly overrides?: ReadonlyArray<{ readonly token: symbol | string; readonly value: unknown }>;
   } = {},
 ): Promise<INestApplicationContext> {
   const env = loadAppEnv('worker', {
@@ -124,6 +126,8 @@ export async function createTestWorker(
     .overrideProvider(SYSTEM_MAILER)
     .useValue(options.mailer ?? new FakeMailer());
   if (options.clock) builder = builder.overrideProvider(CLOCK).useValue(options.clock);
+  for (const { token, value } of options.overrides ?? [])
+    builder = builder.overrideProvider(token).useValue(value);
   const moduleRef = await builder.compile();
   await moduleRef.init();
   return moduleRef;

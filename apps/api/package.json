@@ -19,7 +19,8 @@
     "secrets:rotate-master": "node --import @swc-node/register/esm-register src/cli/rotate-master-key.ts",
     "bench:ingest": "BF_BENCH=1 vitest run --config vitest.int.config.ts src/modules/business-graph/resolution.bench.int.test.ts",
     "bench:discovery": "BF_BENCH=1 vitest run --config vitest.int.config.ts src/modules/discovery/runs.bench.int.test.ts",
-    "geo:import": "node --import @swc-node/register/esm-register src/cli/geo-import.ts"
+    "geo:import": "node --import @swc-node/register/esm-register src/cli/geo-import.ts",
+    "search:reindex": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/cli/search-reindex.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "catalog:",

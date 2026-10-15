@@ -106,6 +106,7 @@ export {
   type BusinessSort,
   CategoryFacetSchema,
   RATING_BANDS,
+  SearchEmbedBusinessJob,
 } from './business-search.ts';
 export {
   DEFAULT_DISCOVERY_SETTINGS,

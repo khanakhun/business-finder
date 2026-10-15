@@ -12,6 +12,7 @@ import { type Browser, createWorkspace, signUpVerified } from '../../../test/ide
 import { GEO_PACKS, importPack } from '../geo/application/packs/index.ts';
 import { DrizzleGeoAreaRepository } from '../geo/infrastructure/drizzle-geo-area.repository.ts';
 import { AI_GATEWAY } from '../platform/ai/ai.module.ts';
+import { APP_ENV } from '../platform/config/app-env.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 
 // GET /v1/businesses and /facets (BF-022) over a small hand-built workspace: every filter, sort, cursor paging,
@@ -200,7 +201,10 @@ beforeAll(async () => {
   // Semantic-only match: no word in common with the query, an embedding equal to the query's.
   await db
     .update(businesses)
-    .set({ embedding: fakeEmbedding('somewhere to buy hammocks'), embeddingModel: 'fake' })
+    .set({
+      embedding: fakeEmbedding('somewhere to buy hammocks'),
+      embeddingModel: t.app.get(APP_ENV).AI_EMBEDDING_MODEL,
+    })
     .where(sql`${businesses.id} = ${ids.creole}`);
 });
 
@@ -283,7 +287,10 @@ describe('GET /v1/businesses', () => {
   });
 
   it('sorts with nulls last and pages every sort with cursors', async () => {
-    expect(await keys('sort=-score')).toEqual(['salon', 'pizzeria', 'cafe', 'creole']);
+    const byScore = await keys('sort=-score');
+    // salon and pizzeria tie on 80: the id breaks the tie (random ids here), the null score comes last.
+    expect(byScore.slice(0, 2).sort()).toEqual(['pizzeria', 'salon']);
+    expect(byScore.slice(2)).toEqual(['cafe', 'creole']);
     expect(await keys('sort=rating')).toEqual(['cafe', 'creole', 'salon', 'pizzeria']);
     expect(await keys('sort=name')).toEqual(['cafe', 'creole', 'pizzeria', 'salon']);
     const near = await list(`near=${gustavia.lat},${gustavia.lng}&radiusKm=50&sort=distance`);

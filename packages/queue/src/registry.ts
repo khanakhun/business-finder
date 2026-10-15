@@ -42,6 +42,16 @@ export const QUEUES = {
     concurrency: 4,
   },
   discoveryIngest: { name: 'discovery-ingest', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  /** Listing search (BF-022): business embeddings, re-computed when their text or the model changes. */
+  search: {
+    name: 'search',
+    defaultJobOptions: {
+      ...DEFAULT_JOB_OPTIONS,
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 2_000 },
+    },
+    concurrency: 4,
+  },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

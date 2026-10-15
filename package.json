@@ -32,6 +32,7 @@
     "db:generate": "node packages/db/src/cli/kit.ts generate",
     "db:migrate": "node packages/db/src/cli/migrate.ts",
     "db:check": "node packages/db/src/cli/kit.ts check",
+    "search:reindex": "pnpm --filter @bf/api search:reindex",
     "db:seed": "node packages/db/src/cli/seed.ts",
     "db:studio": "node packages/db/src/cli/kit.ts studio",
     "db:reset": "node packages/db/src/cli/reset.ts",

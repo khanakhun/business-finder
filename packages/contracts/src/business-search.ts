@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { BusinessSummarySchema, PIPELINE_STATUSES } from './business.ts';
+import { BusinessId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
 import { SCORE_TIERS, ScoreTierSchema } from './search-intent.ts';
 import { IsoDateTimeSchema } from './time.ts';
@@ -157,3 +159,9 @@ export const BusinessFacetsSchema = z
   })
   .meta({ id: 'BusinessFacets' });
 export type BusinessFacets = z.infer<typeof BusinessFacetsSchema>;
+
+/**
+ * `search.embed-business`: embeds one business whose embedding text or the configured model changed (BF-022).
+ * Idempotency key `businessId:model:textHash`, so repeated updates with the same text collapse.
+ */
+export const SearchEmbedBusinessJob = defineJob('search', 'embed-business', { businessId: BusinessId });

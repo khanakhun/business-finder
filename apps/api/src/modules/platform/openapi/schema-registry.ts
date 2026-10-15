@@ -41,9 +41,31 @@ export function componentSchemas(): Record<string, SchemaObject> {
     unrepresentable: 'any',
     uri: (id) => `#/components/schemas/${id}`,
   });
+  // Schemas with an id that no route references directly but several components share (e.g. ApiKeySummary inside
+  // ApiKeyList and CreatedApiKey) land in a synthetic `__shared` document; promote them to real components.
+  const { __shared: shared, ...named } = schemas;
+  const promoted: Record<string, object> = { ...((shared?.$defs ?? {}) as Record<string, object>) };
+  const all = Object.fromEntries(
+    Object.entries({ ...named, ...promoted }).map(([id, json]) => {
+      const { $schema: _s, $id: _i, ...rest } = json as Record<string, unknown>;
+      return [id, rewriteSharedRefs(rest)] as const;
+    }),
+  );
   return Object.fromEntries(
-    Object.entries(schemas).map(
-      ([id, { $schema: _s, $id: _i, ...rest }]) => [id, asSchemaObject(rest)] as const,
+    Object.entries(all).map(([id, json]) => [id, asSchemaObject(json as object)] as const),
+  );
+}
+
+const SHARED_REF = '#/components/schemas/__shared#/$defs/';
+
+function rewriteSharedRefs(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(rewriteSharedRefs);
+  if (value === null || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) =>
+      key === '$ref' && typeof item === 'string' && item.startsWith(SHARED_REF)
+        ? [key, `#/components/schemas/${item.slice(SHARED_REF.length)}`]
+        : [key, rewriteSharedRefs(item)],
     ),
   );
 }

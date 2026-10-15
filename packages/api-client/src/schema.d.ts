@@ -211,37 +211,22 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
-        __shared: {
-            $defs: {
-                ApiKeySummary: {
-                    /** Format: date-time */
-                    createdAt: string;
-                    createdBy: string | null;
-                    expiresAt: string | null;
-                    /** Format: uuid */
-                    id: string;
-                    lastUsedAt: string | null;
-                    name: string;
-                    permissions: ("business:read" | "business:write" | "discovery:run" | "sites:read" | "sites:generate" | "sites:publish" | "sites:admin" | "leads:read" | "leads:manage" | "leads:export" | "outreach:send" | "outreach:auto_send" | "templates:manage" | "analytics:read" | "analytics:export" | "settings:manage" | "scoring:manage" | "compliance:manage" | "members:manage" | "billing:manage")[];
-                    revokedAt: string | null;
-                    /** @description First characters of the key, e.g. `bf_Ab12`. */
-                    start: string | null;
-                };
-                OrganizationSummary: {
-                    /** Format: uuid */
-                    id: string;
-                    name: string;
-                    /**
-                     * @description The caller's role in this workspace.
-                     * @enum {string}
-                     */
-                    role: "owner" | "admin" | "member" | "viewer";
-                    slug: string;
-                };
-            };
-        };
         ApiKeyList: {
-            items: components["schemas"]["__shared"][];
+            items: components["schemas"]["ApiKeySummary"][];
+        };
+        ApiKeySummary: {
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            expiresAt: string | null;
+            /** Format: uuid */
+            id: string;
+            lastUsedAt: string | null;
+            name: string;
+            permissions: ("business:read" | "business:write" | "discovery:run" | "sites:read" | "sites:generate" | "sites:publish" | "sites:admin" | "leads:read" | "leads:manage" | "leads:export" | "outreach:send" | "outreach:auto_send" | "templates:manage" | "analytics:read" | "analytics:export" | "settings:manage" | "scoring:manage" | "compliance:manage" | "members:manage" | "billing:manage")[];
+            revokedAt: string | null;
+            /** @description First characters of the key, e.g. `bf_Ab12`. */
+            start: string | null;
         };
         ChangeMemberRoleRequest: {
             /** @enum {string} */
@@ -302,8 +287,8 @@ export type components = {
         };
         /** @description The signed-in user, their active workspace, role and permissions. */
         Me: {
-            activeOrganization: components["schemas"]["__shared"] | null;
-            organizations: components["schemas"]["__shared"][];
+            activeOrganization: components["schemas"]["OrganizationSummary"] | null;
+            organizations: components["schemas"]["OrganizationSummary"][];
             /** @description Permissions in the active workspace (empty without one). */
             permissions: ("business:read" | "business:write" | "discovery:run" | "sites:read" | "sites:generate" | "sites:publish" | "sites:admin" | "leads:read" | "leads:manage" | "leads:export" | "outreach:send" | "outreach:auto_send" | "templates:manage" | "analytics:read" | "analytics:export" | "settings:manage" | "scoring:manage" | "compliance:manage" | "members:manage" | "billing:manage")[];
             role: ("owner" | "admin" | "member" | "viewer") | null;
@@ -342,6 +327,17 @@ export type components = {
             invitations: components["schemas"]["Invitation"][];
             members: components["schemas"]["Member"][];
         };
+        OrganizationSummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /**
+             * @description The caller's role in this workspace.
+             * @enum {string}
+             */
+            role: "owner" | "admin" | "member" | "viewer";
+            slug: string;
+        };
         /** @description Ids of the enqueued jobs. */
         PingJobsAccepted: {
             jobIds: string[];
@@ -366,6 +362,7 @@ export type components = {
                 path: (string | number)[];
             }[];
             instance?: string;
+            reason?: string;
             status: number;
             title: string;
             traceId?: string;

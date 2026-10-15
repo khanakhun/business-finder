@@ -25,6 +25,8 @@ export const TEST_ENV = {
   SECRETS_MASTER_KEY: Buffer.alloc(32, 7).toString('base64'),
   SMTP_URL: 'smtp://127.0.0.1:9',
   INTEL_SHARED_SECRET: 'test-intel-secret-test-intel-secret-00',
+  // Supertest connects from loopback: treat it as the reverse proxy so tests can set per-user client IPs.
+  AUTH_TRUSTED_PROXIES: '127.0.0.1,::1',
 } as const;
 
 export interface TestAppOptions {

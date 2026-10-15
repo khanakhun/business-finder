@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@bf/api-client": "workspace:*",
+    "@bf/auth": "workspace:*",
     "@bf/config": "workspace:*",
+    "@bf/contracts": "workspace:*",
     "@bf/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "lucide-react": "catalog:",
@@ -23,7 +25,9 @@
     "next-intl": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "server-only": "catalog:",
+    "uqr": "catalog:"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",

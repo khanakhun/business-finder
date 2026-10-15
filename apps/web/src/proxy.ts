@@ -37,6 +37,8 @@ export function proxy(request: NextRequest): NextResponse {
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
+  // The dashboard layout needs the requested path to send signed-out visitors back after sign-in.
+  requestHeaders.set('x-pathname', `${request.nextUrl.pathname}${request.nextUrl.search}`);
   requestHeaders.set('Content-Security-Policy', csp);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('Content-Security-Policy', csp);

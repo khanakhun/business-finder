@@ -1,4 +1,5 @@
 import { AUTH_BASE_PATH } from '@bf/auth';
+import type { ApiEnv } from '@bf/config';
 import type { Logger } from '@bf/observability';
 import type { INestApplication } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
@@ -64,7 +65,7 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   app.enableCors({ origin: [env.APP_URL], credentials: true });
   // Registered before app.init(), so these run ahead of Nest's body parsers: Better Auth reads the raw body.
   const auth = optional<Auth>(app, BETTER_AUTH);
-  if (auth) app.use(betterAuthMiddleware(auth));
+  if (auth) app.use(betterAuthMiddleware(auth, (env as Partial<ApiEnv>).AUTH_TRUSTED_PROXIES ?? []));
   const resolver = optional<AuthResolver>(app, AUTH_RESOLVER);
   if (resolver) app.use(resolveCredentials(resolver, optional<Logger>(app, LOGGER)));
 }

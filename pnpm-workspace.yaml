@@ -110,6 +110,10 @@ catalog:
   '@react-email/components': 1.0.12
   '@react-email/render': 2.1.0
   otplib: 13.5.0
+  # QR codes for TOTP setup (no dependencies; returns the module matrix, rendered as React SVG).
+  uqr: 0.1.3
+  # Marks modules that must never reach the browser bundle (build error if a client component imports them).
+  server-only: 0.0.1
 
 # lefthook's postinstall only copies a binary that pnpm already installs from its optional platform
 # package; `pnpm prepare` installs the git hooks. Everything else stays blocked (pnpm 10 default).

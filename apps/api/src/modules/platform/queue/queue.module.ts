@@ -16,7 +16,7 @@ export const BULL_BOARD_ROUTE = '/admin/queues';
  */
 @Module({})
 export class QueueModule {
-  static forRoot(env: AppEnv, mode: AppMode): DynamicModule {
+  static forRoot(mode: AppMode): DynamicModule {
     const imports = [
       BullModule.forRootAsync({
         inject: [APP_ENV],

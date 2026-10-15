@@ -1,7 +1,11 @@
 import { test as base, expect } from '@playwright/test';
+import { nextClientIp } from './users.ts';
 
 /** Fails the test on any CSP violation or uncaught page error (CSP regressions are silent otherwise). */
 export const test = base.extend<{ cspErrors: string[] }>({
+  // Each test's browser looks like its own client to the API's per-IP rate limits (see nextClientIp).
+  extraHTTPHeaders: async ({ extraHTTPHeaders }, use) =>
+    use({ ...extraHTTPHeaders, 'X-Forwarded-For': nextClientIp() }),
   cspErrors: [
     async ({ page }, use) => {
       const errors: string[] = [];

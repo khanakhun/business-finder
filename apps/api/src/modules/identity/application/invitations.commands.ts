@@ -142,6 +142,6 @@ async function pendingInvitation(
   invitationId: string,
 ): Promise<InvitationRecord> {
   const invitation = await members.findInvitation(orgId, invitationId);
-  if (!invitation || invitation.status !== 'pending') throw new NotFoundError('Invitation', invitationId);
+  if (invitation?.status !== 'pending') throw new NotFoundError('Invitation', invitationId);
   return invitation;
 }

@@ -6,13 +6,126 @@
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/__shared#/$defs/ApiKeySummary"
+              "$ref": "#/components/schemas/ApiKeySummary"
             },
             "type": "array"
           }
         },
         "required": [
           "items"
+        ],
+        "type": "object"
+      },
+      "ApiKeySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "permissions": {
+            "items": {
+              "enum": [
+                "business:read",
+                "business:write",
+                "discovery:run",
+                "sites:read",
+                "sites:generate",
+                "sites:publish",
+                "sites:admin",
+                "leads:read",
+                "leads:manage",
+                "leads:export",
+                "outreach:send",
+                "outreach:auto_send",
+                "templates:manage",
+                "analytics:read",
+                "analytics:export",
+                "settings:manage",
+                "scoring:manage",
+                "compliance:manage",
+                "members:manage",
+                "billing:manage"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "revokedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start": {
+            "description": "First characters of the key, e.g. `bf_Ab12`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "start",
+          "permissions",
+          "createdAt",
+          "createdBy",
+          "lastUsedAt",
+          "expiresAt",
+          "revokedAt"
         ],
         "type": "object"
       },
@@ -328,7 +441,7 @@
           "activeOrganization": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/__shared#/$defs/OrganizationSummary"
+                "$ref": "#/components/schemas/OrganizationSummary"
               },
               {
                 "type": "null"
@@ -337,7 +450,7 @@
           },
           "organizations": {
             "items": {
-              "$ref": "#/components/schemas/__shared#/$defs/OrganizationSummary"
+              "$ref": "#/components/schemas/OrganizationSummary"
             },
             "type": "array"
           },
@@ -520,6 +633,39 @@
         ],
         "type": "object"
       },
+      "OrganizationSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "description": "The caller's role in this workspace.",
+            "enum": [
+              "owner",
+              "admin",
+              "member",
+              "viewer"
+            ],
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "role"
+        ],
+        "type": "object"
+      },
       "PingJobsAccepted": {
         "additionalProperties": false,
         "description": "Ids of the enqueued jobs.",
@@ -611,6 +757,10 @@
           "instance": {
             "type": "string"
           },
+          "reason": {
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
           "status": {
             "maximum": 599,
             "minimum": 400,
@@ -688,156 +838,6 @@
           "memberId"
         ],
         "type": "object"
-      },
-      "__shared": {
-        "$defs": {
-          "ApiKeySummary": {
-            "additionalProperties": false,
-            "properties": {
-              "createdAt": {
-                "format": "date-time",
-                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
-                "type": "string"
-              },
-              "createdBy": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "expiresAt": {
-                "anyOf": [
-                  {
-                    "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "id": {
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                "type": "string"
-              },
-              "lastUsedAt": {
-                "anyOf": [
-                  {
-                    "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "name": {
-                "type": "string"
-              },
-              "permissions": {
-                "items": {
-                  "enum": [
-                    "business:read",
-                    "business:write",
-                    "discovery:run",
-                    "sites:read",
-                    "sites:generate",
-                    "sites:publish",
-                    "sites:admin",
-                    "leads:read",
-                    "leads:manage",
-                    "leads:export",
-                    "outreach:send",
-                    "outreach:auto_send",
-                    "templates:manage",
-                    "analytics:read",
-                    "analytics:export",
-                    "settings:manage",
-                    "scoring:manage",
-                    "compliance:manage",
-                    "members:manage",
-                    "billing:manage"
-                  ],
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "revokedAt": {
-                "anyOf": [
-                  {
-                    "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "start": {
-                "description": "First characters of the key, e.g. `bf_Ab12`.",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "start",
-              "permissions",
-              "createdAt",
-              "createdBy",
-              "lastUsedAt",
-              "expiresAt",
-              "revokedAt"
-            ],
-            "type": "object"
-          },
-          "OrganizationSummary": {
-            "additionalProperties": false,
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "role": {
-                "description": "The caller's role in this workspace.",
-                "enum": [
-                  "owner",
-                  "admin",
-                  "member",
-                  "viewer"
-                ],
-                "type": "string"
-              },
-              "slug": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "slug",
-              "role"
-            ],
-            "type": "object"
-          }
-        }
       }
     },
     "securitySchemes": {

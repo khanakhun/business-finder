@@ -27,7 +27,7 @@ export class AppModule {
       imports: [
         PlatformModule.forRoot(env, mode),
         // Creating queues connects to Valkey, which OpenAPI generation must never do.
-        ...(mode === 'openapi' ? [] : [QueueModule.forRoot(env, mode)]),
+        ...(mode === 'openapi' ? [] : [QueueModule.forRoot(mode)]),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
       ],

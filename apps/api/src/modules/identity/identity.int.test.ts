@@ -184,7 +184,7 @@ describe('members and invitations', () => {
     if (!self || !mia) throw new Error('fixture members missing');
 
     const demote = await owner.patch(`/v1/members/${self.id}`, { role: 'admin' }).expect(409);
-    expect(demote.body).toMatchObject({ code: 'CONFLICT' });
+    expect(demote.body).toMatchObject({ code: 'CONFLICT', reason: 'LAST_OWNER' });
     await owner.delete(`/v1/members/${self.id}`).expect(409);
 
     await owner.post('/v1/members/transfer-ownership', { memberId: mia.id }).expect(204);

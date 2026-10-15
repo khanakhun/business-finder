@@ -18,6 +18,8 @@ const child = spawn(process.execPath, [nextBin, ...args], {
     ...Object.fromEntries(Object.entries(raw).filter(([key]) => key.startsWith('NEXT_PUBLIC_'))),
     NEXT_PUBLIC_API_URL: env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_APP_URL: env.NEXT_PUBLIC_APP_URL,
+    // Server-side calls (session check in the dashboard layout) may use an internal API address.
+    API_URL: env.API_URL,
   },
 });
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));

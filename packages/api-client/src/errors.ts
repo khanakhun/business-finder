@@ -6,6 +6,8 @@ export interface Problem {
   readonly detail?: string;
   readonly instance?: string;
   readonly code: string;
+  /** Finer cause within `code` (e.g. `LAST_OWNER`), for localized messages. */
+  readonly reason?: string;
   readonly traceId?: string;
   readonly errors?: ReadonlyArray<{
     readonly path: ReadonlyArray<string | number>;

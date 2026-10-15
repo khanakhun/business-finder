@@ -1,6 +1,6 @@
 import { isUuidV7 } from '@bf/contracts';
 import { closeDb, createDb, type DbClient } from '@bf/db';
-import { invitation, member, organization, user } from '@bf/db/schema';
+import { account, invitation, member, organization, session, user } from '@bf/db/schema';
 import { createIsolatedDatabase, type IsolatedDatabase } from '@bf/testing/db';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -179,5 +179,49 @@ describe('organization API keys', () => {
     await expect(
       auth.api.createApiKey({ body: { name: 'nope', organizationId: org.id, userId: person.id } }),
     ).rejects.toMatchObject({ statusCode: 403 });
+  });
+});
+
+describe('sessions', () => {
+  it('start in the workspace the user joined first', async () => {
+    const { auth } = makeAuth({ mode: 'open', allowedEmailDomains: [] });
+    const { org, person } = await orgWithMember('member');
+    const second = await orgWithMember('owner');
+    await db.insert(member).values({ organizationId: second.org.id, userId: person.id, role: 'admin' });
+    await db.insert(account).values({
+      userId: person.id,
+      providerId: 'credential',
+      accountId: person.id,
+      password: await (await auth.$context).password.hash('correct horse battery'),
+    });
+    const signedIn = await auth.api.signInEmail({
+      body: { email: person.email, password: 'correct horse battery' },
+    });
+    const [row] = await db.select().from(session).where(eq(session.token, signedIn.token));
+    expect(row?.activeOrganizationId).toBe(org.id);
+  });
+
+  it('start without a workspace for users who have none', async () => {
+    const { auth } = makeAuth({ mode: 'open', allowedEmailDomains: [] });
+    const [loner] = await db
+      .insert(user)
+      .values({
+        name: 'L',
+        email: `loner-${crypto.randomUUID().slice(0, 6)}@example.test`,
+        emailVerified: true,
+      })
+      .returning();
+    if (!loner) throw new Error('insert failed');
+    await db.insert(account).values({
+      userId: loner.id,
+      providerId: 'credential',
+      accountId: loner.id,
+      password: await (await auth.$context).password.hash('correct horse battery'),
+    });
+    const signedIn = await auth.api.signInEmail({
+      body: { email: loner.email, password: 'correct horse battery' },
+    });
+    const [row] = await db.select().from(session).where(eq(session.token, signedIn.token));
+    expect(row?.activeOrganizationId).toBeNull();
   });
 });

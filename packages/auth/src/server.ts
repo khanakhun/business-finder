@@ -9,6 +9,7 @@ import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { haveIBeenPwned, organization, twoFactor } from 'better-auth/plugins';
 import { API_KEY_PREFIX, AUTH_BASE_PATH, MIN_PASSWORD_LENGTH } from './constants.ts';
 import { ac, roles } from './roles.ts';
+import { defaultOrganizationId } from './session-defaults.ts';
 import type { SignupPolicy } from './signup.ts';
 import { signupAllowed } from './signup-store.ts';
 
@@ -181,6 +182,19 @@ export function createAuth(options: CreateAuthOptions) {
       database: { generateId: () => newId() },
     },
     databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            if (session.activeOrganizationId) return { data: session };
+            return {
+              data: {
+                ...session,
+                activeOrganizationId: await defaultOrganizationId(options.db, session.userId),
+              },
+            };
+          },
+        },
+      },
       user: {
         create: {
           after: async (user) =>

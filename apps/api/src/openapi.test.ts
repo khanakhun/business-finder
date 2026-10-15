@@ -36,3 +36,17 @@ describe('OpenAPI document', async () => {
     expect(readFileSync(OPENAPI_FILE, 'utf8')).toBe(json);
   });
 });
+
+describe('component references', async () => {
+  const document = JSON.parse(await generateOpenApi());
+
+  it('resolve to components (no synthetic __shared documents)', () => {
+    const refs = [...JSON.stringify(document).matchAll(/"\$ref":"([^"]+)"/g)].map((m) => m[1] ?? '');
+    expect(refs.length).toBeGreaterThan(0);
+    for (const ref of refs) {
+      expect(ref).toMatch(/^#\/components\/schemas\/[A-Za-z]+$/);
+      expect(document.components.schemas[ref.split('/').at(-1) ?? '']).toBeDefined();
+    }
+    expect(document.components.schemas.__shared).toBeUndefined();
+  });
+});

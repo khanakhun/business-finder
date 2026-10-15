@@ -464,7 +464,7 @@ Details: [docs/conventions/security.md](conventions/security.md). Threat model: 
 |---|---|---|
 | Local | Developer machine | `pnpm infra:up` (compose) + `pnpm dev`; Mailpit; MinIO; fake LLM provider optional. |
 | CI | GitHub Actions | Unit + integration (service containers / Testcontainers) + E2E on compose; image builds to GHCR. |
-| Staging | 1 VPS, US-East (closest major region to the Caribbean) | `docker compose -f infra/compose/docker-compose.prod.yml` behind Caddy; deploy on merge to `main` (BF-025). |
+| Staging | 1 VPS, US-East (closest major region to the Caribbean) | `docker compose -f infra/compose/docker-compose.prod.yml` behind Caddy; every green `main` build deploys itself: migrate → update → health gate through Caddy → automatic rollback; nightly `pg_dump` to object storage ([runbook](runbooks/staging-setup.md), BF-025). |
 | Production | 1–2 VPS US-East + S3-compatible storage + managed or self-managed Postgres | Same images, tagged releases, PITR backups, monitoring (BF-061). |
 
 Domains (configuration): `app.<domain>` → web, `api.<domain>` → api, `*.<sites-domain>` → sites. Sending domains are separate from the main domain.

@@ -26,7 +26,7 @@ const toSummary = (b: BusinessRow, ob: OrgBusinessRow): BusinessSummary => ({
   pipelineStatus: ob.pipelineStatus,
 });
 
-/** `created_at` as ISO-8601 UTC with microseconds: cursors keep full precision, so the keyset never repeats a row. */
+/** `created_at` as ISO-8601 UTC with microseconds: cursors keep full precision (a millisecond cursor would skip older rows tracked in the same millisecond). */
 const trackedAtText = sql<string>`to_char(${orgBusinesses.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 
 /** `HH:MM:SS` → `HH:MM`. */

@@ -84,15 +84,21 @@ failure you intend to catch. `isolationLevel` can only be set on the outermost c
 ## Migrations: forward-only, safe on populated tables
 
 - Never edit a migration that has been merged. Fix forward with a new one.
-- No long exclusive locks on large tables. Create indexes concurrently, **alone in their own migration** (Drizzle
-  runs each migration in a transaction, and `CREATE INDEX CONCURRENTLY` cannot run inside one):
+- No long exclusive locks on large tables. Create indexes concurrently, **alone in their own migration** whose
+  first line is `-- bf:no-transaction`: `runMigrations` (and the test template in `@bf/testing`) gives every
+  migration its own transaction except those, because `CREATE INDEX CONCURRENTLY` cannot run inside one
+  (Drizzle's own migrator wraps *all* pending migrations in a single transaction, so we do not use it):
 
   ```sql
-  -- 0012_idx_businesses_name_trgm.sql (hand-written, drizzle-kit generate --custom)
-  CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_businesses__name_trgm ON businesses USING gin (name gin_trgm_ops);
+  -- 0013_idx_businesses_search_tsv.sql (pnpm db:generate --custom --name idx_businesses_search_tsv)
+  -- bf:no-transaction
+  CREATE INDEX CONCURRENTLY IF NOT EXISTS "idx_businesses__search_tsv" ON "businesses" USING gin ("search_tsv");
   ```
 
-  Mark such a migration in its PR; deploy runs it outside a transaction (BF-025).
+  Declare the index in the Drizzle schema as usual, generate, then move its `CREATE INDEX` out of the generated
+  migration into the custom one (the snapshots already include it, so `db:check` stays clean). Such a migration
+  is not atomic: keep it to one index, with `IF NOT EXISTS`. A concurrent build that fails leaves an `INVALID`
+  index that `IF NOT EXISTS` would skip — drop it (`DROP INDEX CONCURRENTLY`) before re-running.
 - Adding a `NOT NULL` column: add it nullable (or with a constant default), backfill, then set `NOT NULL` — or
   add a `CHECK (…) NOT VALID` constraint and `VALIDATE CONSTRAINT` in a later migration.
 

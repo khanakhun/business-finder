@@ -15,9 +15,11 @@
     "dev:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/worker.ts",
     "start:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/worker.ts",
     "dev:api": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/main.ts",
-    "admin:bootstrap": "node --import @swc-node/register/esm-register src/cli/bootstrap.ts"
+    "admin:bootstrap": "node --import @swc-node/register/esm-register src/cli/bootstrap.ts",
+    "secrets:rotate-master": "node --import @swc-node/register/esm-register src/cli/rotate-master-key.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
     "@bf/auth": "workspace:*",
     "@bf/config": "workspace:*",
     "@bf/contracts": "workspace:*",

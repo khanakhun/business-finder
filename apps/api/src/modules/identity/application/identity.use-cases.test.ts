@@ -151,12 +151,17 @@ describe('invitations', () => {
       later,
       APP,
       new InvitationMailer(members, mailer),
+      events,
     ).execute(owner.auth, invitation.id);
     expect(Date.parse(resent.expiresAt)).toBe(later.now().getTime() + INVITATION_TTL_MS);
     expect(mailer.invitations).toHaveLength(2);
 
-    const revoke = new RevokeInvitationCommand(members);
+    const revoke = new RevokeInvitationCommand(members, events);
     await revoke.execute(owner.auth, invitation.id);
+    expect(events.events.map((e) => e.type).slice(-2)).toEqual([
+      'identity.invitation_resent',
+      'identity.invitation_revoked',
+    ]);
     expect(await catchError(revoke.execute(owner.auth, invitation.id))).toBeInstanceOf(NotFoundError);
     expect(await catchError(revoke.execute(owner.auth, 'nope'))).toBeInstanceOf(NotFoundError);
   });
@@ -169,7 +174,7 @@ describe('invitations', () => {
     members.join(intruder, otherOrg, 'owner');
     const auth = session(intruder.id, otherOrg.id, 'owner');
     expect(
-      await catchError(new RevokeInvitationCommand(members).execute(auth, invitation.id)),
+      await catchError(new RevokeInvitationCommand(members, events).execute(auth, invitation.id)),
     ).toBeInstanceOf(NotFoundError);
   });
 

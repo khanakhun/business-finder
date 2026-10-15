@@ -48,7 +48,33 @@ export function toProblem(error: unknown, instance: string, traceId: string | un
       ...(traceId ? { traceId } : {}),
     };
   }
+  if (isClientHttpError(error)) {
+    const code = codeForHttpStatus(error.status);
+    return {
+      type: `${ERROR_TYPE_BASE}${code}`,
+      title: ERROR_CODES[code].title,
+      status: error.status,
+      // Body-parser messages are generic ("request entity too large"); never echo the body.
+      detail: error.message,
+      code,
+      instance,
+      ...(traceId ? { traceId } : {}),
+    };
+  }
   return new InternalError().toProblem(instance, traceId);
+}
+
+/** `http-errors` thrown by Express middleware (body parsers): 4xx, flagged safe to expose. */
+function isClientHttpError(error: unknown): error is { status: number; message: string } {
+  if (typeof error !== 'object' || error === null) return false;
+  const { status, expose, message } = error as { status?: unknown; expose?: unknown; message?: unknown };
+  return (
+    expose === true &&
+    typeof status === 'number' &&
+    status >= 400 &&
+    status < 500 &&
+    typeof message === 'string'
+  );
 }
 
 class InternalError extends DomainError {

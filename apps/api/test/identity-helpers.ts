@@ -21,6 +21,10 @@ export function browser(t: TestApp) {
     get: (path: string) => prepare(agent.get(path)),
     post: (path: string, body?: object) => prepare(agent.post(path)).send(body ?? {}),
     patch: (path: string, body?: object) => prepare(agent.patch(path)).send(body ?? {}),
+    put: (path: string, body?: object) => prepare(agent.put(path)).send(body ?? {}),
+    /** Raw body (e.g. an image upload). */
+    putRaw: (path: string, body: Buffer, contentType: string) =>
+      prepare(agent.put(path)).set('Content-Type', contentType).send(body),
     delete: (path: string) => prepare(agent.delete(path)),
   };
 }

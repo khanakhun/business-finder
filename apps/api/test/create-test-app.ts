@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { type Clock, fixedClock } from '@bf/contracts';
+import type { Logger } from '@bf/observability';
 import { createIsolatedDatabase } from '@bf/testing/db';
 import { testValkeyUrl } from '@bf/testing/valkey';
 import type { INestApplication, INestApplicationContext, Type } from '@nestjs/common';
@@ -12,6 +13,12 @@ import { configureHttp } from '../src/http.ts';
 import { SYSTEM_MAILER, type SystemMailer } from '../src/modules/identity/application/ports.ts';
 import { CLOCK } from '../src/modules/platform/clock/clock.module.ts';
 import { type AppEnv, loadAppEnv } from '../src/modules/platform/config/app-env.ts';
+import { LOGGER } from '../src/modules/platform/logging/logger.ts';
+import {
+  InMemoryObjectStorage,
+  OBJECT_STORAGE,
+  type ObjectStorage,
+} from '../src/modules/platform/storage/object-storage.ts';
 import { FakeMailer } from './fake-mailer.ts';
 
 /** A complete local environment for tests; secrets are throwaway constants. */
@@ -39,6 +46,10 @@ export interface TestAppOptions {
   readonly env?: Partial<Record<string, string>>;
   /** System mailer (verification, invitations…); defaults to a capturing fake, never real SMTP. */
   readonly mailer?: SystemMailer;
+  /** Assets bucket; defaults to in-memory (no S3 in integration tests). */
+  readonly storage?: ObjectStorage;
+  /** Application logger (e.g. one writing to a capture stream); defaults to the env's (silent in tests). */
+  readonly logger?: Logger;
 }
 
 export interface TestApp {
@@ -61,14 +72,17 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   @Module({ controllers: [...(options.controllers ?? [])] })
   class ExtraControllersModule {}
 
-  const moduleRef = await Test.createTestingModule({
+  const builder = Test.createTestingModule({
     imports: [AppModule.forHttp(env), ExtraControllersModule],
   })
     .overrideProvider(CLOCK)
     .useValue(options.clock ?? fixedClock('2026-10-14T12:00:00.000Z'))
     .overrideProvider(SYSTEM_MAILER)
     .useValue(options.mailer ?? new FakeMailer())
-    .compile();
+    .overrideProvider(OBJECT_STORAGE)
+    .useValue(options.storage ?? new InMemoryObjectStorage());
+  if (options.logger) builder.overrideProvider(LOGGER).useValue(options.logger);
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ logger: false });
   configureHttp(app, env);
   await app.init();

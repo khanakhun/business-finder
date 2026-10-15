@@ -50,6 +50,13 @@ describe('toProblem', () => {
     expect(toProblem(error, '/x', undefined)).toMatchObject({ status, code });
   });
 
+  it('maps exposable 4xx errors from Express middleware (body parsers)', () => {
+    const tooLarge = Object.assign(new Error('request entity too large'), { status: 413, expose: true });
+    expect(toProblem(tooLarge, '/x', undefined)).toMatchObject({ status: 413, code: 'VALIDATION_FAILED' });
+    const hidden = Object.assign(new Error('internal detail'), { status: 413, expose: false });
+    expect(toProblem(hidden, '/x', undefined)).toMatchObject({ status: 500, code: 'INTERNAL' });
+  });
+
   it('never leaks internals of unknown errors or Nest 5xx', () => {
     const unknown = toProblem(new Error('password=hunter2 at db.ts:12'), '/x', undefined);
     expect(unknown).toMatchObject({ status: 500, code: 'INTERNAL', detail: 'Internal error' });

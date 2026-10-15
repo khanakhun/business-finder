@@ -1,9 +1,12 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import type { ApiEnv } from '@bf/config';
 import { newId } from '@bf/contracts';
 import { withLogContext } from '@bf/observability';
-import { Injectable, type NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, type NestMiddleware } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
+import { APP_ENV, type AppEnv } from '../config/app-env.ts';
 import { type AuthContext, getRequestAuth } from '../security/auth-context.ts';
+import { clientIp, trustedProxyMatcher } from '../security/client-ip.ts';
 
 /** Per-request facts available anywhere in the call chain (ARCHITECTURE §5.3). */
 export interface RequestContext {
@@ -12,6 +15,9 @@ export interface RequestContext {
   readonly auth?: AuthContext;
   readonly orgId?: string;
   readonly userId?: string;
+  /** Client address (behind AUTH_TRUSTED_PROXIES) and User-Agent, for the audit log. */
+  readonly ip?: string;
+  readonly userAgent?: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
@@ -31,6 +37,12 @@ export function resolveRequestId(header: string | string[] | undefined): string 
 
 @Injectable()
 export class RequestContextMiddleware implements NestMiddleware {
+  private readonly isTrustedProxy: (ip: string) => boolean;
+
+  constructor(@Inject(APP_ENV) env: AppEnv) {
+    this.isTrustedProxy = trustedProxyMatcher((env as Partial<ApiEnv>).AUTH_TRUSTED_PROXIES ?? []);
+  }
+
   use(req: Request, res: Response, next: NextFunction): void {
     const requestId = resolveRequestId(req.headers[REQUEST_ID_HEADER]);
     res.setHeader(REQUEST_ID_HEADER, requestId);
@@ -40,7 +52,10 @@ export class RequestContextMiddleware implements NestMiddleware {
       ...(auth?.userId ? { userId: auth.userId } : {}),
       ...(auth?.orgId ? { orgId: auth.orgId } : {}),
     };
-    storage.run({ requestId, ...(auth ? { auth } : {}), ...ids }, () =>
+    const ip = clientIp(req, this.isTrustedProxy);
+    const userAgent = req.headers['user-agent']?.slice(0, 512);
+    const client = { ...(ip ? { ip } : {}), ...(userAgent ? { userAgent } : {}) };
+    storage.run({ requestId, ...(auth ? { auth } : {}), ...ids, ...client }, () =>
       withLogContext({ requestId, ...ids }, next),
     );
   }

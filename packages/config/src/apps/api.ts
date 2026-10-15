@@ -6,6 +6,7 @@ import { dbEnv } from '../fragments/db.ts';
 import { featureFlagsEnv } from '../fragments/features.ts';
 import { intelEnv } from '../fragments/intel.ts';
 import { mailEnv } from '../fragments/mail.ts';
+import { providersEnv } from '../fragments/providers.ts';
 import { s3Env } from '../fragments/s3.ts';
 import { valkeyEnv } from '../fragments/valkey.ts';
 import { port, secret } from '../schema.ts';
@@ -16,6 +17,7 @@ const backendShape = {
   ...valkeyEnv.shape,
   ...s3Env.shape,
   ...aiEnv.shape,
+  ...providersEnv.shape,
   ...authEnv.shape,
   ...mailEnv.shape,
   ...intelEnv.shape,

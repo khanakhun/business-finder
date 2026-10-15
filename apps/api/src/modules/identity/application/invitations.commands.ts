@@ -109,6 +109,7 @@ export class ResendInvitationCommand {
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(APP_URL) private readonly appUrl: string,
     private readonly invitationMailer: InvitationMailer,
+    @Inject(IDENTITY_EVENTS) private readonly events: IdentityEvents,
   ) {}
 
   async execute(auth: AuthContext, invitationId: string): Promise<Invitation> {
@@ -119,6 +120,10 @@ export class ResendInvitationCommand {
     await this.members.updateInvitation(invitation.id, { expiresAt });
     const refreshed = { ...invitation, expiresAt };
     await this.invitationMailer.send(refreshed, this.appUrl);
+    await this.events.publish(
+      { type: 'identity.invitation_resent', organizationId: actor.orgId, invitationId: invitation.id },
+      { userId: actor.userId },
+    );
     return toInvitation(refreshed);
   }
 }
@@ -126,13 +131,21 @@ export class ResendInvitationCommand {
 /** Withdraw a pending invitation; its link stops working. */
 @Injectable()
 export class RevokeInvitationCommand {
-  constructor(@Inject(MEMBERSHIP_REPOSITORY) private readonly members: MembershipRepository) {}
+  constructor(
+    @Inject(MEMBERSHIP_REPOSITORY) private readonly members: MembershipRepository,
+    @Inject(IDENTITY_EVENTS) private readonly events: IdentityEvents,
+  ) {}
 
+  @Transactional()
   async execute(auth: AuthContext, invitationId: string): Promise<void> {
     const actor = memberActor(auth);
     const invitation = await pendingInvitation(this.members, actor.orgId, invitationId);
     assertCanInvite(actor.role, invitation.role);
     await this.members.updateInvitation(invitation.id, { status: 'canceled' });
+    await this.events.publish(
+      { type: 'identity.invitation_revoked', organizationId: actor.orgId, invitationId: invitation.id },
+      { userId: actor.userId },
+    );
   }
 }
 

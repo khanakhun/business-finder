@@ -13,7 +13,13 @@ describe('declared variables', () => {
   it('mark anything that looks like a credential as secret', () => {
     const looksSecret =
       /SECRET|PASSWORD|TOKEN|API_KEY|MASTER_KEY|ACCESS_KEY|DATABASE_URL|VALKEY_URL|SMTP_URL/;
-    expect(allVariables.filter((v) => looksSecret.test(v.name) && !v.secret).map((v) => v.name)).toEqual([]);
+    // Reviewed exceptions: names that match the pattern but hold no credential.
+    const notSecret = new Set(['SECRETS_MASTER_KEY_VERSION']);
+    expect(
+      allVariables
+        .filter((v) => looksSecret.test(v.name) && !v.secret && !notSecret.has(v.name))
+        .map((v) => v.name),
+    ).toEqual([]);
   });
 });
 

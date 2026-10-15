@@ -129,6 +129,160 @@
         ],
         "type": "object"
       },
+      "AuditLogEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+            "type": "string"
+          },
+          "actorId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "actorType": {
+            "enum": [
+              "user",
+              "api_key",
+              "system"
+            ],
+            "type": "string"
+          },
+          "entityId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entityType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "ip": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "userAgent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "actorType",
+          "actorId",
+          "action",
+          "entityType",
+          "entityId",
+          "ip",
+          "userAgent",
+          "metadata",
+          "occurredAt"
+        ],
+        "type": "object"
+      },
+      "AuditLogPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditLogEntry"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "totalEstimate": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object"
+      },
+      "AuditLogQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "Action prefix, e.g. `secrets.` or `identity.member_invited`.",
+            "maxLength": 100,
+            "pattern": "^[a-z][a-z0-9_.]*$",
+            "type": "string"
+          },
+          "actorId": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "cursor": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "entityId": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "entityType": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "from": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "to": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "limit"
+        ],
+        "type": "object"
+      },
       "ChangeMemberRoleRequest": {
         "additionalProperties": false,
         "properties": {
@@ -314,6 +468,44 @@
           "revokedAt",
           "key"
         ],
+        "type": "object"
+      },
+      "FeatureFlagState": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "False when the deployment disabled this feature.",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Effective value: the workspace choice (or default) and the deployment switch.",
+            "type": "boolean"
+          },
+          "workspaceValue": {
+            "description": "The workspace's own choice, or the default when it never chose.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "workspaceValue",
+          "available"
+        ],
+        "type": "object"
+      },
+      "FeatureFlags": {
+        "additionalProperties": {
+          "type": "boolean"
+        },
+        "propertyNames": {
+          "enum": [
+            "autoSend",
+            "codingEngines",
+            "mapsScraper",
+            "semanticSearch"
+          ],
+          "type": "string"
+        },
         "type": "object"
       },
       "IdentityConfig": {
@@ -633,6 +825,119 @@
         ],
         "type": "object"
       },
+      "OrgSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "agencyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "features": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FeatureFlagState"
+            },
+            "propertyNames": {
+              "enum": [
+                "autoSend",
+                "codingEngines",
+                "mapsScraper",
+                "semanticSearch"
+              ],
+              "type": "string"
+            },
+            "required": [
+              "autoSend",
+              "codingEngines",
+              "mapsScraper",
+              "semanticSearch"
+            ],
+            "type": "object"
+          },
+          "hasLogo": {
+            "description": "Fetch it from GET /v1/workspace/logo.",
+            "type": "boolean"
+          },
+          "legalName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locales": {
+            "items": {
+              "enum": [
+                "fr",
+                "en"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "outreachReadiness": {
+            "$ref": "#/components/schemas/OutreachReadiness"
+          },
+          "postalAddress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PostalAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryLocale": {
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "type": "string"
+          },
+          "senderDefaults": {
+            "$ref": "#/components/schemas/SenderDefaults"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null until the settings are first saved."
+          },
+          "websiteUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "agencyName",
+          "legalName",
+          "postalAddress",
+          "websiteUrl",
+          "hasLogo",
+          "primaryLocale",
+          "locales",
+          "timezone",
+          "senderDefaults",
+          "features",
+          "outreachReadiness",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "OrganizationSummary": {
         "additionalProperties": false,
         "properties": {
@@ -663,6 +968,29 @@
           "name",
           "slug",
           "role"
+        ],
+        "type": "object"
+      },
+      "OutreachReadiness": {
+        "additionalProperties": false,
+        "properties": {
+          "missing": {
+            "items": {
+              "enum": [
+                "agency_name",
+                "postal_address"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ready": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ready",
+          "missing"
         ],
         "type": "object"
       },
@@ -703,6 +1031,46 @@
         },
         "required": [
           "count"
+        ],
+        "type": "object"
+      },
+      "PostalAddress": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "ISO 3166-1 alpha-2, e.g. BL (Saint-Barthélemy), MF (Saint-Martin), FR.",
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          },
+          "line1": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "line2": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "postalCode": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "region": {
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "line1",
+          "city",
+          "postalCode",
+          "countryCode"
         ],
         "type": "object"
       },
@@ -785,6 +1153,167 @@
         ],
         "type": "object"
       },
+      "PutSecretRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "maxLength": 8192,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "SecretList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SecretSummary"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "SecretSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "allowGlobalFallback": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "last4": {
+            "description": "Last four characters of the workspace value (long values only).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastUsedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "enum": [
+              "google_places",
+              "pagespeed",
+              "anthropic",
+              "openai",
+              "foursquare",
+              "huggingface",
+              "unsplash"
+            ],
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "enum": [
+                  "workspace",
+                  "global"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the value would come from: the workspace vault, the deployment env, or nowhere (null)."
+          },
+          "testable": {
+            "description": "Whether POST /v1/workspace/secrets/{name}/test is available.",
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "provider",
+          "description",
+          "source",
+          "last4",
+          "updatedAt",
+          "lastUsedAt",
+          "allowGlobalFallback",
+          "testable"
+        ],
+        "type": "object"
+      },
+      "SecretTestResult": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "Short provider answer; never contains the secret.",
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "workspace",
+              "global"
+            ],
+            "type": "string"
+          },
+          "testedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "source",
+          "testedAt"
+        ],
+        "type": "object"
+      },
+      "SenderDefaults": {
+        "additionalProperties": false,
+        "properties": {
+          "fromName": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "signatureMarkdown": {
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "SystemInfo": {
         "additionalProperties": false,
         "description": "Build and runtime information about the API process.",
@@ -837,6 +1366,89 @@
         "required": [
           "memberId"
         ],
+        "type": "object"
+      },
+      "UpdateOrgSettingsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "agencyName": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlags"
+          },
+          "legalName": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locales": {
+            "items": {
+              "enum": [
+                "fr",
+                "en"
+              ],
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          },
+          "postalAddress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PostalAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "primaryLocale": {
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "type": "string"
+          },
+          "senderDefaults": {
+            "$ref": "#/components/schemas/SenderDefaults"
+          },
+          "timezone": {
+            "description": "IANA time zone, e.g. America/St_Barthelemy.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "websiteUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
         "type": "object"
       }
     },
@@ -1045,6 +1657,68 @@
         "summary": "Revoke an API key",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/v1/audit-logs": {
+      "get": {
+        "operationId": "listAuditLogs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogPage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Audit log of the active workspace, newest first",
+        "tags": [
+          "workspace"
         ]
       }
     },
@@ -1740,6 +2414,582 @@
         "summary": "Enqueue system.ping jobs (queue smoke test)",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/v1/workspace/logo": {
+      "delete": {
+        "operationId": "deleteWorkspaceLogo",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Remove the workspace logo",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "get": {
+        "operationId": "getWorkspaceLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace logo image",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "put": {
+        "operationId": "uploadWorkspaceLogo",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Upload the workspace logo (raw PNG, JPEG or WebP body, ≤ 512 KiB)",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/v1/workspace/secrets": {
+      "get": {
+        "operationId": "listWorkspaceSecrets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Every known secret and whether it is set (never the values)",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/v1/workspace/secrets/{name}": {
+      "delete": {
+        "operationId": "deleteWorkspaceSecret",
+        "parameters": [
+          {
+            "description": "Registry key, e.g. google_places.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Delete a workspace secret (the global fallback, if any, applies again)",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "put": {
+        "operationId": "putWorkspaceSecret",
+        "parameters": [
+          {
+            "description": "Registry key, e.g. google_places.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {}
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutSecretRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretSummary"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Store or replace a secret",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/v1/workspace/secrets/{name}/test": {
+      "post": {
+        "operationId": "testWorkspaceSecret",
+        "parameters": [
+          {
+            "description": "Registry key, e.g. google_places.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretTestResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Check the secret against its provider",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/v1/workspace/settings": {
+      "get": {
+        "operationId": "getWorkspaceSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgSettings"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Settings of the active workspace",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "patch": {
+        "operationId": "updateWorkspaceSettings",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgSettings"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Change workspace settings (only the fields sent)",
+        "tags": [
+          "workspace"
         ]
       }
     }

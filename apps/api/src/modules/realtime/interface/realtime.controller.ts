@@ -12,8 +12,11 @@ import { ConnectionLimiter } from '../infrastructure/connection-limiter.ts';
 import { RealtimeMultiplexer } from '../infrastructure/realtime-multiplexer.ts';
 import { compareStreamIds, isStreamId, serveSse } from './sse.ts';
 
-/** Streams are closed after this long; the browser reconnects (with `Last-Event-ID`) and credentials are re-checked. */
-const MAX_STREAM_MS = 30 * 60_000;
+/**
+ * Streams are closed after this long; the browser reconnects (with `Last-Event-ID`, nothing is lost) and the
+ * credentials are checked again, so a revoked session or removed member stops receiving events within minutes.
+ */
+const MAX_STREAM_MS = 5 * 60_000;
 
 const connections = () =>
   metrics.gauge({ name: 'bf_realtime_connections', help: 'Open realtime SSE connections in this process' });
@@ -60,7 +63,13 @@ export class RealtimeController {
         compareIds: compareStreamIds,
         maxDurationMs: MAX_STREAM_MS,
         replay: (after) => this.publisher.replay(orgId, after),
-        subscribe: (push) => this.multiplexer.subscribe(orgId, (message) => push(toSse(message))),
+        subscribe: (push) =>
+          this.multiplexer.subscribe(orgId, (message) =>
+            // Messages published while the Valkey subscription was down are lost: tell clients to refetch.
+            push(
+              message === 'resync' ? { event: 'resync', data: { reason: 'reconnected' } } : toSse(message),
+            ),
+          ),
         onClose: (reason) => {
           release();
           connections().dec();
@@ -68,11 +77,8 @@ export class RealtimeController {
         },
       });
     } catch (error) {
-      release();
-      connections().dec();
+      // serveSse already closed the stream and ran onClose (release, metrics).
       this.logger.warn({ err: error }, 'realtime stream failed');
-      if (!res.headersSent) throw error;
-      res.end();
     }
   }
 }

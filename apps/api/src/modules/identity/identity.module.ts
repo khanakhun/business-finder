@@ -14,6 +14,7 @@ import {
   ResendInvitationCommand,
   RevokeInvitationCommand,
 } from './application/invitations.commands.ts';
+import { MemberDirectory } from './application/member-directory.ts';
 import { ListMembersQuery } from './application/members.query.ts';
 import {
   ChangeMemberRoleCommand,
@@ -42,22 +43,35 @@ import { MembersController } from './interface/http/members.controller.ts';
 
 /**
  * Identity (ADR-0007): Better Auth (mounted at /api/auth by http.ts), credential resolution for every request,
- * `/v1/me`, members & invitations, API keys. HTTP-only: the worker has no use for sessions.
+ * `/v1/me`, members & invitations, API keys. The worker only gets the read-only member directory and system mail
+ * (for notifications); sessions are HTTP-only.
  */
 @Module({})
 export class IdentityModule {
   static forRoot(mode: AppMode): DynamicModule {
-    if (mode === 'worker') return { module: IdentityModule };
+    const shared = [
+      { provide: MEMBERSHIP_REPOSITORY, useClass: DrizzleMembershipRepository },
+      { provide: SYSTEM_MAILER, useClass: SmtpSystemMailer },
+      MemberDirectory,
+    ];
+    if (mode === 'worker') {
+      return {
+        module: IdentityModule,
+        global: true,
+        providers: shared,
+        exports: [MemberDirectory, SYSTEM_MAILER],
+      };
+    }
     return {
       module: IdentityModule,
+      global: true,
       controllers: [IdentityConfigController, MeController, MembersController, ApiKeysController],
       providers: [
         betterAuthProvider,
         { provide: AUTH_RESOLVER, useClass: BetterAuthResolver },
-        { provide: MEMBERSHIP_REPOSITORY, useClass: DrizzleMembershipRepository },
+        ...shared,
         { provide: API_KEY_REPOSITORY, useClass: DrizzleApiKeyRepository },
         { provide: API_KEY_ISSUER, useClass: BetterAuthApiKeyIssuer },
-        { provide: SYSTEM_MAILER, useClass: SmtpSystemMailer },
         { provide: IDENTITY_EVENTS, useClass: OutboxIdentityEvents },
         { provide: APP_URL, inject: [APP_ENV], useFactory: (env: AppEnv) => (env as ApiEnv).APP_URL },
         GetMeQuery,
@@ -73,7 +87,7 @@ export class IdentityModule {
         CreateApiKeyCommand,
         RevokeApiKeyCommand,
       ],
-      exports: [BETTER_AUTH, AUTH_RESOLVER],
+      exports: [BETTER_AUTH, AUTH_RESOLVER, MemberDirectory, SYSTEM_MAILER],
     };
   }
 }

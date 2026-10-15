@@ -21,7 +21,8 @@ export interface SseStreamOptions {
   readonly maxDurationMs?: number;
   /** Orders ids to drop live messages already sent by the replay. */
   readonly compareIds?: (a: string, b: string) => number;
-  readonly onClose?: (reason: 'client' | 'slow' | 'expired') => void;
+  /** Called exactly once, however the stream ends (including a failing replay). */
+  readonly onClose?: (reason: 'client' | 'slow' | 'expired' | 'error') => void;
 }
 
 const STREAM_ID = /^\d{1,20}-\d{1,20}$/;
@@ -63,7 +64,7 @@ export async function serveSse(req: Request, res: Response, options: SseStreamOp
   const timers: NodeJS.Timeout[] = [];
   let unsubscribe: (() => void) | undefined;
 
-  const close = (reason: 'client' | 'slow' | 'expired') => {
+  const close = (reason: 'client' | 'slow' | 'expired' | 'error') => {
     if (closed) return;
     closed = true;
     for (const timer of timers) clearInterval(timer);
@@ -71,15 +72,18 @@ export async function serveSse(req: Request, res: Response, options: SseStreamOp
     options.onClose?.(reason);
     if (!res.writableEnded) res.end();
   };
+  /** A client this far behind is told to resync and dropped. */
+  const checkBackpressure = () => {
+    if (res.writableLength <= maxBuffered) return;
+    res.write(formatSse({ event: 'resync', data: { reason: 'slow-client' } }));
+    close('slow');
+  };
   const send = (message: SseMessage) => {
     if (closed) return;
     if (message.id && lastSent && compare(message.id, lastSent) <= 0) return;
     res.write(formatSse(message));
     if (message.id) lastSent = message.id;
-    if (res.writableLength > maxBuffered) {
-      res.write(formatSse({ event: 'resync', data: { reason: 'slow-client' } }));
-      close('slow');
-    }
+    checkBackpressure();
   };
 
   req.on('close', () => close('client'));
@@ -92,20 +96,33 @@ export async function serveSse(req: Request, res: Response, options: SseStreamOp
   res.flushHeaders();
   res.write('retry: 3000\n\n');
 
-  unsubscribe = await options.subscribe((message) => {
-    if (replaying) pending.push(message);
-    else send(message);
-  });
-  if (closed) {
-    unsubscribe();
-    return;
+  try {
+    unsubscribe = await options.subscribe((message) => {
+      if (replaying) pending.push(message);
+      else send(message);
+    });
+    if (closed) {
+      // The client left while we were subscribing.
+      unsubscribe();
+      return;
+    }
+    for (const message of (await options.replay?.(options.lastEventId)) ?? []) send(message);
+    replaying = false;
+    for (const message of pending.splice(0)) send(message);
+  } catch (error) {
+    close('error');
+    throw error;
   }
-  for (const message of (await options.replay?.(options.lastEventId)) ?? []) send(message);
-  replaying = false;
-  for (const message of pending.splice(0)) send(message);
+  if (closed) return;
   // Live delivery is set up from here on (clients and tests can rely on it).
-  if (!closed) res.write(': ready\n\n');
-
-  timers.push(setInterval(() => !closed && res.write(': ping\n\n'), heartbeatMs));
+  res.write(': ready\n\n');
+  timers.push(
+    setInterval(() => {
+      if (closed) return;
+      res.write(': ping\n\n');
+      // A client that stopped reading is caught even when no events flow.
+      checkBackpressure();
+    }, heartbeatMs),
+  );
   if (options.maxDurationMs) timers.push(setInterval(() => close('expired'), options.maxDurationMs));
 }

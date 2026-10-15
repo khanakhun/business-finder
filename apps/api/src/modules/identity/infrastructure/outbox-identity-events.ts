@@ -4,6 +4,7 @@ import {
   InvitationResent,
   InvitationRevoked,
   MemberInvited,
+  MemberJoined,
   MemberRemoved,
   MemberRoleChanged,
   UserSignedUp,
@@ -43,6 +44,13 @@ export class OutboxIdentityEvents implements IdentityEvents {
             ...by,
           },
         );
+        return;
+      case 'identity.member_joined':
+        await this.events.record(MemberJoined, {
+          payload: { memberId: event.memberId, userId: event.userId, role: event.role },
+          orgId: event.organizationId,
+          ...by,
+        });
         return;
       case 'identity.member_role_changed':
         await this.events.record(MemberRoleChanged, {

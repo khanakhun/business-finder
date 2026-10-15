@@ -116,4 +116,43 @@ describe('serveSse', () => {
     push({ id: '6-0', event: 'e', data: 'y' });
     expect(chunks.some((c) => c.includes('6-0'))).toBe(false);
   });
+
+  it('cleans up exactly once when the replay fails', async () => {
+    const { req, res } = fakeStream();
+    const onClose = vi.fn();
+    const unsubscribe = vi.fn();
+    await expect(
+      serveSse(req as never, res as never, {
+        lastEventId: '1-0',
+        subscribe: async () => unsubscribe,
+        replay: async () => {
+          throw new Error('valkey down');
+        },
+        onClose,
+      }),
+    ).rejects.toThrow('valkey down');
+    req.emit('close');
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledWith('error');
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+    expect(res.writableEnded).toBe(true);
+  });
+
+  it('drops a client that stopped reading even when no events flow', async () => {
+    vi.useFakeTimers();
+    let buffered = 0;
+    const { req, res, chunks } = fakeStream(() => buffered);
+    const onClose = vi.fn();
+    await serveSse(req as never, res as never, {
+      lastEventId: undefined,
+      heartbeatMs: 1_000,
+      maxBufferedBytes: 100,
+      subscribe: async () => () => undefined,
+      onClose,
+    });
+    buffered = 1_000;
+    vi.advanceTimersByTime(1_000);
+    expect(chunks.at(-1)).toContain('event: resync');
+    expect(onClose).toHaveBeenCalledWith('slow');
+  });
 });

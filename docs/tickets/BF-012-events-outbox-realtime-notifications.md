@@ -75,12 +75,12 @@ apps/web/src/lib/realtime/{provider.tsx, use-realtime-event.ts, invalidations.ts
 - E2E: trigger a test event (dev-only endpoint) → bell count increments without reload.
 
 ## Acceptance criteria
-- [ ] Events recorded transactionally and delivered to all subscribers idempotently (tests with concurrent relays).
-- [ ] `/v1/realtime` SSE with heartbeat, org isolation and `Last-Event-ID` replay.
-- [ ] Web realtime provider invalidates queries from a central map.
-- [ ] Notifications (in-app + optional email) with preferences; bell UI with live count.
-- [ ] Identity events flow to the audit log through subscribers.
-- [ ] Metrics: outbox lag, dispatch counts, SSE connections.
+- [x] Events recorded transactionally and delivered to all subscribers idempotently (tests with concurrent relays).
+- [x] `/v1/realtime` SSE with heartbeat, org isolation and `Last-Event-ID` replay.
+- [x] Web realtime provider invalidates queries from a central map.
+- [x] Notifications (in-app + optional email) with preferences; bell UI with live count.
+- [x] Identity events flow to the audit log through subscribers.
+- [x] Metrics: outbox lag, dispatch counts, SSE connections.
 
 ## Agent prompt
 ```text
@@ -102,3 +102,55 @@ Verify: pnpm verify && pnpm test:int && pnpm e2e; include a short demo (curl -N 
 ## References
 - docs/ARCHITECTURE.md §7 · ADR-0006 · docs/DOMAIN.md §4 · docs/conventions/api.md §7
 - Transactional outbox: https://microservices.io/patterns/data/transactional-outbox.html · Redis Streams: https://valkey.io/topics/streams-intro/ · SSE spec: https://html.spec.whatwg.org/multipage/server-sent-events.html
+
+## Implementation notes
+- **Split**: part 1/3 outbox (afterCommit hook, `outbox_events`, recorder, registry/decorator, relay, processor,
+  reconciler, replay endpoint, identity events → audit subscriber); part 2/3 realtime (publisher, multiplexer,
+  `serveSse`, `/v1/realtime`, web provider); part 3/3 notifications (tables, service, API, email, bell, pages).
+- **Recorder**: inserts into `outbox_events` through `getExecutor()` and runs `SELECT pg_notify('bf_outbox', '')` in
+  the same transaction. DECISION: NOTIFY is transactional in Postgres (delivered on commit, dropped on rollback), so
+  it does not need the `afterCommit` hook; the hook exists in `@bf/db` (`afterCommit(db, fn)`, savepoint-aware) for
+  side effects that are not transactional. Correlation id = request id (or the handled event's), causation id = the
+  handled event; actor = user / API key / handling subscriber / system. Request IP, user agent and `traceparent` are
+  kept in a `context` column (delivery metadata, not part of the envelope) so the audit subscriber keeps them and
+  delivery continues the trace.
+- **Relay** (worker): LISTEN + 2 s polling; batches of 100 claimed with `FOR UPDATE SKIP LOCKED`; one `events` job
+  per event × subscriber with job id/idempotency key `<eventId>:<subscriberId>`; marked dispatched in the same
+  transaction; failed dispatch → `attempts`, `last_error`, exponential `available_at` (≤ 5 min). Queue name
+  `events` (BullMQ/`defineJob` names are kebab-case, so not `system.events`). Reconciler (every minute) makes events
+  undispatched for 5 min due again and publishes `bf_outbox_pending_events`.
+- **Subscribers**: `@OnDomainEvent([Definition], { id })`, discovered at boot in every process (so the API can
+  validate replays). Identity events (now incl. `identity.member_joined` from Better Auth's
+  `afterAcceptInvitation`) reach the audit log through `workspace.audit-identity`; the audit row takes the event id
+  (`ON CONFLICT DO NOTHING`), so redelivery writes nothing.
+- **Replay**: `POST /v1/events/{eventId}/replay` — `settings:manage` route, owner role required in the use case,
+  event must belong to the caller's workspace (else 404), fresh idempotency key, audited (`events.replayed`).
+- **Realtime**: `rt:org:<orgId>` Valkey stream (`MAXLEN ~ 1000`) + channel; SSE `id` = stream entry id, so
+  `Last-Event-ID` (header, or `?lastEventId=` for a fresh EventSource) maps to an exclusive `XRANGE`; a client older
+  than the retained window gets `resync`. One `PSUBSCRIBE rt:org:*` per API process. `serveSse` subscribes before
+  replaying (buffer + dedupe, no gap), writes `: ready`, heartbeats every 15 s, sends `resync` and disconnects a
+  client with > 1 MiB buffered (also checked on heartbeats), and closes streams after 5 min so a revoked session or
+  removed member stops receiving events quickly (the reconnect replays what was missed). A failing replay cleans up
+  exactly once. After the Valkey subscription reconnects, open streams get `resync`. Max 5 streams per user/API key
+  and 2000 in total per process (429).
+- **Web**: `RealtimeProvider` (one EventSource per tab, backoff reconnect when the browser gives up),
+  `useRealtimeEvent`, `realtimeInvalidations` (event type → query keys); event names mirrored as strings so the
+  shell does not import the contracts barrel (bundle budget).
+- **Notifications**: rows fanned out per recipient at creation (read state per user; `user_id` stays nullable as the
+  ticket specified); `source_event_id` unique per user (idempotent); preferences per user/workspace/type with
+  registry defaults in `@bf/contracts`; email (best effort, localized copy, absolute link from `APP_URL`) through
+  identity's system mailer, sent only the first time an event reaches a user (in-app row, or a Valkey marker when
+  in-app is off), so redelivery or replay never emails twice. Links must be dashboard paths (contract regex, checked
+  again in the service and the UI). The `notification.created` nudge is anonymous (no recipient or notification id
+  on the shared workspace stream) and sent once per notify call.
+  `POST /v1/notifications/test` (404 in production) records `system.test_notification_requested` → subscriber →
+  notification → SSE → bell (used by E2E).
+- **Reviews**: security and code reviews — no critical/high; fixed duplicate emails on redelivery, SSE cleanup and
+  timer leak on failed replay, heartbeat backpressure, resync after Valkey reconnect, recipient ids on the shared
+  stream, link validation, global stream cap, duplicate LISTEN. The dev test endpoint relies on `NODE_ENV`, which
+  only allows development/test/production (staging runs as production).
+- **Tests**: API 207 unit / 88 integration (rollback/commit, two relays racing with duplicate wake-ups, retrying
+  subscriber isolated from others, reconciler, correlation/causation, identity → audit with request facts, replay
+  authz, SSE receive/replay/resync/isolation/limits, notifications flow, preferences, member-joined email), `@bf/db`
+  31 integration (afterCommit), web 63 unit, E2E 36 (bell count rises without reload) green three runs in a row.
+

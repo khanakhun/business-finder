@@ -211,4 +211,5 @@ export class RecordingMailer implements SystemMailer {
   async sendVerificationEmail() {}
   async sendPasswordReset() {}
   async sendTwoFactorEnabled() {}
+  async sendNotification() {}
 }

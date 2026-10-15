@@ -57,6 +57,7 @@ export class OutboxRelay implements OnApplicationBootstrap, OnApplicationShutdow
   private readonly producer: TypedProducer<typeof EventDeliveryJob>;
   private timer: NodeJS.Timeout | undefined;
   private listener: { unlisten(): Promise<void> } | undefined;
+  private listening: Promise<void> | undefined;
   private running: Promise<void> | undefined;
   private again = false;
   private stopped = false;
@@ -77,7 +78,7 @@ export class OutboxRelay implements OnApplicationBootstrap, OnApplicationShutdow
     if (!this.options.autoStart) return;
     await this.listen();
     this.timer = setInterval(() => {
-      if (!this.listener) void this.listen();
+      if (!this.listener && !this.listening) void this.listen();
       this.wake();
     }, this.options.pollMs);
     this.timer.unref();
@@ -170,12 +171,19 @@ export class OutboxRelay implements OnApplicationBootstrap, OnApplicationShutdow
     deliveries().inc(subscribers.length);
   }
 
-  private async listen(): Promise<void> {
-    try {
-      this.listener = await this.db.$client.listen(OUTBOX_CHANNEL, () => this.wake());
-    } catch (error) {
-      // Polling keeps the relay working; the timer retries LISTEN.
-      this.logger.warn({ err: error }, 'outbox relay could not LISTEN; polling only');
-    }
+  private listen(): Promise<void> {
+    this.listening ??= (async () => {
+      try {
+        const listener = await this.db.$client.listen(OUTBOX_CHANNEL, () => this.wake());
+        if (this.stopped) await listener.unlisten();
+        else this.listener = listener;
+      } catch (error) {
+        // Polling keeps the relay working; the timer retries LISTEN.
+        this.logger.warn({ err: error }, 'outbox relay could not LISTEN; polling only');
+      } finally {
+        this.listening = undefined;
+      }
+    })();
+    return this.listening;
   }
 }

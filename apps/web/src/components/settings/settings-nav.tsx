@@ -15,6 +15,7 @@ export function SettingsNav() {
   const items = [
     { href: '/settings', label: t('general'), show: true },
     { href: '/settings/account', label: t('account'), show: true },
+    { href: '/settings/notifications', label: t('notifications'), show: true },
     { href: '/settings/workspace', label: t('workspace'), show: canManageSettings },
     { href: '/settings/members', label: t('members'), show: canManageMembers },
     { href: '/settings/integrations', label: t('integrations'), show: canManageSettings },

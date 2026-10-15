@@ -7,7 +7,8 @@ import { LOGGER } from '../../platform/logging/logger.ts';
 import { createValkey } from '../../platform/valkey/valkey.module.ts';
 import { ORG_CHANNEL_PATTERN, type RealtimeMessage } from '../application/realtime-publisher.ts';
 
-type Listener = (message: RealtimeMessage) => void;
+/** A message, or `'resync'` after the subscription reconnected (messages may have been missed meanwhile). */
+type Listener = (message: RealtimeMessage | 'resync') => void;
 
 /**
  * One Valkey subscription per API process (`PSUBSCRIBE rt:org:*`), fanned out to that process's SSE clients by
@@ -53,6 +54,12 @@ export class RealtimeMultiplexer implements OnApplicationShutdown {
       connection.on('pmessage', (_pattern: string, channel: string, raw: string) =>
         this.dispatch(channel, raw),
       );
+      let readyBefore = false;
+      connection.on('ready', () => {
+        if (readyBefore)
+          for (const set of this.listeners.values()) for (const listener of set) listener('resync');
+        readyBefore = true;
+      });
       this.connection = connection;
       await connection.connect();
       await connection.psubscribe(ORG_CHANNEL_PATTERN);

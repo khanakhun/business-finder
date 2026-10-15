@@ -4,6 +4,10 @@ import type { Locale } from '@bf/contracts';
 export const MESSAGES = {
   en: {
     footer: 'You received this email because of activity on your Business Finder account.',
+    notification: {
+      open: 'Open in Business Finder',
+      manage: 'Choose which notifications you receive by email in Settings → Notifications.',
+    },
     ignore: 'If you did not request this, you can ignore this email.',
     verify: {
       subject: 'Confirm your email address',
@@ -41,6 +45,10 @@ export const MESSAGES = {
   },
   fr: {
     footer: 'Vous recevez cet e-mail suite à une activité sur votre compte Business Finder.',
+    notification: {
+      open: 'Ouvrir dans Business Finder',
+      manage: 'Choisissez les notifications reçues par e-mail dans Paramètres → Notifications.',
+    },
     ignore: "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
     verify: {
       subject: 'Confirmez votre adresse e-mail',

@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import { apiUrl, webUrl } from './e2e/env.ts';
+import { apiUrl, webUrl, workerMetricsUrl } from './e2e/env.ts';
 
 const ci = Boolean(process.env.CI);
 
@@ -28,6 +28,13 @@ export default defineConfig({
       // FAKE_CONNECTION_TESTS: provider connection tests pass without calling providers (refused in production).
       env: { AUTH_TRUSTED_PROXIES: '127.0.0.1,::1', FAKE_CONNECTION_TESTS: 'true' },
       url: `${apiUrl}/health/live`,
+      reuseExistingServer: !ci,
+      timeout: 60_000,
+    },
+    {
+      // Outbox relay and event subscribers (notifications reach the bell through the worker).
+      command: 'pnpm --filter @bf/api start:worker',
+      url: workerMetricsUrl,
       reuseExistingServer: !ci,
       timeout: 60_000,
     },

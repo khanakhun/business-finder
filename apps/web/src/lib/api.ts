@@ -18,6 +18,12 @@ export const queryKeys = {
     apiKeys: () => ['identity', 'api-keys'] as const,
     sessions: () => ['identity', 'sessions'] as const,
   }),
+  notifications: defineQueryKeys('notifications', {
+    unread: () => ['notifications', 'unread'] as const,
+    recent: () => ['notifications', 'recent'] as const,
+    list: (filter: 'all' | 'unread') => ['notifications', 'list', filter] as const,
+    preferences: () => ['notifications', 'preferences'] as const,
+  }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,
     logo: () => ['workspace', 'logo'] as const,

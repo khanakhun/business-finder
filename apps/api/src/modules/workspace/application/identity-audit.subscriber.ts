@@ -23,6 +23,12 @@ function target(event: IdentityEvent): {
     case 'identity.invitation_resent':
     case 'identity.invitation_revoked':
       return { entityType: 'invitation', entityId: event.payload.invitationId, metadata: {} };
+    case 'identity.member_joined':
+      return {
+        entityType: 'member',
+        entityId: event.payload.memberId,
+        metadata: { role: event.payload.role },
+      };
     case 'identity.member_role_changed':
       return {
         entityType: 'member',

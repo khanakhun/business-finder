@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { type Auth, createAuth } from '@bf/auth';
 import type { ApiEnv } from '@bf/config';
+import { RoleSchema } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
 import type { Logger } from '@bf/observability';
 import type { Provider } from '@nestjs/common';
@@ -88,6 +89,20 @@ export const betterAuthProvider: Provider = {
       onEvent: async (event) => {
         if (event.type === 'identity.user_signed_up') {
           await events.publish({ type: event.type, userId: event.userId }, { userId: event.userId });
+        }
+        if (event.type === 'identity.member_joined') {
+          const role = RoleSchema.safeParse(event.role);
+          if (!role.success) return;
+          await events.publish(
+            {
+              type: event.type,
+              organizationId: event.organizationId,
+              memberId: event.memberId,
+              userId: event.userId,
+              role: role.data,
+            },
+            { userId: event.userId },
+          );
         }
       },
     });

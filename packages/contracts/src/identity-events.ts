@@ -24,6 +24,12 @@ export const InvitationRevoked = defineEvent(
   z.object({ invitationId: z.uuid() }),
 );
 
+export const MemberJoined = defineEvent(
+  'identity.member_joined',
+  1,
+  z.object({ memberId: z.uuid(), userId: z.uuid(), role: RoleSchema }),
+);
+
 export const MemberRoleChanged = defineEvent(
   'identity.member_role_changed',
   1,
@@ -46,6 +52,7 @@ export const IDENTITY_EVENTS = [
   MemberInvited,
   InvitationResent,
   InvitationRevoked,
+  MemberJoined,
   MemberRoleChanged,
   MemberRemoved,
   ApiKeyCreated,

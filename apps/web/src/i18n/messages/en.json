@@ -227,7 +227,8 @@
     "workspace": "Workspace",
     "integrations": "Integrations",
     "features": "Features",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "notifications": "Notifications"
   },
   "account": {
     "title": "Account",
@@ -472,6 +473,66 @@
       "identity_member_removed": "Member removed",
       "identity_api_key_created": "API key created",
       "identity_api_key_revoked": "API key revoked"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "What happened in this workspace that needs your attention.",
+    "empty": "No notifications yet.",
+    "emptyUnread": "You're all caught up.",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "all": "All",
+    "unread": "Unread",
+    "seeAll": "See all notifications",
+    "loadMore": "Load more",
+    "unreadLabel": "Notifications ({count} unread)",
+    "types": {
+      "reply_received": {
+        "title": "New reply from {business}",
+        "body": "A prospect answered your email."
+      },
+      "lead_captured": {
+        "title": "New lead on {site}",
+        "body": "Someone left their details on a preview site."
+      },
+      "batch_completed": {
+        "title": "Site generation finished",
+        "body": "{count} preview sites are ready to review."
+      },
+      "discovery_completed": {
+        "title": "Discovery finished",
+        "body": "{count} businesses found."
+      },
+      "mailbox_paused": {
+        "title": "Mailbox paused: {mailbox}",
+        "body": "Sending stopped to protect deliverability."
+      },
+      "member_joined": {
+        "title": "{name} joined the workspace",
+        "body": "They accepted their invitation."
+      },
+      "system_test": {
+        "title": "Test notification",
+        "body": "Notifications work."
+      }
+    },
+    "preferences": {
+      "title": "Notifications",
+      "description": "Choose how you hear about each kind of event in this workspace.",
+      "type": "Event",
+      "inApp": "In the app",
+      "email": "By email",
+      "saved": "Preferences saved.",
+      "types": {
+        "reply_received": "Replies from prospects",
+        "lead_captured": "Leads on preview sites",
+        "batch_completed": "Site generation finished",
+        "discovery_completed": "Discovery finished",
+        "mailbox_paused": "Mailbox paused",
+        "member_joined": "New members",
+        "system_test": "Test notifications"
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@bf/ui/components/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@bf/ui/components/popover';
+import { Skeleton } from '@bf/ui/components/skeleton';
 import {
   BellIcon,
   CheckIcon,
@@ -34,6 +35,9 @@ import { Field, FormError, useErrorMessage } from '@/components/auth/fields.tsx'
 import { authClient, unwrap } from '@/lib/auth-client.ts';
 import { useSession } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
+import { NotificationItem } from '../notifications/notification-item.tsx';
+import { UnreadBadge, useBellLabel } from '../notifications/unread-badge.tsx';
+import { useMarkRead, useRecentNotifications } from '../notifications/use-notifications.ts';
 import { LanguageMenu as LanguageMenuBase, ThemeMenu as ThemeMenuBase } from './preferences.tsx';
 
 // The real top-bar menus, loaded by LazyMenu on first intent. Triggers match the placeholders exactly.
@@ -150,16 +154,49 @@ function CreateWorkspaceDialog({
 }
 
 export function NotificationsMenu({ defaultOpen }: { readonly defaultOpen: boolean }) {
-  const t = useTranslations('topbar');
+  const t = useTranslations('notifications');
+  const label = useBellLabel();
+  const [open, setOpen] = React.useState(defaultOpen);
+  const recent = useRecentNotifications(open);
+  const { all } = useMarkRead();
+  const items = recent.data?.items ?? [];
   return (
-    <Popover defaultOpen={defaultOpen}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t('notifications')} className="text-muted-foreground">
+        <Button variant="ghost" size="icon" aria-label={label} className="relative text-muted-foreground">
           <BellIcon aria-hidden />
+          <UnreadBadge />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 text-sm text-muted-foreground">
-        {t('noNotifications')}
+      <PopoverContent align="end" className="w-80 p-2">
+        <div className="flex items-center justify-between px-2 pb-1">
+          <p className="font-medium">{t('title')}</p>
+          {items.some((n) => n.readAt === null) ? (
+            <Button variant="ghost" size="sm" disabled={all.isPending} onClick={() => all.mutate()}>
+              {t('markAllRead')}
+            </Button>
+          ) : null}
+        </div>
+        {recent.isPending ? (
+          <Skeleton className="h-24" />
+        ) : items.length === 0 ? (
+          <p className="px-2 py-6 text-center text-sm text-muted-foreground">{t('empty')}</p>
+        ) : (
+          <ul className="grid max-h-96 gap-0.5 overflow-y-auto">
+            {items.map((notification) => (
+              <li key={notification.id}>
+                <NotificationItem notification={notification} compact />
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link
+          href="/notifications"
+          className="mt-1 block rounded-md px-2 py-2 text-center text-sm text-primary hover:bg-accent"
+          onClick={() => setOpen(false)}
+        >
+          {t('seeAll')}
+        </Link>
       </PopoverContent>
     </Popover>
   );

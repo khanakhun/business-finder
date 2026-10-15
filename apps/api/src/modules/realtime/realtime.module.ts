@@ -1,13 +1,31 @@
 import { type DynamicModule, Global, Module } from '@nestjs/common';
 import type { AppMode } from '../platform/config/app-env.ts';
+import { NotificationService } from './application/notification.service.ts';
+import { NotificationSubscribers } from './application/notification.subscribers.ts';
+import {
+  NOTIFICATION_PREFERENCE_REPOSITORY,
+  NOTIFICATION_REPOSITORY,
+} from './application/notification-ports.ts';
+import {
+  ListNotificationsQuery,
+  MarkNotificationsReadCommands,
+  NotificationPreferencesUseCases,
+  TriggerTestNotificationCommand,
+} from './application/notifications.use-cases.ts';
 import { RealtimePublisher } from './application/realtime-publisher.ts';
 import { ConnectionLimiter } from './infrastructure/connection-limiter.ts';
+import {
+  DrizzleNotificationPreferenceRepository,
+  DrizzleNotificationRepository,
+} from './infrastructure/drizzle-notifications.repository.ts';
 import { RealtimeMultiplexer } from './infrastructure/realtime-multiplexer.ts';
+import { NotificationsController } from './interface/notifications.controller.ts';
 import { RealtimeController } from './interface/realtime.controller.ts';
 
 /**
- * Realtime (BF-012): every process can publish workspace events (`RealtimePublisher`, used by subscribers); the
- * HTTP process serves them over SSE through one multiplexed Valkey subscription.
+ * Realtime (BF-012): every process can publish workspace events (`RealtimePublisher`) and create notifications
+ * (`NotificationService`, used by subscribers in the worker); the HTTP process serves the SSE stream through one
+ * multiplexed Valkey subscription, and the notifications API.
  */
 @Global()
 @Module({})
@@ -16,9 +34,25 @@ export class RealtimeModule {
     const http = mode !== 'worker';
     return {
       module: RealtimeModule,
-      controllers: http ? [RealtimeController] : [],
-      providers: [RealtimePublisher, ...(http ? [RealtimeMultiplexer, ConnectionLimiter] : [])],
-      exports: [RealtimePublisher],
+      controllers: http ? [RealtimeController, NotificationsController] : [],
+      providers: [
+        RealtimePublisher,
+        { provide: NOTIFICATION_REPOSITORY, useClass: DrizzleNotificationRepository },
+        { provide: NOTIFICATION_PREFERENCE_REPOSITORY, useClass: DrizzleNotificationPreferenceRepository },
+        NotificationService,
+        NotificationSubscribers,
+        ...(http
+          ? [
+              RealtimeMultiplexer,
+              ConnectionLimiter,
+              ListNotificationsQuery,
+              MarkNotificationsReadCommands,
+              NotificationPreferencesUseCases,
+              TriggerTestNotificationCommand,
+            ]
+          : []),
+      ],
+      exports: [RealtimePublisher, NotificationService],
     };
   }
 }

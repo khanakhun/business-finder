@@ -1,6 +1,7 @@
+import { NOTIFICATION_CREATED } from '@bf/contracts';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { realtimeInvalidations } from './invalidations.ts';
+import { REALTIME_EVENTS, realtimeInvalidations } from './invalidations.ts';
 import { RealtimeConnection } from './provider.tsx';
 
 class FakeEventSource {
@@ -104,5 +105,12 @@ describe('RealtimeConnection', () => {
     }
     vi.advanceTimersByTime(60_000);
     expect(sources).toHaveLength(1);
+  });
+});
+
+describe('realtime event names', () => {
+  it('match the contracts', () => {
+    expect(REALTIME_EVENTS.notificationCreated).toBe(NOTIFICATION_CREATED);
+    expect(Object.keys(realtimeInvalidations)).toContain(NOTIFICATION_CREATED);
   });
 });

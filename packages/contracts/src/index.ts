@@ -87,6 +87,7 @@ export {
   InvitationResent,
   InvitationRevoked,
   MemberInvited,
+  MemberJoined,
   MemberRemoved,
   MemberRoleChanged,
   UserSignedUp,
@@ -102,6 +103,28 @@ export {
   signInternalRequest,
 } from './internal-auth.ts';
 export { defineJob, getJobDefinition, type JobDefinition, JobPayloadBase } from './jobs.ts';
+export {
+  NOTIFICATION_CREATED,
+  NOTIFICATION_TYPE_NAMES,
+  NOTIFICATION_TYPES,
+  type Notification,
+  type NotificationPage,
+  NotificationPageSchema,
+  type NotificationPreference,
+  NotificationPreferenceSchema,
+  type NotificationPreferences,
+  NotificationPreferencesSchema,
+  type NotificationQuery,
+  NotificationQuerySchema,
+  NotificationSchema,
+  type NotificationType,
+  NotificationTypeSchema,
+  type TestNotificationAccepted,
+  TestNotificationAcceptedSchema,
+  TestNotificationRequested,
+  type UpdateNotificationPreferencesRequest,
+  UpdateNotificationPreferencesRequestSchema,
+} from './notifications.ts';
 export {
   type CursorData,
   type CursorOptions,

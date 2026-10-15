@@ -1,5 +1,6 @@
 import asyncio
 import gzip
+import ssl
 import zlib
 from collections.abc import AsyncIterator, Iterator
 from ipaddress import ip_address
@@ -18,7 +19,9 @@ from app.net.safe_fetch import (
     DisallowedContentTypeError,
     FetchConnectionError,
     FetchPolicy,
+    FetchResolutionError,
     FetchTimeoutError,
+    FetchTlsError,
     ResponseTooLargeError,
     SafeFetcher,
     TooManyRedirectsError,
@@ -418,3 +421,49 @@ class TestPrivacy:
         urls = [v for k, v in span.attributes.items() if k in ("url.full", "http.url")]
         assert urls
         assert all("s3cr3t" not in str(url) for url in urls)
+
+
+class TestCrawlerOptions:
+    """Options the website crawler relies on (BF-026)."""
+
+    async def test_redirects_returned_unfollowed(self, dns: FakeDns, mock: respx.MockRouter) -> None:
+        fetcher = SafeFetcher(FetchPolicy(follow_redirects=False), resolver=dns)
+        mock.get(f"http://{PUBLIC}/").respond(
+            302, headers={"Location": "http://169.254.169.254/"}, text="body"
+        )
+        result = await fetcher.fetch("http://example.com/")
+        assert (result.status_code, result.content, result.headers["location"]) == (
+            302,
+            b"",
+            "http://169.254.169.254/",
+        )
+        await fetcher.aclose()
+
+    async def test_address_policy_is_injectable(self, mock: respx.MockRouter) -> None:
+        async def loopback(host: str, port: int) -> list[IPAddress]:
+            return [ip_address("127.0.0.1")]
+
+        fetcher = SafeFetcher(resolver=loopback, address_policy=lambda ip: None)
+        mock.get("http://127.0.0.1/").respond(200, text="local")
+        assert (await fetcher.fetch("http://site.test/")).content == b"local"
+        await fetcher.aclose()
+
+    async def test_unresolvable_hosts_are_resolution_errors(self, fetcher: SafeFetcher) -> None:
+        with pytest.raises(FetchResolutionError):
+            await fetcher.fetch("http://nowhere.example/")
+
+    async def test_tls_failures_are_tls_errors(self, dns: FakeDns) -> None:
+        def handshake(_: httpx.Request) -> httpx.Response:
+            # As httpx raises it: a ConnectError caused by the ssl module's error.
+            raise httpx.ConnectError("handshake failed") from ssl.SSLCertVerificationError(
+                "certificate expired"
+            )
+
+        fetcher = SafeFetcher(resolver=dns, transport=httpx.MockTransport(handshake))
+        with pytest.raises(FetchTlsError):
+            await fetcher.fetch("https://example.com/")
+        await fetcher.aclose()
+
+    async def test_plain_http_has_no_certificate(self, fetcher: SafeFetcher, mock: respx.MockRouter) -> None:
+        mock.get(f"http://{PUBLIC}/").respond(200, text="ok")
+        assert (await fetcher.fetch("http://example.com/")).certificate is None

@@ -12,6 +12,7 @@ is capped after decompression (we only ask for gzip/deflate and inflate with a b
 import asyncio
 import re
 import socket
+import ssl
 import zlib
 from collections.abc import Awaitable, Callable, Collection, Mapping
 from dataclasses import dataclass, field
@@ -23,6 +24,8 @@ import structlog
 from app.net.ip_policy import IPAddress, blocked_reason
 
 type Resolver = Callable[[str, int], Awaitable[list[IPAddress]]]
+#: Why an address must not be contacted, or None (production: `ip_policy.blocked_reason`).
+type AddressPolicy = Callable[[IPAddress], str | None]
 
 DEFAULT_USER_AGENT = "BusinessFinderBot/1.0"
 _DEFAULT_PORTS = {"http": 80, "https": 443}
@@ -49,7 +52,8 @@ class TooManyRedirectsError(FetchError):
 
 
 class ResponseTooLargeError(FetchError):
-    pass
+    #: The status of the response whose body was too large (it did answer: a link check can still read it).
+    status_code: int | None = None
 
 
 class DisallowedContentTypeError(FetchError):
@@ -64,6 +68,25 @@ class FetchConnectionError(FetchError):
     """DNS failure, refused connection, TLS error, malformed response."""
 
 
+class FetchResolutionError(FetchConnectionError):
+    """The host name does not resolve (or has no addresses)."""
+
+
+class FetchTlsError(FetchConnectionError):
+    """The TLS handshake failed: invalid, expired or mismatched certificate, or no common protocol."""
+
+
+def _tls_failure(error: BaseException) -> bool:
+    seen: set[int] = set()
+    current: BaseException | None = error
+    while current is not None and id(current) not in seen:
+        if isinstance(current, ssl.SSLError):
+            return True
+        seen.add(id(current))
+        current = current.__cause__ or current.__context__
+    return False
+
+
 @dataclass(frozen=True, slots=True)
 class FetchPolicy:
     schemes: frozenset[str] = frozenset({"http", "https"})
@@ -73,6 +96,9 @@ class FetchPolicy:
     max_bytes: int = 10 * 1024 * 1024
     #: Media types such as `text/html` or `image/*`; None accepts any.
     allowed_content_types: frozenset[str] | None = None
+    #: False returns redirect responses as they are (a browser behind the guard follows them itself, so every
+    #: hop goes through the guard again).
+    follow_redirects: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +112,8 @@ class FetchResult:
     #: The address actually connected to for the final hop.
     ip: str = ""
     media_type: str | None = field(default=None)
+    #: The peer certificate of an https response (`ssl.SSLSocket.getpeercert()`), verified by the TLS layer.
+    certificate: Mapping[str, object] | None = None
 
 
 async def system_resolver(host: str, port: int) -> list[IPAddress]:
@@ -98,6 +126,15 @@ async def system_resolver(host: str, port: int) -> list[IPAddress]:
         if address not in addresses:
             addresses.append(address)
     return addresses
+
+
+def _peer_certificate(response: httpx.Response) -> Mapping[str, object] | None:
+    stream = response.extensions.get("network_stream")
+    ssl_object = stream.get_extra_info("ssl_object") if stream is not None else None
+    if ssl_object is None:
+        return None
+    certificate: Mapping[str, object] | None = ssl_object.getpeercert()
+    return certificate
 
 
 def _origin(url: httpx.URL) -> tuple[str, bytes, int | None]:
@@ -187,9 +224,11 @@ class SafeFetcher:
         resolver: Resolver = system_resolver,
         user_agent: str = DEFAULT_USER_AGENT,
         transport: httpx.AsyncBaseTransport | None = None,
+        address_policy: AddressPolicy = blocked_reason,
     ) -> None:
         self.policy = policy or FetchPolicy()
         self._resolver = resolver
+        self._address_policy = address_policy
         self.client = httpx.AsyncClient(
             transport=transport,
             # Environment proxies would bypass pinning and the address checks.
@@ -225,6 +264,8 @@ class SafeFetcher:
         except httpx.InvalidURL as error:
             raise BlockedDestinationError(f"invalid URL: {error}") from None
         except httpx.HTTPError as error:
+            if _tls_failure(error):
+                raise FetchTlsError(type(error).__name__) from None
             raise FetchConnectionError(type(error).__name__) from None
 
     async def _fetch(
@@ -256,7 +297,7 @@ class SafeFetcher:
             response = await self.client.send(request, stream=True)
             try:
                 location = response.headers.get("location")
-                if response.status_code in _REDIRECT_STATUSES and location:
+                if response.status_code in _REDIRECT_STATUSES and location and policy.follow_redirects:
                     if len(redirects) >= policy.max_redirects:
                         raise TooManyRedirectsError(f"more than {policy.max_redirects} redirects")
                     target = current.join(location)
@@ -279,7 +320,16 @@ class SafeFetcher:
                     media_type, policy.allowed_content_types
                 ):
                     raise DisallowedContentTypeError(f"content type {media_type!r} is not allowed")
-                body = b"" if method == "HEAD" else await self._read(response, policy.max_bytes)
+                redirecting = response.status_code in _REDIRECT_STATUSES and bool(location)
+                try:
+                    body = (
+                        b""
+                        if method == "HEAD" or redirecting
+                        else await self._read(response, policy.max_bytes)
+                    )
+                except ResponseTooLargeError as error:
+                    error.status_code = response.status_code
+                    raise
                 return FetchResult(
                     url=str(current),
                     status_code=response.status_code,
@@ -288,6 +338,7 @@ class SafeFetcher:
                     redirects=tuple(redirects),
                     ip=str(ip),
                     media_type=media_type,
+                    certificate=_peer_certificate(response) if current.scheme == "https" else None,
                 )
             finally:
                 await response.aclose()
@@ -311,12 +362,12 @@ class SafeFetcher:
             try:
                 addresses = await self._resolver(host, port)
             except OSError as error:
-                raise FetchConnectionError(f"could not resolve {host}") from error
+                raise FetchResolutionError(f"could not resolve {host}") from error
         if not addresses:
-            raise FetchConnectionError(f"{host} has no addresses")
+            raise FetchResolutionError(f"{host} has no addresses")
         for address in addresses:
             # Any non-public record blocks the host: we cannot know which one a later connection would use.
-            if reason := blocked_reason(address):
+            if reason := self._address_policy(address):
                 raise BlockedDestinationError(f"{host} resolves to a {reason}")
         return addresses[0]
 

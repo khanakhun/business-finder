@@ -132,6 +132,9 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NOMINATIM_BASE_URL` | App-specific | api, worker | no | `https://nominatim.openstreetmap.org` |  | Nominatim endpoint; point it at a self-hosted instance for volume. |
 | `GEOCODER_LOOKUPS_PER_MINUTE` | App-specific | api, worker | no | `20` |  | External geocoder lookups each workspace may trigger per minute (cache hits are free). |
 | `NOMINATIM_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address sent to Nominatim (User-Agent and `email` parameter), required by its policy. |
+| `SEARCH_VECTOR_MAX_DISTANCE` | App-specific | api, worker | no | `0.7` |  | Cosine distance above which a semantic match is dropped, so unrelated text does not return the nearest 200. |
+| `SEARCH_HNSW_EF_SEARCH` | App-specific | api, worker | no | `100` |  | pgvector hnsw.ef_search for semantic ranking (recall vs latency). |
+| `SEARCH_EXPORT_MAX_ROWS` | App-specific | api, worker | no | `50000` |  | Rows one CSV export may stream. |
 | `DISCOVERY_APPLY_FREE_TIER` | App-specific | api, worker | no | `true` |  | Count providers' free monthly allowances (per billing account) before estimating cost. |
 | `GOOGLE_PLACES_REQUESTS_PER_SECOND` | App-specific | api, worker | no | `5` |  | Client-side cap on Google Places calls per second, per API key (Google allows ~100/s). |
 | `OVERPASS_URL` | App-specific | api, worker | no | `https://overpass-api.de/api/interpreter` |  | Overpass API endpoint. The public one is for light use: self-host or use a paid instance in production. |

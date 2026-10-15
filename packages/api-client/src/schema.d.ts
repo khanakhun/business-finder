@@ -77,7 +77,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Businesses the workspace tracks, most recently added first */
+        /** Businesses the workspace tracks: filters, free text (hybrid ranking), sorts and cursor pages */
         get: operations["listBusinesses"];
         put?: never;
         /** Add a business by hand (tracked by the workspace) */
@@ -151,6 +151,23 @@ export type paths = {
         put?: never;
         /** Track a business in the workspace (idempotent: 201 when added, 200 when already tracked) */
         post: operations["trackBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Counts per category, status, tier, website, email, rating band and locality under the same filters */
+        get: operations["listBusinessFacets"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1088,23 +1105,66 @@ export type components = {
             version: number;
             websiteUrl: string | null;
         };
-        BusinessPage: {
-            items: components["schemas"]["BusinessSummary"][];
-            nextCursor: string | null;
-            totalEstimate?: number;
+        BusinessFacets: {
+            /** @description Top-level categories, plus children of selected ones. */
+            categories: {
+                count: number;
+                /** Format: uuid */
+                id: string;
+                labels: {
+                    en: string;
+                    fr: string;
+                };
+                parentId: string | null;
+                slug: string;
+            }[];
+            /** @description `has` / `none`. */
+            email: {
+                count: number;
+                value: string;
+            }[];
+            /** @description Top 20. */
+            localities: {
+                count: number;
+                value: string;
+            }[];
+            pipelineStatuses: {
+                count: number;
+                value: string;
+            }[];
+            /** @description One of none, lt3, 3to4, 4to4.5, gte4.5. */
+            ratingBands: {
+                count: number;
+                value: string;
+            }[];
+            /** @description `none` for unscored businesses. */
+            tiers: {
+                count: number;
+                value: string;
+            }[];
+            total: number;
+            /** @description `has` / `none`. */
+            website: {
+                count: number;
+                value: string;
+            }[];
         };
-        BusinessSummary: {
+        BusinessListItem: {
             countryCode: string | null;
             displayName: string;
+            /** @description From `near` or the area centre; null otherwise. */
+            distanceMeters: number | null;
             /**
              * Format: uuid
              * @description BusinessId (UUID)
              */
             id: string;
+            lastActivityAt: string | null;
             locality: string | null;
             location: components["schemas"]["LatLng"] | null;
             /** @enum {string} */
             operatingStatus: "operational" | "closed_temporarily" | "closed_permanently" | "unknown";
+            ownerUserId: string | null;
             /** @enum {string} */
             pipelineStatus: "new" | "qualified" | "disqualified" | "contacted" | "engaged" | "meeting" | "proposal" | "won" | "lost";
             primaryCategoryId: string | null;
@@ -1112,7 +1172,17 @@ export type components = {
             primaryPhone: string | null;
             ratingAvg: number | null;
             ratingCount: number | null;
+            score: number | null;
+            tags: string[];
+            tier: ("A" | "B" | "C" | "X") | null;
+            /** Format: date-time */
+            trackedAt: string;
             websiteUrl: string | null;
+        };
+        BusinessSearchPage: {
+            items: components["schemas"]["BusinessListItem"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
         };
         CategoryAttributes: {
             [key: string]: boolean;
@@ -2467,8 +2537,33 @@ export interface operations {
     listBusinesses: {
         parameters: {
             query?: {
+                addedWithinDays?: number;
+                area?: string;
+                category?: string | string[];
+                country?: string;
                 cursor?: string;
+                emailVerified?: "true" | "false";
+                hasEmail?: "true" | "false";
+                hasPhone?: "true" | "false";
+                includeClosed?: "true" | "false";
+                keyword?: string | string[];
                 limit?: number;
+                near?: string;
+                owner?: string;
+                price?: string | string[];
+                q?: string;
+                radiusKm?: number;
+                "rating[gte]"?: number;
+                "rating[lte]"?: number;
+                "reviews[gte]"?: number;
+                "reviews[lte]"?: number;
+                "score[gte]"?: number;
+                "score[lte]"?: number;
+                sort?: "relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name";
+                status?: string | string[];
+                tag?: string | string[];
+                tier?: string | string[];
+                website?: "any" | "none" | "has" | "weak";
             };
             header?: never;
             path?: never;
@@ -2482,7 +2577,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BusinessPage"];
+                    "application/json": components["schemas"]["BusinessSearchPage"];
                 };
             };
             /** @description Problem details (RFC 9457) */
@@ -2496,6 +2591,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2966,6 +3070,96 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listBusinessFacets: {
+        parameters: {
+            query?: {
+                addedWithinDays?: number;
+                area?: string;
+                category?: string | string[];
+                country?: string;
+                emailVerified?: "true" | "false";
+                hasEmail?: "true" | "false";
+                hasPhone?: "true" | "false";
+                includeClosed?: "true" | "false";
+                keyword?: string | string[];
+                near?: string;
+                owner?: string;
+                price?: string | string[];
+                q?: string;
+                radiusKm?: number;
+                "rating[gte]"?: number;
+                "rating[lte]"?: number;
+                "reviews[gte]"?: number;
+                "reviews[lte]"?: number;
+                "score[gte]"?: number;
+                "score[lte]"?: number;
+                status?: string | string[];
+                tag?: string | string[];
+                tier?: string | string[];
+                website?: "any" | "none" | "has" | "weak";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessFacets"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

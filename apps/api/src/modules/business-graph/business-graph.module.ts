@@ -5,11 +5,7 @@ import {
   CreateManualBusinessCommand,
   TrackBusinessCommand,
 } from './application/business.commands.ts';
-import {
-  GetBusinessDetailQuery,
-  ListContactsQuery,
-  ListTrackedBusinessesQuery,
-} from './application/business.queries.ts';
+import { GetBusinessDetailQuery, ListContactsQuery } from './application/business.queries.ts';
 import {
   BUSINESS_READ_MODEL,
   BUSINESS_REPOSITORY,
@@ -82,7 +78,6 @@ export class BusinessGraphModule {
         mode === 'worker' ? [] : [ResolutionController, BusinessesController, CategoriesController],
       providers: [
         GetBusinessDetailQuery,
-        ListTrackedBusinessesQuery,
         ListContactsQuery,
         CreateManualBusinessCommand,
         TrackBusinessCommand,

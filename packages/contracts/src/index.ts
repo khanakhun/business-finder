@@ -91,6 +91,23 @@ export {
   SURVIVORSHIP_PRIORITY,
 } from './business-graph/survivorship.ts';
 export {
+  BUSINESS_SORTS,
+  type BusinessFacets,
+  BusinessFacetsSchema,
+  type BusinessFilters,
+  type BusinessFiltersInput,
+  BusinessFiltersSchema,
+  type BusinessListItem,
+  BusinessListItemSchema,
+  type BusinessSearchPage,
+  BusinessSearchPageSchema,
+  type BusinessSearchQuery,
+  BusinessSearchQuerySchema,
+  type BusinessSort,
+  CategoryFacetSchema,
+  RATING_BANDS,
+} from './business-search.ts';
+export {
   DEFAULT_DISCOVERY_SETTINGS,
   DISCOVERY_PROVIDER_IDS,
   type DiscoveryIntent,
@@ -397,6 +414,7 @@ export {
   type ParseSearchIntentResponse,
   ParseSearchIntentResponseSchema,
   SCORE_TIERS,
+  type ScoreTier,
   ScoreTierSchema,
   SEARCH_INTENT_WARNINGS,
   SEARCH_MODES,

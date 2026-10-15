@@ -50,9 +50,31 @@ export async function truncateAll(url: string): Promise<void> {
     >`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
     const tables = rows.map((r) => r.tablename).filter((t) => !EXTENSION_TABLES.has(t));
     if (tables.length > 0) {
-      await sql.unsafe(
-        `TRUNCATE ${tables.map((t) => `"public"."${t}"`).join(', ')} RESTART IDENTITY CASCADE`,
-      );
+      await sql.begin(async (tx) => {
+        // Append-only tables (audit_logs) refuse TRUNCATE through a trigger: lift it for this transaction only
+        // and restore its exact enabled mode afterwards (test databases are owned by the test role).
+        const guards = await tx<{ table: string; trigger: string; mode: string }[]>`
+          SELECT c.relname AS table, t.tgname AS trigger, t.tgenabled AS mode
+          FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+          WHERE n.nspname = 'public' AND NOT t.tgisinternal AND (t.tgtype & 32) <> 0`;
+        for (const guard of guards) {
+          await tx.unsafe(`ALTER TABLE "public"."${guard.table}" DISABLE TRIGGER "${guard.trigger}"`);
+        }
+        await tx.unsafe(
+          `TRUNCATE ${tables.map((t) => `"public"."${t}"`).join(', ')} RESTART IDENTITY CASCADE`,
+        );
+        const enable: Record<string, string> = {
+          O: 'ENABLE',
+          A: 'ENABLE ALWAYS',
+          R: 'ENABLE REPLICA',
+          D: 'DISABLE',
+        };
+        for (const guard of guards) {
+          await tx.unsafe(
+            `ALTER TABLE "public"."${guard.table}" ${enable[guard.mode] ?? 'ENABLE'} TRIGGER "${guard.trigger}"`,
+          );
+        }
+      });
     }
   } finally {
     await sql.end();

@@ -4,6 +4,7 @@ import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { EventsModule } from './modules/platform/events/events.module.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
 import { QueueModule } from './modules/platform/queue/queue.module.ts';
+import { RealtimeModule } from './modules/realtime/realtime.module.ts';
 import { SystemModule } from './modules/system/system.module.ts';
 import { WorkspaceModule } from './modules/workspace/workspace.module.ts';
 
@@ -32,6 +33,7 @@ export class AppModule {
         ...(mode === 'openapi' ? [] : [QueueModule.forRoot(mode)]),
         EventsModule.forRoot(mode),
         WorkspaceModule.forRoot(mode),
+        RealtimeModule.forRoot(mode),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
       ],

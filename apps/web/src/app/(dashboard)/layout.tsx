@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import type * as React from 'react';
 import { AppShell } from '@/components/shell/app-shell.tsx';
 import { WorkspaceGate } from '@/components/shell/workspace-gate.tsx';
+import { RealtimeProvider } from '@/lib/realtime/provider.tsx';
 import { getSession } from '@/lib/server-session.ts';
 import { SessionProvider } from '@/lib/session.tsx';
 
@@ -13,9 +14,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!me) redirect(`/sign-in?next=${encodeURIComponent(path)}`);
   return (
     <SessionProvider me={me}>
-      <AppShell>
-        <WorkspaceGate>{children}</WorkspaceGate>
-      </AppShell>
+      <RealtimeProvider enabled={me.activeOrganization !== null}>
+        <AppShell>
+          <WorkspaceGate>{children}</WorkspaceGate>
+        </AppShell>
+      </RealtimeProvider>
     </SessionProvider>
   );
 }

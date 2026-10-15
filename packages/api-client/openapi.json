@@ -4136,6 +4136,62 @@
         ],
         "type": "object"
       },
+      "ParseSearchIntentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "locale": {
+            "default": "en",
+            "description": "UI locale: the default language and the clarification language.",
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "ParseSearchIntentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "description": "Other location candidates (ambiguous locations).",
+            "items": {
+              "$ref": "#/components/schemas/AreaCandidate"
+            },
+            "type": "array"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/SearchIntent"
+          },
+          "resolvedArea": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AreaCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The confidently resolved location, if any."
+          }
+        },
+        "required": [
+          "intent",
+          "resolvedArea",
+          "alternatives"
+        ],
+        "type": "object"
+      },
       "PingJobsAccepted": {
         "additionalProperties": false,
         "description": "Ids of the enqueued jobs.",
@@ -5019,6 +5075,429 @@
           "allowed",
           "warningVersion",
           "warning"
+        ],
+        "type": "object"
+      },
+      "SearchFilters": {
+        "additionalProperties": false,
+        "properties": {
+          "addedWithinDays": {
+            "anyOf": [
+              {
+                "maximum": 3650,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "emailVerified": {
+            "default": null,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "hasEmail": {
+            "default": null,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "hasPhone": {
+            "default": null,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "languages": {
+            "default": [],
+            "description": "Website languages (ISO 639-1).",
+            "items": {
+              "pattern": "^[a-z]{2}$",
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "maxRating": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "maxReviews": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "minRating": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "minReviews": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "minScore": {
+            "anyOf": [
+              {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "painSignals": {
+            "default": [],
+            "items": {
+              "enum": [
+                "booking_friction",
+                "unreachable_by_phone",
+                "slow_or_no_reply",
+                "website_broken_or_outdated",
+                "no_online_menu_or_prices",
+                "hard_to_find_info",
+                "language_barrier",
+                "payment_friction",
+                "long_wait_times",
+                "inconsistent_hours",
+                "poor_communication",
+                "positive_strong_reputation",
+                "other"
+              ],
+              "type": "string"
+            },
+            "maxItems": 13,
+            "type": "array"
+          },
+          "pipelineStatuses": {
+            "default": [],
+            "items": {
+              "enum": [
+                "new",
+                "qualified",
+                "disqualified",
+                "contacted",
+                "engaged",
+                "meeting",
+                "proposal",
+                "won",
+                "lost"
+              ],
+              "type": "string"
+            },
+            "maxItems": 9,
+            "type": "array"
+          },
+          "priceLevels": {
+            "default": [],
+            "items": {
+              "maximum": 4,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxItems": 4,
+            "type": "array"
+          },
+          "scoreProfile": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Scoring profile id or name."
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "maxLength": 50,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "tiers": {
+            "default": [],
+            "items": {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "X"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": "array"
+          },
+          "website": {
+            "default": "any",
+            "description": "`weak`: has a site that audits rate poorly (slow, outdated, not mobile friendly).",
+            "enum": [
+              "any",
+              "none",
+              "has",
+              "weak"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "website",
+          "minRating",
+          "maxRating",
+          "minReviews",
+          "maxReviews",
+          "hasEmail",
+          "hasPhone",
+          "emailVerified",
+          "languages",
+          "priceLevels",
+          "painSignals",
+          "scoreProfile",
+          "minScore",
+          "tiers",
+          "pipelineStatuses",
+          "tags",
+          "addedWithinDays"
+        ],
+        "type": "object"
+      },
+      "SearchIntent": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "additionalProperties": false,
+            "properties": {
+              "ids": {
+                "items": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "includeDescendants": {
+                "description": "Also match the subcategories (e.g. pizzerias for restaurants).",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "ids",
+              "includeDescendants"
+            ],
+            "type": "object"
+          },
+          "confidence": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/SearchFilters"
+          },
+          "keywords": {
+            "description": "Terms not covered by a category (e.g. \"vegan\", \"rooftop\").",
+            "items": {
+              "maxLength": 60,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "language": {
+            "description": "Language the prompt is written in.",
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "maximum": 2000,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Target result count (discovery)."
+          },
+          "location": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "resolution": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LocationResolution"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "description": "The location phrase as written in the prompt.",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text",
+                  "resolution"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mode": {
+            "description": "`listings`: filter businesses already found; `discover`: find new ones; `both`.",
+            "enum": [
+              "listings",
+              "discover",
+              "both"
+            ],
+            "type": "string"
+          },
+          "needsClarification": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "options": {
+                    "items": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 6,
+                    "type": "array"
+                  },
+                  "question": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "question"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sort": {
+            "additionalProperties": false,
+            "properties": {
+              "direction": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "type": "string"
+              },
+              "field": {
+                "enum": [
+                  "relevance",
+                  "score",
+                  "rating",
+                  "reviews",
+                  "distance",
+                  "recent"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "field",
+              "direction"
+            ],
+            "type": "object"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 300,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "categories",
+          "keywords",
+          "location",
+          "filters",
+          "sort",
+          "limit",
+          "needsClarification",
+          "confidence",
+          "warnings",
+          "language"
         ],
         "type": "object"
       },
@@ -9868,6 +10347,88 @@
         "summary": "Server-sent events of the active workspace (Last-Event-ID replays up to 1000 missed events)",
         "tags": [
           "realtime"
+        ]
+      }
+    },
+    "/v1/search/intent": {
+      "post": {
+        "operationId": "parseSearchIntent",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseSearchIntentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseSearchIntentResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Turn a prompt (\"cafés à Gustavia sans site web\") into a structured, editable search intent",
+        "tags": [
+          "search"
         ]
       }
     },

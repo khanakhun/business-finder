@@ -757,6 +757,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/search/intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn a prompt ("cafés à Gustavia sans site web") into a structured, editable search intent */
+        post: operations["parseSearchIntent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/system/info": {
         parameters: {
             query?: never;
@@ -1721,6 +1738,22 @@ export type components = {
             missing: ("agency_name" | "postal_address")[];
             ready: boolean;
         };
+        ParseSearchIntentRequest: {
+            /**
+             * @description UI locale: the default language and the clarification language.
+             * @default en
+             * @enum {string}
+             */
+            locale: "fr" | "en";
+            prompt: string;
+        };
+        ParseSearchIntentResponse: {
+            /** @description Other location candidates (ambiguous locations). */
+            alternatives: components["schemas"]["AreaCandidate"][];
+            intent: components["schemas"]["SearchIntent"];
+            /** @description The confidently resolved location, if any. */
+            resolvedArea: components["schemas"]["AreaCandidate"] | null;
+        };
         /** @description Ids of the enqueued jobs. */
         PingJobsAccepted: {
             jobIds: string[];
@@ -1938,6 +1971,91 @@ export type components = {
                 fr: string;
             };
             warningVersion: number;
+        };
+        SearchFilters: {
+            /** @default null */
+            addedWithinDays: number | null;
+            /** @default null */
+            emailVerified: boolean | null;
+            /** @default null */
+            hasEmail: boolean | null;
+            /** @default null */
+            hasPhone: boolean | null;
+            /**
+             * @description Website languages (ISO 639-1).
+             * @default []
+             */
+            languages: string[];
+            /** @default null */
+            maxRating: number | null;
+            /** @default null */
+            maxReviews: number | null;
+            /** @default null */
+            minRating: number | null;
+            /** @default null */
+            minReviews: number | null;
+            /** @default null */
+            minScore: number | null;
+            /** @default [] */
+            painSignals: ("booking_friction" | "unreachable_by_phone" | "slow_or_no_reply" | "website_broken_or_outdated" | "no_online_menu_or_prices" | "hard_to_find_info" | "language_barrier" | "payment_friction" | "long_wait_times" | "inconsistent_hours" | "poor_communication" | "positive_strong_reputation" | "other")[];
+            /** @default [] */
+            pipelineStatuses: ("new" | "qualified" | "disqualified" | "contacted" | "engaged" | "meeting" | "proposal" | "won" | "lost")[];
+            /** @default [] */
+            priceLevels: number[];
+            /**
+             * @description Scoring profile id or name.
+             * @default null
+             */
+            scoreProfile: string | null;
+            /** @default [] */
+            tags: string[];
+            /** @default [] */
+            tiers: ("A" | "B" | "C" | "X")[];
+            /**
+             * @description `weak`: has a site that audits rate poorly (slow, outdated, not mobile friendly).
+             * @default any
+             * @enum {string}
+             */
+            website: "any" | "none" | "has" | "weak";
+        };
+        SearchIntent: {
+            categories: {
+                ids: string[];
+                /** @description Also match the subcategories (e.g. pizzerias for restaurants). */
+                includeDescendants: boolean;
+            };
+            confidence: number;
+            filters: components["schemas"]["SearchFilters"];
+            /** @description Terms not covered by a category (e.g. "vegan", "rooftop"). */
+            keywords: string[];
+            /**
+             * @description Language the prompt is written in.
+             * @enum {string}
+             */
+            language: "fr" | "en";
+            /** @description Target result count (discovery). */
+            limit: number | null;
+            location: {
+                resolution: components["schemas"]["LocationResolution"] | null;
+                /** @description The location phrase as written in the prompt. */
+                text: string;
+            } | null;
+            /**
+             * @description `listings`: filter businesses already found; `discover`: find new ones; `both`.
+             * @enum {string}
+             */
+            mode: "listings" | "discover" | "both";
+            needsClarification: {
+                options?: string[];
+                question: string;
+            } | null;
+            sort: {
+                /** @enum {string} */
+                direction: "asc" | "desc";
+                /** @enum {string} */
+                field: "relevance" | "score" | "rating" | "reviews" | "distance" | "recent";
+            };
+            warnings: string[];
         };
         SecretList: {
             items: components["schemas"]["SecretSummary"][];
@@ -5395,6 +5513,75 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    parseSearchIntent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParseSearchIntentRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParseSearchIntentResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

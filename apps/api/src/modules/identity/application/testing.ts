@@ -35,6 +35,7 @@ export function session(userId: string, orgId: string | null, role: Role | null)
     role,
     permissions: role ? ROLE_PERMISSIONS[role] : new Set(),
     crossOrigin: false,
+    operator: false,
   };
 }
 
@@ -47,6 +48,7 @@ export function apiKeyAuth(orgId: string, permissions: Permission[]): AuthContex
     role: null,
     permissions: new Set(permissions),
     crossOrigin: false,
+    operator: false,
   };
 }
 

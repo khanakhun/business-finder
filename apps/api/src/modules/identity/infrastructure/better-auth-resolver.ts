@@ -19,6 +19,7 @@ const BEARER = /^Bearer\s+(\S+)$/i;
 @Injectable()
 export class BetterAuthResolver implements AuthResolver {
   private readonly appOrigin: string;
+  private readonly operators: ReadonlySet<string>;
 
   constructor(
     @Inject(BETTER_AUTH) private readonly auth: Auth,
@@ -26,6 +27,7 @@ export class BetterAuthResolver implements AuthResolver {
     @Inject(APP_ENV) env: AppEnv,
   ) {
     this.appOrigin = new URL((env as ApiEnv).APP_URL).origin;
+    this.operators = new Set((env as ApiEnv).PLATFORM_OPERATOR_EMAILS);
   }
 
   async resolve(req: Request): Promise<AuthResolution> {
@@ -49,6 +51,7 @@ export class BetterAuthResolver implements AuthResolver {
       role: role ?? null,
       permissions: role ? ROLE_PERMISSIONS[role] : new Set(),
       crossOrigin: !SAFE_METHODS.has(req.method) && !this.fromApp(req),
+      operator: session.user.emailVerified && this.operators.has(session.user.email.toLowerCase()),
     };
     return { kind: 'authenticated', auth };
   }
@@ -65,6 +68,7 @@ export class BetterAuthResolver implements AuthResolver {
       role: null,
       permissions: new Set(fromStatements(result.key.permissions)),
       crossOrigin: false,
+      operator: false,
     };
     return { kind: 'authenticated', auth };
   }

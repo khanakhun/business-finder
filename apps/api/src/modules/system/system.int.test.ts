@@ -23,9 +23,9 @@ const completed = (jobId: string) =>
     .toBe('completed');
 
 beforeAll(async () => {
-  t = await createTestApp({ valkeyDb: 4, mailer });
+  t = await createTestApp({ valkeyDb: 4, mailer, env: { PLATFORM_OPERATOR_EMAILS: 'ops@example.test' } });
   await new Redis(t.env.VALKEY_URL).flushdb();
-  // ping-jobs and Bull Board need settings:manage: act as a workspace owner.
+  // ping-jobs and Bull Board are operator tools (PLATFORM_OPERATOR_EMAILS).
   owner = await signUpVerified(t, mailer, 'ops@example.test', 'Ops');
   await createWorkspace(owner, 'Ops');
   worker = await createTestWorker(t);
@@ -76,7 +76,7 @@ describe('POST /v1/system/ping-jobs', () => {
 });
 
 describe('Bull Board', () => {
-  it('is served to signed-in operators with settings:manage', async () => {
+  it('is served to signed-in platform operators', async () => {
     await t.http.get('/admin/queues').expect(401);
     await owner.get('/admin/queues').expect(200);
     const api = await owner.get('/admin/queues/api/queues').expect(200);
@@ -85,8 +85,12 @@ describe('Bull Board', () => {
   });
 });
 
-describe('POST /v1/system/ping-jobs without permission', () => {
-  it('needs settings:manage', async () => {
+describe('POST /v1/system/ping-jobs without operator rights', () => {
+  it('refuses anonymous callers and workspace owners who are not operators', async () => {
     await t.http.post('/v1/system/ping-jobs').send({}).expect(401);
+    const owner = await signUpVerified(t, mailer, 'tenant-owner@example.test');
+    await createWorkspace(owner, 'Tenant');
+    await owner.post('/v1/system/ping-jobs', {}).expect(403);
+    await owner.get('/admin/queues').expect(403);
   });
 });

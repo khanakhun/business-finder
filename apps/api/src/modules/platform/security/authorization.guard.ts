@@ -41,6 +41,10 @@ export class AuthorizationGuard implements CanActivate {
     }
     const { auth } = resolution;
     if (auth.crossOrigin) throw new ForbiddenError('Cross-origin request refused.');
+    if (policy.kind === 'operator') {
+      if (!auth.operator) throw new ForbiddenError('Platform operators only.');
+      return true;
+    }
     const orgRequired = policy.kind === 'permissions' || policy.orgRequired;
     if (orgRequired && !auth.orgId) throw new ForbiddenError('Select a workspace first.');
     if (policy.kind === 'permissions') {

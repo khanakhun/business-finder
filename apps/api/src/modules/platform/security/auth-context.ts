@@ -17,6 +17,11 @@ export interface AuthContext {
   readonly permissions: ReadonlySet<Permission>;
   /** Session requests with an unsafe method whose Origin/Referer is not the app (CSRF defence, security.md §1). */
   readonly crossOrigin: boolean;
+  /**
+   * Platform operator (PLATFORM_OPERATOR_EMAILS, verified session only): may use cross-workspace tools such as Bull
+   * Board. Unrelated to workspace roles — a workspace owner is not an operator.
+   */
+  readonly operator: boolean;
 }
 
 /** Result of resolving a request: authenticated, anonymous, or presented invalid credentials (always 401). */

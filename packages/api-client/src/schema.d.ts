@@ -36,6 +36,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/identity/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Which sign-in and sign-up options are enabled */
+        get: operations["getIdentityConfig"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/invitations": {
         parameters: {
             query?: never;
@@ -252,6 +269,12 @@ export type components = {
             revokedAt: string | null;
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
+        };
+        IdentityConfig: {
+            googleEnabled: boolean;
+            minPasswordLength: number;
+            /** @enum {string} */
+            signupMode: "invite_only" | "allowlist" | "open";
         };
         Invitation: {
             /** Format: date-time */
@@ -525,6 +548,35 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getIdentityConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityConfig"];
                 };
             };
             /** @description Problem details (RFC 9457) */

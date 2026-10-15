@@ -10,7 +10,8 @@ import { type AuthContext, getRequestAuth } from './auth-context.ts';
 export type AccessPolicy =
   | { readonly kind: 'anonymous' }
   | { readonly kind: 'authenticated'; readonly orgRequired: boolean }
-  | { readonly kind: 'permissions'; readonly permissions: readonly Permission[] };
+  | { readonly kind: 'permissions'; readonly permissions: readonly Permission[] }
+  | { readonly kind: 'operator' };
 
 export const ACCESS_POLICY = 'bf:access-policy';
 
@@ -27,6 +28,12 @@ export const RequirePermission = (...permissions: [Permission, ...Permission[]])
  */
 export const NoOrgRequired = () =>
   SetMetadata(ACCESS_POLICY, { kind: 'authenticated', orgRequired: false } satisfies AccessPolicy);
+
+/**
+ * Cross-workspace operator tools (queue smoke tests, …): platform operators only, never workspace roles or API
+ * keys — a workspace owner must not see other workspaces' data.
+ */
+export const OperatorOnly = () => SetMetadata(ACCESS_POLICY, { kind: 'operator' } satisfies AccessPolicy);
 
 /** The resolved caller; only valid on routes that are not anonymous (the guard guarantees it). */
 export const Ctx = createParamDecorator((_: unknown, host: ExecutionContext): AuthContext => {

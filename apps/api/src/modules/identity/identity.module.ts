@@ -36,6 +36,7 @@ import { DrizzleMembershipRepository } from './infrastructure/drizzle-membership
 import { LoggingIdentityEvents } from './infrastructure/logging-identity-events.ts';
 import { SmtpSystemMailer } from './infrastructure/smtp-system-mailer.ts';
 import { ApiKeysController } from './interface/http/api-keys.controller.ts';
+import { IdentityConfigController } from './interface/http/identity-config.controller.ts';
 import { MeController } from './interface/http/me.controller.ts';
 import { MembersController } from './interface/http/members.controller.ts';
 
@@ -49,7 +50,7 @@ export class IdentityModule {
     if (mode === 'worker') return { module: IdentityModule };
     return {
       module: IdentityModule,
-      controllers: [MeController, MembersController, ApiKeysController],
+      controllers: [IdentityConfigController, MeController, MembersController, ApiKeysController],
       providers: [
         betterAuthProvider,
         { provide: AUTH_RESOLVER, useClass: BetterAuthResolver },

@@ -84,6 +84,7 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 | `GET /health/live`, `GET /health/ready` | Probes |
 | `GET /metrics` | Prometheus scrape (internal network) |
 | `GET /v1/system/info` | Version and environment for the dashboard's connection card and deploy checks |
+| `GET /v1/identity/config` | Which sign-in/sign-up options the auth pages may show (sign-up mode, Google) |
 | `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
 ## Adding things

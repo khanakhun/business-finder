@@ -19,6 +19,28 @@ export const authEnv = z.object({
         .filter(Boolean),
     )
     .describe('Comma-separated email domains that may self-register when SIGNUP_MODE=allowlist.'),
+  PLATFORM_OPERATOR_EMAILS: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean),
+    )
+    .describe(
+      'Comma-separated verified emails allowed to use cross-workspace operator tools (Bull Board, queue smoke test).',
+    ),
+  AUTH_TRUSTED_PROXIES: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((proxy) => proxy.trim())
+        .filter(Boolean),
+    )
+    .describe('Reverse-proxy IPs/CIDRs in front of the API, for client-IP detection behind X-Forwarded-For.'),
   AUTH_COOKIE_DOMAIN: z
     .string()
     .min(1)

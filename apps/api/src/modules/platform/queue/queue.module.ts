@@ -5,14 +5,14 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { BullModule } from '@nestjs/bullmq';
 import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_ENV, type AppEnv, type AppMode } from '../config/app-env.ts';
-import { requirePermission } from '../security/require-permission.middleware.ts';
+import { requireOperator } from '../security/require-operator.middleware.ts';
 import { QueueErrorLogger } from './queue-error-logger.ts';
 
 export const BULL_BOARD_ROUTE = '/admin/queues';
 
 /**
  * BullMQ wiring (ADR-0006). Not imported in `openapi` mode: creating a Queue opens a connection.
- * Bull Board is mounted for HTTP, behind the settings:manage permission.
+ * Bull Board is mounted for HTTP, for platform operators only.
  */
 @Module({})
 export class QueueModule {
@@ -35,8 +35,8 @@ export class QueueModule {
         BullBoardModule.forRoot({
           route: BULL_BOARD_ROUTE,
           adapter: ExpressAdapter,
-          // Signed-in operators with settings:manage (credentials resolved by the middleware in http.ts).
-          middleware: requirePermission('settings:manage'),
+          // Platform operators only: Bull Board spans every workspace (credentials resolved in http.ts).
+          middleware: requireOperator(),
         }),
         ...QUEUE_NAMES.map((name) => BullBoardModule.forFeature({ name, adapter: BullMQAdapter })),
       );

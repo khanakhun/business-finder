@@ -5,6 +5,7 @@ import { type Locale, newId } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { haveIBeenPwned, organization, twoFactor } from 'better-auth/plugins';
 import { API_KEY_PREFIX, AUTH_BASE_PATH, MIN_PASSWORD_LENGTH } from './constants.ts';
 import { ac, roles } from './roles.ts';
@@ -57,6 +58,20 @@ export interface CreateAuthOptions {
   /** Auth endpoint rate limits; tests turn them off except where they test them. */
   readonly rateLimit?: boolean;
   readonly onEvent?: (event: AuthEvent) => void | Promise<void>;
+  /**
+   * Whether `userId` may create another workspace (Better Auth's /organization/create). Defaults to no one, so
+   * the caller must decide (the API allows it per sign-up policy).
+   */
+  readonly allowWorkspaceCreation?: (userId: string) => Promise<boolean>;
+  /**
+   * Per-account sign-in throttle, on top of the per-IP limit: return false to refuse an attempt for this
+   * (lower-cased) email. Protects accounts when many IPs are used, and keeps a shared IP from locking everyone out.
+   */
+  readonly signInThrottle?: (email: string) => Promise<boolean>;
+  /** Reverse proxies whose X-Forwarded-For hops are skipped to find the client IP (rate limits, sessions). */
+  readonly trustedProxies?: readonly string[];
+  /** Where Better Auth's own log lines go (warn and above: its info lines contain email addresses). */
+  readonly log?: (level: 'warn' | 'error', message: string, ...args: unknown[]) => void;
 }
 
 /** Users carry the `locale` additional field; Better Auth's base user type does not declare it. */
@@ -68,6 +83,24 @@ export function createAuth(options: CreateAuthOptions) {
 
   return betterAuth({
     appName: 'Business Finder',
+    logger: {
+      level: 'warn',
+      ...(options.log
+        ? {
+            log: (level, message, ...args) =>
+              options.log?.(level === 'error' ? 'error' : 'warn', message, ...args),
+          }
+        : {}),
+    },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/sign-in/email' || !options.signInThrottle) return;
+        const email = typeof ctx.body?.email === 'string' ? ctx.body.email.trim().toLowerCase() : '';
+        if (email && !(await options.signInThrottle(email))) {
+          throw new APIError('TOO_MANY_REQUESTS', { message: 'Too many sign-in attempts. Try again later.' });
+        }
+      }),
+    },
     secret: options.secret,
     baseURL: options.apiUrl,
     basePath: AUTH_BASE_PATH,
@@ -116,7 +149,8 @@ export function createAuth(options: CreateAuthOptions) {
     session: {
       expiresIn: 7 * DAY_SECONDS, // sliding: refreshed at most once a day while in use
       updateAge: DAY_SECONDS,
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
+      // No cookie cache: revoking a session (sign-out elsewhere, password reset) must take effect immediately.
+      cookieCache: { enabled: false },
     },
     account: { accountLinking: { enabled: true, trustedProviders: ['google'] } },
     rateLimit: {
@@ -134,6 +168,10 @@ export function createAuth(options: CreateAuthOptions) {
     },
     advanced: {
       cookiePrefix: 'bf',
+      ipAddress: {
+        ipAddressHeaders: ['x-forwarded-for'],
+        trustedProxies: [...(options.trustedProxies ?? [])],
+      },
       useSecureCookies: options.secureCookies,
       defaultCookieAttributes: { httpOnly: true, sameSite: 'lax', secure: options.secureCookies },
       ...(options.cookieDomain
@@ -166,6 +204,9 @@ export function createAuth(options: CreateAuthOptions) {
         ac,
         roles,
         creatorRole: 'owner',
+        allowUserToCreateOrganization: async (user) =>
+          (await options.allowWorkspaceCreation?.(user.id)) ?? false,
+        organizationLimit: 10,
         invitationExpiresIn: 7 * DAY_SECONDS,
         cancelPendingInvitationsOnReInvite: true,
         requireEmailVerificationOnInvitation: true,

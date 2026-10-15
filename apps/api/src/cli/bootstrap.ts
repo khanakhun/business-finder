@@ -7,7 +7,7 @@ import { type Auth, createAuth } from '@bf/auth';
 import type { ApiEnv } from '@bf/config';
 import { closeDb, createDb, type DbClient, runInTransaction } from '@bf/db';
 import { member, organization, user } from '@bf/db/schema';
-import { count, eq } from 'drizzle-orm';
+import { count, eq, sql } from 'drizzle-orm';
 import { loadAppEnv } from '../modules/platform/config/app-env.ts';
 
 export interface BootstrapInput {
@@ -35,6 +35,8 @@ export async function bootstrap(
 ): Promise<{ userId: string; organizationId: string; link: string }> {
   const email = input.email.trim().toLowerCase();
   const created = await runInTransaction(db, async (tx) => {
+    // Serializes concurrent runs (two operators bootstrapping at once): the check below then sees the other's user.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bf:admin:bootstrap'))`);
     const [existing] = await tx.select({ n: count() }).from(user);
     if ((existing?.n ?? 0) > 0 && !input.force) {
       throw new BootstrapRefusedError(

@@ -61,6 +61,8 @@ export {
   CreateApiKeyRequestSchema,
   type CreatedApiKey,
   CreatedApiKeySchema,
+  type IdentityConfig,
+  IdentityConfigSchema,
   type Invitation,
   InvitationSchema,
   type InviteMemberRequest,

@@ -24,7 +24,7 @@ const api = () => request(t.app.getHttpServer());
 const db = () => t.app.get(DB_CLIENT);
 
 beforeAll(async () => {
-  t = await createTestApp({ mailer, valkeyDb: 5 });
+  t = await createTestApp({ mailer, valkeyDb: 5, env: { PLATFORM_OPERATOR_EMAILS: 'owner@example.test' } });
   owner = await signUpVerified(t, mailer, 'owner@example.test', 'Olive Owner');
   orgId = await createWorkspace(owner, 'Agence SBH');
 });
@@ -339,12 +339,46 @@ describe('Better Auth surface', () => {
 });
 
 describe('Bull Board', () => {
-  it('requires settings:manage', async () => {
+  it('is for platform operators only — workspace roles do not qualify', async () => {
     await api().get('/admin/queues').expect(401);
     const { client: viewer } = await inviteAndJoin(t, mailer, owner, 'bullviewer@example.test', 'viewer');
     await viewer.get('/admin/queues').expect(403);
-    const res = await owner.get('/admin/queues');
-    expect(res.status).toBe(200);
+    const tenant = await signUpVerified(t, mailer, 'tenant@example.test');
+    await createWorkspace(tenant, 'Tenant');
+    await tenant.get('/admin/queues').expect(403); // owner of their own workspace, not an operator
+    await owner.get('/admin/queues').expect(200); // listed in PLATFORM_OPERATOR_EMAILS
+  });
+});
+
+describe('sessions', () => {
+  it('revocation takes effect immediately (no cookie cache)', async () => {
+    await signUpVerified(t, mailer, 'twodevices@example.test');
+    const laptop = browser(t);
+    const phone = browser(t);
+    for (const device of [laptop, phone]) {
+      await device
+        .post('/api/auth/sign-in/email', { email: 'twodevices@example.test', password: PASSWORD })
+        .expect(200);
+      await device.get('/v1/me').expect(200);
+    }
+    await laptop.post('/api/auth/revoke-other-sessions').expect(200);
+    await phone.get('/v1/me').expect(401);
+    await laptop.get('/v1/me').expect(200);
+  });
+
+  it('throttles sign-in per account, whatever the IP', async () => {
+    await signUpVerified(t, mailer, 'target@example.test');
+    const statuses: number[] = [];
+    for (let i = 0; i < 21; i++) {
+      // A fresh client (and so a fresh IP) per attempt: the per-IP limit never triggers.
+      const res = await browser(t).post('/api/auth/sign-in/email', {
+        email: 'target@example.test',
+        password: 'wrong password 123',
+      });
+      statuses.push(res.status);
+    }
+    expect(statuses.slice(0, 18).every((s) => s === 401)).toBe(true);
+    expect(statuses.at(-1)).toBe(429);
   });
 });
 

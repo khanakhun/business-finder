@@ -203,6 +203,33 @@
         ],
         "type": "object"
       },
+      "IdentityConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "googleEnabled": {
+            "type": "boolean"
+          },
+          "minPasswordLength": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "signupMode": {
+            "enum": [
+              "invite_only",
+              "allowlist",
+              "open"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "signupMode",
+          "googleEnabled",
+          "minPasswordLength"
+        ],
+        "type": "object"
+      },
       "Invitation": {
         "additionalProperties": false,
         "properties": {
@@ -1016,6 +1043,38 @@
           }
         },
         "summary": "Revoke an API key",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/v1/identity/config": {
+      "get": {
+        "operationId": "getIdentityConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityConfig"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Which sign-in and sign-up options are enabled",
         "tags": [
           "identity"
         ]

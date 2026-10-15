@@ -7,7 +7,7 @@ import {
 } from '@bf/contracts';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AllowAnonymous, RequirePermission } from '../../platform/security/auth.decorators.ts';
+import { AllowAnonymous, OperatorOnly } from '../../platform/security/auth.decorators.ts';
 import { ApiRoute } from '../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../platform/validation/zod-dto.ts';
 import { EnqueuePingJobsCommand } from '../application/enqueue-ping-jobs.command.ts';
@@ -37,7 +37,8 @@ export class SystemController {
   }
 
   @Post('ping-jobs')
-  @RequirePermission('settings:manage')
+  // Queues are shared by all workspaces: an operator tool, not a workspace permission.
+  @OperatorOnly()
   @ApiRoute({
     summary: 'Enqueue system.ping jobs (queue smoke test)',
     operationId: 'enqueuePingJobs',

@@ -44,6 +44,7 @@ afterAll(async () => {
 // Public routes, reviewed. Adding one means updating this list and apps/api/README.md#anonymous-routes.
 const ANONYMOUS = [
   'HealthController.live',
+  'IdentityConfigController.get',
   'HealthController.ready',
   'MetricsController.scrape',
   'SystemController.info',
@@ -63,6 +64,13 @@ describe('route access policies (AGENTS.md §8)', () => {
       .filter((r) => r.policy?.kind === 'anonymous')
       .map((r) => `${r.controller}.${r.handler}`);
     expect(anonymous.sort()).toEqual([...ANONYMOUS].sort());
+  });
+
+  it('cross-workspace tools are operator-only', () => {
+    const operator = routes
+      .filter((r) => r.policy?.kind === 'operator')
+      .map((r) => `${r.controller}.${r.handler}`);
+    expect(operator).toEqual(['SystemController.ping']);
   });
 
   it('routes without a workspace are limited to the caller acting on themselves', () => {

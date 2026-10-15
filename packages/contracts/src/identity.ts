@@ -129,3 +129,13 @@ export const CreatedApiKeySchema = ApiKeySummarySchema.extend({
   key: z.string().describe('The secret key. Shown once; store it now — it cannot be retrieved again.'),
 }).meta({ id: 'CreatedApiKey' });
 export type CreatedApiKey = z.infer<typeof CreatedApiKeySchema>;
+
+/** `GET /v1/identity/config` (public): what the sign-in and sign-up pages may offer. */
+export const IdentityConfigSchema = z
+  .object({
+    signupMode: z.enum(['invite_only', 'allowlist', 'open']),
+    googleEnabled: z.boolean(),
+    minPasswordLength: z.number().int(),
+  })
+  .meta({ id: 'IdentityConfig' });
+export type IdentityConfig = z.infer<typeof IdentityConfigSchema>;

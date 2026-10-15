@@ -82,8 +82,11 @@ export const RULES = [
   {
     id: 'web-no-server-packages',
     from: ['apps/web/**'],
-    disallow: [{ modules: ['@bf/db', '@bf/db/*', '@bf/queue', '@bf/queue/*', '@bf/ai', '@bf/ai/*'] }],
-    message: 'The dashboard is a client of the API: no database, queue or LLM packages.',
+    // `@bf/auth` itself is server configuration (it pulls in @bf/db); the dashboard uses `@bf/auth/client`.
+    disallow: [
+      { modules: ['@bf/db', '@bf/db/*', '@bf/queue', '@bf/queue/*', '@bf/ai', '@bf/ai/*', '@bf/auth'] },
+    ],
+    message: 'The dashboard is a client of the API: no database, queue, LLM or server auth packages.',
   },
 ];
 

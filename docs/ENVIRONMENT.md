@@ -90,6 +90,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `BETTER_AUTH_SECRET` | Auth & secrets | api, worker | yes |  | yes | Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32 |
 | `SIGNUP_MODE` | Auth & secrets | api, worker | no |  |  | Who may create an account. Default: invite_only in production, open otherwise. |
 | `SIGNUP_ALLOWED_EMAIL_DOMAINS` | Auth & secrets | api, worker | no |  |  | Comma-separated email domains that may self-register when SIGNUP_MODE=allowlist. |
+| `PLATFORM_OPERATOR_EMAILS` | Auth & secrets | api, worker | no |  |  | Comma-separated verified emails allowed to use cross-workspace operator tools (Bull Board, queue smoke test). |
+| `AUTH_TRUSTED_PROXIES` | Auth & secrets | api, worker | no |  |  | Reverse-proxy IPs/CIDRs in front of the API, for client-IP detection behind X-Forwarded-For. |
 | `AUTH_COOKIE_DOMAIN` | Auth & secrets | api, worker | no |  |  | Parent domain shared by app. and api. for the session cookie (e.g. example.com). Unset = host-only. |
 | `AUTH_CHECK_PWNED` | Auth & secrets | api, worker | no | `true` |  | Reject passwords found in known breaches (k-anonymity queries to api.pwnedpasswords.com). |
 | `GOOGLE_CLIENT_ID` | Auth & secrets | api, worker | no |  |  | Google OAuth client id; Google sign-in is off when unset. |

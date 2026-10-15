@@ -1,12 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, type TestApp } from '../../test/create-test-app.ts';
 import { FakeMailer } from '../../test/fake-mailer.ts';
-import { browser } from '../../test/identity-helpers.ts';
+import { browser, inviteAndJoin } from '../../test/identity-helpers.ts';
 import { type Auth, BETTER_AUTH } from '../modules/identity/infrastructure/better-auth.provider.ts';
 import { DB_CLIENT } from '../modules/platform/db/db.module.ts';
 import { BootstrapRefusedError, bootstrap } from './bootstrap.ts';
 
 let t: TestApp;
+const OWNER_PASSWORD = 'a long and memorable passphrase';
 const mailer = new FakeMailer();
 
 beforeAll(async () => {
@@ -33,7 +34,7 @@ describe('pnpm admin:bootstrap', () => {
     expect(`${link.origin}${link.pathname}`).toBe('http://localhost:3000/reset-password');
 
     const client = browser(t);
-    const password = 'a long and memorable passphrase';
+    const password = OWNER_PASSWORD;
     await client
       .post('/api/auth/reset-password', { token: link.searchParams.get('token'), newPassword: password })
       .expect(200);
@@ -43,6 +44,25 @@ describe('pnpm admin:bootstrap', () => {
       .expect(200);
     const me = await client.get('/v1/me').expect(200);
     expect(me.body).toMatchObject({ role: 'owner', activeOrganization: { name: 'Agence Démo' } });
+  });
+
+  it('in invite-only mode, only existing owners may create workspaces', async () => {
+    const owner = browser(t);
+    await owner
+      .post('/api/auth/sign-in/email', { email: 'first@owner.test', password: OWNER_PASSWORD })
+      .expect(200);
+    const me = await owner.get('/v1/me').expect(200);
+    await owner
+      .post('/api/auth/organization/set-active', { organizationId: me.body.organizations[0].id })
+      .expect(200);
+    await owner
+      .post('/api/auth/organization/create', { name: 'Second', slug: `second-${Date.now()}` })
+      .expect(200);
+
+    const { client: invited } = await inviteAndJoin(t, mailer, owner, 'invited@member.test', 'member');
+    await invited
+      .post('/api/auth/organization/create', { name: 'Mine', slug: `mine-${Date.now()}` })
+      .expect(403);
   });
 
   it('refuses once users exist, unless forced', async () => {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CountryCodeSchema } from './geo.ts';
 import { LocaleSchema } from './i18n.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
 import { IsoDateTimeSchema } from './time.ts';
@@ -100,6 +101,10 @@ export const OrgSettingsSchema = z
     primaryLocale: LocaleSchema,
     locales: z.array(LocaleSchema).min(1),
     timezone: z.string(),
+    defaultCountryCode: z
+      .string()
+      .nullable()
+      .describe('Country hint for resolving places typed without one (BL for a Saint-Barth agency).'),
     senderDefaults: SenderDefaultsSchema,
     features: z.record(FeatureFlagSchema, FeatureFlagStateSchema),
     outreachReadiness: OutreachReadinessSchema,
@@ -118,6 +123,7 @@ export const UpdateOrgSettingsRequestSchema = z
     primaryLocale: LocaleSchema,
     locales: z.array(LocaleSchema).min(1).max(10),
     timezone: TimeZoneSchema,
+    defaultCountryCode: CountryCodeSchema.nullable(),
     senderDefaults: SenderDefaultsSchema,
     features: FeatureFlagsSchema,
   })

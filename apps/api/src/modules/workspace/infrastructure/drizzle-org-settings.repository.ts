@@ -16,6 +16,7 @@ const toRecord = (row: typeof orgSettings.$inferSelect): OrgSettingsRecord => ({
   primaryLocale: row.primaryLocale,
   locales: row.locales,
   timezone: row.timezone,
+  defaultCountryCode: row.defaultCountryCode,
   senderDefaults: row.senderDefaults,
   features: row.features,
   updatedAt: row.updatedAt,

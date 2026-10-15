@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 // `@bf/db/seed`: seed modules and the taxonomy loader (Node only: reads files next to the package).
 export { SEED_MODULES } from './modules/index.ts';
 export {
@@ -16,3 +18,6 @@ export {
   TaxonomyFileError,
   type TaxonomyMapping,
 } from './taxonomy/load.ts';
+
+/** Geo area packs (BF-017): `seed/geo/<pack>/`. */
+export const GEO_SEED_DIR = fileURLToPath(new URL('../../seed/geo/', import.meta.url));

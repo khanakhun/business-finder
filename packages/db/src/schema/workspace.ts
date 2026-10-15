@@ -36,6 +36,8 @@ export const orgSettings = pgTable('org_settings', {
   primaryLocale: text().$type<Locale>().notNull().default('en'),
   locales: text().array().$type<Locale[]>().notNull().default(sql`ARRAY['en']::text[]`),
   timezone: text().notNull().default('UTC'),
+  /** Country hint for location resolution (BF-017). */
+  defaultCountryCode: text(),
   senderDefaults: jsonb().$type<SenderDefaults>().notNull().default({}),
   features: jsonb().$type<FeatureFlags>().notNull().default({}),
   updatedBy: uuid().references(() => user.id, { onDelete: 'set null' }),

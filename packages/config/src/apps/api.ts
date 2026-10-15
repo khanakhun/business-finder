@@ -4,6 +4,7 @@ import { authEnv } from '../fragments/auth.ts';
 import { coreEnv } from '../fragments/core.ts';
 import { dbEnv } from '../fragments/db.ts';
 import { featureFlagsEnv } from '../fragments/features.ts';
+import { geoEnv } from '../fragments/geo.ts';
 import { intelEnv } from '../fragments/intel.ts';
 import { mailEnv } from '../fragments/mail.ts';
 import { providersEnv } from '../fragments/providers.ts';
@@ -20,6 +21,7 @@ const backendShape = {
   ...aiEnv.shape,
   ...providersEnv.shape,
   ...resolutionEnv.shape,
+  ...geoEnv.shape,
   ...authEnv.shape,
   ...mailEnv.shape,
   ...intelEnv.shape,

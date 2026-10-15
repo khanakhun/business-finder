@@ -19,18 +19,31 @@ export function componentId(schema: z.ZodType): string | undefined {
 /** `$ref` for schemas with an id (registered as components), inline JSON Schema otherwise. */
 export function schemaObject(schema: z.ZodType, io: 'input' | 'output'): SchemaObject {
   const id = componentId(schema);
-  if (id) {
-    const existing = components.get(id);
-    if (existing && existing !== schema) throw new Error(`Two different schemas use the OpenAPI id "${id}"`);
-    components.set(id, schema);
-    return { $ref: `#/components/schemas/${id}` };
-  }
+  return id ? componentRef(id, schema) : inlineSchemaObject(schema, io);
+}
+
+/** Always the full JSON Schema, even for schemas with a component id (e.g. to list query parameters). */
+export function inlineSchemaObject(schema: z.ZodType, io: 'input' | 'output'): SchemaObject {
   const { $schema: _ignored, ...json } = z.toJSONSchema(schema, {
     target: 'draft-2020-12',
     io,
     unrepresentable: 'any',
   });
-  return asSchemaObject(json);
+  // A schema with an id comes back as `{ $ref: '#/$defs/<id>', $defs }`: unwrap the root definition. Nested named
+  // schemas would leave `#/$defs` references nothing can resolve, so refuse them loudly at build time.
+  const { $ref, $defs } = json as { $ref?: unknown; $defs?: Record<string, object> };
+  if ($defs && Object.keys($defs).length > (typeof $ref === 'string' ? 1 : 0)) {
+    throw new Error('Inline schemas cannot reference other named schemas (keep query schemas flat)');
+  }
+  const root = typeof $ref === 'string' && $ref.startsWith('#/$defs/') ? $defs?.[$ref.slice(8)] : undefined;
+  return asSchemaObject((root ?? json) as typeof json);
+}
+
+function componentRef(id: string, schema: z.ZodType): SchemaObject {
+  const existing = components.get(id);
+  if (existing && existing !== schema) throw new Error(`Two different schemas use the OpenAPI id "${id}"`);
+  components.set(id, schema);
+  return { $ref: `#/components/schemas/${id}` };
 }
 
 export function componentSchemas(): Record<string, SchemaObject> {

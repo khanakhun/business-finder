@@ -25,7 +25,8 @@ export default defineConfig({
       command: 'pnpm --filter @bf/api start',
       // Browsers and the test runner reach the API from loopback: treat it as the reverse proxy so the per-test
       // X-Forwarded-For (e2e/users.ts nextClientIp) separates rate-limit buckets. Never set this in production.
-      env: { AUTH_TRUSTED_PROXIES: '127.0.0.1,::1' },
+      // FAKE_CONNECTION_TESTS: provider connection tests pass without calling providers (refused in production).
+      env: { AUTH_TRUSTED_PROXIES: '127.0.0.1,::1', FAKE_CONNECTION_TESTS: 'true' },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
       timeout: 60_000,

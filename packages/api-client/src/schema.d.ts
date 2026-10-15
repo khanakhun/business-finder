@@ -356,20 +356,6 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
-        AuditLogQuery: {
-            /** @description Action prefix, e.g. `secrets.` or `identity.member_invited`. */
-            action?: string;
-            actorId?: string;
-            cursor?: string;
-            entityId?: string;
-            entityType?: string;
-            /** Format: date-time */
-            from?: string;
-            /** @default 50 */
-            limit: number;
-            /** Format: date-time */
-            to?: string;
-        };
         ChangeMemberRoleRequest: {
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
@@ -792,7 +778,16 @@ export interface operations {
     };
     listAuditLogs: {
         parameters: {
-            query?: never;
+            query?: {
+                action?: string;
+                actorId?: string;
+                cursor?: string;
+                entityId?: string;
+                entityType?: string;
+                from?: string;
+                limit?: number;
+                to?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

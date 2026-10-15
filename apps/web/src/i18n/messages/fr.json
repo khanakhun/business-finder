@@ -223,7 +223,11 @@
     "general": "Général",
     "account": "Compte",
     "members": "Membres",
-    "apiKeys": "Clés d'API"
+    "apiKeys": "Clés d'API",
+    "workspace": "Espace de travail",
+    "integrations": "Intégrations",
+    "features": "Fonctionnalités",
+    "audit": "Journal d'audit"
   },
   "account": {
     "title": "Compte",
@@ -316,5 +320,158 @@
   "forbidden": {
     "title": "Non disponible",
     "body": "Votre rôle dans cet espace ne le permet pas. Demandez à un propriétaire ou un administrateur."
+  },
+  "workspaceSettings": {
+    "title": "Espace de travail",
+    "description": "L'identité et l'adresse de votre agence (affichées en pied des e-mails de prospection), langues et fuseau horaire.",
+    "readinessTitle": "La prospection n'est pas encore prête",
+    "readinessBody": "Chaque e-mail de prospection doit comporter : {missing}.",
+    "missing": {
+      "agency_name": "le nom de votre agence",
+      "postal_address": "votre adresse postale"
+    },
+    "identity": "Identité",
+    "agencyName": "Nom de l'agence",
+    "legalName": "Raison sociale",
+    "legalNameHint": "Si elle diffère du nom de l'agence.",
+    "websiteUrl": "Site web",
+    "address": "Adresse postale",
+    "addressHint": "Affichée en pied de chaque e-mail de prospection.",
+    "line1": "Adresse",
+    "line2": "Complément d'adresse (facultatif)",
+    "city": "Ville",
+    "postalCode": "Code postal",
+    "region": "Région (facultatif)",
+    "country": "Pays",
+    "countryPlaceholder": "Choisissez un pays",
+    "countrySearch": "Rechercher un pays…",
+    "noCountry": "Aucun pays trouvé.",
+    "addressIncomplete": "Renseignez l'adresse, la ville, le code postal et le pays — ou laissez-les tous vides.",
+    "languages": "Langues et fuseau horaire",
+    "locales": "Langues de l'espace",
+    "primaryLocale": "Langue principale",
+    "timezone": "Fuseau horaire",
+    "timezonePlaceholder": "Choisissez un fuseau horaire",
+    "timezoneSearch": "Rechercher un fuseau horaire…",
+    "noTimezone": "Aucun fuseau horaire trouvé.",
+    "save": "Enregistrer",
+    "saved": "Paramètres de l'espace enregistrés.",
+    "logo": "Logo",
+    "logoHint": "PNG, JPEG ou WebP, 512 Ko maximum.",
+    "uploadLogo": "Importer un logo",
+    "replaceLogo": "Remplacer le logo",
+    "removeLogo": "Retirer",
+    "logoAlt": "Logo de l'espace de travail",
+    "noLogo": "Pas encore de logo.",
+    "logoUpdated": "Logo mis à jour.",
+    "logoRemoved": "Logo retiré.",
+    "logoTooLarge": "Cette image dépasse 512 Ko."
+  },
+  "integrations": {
+    "title": "Intégrations",
+    "description": "Les clés des fournisseurs utilisées par cet espace. Elles sont chiffrées et ne sont plus jamais affichées une fois enregistrées.",
+    "providers": {
+      "google": "Google",
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "foursquare": "Foursquare",
+      "huggingface": "Hugging Face",
+      "unsplash": "Unsplash"
+    },
+    "secrets": {
+      "google_places": "Clé API Google Places",
+      "pagespeed": "Clé API PageSpeed Insights",
+      "anthropic": "Clé API Anthropic",
+      "openai": "Clé API OpenAI",
+      "foursquare": "Clé API Foursquare",
+      "huggingface": "Jeton Hugging Face",
+      "unsplash": "Clé d'accès Unsplash"
+    },
+    "statusWorkspace": "Définie pour cet espace",
+    "statusGlobal": "Clé de la plateforme utilisée",
+    "statusNone": "Non définie",
+    "endingIn": "se terminant par {last4}",
+    "lastUsed": "Utilisée le {date}",
+    "neverUsed": "Pas encore utilisée",
+    "add": "Ajouter une clé",
+    "replace": "Remplacer",
+    "delete": "Supprimer",
+    "test": "Tester",
+    "valueLabel": "Clé",
+    "valueHint": "Collez la clé depuis la console du fournisseur. Elle est chiffrée et ne pourra plus être affichée.",
+    "save": "Enregistrer la clé",
+    "saved": "{name} : enregistrement effectué.",
+    "deleted": "{name} : suppression effectuée.",
+    "deleteConfirm": "Supprimer « {name} » ?",
+    "deleteBody": "Les fonctionnalités qui en ont besoin utiliseront la clé de la plateforme, s'il y en a une.",
+    "testOk": "{name} : la connexion fonctionne.",
+    "testFailed": "{name} : échec de la connexion.",
+    "cancel": "Annuler"
+  },
+  "features": {
+    "title": "Fonctionnalités",
+    "description": "Activez ou désactivez les fonctionnalités pour cet espace.",
+    "unavailable": "Désactivée pour ce déploiement",
+    "saved": "Fonctionnalité mise à jour.",
+    "flags": {
+      "autoSend": {
+        "label": "Envoi automatique",
+        "description": "Laisser les séquences envoyer sans valider chaque message."
+      },
+      "codingEngines": {
+        "label": "Génération de sites par IA",
+        "description": "Générer des sites d'aperçu avec des agents de code."
+      },
+      "mapsScraper": {
+        "label": "Extracteur de cartes",
+        "description": "Découvrir des entreprises avec l'extracteur de cartes auto-hébergé."
+      },
+      "semanticSearch": {
+        "label": "Recherche sémantique",
+        "description": "Rechercher des entreprises par le sens, pas seulement par mots-clés."
+      }
+    }
+  },
+  "audit": {
+    "title": "Journal d'audit",
+    "description": "Les actions sensibles de cet espace. Les entrées ne peuvent être ni modifiées ni supprimées.",
+    "filterAction": "Action",
+    "all": "Toutes les actions",
+    "groups": {
+      "settings": "Paramètres",
+      "secrets": "Intégrations",
+      "identity": "Membres et clés API"
+    },
+    "from": "Du",
+    "to": "Au",
+    "clear": "Effacer les filtres",
+    "columns": {
+      "when": "Date",
+      "actor": "Auteur",
+      "action": "Action",
+      "entity": "Cible",
+      "ip": "Adresse IP"
+    },
+    "actorSystem": "Système",
+    "actorApiKey": "Clé API « {name} »",
+    "removedActor": "Supprimé ({id})",
+    "empty": "Aucune entrée ne correspond à ces filtres.",
+    "loadMore": "Afficher plus",
+    "actions": {
+      "settings_updated": "Paramètres modifiés",
+      "settings_logo_updated": "Logo importé",
+      "settings_logo_removed": "Logo retiré",
+      "secrets_created": "Clé ajoutée",
+      "secrets_updated": "Clé remplacée",
+      "secrets_deleted": "Clé supprimée",
+      "secrets_tested": "Clé testée",
+      "identity_member_invited": "Membre invité",
+      "identity_invitation_resent": "Invitation renvoyée",
+      "identity_invitation_revoked": "Invitation révoquée",
+      "identity_member_role_changed": "Rôle modifié",
+      "identity_member_removed": "Membre retiré",
+      "identity_api_key_created": "Clé API créée",
+      "identity_api_key_revoked": "Clé API révoquée"
+    }
   }
 }

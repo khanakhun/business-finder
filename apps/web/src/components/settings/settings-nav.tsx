@@ -15,8 +15,12 @@ export function SettingsNav() {
   const items = [
     { href: '/settings', label: t('general'), show: true },
     { href: '/settings/account', label: t('account'), show: true },
+    { href: '/settings/workspace', label: t('workspace'), show: canManageSettings },
     { href: '/settings/members', label: t('members'), show: canManageMembers },
+    { href: '/settings/integrations', label: t('integrations'), show: canManageSettings },
+    { href: '/settings/features', label: t('features'), show: canManageSettings },
     { href: '/settings/api-keys', label: t('apiKeys'), show: canManageSettings },
+    { href: '/settings/audit', label: t('audit'), show: canManageSettings },
   ].filter((item) => item.show);
   return (
     <nav aria-label={t('label')} className="mb-6 flex gap-1 overflow-x-auto border-b">

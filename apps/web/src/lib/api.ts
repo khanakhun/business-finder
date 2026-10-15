@@ -18,4 +18,10 @@ export const queryKeys = {
     apiKeys: () => ['identity', 'api-keys'] as const,
     sessions: () => ['identity', 'sessions'] as const,
   }),
+  workspace: defineQueryKeys('workspace', {
+    settings: () => ['workspace', 'settings'] as const,
+    logo: () => ['workspace', 'logo'] as const,
+    secrets: () => ['workspace', 'secrets'] as const,
+    audit: (filters: Readonly<Record<string, string>>) => ['workspace', 'audit', filters] as const,
+  }),
 };

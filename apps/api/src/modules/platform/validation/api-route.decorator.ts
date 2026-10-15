@@ -3,7 +3,7 @@ import { applyDecorators, HttpCode, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import type { z } from 'zod';
 import { PROBLEM_CONTENT_TYPE } from '../errors/problem-details.filter.ts';
-import { type SchemaObject, schemaObject } from '../openapi/schema-registry.ts';
+import { inlineSchemaObject, type SchemaObject, schemaObject } from '../openapi/schema-registry.ts';
 import { type ZodDtoClass, zodSchemaOf } from './zod-dto.ts';
 
 export const RESPONSE_SCHEMA = Symbol('RESPONSE_SCHEMA');
@@ -44,7 +44,7 @@ export function ApiRoute(spec: ApiRouteSpec): MethodDecorator {
   ];
   if (spec.body) decorators.push(ApiBody({ schema: schemaObject(asSchema(spec.body), 'input') }));
   if (spec.query) {
-    const json = schemaObject(asSchema(spec.query), 'input') as {
+    const json = inlineSchemaObject(asSchema(spec.query), 'input') as {
       properties?: Record<string, SchemaObject>;
       required?: string[];
     };

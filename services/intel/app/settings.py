@@ -66,6 +66,16 @@ class Settings(BaseSettings):
     intel_fetch_timeout_seconds: Annotated[float, Field(gt=0, le=300)] = 20.0
     intel_fetch_max_bytes: Annotated[int, Field(gt=0)] = 10_485_760
 
+    # Website intelligence (BF-026).
+    site_intel_user_agent: Annotated[str, Field(min_length=8, max_length=200)] = (
+        "BusinessFinderBot/1.0 (+https://github.com/khanakhun/business-finder/blob/main/docs/bot.md)"
+    )
+    site_intel_max_contexts: Annotated[int, Field(ge=1, le=16)] = 2
+    site_intel_resource_max_bytes: Annotated[int, Field(gt=0, le=52_428_800)] = 5_242_880
+    site_intel_resource_timeout_seconds: Annotated[float, Field(gt=0, le=60)] = 15.0
+    site_intel_chromium_sandbox: Flag = True
+    site_intel_browser_check: Flag = True
+
     # Open data (BF-019): DuckDB over Overture / Foursquare parquet, with regional extracts cached.
     open_data_cache_dir: Annotated[str, Field(min_length=1)] = ".cache/open-data"
     open_data_object_cache: Flag = False

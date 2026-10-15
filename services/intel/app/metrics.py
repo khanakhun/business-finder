@@ -42,6 +42,23 @@ class Metrics:
             registry=self.registry,
         )
 
+        # Website intelligence (BF-026).
+        self.site_intel_results = Counter(
+            "bf_intel_site_intel_total",
+            "Website analyses, by reachability (ok, timeout, blocked…).",
+            ["reachability"],
+            registry=self.registry,
+        )
+        self.site_intel_duration = Histogram(
+            "bf_intel_site_intel_duration_seconds",
+            "Time to analyse one website, screenshots included.",
+            buckets=LATENCY_BUCKETS_SECONDS,
+            registry=self.registry,
+        )
+        self.site_intel_pages = Counter(
+            "bf_intel_site_intel_pages_total", "Pages read by the website crawler.", registry=self.registry
+        )
+
     def observe_request(self, *, method: str, route: str, status: int, seconds: float) -> None:
         # Clients choose the method token; unknown ones share one series (label cardinality stays bounded).
         method = method if method in _METHODS else "OTHER"

@@ -57,6 +57,7 @@ def settings(monkeypatch: pytest.MonkeyPatch) -> Settings:
         s3_endpoint="http://127.0.0.1:9000",
         s3_access_key_id="test",
         s3_secret_access_key="test-secret",
+        site_intel_browser_check=False,  # covered by its own test; most apps here never use the browser
     )
 
 

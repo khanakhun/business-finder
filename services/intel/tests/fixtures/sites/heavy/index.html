@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Heavy page</title></head>
+<body><h1>Gallery</h1><p>A page that asks for more images than any visit should load.</p>
+<script>
+for (let i = 0; i < 350; i++) {
+  const img = document.createElement('img');
+  img.src = '/images/photo-' + i + '.png';
+  document.body.appendChild(img);
+}
+</script></body></html>

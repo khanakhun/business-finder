@@ -18,6 +18,7 @@
     "admin:bootstrap": "node --import @swc-node/register/esm-register src/cli/bootstrap.ts",
     "secrets:rotate-master": "node --import @swc-node/register/esm-register src/cli/rotate-master-key.ts",
     "bench:ingest": "BF_BENCH=1 vitest run --config vitest.int.config.ts src/modules/business-graph/resolution.bench.int.test.ts",
+    "bench:discovery": "BF_BENCH=1 vitest run --config vitest.int.config.ts src/modules/discovery/runs.bench.int.test.ts",
     "geo:import": "node --import @swc-node/register/esm-register src/cli/geo-import.ts"
   },
   "dependencies": {

@@ -57,14 +57,23 @@ export class FakeDiscoveryProvider implements DiscoveryProvider {
     commercialUseAllowed: true,
     notes: 'Fictional fixture data for tests and E2E.',
   };
-  readonly costModel = {
-    currency: 'USD' as const,
-    skus: [{ sku: 'fixture', label: 'Fixture call', perThousandUsd: 0, freeMonthlyCalls: 0 }],
-    perResultUsd: null,
-    notes: 'No cost.',
-  };
+  readonly costModel;
 
-  constructor(private readonly clock: Clock) {}
+  /** `synthetic`: generated records on a fixed grid (benchmarks, adaptive-tiling tests) instead of fixtures. */
+  constructor(
+    private readonly clock: Clock,
+    private readonly synthetic = false,
+  ) {
+    // Synthetic calls cost $1 each, so budget stops can be tested end to end; fixtures are free.
+    this.costModel = {
+      currency: 'USD' as const,
+      skus: [
+        { sku: 'fixture', label: 'Fixture call', perThousandUsd: synthetic ? 1_000 : 0, freeMonthlyCalls: 0 },
+      ],
+      perResultUsd: null,
+      notes: synthetic ? 'Synthetic test calls: $1 each.' : 'No cost.',
+    };
+  }
 
   buildQueries({ intent, tile, keysByCategory, fieldTier }: BuildQueriesInput): ProviderQuery[] {
     const base = {
@@ -103,6 +112,7 @@ export class FakeDiscoveryProvider implements DiscoveryProvider {
   }
 
   async fetchPage(query: ProviderQuery, _context: ProviderCallContext): Promise<ProviderFetchResult> {
+    if (this.synthetic) return this.syntheticPage(query);
     const words = (query.keywords ?? '').toLowerCase().split(/\s+/).filter(Boolean);
     const matches = FIXTURES.filter(
       (f) =>
@@ -116,6 +126,49 @@ export class FakeDiscoveryProvider implements DiscoveryProvider {
       records: matches.slice(0, MAX_RESULTS).map((f) => ({ ...f, provider: 'import', fetchedAt })),
       nextPageToken: null,
       saturated: matches.length >= MAX_RESULTS,
+      sku: 'fixture',
+    };
+  }
+
+  /**
+   * Grid points (every 0.005°, ~550 m) inside the tile: overlapping tiles return the same points (stable refs),
+   * and dense tiles saturate at 20 like a capped provider.
+   */
+  private syntheticPage(query: ProviderQuery): ProviderFetchResult {
+    const step = 0.005;
+    const box =
+      query.tile.type === 'BBox'
+        ? query.tile.bbox
+        : {
+            west: query.tile.center.lng - query.tile.radiusM / 100_000,
+            east: query.tile.center.lng + query.tile.radiusM / 100_000,
+            south: query.tile.center.lat - query.tile.radiusM / 100_000,
+            north: query.tile.center.lat + query.tile.radiusM / 100_000,
+          };
+    const key = query.providerKeys[0] ?? 'establishment';
+    const points: Array<{ lat: number; lng: number; id: string }> = [];
+    for (let i = Math.ceil(box.south / step); i * step <= box.north; i++) {
+      for (let j = Math.ceil(box.west / step); j * step <= box.east; j++) {
+        const location = { lat: Number((i * step).toFixed(6)), lng: Number((j * step).toFixed(6)) };
+        if (inTile(location, query.tile)) points.push({ ...location, id: `${key}:${i}:${j}` });
+      }
+    }
+    const fetchedAt = this.clock.now().toISOString();
+    return {
+      records: points.slice(0, MAX_RESULTS).map((p) => ({
+        provider: 'import' as const,
+        providerRef: `fake:syn:${p.id}`,
+        fetchedAt,
+        name: `Entreprise synthétique ${p.id}`,
+        providerCategories: [{ key }],
+        location: { lat: p.lat, lng: p.lng },
+        address: { city: 'Gustavia', countryCode: 'BL' },
+        phones: [],
+        emails: [],
+        socials: [],
+      })),
+      nextPageToken: null,
+      saturated: points.length >= MAX_RESULTS,
       sku: 'fixture',
     };
   }

@@ -2,10 +2,13 @@ import type { ApiEnv } from '@bf/config';
 import { type Clock, ExternalServiceError } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import { type DynamicModule, Inject, Module, type OnModuleInit } from '@nestjs/common';
+import { BusinessGraphModule } from '../business-graph/index.ts';
+import { GeoModule } from '../geo/index.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
 import { LOGGER } from '../platform/logging/logger.ts';
+import { RealtimeModule } from '../realtime/index.ts';
 import { ConnectionTesterRegistry, SecretResolver, WorkspaceDefaults } from '../workspace/index.ts';
 import {
   DiscoveryQueries,
@@ -21,9 +24,21 @@ import {
   type RateLimiter,
 } from './application/ports.ts';
 import { ProviderRegistry } from './application/provider-registry.ts';
+import {
+  CancelDiscoveryRunCommand,
+  DiscoveryRunPlanner,
+  DiscoveryRunQueries,
+  EstimateDiscoveryRunQuery,
+  StartDiscoveryRunCommand,
+} from './application/run.use-cases.ts';
+import { DiscoveryRunNotifications } from './application/run-notifications.ts';
+import { RunOrchestrator } from './application/run-orchestrator.ts';
+import { DISCOVERY_RUN_REPOSITORY, RUN_PROGRESS, RUN_QUEUE, type RunQueue } from './application/run-ports.ts';
 import { ScraperAcknowledgement } from './application/scraper-acknowledgement.ts';
 import type { DiscoveryProvider } from './domain/provider.port.ts';
+import { BullmqRunQueue } from './infrastructure/bullmq-run-queue.ts';
 import { DrizzleCategoryProviderKeys } from './infrastructure/drizzle-category-provider-keys.ts';
+import { DrizzleDiscoveryRunRepository } from './infrastructure/drizzle-discovery-run.repository.ts';
 import { DrizzleProviderUsageMeter } from './infrastructure/drizzle-provider-usage-meter.ts';
 import { GuardedProvider } from './infrastructure/guarded-provider.ts';
 import { buildProviderPolicy } from './infrastructure/provider-resilience.ts';
@@ -32,8 +47,16 @@ import { GooglePlacesProvider } from './infrastructure/providers/google-places/p
 import { MapsScraperProvider } from './infrastructure/providers/maps-scraper/provider.ts';
 import { OpenDataProvider } from './infrastructure/providers/open-data/provider.ts';
 import { OsmOverpassProvider } from './infrastructure/providers/osm/provider.ts';
+import { RealtimeRunProgress } from './infrastructure/realtime-run-progress.ts';
+import { RECONCILER_AUTOSTART, RunReconciler } from './infrastructure/run-reconciler.ts';
 import { ValkeyRateLimiter } from './infrastructure/valkey-rate-limiter.ts';
 import { DiscoveryController } from './interface/http/discovery.controller.ts';
+import { DiscoveryRunsController } from './interface/http/discovery-runs.controller.ts';
+import {
+  DiscoveryFetchProcessor,
+  DiscoveryIngestProcessor,
+  DiscoveryPlanProcessor,
+} from './interface/processors/discovery.processors.ts';
 
 /** The fixture provider exists only in tests and E2E (refused in production). */
 function fakeProviderEnabled(env: ApiEnv): boolean {
@@ -115,9 +138,19 @@ const registryProvider = {
         ),
       );
     }
-    if (fakeProviderEnabled(apiEnv)) providers.push(guard(new FakeDiscoveryProvider(clock), null));
+    if (fakeProviderEnabled(apiEnv)) {
+      providers.push(guard(new FakeDiscoveryProvider(clock, apiEnv.FAKE_DISCOVERY_SYNTHETIC), null));
+    }
     return new ProviderRegistry(providers);
   },
+};
+
+const noQueue = () => Promise.reject(new Error('no queue in openapi mode'));
+const OPENAPI_RUN_QUEUE: RunQueue = {
+  plan: noQueue,
+  fetch: noQueue,
+  ingest: noQueue,
+  cancelFetches: noQueue,
 };
 
 /** Messages users see for a failed key test (never the provider's raw error, which may quote the request). */
@@ -145,8 +178,29 @@ export class DiscoveryModule implements OnModuleInit {
   static forRoot(mode: AppMode): DynamicModule {
     return {
       module: DiscoveryModule,
-      controllers: mode === 'worker' ? [] : [DiscoveryController],
+      // Ingestion and tracking, areas and realtime come from their modules' public surfaces.
+      imports: [BusinessGraphModule.forRoot(mode), GeoModule.forRoot(mode), RealtimeModule.forRoot(mode)],
+      controllers: mode === 'worker' ? [] : [DiscoveryController, DiscoveryRunsController],
       providers: [
+        { provide: DISCOVERY_RUN_REPOSITORY, useClass: DrizzleDiscoveryRunRepository },
+        // OpenAPI generation connects to nothing: no queues in that mode.
+        mode === 'openapi'
+          ? { provide: RUN_QUEUE, useValue: OPENAPI_RUN_QUEUE }
+          : { provide: RUN_QUEUE, useClass: BullmqRunQueue },
+        { provide: RUN_PROGRESS, useClass: RealtimeRunProgress },
+        // The worker runs the reconciler; the HTTP process only produces jobs.
+        { provide: RECONCILER_AUTOSTART, useValue: mode === 'worker' },
+        RunOrchestrator,
+        RunReconciler,
+        DiscoveryRunPlanner,
+        EstimateDiscoveryRunQuery,
+        StartDiscoveryRunCommand,
+        CancelDiscoveryRunCommand,
+        DiscoveryRunQueries,
+        DiscoveryRunNotifications,
+        ...(mode === 'worker'
+          ? [DiscoveryPlanProcessor, DiscoveryFetchProcessor, DiscoveryIngestProcessor]
+          : []),
         { provide: CATEGORY_PROVIDER_KEYS, useClass: DrizzleCategoryProviderKeys },
         { provide: PROVIDER_USAGE_METER, useClass: DrizzleProviderUsageMeter },
         { provide: RATE_LIMITER, useClass: ValkeyRateLimiter },
@@ -158,7 +212,13 @@ export class DiscoveryModule implements OnModuleInit {
         ProviderSelectionService,
         DiscoveryQueries,
       ],
-      exports: [ProviderRegistry, ProviderQueryBuilder, ProviderCostEstimator, ProviderSelectionService],
+      exports: [
+        ProviderRegistry,
+        ProviderQueryBuilder,
+        ProviderCostEstimator,
+        ProviderSelectionService,
+        RunReconciler,
+      ],
     };
   }
 

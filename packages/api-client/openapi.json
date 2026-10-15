@@ -1889,6 +1889,39 @@
         ],
         "type": "object"
       },
+      "DiscoveryIntent": {
+        "additionalProperties": false,
+        "properties": {
+          "categoryIds": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array"
+          },
+          "keywords": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "languageCode": {
+            "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+            "type": "string"
+          },
+          "regionCode": {
+            "pattern": "^[A-Z]{2}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryIds",
+          "languageCode"
+        ],
+        "type": "object"
+      },
       "DiscoveryProviderList": {
         "additionalProperties": false,
         "properties": {
@@ -1966,6 +1999,435 @@
         ],
         "type": "object"
       },
+      "DiscoveryRun": {
+        "additionalProperties": false,
+        "properties": {
+          "areaId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "budgetUsd": {
+            "type": "number"
+          },
+          "costUsd": {
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/RunCounts"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/DiscoveryIntent"
+          },
+          "options": {
+            "$ref": "#/components/schemas/DiscoveryRunOptions"
+          },
+          "providers": {
+            "items": {
+              "enum": [
+                "google_places",
+                "overture",
+                "foursquare",
+                "osm",
+                "gmaps_scraper",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "budget",
+                  "monthly_budget",
+                  "tasks_failed",
+                  "cancelled",
+                  "no_providers",
+                  "error"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "partially_completed",
+              "failed",
+              "cancelled"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "reason",
+          "intent",
+          "areaId",
+          "providers",
+          "options",
+          "budgetUsd",
+          "costUsd",
+          "counts",
+          "createdBy",
+          "startedAt",
+          "finishedAt",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "DiscoveryRunEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "budgetUsd": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "excluded": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "provider": {
+                  "enum": [
+                    "google_places",
+                    "overture",
+                    "foursquare",
+                    "osm",
+                    "gmaps_scraper",
+                    "fake"
+                  ],
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "provider",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "providers": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "calls": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "expected": {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    "max": {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    "min": {
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "expected",
+                    "max"
+                  ],
+                  "type": "object"
+                },
+                "costUsd": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "expected": {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    "max": {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    "min": {
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "expected",
+                    "max"
+                  ],
+                  "type": "object"
+                },
+                "provider": {
+                  "enum": [
+                    "google_places",
+                    "overture",
+                    "foursquare",
+                    "osm",
+                    "gmaps_scraper",
+                    "fake"
+                  ],
+                  "type": "string"
+                },
+                "results": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "max": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "min": {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "type": "object"
+                },
+                "tasks": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "tiles": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "provider",
+                "tiles",
+                "tasks",
+                "calls",
+                "costUsd",
+                "results"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "properties": {
+              "calls": {
+                "additionalProperties": false,
+                "properties": {
+                  "expected": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "max": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "min": {
+                    "minimum": 0,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "min",
+                  "expected",
+                  "max"
+                ],
+                "type": "object"
+              },
+              "costUsd": {
+                "additionalProperties": false,
+                "properties": {
+                  "expected": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "max": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "min": {
+                    "minimum": 0,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "min",
+                  "expected",
+                  "max"
+                ],
+                "type": "object"
+              },
+              "tasks": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "tasks",
+              "calls",
+              "costUsd"
+            ],
+            "type": "object"
+          },
+          "warnings": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "providers",
+          "excluded",
+          "totals",
+          "budgetUsd",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "DiscoveryRunOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "autoEnrich": {
+            "default": false,
+            "description": "Emit `discovery.business_found` for enrichment (BF-027).",
+            "type": "boolean"
+          },
+          "fieldTier": {
+            "description": "Google field tier for this run (workspace setting by default).",
+            "enum": [
+              "essentials",
+              "pro",
+              "enterprise"
+            ],
+            "type": "string"
+          },
+          "maxResults": {
+            "default": 2000,
+            "description": "Stop fetching beyond this many records.",
+            "maximum": 20000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "tileStrategy": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "circles",
+              "bboxes"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "autoEnrich",
+          "maxResults",
+          "tileStrategy"
+        ],
+        "type": "object"
+      },
+      "DiscoveryRunPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DiscoveryRun"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "totalEstimate": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object"
+      },
       "DiscoverySettings": {
         "additionalProperties": false,
         "properties": {
@@ -2033,6 +2495,12 @@
             },
             "maxItems": 6,
             "type": "array"
+          },
+          "runBudgetUsd": {
+            "description": "Default budget of one discovery run (a run never spends more).",
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number"
           }
         },
         "required": [
@@ -2040,7 +2508,311 @@
           "disabledProviders",
           "googleFieldTier",
           "overtureRelease",
+          "runBudgetUsd",
           "monthlyBudgetUsd"
+        ],
+        "type": "object"
+      },
+      "DiscoveryTask": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "categoryId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "costUsd": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "depth": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "pageNumber": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "provider": {
+            "enum": [
+              "google_places",
+              "overture",
+              "foursquare",
+              "osm",
+              "gmaps_scraper",
+              "fake"
+            ],
+            "type": "string"
+          },
+          "records": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "saturated": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "tile": {
+            "$ref": "#/components/schemas/DiscoveryTile"
+          }
+        },
+        "required": [
+          "id",
+          "provider",
+          "categoryId",
+          "tile",
+          "depth",
+          "pageNumber",
+          "status",
+          "attempt",
+          "records",
+          "saturated",
+          "costUsd",
+          "error",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "DiscoveryTaskPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DiscoveryTask"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "totalEstimate": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object"
+      },
+      "DiscoveryTile": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CircleGeometry"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "bbox": {
+                "additionalProperties": false,
+                "properties": {
+                  "east": {
+                    "maximum": 180,
+                    "minimum": -180,
+                    "type": "number"
+                  },
+                  "north": {
+                    "maximum": 90,
+                    "minimum": -90,
+                    "type": "number"
+                  },
+                  "south": {
+                    "maximum": 90,
+                    "minimum": -90,
+                    "type": "number"
+                  },
+                  "west": {
+                    "maximum": 180,
+                    "minimum": -180,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "west",
+                  "south",
+                  "east",
+                  "north"
+                ],
+                "type": "object"
+              },
+              "type": {
+                "const": "BBox",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "bbox"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "EstimateDiscoveryRunRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "area": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "areaId": {
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "areaId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "geometry": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "coordinates": {
+                            "items": {
+                              "items": {
+                                "items": {
+                                  "items": false,
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "prefixItems": [
+                                    {
+                                      "maximum": 180,
+                                      "minimum": -180,
+                                      "type": "number"
+                                    },
+                                    {
+                                      "maximum": 90,
+                                      "minimum": -90,
+                                      "type": "number"
+                                    }
+                                  ],
+                                  "type": "array"
+                                },
+                                "minItems": 4,
+                                "type": "array"
+                              },
+                              "minItems": 1,
+                              "type": "array"
+                            },
+                            "minItems": 1,
+                            "type": "array"
+                          },
+                          "type": {
+                            "const": "MultiPolygon",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "coordinates"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "$ref": "#/components/schemas/CircleGeometry"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "geometry"
+                ],
+                "type": "object"
+              }
+            ],
+            "description": "A stored area (BF-017) or a drawn geometry."
+          },
+          "budgetUsd": {
+            "description": "Default: the workspace run budget.",
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/DiscoveryIntent"
+          },
+          "options": {
+            "$ref": "#/components/schemas/DiscoveryRunOptions",
+            "default": {
+              "autoEnrich": false,
+              "maxResults": 2000,
+              "tileStrategy": "auto"
+            }
+          },
+          "providers": {
+            "description": "Default: the workspace selection.",
+            "items": {
+              "enum": [
+                "google_places",
+                "overture",
+                "foursquare",
+                "osm",
+                "gmaps_scraper",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "intent",
+          "area",
+          "options"
         ],
         "type": "object"
       },
@@ -4029,6 +4801,145 @@
         ],
         "type": "object"
       },
+      "RunBusiness": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "locality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "primaryCategoryId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trackedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "businessId",
+          "name",
+          "primaryCategoryId",
+          "locality",
+          "trackedAt"
+        ],
+        "type": "object"
+      },
+      "RunBusinessPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RunBusiness"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "totalEstimate": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "type": "object"
+      },
+      "RunCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "failedRecords": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "merged": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "possibleDuplicates": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "recordsFetched": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tasksDone": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tasksFailed": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tasksSkipped": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tasksTotal": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "unchanged": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tasksTotal",
+          "tasksDone",
+          "tasksFailed",
+          "tasksSkipped",
+          "recordsFetched",
+          "created",
+          "merged",
+          "unchanged",
+          "possibleDuplicates",
+          "failedRecords"
+        ],
+        "type": "object"
+      },
       "ScraperStatus": {
         "additionalProperties": false,
         "properties": {
@@ -4305,6 +5216,9 @@
         ],
         "type": "object"
       },
+      "StartDiscoveryRunRequest": {
+        "$ref": "#/components/schemas/EstimateDiscoveryRunRequest"
+      },
       "SystemInfo": {
         "additionalProperties": false,
         "description": "Build and runtime information about the API process.",
@@ -4507,6 +5421,12 @@
                 },
                 "maxItems": 6,
                 "type": "array"
+              },
+              "runBudgetUsd": {
+                "description": "Default budget of one discovery run (a run never spends more).",
+                "maximum": 10000,
+                "minimum": 0,
+                "type": "number"
               }
             },
             "type": "object"
@@ -6384,6 +7304,671 @@
         "summary": "Typeahead over category labels and synonyms (EN/FR, accent-insensitive)",
         "tags": [
           "categories"
+        ]
+      }
+    },
+    "/v1/discovery-runs": {
+      "get": {
+        "operationId": "listDiscoveryRuns",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "queued",
+                "running",
+                "completed",
+                "partially_completed",
+                "failed",
+                "cancelled"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRunPage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Discovery runs of the workspace, newest first",
+        "tags": [
+          "discovery"
+        ]
+      },
+      "post": {
+        "operationId": "startDiscoveryRun",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartDiscoveryRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Start a discovery run (`Idempotency-Key` header: the same key returns the same run)",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/discovery-runs/estimate": {
+      "post": {
+        "operationId": "estimateDiscoveryRun",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstimateDiscoveryRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRunEstimate"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Tiles, tasks, calls and cost ranges per provider for a discovery run (no side effects)",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/discovery-runs/{id}": {
+      "get": {
+        "operationId": "getDiscoveryRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A discovery run with its counts and cost",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/discovery-runs/{id}/businesses": {
+      "get": {
+        "operationId": "listDiscoveryRunBusinesses",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunBusinessPage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Businesses this run added to the workspace",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/discovery-runs/{id}/cancel": {
+      "post": {
+        "operationId": "cancelDiscoveryRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Cancel a run: no new provider calls; in-flight calls stop at their next checkpoint",
+        "tags": [
+          "discovery"
+        ]
+      }
+    },
+    "/v1/discovery-runs/{id}/tasks": {
+      "get": {
+        "operationId": "listDiscoveryRunTasks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryTaskPage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Provider tasks of a run (debugging)",
+        "tags": [
+          "discovery"
         ]
       }
     },

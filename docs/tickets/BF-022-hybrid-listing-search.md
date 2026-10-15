@@ -73,11 +73,62 @@ modules/search/
 - Performance: benchmark results attached; EXPLAIN tests assert index usage.
 
 ## Acceptance criteria
-- [ ] Hybrid search endpoint with all filters, sorts and cursor pagination; org-scoped.
-- [ ] Facets endpoint consistent with results.
-- [ ] Embedding pipeline + backfill + model change handling.
-- [ ] Saved searches, lists, CSV export with audit logging.
-- [ ] p95 targets met on the 200k synthetic dataset (benchmark in PR).
+- [x] Hybrid search endpoint with all filters, sorts and cursor pagination; org-scoped.
+- [x] Facets endpoint consistent with results.
+- [x] Embedding pipeline + backfill + model change handling.
+- [x] Saved searches, lists, CSV export with audit logging.
+- [x] p95 targets met on the 200k synthetic dataset (benchmark in PR).
+
+## Implementation notes (BF-022)
+- **Migrations and `CONCURRENTLY`**: Drizzle's migrator wraps all pending migrations in one transaction, so
+  `runMigrations` (`@bf/db`, mirrored by `@bf/testing` for the template DB) now runs each migration in its own
+  transaction and none for one starting with `-- bf:no-transaction` (0013–0016, one index each). A concurrent
+  build that leaves an INVALID index makes the migrator refuse to record it (drop it and re-run).
+- **0012 rewrites `businesses`** (stored generated `search_tsv`) and backfills `category_text` under an exclusive
+  lock: fine before the first deployment (BF-025); on a populated table it needs a maintenance window.
+- **Text document**: `search_tsv` = name (A) + `category_text` (B: every category's ancestors' labels EN/FR and
+  synonyms, maintained by statement-level triggers on `business_categories` and on category renames/moves) +
+  locality/address (C) + `short_description` (D, filled by BF-026), via `bf_tsvector` (english + french + simple,
+  unaccented). Stemming limits: "coiffeurs" matches "coiffeur"/"Coiffure" through the French stemmer only when
+  the stems agree; names are matched unstemmed (simple) and by trigram.
+- **Listing** (`GET /v1/businesses`, moved from business-graph; `SearchModule` registers before
+  `BusinessGraphModule` so `/businesses/facets` and `/export.csv` win over `/businesses/:id`): always scoped to
+  the workspace's tracked businesses (ADR-0008), permanently closed excluded unless `includeClosed`. Filters are a
+  Specification compiled to bound SQL. Sorts: keyset cursors on (key, id), nulls last, carrying the sort name
+  (a cursor from another sort is a 422). `website=weak` behaves as `has` until audits exist (`DECISION`).
+- **Relevance**: full text (`ts_rank_cd`), name word similarity (`<%`, trigram GIN) and embeddings (HNSW,
+  iterative scans, `hnsw.ef_search` = `SEARCH_HNSW_EF_SEARCH`, distance ≤ `SEARCH_VECTOR_MAX_DISTANCE`, same model
+  only) — ≤ 200 candidates each — fused with RRF (k = 60). The fused ranking is cached 5 min in Valkey per
+  (workspace, filters, origin, recency) so relevance pages are stable. Without an embedding key/budget, ranking
+  uses the two lexical rankers. Text result sets (and their counts) are capped by the candidate limits.
+- **Facets**: each dimension drops its own filter; with text, the candidates are ranked without the facet
+  dimensions' filters and every count applies all the other filters. One statement computes them all (one
+  snapshot, one scan): matching rows with one flag per dimension filter, GROUPING SETS for the simple dimensions,
+  and a category rollup through a small category → facet-prefix map. JIT is off for it (compiling cost ~0.4 s at
+  200k rows, more than the query).
+- **Embeddings**: `EmbeddingTextComposer` (name, category paths EN/FR, place, description, price; global facts
+  only) → sha256 hash. `business.created/updated` enqueue `search/embed-business` (key
+  `businessId:model:hash`) only when text or model changed; no key/budget → skipped, provider outage → retried.
+  `pnpm search:reindex [--model] [--batch]` backfills resumably. Vector column is 1536-d: a model with other
+  dimensions needs a migration.
+- **Saved searches**: store prompt, edited intent, query-string filters (validated against the listing schema)
+  and sort; private or workspace-shared, creator-only edits; `newMatches` (tracked since last run) on get/run only
+  (null in lists); a run by someone else does not reset the creator's count; ≤ 500 per workspace. `notifyNew` is
+  stored only (notifications are a follow-up).
+- **Lists**: unique names per workspace, bulk add/remove ≤ 1,000 tracked businesses, `GET /v1/businesses?list=`.
+- **CSV export**: same filters/sort, selectable columns, ≤ `SEARCH_EXPORT_MAX_ROWS` (50k), UTF-8 BOM, text cells
+  starting with `= + - @` prefixed with `'`, `email` only with `outreach:send` (the public phone is exported as
+  the listing shows it), one `business.exported` audit entry (row count, columns, filter keys — no values).
+- **Benchmark** (200k businesses, 20k embedded, 20 rounds, local Docker, over HTTP): p95 — default 8 ms,
+  category + score 90 ms, radius + rating + email 63 ms, status + tag 7 ms, 5th page 6 ms, text 8 ms (cached
+  ranking) / 77 ms (uncached), facets 422 ms, facets + category 446 ms, facets + text 21 ms (88 ms uncached).
+  `pnpm --filter @bf/api search:bench-seed --org <id>` fills a development workspace the same way.
+- **Performance**: `pnpm --filter @bf/api bench:search` seeds BF_BENCH_BUSINESSES (200k) synthetic businesses
+  (generate_series, deterministic) and times 10 request shapes over HTTP; `explain.int.test.ts` checks that the
+  six main shapes can use their indexes and that sorted pages walk theirs without a Sort.
+- **Follow-ups**: saved-search new-match notifications; suppression-aware export once suppressions exist (M4);
+  per-route rate limits for export/search; `weak` website filter (BF-030/BF-031); merging org sort keys (tags,
+  score) on business merge (BF-024).
 
 ## Agent prompt
 ```text

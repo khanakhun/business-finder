@@ -62,6 +62,29 @@ describe('applyMigrations', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+  it('refuses to record a concurrent migration that left an invalid index', async () => {
+    const dir = migrationsFolder([
+      ['9101_dupes', 'CREATE TABLE mig_dupes (v int); INSERT INTO mig_dupes VALUES (1), (1);'],
+      [
+        '9102_unique',
+        `${NO_TRANSACTION_MARKER}\nCREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS uq_mig_dupes ON mig_dupes (v);`,
+      ],
+    ]);
+    const client = postgres(database.url, { max: 1, onnotice: () => undefined });
+    try {
+      // The build fails on the duplicates and leaves uq_mig_dupes INVALID; a re-run skips it, then refuses.
+      await expect(applyMigrations(client, dir)).rejects.toThrow(/could not create unique index/);
+      await expect(applyMigrations(client, dir)).rejects.toThrow(
+        /Invalid indexes after a concurrent migration: uq_mig_dupes/,
+      );
+      await client`DROP INDEX uq_mig_dupes`;
+      await client`DELETE FROM mig_dupes`;
+      await expect(applyMigrations(client, dir)).resolves.toBeUndefined();
+    } finally {
+      await client.end();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('businesses search text', () => {

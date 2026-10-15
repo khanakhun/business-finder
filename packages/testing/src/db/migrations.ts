@@ -17,6 +17,15 @@ export async function applyMigrations(sql: postgres.Sql, migrationsFolder: strin
         VALUES (${migration.hash}, ${migration.folderMillis})`;
     if (statements[0]?.startsWith(NO_TRANSACTION_MARKER)) {
       for (const statement of statements) await sql.unsafe(statement);
+      // A concurrent build that failed half-way leaves an INVALID index that `IF NOT EXISTS` would then skip
+      // forever: refuse to record the migration until it is dropped (DROP INDEX CONCURRENTLY) and re-run.
+      const invalid = await sql<Array<{ name: string }>>`
+        SELECT indexrelid::regclass::text AS name FROM pg_index WHERE NOT indisvalid`;
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid indexes after a concurrent migration: ${invalid.map((i) => i.name).join(', ')}`,
+        );
+      }
       await record(sql);
     } else {
       await sql.begin(async (tx) => {

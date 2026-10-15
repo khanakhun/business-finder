@@ -67,7 +67,8 @@ export const orgBusinesses = pgTable(
     index('idx_org_businesses__organization_id_score').on(
       table.organizationId,
       table.score.desc().nullsLast(),
-      table.businessId,
+      // Same direction as the score: `-score` (the listing's id tie-break follows the sort) walks it in order.
+      table.businessId.desc(),
     ),
     index('idx_org_businesses__tags').using('gin', table.tags),
     check(

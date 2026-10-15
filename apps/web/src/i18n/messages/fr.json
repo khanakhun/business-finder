@@ -411,7 +411,42 @@
     "deleteBody": "Les fonctionnalités qui en ont besoin utiliseront la clé de la plateforme, s'il y en a une.",
     "testOk": "{name} : la connexion fonctionne.",
     "testFailed": "{name} : échec de la connexion.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "discovery": {
+      "title": "Sources de découverte",
+      "description": "Où la découverte cherche des entreprises, dans votre ordre de préférence. Les données ouvertes passent en premier par défaut.",
+      "orderLabel": "Fournisseurs par ordre de préférence",
+      "noAttribution": "Aucune attribution requise",
+      "status": {
+        "ready": "Prêt",
+        "not_configured": "Clé manquante",
+        "disabled": "Désactivé",
+        "unavailable": "Indisponible"
+      },
+      "moveUp": "Monter {provider}",
+      "moveDown": "Descendre {provider}",
+      "overtureRelease": "Version Overture",
+      "overtureReleaseHint": "Laissez vide pour suivre la dernière version, ou fixez-en une (ex. 2026-09-23.1). Overture supprime les versions après environ deux mois.",
+      "latest": "Dernière",
+      "save": "Enregistrer",
+      "saved": "Sources de découverte enregistrées.",
+      "huggingfaceHint": "Foursquare OS Places demande un jeton Hugging Face (ci-dessous) d’un compte ayant accepté les conditions du jeu de données.",
+      "scraper": {
+        "title": "Scraper Google Maps",
+        "acknowledged": "Accepté le {date}.",
+        "notAcknowledged": "Non accepté.",
+        "flagOff": "L’option de l’espace de travail est désactivée (Paramètres → Fonctionnalités).",
+        "acknowledge": "Accepter les risques…",
+        "revoke": "Retirer l’acceptation",
+        "ownerOnly": "Seul un propriétaire de l’espace de travail peut accepter cet avertissement.",
+        "dialogTitle": "Activer le scraper Google Maps ?",
+        "accept": "J’ai lu cet avertissement et j’en accepte les risques au nom de l’espace de travail.",
+        "cancel": "Annuler",
+        "confirm": "Accepter",
+        "loadFailed": "Impossible de charger l’état du scraper.",
+        "retry": "Réessayer"
+      }
+    }
   },
   "features": {
     "title": "Fonctionnalités",

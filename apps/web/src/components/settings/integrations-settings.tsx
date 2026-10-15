@@ -22,6 +22,7 @@ import { apiClient, queryKeys } from '@/lib/api.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { ConfirmDialog } from './confirm-dialog.tsx';
+import { DiscoverySources } from './discovery-sources.tsx';
 import { Forbidden } from './forbidden.tsx';
 import { SettingsSection } from './section.tsx';
 
@@ -54,6 +55,7 @@ export function IntegrationsSettings() {
   })).filter((group) => group.items.length > 0);
   return (
     <div className="grid gap-6">
+      <DiscoverySources />
       {groups.map((group) => (
         <SettingsSection
           key={group.provider}

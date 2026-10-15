@@ -62,11 +62,37 @@ Four additional providers behind the BF-018 framework: Overture and Foursquare v
 - Integration: provider selection includes/excludes these providers per settings.
 
 ## Acceptance criteria
-- [ ] Overture and Foursquare providers return normalized records through intel with regional caching.
-- [ ] OSM Overpass provider with tag mappings and opening hours parsing.
-- [ ] Maps scraper provider gated by env flag + org flag + recorded owner acknowledgement; off by default.
-- [ ] Licensing/attribution recorded per source; settings UI for enabling and ordering providers.
-- [ ] Python and TS test suites pass without network.
+- [x] Overture and Foursquare providers return normalized records through intel with regional caching.
+- [x] OSM Overpass provider with tag mappings and opening hours parsing.
+- [x] Maps scraper provider gated by env flag + org flag + recorded owner acknowledgement; off by default.
+- [x] Licensing/attribution recorded per source; settings UI for enabling and ordering providers.
+- [x] Python and TS test suites pass without network.
+
+## Implementation notes (BF-019)
+- **Verified sources** (2026-10-15): `services/intel/app/services/open_data/SOURCES.md` — Overture `2026-09-23.1`
+  (schema v2: `categories` removed → `basic_category` + `taxonomy`; latest via the STAC catalog, releases
+  deleted after ~60 days), Foursquare OS Places on Hugging Face (gated, `hf://` + DuckDB secret), Overpass usage
+  policy, gosom web API (CSV results).
+- **Intel** `POST /v1/open-data/places/search` (signed): DuckDB per request (memory limit, spill cap, 2 query
+  slots with a bounded wait → 429, time budget with `interrupt()` also on cancellation); bbox pushdown on the
+  `bbox` struct, polygons filtered point-in-polygon in Python (no spatial extension); keyset cursors per
+  dataset+release; regional extracts per (dataset, release, 0.1°-snapped bbox ≤ 1°²) on local disk (optional
+  mirror in the artifacts bucket), atomic writes, temp cleanup, older releases dropped, LRU size cap
+  (`OPEN_DATA_CACHE_MAX_MB`). Image bundles httpfs. Measured on the BL bbox: **first query 18.3 s, cached 0.0 s**
+  (489 places, release 2026-09-23.1).
+- **Providers**: `overture`/`foursquare` via `IntelClient` (HMAC-signed, typed errors, no retry on timeouts),
+  storable records with per-source licences in `attributes.sources`, page tokens pin the release; `osm` via
+  Overpass (escaped QL, identifying User-Agent, 0.1 req/s default, 30 s back-off on 429, remark errors retried,
+  own `opening_hours` parser — the npm library is LGPL); `gmaps_scraper` (gosom web API: create job → poll →
+  CSV download → delete job; 30-day expiry, identifiers only as raw).
+- **Scraper gates**: registered only with `FEATURE_MAPS_SCRAPER` + `MAPS_SCRAPER_URL`; every call also requires
+  the workspace flag `mapsScraper` and an owner acknowledgement of the current warning version (audit log,
+  latest acknowledge/revoke wins; owners only, sessions only; refused while not deployed).
+- **Settings UI** (`/settings/integrations` → Discovery sources): enable/disable, reorder (↑/↓, keyboard
+  accessible), Overture release (latest or pinned), Hugging Face hint, scraper warning and acknowledgement dialog
+  (consent resets on close), loading and error states, EN/FR.
+- **Follow-ups**: drag-and-drop ordering; verifying Hugging Face access before serving cached Foursquare extracts
+  (the cache is shared by design; the data is Apache-2.0); a self-hosted Overpass instance for production volume.
 
 ## Agent prompt
 ```text

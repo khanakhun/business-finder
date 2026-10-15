@@ -249,6 +249,7 @@ erDiagram
 - Primary keys `uuid` (UUIDv7), `created_at`/`updated_at` `timestamptz`. Org-scoped tables carry `organization_id uuid not null` with a composite index leading on it.
 - Money and costs: `numeric(12,6)` in USD for provider/LLM costs; currency-aware fields store ISO-4217 code alongside.
 - Geography: `geography(Point, 4326)` for locations; `geography(MultiPolygon, 4326)` for areas; GiST indexes.
+- Area geometry in TypeScript (BF-017): tiling and clipping for discovery are pure functions on Turf.js (`geo/domain/tiling.ts`), so they run in unit tests without a database; PostGIS does storage-side work (containment, distance, area, trigram name lookup). GeoJSON positions are `[lng, lat]`; APIs speak `{ lat, lng }`, converted only in `geo/domain/geometry.ts`.
 - Text search: generated `tsvector` columns using `unaccent` and a language-aware config (`simple` + `french` + `english` combined weights); `pg_trgm` GIN on names.
 - Vectors: `vector(<dims>)` with HNSW index (`vector_cosine_ops`); the embedding model and dimension are recorded per row (`embedding_model`), re-embedding is a background job.
 - Hierarchies: `ltree` path on `categories` for "category and all descendants" filters.

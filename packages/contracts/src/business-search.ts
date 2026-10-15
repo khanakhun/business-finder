@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BusinessSummarySchema, PIPELINE_STATUSES } from './business.ts';
+import { AddedViaSchema, BusinessSummarySchema, PIPELINE_STATUSES } from './business.ts';
 import { BusinessId } from './ids.ts';
 import { defineJob } from './jobs.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
@@ -99,6 +99,8 @@ export const BusinessFiltersSchema = z.object({
   tag: many(z.string().min(1).max(50), 20).describe('Any of these tags.'),
   owner: z.uuid().optional().describe('Owner user id.'),
   list: z.uuid().optional().describe('Businesses in this list (of the workspace).'),
+  run: z.uuid().optional().describe('Businesses a discovery run added to the workspace.'),
+  id: many(z.uuid(), 200).describe('Only these businesses (e.g. exporting a selection; at most 200).'),
   addedWithinDays: z.coerce.number().int().min(1).max(3_650).optional(),
   includeClosed: bool().describe('Include permanently closed businesses (excluded by default).'),
 });
@@ -159,6 +161,8 @@ export const BusinessListItemSchema = BusinessSummarySchema.extend({
   trackedAt: IsoDateTimeSchema,
   lastActivityAt: IsoDateTimeSchema.nullable(),
   distanceMeters: z.number().nullable().describe('From `near` or the area centre; null otherwise.'),
+  hasEmail: z.boolean().describe('Whether an email contact is known (the address itself is not listed).'),
+  addedVia: AddedViaSchema,
 }).meta({ id: 'BusinessListItem' });
 export type BusinessListItem = z.infer<typeof BusinessListItemSchema>;
 

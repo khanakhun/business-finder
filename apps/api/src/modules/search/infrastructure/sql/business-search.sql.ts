@@ -99,6 +99,8 @@ export function filterSql(spec: ListingSpec, omit?: FacetDimension | 'dimensions
     f.hasPhone === false ? sql`NOT ${hasPhone}` : undefined,
     f.tag?.length ? sql`${orgBusinesses.tags} && ${arrayOf(f.tag, 'text')}` : undefined,
     f.owner ? sql`${orgBusinesses.ownerUserId} = ${f.owner}` : undefined,
+    f.id?.length ? sql`${businesses.id} = ANY(${arrayOf(f.id, 'uuid')})` : undefined,
+    f.run ? sql`${orgBusinesses.addedVia} = 'discovery' AND ${orgBusinesses.addedRef} = ${f.run}` : undefined,
     f.list
       ? sql`EXISTS (SELECT 1 FROM ${listItems} li JOIN ${lists} l ON l.id = li.list_id
           WHERE li.list_id = ${f.list} AND l.organization_id = ${spec.organizationId}

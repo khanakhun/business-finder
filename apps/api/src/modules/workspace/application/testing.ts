@@ -101,7 +101,8 @@ export class InMemoryAuditLog implements AuditLogRepository {
   entries: AuditEntryRecord[] = [];
 
   async insert(entry: NewAuditEntry) {
-    this.entries.push({ ...entry, id: newId() });
+    if (entry.id && this.entries.some((e) => e.id === entry.id)) return;
+    this.entries.push({ ...entry, id: entry.id ?? newId() });
   }
 
   async list(filter: AuditLogFilter) {

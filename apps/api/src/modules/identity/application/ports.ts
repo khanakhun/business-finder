@@ -139,10 +139,7 @@ export type IdentityEvent =
   | { readonly type: 'identity.api_key_created'; readonly organizationId: string; readonly apiKeyId: string }
   | { readonly type: 'identity.api_key_revoked'; readonly organizationId: string; readonly apiKeyId: string };
 
-/**
- * Port: domain events. Recorded in the audit log (BF-011). TODO(BF-012): also publish through the transactional
- * outbox; until then they are logged.
- */
+/** Port: identity domain events, recorded in the transactional outbox (BF-012) and audited by a subscriber. */
 export interface IdentityEvents {
   publish(event: IdentityEvent, actor: { readonly userId: string | null }): Promise<void>;
 }

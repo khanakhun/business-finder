@@ -9,7 +9,14 @@ import { id, timestamps } from './columns.ts';
 import { MIGRATIONS_DIR, runMigrations } from './migrate.ts';
 import { runSeeds, type SeedModule } from './seed/runner.ts';
 import { withRollback } from './testing.ts';
-import { getExecutor, isInTransaction, NestedIsolationLevelError, runInTransaction } from './tx.ts';
+import {
+  afterCommit,
+  getExecutor,
+  isInTransaction,
+  NestedIsolationLevelError,
+  onAfterCommitError,
+  runInTransaction,
+} from './tx.ts';
 import { geographyMultiPolygon, geographyPoint } from './types/geography.ts';
 import { citext, ltree, tsvector } from './types/text.ts';
 import { vector } from './types/vector.ts';
@@ -287,6 +294,53 @@ describe('transaction context', () => {
     });
     expect(await count('sp-outer')).toBe(1);
     expect(await count('sp-inner')).toBe(0);
+  });
+
+  it('runs afterCommit callbacks only once the outermost transaction commits', async () => {
+    const calls: string[] = [];
+    await runInTransaction(db, async () => {
+      await afterCommit(db, () => void calls.push('outer'));
+      await runInTransaction(db, async () => afterCommit(db, () => void calls.push('joined')));
+      await runInTransaction(db, async () => afterCommit(db, () => void calls.push('savepoint')), {
+        savepoint: true,
+      });
+      await runInTransaction(
+        db,
+        async () => {
+          await afterCommit(db, () => void calls.push('failed savepoint'));
+          throw new Error('savepoint failure');
+        },
+        { savepoint: true },
+      ).catch(() => undefined);
+      expect(calls).toEqual([]);
+    });
+    expect(calls).toEqual(['outer', 'joined', 'savepoint']);
+  });
+
+  it('drops afterCommit callbacks on rollback, runs them immediately outside a transaction', async () => {
+    const calls: string[] = [];
+    await expect(
+      runInTransaction(db, async () => {
+        await afterCommit(db, () => void calls.push('rolled back'));
+        throw new Error('boom');
+      }),
+    ).rejects.toThrow('boom');
+    await afterCommit(db, () => void calls.push('now'));
+    expect(calls).toEqual(['now']);
+  });
+
+  it('reports a failing afterCommit callback without affecting the others', async () => {
+    const reported: unknown[] = [];
+    onAfterCommitError((error) => reported.push(error));
+    const calls: string[] = [];
+    await runInTransaction(db, async () => {
+      await afterCommit(db, () => {
+        throw new Error('callback failure');
+      });
+      await afterCommit(db, () => void calls.push('second'));
+    });
+    expect(calls).toEqual(['second']);
+    expect(reported).toEqual([new Error('callback failure')]);
   });
 
   it('refuses to change the isolation level of a running transaction', async () => {

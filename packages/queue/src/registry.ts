@@ -18,6 +18,16 @@ export interface QueueDefinition {
 /** Every queue in the system. Feature tickets add theirs here; jobs are declared in @bf/contracts (`defineJob`). */
 export const QUEUES = {
   system: { name: 'system', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 5 },
+  /** Outbox deliveries, one job per event × subscriber (BF-012): more attempts, since subscribers may hit transient errors. */
+  events: {
+    name: 'events',
+    defaultJobOptions: {
+      ...DEFAULT_JOB_OPTIONS,
+      attempts: 8,
+      backoff: { type: 'exponential', delay: 2_000 },
+    },
+    concurrency: 10,
+  },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

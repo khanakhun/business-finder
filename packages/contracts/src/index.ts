@@ -22,9 +22,11 @@ export {
 export {
   type Actor,
   ActorSchema,
+  type DomainEvent,
   defineEvent,
   domainEventEnvelope,
   type EventDefinition,
+  EventDeliveryJob,
   getEventDefinition,
   registeredEvents,
 } from './events.ts';
@@ -78,6 +80,17 @@ export {
   type TransferOwnershipRequest,
   TransferOwnershipRequestSchema,
 } from './identity.ts';
+export {
+  ApiKeyCreated,
+  ApiKeyRevoked,
+  IDENTITY_EVENTS,
+  InvitationResent,
+  InvitationRevoked,
+  MemberInvited,
+  MemberRemoved,
+  MemberRoleChanged,
+  UserSignedUp,
+} from './identity-events.ts';
 export { BusinessId, EventId, type Id, idSchema, isUuidV7, newId, OrgId, SiteId, UserId } from './ids.ts';
 export { type EchoRequest, EchoRequestSchema, type EchoResponse, EchoResponseSchema } from './intel.ts';
 export {
@@ -128,6 +141,10 @@ export {
   PingJobsAcceptedSchema,
   type PingJobsRequest,
   PingJobsRequestSchema,
+  type ReplayEventAccepted,
+  ReplayEventAcceptedSchema,
+  type ReplayEventRequest,
+  ReplayEventRequestSchema,
   type SystemInfo,
   SystemInfoSchema,
   SystemPingJob,

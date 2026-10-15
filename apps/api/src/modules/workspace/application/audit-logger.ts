@@ -24,6 +24,16 @@ export interface AuditEntryInput {
   readonly auth?: AuthContext;
   /** Overrides `auth` (e.g. a user acting through a Better Auth hook). */
   readonly actor?: AuditActor;
+  /**
+   * For entries written from a domain event (BF-012): the event id (a redelivery inserts nothing), when it happened
+   * and the request facts recorded with it.
+   */
+  readonly fromEvent?: {
+    readonly id: string;
+    readonly occurredAt: Date;
+    readonly ip?: string | undefined;
+    readonly userAgent?: string | undefined;
+  };
 }
 
 export function actorOf(auth: AuthContext | undefined): AuditActor {
@@ -49,17 +59,19 @@ export class AuditLogger {
     const context = getRequestContext();
     const auth = entry.auth ?? context?.auth;
     const actor = entry.actor ?? actorOf(auth);
+    const fromEvent = entry.fromEvent;
     await this.repository.insert({
+      ...(fromEvent ? { id: fromEvent.id } : {}),
       organizationId: entry.organizationId === undefined ? (auth?.orgId ?? null) : entry.organizationId,
       actorType: actor.type,
       actorId: actor.id,
       action: entry.action,
       entityType: entry.entityType ?? null,
       entityId: entry.entityId ?? null,
-      ip: context?.ip ?? null,
-      userAgent: context?.userAgent ?? null,
+      ip: (fromEvent ? fromEvent.ip : context?.ip) ?? null,
+      userAgent: (fromEvent ? fromEvent.userAgent : context?.userAgent) ?? null,
       metadata: redactMetadata(entry.metadata ?? {}),
-      occurredAt: this.clock.now(),
+      occurredAt: fromEvent?.occurredAt ?? this.clock.now(),
     });
   }
 }

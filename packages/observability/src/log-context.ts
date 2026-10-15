@@ -7,6 +7,11 @@ export interface LogContext {
   readonly userId?: string;
   readonly jobId?: string;
   readonly queue?: string;
+  /** Domain event being delivered (BF-012) and its correlation id across the whole user action. */
+  readonly eventId?: string;
+  readonly eventType?: string;
+  readonly subscriberId?: string;
+  readonly correlationId?: string;
 }
 
 const storage = new AsyncLocalStorage<LogContext>();

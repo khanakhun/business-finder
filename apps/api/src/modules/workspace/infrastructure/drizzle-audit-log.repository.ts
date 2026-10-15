@@ -18,7 +18,7 @@ export class DrizzleAuditLogRepository implements AuditLogRepository {
   constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
 
   async insert(entry: NewAuditEntry): Promise<void> {
-    await getExecutor(this.db).insert(auditLogs).values(entry);
+    await getExecutor(this.db).insert(auditLogs).values(entry).onConflictDoNothing({ target: auditLogs.id });
   }
 
   async list(filter: AuditLogFilter): Promise<AuditEntryRecord[]> {

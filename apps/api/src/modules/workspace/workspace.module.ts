@@ -7,6 +7,7 @@ import { AuditLogger } from './application/audit-logger.ts';
 import { ListAuditLogsQuery } from './application/audit-logs.query.ts';
 import { ConnectionTesterRegistry } from './application/connection-testers.ts';
 import { FeatureFlagService } from './application/feature-flags.service.ts';
+import { IdentityAuditSubscriber } from './application/identity-audit.subscriber.ts';
 import {
   AUDIT_LOG_REPOSITORY,
   DEPLOYMENT_ENV,
@@ -76,6 +77,7 @@ export class WorkspaceModule {
         },
       },
       ...PUBLIC.filter((service) => service !== ConnectionTesterRegistry),
+      IdentityAuditSubscriber,
     ];
     if (mode === 'worker') return { module: WorkspaceModule, global: true, providers, exports: [...PUBLIC] };
     return {

@@ -98,6 +98,8 @@ export interface MasterKeyProvider {
 export const MASTER_KEY_PROVIDER = Symbol('MasterKeyProvider');
 
 export interface NewAuditEntry {
+  /** Set for entries derived from a domain event: inserting the same id again is a no-op (idempotent receiver). */
+  readonly id?: string;
   readonly organizationId: string | null;
   readonly actorType: AuditActorType;
   readonly actorId: string | null;
@@ -110,7 +112,7 @@ export interface NewAuditEntry {
   readonly occurredAt: Date;
 }
 
-export interface AuditEntryRecord extends NewAuditEntry {
+export interface AuditEntryRecord extends Omit<NewAuditEntry, 'id'> {
   readonly id: string;
 }
 

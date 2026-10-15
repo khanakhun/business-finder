@@ -11,3 +11,14 @@ export interface PingJobQueue {
   enqueue(job: { readonly idempotencyKey: string; readonly sequence: number }): Promise<string>;
 }
 export const PING_JOB_QUEUE = Symbol('PingJobQueue');
+
+/** Port: enqueue one outbox delivery (event × subscriber) under a fresh idempotency key; returns the job id. */
+export interface EventReplayQueue {
+  enqueue(job: {
+    readonly eventId: string;
+    readonly subscriberId: string;
+    readonly orgId: string | null;
+    readonly idempotencyKey: string;
+  }): Promise<string>;
+}
+export const EVENT_REPLAY_QUEUE = Symbol('EventReplayQueue');

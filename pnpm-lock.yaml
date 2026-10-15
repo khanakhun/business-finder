@@ -431,6 +431,9 @@ importers:
       '@bf/queue':
         specifier: workspace:*
         version: link:../../packages/queue
+      '@bf/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@bull-board/api':
         specifier: 'catalog:'
         version: 9.10.4(@bull-board/ui@9.10.4(bullmq@6.3.15(ioredis@6.0.0))(typescript@6.0.3))(bullmq@6.3.15(ioredis@6.0.0))(typescript@6.0.3)
@@ -564,9 +567,6 @@ importers:
       '@bf/testing':
         specifier: workspace:*
         version: link:../../packages/testing
-      '@bf/tsconfig':
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
       '@biomejs/biome':
         specifier: 'catalog:'
         version: 2.5.15

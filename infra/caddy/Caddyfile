@@ -1,0 +1,102 @@
+# Edge proxy for staging/production (BF-025, ADR-0014). Values come from the environment (compose passes them):
+#   BASE_DOMAIN        app.{BASE_DOMAIN} → web, api.{BASE_DOMAIN} → api
+#   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (a 503 page until apps/sites ships, BF-036)
+#   ACME_EMAIL         account e-mail for Let's Encrypt
+#   ACME_DNS_PROVIDER  DNS module for the wildcard (cloudflare by default; the image must include it)
+#   ACME_DNS_API_TOKEN token of that provider (DNS edit on the zone only)
+#   CADDY_TLS          `acme` (default) or `internal` (local test with Caddy's own CA)
+{
+	email {$ACME_EMAIL}
+	# Admin API on loopback only (the healthcheck reads it).
+	admin 127.0.0.1:2019
+	log default {
+		output stdout
+		format json
+	}
+	servers {
+		timeouts {
+			read_header 10s
+			idle 2m
+		}
+	}
+}
+
+(tls_acme) {
+}
+
+(tls_internal) {
+	tls internal
+}
+
+(wildcard_tls_acme) {
+	tls {
+		dns {$ACME_DNS_PROVIDER:cloudflare} {$ACME_DNS_API_TOKEN}
+	}
+}
+
+(wildcard_tls_internal) {
+	tls internal
+}
+
+# Headers the apps may already set win (`?` only fills in what is missing): the dashboard sets its own CSP.
+(security_headers) {
+	header {
+		?Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		?X-Content-Type-Options "nosniff"
+		?Referrer-Policy "strict-origin-when-cross-origin"
+		?X-Frame-Options "DENY"
+		-Server
+		-X-Powered-By
+	}
+}
+
+(access_log) {
+	log {
+		output stdout
+		format json
+	}
+}
+
+app.{$BASE_DOMAIN} {
+	import tls_{$CADDY_TLS:acme}
+	import security_headers
+	import access_log
+	encode zstd gzip
+	request_body {
+		max_size 2MB
+	}
+	reverse_proxy web:3000 {
+		# Streamed server rendering (Suspense boundaries) reaches the browser as it is produced.
+		flush_interval -1
+	}
+}
+
+api.{$BASE_DOMAIN} {
+	import tls_{$CADDY_TLS:acme}
+	import security_headers
+	import access_log
+	# Never compress the realtime stream: compression buffers events (SSE, /v1/realtime).
+	@compressible not header Accept text/event-stream*
+	encode @compressible zstd gzip
+	request_body {
+		max_size 25MB
+	}
+	reverse_proxy api:4000 {
+		# Stream responses as they are written (SSE).
+		flush_interval -1
+	}
+}
+
+*.{$SITES_BASE_DOMAIN} {
+	import wildcard_tls_{$CADDY_TLS:acme}
+	import security_headers
+	import access_log
+	# apps/sites arrives in M3 (BF-036): replace this block with `reverse_proxy sites:3000`.
+	header Cache-Control "no-store"
+	header Retry-After "3600"
+	rewrite * /sites-unavailable.html
+	file_server {
+		root /srv
+		status 503
+	}
+}

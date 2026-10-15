@@ -6,10 +6,40 @@
       "dockerfile": "infra/docker/postgres/Dockerfile",
       "context": "infra/docker/postgres"
     },
-    { "name": "intel", "dockerfile": "infra/docker/intel/Dockerfile", "context": "." },
-    { "name": "api", "dockerfile": "infra/docker/api/Dockerfile", "context": "." },
-    { "name": "web", "dockerfile": "infra/docker/web/Dockerfile", "context": "." },
-    { "name": "sites", "dockerfile": "infra/docker/sites/Dockerfile", "context": "." },
-    { "name": "agent-runner", "dockerfile": "services/agent-runner/Dockerfile", "context": "." }
+    {
+      "name": "intel",
+      "dockerfile": "infra/docker/intel/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "api",
+      "dockerfile": "infra/docker/api/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "web",
+      "dockerfile": "infra/docker/web/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "sites",
+      "dockerfile": "infra/docker/sites/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "agent-runner",
+      "dockerfile": "services/agent-runner/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "caddy",
+      "dockerfile": "infra/caddy/Dockerfile",
+      "context": "infra/caddy"
+    },
+    {
+      "name": "backup",
+      "dockerfile": "infra/docker/backup/Dockerfile",
+      "context": "infra/docker/backup"
+    }
   ]
 }

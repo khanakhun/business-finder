@@ -2,7 +2,7 @@
 # DECISION(BF-002): Alpine variant + source build — the Debian `17-3.5` tag is still on bullseye, whose PGDG
 # apt repository (source of the postgresql-17-pgvector package) has been retired.
 # Contrib extensions (pg_trgm, unaccent, ltree, citext) ship with PostgreSQL itself.
-FROM postgis/postgis:17-3.5-alpine
+FROM postgis/postgis:17-3.5-alpine@sha256:894f570c0cf0664ed5576a8fd5d5bfb8fb1b19d592885b686c3a88c8bd90c41f
 
 ARG PGVECTOR_VERSION=0.8.7
 ARG PGVECTOR_SHA256=cac0b10c360f05b2d521200105ba3697e773d4cd3731f5a915a7e37ebe0bea85

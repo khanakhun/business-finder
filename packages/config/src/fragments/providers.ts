@@ -10,5 +10,8 @@ export const providersEnv = z.object({
   PAGESPEED_API_KEY: secret(z.string().min(1).optional().describe('PageSpeed Insights API key (audits).')),
   FOURSQUARE_API_KEY: secret(z.string().min(1).optional().describe('Foursquare Places API key (discovery).')),
   HF_TOKEN: secret(z.string().min(1).optional().describe('Hugging Face access token.')),
+  ZEROBOUNCE_API_KEY: secret(
+    z.string().min(1).optional().describe('ZeroBounce API key (e-mail verification without SMTP port 25).'),
+  ),
   UNSPLASH_ACCESS_KEY: secret(z.string().min(1).optional().describe('Unsplash access key (stock photos).')),
 });

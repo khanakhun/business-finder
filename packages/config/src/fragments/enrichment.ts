@@ -16,6 +16,31 @@ export const enrichmentEnv = z.object({
     .max(1)
     .default(0)
     .describe('Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0).'),
+  REACHER_URL: z
+    .url()
+    .optional()
+    .describe(
+      'Self-hosted Reacher backend (compose profile `verify`; needs outbound port 25). Unset: skipped.',
+    ),
+  ENRICHMENT_EMAIL_VERIFY_COST_USD: z.coerce
+    .number()
+    .min(0)
+    .max(1)
+    .default(0.008)
+    .describe('Estimated cost of one commercial e-mail verification (ZeroBounce), for budgets.'),
+  EMAIL_VERIFY_PER_DOMAIN_PER_MINUTE: z.coerce
+    .number()
+    .positive()
+    .max(60)
+    .default(6)
+    .describe('Mailbox checks per recipient domain per minute (politeness towards mail servers).'),
+  EMAIL_VERIFY_CONCURRENCY: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(32)
+    .default(4)
+    .describe('SMTP mailbox checks (Reacher) running at once per worker process.'),
   ENRICHMENT_REFRESH_HOUR_UTC: z.coerce
     .number()
     .int()

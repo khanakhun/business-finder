@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EmailVerificationDetailsSchema, PublishedContextSchema } from './email-verification.ts';
 import { defineEvent } from './events.ts';
 import { LatLngSchema } from './geo.ts';
 import { BusinessId } from './ids.ts';
@@ -75,6 +76,7 @@ export const VERIFICATION_STATUSES = [
   'disposable',
 ] as const;
 export const VerificationStatusSchema = z.enum(VERIFICATION_STATUSES);
+export type VerificationStatus = z.infer<typeof VerificationStatusSchema>;
 
 export const ContactSchema = z
   .object({
@@ -97,6 +99,11 @@ export const ContactSchema = z
     confidence: z.number().min(0).max(1),
     verificationStatus: VerificationStatusSchema,
     verifiedAt: IsoDateTimeSchema.nullable(),
+    verificationDetails: EmailVerificationDetailsSchema.nullable().describe('email: what the verifier saw.'),
+    isFreeMail: z.boolean().nullable().describe('email: a free webmail domain (gmail.com, orange.fr…).'),
+    publishedContext: PublishedContextSchema.nullable().describe(
+      'email: where the business published it on its own site.',
+    ),
     firstSeenAt: IsoDateTimeSchema,
     lastSeenAt: IsoDateTimeSchema,
   })

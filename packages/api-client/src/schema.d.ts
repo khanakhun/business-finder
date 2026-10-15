@@ -550,6 +550,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/contacts/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify an e-mail contact now: starts an `email_verify` enrichment run for its business (or returns the run already open, 200). Addresses are checked at most once per TTL; fresh verdicts come from the cache. */
+        post: operations["verifyContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/discovery-runs": {
         parameters: {
             query?: never;
@@ -1361,6 +1378,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspace/diagnostics/smtp-port": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Can this deployment reach mail servers on port 25? Opens a TCP connection to a large provider’s MX (no mail sent). Without it, Reacher cannot check mailboxes: use the commercial verifier. */
+        post: operations["diagnoseSmtpPort"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspace/logo": {
         parameters: {
             query?: never;
@@ -1896,11 +1930,15 @@ export type components = {
             firstSeenAt: string;
             /** Format: uuid */
             id: string;
+            /** @description email: a free webmail domain (gmail.com, orange.fr…). */
+            isFreeMail: boolean | null;
             /** Format: date-time */
             lastSeenAt: string;
             normalizedValue: string;
             /** @description Only when published by the business itself (data minimization). */
             personName: string | null;
+            /** @description email: where the business published it on its own site. */
+            publishedContext: components["schemas"]["PublishedContext"] | null;
             publishedOnSite: boolean;
             /** @enum {string} */
             source: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "website" | "manual" | "import";
@@ -1910,6 +1948,8 @@ export type components = {
             /** @enum {string} */
             type: "email" | "phone" | "whatsapp" | "website_form" | "social";
             value: string;
+            /** @description email: what the verifier saw. */
+            verificationDetails: components["schemas"]["EmailVerificationDetails"] | null;
             /** @enum {string} */
             verificationStatus: "unknown" | "valid" | "invalid" | "catch_all" | "risky" | "disposable";
             verifiedAt: string | null;
@@ -2180,6 +2220,22 @@ export type components = {
             /** @constant */
             type: "BBox";
         };
+        EmailVerificationDetails: {
+            /** @enum {string} */
+            checkedVia: "reacher" | "zerobounce" | "dns" | "classification";
+            isCatchAll: boolean | null;
+            isDisposable: boolean | null;
+            isRoleAccount: boolean | null;
+            mxAcceptsMail: boolean | null;
+            /** @description The mail provider, when the verifier knows it. */
+            provider: string | null;
+            /**
+             * @description The verifier’s own verdict.
+             * @enum {string}
+             */
+            reachable: "safe" | "risky" | "invalid" | "unknown";
+            smtpCanConnect: boolean | null;
+        };
         EnrichBusinessRequest: {
             /**
              * @description Re-run steps whose last output is still fresh.
@@ -2228,6 +2284,8 @@ export type components = {
             trigger: "discovery" | "manual" | "bulk" | "schedule" | "event";
         };
         EnrichmentSettings: {
+            /** @description E-mail verifiers to try, in order (BF-028); `dns` (no mailbox check) is the usual last resort. */
+            emailVerifiers: ("reacher" | "zerobounce" | "dns")[];
             /** @description Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap. */
             monthlyBudgetUsd: number | null;
             /** @description Businesses with stale steps re-enriched per night (0 disables the nightly refresh). */
@@ -2763,6 +2821,12 @@ export type components = {
             results: number;
             sku: string;
         };
+        PublishedContext: {
+            foundAs: ("mailto" | "text" | "jsonld" | "cfemail" | "obfuscated") | null;
+            /** @enum {string} */
+            pageKind: "contact" | "home" | "footer" | "legal" | "other";
+            pageUrl: string | null;
+        };
         PutSecretRequest: {
             value: string;
         };
@@ -2962,7 +3026,7 @@ export type components = {
             last4: string | null;
             lastUsedAt: string | null;
             /** @enum {string} */
-            name: "google_places" | "pagespeed" | "anthropic" | "openai" | "foursquare" | "huggingface" | "unsplash";
+            name: "google_places" | "pagespeed" | "anthropic" | "openai" | "foursquare" | "huggingface" | "zerobounce" | "unsplash";
             provider: string;
             /** @description Where the value would come from: the workspace vault, the deployment env, or nowhere (null). */
             source: ("workspace" | "global") | null;
@@ -2982,6 +3046,15 @@ export type components = {
         SenderDefaults: {
             fromName?: string;
             signatureMarkdown?: string;
+        };
+        SmtpPortDiagnostic: {
+            error: ("timeout" | "refused" | "unreachable" | "dns" | "other") | null;
+            /** @description The mail server tried (an MX of a large mail provider). */
+            host: string | null;
+            latencyMs: number | null;
+            reachable: boolean;
+            /** @description Whether this deployment has a Reacher backend (it needs port 25 to check mailboxes). */
+            reacherConfigured: boolean;
         };
         SplitBusinessRequest: {
             sourceIds: string[];
@@ -3088,6 +3161,8 @@ export type components = {
                 runBudgetUsd?: number;
             };
             enrichment?: {
+                /** @description E-mail verifiers to try, in order (BF-028); `dns` (no mailbox check) is the usual last resort. */
+                emailVerifiers?: ("reacher" | "zerobounce" | "dns")[];
                 /** @description Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap. */
                 monthlyBudgetUsd?: number | null;
                 /** @description Businesses with stale steps re-enriched per night (0 disables the nightly refresh). */
@@ -6027,6 +6102,82 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    verifyContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichmentRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9788,6 +9939,62 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    diagnoseSmtpPort: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SmtpPortDiagnostic"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

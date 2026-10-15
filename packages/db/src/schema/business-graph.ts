@@ -5,6 +5,7 @@ import {
   type CategoryAttributes,
   CONTACT_TYPES,
   type ContactType,
+  type EmailVerificationDetails,
   type LocalizedText,
   MAPPING_ORIGINS,
   MAPPING_STATUSES,
@@ -17,6 +18,7 @@ import {
   type OperatingStatus,
   type PostalAddress,
   type Provenance,
+  type PublishedContext,
   SOURCE_PROVIDERS,
   type SourceProvider,
   TAXONOMY_PROVIDERS,
@@ -274,6 +276,10 @@ export const businessContacts = pgTable(
     submittedByOrgId: uuid().references(() => organization.id, { onDelete: 'set null' }),
     verificationStatus: text().$type<(typeof VERIFICATION_STATUSES)[number]>().notNull().default('unknown'),
     verifiedAt: tz(),
+    /** E-mails (BF-028): what the verifier saw, where the business published it, and whether it is webmail. */
+    verificationDetails: jsonb().$type<EmailVerificationDetails>(),
+    publishedContext: jsonb().$type<PublishedContext>(),
+    isFreeMail: boolean(),
     firstSeenAt: tz().notNull().defaultNow(),
     lastSeenAt: tz().notNull().defaultNow(),
     ...timestamps(),
@@ -430,5 +436,26 @@ export const possibleDuplicates = pgTable(
     check('ck_possible_duplicates__ordered_pair', sql`${table.businessAId} < ${table.businessBId}`),
     check('ck_possible_duplicates__status', sql`${table.status} IN (${inList(DUPLICATE_STATUS_VALUES)})`),
     check('ck_possible_duplicates__score', sql`${table.score} BETWEEN 0 AND 1`),
+  ],
+);
+
+/**
+ * E-mail verification results by address (BF-028), shared by every business and workspace: a mailbox is checked
+ * at most once per TTL (politeness towards mail servers, verifier costs).
+ */
+export const emailVerificationCache = pgTable(
+  'email_verification_cache',
+  {
+    email: citext().primaryKey(),
+    status: text().$type<(typeof VERIFICATION_STATUSES)[number]>().notNull(),
+    details: jsonb().$type<EmailVerificationDetails>().notNull(),
+    costUsd: numeric({ precision: 12, scale: 6, mode: 'number' }).notNull().default(0),
+    checkedAt: tz().notNull(),
+    expiresAt: tz().notNull(),
+    /** Consecutive inconclusive checks (greylisting…): their re-check backs off (1, 2, 4… days). */
+    inconclusiveStreak: smallint().notNull().default(0),
+  },
+  (table) => [
+    check('ck_email_verification_cache__status', sql`${table.status} IN (${inList(VERIFICATION_STATUSES)})`),
   ],
 );

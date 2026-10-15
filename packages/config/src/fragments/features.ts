@@ -15,6 +15,9 @@ export const featureFlagsEnv = z.object({
   FAKE_SITE_INTEL: booleanFlag(false).describe(
     'Website crawls answer from a built-in fake instead of services/intel (tests and E2E only; refused in production).',
   ),
+  FAKE_EMAIL_VERIFIER: booleanFlag(false).describe(
+    'E-mail verification answers from a built-in fake (no SMTP or DNS; tests and E2E only; refused in production).',
+  ),
   FAKE_CONNECTION_TESTS: booleanFlag(false).describe(
     'Development/E2E only: provider connection tests succeed without calling providers. Refused in production.',
   ),

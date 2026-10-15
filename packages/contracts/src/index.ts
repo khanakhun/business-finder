@@ -47,6 +47,7 @@ export {
   type TrackBusinessRequest,
   TrackBusinessRequestSchema,
   VERIFICATION_STATUSES,
+  type VerificationStatus,
   VerificationStatusSchema,
 } from './business.ts';
 export {
@@ -267,6 +268,24 @@ export {
   TERMINAL_RUN_STATUSES,
   TILE_STRATEGIES,
 } from './discovery-runs.ts';
+export {
+  DEFAULT_EMAIL_VERIFIERS,
+  EMAIL_CHECK_SOURCES,
+  EMAIL_FOUND_AS,
+  EMAIL_VERIFIERS,
+  type EmailFoundAs,
+  type EmailVerificationDetails,
+  EmailVerificationDetailsSchema,
+  type EmailVerifierId,
+  EmailVerifierIdSchema,
+  PUBLISHED_PAGE_KINDS,
+  type PublishedContext,
+  PublishedContextSchema,
+  type PublishedPageKind,
+  SMTP_PROBE_ERRORS,
+  type SmtpPortDiagnostic,
+  SmtpPortDiagnosticSchema,
+} from './email-verification.ts';
 export {
   type BulkEnrichRequest,
   BulkEnrichRequestSchema,

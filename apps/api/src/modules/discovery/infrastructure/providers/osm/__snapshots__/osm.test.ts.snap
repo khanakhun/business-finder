@@ -1,0 +1,125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OSM records > maps recorded Overpass elements (named only, centres for ways) 1`] = `
+[
+  {
+    "address": {
+      "city": "Gustavia",
+      "line1": "5 Rue Imaginaire",
+      "postalCode": "97133",
+    },
+    "attributes": {
+      "openingHours": "Mo-Fr 07:00-18:30; Sa 08:00-14:00; Su off",
+      "osmType": "node",
+    },
+    "emails": [
+      "contact@cafe-osm.example",
+    ],
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "hours": [
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 0,
+      },
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 1,
+      },
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 2,
+      },
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 3,
+      },
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 4,
+      },
+      {
+        "closesAt": "14:00",
+        "opensAt": "08:00",
+        "weekday": 5,
+      },
+    ],
+    "location": {
+      "lat": 17.8965,
+      "lng": -62.8501,
+    },
+    "name": "Café Fictif OSM",
+    "operatingStatus": "unknown",
+    "phones": [
+      "+590 590 00 00 10",
+      "+590 690 00 00 10",
+    ],
+    "provider": "osm",
+    "providerCategories": [
+      {
+        "key": "amenity=cafe",
+      },
+    ],
+    "providerRef": "node/1000000001",
+    "raw": {
+      "id": 1000000001,
+      "tags": {
+        "addr:city": "Gustavia",
+        "addr:housenumber": "5",
+        "addr:postcode": "97133",
+        "addr:street": "Rue Imaginaire",
+        "amenity": "cafe",
+        "contact:instagram": "https://www.instagram.com/cafe_osm_fictif",
+        "email": "contact@cafe-osm.example",
+        "name": "Café Fictif OSM",
+        "opening_hours": "Mo-Fr 07:00-18:30; Sa 08:00-14:00; Su off",
+        "phone": "+590 590 00 00 10;+590 690 00 00 10",
+        "website": "https://cafe-osm.example",
+      },
+      "type": "node",
+    },
+    "socials": [
+      "https://www.instagram.com/cafe_osm_fictif",
+    ],
+    "website": "https://cafe-osm.example",
+  },
+  {
+    "attributes": {
+      "openingHours": "sunrise-sunset",
+      "osmType": "way",
+    },
+    "emails": [],
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "location": {
+      "lat": 17.9041,
+      "lng": -62.8182,
+    },
+    "name": "Boulangerie OSM Démo",
+    "operatingStatus": "unknown",
+    "phones": [],
+    "provider": "osm",
+    "providerCategories": [
+      {
+        "key": "shop=bakery",
+      },
+    ],
+    "providerRef": "way/2000000002",
+    "raw": {
+      "id": 2000000002,
+      "tags": {
+        "name": "Boulangerie OSM Démo",
+        "opening_hours": "sunrise-sunset",
+        "shop": "bakery",
+        "website": "www.boulangerie-demo.example",
+      },
+      "type": "way",
+    },
+    "socials": [],
+    "website": "https://www.boulangerie-demo.example",
+  },
+]
+`;

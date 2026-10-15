@@ -130,6 +130,10 @@ export {
   type ProviderUsageRow,
   ProviderUsageRowSchema,
   resolveDiscoverySettings,
+  SCRAPER_WARNING,
+  SCRAPER_WARNING_VERSION,
+  type ScraperStatus,
+  ScraperStatusSchema,
 } from './discovery.ts';
 export {
   BudgetExceededError,
@@ -293,6 +297,18 @@ export {
   type UpdateNotificationPreferencesRequest,
   UpdateNotificationPreferencesRequestSchema,
 } from './notifications.ts';
+export {
+  OPEN_DATA_DATASETS,
+  type OpenDataDataset,
+  OpenDataDatasetSchema,
+  OpenDataGeometrySchema,
+  type OpenDataPlace,
+  OpenDataPlaceSchema,
+  type OpenDataSearchRequest,
+  OpenDataSearchRequestSchema,
+  type OpenDataSearchResponse,
+  OpenDataSearchResponseSchema,
+} from './open-data.ts';
 export {
   type CursorData,
   type CursorOptions,

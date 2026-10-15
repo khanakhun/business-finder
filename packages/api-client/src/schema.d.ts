@@ -293,6 +293,41 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/discovery/scraper": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Google Maps scraper gates: deployment switch, workspace flag, owner acknowledgement, warning text */
+        get: operations["getScraperStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery/scraper/acknowledgement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge the scraper ToS warning (workspace owner only; recorded in the audit log) */
+        post: operations["acknowledgeScraperWarning"];
+        /** Withdraw the scraper acknowledgement (workspace owner only) */
+        delete: operations["revokeScraperAcknowledgement"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/discovery/usage": {
         parameters: {
             query?: never;
@@ -1143,6 +1178,8 @@ export type components = {
             googleFieldTier: "essentials" | "pro" | "enterprise";
             /** @description Provider spend allowed per calendar month (UTC); null for no workspace cap. */
             monthlyBudgetUsd: number | null;
+            /** @description Pinned Overture release (e.g. 2026-09-23.1); null follows the latest release. */
+            overtureRelease: string | null;
             /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
             providerOrder: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
         };
@@ -1590,6 +1627,26 @@ export type components = {
              */
             categoryId?: string;
         };
+        ScraperStatus: {
+            /** @description The owner acknowledgement in force (current warning version), if any. */
+            acknowledgement: {
+                /** Format: date-time */
+                acknowledgedAt: string;
+                userId: string | null;
+                warningVersion: number;
+            } | null;
+            /** @description All three gates pass: the scraper may run for this workspace. */
+            allowed: boolean;
+            /** @description FEATURE_MAPS_SCRAPER is on and a scraper URL is configured. */
+            deployed: boolean;
+            /** @description The workspace feature flag `mapsScraper` is on. */
+            flagEnabled: boolean;
+            warning: {
+                en: string;
+                fr: string;
+            };
+            warningVersion: number;
+        };
         SecretList: {
             items: components["schemas"]["SecretSummary"][];
         };
@@ -1682,6 +1739,8 @@ export type components = {
                 googleFieldTier?: "essentials" | "pro" | "enterprise";
                 /** @description Provider spend allowed per calendar month (UTC); null for no workspace cap. */
                 monthlyBudgetUsd?: number | null;
+                /** @description Pinned Overture release (e.g. 2026-09-23.1); null follows the latest release. */
+                overtureRelease?: string | null;
                 /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
                 providerOrder?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
             };
@@ -3033,6 +3092,171 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DiscoveryProviderList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getScraperStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScraperStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    acknowledgeScraperWarning: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    warningVersion: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScraperStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    revokeScraperAcknowledgement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScraperStatus"];
                 };
             };
             /** @description Problem details (RFC 9457) */

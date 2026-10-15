@@ -4,6 +4,7 @@ import type { Logger } from '@bf/observability';
 import { type DynamicModule, Inject, Module, type OnModuleInit } from '@nestjs/common';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
+import { IntelClient } from '../platform/intel/intel-client.ts';
 import { LOGGER } from '../platform/logging/logger.ts';
 import { ConnectionTesterRegistry, SecretResolver, WorkspaceDefaults } from '../workspace/index.ts';
 import {
@@ -20,6 +21,7 @@ import {
   type RateLimiter,
 } from './application/ports.ts';
 import { ProviderRegistry } from './application/provider-registry.ts';
+import { ScraperAcknowledgement } from './application/scraper-acknowledgement.ts';
 import type { DiscoveryProvider } from './domain/provider.port.ts';
 import { DrizzleCategoryProviderKeys } from './infrastructure/drizzle-category-provider-keys.ts';
 import { DrizzleProviderUsageMeter } from './infrastructure/drizzle-provider-usage-meter.ts';
@@ -27,6 +29,9 @@ import { GuardedProvider } from './infrastructure/guarded-provider.ts';
 import { buildProviderPolicy } from './infrastructure/provider-resilience.ts';
 import { FakeDiscoveryProvider } from './infrastructure/providers/fake/provider.ts';
 import { GooglePlacesProvider } from './infrastructure/providers/google-places/provider.ts';
+import { MapsScraperProvider } from './infrastructure/providers/maps-scraper/provider.ts';
+import { OpenDataProvider } from './infrastructure/providers/open-data/provider.ts';
+import { OsmOverpassProvider } from './infrastructure/providers/osm/provider.ts';
 import { ValkeyRateLimiter } from './infrastructure/valkey-rate-limiter.ts';
 import { DiscoveryController } from './interface/http/discovery.controller.ts';
 
@@ -39,7 +44,17 @@ function fakeProviderEnabled(env: ApiEnv): boolean {
 
 const registryProvider = {
   provide: ProviderRegistry,
-  inject: [APP_ENV, CLOCK, SecretResolver, RATE_LIMITER, PROVIDER_USAGE_METER, WorkspaceDefaults, LOGGER],
+  inject: [
+    APP_ENV,
+    CLOCK,
+    SecretResolver,
+    RATE_LIMITER,
+    PROVIDER_USAGE_METER,
+    WorkspaceDefaults,
+    LOGGER,
+    IntelClient,
+    ScraperAcknowledgement,
+  ],
   useFactory: (
     env: AppEnv,
     clock: Clock,
@@ -48,6 +63,8 @@ const registryProvider = {
     meter: ProviderUsageMeter,
     defaults: WorkspaceDefaults,
     logger: Logger,
+    intel: IntelClient,
+    acknowledgement: ScraperAcknowledgement,
   ) => {
     const apiEnv = env as ApiEnv;
     const guard = (provider: DiscoveryProvider, perSecond: number | null) =>
@@ -62,7 +79,42 @@ const registryProvider = {
         monthlyBudgetUsd: async (organizationId) =>
           (await defaults.discoverySettings(organizationId)).monthlyBudgetUsd,
       });
-    const providers = [guard(new GooglePlacesProvider(clock), apiEnv.GOOGLE_PLACES_REQUESTS_PER_SECOND)];
+    const providers = [
+      guard(new GooglePlacesProvider(clock), apiEnv.GOOGLE_PLACES_REQUESTS_PER_SECOND),
+      guard(
+        new OpenDataProvider({
+          dataset: 'overture',
+          intel,
+          clock,
+          releaseFor: async (orgId) => (await defaults.discoverySettings(orgId)).overtureRelease,
+        }),
+        null,
+      ),
+      guard(new OpenDataProvider({ dataset: 'foursquare', intel, clock }), null),
+      guard(
+        new OsmOverpassProvider({
+          clock,
+          endpoint: apiEnv.OVERPASS_URL,
+          contactEmail: apiEnv.OVERPASS_CONTACT_EMAIL,
+        }),
+        apiEnv.OVERPASS_REQUESTS_PER_SECOND,
+      ),
+    ];
+    // Legally sensitive: registered only when the deployment enables it (the workspace flag and an owner
+    // acknowledgement are checked per call).
+    if (apiEnv.FEATURE_MAPS_SCRAPER && apiEnv.MAPS_SCRAPER_URL) {
+      providers.push(
+        guard(
+          new MapsScraperProvider({
+            clock,
+            baseUrl: apiEnv.MAPS_SCRAPER_URL,
+            maxTimeSeconds: apiEnv.MAPS_SCRAPER_MAX_TIME_SECONDS,
+            acknowledged: (orgId) => acknowledgement.allowed(orgId),
+          }),
+          1,
+        ),
+      );
+    }
     if (fakeProviderEnabled(apiEnv)) providers.push(guard(new FakeDiscoveryProvider(clock), null));
     return new ProviderRegistry(providers);
   },
@@ -98,6 +150,8 @@ export class DiscoveryModule implements OnModuleInit {
         { provide: CATEGORY_PROVIDER_KEYS, useClass: DrizzleCategoryProviderKeys },
         { provide: PROVIDER_USAGE_METER, useClass: DrizzleProviderUsageMeter },
         { provide: RATE_LIMITER, useClass: ValkeyRateLimiter },
+        IntelClient,
+        ScraperAcknowledgement,
         registryProvider,
         ProviderQueryBuilder,
         ProviderCostEstimator,

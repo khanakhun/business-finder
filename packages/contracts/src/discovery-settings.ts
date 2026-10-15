@@ -31,6 +31,11 @@ export const DiscoverySettingsSchema = z
     googleFieldTier: FieldTierSchema.describe(
       'Response detail requested from Google Places (and so its SKU).',
     ),
+    overtureRelease: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}\.\d{1,3}$/)
+      .nullable()
+      .describe('Pinned Overture release (e.g. 2026-09-23.1); null follows the latest release.'),
     monthlyBudgetUsd: z
       .number()
       .min(0)
@@ -45,6 +50,7 @@ export const DEFAULT_DISCOVERY_SETTINGS: DiscoverySettings = {
   providerOrder: ['overture', 'foursquare', 'osm', 'google_places', 'gmaps_scraper'],
   disabledProviders: [],
   googleFieldTier: 'pro',
+  overtureRelease: null,
   monthlyBudgetUsd: null,
 };
 

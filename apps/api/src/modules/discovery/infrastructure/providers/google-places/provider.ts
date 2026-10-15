@@ -8,6 +8,7 @@ import type {
   ProviderFetchResult,
   ProviderKey,
 } from '../../../domain/provider.port.ts';
+import { circleBounds, distanceM } from '../../../domain/tile-geometry.ts';
 import { GooglePlacesClient, type SearchResponse } from './client.ts';
 import { effectiveTier, fieldMask, type GoogleEndpoint, ID_ONLY_TEXT_MASK, skuFor } from './field-masks.ts';
 import { GOOGLE_PLACES_COST_MODEL, GOOGLE_PLACES_LICENSING } from './licensing.ts';
@@ -21,34 +22,12 @@ const NEARBY_MAX_RESULTS = 20;
 const MAX_TYPES = 50;
 const MAX_RADIUS_M = 50_000;
 
-const KM_PER_DEGREE_LAT = 110.574;
-
-/** The rectangle enclosing a circle (Text Search restricts to rectangles only). */
-function circleBounds(center: { lat: number; lng: number }, radiusM: number): BBox {
-  const dLat = radiusM / 1000 / KM_PER_DEGREE_LAT;
-  const dLng = radiusM / 1000 / (111.32 * Math.max(0.01, Math.cos((center.lat * Math.PI) / 180)));
-  return {
-    west: Math.max(-180, center.lng - dLng),
-    south: Math.max(-90, center.lat - dLat),
-    east: Math.min(180, center.lng + dLng),
-    north: Math.min(90, center.lat + dLat),
-  };
-}
-
 const rectangle = (box: BBox) => ({
   rectangle: {
     low: { latitude: box.south, longitude: box.west },
     high: { latitude: box.north, longitude: box.east },
   },
 });
-
-function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-  const rad = Math.PI / 180;
-  const h =
-    Math.sin(((b.lat - a.lat) * rad) / 2) ** 2 +
-    Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(((b.lng - a.lng) * rad) / 2) ** 2;
-  return 2 * 6_371_000 * Math.asin(Math.sqrt(h));
-}
 
 const phrase = (key: ProviderKey) => key.label ?? key.key.replace(/_/g, ' ');
 

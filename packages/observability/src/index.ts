@@ -17,6 +17,7 @@ export {
 } from './logger.ts';
 export { LATENCY_BUCKETS_SECONDS, metrics, metricsHandler, registry } from './metrics.ts';
 export { injectTraceContext, runWithExtractedContext, type TraceCarrier } from './propagation.ts';
+export { RedactUrlProcessor, redactQuery, redactUrl } from './redact-urls.ts';
 export {
   type InitTelemetryOptions,
   initTelemetry,

@@ -14,6 +14,7 @@ import {
   TraceIdRatioBasedSampler,
 } from '@opentelemetry/sdk-trace-base';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import { RedactUrlProcessor } from './redact-urls.ts';
 
 export type TraceExporterKind = 'otlp' | 'console' | 'none';
 
@@ -53,7 +54,8 @@ export function initTelemetry(options: InitTelemetryOptions): Telemetry {
   if (options.exporter === 'otlp' && !options.otlpEndpoint)
     throw new Error('exporter "otlp" needs otlpEndpoint');
 
-  const processors: SpanProcessor[] = [...(options.spanProcessors ?? [])];
+  // URL redaction first: no processor or exporter after it sees keys or addresses in query strings.
+  const processors: SpanProcessor[] = [new RedactUrlProcessor(), ...(options.spanProcessors ?? [])];
   if (options.exporter === 'otlp') {
     const url = `${options.otlpEndpoint?.replace(/\/$/, '')}/v1/traces`;
     processors.push(new BatchSpanProcessor(new OTLPTraceExporter({ url })));

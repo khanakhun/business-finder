@@ -4,6 +4,7 @@ import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-tr
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createLogger } from './logger.ts';
 import { injectTraceContext, runWithExtractedContext } from './propagation.ts';
+import { redactUrl } from './redact-urls.ts';
 import { initTelemetry, startSpan } from './telemetry.ts';
 
 const exporter = new InMemorySpanExporter();
@@ -136,5 +137,36 @@ describe('initTelemetry validation', () => {
       /samplingRatio/,
     );
     expect(() => initTelemetry({ serviceName: 'x', exporter: 'otlp' })).toThrow(/otlpEndpoint/);
+  });
+});
+
+describe('URL redaction', () => {
+  it('never exports a key or an e-mail address from a request URL', async () => {
+    const key = '0123456789abcdef0123456789abcdef';
+    await startSpan(
+      'GET',
+      {
+        'url.full': `https://api.zerobounce.example/v2/validate?api_key=${key}&email=jean%40salon.example&timeout=20`,
+        'url.query': `api_key=${key}&email=jean@salon.example`,
+        'http.url': `https://api.example/v1?to_email=a@b.example&page=2#top`,
+      },
+      () => undefined,
+    );
+    const [span] = await finishedSpans();
+    const exported = JSON.stringify(span?.attributes);
+    expect(exported).not.toContain(key);
+    expect(exported).not.toContain('jean');
+    expect(span?.attributes['url.full']).toBe(
+      'https://api.zerobounce.example/v2/validate?api_key=[redacted]&email=[redacted]&timeout=20',
+    );
+    expect(span?.attributes['http.url']).toBe('https://api.example/v1?to_email=[redacted]&page=2#top');
+  });
+
+  it('leaves URLs without sensitive values alone', () => {
+    expect(redactUrl('https://places.example/v1/places:searchText')).toBe(
+      'https://places.example/v1/places:searchText',
+    );
+    expect(redactUrl('/v1/search?q=bakery&page=2')).toBe('/v1/search?q=bakery&page=2');
+    expect(redactUrl('/v1/x?contact=info%40cafe.example')).toBe('/v1/x?contact=[redacted]');
   });
 });

@@ -43,10 +43,13 @@ compose_file() {
   else echo docker-compose.prod.yml; fi
 }
 # The deploy directory stays the project directory wherever the release's file lives: .env and the env files
-# (app.env, caddy.env, backup.env) are read from there.
+# (app.env, caddy.env, backup.env) are read from there. Files shipped with the compose file (the Chromium seccomp
+# profile) are found through RELEASE_DIR, the compose file's own directory.
 compose() {
-  IMAGE_TAG="$1" docker compose --project-name "$project" --project-directory "$deploy_dir" \
-    --env-file "$deploy_dir/.env" --file "$(compose_file "$1")" "${@:2}"
+  local file
+  file="$(compose_file "$1")"
+  IMAGE_TAG="$1" RELEASE_DIR="$deploy_dir/$(dirname "$file")" docker compose --project-name "$project" \
+    --project-directory "$deploy_dir" --env-file "$deploy_dir/.env" --file "$file" "${@:2}"
 }
 
 # Through Caddy, as a visitor would arrive (TLS and routing included), but resolved locally.
@@ -67,6 +70,13 @@ healthy() {
 }
 
 log "deploying ${new_tag} (current: ${current_tag:-none})"
+# Files the compose file needs next to it (BF-026: intel's seccomp profile). Missing = an outdated forced command
+# on the server (it extracts only the members it knows): stop before anything changes.
+release_dir="$(dirname "$(compose_file "$new_tag")")"
+if grep -q 'seccomp-chromium.json' "$(compose_file "$new_tag")" && [ ! -f "$release_dir/seccomp-chromium.json" ]; then
+  log "missing $release_dir/seccomp-chromium.json: reinstall the forced command (runbook §4.1), then deploy again"
+  exit 1
+fi
 # BF_SKIP_PULL=1: images built on this machine (local rehearsal of a deploy, docs/runbooks/staging-setup.md).
 [ "${BF_SKIP_PULL:-}" = 1 ] || compose "$new_tag" pull --quiet
 log "running migrations"

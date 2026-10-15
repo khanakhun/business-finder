@@ -35,6 +35,19 @@ systemctl enable --now fail2ban
 dpkg-reconfigure -f noninteractive unattended-upgrades
 ```
 
+The intel container renders crawled pages in Chromium **with Chromium's own sandbox**, which needs unprivileged user
+namespaces (its seccomp profile, `seccomp-chromium.json`, allows them; it ships with each release). Ubuntu 24.04
+restricts them through AppArmor by default; allow them (Debian 13 needs nothing):
+
+```sh
+[ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ] && \
+  echo 'kernel.apparmor_restrict_unprivileged_userns = 0' > /etc/sysctl.d/60-bf-chromium-sandbox.conf && \
+  sysctl --system
+```
+
+If the sandbox cannot start, intel's readiness check (`browser`) fails, its container stays unhealthy and the deploy
+rolls back — `dc logs intel` says why. `SITE_INTEL_CHROMIUM_SANDBOX=false` in `intel.env` is a stop-gap only.
+
 Install Docker Engine and the Compose plugin **from Docker's repository** (follow
 <https://docs.docker.com/engine/install/> for your distribution), then:
 
@@ -137,6 +150,9 @@ script, log in/out of GHCR, `deploy <sha>`): no shell, no forwarding.
 
 1. Install the forced command, root-owned (from a checkout of `main`):
    `server$ sudo install -o root -g root -m 0755 ssh-command.sh /usr/local/bin/bf-deploy-command`
+   **Reinstall it whenever `infra/deploy/ssh-command.sh` changes**, from the new `main`, then re-run
+   **deploy-staging**. (BF-026 added `seccomp-chromium.json` to the upload: the first deploy after that merge stops
+   early, with a message saying so, until the command is reinstalled — nothing is changed on the server.)
 2. Create the key pair: `local$ ssh-keygen -t ed25519 -f bf-staging-deploy -C bf-staging-deploy`, then add **one line**
    to `/home/deploy/.ssh/authorized_keys`:
    `restrict,command="/usr/local/bin/bf-deploy-command" ssh-ed25519 AAAA… bf-staging-deploy`
@@ -154,8 +170,9 @@ script, log in/out of GHCR, `deploy <sha>`): no shell, no forwarding.
 ## 5. First deploy
 
 Merge to `main` (or run **Actions → deploy-staging → Run workflow** with a sha of a green `main` build). The job checks
-that the sha is on `main`, uploads `docker-compose.prod.yml` (to `/opt/bf/releases/<sha>/`: a rollback uses each
-release's own file) and `deploy.sh` **from main**, then runs
+that the sha is on `main`, uploads `docker-compose.prod.yml` and `seccomp-chromium.json` (the intel container's
+seccomp profile: Docker's default plus the user namespaces Chromium's sandbox needs) to `/opt/bf/releases/<sha>/` (a
+rollback uses each release's own files), and `deploy.sh` **from main**, then runs
 `deploy.sh <sha>` (a build older than the deployed one is skipped):
 
 1. `docker compose pull`
@@ -168,7 +185,8 @@ release's own file) and `deploy.sh` **from main**, then runs
 Then create the first owner (prints a one-time link to choose a password):
 
 ```sh
-server$ cd /opt/bf && IMAGE_TAG=$(cat IMAGE_TAG) docker compose -p bf --project-directory . --env-file .env \
+server$ cd /opt/bf && IMAGE_TAG=$(cat IMAGE_TAG) RELEASE_DIR="/opt/bf/releases/$(cat IMAGE_TAG)" \
+          docker compose -p bf --project-directory . --env-file .env \
           -f "releases/$(cat IMAGE_TAG)/docker-compose.prod.yml" \
           run --rm api admin:bootstrap --email you@example.com --name "Your Name" --workspace "Your agency"
 ```
@@ -180,7 +198,7 @@ Check from anywhere: `local$ node scripts/smoke-staging.mjs https://app.example.
 Run these in `/opt/bf` after:
 
 ```sh
-export IMAGE_TAG=$(cat IMAGE_TAG)
+export IMAGE_TAG=$(cat IMAGE_TAG) RELEASE_DIR="/opt/bf/releases/$(cat IMAGE_TAG)"
 alias dc='docker compose -p bf --project-directory /opt/bf --env-file /opt/bf/.env -f "/opt/bf/releases/$IMAGE_TAG/docker-compose.prod.yml"'
 ```
 

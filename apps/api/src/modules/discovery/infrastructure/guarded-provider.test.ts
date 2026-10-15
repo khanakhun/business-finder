@@ -56,7 +56,10 @@ function setup(
       options.secret === null ? undefined : { value: 'fake-key', source: options.secret ?? 'workspace' },
     ),
   } as unknown as SecretResolver;
-  const limiter: RateLimiter = { acquire: vi.fn(async () => options.token ?? true) };
+  const limiter: RateLimiter = {
+    acquire: vi.fn(async () => options.token ?? true),
+    tryTake: vi.fn(async () => 0),
+  };
   const meter = {
     record: vi.fn(async () => {
       if (options.meterFails) throw new Error('db down');

@@ -13,12 +13,12 @@ import {
   signUpVerified,
 } from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
+import { ValkeyRateLimiter } from '../platform/rate-limit/valkey-rate-limiter.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { ProviderQueryBuilder } from './application/discovery.services.ts';
 import { PROVIDER_USAGE_METER, type ProviderUsageMeter } from './application/ports.ts';
 import { ProviderRegistry } from './application/provider-registry.ts';
 import { DrizzleCategoryProviderKeys } from './infrastructure/drizzle-category-provider-keys.ts';
-import { ValkeyRateLimiter } from './infrastructure/valkey-rate-limiter.ts';
 
 const mailer = new FakeMailer();
 let t: TestApp;

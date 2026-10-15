@@ -1,9 +1,22 @@
 import type { Clock } from '@bf/contracts';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { Redis } from 'ioredis';
-import { CLOCK } from '../../platform/clock/clock.module.ts';
-import { VALKEY } from '../../platform/valkey/valkey.module.ts';
-import type { RateLimiter } from '../application/ports.ts';
+import { CLOCK } from '../clock/clock.module.ts';
+import { VALKEY } from '../valkey/valkey.module.ts';
+
+/** Token bucket per key (a provider and its key, a mailbox…), shared by every process. */
+export interface RateLimiter {
+  /** One attempt: 0 when a token was taken, else the milliseconds until one is available. */
+  tryTake(key: string, limit: { readonly capacity: number; readonly perSecond: number }): Promise<number>;
+  /** Takes one token, waiting for it up to `maxWaitMs`; false when none came in time. */
+  acquire(
+    key: string,
+    limit: { readonly capacity: number; readonly perSecond: number },
+    signal: AbortSignal,
+    maxWaitMs?: number,
+  ): Promise<boolean>;
+}
+export const RATE_LIMITER = Symbol('RateLimiter');
 
 /**
  * Token bucket in one Lua call (atomic across processes): refills `perSecond` tokens per second up to `capacity`;

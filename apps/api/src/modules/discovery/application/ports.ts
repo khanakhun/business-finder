@@ -35,17 +35,8 @@ export interface ProviderUsageMeter {
 }
 export const PROVIDER_USAGE_METER = Symbol('ProviderUsageMeter');
 
-/** Token bucket per provider and key, shared by every process. */
-export interface RateLimiter {
-  /** Takes one token, waiting for it up to `maxWaitMs`; false when none came in time. */
-  acquire(
-    key: string,
-    limit: { readonly capacity: number; readonly perSecond: number },
-    signal: AbortSignal,
-    maxWaitMs?: number,
-  ): Promise<boolean>;
-}
-export const RATE_LIMITER = Symbol('RateLimiter');
+// Token buckets are shared with other modules (enrichment steps): defined in platform.
+export { RATE_LIMITER, type RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
 
 export const billingScopeOf = (organizationId: string, source: 'workspace' | 'global' | null) =>
   source === 'workspace' ? organizationId : 'global';

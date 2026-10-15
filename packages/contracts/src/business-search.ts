@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AddedViaSchema, BusinessSummarySchema, PIPELINE_STATUSES } from './business.ts';
+import { EnrichmentListingStatusSchema } from './enrichment.ts';
 import { BusinessId } from './ids.ts';
 import { defineJob } from './jobs.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
@@ -163,6 +164,9 @@ export const BusinessListItemSchema = BusinessSummarySchema.extend({
   distanceMeters: z.number().nullable().describe('From `near` or the area centre; null otherwise.'),
   hasEmail: z.boolean().describe('Whether an email contact is known (the address itself is not listed).'),
   addedVia: AddedViaSchema,
+  enrichment: z
+    .object({ status: EnrichmentListingStatusSchema, finishedAt: IsoDateTimeSchema.nullable() })
+    .describe("This workspace's latest enrichment run of the business (BF-027)."),
 }).meta({ id: 'BusinessListItem' });
 export type BusinessListItem = z.infer<typeof BusinessListItemSchema>;
 

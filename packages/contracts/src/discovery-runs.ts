@@ -55,7 +55,7 @@ export const DiscoveryRunOptionsSchema = z
     autoEnrich: z
       .boolean()
       .default(false)
-      .describe('Emit `discovery.business_found` for enrichment (BF-027).'),
+      .describe('Enrich businesses this run adds to the workspace (`discovery.business.found`, BF-027).'),
     maxResults: z
       .number()
       .int()

@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { BusinessGraphModule } from './modules/business-graph/index.ts';
+import { CrmModule } from './modules/crm/index.ts';
 import { DiscoveryModule } from './modules/discovery/index.ts';
 import { GeoModule } from './modules/geo/index.ts';
 import { IdentityModule } from './modules/identity/identity.module.ts';
@@ -45,6 +46,8 @@ export class AppModule {
         // Before BusinessGraphModule: Express matches routes in registration order, and the listing's
         // `GET /businesses/facets` (search) must win over `GET /businesses/:id` (business graph).
         SearchModule.forRoot(mode),
+        // Before BusinessGraphModule too: `businesses/bulk/*` must win over `businesses/:id/*` routes.
+        CrmModule.forRoot(mode),
         BusinessGraphModule.forRoot(mode),
         GeoModule.forRoot(mode),
         DiscoveryModule.forRoot(mode),

@@ -120,6 +120,13 @@
       "when": 1792078421237,
       "tag": "0016_idx_org_businesses_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792086098877,
+      "tag": "0017_crm_basics",
+      "breakpoints": true
     }
   ]
 }

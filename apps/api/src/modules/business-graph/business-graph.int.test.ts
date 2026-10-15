@@ -181,7 +181,7 @@ describe('GET /v1/businesses/:id', () => {
     const [category] = await db
       .insert(categories)
       .values({
-        slug: `cafe-${business.id.slice(-6)}`,
+        slug: `cafe_${business.id.slice(-6)}`,
         path: 'food_drink.cafe',
         labels: { en: 'Café', fr: 'Café' },
       })

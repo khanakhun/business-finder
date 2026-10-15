@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Cabinet Immobilier des Îles",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "real_estate_agency"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Achat, vente et estimation de maisons, terrains et appartements. Plus de 200 biens en portefeuille.",
+    "candidates": [
+      {
+        "id": "real_estate_agency",
+        "label": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "property_management",
+        "label": "Gestion locative",
+        "path": "real_estate › property_management"
+      },
+      {
+        "id": "notary",
+        "label": "Notaire",
+        "path": "professional_services › legal_services › notary"
+      },
+      {
+        "id": "villa_rental_agency",
+        "label": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "real_estate_appraiser",
+        "label": "Expert immobilier",
+        "path": "real_estate › real_estate_appraiser"
+      },
+      {
+        "id": "condominium_manager",
+        "label": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "property_developer",
+        "label": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      }
+    ]
+  },
+  "output": {
+    "primary": "real_estate_agency",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, website)."
+  }
+}

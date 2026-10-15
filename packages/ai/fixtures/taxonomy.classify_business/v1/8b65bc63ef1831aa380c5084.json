@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Bayside FreshMart Supermarket",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "supermarket"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "grocery_store",
+        "label": "Grocery store",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "department_store",
+        "label": "Department store",
+        "path": "retail_shopping › department_store"
+      },
+      {
+        "id": "farmers_market",
+        "label": "Farmers market",
+        "path": "retail_shopping › food_retail › farmers_market"
+      },
+      {
+        "id": "supermarket",
+        "label": "Supermarket",
+        "path": "retail_shopping › food_retail › supermarket"
+      },
+      {
+        "id": "organic_store",
+        "label": "Organic store",
+        "path": "retail_shopping › food_retail › organic_store"
+      },
+      {
+        "id": "greengrocer",
+        "label": "Greengrocer",
+        "path": "retail_shopping › food_retail › greengrocer"
+      },
+      {
+        "id": "wholesaler",
+        "label": "Wholesaler",
+        "path": "industry_trade › wholesaler"
+      }
+    ]
+  },
+  "output": {
+    "primary": "supermarket",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

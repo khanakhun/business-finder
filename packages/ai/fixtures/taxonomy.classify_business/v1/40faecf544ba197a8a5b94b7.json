@@ -1,0 +1,66 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Hugo's Hardware & Pool",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "hardware_store"
+      },
+      {
+        "provider": "overture",
+        "key": "pool_service"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "pool_services",
+        "label": "Pool services",
+        "path": "home_services › pool_services"
+      },
+      {
+        "id": "building_supplies",
+        "label": "Building supplies",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "label": "Electrical & plumbing supplies",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      },
+      {
+        "id": "pool_maintenance",
+        "label": "Pool maintenance",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "hardware_store",
+        "label": "Hardware store",
+        "path": "home_construction › construction_supplies › hardware_store"
+      },
+      {
+        "id": "garden_center",
+        "label": "Garden center",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "pool_construction",
+        "label": "Pool builder",
+        "path": "home_services › pool_services › pool_construction"
+      },
+      {
+        "id": "sporting_goods_store",
+        "label": "Sporting goods store",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      }
+    ]
+  },
+  "output": {
+    "primary": "hardware_store",
+    "secondary": ["pool_maintenance", "pool_services"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous)."
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Au Jardin d'Hibiscus",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "florist"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "landscaping",
+        "label": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "garden_center",
+        "label": "Jardinerie",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "gift_shop",
+        "label": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "florist",
+        "label": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "home_decor_store",
+        "label": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      },
+      {
+        "id": "event_planner",
+        "label": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      }
+    ]
+  },
+  "output": {
+    "primary": "florist",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

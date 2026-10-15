@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Cabinet de Kinésithérapie Marine",
+    "providerCategories": [
+      {
+        "provider": "osm",
+        "key": "healthcare=physiotherapist"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "gym",
+        "label": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "medical_clinic",
+        "label": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "massage",
+        "label": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "osteopath",
+        "label": "Ostéopathe",
+        "path": "health_medical › paramedical › osteopath"
+      },
+      {
+        "id": "physiotherapist",
+        "label": "Masseur-kinésithérapeute",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "podiatrist",
+        "label": "Pédicure-podologue",
+        "path": "health_medical › paramedical › podiatrist"
+      },
+      {
+        "id": "paramedical",
+        "label": "Paramédical",
+        "path": "health_medical › paramedical"
+      }
+    ]
+  },
+  "output": {
+    "primary": "physiotherapist",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

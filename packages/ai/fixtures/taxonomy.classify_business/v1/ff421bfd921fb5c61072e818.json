@@ -1,0 +1,47 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Tropic Ink Tattoo Studio",
+    "providerCategories": [],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "beauty_salon",
+        "label": "Beauty salon",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "art_gallery",
+        "label": "Art gallery",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "barber",
+        "label": "Barber",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "artist_studio",
+        "label": "Artist studio",
+        "path": "events_creative › arts_crafts › artist_studio"
+      },
+      {
+        "id": "lash_brow_bar",
+        "label": "Lash & brow bar",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "nail_salon",
+        "label": "Nail salon",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      }
+    ]
+  },
+  "output": {
+    "primary": "none",
+    "secondary": [],
+    "confidence": 0.3,
+    "rationale": "None of the candidates describes this business."
+  }
+}

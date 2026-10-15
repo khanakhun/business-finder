@@ -1,0 +1,68 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Le Ti St Barth",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "restaurant"
+      },
+      {
+        "provider": "foursquare",
+        "key": "4a8476055ea6e0d1877b80a9",
+        "label": "Dining and Drinking > Bar"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Dîners festifs, grillades et cocktails, soirées animées jusque tard dans la nuit.",
+    "candidates": [
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "live_music_venue",
+        "label": "Salle de concert",
+        "path": "tourism_leisure › attractions_entertainment › live_music_venue"
+      },
+      {
+        "id": "steakhouse",
+        "label": "Grill et steakhouse",
+        "path": "food_drink › restaurant › steakhouse"
+      },
+      {
+        "id": "bars_nightlife",
+        "label": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "creole_restaurant",
+        "label": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "beach_club",
+        "label": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "nightclub",
+        "label": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      }
+    ]
+  },
+  "output": {
+    "primary": "restaurant",
+    "secondary": ["bar"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous, website)."
+  }
+}

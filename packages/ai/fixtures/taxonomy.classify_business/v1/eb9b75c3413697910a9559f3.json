@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Coral Coast Excursions & Tours",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "travel_agency"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Island tours by 4x4, snorkeling day trips and sunset catamaran cruises. Hotel pickup included.",
+    "candidates": [
+      {
+        "id": "guided_tours",
+        "label": "Guided tours",
+        "path": "tourism_leisure › travel_services › guided_tours"
+      },
+      {
+        "id": "scuba_diving",
+        "label": "Scuba diving",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "tourist_office",
+        "label": "Tourist office",
+        "path": "tourism_leisure › travel_services › tourist_office"
+      },
+      {
+        "id": "boat_excursion",
+        "label": "Boat trips & excursions",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "travel_agency",
+        "label": "Travel agency",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "boat_charter",
+        "label": "Boat & yacht charter",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "tour_operator",
+        "label": "Tour operator",
+        "path": "tourism_leisure › travel_services › tour_operator"
+      }
+    ]
+  },
+  "output": {
+    "primary": "tour_operator",
+    "secondary": ["guided_tours", "boat_excursion"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous, website)."
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Conciergerie Saint-Jean Services",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "personal_service"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Accueil des voyageurs, réservations de restaurants et d'activités, transferts aéroport et services sur mesure 7j/7.",
+    "candidates": [
+      {
+        "id": "concierge",
+        "label": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "chauffeur_service",
+        "label": "Chauffeur privé",
+        "path": "automotive_transport › passenger_transport › chauffeur_service"
+      },
+      {
+        "id": "villa_caretaking",
+        "label": "Gardiennage de villas",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "villa_rental_agency",
+        "label": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "travel_agency",
+        "label": "Agence de voyages",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "house_cleaning",
+        "label": "Ménage à domicile",
+        "path": "home_services › cleaning_services › house_cleaning"
+      },
+      {
+        "id": "event_planner",
+        "label": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      }
+    ]
+  },
+  "output": {
+    "primary": "concierge",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, website)."
+  }
+}

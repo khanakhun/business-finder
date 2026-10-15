@@ -1,0 +1,56 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "First Island Savings Bank",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "bank"
+      },
+      {
+        "provider": "osm",
+        "key": "amenity=bank"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "wealth_management",
+        "label": "Wealth management",
+        "path": "finance_insurance › wealth_management"
+      },
+      {
+        "id": "accountant",
+        "label": "Accountant",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "currency_exchange",
+        "label": "Currency exchange & money transfer",
+        "path": "finance_insurance › currency_exchange"
+      },
+      {
+        "id": "bank",
+        "label": "Bank",
+        "path": "finance_insurance › bank"
+      },
+      {
+        "id": "insurance_agency",
+        "label": "Insurance agency",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "credit_broker",
+        "label": "Mortgage & credit broker",
+        "path": "finance_insurance › credit_broker"
+      }
+    ]
+  },
+  "output": {
+    "primary": "bank",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Island Gym & Physio",
+    "providerCategories": [],
+    "locale": "en",
+    "websiteSnippet": "Open strength-training floor and cardio area, plus licensed physiotherapists for sports injuries.",
+    "candidates": [
+      {
+        "id": "medical_clinic",
+        "label": "Medical clinic",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "sports_club",
+        "label": "Sports club",
+        "path": "sports_fitness › sports_club"
+      },
+      {
+        "id": "physiotherapist",
+        "label": "Physiotherapist",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "personal_trainer",
+        "label": "Personal trainer",
+        "path": "sports_fitness › personal_trainer"
+      },
+      {
+        "id": "massage",
+        "label": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "fitness_studio",
+        "label": "Fitness studio",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "gym",
+        "label": "Gym",
+        "path": "sports_fitness › gym"
+      }
+    ]
+  },
+  "output": {
+    "primary": "gym",
+    "secondary": ["physiotherapist"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous, website)."
+  }
+}

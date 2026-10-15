@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Island Lumber & Concrete Supply",
+    "providerCategories": [
+      {
+        "provider": "osm",
+        "key": "shop=trade"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "hardware_store",
+        "label": "Hardware store",
+        "path": "home_construction › construction_supplies › hardware_store"
+      },
+      {
+        "id": "masonry",
+        "label": "Masonry",
+        "path": "home_construction › structural_work › masonry"
+      },
+      {
+        "id": "construction_supplies",
+        "label": "Building supplies & hardware",
+        "path": "home_construction › construction_supplies"
+      },
+      {
+        "id": "carpentry",
+        "label": "Carpentry & joinery",
+        "path": "home_construction › finishing_trades › carpentry"
+      },
+      {
+        "id": "building_supplies",
+        "label": "Building supplies",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "wholesaler",
+        "label": "Wholesaler",
+        "path": "industry_trade › wholesaler"
+      },
+      {
+        "id": "general_contractor",
+        "label": "General contractor",
+        "path": "home_construction › structural_work › general_contractor"
+      }
+    ]
+  },
+  "output": {
+    "primary": "building_supplies",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

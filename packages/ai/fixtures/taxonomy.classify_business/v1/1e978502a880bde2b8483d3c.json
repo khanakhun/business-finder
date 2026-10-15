@@ -1,0 +1,61 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Sunset Café & Bakery",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "cafe"
+      },
+      {
+        "provider": "overture",
+        "key": "bakery"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "juice_bar",
+        "label": "Juice bar",
+        "path": "food_drink › juice_bar"
+      },
+      {
+        "id": "bakery",
+        "label": "Bakery",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "cafe",
+        "label": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "pastry_shop",
+        "label": "Pastry shop",
+        "path": "food_drink › pastry_shop"
+      },
+      {
+        "id": "ice_cream_shop",
+        "label": "Ice cream shop",
+        "path": "food_drink › ice_cream_shop"
+      },
+      {
+        "id": "snack_bar",
+        "label": "Snack bar",
+        "path": "food_drink › quick_service › snack_bar"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      }
+    ]
+  },
+  "output": {
+    "primary": "cafe",
+    "secondary": ["bakery"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous)."
+  }
+}

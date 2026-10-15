@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Lighthouse Event & Wedding Co.",
+    "providerCategories": [],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "party_rental",
+        "label": "Event rental",
+        "path": "events_creative › events › party_rental"
+      },
+      {
+        "id": "wedding_planner",
+        "label": "Wedding planner",
+        "path": "events_creative › events › wedding_planner"
+      },
+      {
+        "id": "photographer",
+        "label": "Photographer",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "event_venue",
+        "label": "Event venue",
+        "path": "events_creative › events › event_venue"
+      },
+      {
+        "id": "dj_entertainment",
+        "label": "DJ & entertainment",
+        "path": "events_creative › events › dj_entertainment"
+      },
+      {
+        "id": "catering",
+        "label": "Catering",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "event_planner",
+        "label": "Event planner",
+        "path": "events_creative › events › event_planner"
+      }
+    ]
+  },
+  "output": {
+    "primary": "event_planner",
+    "secondary": ["wedding_planner"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous, name_only)."
+  }
+}

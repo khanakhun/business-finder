@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Wanderlight Travel Agency",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "travel_agency"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "guided_tours",
+        "label": "Guided tours",
+        "path": "tourism_leisure › travel_services › guided_tours"
+      },
+      {
+        "id": "travel_agency",
+        "label": "Travel agency",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "concierge",
+        "label": "Concierge service",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "airline",
+        "label": "Airline",
+        "path": "automotive_transport › passenger_transport › airline"
+      },
+      {
+        "id": "tour_operator",
+        "label": "Tour operator",
+        "path": "tourism_leisure › travel_services › tour_operator"
+      },
+      {
+        "id": "tourist_office",
+        "label": "Tourist office",
+        "path": "tourism_leisure › travel_services › tourist_office"
+      }
+    ]
+  },
+  "output": {
+    "primary": "travel_agency",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

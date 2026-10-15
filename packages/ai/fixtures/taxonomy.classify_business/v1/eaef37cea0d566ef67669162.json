@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Froid & Clim Caraïbes",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "hvac_services"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "plumber",
+        "label": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "solar_installer",
+        "label": "Installateur solaire",
+        "path": "home_construction › finishing_trades › solar_installer"
+      },
+      {
+        "id": "hvac",
+        "label": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "appliance_repair",
+        "label": "Réparation d'électroménager",
+        "path": "home_services › repairs_maintenance › appliance_repair"
+      },
+      {
+        "id": "appliance_store",
+        "label": "Magasin d'électroménager",
+        "path": "retail_shopping › home_retail › appliance_store"
+      },
+      {
+        "id": "electrician",
+        "label": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      }
+    ]
+  },
+  "output": {
+    "primary": "hvac",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

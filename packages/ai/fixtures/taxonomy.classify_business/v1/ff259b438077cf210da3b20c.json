@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Chez Maryse",
+    "providerCategories": [],
+    "locale": "fr",
+    "websiteSnippet": "Accras, colombo de poulet et blaff de poisson servis midi et soir dans notre petite salle. Plats à emporter.",
+    "candidates": [
+      {
+        "id": "seafood_restaurant",
+        "label": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "grocery_store",
+        "label": "Épicerie",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "guest_house",
+        "label": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "creole_restaurant",
+        "label": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "catering",
+        "label": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "snack_bar",
+        "label": "Snack",
+        "path": "food_drink › quick_service › snack_bar"
+      }
+    ]
+  },
+  "output": {
+    "primary": "creole_restaurant",
+    "secondary": ["restaurant"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous, website)."
+  }
+}

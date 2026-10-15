@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Nonna Lucia's Trattoria",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "italian_restaurant"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "pizzeria",
+        "label": "Pizzeria",
+        "path": "food_drink › restaurant › pizzeria"
+      },
+      {
+        "id": "catering",
+        "label": "Catering",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "italian_restaurant",
+        "label": "Italian restaurant",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "deli",
+        "label": "Delicatessen",
+        "path": "retail_shopping › food_retail › deli"
+      },
+      {
+        "id": "french_restaurant",
+        "label": "French restaurant",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "fine_dining",
+        "label": "Fine dining restaurant",
+        "path": "food_drink › restaurant › fine_dining"
+      }
+    ]
+  },
+  "output": {
+    "primary": "italian_restaurant",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Supérette Marché Express",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "convenience_store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "supermarket",
+        "label": "Supermarché",
+        "path": "retail_shopping › food_retail › supermarket"
+      },
+      {
+        "id": "deli",
+        "label": "Épicerie fine",
+        "path": "retail_shopping › food_retail › deli"
+      },
+      {
+        "id": "greengrocer",
+        "label": "Primeur",
+        "path": "retail_shopping › food_retail › greengrocer"
+      },
+      {
+        "id": "tobacco_newsstand",
+        "label": "Tabac-presse",
+        "path": "retail_shopping › leisure_gifts › tobacco_newsstand"
+      },
+      {
+        "id": "grocery_store",
+        "label": "Épicerie",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "organic_store",
+        "label": "Magasin bio",
+        "path": "retail_shopping › food_retail › organic_store"
+      },
+      {
+        "id": "farmers_market",
+        "label": "Marché",
+        "path": "retail_shopping › food_retail › farmers_market"
+      }
+    ]
+  },
+  "output": {
+    "primary": "grocery_store",
+    "secondary": ["supermarket"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous)."
+  }
+}

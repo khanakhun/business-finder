@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Spa Les Alizés",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "spa"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "hotel",
+        "label": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "wellness",
+        "label": "Bien-être",
+        "path": "beauty_wellness › wellness"
+      },
+      {
+        "id": "massage",
+        "label": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "reflexology",
+        "label": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "wellness_center",
+        "label": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "spa",
+        "label": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "beauty_salon",
+        "label": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      }
+    ]
+  },
+  "output": {
+    "primary": "spa",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

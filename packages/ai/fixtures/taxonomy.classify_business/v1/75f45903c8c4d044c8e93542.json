@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Studio Lumière Tropicale",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "point_of_interest"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Photographe de mariage, portraits de famille et séances photo sur la plage au coucher du soleil.",
+    "candidates": [
+      {
+        "id": "videographer",
+        "label": "Vidéaste",
+        "path": "events_creative › photo_video › videographer"
+      },
+      {
+        "id": "picture_framing",
+        "label": "Encadrement",
+        "path": "events_creative › arts_crafts › picture_framing"
+      },
+      {
+        "id": "artist_studio",
+        "label": "Atelier d'artiste",
+        "path": "events_creative › arts_crafts › artist_studio"
+      },
+      {
+        "id": "printing",
+        "label": "Imprimerie",
+        "path": "professional_services › business_services › printing"
+      },
+      {
+        "id": "photographer",
+        "label": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "art_gallery",
+        "label": "Galerie d'art",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "graphic_designer",
+        "label": "Graphiste",
+        "path": "technology_media › graphic_designer"
+      }
+    ]
+  },
+  "output": {
+    "primary": "photographer",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, generic_provider, website)."
+  }
+}

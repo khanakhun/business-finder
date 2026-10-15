@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Cabinet Delorme & Associés, Avocats",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "lawyer"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "notary",
+        "label": "Notaire",
+        "path": "professional_services › legal_services › notary"
+      },
+      {
+        "id": "lawyer",
+        "label": "Avocat",
+        "path": "professional_services › legal_services › lawyer"
+      },
+      {
+        "id": "legal_services",
+        "label": "Services juridiques",
+        "path": "professional_services › legal_services"
+      },
+      {
+        "id": "accountant",
+        "label": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "insurance_broker",
+        "label": "Courtier en assurances",
+        "path": "finance_insurance › insurance_broker"
+      },
+      {
+        "id": "business_consultant",
+        "label": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "bailiff",
+        "label": "Commissaire de justice",
+        "path": "professional_services › legal_services › bailiff"
+      }
+    ]
+  },
+  "output": {
+    "primary": "lawyer",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

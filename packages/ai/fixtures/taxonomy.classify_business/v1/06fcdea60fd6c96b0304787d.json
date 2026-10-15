@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Bijouterie Perle des Îles",
+    "providerCategories": [
+      {
+        "provider": "foursquare",
+        "key": "f52ccfb6a245d7fb06e789a5",
+        "label": "Retail > Jewelry Store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "fashion_boutique",
+        "label": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "jewelry_store",
+        "label": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "craft_artisan",
+        "label": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "gift_shop",
+        "label": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "duty_free_shop",
+        "label": "Boutique hors taxes",
+        "path": "retail_shopping › duty_free_shop"
+      },
+      {
+        "id": "leather_goods_store",
+        "label": "Maroquinerie",
+        "path": "retail_shopping › fashion › leather_goods_store"
+      }
+    ]
+  },
+  "output": {
+    "primary": "jewelry_store",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

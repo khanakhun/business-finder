@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Boulangerie-Pâtisserie Ti Pain Doré",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "bakery"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "bakery",
+        "label": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "grocery_store",
+        "label": "Épicerie",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "catering",
+        "label": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "deli",
+        "label": "Épicerie fine",
+        "path": "retail_shopping › food_retail › deli"
+      },
+      {
+        "id": "pastry_shop",
+        "label": "Pâtisserie",
+        "path": "food_drink › pastry_shop"
+      },
+      {
+        "id": "cafe",
+        "label": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "snack_bar",
+        "label": "Snack",
+        "path": "food_drink › quick_service › snack_bar"
+      }
+    ]
+  },
+  "output": {
+    "primary": "bakery",
+    "secondary": ["pastry_shop"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous)."
+  }
+}

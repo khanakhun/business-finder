@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Harbor Medical Center",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "doctor"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Walk-in consultations, general practice and minor emergencies, seven days a week. Several doctors on site.",
+    "candidates": [
+      {
+        "id": "medical_laboratory",
+        "label": "Medical laboratory",
+        "path": "health_medical › medical_laboratory"
+      },
+      {
+        "id": "general_practitioner",
+        "label": "General practitioner",
+        "path": "health_medical › general_practitioner"
+      },
+      {
+        "id": "ambulance_service",
+        "label": "Ambulance service",
+        "path": "health_medical › ambulance_service"
+      },
+      {
+        "id": "pharmacy",
+        "label": "Pharmacy",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "radiology_center",
+        "label": "Radiology center",
+        "path": "health_medical › medical_specialists › radiology_center"
+      },
+      {
+        "id": "hospital",
+        "label": "Hospital",
+        "path": "health_medical › hospital"
+      },
+      {
+        "id": "medical_clinic",
+        "label": "Medical clinic",
+        "path": "health_medical › medical_clinic"
+      }
+    ]
+  },
+  "output": {
+    "primary": "medical_clinic",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, website)."
+  }
+}

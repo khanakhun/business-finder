@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Seabreeze Self Storage",
+    "providerCategories": [],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "coworking_space",
+        "label": "Coworking space",
+        "path": "professional_services › business_services › coworking_space"
+      },
+      {
+        "id": "marina",
+        "label": "Marina",
+        "path": "marine_nautical › boating_services › marina"
+      },
+      {
+        "id": "courier",
+        "label": "Courier & delivery",
+        "path": "automotive_transport › logistics › courier"
+      },
+      {
+        "id": "freight_forwarder",
+        "label": "Freight forwarder",
+        "path": "automotive_transport › logistics › freight_forwarder"
+      },
+      {
+        "id": "wholesaler",
+        "label": "Wholesaler",
+        "path": "industry_trade › wholesaler"
+      },
+      {
+        "id": "real_estate_agency",
+        "label": "Real estate agency",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "vacation_rental",
+        "label": "Vacation rental",
+        "path": "lodging › vacation_rental"
+      }
+    ]
+  },
+  "output": {
+    "primary": "none",
+    "secondary": [],
+    "confidence": 0.3,
+    "rationale": "None of the candidates describes this business."
+  }
+}

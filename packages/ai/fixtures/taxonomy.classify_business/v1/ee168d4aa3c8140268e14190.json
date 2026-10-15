@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Saltwater Fine Art Gallery",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "art_gallery"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "craft_artisan",
+        "label": "Artisan crafts",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "museum",
+        "label": "Museum",
+        "path": "tourism_leisure › attractions_entertainment › museum"
+      },
+      {
+        "id": "art_gallery",
+        "label": "Art gallery",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "picture_framing",
+        "label": "Picture framing",
+        "path": "events_creative › arts_crafts › picture_framing"
+      },
+      {
+        "id": "art_school",
+        "label": "Art & craft classes",
+        "path": "education › art_school"
+      },
+      {
+        "id": "artist_studio",
+        "label": "Artist studio",
+        "path": "events_creative › arts_crafts › artist_studio"
+      },
+      {
+        "id": "gift_shop",
+        "label": "Gift & souvenir shop",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      }
+    ]
+  },
+  "output": {
+    "primary": "art_gallery",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

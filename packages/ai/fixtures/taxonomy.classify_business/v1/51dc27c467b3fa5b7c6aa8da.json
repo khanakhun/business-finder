@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Élec Services Caraïbes",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "electrician"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "security_services",
+        "label": "Sécurité et surveillance",
+        "path": "home_services › security_services"
+      },
+      {
+        "id": "solar_installer",
+        "label": "Installateur solaire",
+        "path": "home_construction › finishing_trades › solar_installer"
+      },
+      {
+        "id": "general_contractor",
+        "label": "Entreprise générale du bâtiment",
+        "path": "home_construction › structural_work › general_contractor"
+      },
+      {
+        "id": "handyman",
+        "label": "Homme toutes mains",
+        "path": "home_services › repairs_maintenance › handyman"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "label": "Fournitures électriques et sanitaires",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      },
+      {
+        "id": "hvac",
+        "label": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "electrician",
+        "label": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      }
+    ]
+  },
+  "output": {
+    "primary": "electrician",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

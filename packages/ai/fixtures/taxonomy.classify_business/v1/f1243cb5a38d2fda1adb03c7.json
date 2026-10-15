@@ -1,0 +1,61 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Salon Coiff'Mania",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "hair_salon"
+      },
+      {
+        "provider": "overture",
+        "key": "hair_salon"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "braiding_salon",
+        "label": "Salon de tresses et coiffure afro",
+        "path": "beauty_wellness › hair_services › braiding_salon"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "label": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      },
+      {
+        "id": "hair_services",
+        "label": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "hair_salon",
+        "label": "Salon de coiffure",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "nail_salon",
+        "label": "Onglerie",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      },
+      {
+        "id": "beauty_salon",
+        "label": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "barber",
+        "label": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      }
+    ]
+  },
+  "output": {
+    "primary": "hair_salon",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

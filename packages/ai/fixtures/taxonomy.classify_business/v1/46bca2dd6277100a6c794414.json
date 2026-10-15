@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Pharmacie de la Colline",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "medical_clinic",
+        "label": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "health_medical",
+        "label": "Santé",
+        "path": "health_medical"
+      },
+      {
+        "id": "perfume_cosmetics_store",
+        "label": "Parfumerie",
+        "path": "retail_shopping › perfume_cosmetics_store"
+      },
+      {
+        "id": "medical_laboratory",
+        "label": "Laboratoire d'analyses médicales",
+        "path": "health_medical › medical_laboratory"
+      },
+      {
+        "id": "optician",
+        "label": "Opticien",
+        "path": "health_medical › optician"
+      },
+      {
+        "id": "pharmacy",
+        "label": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "organic_store",
+        "label": "Magasin bio",
+        "path": "retail_shopping › food_retail › organic_store"
+      }
+    ]
+  },
+  "output": {
+    "primary": "pharmacy",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, generic_provider)."
+  }
+}

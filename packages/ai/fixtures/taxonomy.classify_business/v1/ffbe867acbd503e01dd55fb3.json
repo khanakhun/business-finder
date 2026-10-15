@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Safe Harbor Insurance Agency",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "insurance_agency"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "bank",
+        "label": "Bank",
+        "path": "finance_insurance › bank"
+      },
+      {
+        "id": "insurance_agency",
+        "label": "Insurance agency",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "insurance_broker",
+        "label": "Insurance broker",
+        "path": "finance_insurance › insurance_broker"
+      },
+      {
+        "id": "real_estate_agency",
+        "label": "Real estate agency",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "wealth_management",
+        "label": "Wealth management",
+        "path": "finance_insurance › wealth_management"
+      },
+      {
+        "id": "credit_broker",
+        "label": "Mortgage & credit broker",
+        "path": "finance_insurance › credit_broker"
+      }
+    ]
+  },
+  "output": {
+    "primary": "insurance_agency",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

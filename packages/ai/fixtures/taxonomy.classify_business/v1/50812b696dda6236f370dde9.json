@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Paysages Tropicaux Création",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "landscaping"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "pool_construction",
+        "label": "Construction de piscines",
+        "path": "home_services › pool_services › pool_construction"
+      },
+      {
+        "id": "tree_care",
+        "label": "Élagage",
+        "path": "home_services › garden_services › tree_care"
+      },
+      {
+        "id": "landscaping",
+        "label": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "garden_center",
+        "label": "Jardinerie",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "florist",
+        "label": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "garden_services",
+        "label": "Jardin et extérieurs",
+        "path": "home_services › garden_services"
+      },
+      {
+        "id": "handyman",
+        "label": "Homme toutes mains",
+        "path": "home_services › repairs_maintenance › handyman"
+      }
+    ]
+  },
+  "output": {
+    "primary": "landscaping",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

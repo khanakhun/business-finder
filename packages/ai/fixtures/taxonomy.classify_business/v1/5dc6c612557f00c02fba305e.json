@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Auto-École La Conduite Sereine",
+    "providerCategories": [],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "car_rental",
+        "label": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "tutoring",
+        "label": "Soutien scolaire",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "auto_repair",
+        "label": "Garage automobile",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "language_school",
+        "label": "École de langues",
+        "path": "education › language_school"
+      },
+      {
+        "id": "scooter_rental",
+        "label": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "taxi",
+        "label": "Taxi",
+        "path": "automotive_transport › passenger_transport › taxi"
+      },
+      {
+        "id": "car_dealer",
+        "label": "Concessionnaire automobile",
+        "path": "automotive_transport › automotive_services › car_dealer"
+      }
+    ]
+  },
+  "output": {
+    "primary": "none",
+    "secondary": [],
+    "confidence": 0.3,
+    "rationale": "None of the candidates describes this business."
+  }
+}

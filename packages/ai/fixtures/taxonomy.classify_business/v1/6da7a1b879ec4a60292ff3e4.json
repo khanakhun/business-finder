@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "The Gourmet Pantry",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "grocery_store"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Imported cheeses, charcuterie, truffle oils and fine wines, delivered to your villa or yacht.",
+    "candidates": [
+      {
+        "id": "grocery_store",
+        "label": "Grocery store",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "deli",
+        "label": "Delicatessen",
+        "path": "retail_shopping › food_retail › deli"
+      },
+      {
+        "id": "supermarket",
+        "label": "Supermarket",
+        "path": "retail_shopping › food_retail › supermarket"
+      },
+      {
+        "id": "butcher",
+        "label": "Butcher",
+        "path": "retail_shopping › food_retail › butcher"
+      },
+      {
+        "id": "wine_spirits_shop",
+        "label": "Wine & spirits shop",
+        "path": "retail_shopping › food_retail › wine_spirits_shop"
+      },
+      {
+        "id": "yacht_services",
+        "label": "Yacht services & provisioning",
+        "path": "marine_nautical › boating_services › yacht_services"
+      },
+      {
+        "id": "catering",
+        "label": "Catering",
+        "path": "food_drink › catering"
+      }
+    ]
+  },
+  "output": {
+    "primary": "deli",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, website)."
+  }
+}

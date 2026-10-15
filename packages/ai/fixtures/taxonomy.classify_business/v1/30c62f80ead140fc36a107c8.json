@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Taxi Ti Mano",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "taxi_stand"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "chauffeur_service",
+        "label": "Chauffeur privé",
+        "path": "automotive_transport › passenger_transport › chauffeur_service"
+      },
+      {
+        "id": "courier",
+        "label": "Coursier et livraison",
+        "path": "automotive_transport › logistics › courier"
+      },
+      {
+        "id": "passenger_transport",
+        "label": "Transport de personnes",
+        "path": "automotive_transport › passenger_transport"
+      },
+      {
+        "id": "water_taxi",
+        "label": "Taxi-boat",
+        "path": "marine_nautical › water_taxi"
+      },
+      {
+        "id": "ambulance_service",
+        "label": "Ambulancier",
+        "path": "health_medical › ambulance_service"
+      },
+      {
+        "id": "car_rental",
+        "label": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "taxi",
+        "label": "Taxi",
+        "path": "automotive_transport › passenger_transport › taxi"
+      }
+    ]
+  },
+  "output": {
+    "primary": "taxi",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

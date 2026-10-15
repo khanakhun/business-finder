@@ -140,6 +140,74 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The category tree with labels in the requested locale */
+        get: operations["getCategoryTree"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/categories/mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider category mappings by status (default: LLM proposals awaiting review) */
+        get: operations["listCategoryMappings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/categories/mappings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Approve, reassign or reject a provider mapping (platform operators) */
+        patch: operations["reviewCategoryMapping"];
+        trace?: never;
+    };
+    "/v1/categories/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Typeahead over category labels and synonyms (EN/FR, accent-insensitive) */
+        get: operations["searchCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/events/{eventId}/replay": {
         parameters: {
             query?: never;
@@ -712,6 +780,71 @@ export type components = {
             ratingCount: number | null;
             websiteUrl: string | null;
         };
+        CategoryAttributes: {
+            [key: string]: boolean;
+        };
+        CategoryMapping: {
+            /** Format: uuid */
+            categoryId: string;
+            categoryLabel: string;
+            categorySlug: string;
+            confidence: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            origin: "seed" | "llm" | "human";
+            /** @enum {string} */
+            provider: "google_places" | "overture" | "foursquare" | "osm";
+            providerKey: string;
+            providerLabel: string | null;
+            /** @description Why the model proposed it (LLM mappings). */
+            rationale: string | null;
+            reviewedAt: string | null;
+            /** @enum {string} */
+            status: "active" | "needs_review" | "rejected";
+        };
+        CategoryMappingPage: {
+            /** @description Mappings are shared by every workspace: only platform operators approve, reassign or reject. */
+            canReview: boolean;
+            items: components["schemas"]["CategoryMapping"][];
+            nextCursor: string | null;
+        };
+        CategoryNode: {
+            attributes: components["schemas"]["CategoryAttributes"];
+            children: components["schemas"]["CategoryNode"][];
+            /** @description Tabler icon name. */
+            icon: string | null;
+            /** Format: uuid */
+            id: string;
+            /** @description In the requested locale. */
+            label: string;
+            labels: {
+                en: string;
+                fr: string;
+            };
+            /** @description Dotted slugs from the root, e.g. `food_drink.cafe`. */
+            path: string;
+            slug: string;
+        };
+        CategorySearchHit: {
+            breadcrumb: string[];
+            /** Format: uuid */
+            id: string;
+            label: string;
+            path: string;
+            /** @description Higher is better; comparable only within one response. */
+            score: number;
+            slug: string;
+        };
+        CategorySearchResult: {
+            items: components["schemas"]["CategorySearchHit"][];
+        };
+        CategoryTree: {
+            items: components["schemas"]["CategoryNode"][];
+            version: number;
+        };
         ChangeMemberRoleRequest: {
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
@@ -1003,6 +1136,15 @@ export type components = {
         ReplayEventRequest: {
             /** @description Subscriber id, e.g. `workspace.audit-identity`. */
             subscriberId: string;
+        };
+        ReviewCategoryMappingRequest: {
+            /** @enum {string} */
+            action: "approve" | "reassign" | "reject";
+            /**
+             * Format: uuid
+             * @description The new category (`reassign` only).
+             */
+            categoryId?: string;
         };
         SecretList: {
             items: components["schemas"]["SecretSummary"][];
@@ -1790,6 +1932,268 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getCategoryTree: {
+        parameters: {
+            query?: {
+                locale?: "fr" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryTree"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listCategoryMappings: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+                locale?: "fr" | "en";
+                provider?: "google_places" | "overture" | "foursquare" | "osm";
+                status?: "active" | "needs_review" | "rejected";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryMappingPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    reviewCategoryMapping: {
+        parameters: {
+            query?: {
+                locale?: "fr" | "en";
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewCategoryMappingRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryMapping"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    searchCategories: {
+        parameters: {
+            query: {
+                limit?: number;
+                locale?: "fr" | "en";
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategorySearchResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

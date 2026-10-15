@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Le Colombo Créole",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "restaurant"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "catering",
+        "label": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "snack_bar",
+        "label": "Snack",
+        "path": "food_drink › quick_service › snack_bar"
+      },
+      {
+        "id": "french_restaurant",
+        "label": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "creole_restaurant",
+        "label": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "food_truck",
+        "label": "Food truck",
+        "path": "food_drink › quick_service › food_truck"
+      },
+      {
+        "id": "seafood_restaurant",
+        "label": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      }
+    ]
+  },
+  "output": {
+    "primary": "creole_restaurant",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, generic_provider)."
+  }
+}

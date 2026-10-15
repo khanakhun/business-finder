@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Crystal Blue Pool Care",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "swimming_pool"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Weekly pool cleaning, water balancing and pump repairs for private villas.",
+    "candidates": [
+      {
+        "id": "pool_construction",
+        "label": "Pool builder",
+        "path": "home_services › pool_services › pool_construction"
+      },
+      {
+        "id": "swimming_pool",
+        "label": "Swimming pool",
+        "path": "sports_fitness › swimming_pool"
+      },
+      {
+        "id": "pool_services",
+        "label": "Pool services",
+        "path": "home_services › pool_services"
+      },
+      {
+        "id": "house_cleaning",
+        "label": "House cleaning",
+        "path": "home_services › cleaning_services › house_cleaning"
+      },
+      {
+        "id": "pool_maintenance",
+        "label": "Pool maintenance",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "landscaping",
+        "label": "Landscaping",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "water_tank_service",
+        "label": "Cistern & water treatment",
+        "path": "home_services › repairs_maintenance › water_tank_service"
+      }
+    ]
+  },
+  "output": {
+    "primary": "pool_maintenance",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, misleading_provider, website)."
+  }
+}

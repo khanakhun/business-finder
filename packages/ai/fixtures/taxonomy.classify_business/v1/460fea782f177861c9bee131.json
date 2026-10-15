@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Loc'Scoot Gustavia",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "car_rental"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "motorcycle_shop",
+        "label": "Concession moto et scooter",
+        "path": "automotive_transport › automotive_services › motorcycle_shop"
+      },
+      {
+        "id": "jet_ski_rental",
+        "label": "Location de jet-ski",
+        "path": "marine_nautical › water_sports › jet_ski_rental"
+      },
+      {
+        "id": "car_rental",
+        "label": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "auto_repair",
+        "label": "Garage automobile",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "scooter_rental",
+        "label": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "vehicle_rental",
+        "label": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "bike_rental",
+        "label": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      }
+    ]
+  },
+  "output": {
+    "primary": "motorcycle_shop",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, misleading_provider)."
+  }
+}

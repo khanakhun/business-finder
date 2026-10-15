@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Coconut Grove Guest House",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "lodging"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "guest_house",
+        "label": "Guest house",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "hostel",
+        "label": "Hostel",
+        "path": "lodging › hostel"
+      },
+      {
+        "id": "hotel",
+        "label": "Hotel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "aparthotel",
+        "label": "Aparthotel",
+        "path": "lodging › aparthotel"
+      },
+      {
+        "id": "boutique_hotel",
+        "label": "Boutique hotel",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "vacation_rental",
+        "label": "Vacation rental",
+        "path": "lodging › vacation_rental"
+      },
+      {
+        "id": "lodging",
+        "label": "Lodging",
+        "path": "lodging"
+      }
+    ]
+  },
+  "output": {
+    "primary": "guest_house",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, generic_provider)."
+  }
+}

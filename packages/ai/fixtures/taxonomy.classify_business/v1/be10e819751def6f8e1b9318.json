@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Island Wheels Car Rental",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "car_rental"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "chauffeur_service",
+        "label": "Private driver",
+        "path": "automotive_transport › passenger_transport › chauffeur_service"
+      },
+      {
+        "id": "taxi",
+        "label": "Taxi",
+        "path": "automotive_transport › passenger_transport › taxi"
+      },
+      {
+        "id": "car_rental",
+        "label": "Car rental",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "vehicle_rental",
+        "label": "Vehicle rental",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "car_dealer",
+        "label": "Car dealer",
+        "path": "automotive_transport › automotive_services › car_dealer"
+      },
+      {
+        "id": "auto_repair",
+        "label": "Auto repair",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "scooter_rental",
+        "label": "Scooter rental",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      }
+    ]
+  },
+  "output": {
+    "primary": "car_rental",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

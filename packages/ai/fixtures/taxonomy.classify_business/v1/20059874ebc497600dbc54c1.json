@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Blue Horizon Yacht Charters",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "travel_agency"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Crewed and bareboat charters on our fleet of catamarans and motor yachts, by the day or the week.",
+    "candidates": [
+      {
+        "id": "yacht_services",
+        "label": "Yacht services & provisioning",
+        "path": "marine_nautical › boating_services › yacht_services"
+      },
+      {
+        "id": "marina",
+        "label": "Marina",
+        "path": "marine_nautical › boating_services › marina"
+      },
+      {
+        "id": "travel_agency",
+        "label": "Travel agency",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "boat_excursion",
+        "label": "Boat trips & excursions",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "yacht_broker",
+        "label": "Yacht broker",
+        "path": "marine_nautical › boating_services › yacht_broker"
+      },
+      {
+        "id": "boat_charter",
+        "label": "Boat & yacht charter",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "sport_fishing",
+        "label": "Sport fishing",
+        "path": "marine_nautical › sport_fishing"
+      }
+    ]
+  },
+  "output": {
+    "primary": "boat_charter",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, misleading_provider, website)."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "QuickPress Print Shop",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "printing_services"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "printing",
+        "label": "Printing",
+        "path": "professional_services › business_services › printing"
+      },
+      {
+        "id": "marketing_agency",
+        "label": "Marketing agency",
+        "path": "technology_media › marketing_agency"
+      },
+      {
+        "id": "photographer",
+        "label": "Photographer",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "bookstore",
+        "label": "Bookstore",
+        "path": "retail_shopping › leisure_gifts › bookstore"
+      },
+      {
+        "id": "picture_framing",
+        "label": "Picture framing",
+        "path": "events_creative › arts_crafts › picture_framing"
+      },
+      {
+        "id": "graphic_designer",
+        "label": "Graphic designer",
+        "path": "technology_media › graphic_designer"
+      },
+      {
+        "id": "sign_maker",
+        "label": "Signs & signage",
+        "path": "professional_services › business_services › sign_maker"
+      }
+    ]
+  },
+  "output": {
+    "primary": "printing",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

@@ -2,17 +2,25 @@
 // Index names follow coding-standards §5 (`idx_` / `uq_` / `ck_`).
 
 import {
+  type CategoryAttributes,
   CONTACT_TYPES,
   type ContactType,
   type LocalizedText,
+  MAPPING_ORIGINS,
+  MAPPING_STATUSES,
+  type MappingOrigin,
+  type MappingStatus,
   MEDIA_KINDS,
   MEDIA_LICENSES,
+  type OfferRelevance,
   OPERATING_STATUSES,
   type OperatingStatus,
   type PostalAddress,
   type Provenance,
   SOURCE_PROVIDERS,
   type SourceProvider,
+  TAXONOMY_PROVIDERS,
+  type TaxonomyProvider,
   VERIFICATION_STATUSES,
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
@@ -37,14 +45,18 @@ import {
 import { id, timestamps } from '../columns.ts';
 import { geographyPoint } from '../types/geography.ts';
 import { citext, ltree } from '../types/text.ts';
-import { organization } from './auth.ts';
+import { vector } from '../types/vector.ts';
+import { organization, user } from './auth.ts';
 
 const tz = () => timestamp({ withTimezone: true });
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(', '));
 
 export const DUPLICATE_STATUS_VALUES = ['open', 'merged', 'dismissed'] as const;
 
-/** Taxonomy skeleton; BF-015 completes it (synonyms, mappings, embeddings, GiST on `path`). */
+/**
+ * Category taxonomy (BF-015): a bilingual tree seeded from `seed/taxonomy/taxonomy.v<N>.yaml`. Slugs are stable
+ * (renames add synonyms). `search_text` (labels + synonyms, lowercase, unaccented) backs typeahead and matching.
+ */
 export const categories = pgTable(
   'categories',
   {
@@ -53,13 +65,73 @@ export const categories = pgTable(
     parentId: uuid().references((): AnyPgColumn => categories.id, { onDelete: 'restrict' }),
     /** Dotted slugs from the root (`food_drink.cafe`). */
     path: ltree().notNull(),
-    labels: jsonb().$type<LocalizedText>().notNull(),
+    labels: jsonb().$type<{ en: string; fr: string }>().notNull(),
+    synonyms: jsonb().$type<{ en: string[]; fr: string[] }>().notNull().default({ en: [], fr: [] }),
+    description: text(),
+    /** Tabler icon name. */
+    icon: text(),
+    attributes: jsonb().$type<CategoryAttributes>().notNull().default({}),
+    /** Offer → relevance 0–1 (scoring and compliance relevance). */
+    offerRelevance: jsonb().$type<OfferRelevance>().notNull().default({}),
+    searchText: text().generatedAlwaysAs(
+      sql`f_unaccent(lower(coalesce(labels->>'en', '') || ' ' || coalesce(labels->>'fr', '') || ' ' || synonyms::text))`,
+    ),
+    embedding: vector(1536),
+    embeddingModel: text(),
+    /** Hash of the embedded text: re-embed only when labels or synonyms change. */
+    embeddingTextHash: text(),
+    sortOrder: integer().notNull().default(0),
     isActive: boolean().notNull().default(true),
     ...timestamps(),
   },
   (table) => [
     uniqueIndex('uq_categories__slug').on(table.slug),
     index('idx_categories__parent_id').on(table.parentId),
+    index('idx_categories__path').using('gist', table.path),
+    index('idx_categories__search_text').using('gin', table.searchText.op('gin_trgm_ops')),
+    check('ck_categories__slug', sql`${table.slug} ~ '^[a-z0-9_]{1,40}$'`),
+    check('ck_categories__depth', sql`nlevel(${table.path}) BETWEEN 1 AND 4`),
+  ],
+);
+
+/**
+ * Provider category → our category. Seeds never overwrite `human` rows; LLM-learned keys wait in `needs_review`.
+ */
+export const categoryMappings = pgTable(
+  'category_mappings',
+  {
+    id: id(),
+    provider: text().$type<TaxonomyProvider>().notNull(),
+    /** Google type, Overture basic_category, Foursquare id, OSM `key=value`. */
+    providerKey: text().notNull(),
+    providerLabel: text(),
+    categoryId: uuid()
+      .notNull()
+      .references(() => categories.id, { onDelete: 'restrict' }),
+    confidence: real().notNull(),
+    origin: text().$type<MappingOrigin>().notNull(),
+    status: text().$type<MappingStatus>().notNull(),
+    /** Model's reason for an `llm` mapping (shown to reviewers). */
+    rationale: text(),
+    /** Taxonomy/mapping file version that wrote a `seed` row. */
+    seedVersion: integer(),
+    reviewedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp({ withTimezone: true }),
+    ...timestamps(),
+  },
+  (table) => [
+    uniqueIndex('uq_category_mappings__provider_provider_key').on(table.provider, table.providerKey),
+    index('idx_category_mappings__category_id').on(table.categoryId),
+    index('idx_category_mappings__status_created_at').on(
+      table.status,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
+    check('ck_category_mappings__provider', sql`${table.provider} IN (${inList(TAXONOMY_PROVIDERS)})`),
+    check('ck_category_mappings__origin', sql`${table.origin} IN (${inList(MAPPING_ORIGINS)})`),
+    check('ck_category_mappings__status', sql`${table.status} IN (${inList(MAPPING_STATUSES)})`),
+    check('ck_category_mappings__confidence', sql`${table.confidence} BETWEEN 0 AND 1`),
+    check('ck_category_mappings__provider_key', sql`length(${table.providerKey}) BETWEEN 1 AND 200`),
   ],
 );
 

@@ -1,0 +1,1395 @@
+# Business Finder category taxonomy, version 1 (BF-015).
+# Slugs are stable: renames add synonyms, never change slugs. Children inherit icon, attributes and
+# offerRelevance from their parent unless they set their own.
+version: 1
+categories:
+  # Rationale: restaurants, cafés and bars are the densest local-business segment in every market and
+  # the core of a tourism economy; reservations and menus make them strong booking/website prospects.
+  - slug: food_drink
+    labels: { en: Food & drink, fr: Restauration }
+    description: Places that prepare and serve food or drinks.
+    icon: tools-kitchen-2
+    attributes: { hospitality: true, tourismFacing: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.6, booking_system: 0.7, local_seo: 0.9 }
+    children:
+      - slug: restaurant
+        labels: { en: Restaurant, fr: Restaurant }
+        synonyms: { en: [eatery, dining, bistro, brasserie, grill], fr: [resto, bistrot, brasserie, table, restauration] }
+        offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.8, booking_system: 0.9, local_seo: 0.9 }
+        children:
+          - slug: seafood_restaurant
+            labels: { en: Seafood restaurant, fr: Restaurant de fruits de mer }
+            synonyms: { en: [fish restaurant, seafood, lobster house, oyster bar], fr: [restaurant de poisson, fruits de mer, langoustes, crustacés] }
+            icon: fish
+          - slug: french_restaurant
+            labels: { en: French restaurant, fr: Restaurant français }
+            synonyms: { en: [french cuisine, french bistro, brasserie], fr: [cuisine française, bistrot, brasserie, cuisine traditionnelle] }
+          - slug: creole_restaurant
+            labels: { en: Creole restaurant, fr: Restaurant créole }
+            synonyms: { en: [caribbean restaurant, west indian food, antillean cuisine, local food], fr: [cuisine créole, cuisine antillaise, cuisine locale, colombo, accras] }
+          - slug: italian_restaurant
+            labels: { en: Italian restaurant, fr: Restaurant italien }
+            synonyms: { en: [italian cuisine, trattoria, pasta, osteria], fr: [cuisine italienne, trattoria, pâtes, osteria] }
+          - slug: japanese_restaurant
+            labels: { en: Japanese restaurant, fr: Restaurant japonais }
+            synonyms: { en: [sushi, sushi bar, ramen, izakaya], fr: [sushi, cuisine japonaise, bar à sushis, ramen] }
+          - slug: pizzeria
+            labels: { en: Pizzeria, fr: Pizzeria }
+            synonyms: { en: [pizza, pizza place, pizza delivery], fr: [pizza, pizzas à emporter, camion pizza] }
+            icon: pizza
+          - slug: asian_restaurant
+            labels: { en: Asian restaurant, fr: Restaurant asiatique }
+            synonyms: { en: [chinese restaurant, thai restaurant, vietnamese restaurant, wok, indian restaurant], fr: [restaurant chinois, restaurant thaï, restaurant vietnamien, cuisine asiatique, restaurant indien] }
+          - slug: steakhouse
+            labels: { en: Steakhouse & grill, fr: Grill et steakhouse }
+            synonyms: { en: [grill, barbecue, bbq, steak house, smokehouse], fr: [grillades, barbecue, viandes grillées, rôtisserie] }
+            icon: meat
+          - slug: vegetarian_restaurant
+            labels: { en: Vegetarian restaurant, fr: Restaurant végétarien }
+            synonyms: { en: [vegan restaurant, plant-based, healthy food, salad bar], fr: [restaurant végan, végétalien, cuisine healthy, bar à salades] }
+            icon: salad
+          - slug: fine_dining
+            labels: { en: Fine dining restaurant, fr: Restaurant gastronomique }
+            synonyms: { en: [gourmet restaurant, starred restaurant, tasting menu, haute cuisine], fr: [gastronomie, cuisine gastronomique, table étoilée, menu dégustation] }
+            icon: chef-hat
+      - slug: quick_service
+        labels: { en: Quick service, fr: Restauration rapide }
+        offerRelevance: { new_website: 0.6, website_redesign: 0.5, ai_receptionist: 0.4, booking_system: 0.2, local_seo: 0.8 }
+        children:
+          - slug: fast_food
+            labels: { en: Fast food, fr: Fast-food }
+            synonyms: { en: [burgers, fries, fried chicken, kebab, takeaway], fr: [burger, restauration rapide, kebab, tacos, vente à emporter] }
+          - slug: snack_bar
+            labels: { en: Snack bar, fr: Snack }
+            synonyms: { en: [snack, lolo, sandwich shop, roadside food], fr: [lolo, snack-bar, sandwicherie, bokit, petite restauration] }
+          - slug: food_truck
+            labels: { en: Food truck, fr: Food truck }
+            synonyms: { en: [street food, food van, mobile kitchen], fr: [camion restaurant, cuisine de rue, street food, roulotte] }
+            icon: truck
+      - slug: cafe
+        labels: { en: Café, fr: Café }
+        synonyms: { en: [coffee shop, coffee house, espresso bar, tea room], fr: [salon de thé, coffee shop, café-restaurant, bar-café] }
+        icon: coffee
+        offerRelevance: { booking_system: 0.3 }
+      - slug: bakery
+        labels: { en: Bakery, fr: Boulangerie-pâtisserie }
+        synonyms: { en: [bread shop, french bakery, viennoiserie, croissants], fr: [boulangerie, boulanger, pain, viennoiseries, dépôt de pain] }
+        icon: bread
+        offerRelevance: { ai_receptionist: 0.4, booking_system: 0.2 }
+      - slug: pastry_shop
+        labels: { en: Pastry shop, fr: Pâtisserie }
+        synonyms: { en: [patisserie, cake shop, custom cakes, macarons, chocolatier], fr: [pâtissier, gâteaux, chocolatier, confiserie, gâteaux sur commande] }
+        offerRelevance: { booking_system: 0.3 }
+      - slug: ice_cream_shop
+        labels: { en: Ice cream shop, fr: Glacier }
+        synonyms: { en: [gelato, ice cream parlor, frozen yogurt, sorbet], fr: [glaces, sorbets, gelato, glaces artisanales] }
+        icon: ice-cream
+        offerRelevance: { ai_receptionist: 0.3, booking_system: 0.1 }
+      - slug: juice_bar
+        labels: { en: Juice bar, fr: Bar à jus }
+        synonyms: { en: [smoothie bar, fresh juice, acai bowl], fr: [jus de fruits frais, smoothies, bar à smoothies, jus pressés] }
+        offerRelevance: { ai_receptionist: 0.3, booking_system: 0.1 }
+      - slug: bars_nightlife
+        labels: { en: Bars & nightlife, fr: Bars et vie nocturne }
+        icon: glass-full
+        offerRelevance: { booking_system: 0.6 }
+        children:
+          - slug: bar
+            labels: { en: Bar, fr: Bar }
+            synonyms: { en: [pub, cocktail bar, lounge, rum bar, tavern], fr: [pub, bar à cocktails, lounge, bar à rhum, buvette] }
+          - slug: wine_bar
+            labels: { en: Wine bar, fr: Bar à vins }
+            synonyms: { en: [wine lounge, wine tasting, tapas bar], fr: [bar à vin, dégustation de vins, cave à manger, tapas] }
+          - slug: beach_club
+            labels: { en: Beach club, fr: Beach club }
+            synonyms: { en: [beach bar, beach restaurant, beach lounge, sun loungers], fr: [plage privée, bar de plage, restaurant de plage, transats, paillote] }
+            icon: beach
+            offerRelevance: { new_website: 0.8, website_redesign: 0.8, ai_receptionist: 0.8, booking_system: 0.9, local_seo: 0.9 }
+          - slug: nightclub
+            labels: { en: Nightclub, fr: Discothèque }
+            synonyms: { en: [club, disco, dance club, night club], fr: [boîte de nuit, club, boîte, soirée dansante] }
+            icon: disc
+            offerRelevance: { booking_system: 0.7 }
+      - slug: catering
+        labels: { en: Catering, fr: Traiteur }
+        synonyms: { en: [caterer, event catering, buffet, canapés], fr: [traiteur événementiel, buffet, cocktail dînatoire, plateaux repas] }
+        offerRelevance: { ai_receptionist: 0.7, booking_system: 0.6 }
+      - slug: private_chef
+        labels: { en: Private chef, fr: Chef à domicile }
+        synonyms: { en: [personal chef, chef at home, villa chef, private dining], fr: [chef privé, cuisinier à domicile, chef en villa, dîner privé] }
+        icon: chef-hat
+        attributes: { appointmentBased: true }
+        offerRelevance: { new_website: 0.9, ai_receptionist: 0.7, booking_system: 0.8 }
+
+  # Rationale: accommodation is the backbone of a tourism destination like Saint-Barthélemy; direct
+  # bookings versus OTA commissions make websites and booking engines highly valuable here.
+  - slug: lodging
+    labels: { en: Lodging, fr: Hébergement }
+    description: Places to stay and the agencies that rent them out.
+    icon: bed
+    attributes: { hospitality: true, tourismFacing: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.8, ai_receptionist: 0.8, booking_system: 0.9, local_seo: 0.9 }
+    children:
+      - slug: hotel
+        labels: { en: Hotel, fr: Hôtel }
+        synonyms: { en: [inn, motel, accommodation, lodging], fr: [hôtellerie, établissement hôtelier, auberge, hébergement] }
+        icon: building
+      - slug: boutique_hotel
+        labels: { en: Boutique hotel, fr: Hôtel de charme }
+        synonyms: { en: [luxury hotel, design hotel, small hotel, 5-star hotel], fr: [hôtel boutique, hôtel de luxe, palace, hôtel 5 étoiles] }
+      - slug: resort
+        labels: { en: Resort, fr: Complexe hôtelier }
+        synonyms: { en: [beach resort, all-inclusive, resort hotel, vacation resort], fr: [resort, club de vacances, village vacances, tout compris] }
+      - slug: guest_house
+        labels: { en: Guest house, fr: Maison d'hôtes }
+        synonyms: { en: [bed and breakfast, b&b, guesthouse, inn], fr: [chambre d'hôtes, chambres d'hôtes, pension, gîte] }
+      - slug: aparthotel
+        labels: { en: Aparthotel, fr: Résidence hôtelière }
+        synonyms: { en: [serviced apartments, apartment hotel, residence, studios], fr: [résidence de tourisme, appart-hôtel, studios meublés, résidence de vacances] }
+      - slug: vacation_rental
+        labels: { en: Vacation rental, fr: Location saisonnière }
+        synonyms: { en: [holiday rental, holiday home, villa for rent, furnished rental, short-term rental], fr: [location de vacances, meublé de tourisme, gîte, villa à louer, location courte durée] }
+        icon: home
+      - slug: villa_rental_agency
+        labels: { en: Villa rental agency, fr: Agence de location de villas }
+        synonyms: { en: [villa agency, luxury villa rentals, villa specialist, vacation rental agency, holiday villas], fr: [location de villas, agence de villas, villas de luxe, agence de location saisonnière, villas avec piscine] }
+        icon: key
+        offerRelevance: { new_website: 0.9, website_redesign: 0.9, ai_receptionist: 0.8, booking_system: 0.9, local_seo: 0.9 }
+      - slug: hostel
+        labels: { en: Hostel, fr: Auberge de jeunesse }
+        synonyms: { en: [youth hostel, backpackers, dormitory], fr: [hostel, auberge, dortoir] }
+      - slug: campground
+        labels: { en: Campground, fr: Camping }
+        synonyms: { en: [campsite, camping, rv park, glamping], fr: [terrain de camping, aire de camping-car, glamping, camping-car] }
+        icon: tent
+
+  # Rationale: salons, spas and therapists live on appointments and repeat clients, making them the
+  # best fit for online booking and an AI receptionist that answers while hands are busy.
+  - slug: beauty_wellness
+    labels: { en: Beauty & wellness, fr: Beauté et bien-être }
+    description: Hair, beauty, spa and wellness services.
+    icon: sparkles
+    attributes: { appointmentBased: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.8, booking_system: 0.9, local_seo: 0.8 }
+    children:
+      - slug: hair_services
+        labels: { en: Hair, fr: Coiffure }
+        icon: scissors
+        children:
+          - slug: hair_salon
+            labels: { en: Hair salon, fr: Salon de coiffure }
+            synonyms: { en: [hairdresser, hairstylist, hair stylist, hair studio, colorist], fr: [coiffeur, coiffeuse, coiffure, coloriste, coiffeur visagiste] }
+          - slug: barber
+            labels: { en: Barber, fr: Barbier }
+            synonyms: { en: [barbershop, barber shop, men's haircut, beard trim], fr: [barber shop, coiffeur homme, rasage, taille de barbe] }
+          - slug: braiding_salon
+            labels: { en: Braiding & natural hair salon, fr: Salon de tresses et coiffure afro }
+            synonyms: { en: [hair braiding, braids, afro hair, natural hair, locs], fr: [tresses, nattes, coiffure afro, locks, tissage] }
+          - slug: mobile_hairdresser
+            labels: { en: Mobile hairdresser, fr: Coiffure à domicile }
+            synonyms: { en: [home hairdresser, at-home haircut, wedding hair, hair stylist at home], fr: [coiffeur à domicile, coiffeuse à domicile, coiffure mariage, coiffure événementielle] }
+      - slug: beauty_services
+        labels: { en: Beauty care, fr: Esthétique }
+        children:
+          - slug: beauty_salon
+            labels: { en: Beauty salon, fr: Institut de beauté }
+            synonyms: { en: [beauty institute, beautician, esthetician, facials, skin care], fr: [esthéticienne, salon d'esthétique, soins du visage, centre de beauté, institut] }
+          - slug: nail_salon
+            labels: { en: Nail salon, fr: Onglerie }
+            synonyms: { en: [manicure, pedicure, nail bar, gel nails, nail art], fr: [manucure, prothésiste ongulaire, pose d'ongles, bar à ongles, vernis semi-permanent] }
+          - slug: lash_brow_bar
+            labels: { en: Lash & brow bar, fr: Bar à cils et sourcils }
+            synonyms: { en: [eyelash extensions, brow bar, lash lift, microblading], fr: [extensions de cils, rehaussement de cils, restructuration des sourcils, microblading] }
+          - slug: waxing_salon
+            labels: { en: Hair removal, fr: Épilation }
+            synonyms: { en: [waxing, laser hair removal, sugaring, epilation], fr: [épilation laser, épilation à la cire, épilation définitive, lumière pulsée] }
+          - slug: makeup_artist
+            labels: { en: Makeup artist, fr: Maquilleuse professionnelle }
+            synonyms: { en: [make-up artist, bridal makeup, mua, makeup studio], fr: [maquilleur, maquillage mariée, maquillage professionnel, maquillage événementiel] }
+          - slug: tanning_salon
+            labels: { en: Tanning salon, fr: Centre de bronzage }
+            synonyms: { en: [spray tan, sunbed, solarium, self-tan], fr: [solarium, bronzage, autobronzant, cabine UV] }
+      - slug: wellness
+        labels: { en: Wellness, fr: Bien-être }
+        children:
+          - slug: spa
+            labels: { en: Spa, fr: Spa }
+            synonyms: { en: [day spa, hotel spa, hammam, sauna, wellness spa], fr: [spa de jour, hammam, sauna, soins spa, balnéothérapie] }
+            attributes: { tourismFacing: true }
+          - slug: massage
+            labels: { en: Massage, fr: Massage }
+            synonyms: { en: [massage therapist, deep tissue, thai massage, in-villa massage, sports massage], fr: [masseur, masseuse, praticien massage, massage à domicile, massage bien-être] }
+            icon: massage
+          - slug: wellness_center
+            labels: { en: Wellness center, fr: Centre de bien-être }
+            synonyms: { en: [holistic center, wellbeing, detox, relaxation], fr: [bien-être, centre holistique, relaxation, sophrologie, naturopathie] }
+          - slug: reflexology
+            labels: { en: Reflexology & energy healing, fr: Réflexologie et soins énergétiques }
+            synonyms: { en: [reflexologist, foot reflexology, reiki, energy healing], fr: [réflexologue, réflexologie plantaire, reiki, magnétiseur] }
+      - slug: tattoo_studio
+        labels: { en: Tattoo & piercing studio, fr: Salon de tatouage }
+        synonyms: { en: [tattoo parlor, tattoo artist, piercing, ink], fr: [tatoueur, tatouage, piercing, perceur] }
+        offerRelevance: { booking_system: 0.7 }
+
+  # Rationale: gyms, studios and coaches sell classes and sessions; scheduling and membership pages
+  # drive demand, and boutique studios often lack a proper site.
+  - slug: sports_fitness
+    labels: { en: Sports & fitness, fr: Sport et fitness }
+    description: Gyms, studios, coaches and sports clubs.
+    icon: barbell
+    attributes: { appointmentBased: true }
+    offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.6, booking_system: 0.8, local_seo: 0.7 }
+    children:
+      - slug: gym
+        labels: { en: Gym, fr: Salle de sport }
+        synonyms: { en: [fitness center, health club, weight room, fitness club], fr: [salle de fitness, salle de musculation, club de remise en forme, musculation] }
+        attributes: { appointmentBased: false }
+      - slug: fitness_studio
+        labels: { en: Fitness studio, fr: Studio de fitness }
+        synonyms: { en: [boutique fitness, hiit studio, spinning, bootcamp, group classes], fr: [cours collectifs, cours de fitness, studio de sport, biking, cross training] }
+      - slug: yoga_studio
+        labels: { en: Yoga studio, fr: Studio de yoga }
+        synonyms: { en: [yoga classes, yoga teacher, yoga retreat, meditation], fr: [cours de yoga, professeur de yoga, retraite de yoga, méditation] }
+        icon: yoga
+      - slug: pilates_studio
+        labels: { en: Pilates studio, fr: Studio de Pilates }
+        synonyms: { en: [pilates, reformer pilates, barre, mat pilates], fr: [cours de pilates, pilates reformer, barre au sol, gym douce] }
+      - slug: crossfit_box
+        labels: { en: CrossFit box, fr: Salle de CrossFit }
+        synonyms: { en: [crossfit, functional training, cross training], fr: [crossfit, cross training, entraînement fonctionnel, box] }
+      - slug: personal_trainer
+        labels: { en: Personal trainer, fr: Coach sportif }
+        synonyms: { en: [fitness coach, personal training, private coach, home training], fr: [coach personnel, préparateur physique, coaching à domicile, entraîneur] }
+      - slug: martial_arts
+        labels: { en: Martial arts school, fr: Club d'arts martiaux }
+        synonyms: { en: [karate, judo, jiu-jitsu, boxing gym, mma], fr: [karaté, judo, boxe, jiu-jitsu, self-défense] }
+        icon: karate
+      - slug: dance_school
+        labels: { en: Dance school, fr: École de danse }
+        synonyms: { en: [dance studio, dance classes, salsa classes, ballet], fr: [cours de danse, studio de danse, salsa, zouk, danse classique] }
+      - slug: racket_club
+        labels: { en: Tennis & padel club, fr: Club de tennis et de padel }
+        synonyms: { en: [tennis court, padel, squash, pickleball, tennis lessons], fr: [tennis, padel, squash, cours de tennis, terrain de padel] }
+        icon: ball-tennis
+      - slug: golf_course
+        labels: { en: Golf course, fr: Golf }
+        synonyms: { en: [golf club, driving range, mini golf, golf lessons], fr: [parcours de golf, practice, minigolf, club de golf] }
+        icon: golf
+      - slug: sports_club
+        labels: { en: Sports club, fr: Club sportif }
+        synonyms: { en: [sports association, football club, athletics club, rugby club], fr: [association sportive, club de football, club d'athlétisme, club omnisports] }
+        attributes: { appointmentBased: false }
+        offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.3, booking_system: 0.5, local_seo: 0.5 }
+      - slug: swimming_pool
+        labels: { en: Swimming pool, fr: Piscine }
+        synonyms: { en: [public pool, aquatic center, swim lessons, swimming club], fr: [piscine municipale, centre aquatique, leçons de natation, club de natation] }
+        icon: swimming
+      - slug: equestrian_center
+        labels: { en: Equestrian center, fr: Centre équestre }
+        synonyms: { en: [horse riding, riding school, stables, horseback rides, pony club], fr: [équitation, poney-club, balade à cheval, écurie, club hippique] }
+        attributes: { tourismFacing: true }
+
+  # Rationale: licensed health professionals handle heavy appointment and phone volume; they are
+  # regulated (claims and advertising rules), which matters for generated copy and compliance.
+  - slug: health_medical
+    labels: { en: Health & medical, fr: Santé }
+    description: Doctors, clinics, allied health professionals and pharmacies.
+    icon: stethoscope
+    attributes: { regulated: true, appointmentBased: true }
+    offerRelevance: { new_website: 0.6, website_redesign: 0.6, ai_receptionist: 0.7, booking_system: 0.8, local_seo: 0.7 }
+    children:
+      - slug: medical_clinic
+        labels: { en: Medical clinic, fr: Centre médical }
+        synonyms: { en: [clinic, medical center, health center, walk-in clinic, doctors office], fr: [clinique, cabinet médical, maison de santé, centre de santé, polyclinique] }
+      - slug: hospital
+        labels: { en: Hospital, fr: Hôpital }
+        synonyms: { en: [emergency room, er, medical center, infirmary], fr: [centre hospitalier, urgences, CHU, hôpital public] }
+        attributes: { appointmentBased: false }
+        offerRelevance: { new_website: 0.2, website_redesign: 0.2, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.2 }
+      - slug: general_practitioner
+        labels: { en: General practitioner, fr: Médecin généraliste }
+        synonyms: { en: [family doctor, gp, physician, doctor], fr: [médecin, médecin traitant, docteur, généraliste] }
+      - slug: medical_specialists
+        labels: { en: Medical specialists, fr: Médecins spécialistes }
+        children:
+          - slug: pediatrician
+            labels: { en: Pediatrician, fr: Pédiatre }
+            synonyms: { en: [children's doctor, pediatrics, kids doctor], fr: [pédiatrie, médecin pour enfants, docteur pour enfants] }
+          - slug: gynecologist
+            labels: { en: Gynecologist, fr: Gynécologue }
+            synonyms: { en: [obgyn, obstetrician, women's health], fr: [gynécologie, obstétricien, gynéco, santé de la femme] }
+          - slug: dermatologist
+            labels: { en: Dermatologist, fr: Dermatologue }
+            synonyms: { en: [skin doctor, dermatology, skin clinic], fr: [dermatologie, dermato, médecin de la peau] }
+          - slug: ophthalmologist
+            labels: { en: Ophthalmologist, fr: Ophtalmologue }
+            synonyms: { en: [eye doctor, ophthalmology, eye clinic], fr: [ophtalmologie, ophtalmo, ophtalmologiste, médecin des yeux] }
+          - slug: aesthetic_medicine
+            labels: { en: Aesthetic medicine, fr: Médecine esthétique }
+            synonyms: { en: [cosmetic clinic, botox, fillers, plastic surgeon, medspa], fr: [chirurgien esthétique, botox, injections, médecine anti-âge, chirurgie esthétique] }
+          - slug: radiology_center
+            labels: { en: Radiology center, fr: Cabinet de radiologie }
+            synonyms: { en: [imaging center, x-ray, mri, ultrasound, ct scan], fr: [radiologie, imagerie médicale, radio, échographie, IRM, scanner] }
+      - slug: dental
+        labels: { en: Dental care, fr: Soins dentaires }
+        icon: dental
+        children:
+          - slug: dentist
+            labels: { en: Dentist, fr: Chirurgien-dentiste }
+            synonyms: { en: [dental clinic, dental office, dental surgeon, teeth whitening], fr: [dentiste, cabinet dentaire, centre dentaire, blanchiment dentaire] }
+          - slug: orthodontist
+            labels: { en: Orthodontist, fr: Orthodontiste }
+            synonyms: { en: [braces, orthodontics, clear aligners], fr: [orthodontie, appareil dentaire, aligneurs, gouttières] }
+      - slug: paramedical
+        labels: { en: Allied health, fr: Paramédical }
+        children:
+          - slug: physiotherapist
+            labels: { en: Physiotherapist, fr: Masseur-kinésithérapeute }
+            synonyms: { en: [physical therapist, physio, physiotherapy, rehab, sports therapy], fr: [kiné, kinésithérapeute, rééducation, kinésithérapie, kiné du sport] }
+          - slug: osteopath
+            labels: { en: Osteopath, fr: Ostéopathe }
+            synonyms: { en: [osteopathy, chiropractor, chiropractic, back pain], fr: [ostéopathie, chiropracteur, chiropraxie, étiopathe] }
+          - slug: nurse
+            labels: { en: Home nurse, fr: Infirmier libéral }
+            synonyms: { en: [nurse, nursing care, home nursing, visiting nurse], fr: [infirmière, infirmière à domicile, soins infirmiers, cabinet infirmier] }
+          - slug: midwife
+            labels: { en: Midwife, fr: Sage-femme }
+            synonyms: { en: [midwifery, prenatal care, doula, childbirth classes], fr: [sage femme, préparation à l'accouchement, suivi de grossesse, rééducation périnéale] }
+          - slug: speech_therapist
+            labels: { en: Speech therapist, fr: Orthophoniste }
+            synonyms: { en: [speech pathologist, speech therapy, language therapy], fr: [orthophonie, rééducation du langage, logopède] }
+          - slug: podiatrist
+            labels: { en: Podiatrist, fr: Pédicure-podologue }
+            synonyms: { en: [chiropodist, foot doctor, podiatry, orthotics], fr: [podologue, pédicure, semelles orthopédiques, podologie] }
+          - slug: dietitian
+            labels: { en: Dietitian, fr: Diététicien-nutritionniste }
+            synonyms: { en: [nutritionist, nutrition coach, diet, weight loss], fr: [diététicienne, nutritionniste, nutrition, rééquilibrage alimentaire] }
+          - slug: psychologist
+            labels: { en: Psychologist, fr: Psychologue }
+            synonyms: { en: [therapist, counselor, psychotherapist, mental health, psychiatrist], fr: [psychothérapeute, psy, thérapeute, psychiatre, soutien psychologique] }
+      - slug: pharmacy
+        labels: { en: Pharmacy, fr: Pharmacie }
+        synonyms: { en: [drugstore, chemist, pharmacist, parapharmacy], fr: [pharmacien, parapharmacie, pharmacie de garde, officine] }
+        icon: pill
+        attributes: { appointmentBased: false, retail: true }
+        offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.5, booking_system: 0.1, local_seo: 0.7 }
+      - slug: medical_laboratory
+        labels: { en: Medical laboratory, fr: Laboratoire d'analyses médicales }
+        synonyms: { en: [blood test, lab, diagnostic lab, pathology lab, pcr test], fr: [laboratoire, prise de sang, analyses, biologie médicale, test PCR] }
+        icon: microscope
+        offerRelevance: { booking_system: 0.6 }
+      - slug: optician
+        labels: { en: Optician, fr: Opticien }
+        synonyms: { en: [eyewear, glasses, eyeglasses, contact lenses, sunglasses], fr: [lunettes, lunetterie, lentilles, lunettes de soleil, optique] }
+        icon: eyeglass
+        attributes: { retail: true }
+        offerRelevance: { booking_system: 0.5 }
+      - slug: hearing_aid_center
+        labels: { en: Hearing aid center, fr: Audioprothésiste }
+        synonyms: { en: [hearing aids, audiologist, hearing test], fr: [appareils auditifs, audition, test auditif, centre auditif] }
+        icon: ear
+      - slug: ambulance_service
+        labels: { en: Ambulance service, fr: Ambulancier }
+        synonyms: { en: [ambulance, medical transport, patient transport, medevac], fr: [ambulance, transport sanitaire, taxi conventionné, évacuation sanitaire] }
+        icon: ambulance
+        attributes: { appointmentBased: false }
+        offerRelevance: { new_website: 0.4, website_redesign: 0.4, ai_receptionist: 0.6, booking_system: 0.3, local_seo: 0.5 }
+
+  # Rationale: shops are numerous and depend on discovery (maps, search) more than bookings; the
+  # duty-free, luxury and beachwear niches matter for Saint-Barthélemy's visitor economy.
+  - slug: retail_shopping
+    labels: { en: Retail & shopping, fr: Commerces }
+    description: Shops selling goods to consumers.
+    icon: shopping-bag
+    attributes: { retail: true }
+    offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.3, booking_system: 0.1, local_seo: 0.8 }
+    children:
+      - slug: food_retail
+        labels: { en: Food shops, fr: Alimentation }
+        icon: basket
+        children:
+          - slug: grocery_store
+            labels: { en: Grocery store, fr: Épicerie }
+            synonyms: { en: [grocer, corner shop, convenience store, minimarket, lolo], fr: [épicerie de quartier, supérette, lolo, alimentation générale, petit commerce] }
+          - slug: supermarket
+            labels: { en: Supermarket, fr: Supermarché }
+            synonyms: { en: [hypermarket, grocery supermarket, food market, superstore], fr: [hypermarché, grande surface, libre-service, magasin d'alimentation] }
+            icon: shopping-cart
+            offerRelevance: { new_website: 0.4, website_redesign: 0.5, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.6 }
+          - slug: deli
+            labels: { en: Delicatessen, fr: Épicerie fine }
+            synonyms: { en: [deli, gourmet shop, fine foods, cheese shop], fr: [épicerie gourmet, fromagerie, produits fins, traiteur fin, comptoir gourmand] }
+            attributes: { tourismFacing: true }
+          - slug: butcher
+            labels: { en: Butcher, fr: Boucherie }
+            synonyms: { en: [butcher shop, meat market, charcuterie], fr: [boucher, boucherie-charcuterie, charcuterie, volailler] }
+            icon: meat
+          - slug: fishmonger
+            labels: { en: Fishmonger, fr: Poissonnerie }
+            synonyms: { en: [fish market, seafood market, fresh fish], fr: [poissonnier, marché aux poissons, poisson frais, retour de pêche] }
+            icon: fish
+          - slug: greengrocer
+            labels: { en: Greengrocer, fr: Primeur }
+            synonyms: { en: [fruit and vegetable shop, produce store, fruit stand], fr: [fruits et légumes, marchand de légumes, maraîcher, étal] }
+          - slug: organic_store
+            labels: { en: Organic store, fr: Magasin bio }
+            synonyms: { en: [health food store, organic grocery, natural foods, bulk store], fr: [épicerie bio, produits bio, vrac, épicerie vrac] }
+          - slug: wine_spirits_shop
+            labels: { en: Wine & spirits shop, fr: Cave à vins et spiritueux }
+            synonyms: { en: [wine shop, liquor store, wine merchant, off-licence, rum shop], fr: [caviste, cave à vin, cave, rhumerie, vins et spiritueux] }
+            icon: bottle
+            attributes: { tourismFacing: true }
+          - slug: farmers_market
+            labels: { en: Farmers market, fr: Marché }
+            synonyms: { en: [local market, produce market, open-air market, covered market], fr: [marché local, marché couvert, marché de producteurs, halle] }
+            offerRelevance: { new_website: 0.3, website_redesign: 0.3, ai_receptionist: 0.1, booking_system: 0.1, local_seo: 0.5 }
+      - slug: fashion
+        labels: { en: Fashion & accessories, fr: Mode et accessoires }
+        icon: shirt
+        attributes: { tourismFacing: true }
+        children:
+          - slug: fashion_boutique
+            labels: { en: Fashion boutique, fr: Boutique de prêt-à-porter }
+            synonyms: { en: [clothing store, clothes shop, designer boutique, apparel, fashion store], fr: [boutique de vêtements, prêt-à-porter, magasin de vêtements, boutique de mode, créateur] }
+          - slug: swimwear_store
+            labels: { en: Swimwear store, fr: Boutique de maillots de bain }
+            synonyms: { en: [bikini shop, beachwear, swimsuits, resort wear], fr: [maillots de bain, mode plage, bikinis, vêtements de plage] }
+          - slug: shoe_store
+            labels: { en: Shoe store, fr: Magasin de chaussures }
+            synonyms: { en: [footwear, shoes, sandals, sneaker store], fr: [chausseur, chaussures, sandales, baskets] }
+            icon: shoe
+          - slug: jewelry_store
+            labels: { en: Jewelry store, fr: Bijouterie }
+            synonyms: { en: [jeweler, jewellery, fine jewelry, watches, goldsmith], fr: [bijoutier, joaillerie, horlogerie, bijoux, joaillier] }
+            icon: diamond
+          - slug: lingerie_store
+            labels: { en: Lingerie store, fr: Boutique de lingerie }
+            synonyms: { en: [underwear, intimates, lingerie boutique], fr: [lingerie, sous-vêtements, corsetterie] }
+          - slug: leather_goods_store
+            labels: { en: Leather goods & bags, fr: Maroquinerie }
+            synonyms: { en: [handbags, bags, leather goods, accessories], fr: [sacs à main, maroquinier, accessoires, bagagerie] }
+          - slug: surf_shop
+            labels: { en: Surf shop, fr: Surf shop }
+            synonyms: { en: [surf store, boardshop, surfboards, beachwear], fr: [magasin de surf, planches de surf, glisse, boardshop] }
+      - slug: perfume_cosmetics_store
+        labels: { en: Perfume & cosmetics store, fr: Parfumerie }
+        synonyms: { en: [perfumery, cosmetics, beauty store, fragrances, skincare shop], fr: [parfums, cosmétiques, produits de beauté, parfumerie détaxée] }
+        attributes: { tourismFacing: true }
+      - slug: home_retail
+        labels: { en: Home & garden, fr: Maison et jardin }
+        icon: sofa
+        children:
+          - slug: furniture_store
+            labels: { en: Furniture store, fr: Magasin de meubles }
+            synonyms: { en: [furniture, outdoor furniture, mattress store, home furnishings], fr: [meubles, ameublement, mobilier de jardin, literie] }
+          - slug: home_decor_store
+            labels: { en: Home decor store, fr: Boutique de décoration }
+            synonyms: { en: [interior decor, homeware, home accessories, linens], fr: [décoration intérieure, art de la table, linge de maison, objets déco] }
+          - slug: appliance_store
+            labels: { en: Appliance store, fr: Magasin d'électroménager }
+            synonyms: { en: [home appliances, white goods, kitchen appliances, air conditioner store], fr: [électroménager, gros électroménager, petit électroménager, climatiseurs] }
+          - slug: garden_center
+            labels: { en: Garden center, fr: Jardinerie }
+            synonyms: { en: [plant nursery, nursery, plants, garden supplies], fr: [pépinière, pépiniériste, plantes, graineterie] }
+            icon: plant
+      - slug: electronics
+        labels: { en: Electronics, fr: High-tech }
+        icon: device-mobile
+        children:
+          - slug: electronics_store
+            labels: { en: Electronics store, fr: Magasin d'électronique }
+            synonyms: { en: [consumer electronics, computer store, tv store, audio store], fr: [informatique, magasin d'informatique, hi-fi, multimédia] }
+          - slug: mobile_phone_store
+            labels: { en: Mobile phone store, fr: Boutique de téléphonie }
+            synonyms: { en: [cell phone store, phone shop, smartphones, phone accessories], fr: [téléphonie mobile, magasin de téléphones, smartphones, accessoires téléphone] }
+      - slug: leisure_gifts
+        labels: { en: Gifts & leisure, fr: Loisirs et cadeaux }
+        icon: gift
+        children:
+          - slug: bookstore
+            labels: { en: Bookstore, fr: Librairie }
+            synonyms: { en: [bookshop, books, stationery, comic shop], fr: [livres, papeterie, librairie-papeterie, bandes dessinées] }
+            icon: book
+          - slug: toy_store
+            labels: { en: Toy store, fr: Magasin de jouets }
+            synonyms: { en: [toys, games, kids store, toy shop], fr: [jouets, jeux, magasin pour enfants, puériculture] }
+          - slug: sporting_goods_store
+            labels: { en: Sporting goods store, fr: Magasin de sport }
+            synonyms: { en: [sports store, sports equipment, outdoor store, fishing tackle, bike shop], fr: [articles de sport, matériel de sport, articles de pêche, magasin de vélos] }
+          - slug: gift_shop
+            labels: { en: Gift & souvenir shop, fr: Boutique de souvenirs }
+            synonyms: { en: [souvenirs, gift store, curios, local crafts, t-shirts], fr: [cadeaux, boutique cadeaux, artisanat local, souvenirs] }
+            attributes: { tourismFacing: true }
+          - slug: tobacco_newsstand
+            labels: { en: Tobacconist & newsagent, fr: Tabac-presse }
+            synonyms: { en: [newsstand, newsagent, tobacco shop, lottery, magazines], fr: [bureau de tabac, tabac, presse, maison de la presse, journaux] }
+            offerRelevance: { new_website: 0.3, website_redesign: 0.3, ai_receptionist: 0.1, booking_system: 0.1, local_seo: 0.6 }
+          - slug: cigar_shop
+            labels: { en: Cigar shop, fr: Cave à cigares }
+            synonyms: { en: [cigar lounge, humidor, cigars, cuban cigars], fr: [cigares, civette, cigares cubains, fumoir] }
+            attributes: { tourismFacing: true }
+          - slug: florist
+            labels: { en: Florist, fr: Fleuriste }
+            synonyms: { en: [flower shop, flowers, bouquets, wedding flowers, floral design], fr: [fleurs, artisan fleuriste, bouquets, compositions florales, fleurs de mariage] }
+            icon: flower
+            offerRelevance: { ai_receptionist: 0.6, booking_system: 0.3 }
+      - slug: department_store
+        labels: { en: Department store, fr: Grand magasin }
+        synonyms: { en: [general store, variety store, bazaar, shopping center], fr: [bazar, magasin général, galerie marchande, centre commercial] }
+      - slug: duty_free_shop
+        labels: { en: Duty-free shop, fr: Boutique hors taxes }
+        synonyms: { en: [duty free, tax-free shopping, luxury boutique, designer store], fr: [duty free, détaxe, boutique de luxe, produits détaxés] }
+        attributes: { tourismFacing: true }
+      - slug: second_hand_store
+        labels: { en: Second-hand store, fr: Dépôt-vente }
+        synonyms: { en: [thrift store, consignment shop, vintage store, charity shop, pawn shop], fr: [friperie, vide-dressing, vintage, brocante, ressourcerie] }
+
+  # Rationale: building trades and their suppliers win work through phone calls, quotes and local
+  # search; hurricane-proofing, solar and cisterns are distinctive Caribbean construction niches.
+  - slug: home_construction
+    labels: { en: Construction & renovation, fr: Construction et rénovation }
+    description: Building trades, design professionals and construction suppliers.
+    icon: hammer
+    offerRelevance: { new_website: 0.8, website_redesign: 0.6, ai_receptionist: 0.7, booking_system: 0.3, local_seo: 0.8 }
+    children:
+      - slug: design_engineering
+        labels: { en: Design & engineering, fr: Conception et ingénierie }
+        icon: ruler-2
+        children:
+          - slug: architect
+            labels: { en: Architect, fr: Architecte }
+            synonyms: { en: [architecture firm, architectural design, building plans, villa design], fr: [cabinet d'architecture, architecte DPLG, plans de maison, maître d'œuvre] }
+            attributes: { regulated: true }
+            offerRelevance: { website_redesign: 0.7 }
+          - slug: interior_designer
+            labels: { en: Interior designer, fr: Architecte d'intérieur }
+            synonyms: { en: [interior design, interior decorator, home staging, decorator], fr: [décorateur d'intérieur, décoratrice, home staging, design intérieur] }
+          - slug: engineering_firm
+            labels: { en: Engineering firm, fr: Bureau d'études }
+            synonyms: { en: [structural engineer, civil engineer, engineering consultancy, mep engineer], fr: [ingénieur structure, bureau d'études techniques, BET, ingénierie] }
+          - slug: land_surveyor
+            labels: { en: Land surveyor, fr: Géomètre-expert }
+            synonyms: { en: [surveyor, land survey, topographic survey, boundary survey], fr: [géomètre, bornage, topographie, relevé topographique] }
+            attributes: { regulated: true }
+      - slug: structural_work
+        labels: { en: Structural work, fr: Gros œuvre }
+        icon: building
+        children:
+          - slug: general_contractor
+            labels: { en: General contractor, fr: Entreprise générale du bâtiment }
+            synonyms: { en: [builder, construction company, home builder, renovation contractor, construction], fr: [entreprise de BTP, constructeur, entreprise de construction, rénovation, entrepreneur] }
+          - slug: masonry
+            labels: { en: Masonry, fr: Maçonnerie }
+            synonyms: { en: [mason, bricklayer, concrete work, stonework], fr: [maçon, béton, enduits, travaux de pierre] }
+          - slug: earthworks
+            labels: { en: Earthworks, fr: Terrassement }
+            synonyms: { en: [excavation, groundworks, demolition, site preparation], fr: [terrassier, démolition, travaux publics, VRD] }
+          - slug: roofing
+            labels: { en: Roofing, fr: Couverture et charpente }
+            synonyms: { en: [roofer, roof repair, waterproofing, gutters, timber framing], fr: [couvreur, charpentier, étanchéité, toiture, zinguerie] }
+          - slug: metalwork
+            labels: { en: Metalwork, fr: Ferronnerie et métallerie }
+            synonyms: { en: [welder, ironwork, railings, steel fabrication, gates], fr: [ferronnier, métallier, soudure, garde-corps, portails] }
+      - slug: finishing_trades
+        labels: { en: Finishing trades, fr: Second œuvre }
+        icon: tools
+        children:
+          - slug: electrician
+            labels: { en: Electrician, fr: Électricien }
+            synonyms: { en: [electrical contractor, electrical repair, wiring, lighting installation], fr: [électricité, installateur électricien, dépannage électrique, électricité générale] }
+            icon: bolt
+          - slug: plumber
+            labels: { en: Plumber, fr: Plombier }
+            synonyms: { en: [plumbing, drain cleaning, water heater, leak repair, pipefitter], fr: [plomberie, plombier chauffagiste, chauffe-eau, fuite d'eau, débouchage] }
+            icon: droplet
+          - slug: hvac
+            labels: { en: Air conditioning & HVAC, fr: Climatisation }
+            synonyms: { en: [air conditioning, ac repair, hvac contractor, ventilation, refrigeration, heating], fr: [climaticien, frigoriste, clim, installation de climatisation, dépannage clim, ventilation] }
+            icon: air-conditioning
+          - slug: carpentry
+            labels: { en: Carpentry & joinery, fr: Menuiserie }
+            synonyms: { en: [carpenter, joiner, cabinetmaker, woodwork, custom furniture], fr: [menuisier, ébéniste, menuiserie bois, agencement, bois] }
+          - slug: painter
+            labels: { en: Painter & decorator, fr: Peintre en bâtiment }
+            synonyms: { en: [house painter, painting contractor, decorator, wall coatings], fr: [peintre, peinture, ravalement de façade, revêtements muraux] }
+            icon: paint
+          - slug: tiling
+            labels: { en: Tiling & flooring, fr: Carrelage et revêtements de sol }
+            synonyms: { en: [tiler, flooring, tile installer, parquet, resin floor], fr: [carreleur, revêtement de sol, parquet, sol résine] }
+          - slug: glazing
+            labels: { en: Glazing & windows, fr: Vitrerie et miroiterie }
+            synonyms: { en: [glazier, windows, glass installer, mirrors, aluminum windows], fr: [vitrier, miroitier, fenêtres, baies vitrées, menuiserie aluminium] }
+          - slug: hurricane_shutters
+            labels: { en: Hurricane shutters & closures, fr: Volets anticycloniques et fermetures }
+            synonyms: { en: [storm shutters, hurricane protection, roller shutters, impact windows, garage doors], fr: [volets roulants, protection anticyclonique, fermetures, stores, portes de garage] }
+          - slug: solar_installer
+            labels: { en: Solar installer, fr: Installateur solaire }
+            synonyms: { en: [solar panels, photovoltaic, solar water heater, solar energy, home batteries], fr: [panneaux solaires, photovoltaïque, chauffe-eau solaire, énergie solaire] }
+            icon: solar-panel
+      - slug: construction_supplies
+        labels: { en: Building supplies & hardware, fr: Matériaux et quincaillerie }
+        attributes: { retail: true }
+        offerRelevance: { new_website: 0.6, website_redesign: 0.5, ai_receptionist: 0.4, booking_system: 0.1, local_seo: 0.8 }
+        children:
+          - slug: hardware_store
+            labels: { en: Hardware store, fr: Quincaillerie }
+            synonyms: { en: [hardware, diy store, home improvement store, tools, paint store], fr: [quincaillier, bricolage, magasin de bricolage, outillage, droguerie] }
+            icon: tools
+          - slug: building_supplies
+            labels: { en: Building supplies, fr: Négoce de matériaux }
+            synonyms: { en: [building materials, lumber yard, timber merchant, builders merchant, concrete], fr: [matériaux de construction, négoce de bois, bois de construction, ciment, matériaux] }
+            icon: building-warehouse
+          - slug: electrical_plumbing_supply
+            labels: { en: Electrical & plumbing supplies, fr: Fournitures électriques et sanitaires }
+            synonyms: { en: [electrical supply, plumbing supply, bathroom showroom, sanitary ware], fr: [matériel électrique, sanitaire, salle de bain, robinetterie, plomberie sanitaire] }
+
+  # Rationale: service businesses that come to the customer (pools, gardens, cleaning, caretaking)
+  # are phone-driven and often owner-operated; villa caretaking and cisterns are island-specific.
+  - slug: home_services
+    labels: { en: Home & personal services, fr: Services à domicile et à la personne }
+    description: Maintenance, cleaning, repair and personal services for homes and households.
+    icon: home
+    attributes: { appointmentBased: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.6, ai_receptionist: 0.8, booking_system: 0.6, local_seo: 0.8 }
+    children:
+      - slug: pool_services
+        labels: { en: Pool services, fr: Piscines }
+        icon: pool
+        children:
+          - slug: pool_maintenance
+            labels: { en: Pool maintenance, fr: Entretien de piscines }
+            synonyms: { en: [pool cleaning, pool service, pool technician, pool repair, pool care], fr: [pisciniste, nettoyage de piscine, entretien piscine, traitement de l'eau, réparation de piscine] }
+          - slug: pool_construction
+            labels: { en: Pool builder, fr: Construction de piscines }
+            synonyms: { en: [pool contractor, pool installation, pool renovation, hot tub installation], fr: [constructeur de piscines, pisciniste, rénovation de piscine, pose de spa] }
+      - slug: garden_services
+        labels: { en: Garden & outdoor, fr: Jardin et extérieurs }
+        icon: plant-2
+        children:
+          - slug: landscaping
+            labels: { en: Landscaping, fr: Paysagiste }
+            synonyms: { en: [landscaper, gardener, garden maintenance, lawn care, landscape design, irrigation], fr: [jardinier, entretien de jardin, espaces verts, création de jardin, arrosage automatique] }
+          - slug: tree_care
+            labels: { en: Tree care, fr: Élagage }
+            synonyms: { en: [tree surgeon, arborist, tree trimming, palm tree pruning, tree removal], fr: [élagueur, abattage, taille de palmiers, arboriste] }
+      - slug: cleaning_services
+        labels: { en: Cleaning services, fr: Nettoyage }
+        children:
+          - slug: house_cleaning
+            labels: { en: House cleaning, fr: Ménage à domicile }
+            synonyms: { en: [maid service, housekeeping, cleaner, villa cleaning, domestic help], fr: [femme de ménage, aide ménagère, ménage, entretien de villa, nettoyage de maison] }
+          - slug: commercial_cleaning
+            labels: { en: Commercial cleaning, fr: Nettoyage professionnel }
+            synonyms: { en: [office cleaning, janitorial, pressure washing, window cleaning, post-construction cleaning], fr: [nettoyage de bureaux, entreprise de nettoyage, nettoyage haute pression, lavage de vitres, propreté] }
+      - slug: repairs_maintenance
+        labels: { en: Repairs & maintenance, fr: Dépannage et entretien }
+        icon: tool
+        children:
+          - slug: handyman
+            labels: { en: Handyman, fr: Homme toutes mains }
+            synonyms: { en: [odd jobs, home repairs, maintenance man, property maintenance], fr: [bricoleur, multiservices, petits travaux, dépannage, homme à tout faire] }
+          - slug: locksmith
+            labels: { en: Locksmith, fr: Serrurier }
+            synonyms: { en: [lockout, key cutting, locks, safes], fr: [serrurerie, dépannage serrure, double de clés, ouverture de porte] }
+            icon: lock
+          - slug: appliance_repair
+            labels: { en: Appliance repair, fr: Réparation d'électroménager }
+            synonyms: { en: [washer repair, fridge repair, appliance technician, appliance service], fr: [dépannage électroménager, réparateur, SAV électroménager, réparation frigo] }
+          - slug: pest_control
+            labels: { en: Pest control, fr: Dératisation et désinsectisation }
+            synonyms: { en: [exterminator, termite treatment, mosquito control, fumigation, rodent control], fr: [désinsectisation, dératisation, traitement anti-termites, démoustication, 3D] }
+            icon: bug
+          - slug: water_tank_service
+            labels: { en: Cistern & water treatment, fr: Citernes et traitement de l'eau }
+            synonyms: { en: [cistern cleaning, water tank, water treatment, desalination, water delivery], fr: [nettoyage de citerne, citerne, traitement de l'eau, livraison d'eau, osmoseur] }
+          - slug: septic_service
+            labels: { en: Septic & drainage service, fr: Assainissement }
+            synonyms: { en: [septic tank pumping, drain unblocking, sewer, wastewater], fr: [vidange de fosse septique, fosse septique, débouchage de canalisations, assainissement non collectif] }
+      - slug: security_services
+        labels: { en: Security & alarm systems, fr: Sécurité et surveillance }
+        synonyms: { en: [alarm system, cctv, security guard, video surveillance, access control], fr: [alarme, vidéosurveillance, gardiennage, agent de sécurité, télésurveillance] }
+        icon: shield-lock
+      - slug: villa_caretaking
+        labels: { en: Villa caretaking, fr: Gardiennage de villas }
+        synonyms: { en: [house sitting, property caretaker, home watch, villa manager, key holding], fr: [gardien de villa, gestion de villas, surveillance de propriété, gardiennage, intendance] }
+        attributes: { tourismFacing: true }
+      - slug: moving_storage
+        labels: { en: Moving & storage, fr: Déménagement et garde-meubles }
+        synonyms: { en: [movers, removals, storage units, self storage, relocation], fr: [déménageur, garde-meuble, stockage, box de stockage, transport de meubles] }
+        icon: truck
+      - slug: personal_services
+        labels: { en: Personal services, fr: Services à la personne }
+        children:
+          - slug: laundry
+            labels: { en: Laundry & dry cleaning, fr: Pressing / Laverie }
+            synonyms: { en: [laundromat, dry cleaner, laundry service, wash and fold, ironing], fr: [pressing, laverie, blanchisserie, laverie automatique, repassage] }
+            icon: wash-machine
+            attributes: { appointmentBased: false }
+            offerRelevance: { booking_system: 0.3 }
+          - slug: tailor
+            labels: { en: Tailor & alterations, fr: Retouches et couture }
+            synonyms: { en: [alterations, seamstress, dressmaker, tailoring], fr: [couturière, retouches, couturier, atelier de couture] }
+          - slug: shoe_repair
+            labels: { en: Shoe repair & key cutting, fr: Cordonnerie }
+            synonyms: { en: [cobbler, shoe repair, key cutting, leather repair], fr: [cordonnier, clés minute, réparation de chaussures, cordonnerie-clés] }
+            attributes: { appointmentBased: false }
+          - slug: babysitting
+            labels: { en: Childcare & babysitting, fr: Garde d'enfants }
+            synonyms: { en: [babysitter, nanny, au pair, kids club], fr: [baby-sitting, nounou, baby-sitter, assistante maternelle] }
+            icon: baby-carriage
+            attributes: { tourismFacing: true }
+          - slug: home_care
+            labels: { en: Home care, fr: Aide à domicile }
+            synonyms: { en: [elderly care, caregiver, senior care, home help, disability care], fr: [auxiliaire de vie, aide aux personnes âgées, maintien à domicile, assistance à domicile] }
+          - slug: funeral_home
+            labels: { en: Funeral home, fr: Pompes funèbres }
+            synonyms: { en: [funeral services, undertaker, funeral director, cremation], fr: [services funéraires, obsèques, funérarium, marbrerie funéraire] }
+            attributes: { appointmentBased: false }
+            offerRelevance: { booking_system: 0.1 }
+
+  # Rationale: getting around an island (rentals, taxis, air and sea links) is a tourist essential;
+  # garages and dealers are classic phone- and search-driven local businesses.
+  - slug: automotive_transport
+    labels: { en: Automotive & transport, fr: Automobile et transport }
+    description: Vehicle rental, passenger transport, logistics and automotive services.
+    icon: car
+    offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.7, booking_system: 0.6, local_seo: 0.8 }
+    children:
+      - slug: vehicle_rental
+        labels: { en: Vehicle rental, fr: Location de véhicules }
+        attributes: { tourismFacing: true }
+        offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.7, booking_system: 0.9, local_seo: 0.9 }
+        children:
+          - slug: car_rental
+            labels: { en: Car rental, fr: Location de voitures }
+            synonyms: { en: [car hire, rent a car, rental car, jeep rental, suv rental], fr: [loueur de voitures, location auto, location de jeep, location de véhicules, voiture de location] }
+            icon: car
+          - slug: scooter_rental
+            labels: { en: Scooter rental, fr: Location de scooters }
+            synonyms: { en: [moped rental, motorbike rental, motorcycle rental, quad rental, atv rental], fr: [location de motos, location de quads, scooter, deux-roues, loueur de scooters] }
+            icon: scooter
+          - slug: bike_rental
+            labels: { en: Bike rental, fr: Location de vélos }
+            synonyms: { en: [bicycle rental, e-bike rental, electric bike, cycling tours], fr: [location de vélos électriques, VTT, vélo électrique, balade à vélo] }
+            icon: bike
+      - slug: passenger_transport
+        labels: { en: Passenger transport, fr: Transport de personnes }
+        children:
+          - slug: taxi
+            labels: { en: Taxi, fr: Taxi }
+            synonyms: { en: [cab, taxi service, airport taxi, taxi rank, minibus], fr: [taxis, taxi aéroport, station de taxis, transport de personnes, minibus] }
+            attributes: { regulated: true, tourismFacing: true }
+            offerRelevance: { ai_receptionist: 0.9, booking_system: 0.8 }
+          - slug: chauffeur_service
+            labels: { en: Private driver, fr: Chauffeur privé }
+            synonyms: { en: [chauffeur, limousine, vtc, airport transfer, private car service], fr: [VTC, chauffeur, limousine, transfert aéroport, navette privée] }
+            attributes: { tourismFacing: true }
+            offerRelevance: { new_website: 0.8, ai_receptionist: 0.9, booking_system: 0.9 }
+          - slug: airline
+            labels: { en: Airline, fr: Compagnie aérienne }
+            synonyms: { en: [regional airline, commuter airline, flights, air shuttle], fr: [compagnie régionale, vols, navette aérienne, aviation commerciale] }
+            icon: plane
+            attributes: { tourismFacing: true }
+            offerRelevance: { new_website: 0.2, website_redesign: 0.2, ai_receptionist: 0.2, booking_system: 0.2, local_seo: 0.2 }
+          - slug: private_aviation
+            labels: { en: Private aviation, fr: Aviation privée }
+            synonyms: { en: [private jet, air charter, helicopter, aircraft charter, air taxi], fr: [jet privé, avion-taxi, hélicoptère, affrètement aérien, location d'avion] }
+            icon: plane
+            attributes: { tourismFacing: true }
+            offerRelevance: { new_website: 0.6, website_redesign: 0.7, ai_receptionist: 0.6, booking_system: 0.7, local_seo: 0.6 }
+          - slug: ferry
+            labels: { en: Ferry, fr: Ferry }
+            synonyms: { en: [ferry service, passenger boat, inter-island ferry, sea shuttle], fr: [navette maritime, bateau, liaison maritime, traversée] }
+            icon: ship
+            attributes: { tourismFacing: true }
+            offerRelevance: { booking_system: 0.8 }
+      - slug: logistics
+        labels: { en: Logistics & delivery, fr: Logistique et livraison }
+        children:
+          - slug: freight_forwarder
+            labels: { en: Freight forwarder, fr: Transitaire }
+            synonyms: { en: [shipping company, freight, customs broker, cargo, container shipping], fr: [fret, commissionnaire en douane, transport de marchandises, transport maritime, conteneur] }
+            offerRelevance: { new_website: 0.6, website_redesign: 0.6, ai_receptionist: 0.5, booking_system: 0.2, local_seo: 0.5 }
+          - slug: courier
+            labels: { en: Courier & delivery, fr: Coursier et livraison }
+            synonyms: { en: [delivery service, courier service, parcel delivery, express delivery, errands], fr: [livraison, coursier, livraison express, colis, livreur] }
+            icon: truck-delivery
+      - slug: automotive_services
+        labels: { en: Automotive services, fr: Services automobiles }
+        icon: steering-wheel
+        children:
+          - slug: auto_repair
+            labels: { en: Auto repair, fr: Garage automobile }
+            synonyms: { en: [mechanic, car repair, auto mechanic, car service, towing], fr: [garagiste, mécanicien, mécanique auto, réparation auto, dépannage auto, remorquage] }
+            attributes: { appointmentBased: true }
+          - slug: auto_body
+            labels: { en: Body shop, fr: Carrosserie }
+            synonyms: { en: [collision repair, auto body, car painting, dent repair], fr: [carrossier, peinture auto, débosselage, tôlerie] }
+            attributes: { appointmentBased: true }
+          - slug: car_dealer
+            labels: { en: Car dealer, fr: Concessionnaire automobile }
+            synonyms: { en: [car dealership, used cars, new cars, auto sales], fr: [concessionnaire, vente de voitures, voitures d'occasion, garage vente] }
+            offerRelevance: { booking_system: 0.4 }
+          - slug: tire_shop
+            labels: { en: Tire shop, fr: Pneumatiques }
+            synonyms: { en: [tyres, tire repair, wheel alignment, tire center], fr: [pneus, vulcanisation, géométrie, centre auto] }
+          - slug: car_wash
+            labels: { en: Car wash, fr: Station de lavage }
+            synonyms: { en: [car detailing, valeting, hand car wash, car cleaning], fr: [lavage auto, nettoyage auto, detailing, lavage à la main] }
+          - slug: auto_parts
+            labels: { en: Auto parts store, fr: Pièces auto }
+            synonyms: { en: [car parts, spare parts, auto accessories, car batteries], fr: [pièces détachées, accessoires auto, batteries, magasin de pièces] }
+            attributes: { retail: true }
+            offerRelevance: { booking_system: 0.1 }
+          - slug: motorcycle_shop
+            labels: { en: Motorcycle & scooter shop, fr: Concession moto et scooter }
+            synonyms: { en: [motorcycle dealer, scooter repair, motorbike mechanic, moto shop], fr: [concessionnaire moto, réparation scooter, mécanique moto, deux-roues] }
+          - slug: gas_station
+            labels: { en: Gas station, fr: Station-service }
+            synonyms: { en: [petrol station, fuel station, service station, filling station], fr: [station essence, carburant, pompe à essence, station] }
+            icon: gas-station
+            offerRelevance: { new_website: 0.3, website_redesign: 0.3, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.5 }
+          - slug: driving_school
+            labels: { en: Driving school, fr: Auto-école }
+            synonyms: { en: [driving lessons, driving instructor, driver training, driving license], fr: [permis de conduire, moniteur auto-école, code de la route, leçons de conduite] }
+            attributes: { appointmentBased: true }
+            offerRelevance: { booking_system: 0.8 }
+
+  # Rationale: visitor-facing services (agencies, tours, concierges, attractions) sell experiences
+  # online and compete for discovery; concierges are a signature Saint-Barthélemy niche.
+  - slug: tourism_leisure
+    labels: { en: Tourism & leisure, fr: Tourisme et loisirs }
+    description: Travel services, tours, concierges, attractions and entertainment.
+    icon: map
+    attributes: { tourismFacing: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.7, booking_system: 0.8, local_seo: 0.8 }
+    children:
+      - slug: travel_services
+        labels: { en: Travel services, fr: Services touristiques }
+        children:
+          - slug: travel_agency
+            labels: { en: Travel agency, fr: Agence de voyages }
+            synonyms: { en: [travel agent, holiday packages, flight booking, travel advisor], fr: [agent de voyages, voyagiste, billetterie, séjours] }
+            icon: plane
+          - slug: tour_operator
+            labels: { en: Tour operator, fr: Tour-opérateur }
+            synonyms: { en: [tour company, excursions, day trips, destination management, dmc], fr: [voyagiste, réceptif, excursions, organisateur de séjours, agence réceptive] }
+          - slug: guided_tours
+            labels: { en: Guided tours, fr: Visites guidées }
+            synonyms: { en: [tour guide, island tour, sightseeing, walking tour, hiking guide, jeep tour], fr: [guide touristique, tour de l'île, excursion, randonnée guidée, visite de l'île] }
+          - slug: concierge
+            labels: { en: Concierge service, fr: Conciergerie }
+            synonyms: { en: [concierge, luxury concierge, villa concierge, lifestyle manager, personal assistant], fr: [concierge, conciergerie de luxe, conciergerie privée, services aux villas, assistance personnelle] }
+            icon: bell
+            offerRelevance: { new_website: 0.9, ai_receptionist: 0.8, booking_system: 0.8 }
+          - slug: tourist_office
+            labels: { en: Tourist office, fr: Office de tourisme }
+            synonyms: { en: [tourist information, visitor center, tourism board], fr: [office du tourisme, syndicat d'initiative, point info tourisme, comité du tourisme] }
+            offerRelevance: { new_website: 0.2, website_redesign: 0.3, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.3 }
+      - slug: attractions_entertainment
+        labels: { en: Attractions & entertainment, fr: Loisirs et divertissements }
+        icon: ticket
+        children:
+          - slug: museum
+            labels: { en: Museum, fr: Musée }
+            synonyms: { en: [heritage site, exhibition, historical site, gallery museum], fr: [site historique, exposition, patrimoine, écomusée] }
+            offerRelevance: { new_website: 0.5, website_redesign: 0.6, ai_receptionist: 0.3, booking_system: 0.5, local_seo: 0.6 }
+          - slug: cinema
+            labels: { en: Cinema, fr: Cinéma }
+            synonyms: { en: [movie theater, movies, open-air cinema, film], fr: [salle de cinéma, ciné, cinéma en plein air, films] }
+            icon: movie
+            offerRelevance: { booking_system: 0.5 }
+          - slug: theater
+            labels: { en: Theater, fr: Théâtre }
+            synonyms: { en: [performing arts, playhouse, auditorium, shows], fr: [salle de spectacle, spectacles, scène, auditorium] }
+            icon: masks-theater
+          - slug: live_music_venue
+            labels: { en: Concert venue, fr: Salle de concert }
+            synonyms: { en: [live music, music venue, concerts, jazz club], fr: [concerts, musique live, scène musicale, club de jazz] }
+            icon: music
+          - slug: casino
+            labels: { en: Casino, fr: Casino }
+            synonyms: { en: [gaming, gambling, slot machines, card room], fr: [jeux, machines à sous, salle de jeux, jeux de table] }
+          - slug: escape_game
+            labels: { en: Escape game, fr: Escape game }
+            synonyms: { en: [escape room, puzzle room, laser tag, arcade], fr: [escape room, jeu d'évasion, laser game, salle d'arcade] }
+            offerRelevance: { booking_system: 0.9 }
+          - slug: amusement_park
+            labels: { en: Amusement park, fr: Parc de loisirs }
+            synonyms: { en: [theme park, water park, adventure park, zip line], fr: [parc d'attractions, parc aquatique, accrobranche, tyrolienne, parc aventure] }
+          - slug: kids_activities
+            labels: { en: Kids activities, fr: Activités pour enfants }
+            synonyms: { en: [play center, playground, children's activities, birthday parties, holiday camp], fr: [club enfants, aire de jeux, centre de loisirs, anniversaires enfants, colonie de vacances] }
+          - slug: nature_park
+            labels: { en: Nature park & wildlife, fr: Parc naturel }
+            synonyms: { en: [nature reserve, botanical garden, zoo, wildlife park, marine reserve], fr: [réserve naturelle, jardin botanique, parc animalier, zoo, réserve marine] }
+
+  # Rationale: the sea is Saint-Barthélemy's main attraction; charters, excursions and water sports
+  # are high-value bookable experiences, and marine services support a large yachting scene.
+  - slug: marine_nautical
+    labels: { en: Marine & nautical, fr: Nautisme }
+    description: Boat charters, sea excursions, water sports and boating services.
+    icon: anchor
+    attributes: { tourismFacing: true }
+    offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.7, booking_system: 0.9, local_seo: 0.8 }
+    children:
+      - slug: boat_charter
+        labels: { en: Boat & yacht charter, fr: Location de bateaux }
+        synonyms: { en: [yacht charter, boat rental, catamaran charter, sailboat rental, crewed yacht, motor yacht], fr: [location de yachts, charter, location de catamaran, location de voilier, bateau avec skipper, location de bateau à moteur] }
+        icon: sailboat
+        offerRelevance: { new_website: 0.9, website_redesign: 0.8 }
+      - slug: boat_excursion
+        labels: { en: Boat trips & excursions, fr: Excursions en mer }
+        synonyms: { en: [boat tour, catamaran cruise, snorkeling trip, sunset cruise, day sail, island hopping], fr: [sortie en mer, sortie en catamaran, croisière, balade en bateau, coucher de soleil en mer, journée en mer] }
+        icon: sailboat
+      - slug: sport_fishing
+        labels: { en: Sport fishing, fr: Pêche au gros }
+        synonyms: { en: [deep sea fishing, fishing charter, big game fishing, fishing trip], fr: [pêche sportive, pêche en mer, sortie pêche, pêche à la traîne] }
+        icon: fish-hook
+      - slug: water_taxi
+        labels: { en: Water taxi, fr: Taxi-boat }
+        synonyms: { en: [boat taxi, water shuttle, boat transfer, tender service], fr: [taxi boat, bateau-taxi, navette en bateau, transfert maritime] }
+        offerRelevance: { ai_receptionist: 0.9 }
+      - slug: water_sports
+        labels: { en: Water sports, fr: Sports nautiques }
+        icon: ripple
+        children:
+          - slug: scuba_diving
+            labels: { en: Scuba diving, fr: Plongée sous-marine }
+            synonyms: { en: [dive center, dive shop, diving school, snorkeling, freediving], fr: [centre de plongée, club de plongée, baptême de plongée, plongée, apnée, randonnée palmée] }
+            icon: scuba-mask
+          - slug: jet_ski_rental
+            labels: { en: Jet ski rental, fr: Location de jet-ski }
+            synonyms: { en: [jet ski, waverunner, personal watercraft, jet ski tour, flyboard], fr: [jet ski, scooter des mers, randonnée en jet ski, flyboard, motomarine] }
+          - slug: kitesurfing
+            labels: { en: Kitesurfing & windsurfing, fr: Kitesurf et planche à voile }
+            synonyms: { en: [kiteboarding, kite school, windsurfing, wing foil, kite lessons], fr: [kite, école de kitesurf, planche à voile, wingfoil, windsurf] }
+            icon: wind
+          - slug: surf_school
+            labels: { en: Surf school, fr: École de surf }
+            synonyms: { en: [surf lessons, surf camp, bodyboard, surfboard rental], fr: [cours de surf, stage de surf, bodyboard, location de planches] }
+          - slug: sailing_school
+            labels: { en: Sailing school, fr: École de voile }
+            synonyms: { en: [sailing lessons, sailing club, yacht club, dinghy sailing], fr: [cours de voile, club nautique, yacht club, dériveur, catamaran de sport] }
+          - slug: paddle_kayak_rental
+            labels: { en: Paddle & kayak rental, fr: Location de paddle et kayak }
+            synonyms: { en: [stand up paddle, sup rental, kayak tours, canoe rental, clear kayak], fr: [paddle, stand up paddle, kayak, canoë, kayak transparent] }
+            icon: kayak
+      - slug: boating_services
+        labels: { en: Boating services, fr: Services nautiques }
+        offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.6, booking_system: 0.3, local_seo: 0.7 }
+        children:
+          - slug: marina
+            labels: { en: Marina, fr: Port de plaisance }
+            synonyms: { en: [harbor, port, boat slip, mooring, harbour office], fr: [port, marina, mouillage, capitainerie, anneau] }
+            offerRelevance: { booking_system: 0.5 }
+          - slug: boat_repair
+            labels: { en: Boat repair & shipyard, fr: Chantier naval }
+            synonyms: { en: [marine mechanic, boatyard, outboard repair, hull cleaning, boat maintenance], fr: [mécanique marine, mécanicien marine, réparation de bateaux, carénage, entretien de bateaux] }
+          - slug: chandlery
+            labels: { en: Ship chandler, fr: Accastillage }
+            synonyms: { en: [marine store, boat supplies, ship chandlery, marine hardware], fr: [shipchandler, accastillage, matériel nautique, magasin nautique] }
+            attributes: { retail: true }
+          - slug: yacht_broker
+            labels: { en: Yacht broker, fr: Courtier en yachts }
+            synonyms: { en: [boat sales, yacht sales, boat dealer, used boats], fr: [vente de bateaux, courtage de yachts, bateaux d'occasion, concessionnaire nautique] }
+          - slug: yacht_services
+            labels: { en: Yacht services & provisioning, fr: Services aux yachts et avitaillement }
+            synonyms: { en: [yacht agent, provisioning, yacht management, crew services, superyacht agent], fr: [avitaillement, agent maritime, gestion de yachts, services aux équipages, agent de yachts] }
+
+  # Rationale: weddings and events are a major destination business; planners, venues, photographers
+  # and artists sell on portfolios, so websites and lead capture are the main lever.
+  - slug: events_creative
+    labels: { en: Events & creative, fr: Événementiel et création }
+    description: Event planning and services, photography and video, arts and crafts.
+    icon: confetti
+    offerRelevance: { new_website: 0.8, website_redesign: 0.7, ai_receptionist: 0.6, booking_system: 0.6, local_seo: 0.8 }
+    children:
+      - slug: events
+        labels: { en: Events, fr: Événementiel }
+        attributes: { appointmentBased: true }
+        children:
+          - slug: event_planner
+            labels: { en: Event planner, fr: Organisateur d'événements }
+            synonyms: { en: [event organizer, event management, event agency, party planner, corporate events], fr: [agence événementielle, organisation d'événements, organisatrice de soirées, événementiel d'entreprise] }
+          - slug: wedding_planner
+            labels: { en: Wedding planner, fr: Wedding planner }
+            synonyms: { en: [wedding organizer, destination wedding, wedding coordinator, elopement], fr: [organisatrice de mariage, organisation de mariage, mariage sur la plage, mariage à l'étranger] }
+            attributes: { tourismFacing: true }
+            offerRelevance: { new_website: 0.9 }
+          - slug: event_venue
+            labels: { en: Event venue, fr: Salle de réception }
+            synonyms: { en: [reception hall, wedding venue, banquet hall, function room, conference venue], fr: [lieu de réception, salle des fêtes, domaine, salle de séminaire, lieu événementiel] }
+            offerRelevance: { booking_system: 0.8 }
+          - slug: party_rental
+            labels: { en: Event rental, fr: Location de matériel événementiel }
+            synonyms: { en: [party rentals, tent rental, furniture rental, tableware rental, event equipment], fr: [location de tentes, location de mobilier, location de vaisselle, chapiteau, matériel de réception] }
+          - slug: dj_entertainment
+            labels: { en: DJ & entertainment, fr: DJ et animation }
+            synonyms: { en: [dj, mobile dj, entertainer, mc, party entertainment], fr: [DJ, animateur, animation de soirée, disc-jockey] }
+          - slug: live_musicians
+            labels: { en: Musicians & bands, fr: Musiciens et groupes }
+            synonyms: { en: [live band, musician, singer, steel band, wedding band], fr: [groupe de musique, musicien, chanteur, orchestre, steel band] }
+            icon: music
+          - slug: sound_lighting
+            labels: { en: Sound & lighting, fr: Sonorisation et éclairage }
+            synonyms: { en: [audio visual, av rental, stage lighting, pa system, staging], fr: [sonorisation, éclairage scénique, location de son, régie, scène] }
+      - slug: photo_video
+        labels: { en: Photo & video, fr: Photo et vidéo }
+        icon: camera
+        attributes: { appointmentBased: true }
+        offerRelevance: { booking_system: 0.7 }
+        children:
+          - slug: photographer
+            labels: { en: Photographer, fr: Photographe }
+            synonyms: { en: [photography, photo studio, wedding photographer, portrait photographer, photoshoot], fr: [studio photo, photographe de mariage, shooting photo, reportage photo, portraitiste] }
+          - slug: videographer
+            labels: { en: Videographer, fr: Vidéaste }
+            synonyms: { en: [video production, wedding video, filmmaker, drone filming, video studio], fr: [production vidéo, vidéo de mariage, réalisateur, prise de vue par drone, film d'entreprise] }
+            icon: video
+      - slug: arts_crafts
+        labels: { en: Arts & crafts, fr: Arts et artisanat }
+        icon: palette
+        attributes: { tourismFacing: true }
+        offerRelevance: { ai_receptionist: 0.3, booking_system: 0.2 }
+        children:
+          - slug: art_gallery
+            labels: { en: Art gallery, fr: Galerie d'art }
+            synonyms: { en: [gallery, contemporary art, fine art, art dealer, exhibition space], fr: [galerie, art contemporain, marchand d'art, exposition, galerie de peinture] }
+            attributes: { retail: true }
+          - slug: artist_studio
+            labels: { en: Artist studio, fr: Atelier d'artiste }
+            synonyms: { en: [painter, sculptor, artist, art studio, ceramicist], fr: [artiste peintre, sculpteur, atelier, céramiste, plasticien] }
+          - slug: craft_artisan
+            labels: { en: Artisan crafts, fr: Artisan d'art }
+            synonyms: { en: [artisan, handmade, crafts, pottery, woodcraft, local artisan], fr: [artisanat d'art, fait main, poterie, créateur, artisan local] }
+            attributes: { retail: true }
+          - slug: picture_framing
+            labels: { en: Picture framing, fr: Encadrement }
+            synonyms: { en: [framing shop, frame maker, custom framing, art framing], fr: [encadreur, cadres, encadrement sur mesure, atelier d'encadrement] }
+            attributes: { tourismFacing: false }
+
+  # Rationale: B2B and advisory firms win clients on credibility and referrals; legal and accounting
+  # are regulated professions, so generated content must respect advertising rules.
+  - slug: professional_services
+    labels: { en: Professional services, fr: Services professionnels }
+    description: Legal, accounting, consulting and other business services.
+    icon: briefcase
+    attributes: { appointmentBased: true }
+    offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.6, booking_system: 0.5, local_seo: 0.7 }
+    children:
+      - slug: legal_services
+        labels: { en: Legal services, fr: Services juridiques }
+        icon: scale
+        attributes: { regulated: true }
+        offerRelevance: { ai_receptionist: 0.7 }
+        children:
+          - slug: lawyer
+            labels: { en: Lawyer, fr: Avocat }
+            synonyms: { en: [attorney, law firm, legal counsel, solicitor, barrister], fr: [cabinet d'avocats, avocate, conseil juridique, juriste, avocat d'affaires] }
+            offerRelevance: { booking_system: 0.6 }
+          - slug: notary
+            labels: { en: Notary, fr: Notaire }
+            synonyms: { en: [notary public, notarial office, conveyancing, property deeds], fr: [étude notariale, office notarial, acte notarié, notaires] }
+          - slug: bailiff
+            labels: { en: Bailiff, fr: Commissaire de justice }
+            synonyms: { en: [process server, court officer, judicial officer, debt recovery], fr: [huissier, huissier de justice, constat, recouvrement] }
+      - slug: accountant
+        labels: { en: Accountant, fr: Expert-comptable }
+        synonyms: { en: [accounting firm, bookkeeper, cpa, tax advisor, chartered accountant, payroll], fr: [cabinet comptable, comptable, expertise comptable, conseiller fiscal, tenue de comptabilité, paie] }
+        icon: calculator
+        attributes: { regulated: true }
+      - slug: business_services
+        labels: { en: Business services, fr: Services aux entreprises }
+        children:
+          - slug: business_consultant
+            labels: { en: Business consultant, fr: Conseil en entreprise }
+            synonyms: { en: [consulting firm, management consultant, business advisor, company formation, strategy consulting], fr: [consultant, cabinet de conseil, création d'entreprise, conseil en gestion, accompagnement d'entreprise] }
+          - slug: recruitment_agency
+            labels: { en: Recruitment & staffing agency, fr: Agence de recrutement et d'intérim }
+            synonyms: { en: [staffing agency, temp agency, employment agency, headhunter, recruiter], fr: [agence d'intérim, intérim, cabinet de recrutement, chasseur de têtes, travail temporaire] }
+            icon: users
+          - slug: translation_service
+            labels: { en: Translation service, fr: Traduction et interprétariat }
+            synonyms: { en: [translator, interpreter, certified translation, localization], fr: [traducteur, interprète, traduction assermentée, traduction] }
+            icon: language
+          - slug: coworking_space
+            labels: { en: Coworking space, fr: Espace de coworking }
+            synonyms: { en: [shared office, business center, office rental, virtual office, meeting rooms], fr: [coworking, bureau partagé, centre d'affaires, location de bureaux, domiciliation, salle de réunion] }
+            offerRelevance: { booking_system: 0.8 }
+          - slug: printing
+            labels: { en: Printing, fr: Imprimerie }
+            synonyms: { en: [print shop, printer, copy shop, digital printing, large format printing, business cards], fr: [imprimeur, reprographie, impression numérique, photocopies, cartes de visite, impression grand format] }
+            icon: printer
+            attributes: { appointmentBased: false }
+            offerRelevance: { booking_system: 0.2 }
+          - slug: sign_maker
+            labels: { en: Signs & signage, fr: Enseignes et signalétique }
+            synonyms: { en: [sign shop, signage, vehicle wraps, banners, lettering], fr: [enseigniste, signalétique, covering, banderoles, lettrage, marquage de véhicules] }
+            attributes: { appointmentBased: false }
+            offerRelevance: { booking_system: 0.2 }
+
+  # Rationale: banks and insurers are regulated, usually part of networks with central websites, so
+  # they rank low for our offers; independent agents and brokers are the realistic prospects.
+  - slug: finance_insurance
+    labels: { en: Finance & insurance, fr: Banque et assurance }
+    description: Banks, insurers, brokers and financial advisors.
+    icon: building-bank
+    attributes: { regulated: true }
+    offerRelevance: { new_website: 0.3, website_redesign: 0.3, ai_receptionist: 0.3, booking_system: 0.2, local_seo: 0.4 }
+    children:
+      - slug: bank
+        labels: { en: Bank, fr: Banque }
+        synonyms: { en: [bank branch, atm, banking, credit union, savings bank], fr: [agence bancaire, distributeur de billets, DAB, banque mutualiste, crédit] }
+        offerRelevance: { new_website: 0.1, website_redesign: 0.1, ai_receptionist: 0.1, booking_system: 0.1, local_seo: 0.1 }
+      - slug: insurance_agency
+        labels: { en: Insurance agency, fr: Agence d'assurances }
+        synonyms: { en: [insurance agent, insurance company, car insurance, home insurance, general agent], fr: [assureur, agent général d'assurances, assurance auto, assurance habitation, compagnie d'assurance] }
+        icon: shield-check
+        offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.5, booking_system: 0.4, local_seo: 0.6 }
+      - slug: insurance_broker
+        labels: { en: Insurance broker, fr: Courtier en assurances }
+        synonyms: { en: [broker, insurance brokerage, marine insurance, yacht insurance], fr: [courtier, courtage en assurances, assurance bateau, assurance villa] }
+        icon: shield-check
+        offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.4, booking_system: 0.4, local_seo: 0.6 }
+      - slug: wealth_management
+        labels: { en: Wealth management, fr: Gestion de patrimoine }
+        synonyms: { en: [financial advisor, financial planner, wealth manager, investment advisor, family office], fr: [conseiller en gestion de patrimoine, CGP, conseiller financier, placements, family office] }
+        offerRelevance: { new_website: 0.5, website_redesign: 0.6, ai_receptionist: 0.4, booking_system: 0.4, local_seo: 0.5 }
+      - slug: credit_broker
+        labels: { en: Mortgage & credit broker, fr: Courtier en crédit }
+        synonyms: { en: [mortgage broker, loan broker, financing, home loan], fr: [courtier en prêt immobilier, prêt immobilier, financement, rachat de crédit] }
+        offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.4, booking_system: 0.4, local_seo: 0.6 }
+      - slug: currency_exchange
+        labels: { en: Currency exchange & money transfer, fr: Bureau de change et transfert d'argent }
+        synonyms: { en: [money transfer, foreign exchange, remittance, exchange office], fr: [bureau de change, transfert d'argent, change, envoi d'argent] }
+        icon: coin
+
+  # Rationale: high-ticket property sales and rentals make real estate one of the strongest website
+  # markets on the island; agencies and managers are regulated (professional cards).
+  - slug: real_estate
+    labels: { en: Real estate, fr: Immobilier }
+    description: Agencies, property managers, developers and property experts.
+    icon: key
+    attributes: { regulated: true }
+    offerRelevance: { new_website: 0.7, website_redesign: 0.8, ai_receptionist: 0.7, booking_system: 0.5, local_seo: 0.8 }
+    children:
+      - slug: real_estate_agency
+        labels: { en: Real estate agency, fr: Agence immobilière }
+        synonyms: { en: [realtor, estate agent, real estate broker, property sales, luxury real estate, homes for sale], fr: [agent immobilier, immobilier, transaction immobilière, immobilier de prestige, vente de villas, mandataire immobilier] }
+        attributes: { tourismFacing: true }
+      - slug: property_management
+        labels: { en: Property management, fr: Gestion locative }
+        synonyms: { en: [property manager, rental management, letting agent, holiday rental management, condo management], fr: [administrateur de biens, gestionnaire de biens, gestion de location saisonnière, gestion immobilière, location à l'année] }
+        offerRelevance: { booking_system: 0.7 }
+      - slug: property_developer
+        labels: { en: Property developer, fr: Promoteur immobilier }
+        synonyms: { en: [real estate developer, new developments, residential development, off-plan sales], fr: [promotion immobilière, programme neuf, lotisseur, immobilier neuf] }
+      - slug: real_estate_appraiser
+        labels: { en: Real estate appraiser, fr: Expert immobilier }
+        synonyms: { en: [property valuation, appraisal, home inspector, property inspection], fr: [expertise immobilière, estimation immobilière, diagnostiqueur, diagnostic immobilier] }
+      - slug: condominium_manager
+        labels: { en: Condominium manager, fr: Syndic de copropriété }
+        synonyms: { en: [homeowners association, hoa management, building manager, co-ownership], fr: [syndic, copropriété, syndic bénévole, gestion de copropriété] }
+
+  # Rationale: schools and training centers range from public institutions (low fit) to private
+  # tutors and course providers that sell lessons and need scheduling.
+  - slug: education
+    labels: { en: Education & training, fr: Enseignement et formation }
+    description: Schools, childcare, tutoring and course providers.
+    icon: school
+    offerRelevance: { new_website: 0.6, website_redesign: 0.6, ai_receptionist: 0.5, booking_system: 0.5, local_seo: 0.6 }
+    children:
+      - slug: school
+        labels: { en: Schools, fr: Établissements scolaires }
+        offerRelevance: { new_website: 0.3, website_redesign: 0.4, ai_receptionist: 0.3, booking_system: 0.1, local_seo: 0.4 }
+        children:
+          - slug: preschool
+            labels: { en: Preschool, fr: École maternelle }
+            synonyms: { en: [kindergarten, nursery school, pre-k, montessori], fr: [maternelle, jardin d'enfants, école Montessori, petite section] }
+          - slug: primary_school
+            labels: { en: Primary school, fr: École primaire }
+            synonyms: { en: [elementary school, grade school, primary], fr: [école élémentaire, école, groupe scolaire, primaire] }
+          - slug: secondary_school
+            labels: { en: Secondary school, fr: Collège et lycée }
+            synonyms: { en: [high school, middle school, secondary], fr: [collège, lycée, lycée professionnel, établissement secondaire] }
+          - slug: international_school
+            labels: { en: Private & international school, fr: École privée et internationale }
+            synonyms: { en: [private school, bilingual school, international school, boarding school], fr: [école bilingue, école privée, école internationale, établissement privé] }
+            offerRelevance: { new_website: 0.5, website_redesign: 0.6, ai_receptionist: 0.4, booking_system: 0.3, local_seo: 0.6 }
+      - slug: daycare
+        labels: { en: Daycare, fr: Crèche }
+        synonyms: { en: [nursery, childcare center, day care, creche], fr: [micro-crèche, halte-garderie, garderie, multi-accueil] }
+        icon: baby-carriage
+      - slug: tutoring
+        labels: { en: Tutoring, fr: Soutien scolaire }
+        synonyms: { en: [tutor, private lessons, homework help, exam prep, academic coaching], fr: [cours particuliers, aide aux devoirs, professeur particulier, accompagnement scolaire, préparation aux examens] }
+        attributes: { appointmentBased: true }
+        offerRelevance: { booking_system: 0.8 }
+      - slug: language_school
+        labels: { en: Language school, fr: École de langues }
+        synonyms: { en: [language courses, english lessons, french lessons, language center, esl], fr: [cours de langues, cours d'anglais, cours de français, FLE, centre de langues] }
+        icon: language
+        attributes: { appointmentBased: true }
+        offerRelevance: { booking_system: 0.7 }
+      - slug: music_school
+        labels: { en: Music school, fr: École de musique }
+        synonyms: { en: [music lessons, piano lessons, guitar lessons, conservatory], fr: [cours de musique, conservatoire, cours de piano, cours de guitare] }
+        icon: music
+        attributes: { appointmentBased: true }
+        offerRelevance: { booking_system: 0.7 }
+      - slug: art_school
+        labels: { en: Art & craft classes, fr: Cours d'art et ateliers créatifs }
+        synonyms: { en: [art classes, painting classes, pottery classes, drawing lessons, workshops], fr: [atelier créatif, cours de peinture, cours de poterie, cours de dessin, ateliers] }
+        attributes: { appointmentBased: true }
+        offerRelevance: { booking_system: 0.7 }
+      - slug: vocational_training
+        labels: { en: Vocational training, fr: Organisme de formation }
+        synonyms: { en: [training center, professional training, certification courses, adult education, first aid training], fr: [centre de formation, formation professionnelle, formation continue, CFA, formation aux premiers secours] }
+      - slug: cooking_school
+        labels: { en: Cooking classes, fr: Cours de cuisine }
+        synonyms: { en: [cooking school, culinary classes, cooking workshop, mixology class], fr: [atelier cuisine, cours de pâtisserie, école de cuisine, atelier cocktails] }
+        attributes: { appointmentBased: true, tourismFacing: true }
+        offerRelevance: { booking_system: 0.8 }
+
+  # Rationale: digital and media businesses are partners or competitors rather than prime prospects
+  # (they build their own sites), except consumer-facing repair shops.
+  - slug: technology_media
+    labels: { en: Technology & media, fr: Numérique et médias }
+    description: IT, web, marketing, telecom and media businesses.
+    icon: device-laptop
+    offerRelevance: { new_website: 0.4, website_redesign: 0.4, ai_receptionist: 0.3, booking_system: 0.2, local_seo: 0.5 }
+    children:
+      - slug: it_services
+        labels: { en: IT services, fr: Services informatiques }
+        synonyms: { en: [it support, managed it, computer services, network installation, it consultant, cybersecurity], fr: [informaticien, infogérance, maintenance informatique, dépannage informatique, réseau, cybersécurité] }
+        icon: server
+      - slug: web_agency
+        labels: { en: Web agency, fr: Agence web }
+        synonyms: { en: [web design, web developer, website design, digital agency, seo agency], fr: [création de site internet, développeur web, webdesigner, agence digitale, référencement] }
+        icon: code
+      - slug: software_company
+        labels: { en: Software company, fr: Éditeur de logiciels }
+        synonyms: { en: [software developer, app developer, saas, software house, mobile apps], fr: [éditeur logiciel, développement d'applications, ESN, startup, applications mobiles] }
+        icon: code
+      - slug: computer_repair
+        labels: { en: Computer & phone repair, fr: Réparation informatique et téléphonie }
+        synonyms: { en: [phone repair, laptop repair, screen repair, computer shop, tablet repair], fr: [réparation de téléphone, réparation d'ordinateur, changement d'écran, réparation smartphone, SAV] }
+        offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.6, booking_system: 0.5, local_seo: 0.8 }
+      - slug: telecom_provider
+        labels: { en: Telecom & internet provider, fr: Opérateur télécom et internet }
+        synonyms: { en: [internet provider, isp, mobile operator, fiber, telecom], fr: [fournisseur d'accès internet, opérateur mobile, fibre, box internet, télécoms] }
+        icon: antenna
+        offerRelevance: { new_website: 0.2, website_redesign: 0.3, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.3 }
+      - slug: marketing_agency
+        labels: { en: Marketing agency, fr: Agence de communication }
+        synonyms: { en: [advertising agency, marketing firm, social media agency, branding agency, digital marketing, pr agency], fr: [agence marketing, agence de publicité, community manager, agence de marketing digital, relations presse, communication] }
+        icon: speakerphone
+      - slug: graphic_designer
+        labels: { en: Graphic designer, fr: Graphiste }
+        synonyms: { en: [graphic design, logo design, branding, illustrator, design studio], fr: [graphisme, création de logo, studio de design, illustrateur, identité visuelle] }
+        icon: palette
+      - slug: media_outlet
+        labels: { en: Media outlet, fr: Presse et médias }
+        synonyms: { en: [newspaper, magazine, radio station, tv channel, local news, publisher], fr: [journal, magazine, radio, télévision locale, éditeur, presse locale] }
+        icon: news
+
+  # Rationale: public bodies, associations and places of worship appear in provider data and must be
+  # classifiable, but they are rarely buyers of our offers.
+  - slug: public_community
+    labels: { en: Public & community, fr: Services publics et associations }
+    description: Public administration, emergency services, associations and places of worship.
+    icon: building-community
+    offerRelevance: { new_website: 0.2, website_redesign: 0.3, ai_receptionist: 0.2, booking_system: 0.1, local_seo: 0.2 }
+    children:
+      - slug: town_hall
+        labels: { en: Town hall, fr: Mairie }
+        synonyms: { en: [city hall, municipality, local government, territorial collectivity], fr: [hôtel de ville, collectivité, collectivité territoriale, services municipaux] }
+      - slug: government_office
+        labels: { en: Government office, fr: Administration }
+        synonyms: { en: [public administration, government agency, prefecture, tax office, customs], fr: [service public, préfecture, centre des impôts, douanes, administration publique] }
+      - slug: post_office
+        labels: { en: Post office, fr: Bureau de poste }
+        synonyms: { en: [postal service, mail, parcel pickup, post], fr: [poste, courrier, envoi de colis, point relais] }
+        icon: mail
+      - slug: police_station
+        labels: { en: Police station, fr: Gendarmerie et police }
+        synonyms: { en: [police, gendarmerie, law enforcement, police department], fr: [gendarmerie, police municipale, commissariat, brigade de gendarmerie] }
+        icon: shield
+      - slug: fire_station
+        labels: { en: Fire station, fr: Caserne de pompiers }
+        synonyms: { en: [fire department, firefighters, rescue services, fire brigade], fr: [pompiers, centre de secours, sapeurs-pompiers, SDIS] }
+        icon: flame
+      - slug: library
+        labels: { en: Library, fr: Médiathèque }
+        synonyms: { en: [public library, media library, reading room], fr: [bibliothèque, bibliothèque municipale, salle de lecture] }
+        icon: books
+      - slug: place_of_worship
+        labels: { en: Place of worship, fr: Lieu de culte }
+        synonyms: { en: [church, chapel, temple, mosque, synagogue, parish], fr: [église, chapelle, temple, mosquée, synagogue, paroisse] }
+        icon: building-church
+      - slug: nonprofit_association
+        labels: { en: Nonprofit, fr: Association }
+        synonyms: { en: [non-profit, charity, ngo, foundation, volunteer group], fr: [association loi 1901, ONG, fondation, organisme caritatif, bénévolat] }
+        icon: heart-handshake
+        offerRelevance: { new_website: 0.5, website_redesign: 0.4, ai_receptionist: 0.2, booking_system: 0.3, local_seo: 0.4 }
+      - slug: community_center
+        labels: { en: Community & cultural center, fr: Centre culturel }
+        synonyms: { en: [community center, cultural center, youth center, civic center], fr: [maison de quartier, centre socioculturel, maison des jeunes, espace culturel] }
+        offerRelevance: { new_website: 0.4, website_redesign: 0.4, ai_receptionist: 0.2, booking_system: 0.3, local_seo: 0.3 }
+
+  # Rationale: vets, groomers and pet boarding are appointment-driven with loyal local clientele;
+  # vets are a regulated profession.
+  - slug: pets_animals
+    labels: { en: Pets & animals, fr: Animaux }
+    description: Veterinary care, pet shops and pet services.
+    icon: paw
+    attributes: { appointmentBased: true }
+    offerRelevance: { new_website: 0.7, website_redesign: 0.6, ai_receptionist: 0.7, booking_system: 0.8, local_seo: 0.8 }
+    children:
+      - slug: veterinarian
+        labels: { en: Veterinarian, fr: Vétérinaire }
+        synonyms: { en: [vet, animal hospital, veterinary clinic, pet clinic, vet surgeon], fr: [clinique vétérinaire, cabinet vétérinaire, véto, urgences vétérinaires] }
+        attributes: { regulated: true }
+      - slug: pet_store
+        labels: { en: Pet store, fr: Animalerie }
+        synonyms: { en: [pet shop, pet supplies, pet food, aquarium shop], fr: [magasin pour animaux, accessoires pour animaux, croquettes, aquariophilie] }
+        attributes: { appointmentBased: false, retail: true }
+        offerRelevance: { ai_receptionist: 0.3, booking_system: 0.1 }
+      - slug: pet_grooming
+        labels: { en: Pet grooming, fr: Toilettage }
+        synonyms: { en: [dog grooming, groomer, cat grooming, pet salon], fr: [toiletteur, toilettage canin, salon de toilettage, toilettage pour chats] }
+        icon: dog
+      - slug: pet_boarding
+        labels: { en: Pet boarding, fr: Pension pour animaux }
+        synonyms: { en: [kennel, dog boarding, cattery, pet sitting, dog walker], fr: [pension canine, chenil, pension féline, garde d'animaux, promeneur de chiens] }
+      - slug: dog_trainer
+        labels: { en: Dog trainer, fr: Éducateur canin }
+        synonyms: { en: [dog training, obedience school, puppy classes, behaviorist], fr: [dressage, dresseur, éducation canine, comportementaliste] }
+
+  # Rationale: producers, wholesalers and importers are B2B and less search-driven, but provider data
+  # contains them and an island economy relies heavily on import and distribution.
+  - slug: industry_trade
+    labels: { en: Industry & trade, fr: Industrie et négoce }
+    description: Producers, manufacturers, wholesalers and importers.
+    icon: building-factory-2
+    offerRelevance: { new_website: 0.5, website_redesign: 0.5, ai_receptionist: 0.3, booking_system: 0.1, local_seo: 0.4 }
+    children:
+      - slug: wholesaler
+        labels: { en: Wholesaler, fr: Grossiste }
+        synonyms: { en: [wholesale, distributor, cash and carry, supplier, food distributor], fr: [distributeur, vente en gros, centrale d'achat, fournisseur, grossiste alimentaire] }
+        icon: building-warehouse
+      - slug: import_export
+        labels: { en: Import-export, fr: Import-export }
+        synonyms: { en: [importer, exporter, trading company, sourcing], fr: [importateur, exportateur, négoce, société de négoce] }
+      - slug: food_producer
+        labels: { en: Food & beverage producer, fr: Producteur agroalimentaire }
+        synonyms: { en: [distillery, brewery, rum distillery, food manufacturer, artisan producer, winery], fr: [distillerie, brasserie artisanale, rhumerie, fabricant, producteur local, conserverie] }
+        attributes: { tourismFacing: true }
+      - slug: farm
+        labels: { en: Farm, fr: Exploitation agricole }
+        synonyms: { en: [agriculture, market garden, orchard, livestock farm, fishery], fr: [ferme, agriculteur, maraîcher, éleveur, pêcherie, exploitation] }
+        icon: tractor
+      - slug: manufacturer
+        labels: { en: Manufacturer, fr: Fabricant }
+        synonyms: { en: [factory, manufacturing, workshop, industrial company, production plant], fr: [usine, industrie, atelier de fabrication, entreprise industrielle, fabrication] }

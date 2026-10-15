@@ -110,6 +110,7 @@ catalog:
   ai: 7.0.135
   libphonenumber-js: 1.13.15
   tldts: 7.4.18
+  yaml: 2.9.1
   '@ai-sdk/otel': 1.0.135
   '@langfuse/otel': 5.13.1
   '@ai-sdk/anthropic': 4.0.78

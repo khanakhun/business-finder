@@ -104,6 +104,22 @@ failure you intend to catch. `isolationLevel` can only be set on the outermost c
 
 Each step is deployable and reversible on its own; never combine expand and contract in one release.
 
+## Reference data: the category taxonomy (BF-015)
+
+`seed/taxonomy/taxonomy.v<N>.yaml` is the bilingual category tree and `seed/taxonomy/mappings/<provider>.v<N>.yaml`
+map provider categories (Google Places types, Overture `basic_category`, Foursquare ids, OSM `key=value`) onto it.
+The `taxonomy` seed module (`pnpm db:seed --only taxonomy`, every environment) loads the newest version of each file,
+validates it (`src/seed/taxonomy/load.ts`) and upserts it:
+
+- **Slugs are stable.** Renaming a category means changing its labels and adding the old name as a synonym; a slug
+  that disappears from the file is deactivated (`is_active = false`), never deleted.
+- Children inherit `icon`, `attributes` and `offerRelevance` unless they set their own; depth ≤ 4.
+- Unchanged rows are not rewritten (embeddings and `updated_at` stay put), so re-running is free.
+- **Reviewers win.** Mappings a human approved, reassigned or rejected (`origin = human`) are never overwritten;
+  seed mappings dropped from a file are retired (`status = rejected`).
+- Changing the taxonomy: copy the file to the next version (`taxonomy.v2.yaml`), edit, run the seed; the version
+  lands in `app_meta.taxonomy_version`. Category embeddings refresh on the next worker start.
+
 ## Tests
 
 - Unit tests (`*.test.ts`) need no database.

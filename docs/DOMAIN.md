@@ -204,6 +204,24 @@ stateDiagram-v2
   error --> connected : reconnected
 ```
 
+### 3.8 Enrichment run (BF-027)
+
+```mermaid
+stateDiagram-v2
+  [*] --> queued
+  queued --> running : start job
+  running --> completed : every step done or skipped
+  running --> partially_completed : some steps failed, some done
+  running --> failed : every step that ran failed
+  queued --> cancelled
+  running --> cancelled : user stop (open steps skipped)
+```
+
+Steps (`queued → running → done | skipped | failed`) form a DAG per run (`depends_on`): a step runs once its
+dependencies are terminal; a failed dependency skips it (`dependency_failed`), one skipped for any reason but freshness
+too (`dependency_skipped`). A step is `fresh` (not repeated without `force`) while its last output has the same input
+hash and is within the step's TTL. One open run per business and workspace.
+
 ## 4. Domain events
 
 Envelope (in `@bf/contracts/events`): `{ id, type, version, occurredAt, orgId | null, actor: {type: 'user'|'system'|'job', id}, correlationId, causationId, payload }`. Events are past-tense facts. Consumers must be idempotent (dedupe on `id`).

@@ -358,6 +358,50 @@ describe('GoldenRecordWriter', () => {
     expect(recorded).toEqual(['business.updated']);
   });
 
+  it('refreshes where the site shows an e-mail when a crawl sees it on another page', async () => {
+    const existing = Business.rehydrate({
+      ...Business.create({
+        id: id(8),
+        name: BusinessName.parse('Le Tamarin'),
+        countryCode: 'BL',
+        provenance: { source: 'osm', sourceRef: 'n', confidence: 0.7, observedAt: new Date('2026-01-01') },
+      }).snapshot(),
+      version: 1,
+    });
+    const known = (pageKind: 'home' | 'contact') =>
+      ({
+        type: 'email',
+        normalizedValue: 'resa@le-tamarin.com',
+        publishedOnSite: true,
+        publishedContext: { pageUrl: `https://www.le-tamarin.com/${pageKind}`, pageKind, foundAs: 'mailto' },
+        confidence: 0.9,
+      }) as unknown as ContactRecord;
+    const crawl = normalized({
+      provider: 'website',
+      providerRef: 'w',
+      emails: ['resa@le-tamarin.com'],
+      contactPages: [
+        {
+          value: 'resa@le-tamarin.com',
+          pageUrl: 'https://www.le-tamarin.com/contact',
+          pageKind: 'contact',
+          foundAs: 'mailto',
+        },
+      ],
+    });
+    const moved = writerHarness(existing, [known('home')]);
+    const written = await moved.writer.write(id(8), [crawl], { create: false });
+    const emails = (b: Business) => b.pullNewContacts().filter((c) => c.type === 'email');
+    expect(emails(written)).toEqual([
+      expect.objectContaining({ publishedContext: expect.objectContaining({ pageKind: 'contact' }) }),
+    ]);
+    const same = writerHarness(Business.rehydrate({ ...existing.snapshot(), version: 1 }), [
+      known('contact'),
+    ]);
+    const unchanged = await same.writer.write(id(8), [crawl], { create: false });
+    expect(emails(unchanged)).toEqual([]);
+  });
+
   it('refuses to recompute a missing business or create one without sources', async () => {
     await expect(writerHarness().writer.write(id(7), [normalized()], { create: false })).rejects.toThrow(
       /not found/,

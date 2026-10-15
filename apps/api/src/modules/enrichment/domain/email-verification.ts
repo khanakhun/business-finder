@@ -13,6 +13,21 @@ export interface EmailCheck {
 
 export const isConclusive = (check: Pick<EmailCheck, 'status'>): boolean => check.status !== 'unknown';
 
+/** Verifiers that ask about the mailbox itself (DNS only knows whether the domain takes mail). */
+export const checksMailbox = (id: EmailCheck['details']['checkedVia']): boolean =>
+  id === 'reacher' || id === 'zerobounce';
+
+/**
+ * A mail server's politeness bucket is empty (BF-028): nothing was asked; try again in `retryAfterMs`. Thrown by the
+ * politeness decorator around verifiers that talk to recipients' mail servers.
+ */
+export class MailServerBusyError extends Error {
+  constructor(readonly retryAfterMs: number) {
+    super('The mail server was asked recently; waiting');
+    this.name = 'MailServerBusyError';
+  }
+}
+
 type Reachable = EmailVerificationDetails['reachable'];
 const REACHABLE: readonly Reachable[] = ['safe', 'risky', 'invalid', 'unknown'];
 
@@ -190,12 +205,6 @@ export function disposableByClassification(isRoleAccount: boolean): EmailCheck {
       checkedVia: 'classification',
     },
   };
-}
-
-/** The classification knows better than a verifier that missed a disposable domain. */
-export function withClassification(check: EmailCheck, isDisposable: boolean): EmailCheck {
-  if (!isDisposable || check.status === 'invalid') return check;
-  return { ...check, status: 'disposable', details: { ...check.details, isDisposable: true } };
 }
 
 /**

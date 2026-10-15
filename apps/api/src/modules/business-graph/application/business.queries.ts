@@ -4,7 +4,9 @@ import type { AuthContext } from '../../platform/security/auth-context.ts';
 import { toContact } from './mappers.ts';
 import {
   BUSINESS_READ_MODEL,
+  BUSINESS_REPOSITORY,
   type BusinessReadModel,
+  type BusinessRepository,
   CONTACT_REPOSITORY,
   type ContactRepository,
   ORG_BUSINESS_REPOSITORY,
@@ -30,13 +32,18 @@ export class ListContactsQuery {
   constructor(
     @Inject(ORG_BUSINESS_REPOSITORY) private readonly orgBusinesses: OrgBusinessRepository,
     @Inject(CONTACT_REPOSITORY) private readonly contacts: ContactRepository,
+    @Inject(BUSINESS_REPOSITORY) private readonly businesses: BusinessRepository,
   ) {}
 
   async execute(auth: AuthContext, businessId: string): Promise<ContactList> {
     if (!(await this.orgBusinesses.find(workspaceOf(auth), businessId))) {
       throw new NotFoundError('Business', businessId);
     }
-    const records = await this.contacts.listByBusiness(businessId);
-    return { items: records.map(toContact) };
+    const [records, business] = await Promise.all([
+      this.contacts.listByBusiness(businessId),
+      this.businesses.getById(businessId),
+    ]);
+    const host = business?.snapshot().websiteHost ?? null;
+    return { items: records.map((record) => toContact(record, host)) };
   }
 }

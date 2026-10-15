@@ -2,7 +2,7 @@ import type { ContactType } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { businessContacts } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { ContactRecord, ContactRepository } from '../application/ports.ts';
 
@@ -39,6 +39,24 @@ export class DrizzleContactRepository implements ContactRepository {
       .where(eq(businessContacts.businessId, businessId))
       .orderBy(asc(businessContacts.type), asc(businessContacts.firstSeenAt), asc(businessContacts.id));
     return rows.map(toContactRecord);
+  }
+
+  async getById(id: string): Promise<ContactRecord | undefined> {
+    const [row] = await getExecutor(this.db)
+      .select()
+      .from(businessContacts)
+      .where(eq(businessContacts.id, id));
+    return row ? toContactRecord(row) : undefined;
+  }
+
+  async personNames(businessId: string, limit: number): Promise<string[]> {
+    const rows = await getExecutor(this.db)
+      .selectDistinct({ name: businessContacts.personName })
+      .from(businessContacts)
+      .where(and(eq(businessContacts.businessId, businessId), isNotNull(businessContacts.personName)))
+      .orderBy(asc(businessContacts.personName))
+      .limit(limit);
+    return rows.flatMap((row) => (row.name ? [row.name] : []));
   }
 
   async find(
@@ -78,6 +96,8 @@ export class DrizzleContactRepository implements ContactRepository {
           eq(businessContacts.businessId, businessId),
           eq(businessContacts.type, 'email'),
           eq(businessContacts.normalizedValue, email),
+          or(isNull(businessContacts.verifiedAt), lte(businessContacts.verifiedAt, verdict.verifiedAt)),
+          verdict.status === 'unknown' ? eq(businessContacts.verificationStatus, 'unknown') : undefined,
           or(
             sql`${businessContacts.verificationStatus} IS DISTINCT FROM ${verdict.status}`,
             sql`${businessContacts.verifiedAt} IS DISTINCT FROM ${verdict.verifiedAt.toISOString()}::timestamptz`,

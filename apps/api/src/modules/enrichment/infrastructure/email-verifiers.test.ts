@@ -1,9 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { ExternalServiceError } from '@bf/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
+import type { EmailVerifier } from '../application/ports.ts';
+import { fromReacher, MailServerBusyError } from '../domain/email-verification.ts';
 import {
   DnsMxVerifier,
   FakeEmailVerifier,
+  type MailDns,
+  PoliteMailServerVerifier,
   ReacherVerifier,
   Semaphore,
   ZeroBounceVerifier,
@@ -50,10 +55,23 @@ describe('ReacherVerifier', () => {
     expect(check.status).toBe('unknown');
   });
 
-  it('is unavailable without a URL', async () => {
+  it('is unavailable without a URL (a typed, permanent error if called anyway)', async () => {
     const reacher = new ReacherVerifier(undefined, 2);
     expect(await reacher.available()).toBe(false);
-    await expect(reacher.verify('a@b.example.com', context)).rejects.toThrow('not configured');
+    const error = await reacher.verify('a@b.example.com', context).catch((e: unknown) => e);
+    expect((error as ExternalServiceError).details).toMatchObject({
+      reason: 'not_configured',
+      retryable: false,
+    });
+  });
+
+  it('sends the shared secret when one is configured', async () => {
+    const mock = respond(200, fixture('reacher-safe.json'));
+    await new ReacherVerifier('http://reacher.internal:8080', 2, 's'.repeat(32)).verify(
+      'a@b.example.com',
+      context,
+    );
+    expect(new Headers(mock.mock.calls[0]?.[1]?.headers).get('x-reacher-secret')).toBe('s'.repeat(32));
   });
 
   it('types failures: 5xx transient, 4xx not, no body text kept', async () => {
@@ -74,10 +92,11 @@ describe('ReacherVerifier', () => {
 
 describe('ZeroBounceVerifier', () => {
   const key = vi.fn(async (_org: string) => ({ value: KEY, source: 'workspace' as const }));
+  const canSpend = vi.fn(async (_org: string, _usd: number) => true);
 
   it('validates with the workspace key and bills only conclusive answers', async () => {
     const mock = respond(200, fixture('zerobounce-valid.json'));
-    const zb = new ZeroBounceVerifier(key, 0.008, 'https://zb.example.test');
+    const zb = new ZeroBounceVerifier(key, 0.008, canSpend, 'https://zb.example.test');
     expect(await zb.available(ORG)).toBe(true);
     expect(await zb.verify('contact@salon-ondine.example.com', context)).toMatchObject({
       status: 'valid',
@@ -100,7 +119,7 @@ describe('ZeroBounceVerifier', () => {
 
   it('an error body (bad key, no credits) is a permanent failure that never quotes the key', async () => {
     respond(200, fixture('zerobounce-error.json'));
-    const error = await new ZeroBounceVerifier(key, 0.008, 'https://zb.example.test')
+    const error = await new ZeroBounceVerifier(key, 0.008, canSpend, 'https://zb.example.test')
       .verify('a@b.example.com', context)
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ExternalServiceError);
@@ -120,7 +139,7 @@ describe('ZeroBounceVerifier', () => {
         throw new TypeError(`fetch failed for ${String(url)}`);
       }),
     );
-    const error = await new ZeroBounceVerifier(key, 0.008, 'https://zb.example.test')
+    const error = await new ZeroBounceVerifier(key, 0.008, canSpend, 'https://zb.example.test')
       .verify('a@b.example.com', { organizationId: ORG, signal: AbortSignal.timeout(20_000) })
       .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ExternalServiceError);
@@ -128,15 +147,28 @@ describe('ZeroBounceVerifier', () => {
   }, 10_000);
 
   it('is unavailable without a key', async () => {
-    const zb = new ZeroBounceVerifier(async () => undefined, 0.008);
+    const zb = new ZeroBounceVerifier(async () => undefined, 0.008, canSpend);
     expect(await zb.available(ORG)).toBe(false);
   });
 
-  it('tests a key with its credits', async () => {
+  it('is unavailable once the workspace budget cannot pay one more check', async () => {
+    const broke = new ZeroBounceVerifier(key, 0.008, async () => false, 'https://zb.example.test');
+    expect(await broke.available(ORG)).toBe(false);
+  });
+
+  it('keeps a 429 (quota) out of the shared breaker: not transient', async () => {
+    respond(429, {});
+    const error = await new ZeroBounceVerifier(key, 0.008, canSpend, 'https://zb.example.test')
+      .verify('a@b.example.com', context)
+      .catch((e: unknown) => e);
+    expect((error as ExternalServiceError).details).toMatchObject({ reason: 'HTTP_429', retryable: false });
+  });
+
+  it('tests a key without revealing the balance (it may be the operator’s account)', async () => {
     respond(200, { Credits: '2500' });
     expect(await ZeroBounceVerifier.testKey(KEY, context.signal, 'https://zb.example.test')).toEqual({
       ok: true,
-      message: '2500 credits left.',
+      message: 'ZeroBounce accepted the key.',
     });
     respond(200, { Credits: '-1' });
     expect((await ZeroBounceVerifier.testKey(KEY, context.signal, 'https://zb.example.test')).ok).toBe(false);
@@ -186,7 +218,130 @@ describe('DnsMxVerifier', () => {
   });
 });
 
+describe('PoliteMailServerVerifier', () => {
+  const dns = (
+    addresses: Record<string, string[]>,
+    mx = ['mx1.mail.example', 'mx2.mail.example'],
+  ): MailDns => ({
+    resolveMx: async () => mx.map((exchange, i) => ({ exchange, priority: (i + 1) * 10 })),
+    resolve4: async (host) => addresses[host] ?? [],
+    resolve6: async () => [],
+  });
+  const inner = (): EmailVerifier & { calls: string[] } => {
+    const calls: string[] = [];
+    return {
+      id: 'reacher',
+      calls,
+      available: async () => true,
+      verify: async (email) => {
+        calls.push(email);
+        return fromReacher({ is_reachable: 'safe' });
+      },
+    };
+  };
+  const limiter = (waits: Record<string, number> = {}) => {
+    const keys: string[] = [];
+    const tryTake = vi.fn(async (key: string) => {
+      keys.push(key);
+      return waits[key] ?? 0;
+    });
+    return { limiter: { tryTake, acquire: vi.fn() } as unknown as RateLimiter, keys };
+  };
+  const PUBLIC = { 'mx1.mail.example': ['8.8.8.8'], 'mx2.mail.example': ['8.8.4.4'] };
+
+  it('takes the workspace’s share, then the mail server’s token, then asks', async () => {
+    const reacher = inner();
+    const { limiter: rl, keys } = limiter();
+    const polite = new PoliteMailServerVerifier(reacher, { dns: dns(PUBLIC), limiter: rl, perMinute: 6 });
+    expect((await polite.verify('a@salon.example', context)).status).toBe('valid');
+    expect(keys).toEqual([`email-verify:org:${ORG}:mx:mx1.mail.example`, 'email-verify:mx:mx1.mail.example']);
+    expect(reacher.calls).toEqual(['a@salon.example']);
+  });
+
+  it('refuses mail servers on private addresses (a crawled domain cannot aim SMTP inside)', async () => {
+    for (const ip of ['172.30.0.1', '127.0.0.1', '169.254.169.254', '::1']) {
+      const reacher = inner();
+      const { limiter: rl, keys } = limiter();
+      const polite = new PoliteMailServerVerifier(reacher, {
+        dns: { ...dns({ ...PUBLIC, 'mx2.mail.example': [ip] }), resolve6: async () => [] },
+        limiter: rl,
+        perMinute: 6,
+      });
+      const error = await polite.verify('a@evil.example', context).catch((e: unknown) => e);
+      expect((error as ExternalServiceError).details).toMatchObject({
+        reason: 'private_address',
+        retryable: false,
+      });
+      expect(reacher.calls).toEqual([]);
+      expect(keys).toEqual([]);
+    }
+  });
+
+  it('a busy bucket stops before asking (own share or the server’s)', async () => {
+    for (const key of [`email-verify:org:${ORG}:mx:mx1.mail.example`, 'email-verify:mx:mx1.mail.example']) {
+      const reacher = inner();
+      const { limiter: rl } = limiter({ [key]: 4_000 });
+      const polite = new PoliteMailServerVerifier(reacher, { dns: dns(PUBLIC), limiter: rl, perMinute: 6 });
+      const error = await polite.verify('a@salon.example', context).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(MailServerBusyError);
+      expect((error as MailServerBusyError).retryAfterMs).toBe(4_000);
+      expect(reacher.calls).toEqual([]);
+    }
+  });
+
+  it('a domain without mail hosts (null MX) is answered without a token', async () => {
+    const reacher = inner();
+    const { limiter: rl, keys } = limiter();
+    const polite = new PoliteMailServerVerifier(reacher, { dns: dns({}, ['']), limiter: rl, perMinute: 6 });
+    await polite.verify('a@nomail.example', context);
+    expect(keys).toEqual([]);
+  });
+});
+
 describe('Semaphore', () => {
+  it('hands a released slot to the next waiter (a caller arriving in the same tick does not jump in)', async () => {
+    const slots = new Semaphore(1);
+    let active = 0;
+    let peak = 0;
+    let release: () => void = () => {};
+    const first = slots.run(
+      () =>
+        new Promise<void>((resolve) => {
+          active += 1;
+          release = () => {
+            active -= 1;
+            resolve();
+          };
+        }),
+    );
+    const task = () =>
+      slots.run(async () => {
+        active += 1;
+        peak = Math.max(peak, active);
+        await Promise.resolve();
+        active -= 1;
+      });
+    const second = task();
+    await Promise.resolve();
+    release();
+    const third = task();
+    await Promise.all([first, second, third]);
+    expect(peak).toBe(1);
+  });
+
+  it('drops a waiter whose signal aborts', async () => {
+    const slots = new Semaphore(1);
+    let release: () => void = () => {};
+    const busy = slots.run(() => new Promise<void>((resolve) => (release = resolve)));
+    const controller = new AbortController();
+    const waiting = slots.run(async () => 'ran', controller.signal);
+    controller.abort(new Error('stop'));
+    await expect(waiting).rejects.toThrow('stop');
+    release();
+    await busy;
+    expect(await slots.run(async () => 'free')).toBe('free');
+  });
+
   it('runs at most `limit` tasks at once', async () => {
     const slots = new Semaphore(2);
     let active = 0;

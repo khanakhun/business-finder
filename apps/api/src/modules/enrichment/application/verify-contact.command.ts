@@ -1,22 +1,18 @@
 import { NotFoundError, ValidationError } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
+import { EmailContactsQuery } from '../../business-graph/index.ts';
 import { StartEnrichmentCommand, type StartOutcome } from './enrichment.use-cases.ts';
-import {
-  EMAIL_CONTACT_READER,
-  type EmailContactReader,
-  SUBJECT_READER,
-  type SubjectReader,
-} from './ports.ts';
+import { SUBJECT_READER, type SubjectReader } from './ports.ts';
 
 /**
- * On-demand verification of one e-mail contact (BF-028): an enrichment run of `email_verify` for its business, so
- * budgets, politeness, retries and progress are the engine's. Every stale address of the business is checked with
- * it; fresh verdicts come from the cache (an address is checked at most once per TTL).
+ * On-demand verification of one e-mail contact (BF-028): an enrichment run of `email_verify` alone for its business
+ * (no crawl first), so budgets, politeness, retries and progress are the engine's. Every stale address of the
+ * business is checked with it; fresh verdicts come from the cache (an address is checked at most once per TTL).
  */
 @Injectable()
 export class VerifyContactCommand {
   constructor(
-    @Inject(EMAIL_CONTACT_READER) private readonly contacts: EmailContactReader,
+    private readonly contacts: EmailContactsQuery,
     @Inject(SUBJECT_READER) private readonly subjects: SubjectReader,
     private readonly start: StartEnrichmentCommand,
   ) {}
@@ -44,6 +40,7 @@ export class VerifyContactCommand {
       steps: ['email_verify'],
       force: false,
       idempotencyKey: null,
+      withoutOptionalDependencies: true,
     });
   }
 }

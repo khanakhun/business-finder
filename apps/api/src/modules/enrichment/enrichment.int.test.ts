@@ -4,13 +4,14 @@ import {
   businessContacts,
   businesses,
   businessMedia,
-  emailVerificationCache,
+  enrichmentEmailVerdicts,
   enrichmentRuns,
   enrichmentSteps,
   orgBusinesses,
   outboxEvents,
   websiteSnapshots,
 } from '@bf/db/schema';
+import { createLogger } from '@bf/observability';
 import { aBusiness, aContact } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
@@ -24,6 +25,7 @@ import {
   inviteAndJoin,
   signUpVerified,
 } from '../../../test/identity-helpers.ts';
+import { RecordEmailVerificationCommand } from '../business-graph/index.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { ValkeyRateLimiter } from '../platform/rate-limit/valkey-rate-limiter.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
@@ -37,9 +39,13 @@ import {
   type EmailSuppressionCheck,
   type EmailVerdictCache,
   type EmailVerifier,
+  ENRICHMENT_REPOSITORY,
+  type EnrichmentRepository,
 } from './application/ports.ts';
-import { fromReacher, fromZeroBounce } from './domain/email-verification.ts';
+import { fromReacher, fromZeroBounce, MailServerBusyError } from './domain/email-verification.ts';
 import { type EnrichmentStep, StepRegistry } from './index.ts';
+import { emailHash } from './infrastructure/drizzle-email-verification.ts';
+import { PoliteMailServerVerifier } from './infrastructure/email-verifiers.ts';
 import { EnrichmentReconciler } from './infrastructure/enrichment-maintenance.ts';
 
 // Enrichment (BF-027) end to end: HTTP app + worker on real Postgres and Valkey, the fake site intel
@@ -58,6 +64,10 @@ const scriptedVerifier: EmailVerifier = {
   verify: async (email) => {
     verifierCalls.push(email);
     const local = email.slice(0, email.lastIndexOf('@'));
+    // `busy…`: the mail server is busy the first time it is asked about this address.
+    if (local.startsWith('busy') && verifierCalls.filter((e) => e === email).length === 1) {
+      throw new MailServerBusyError(1_000);
+    }
     const status = local.startsWith('invalid')
       ? 'invalid'
       : local.startsWith('unknown')
@@ -82,6 +92,8 @@ let owner: Browser;
 let viewer: Browser;
 let outsider: Browser;
 let org: string;
+let outsiderOrg: string;
+const DAY_MS = 24 * 3_600_000;
 
 /** What the test steps do, per business. */
 const behaviour = new Map<string, 'fail' | 'block'>();
@@ -158,7 +170,7 @@ beforeAll(async () => {
   org = await createWorkspace(owner, 'Agence Enrich');
   viewer = (await inviteAndJoin(t, mailer, owner, 'viewer@enrich.test', 'viewer')).client;
   outsider = await signUpVerified(t, mailer, 'outsider@enrich.test', 'Oscar Outsider');
-  await createWorkspace(outsider, 'Ailleurs');
+  outsiderOrg = await createWorkspace(outsider, 'Ailleurs');
 }, 60_000);
 
 afterAll(async () => {
@@ -582,13 +594,17 @@ describe('e-mail verification (BF-028)', () => {
     expect(emailOf(items, 'cafe.verify@gmail.com')).toMatchObject({
       verificationStatus: 'valid',
       isFreeMail: true,
+      isDisposable: false,
+      onWebsiteDomain: false,
     });
-    // Verdicts are cached by address, with the cost they had.
+    expect(emailOf(items, 'hello@verify-cafe-enrich.com')).toMatchObject({ onWebsiteDomain: true });
+    // Verdicts are cached by a hash of the address (never in clear), with the cost they had.
     const [cached] = await db
       .select()
-      .from(emailVerificationCache)
-      .where(eq(emailVerificationCache.email, 'invalid.box@verify-cafe-enrich.com'));
+      .from(enrichmentEmailVerdicts)
+      .where(eq(enrichmentEmailVerdicts.emailHash, emailHash('invalid.box@verify-cafe-enrich.com')));
     expect(cached).toMatchObject({ status: 'invalid', costUsd: VERIFY_COST, inconclusiveStreak: 0 });
+    expect(JSON.stringify(await db.select().from(enrichmentEmailVerdicts))).not.toContain('verify-cafe');
   });
 
   it('never asks a mail server twice within the TTL: another business’s same address comes from the cache', async () => {
@@ -638,11 +654,14 @@ describe('e-mail verification (BF-028)', () => {
     expect(verifierCalls).not.toContain(address);
     expect(emailOf(await contactsOf(owner, id), address)).toMatchObject({ verificationStatus: 'unknown' });
     expect(
-      await db.select().from(emailVerificationCache).where(eq(emailVerificationCache.email, address)),
+      await db
+        .select()
+        .from(enrichmentEmailVerdicts)
+        .where(eq(enrichmentEmailVerdicts.emailHash, emailHash(address))),
     ).toEqual([]);
   });
 
-  it('is polite per recipient domain under a burst (real Valkey buckets, fake clock)', async () => {
+  it('is polite per mail server under a burst, with a share per workspace (real Valkey, fake clock)', async () => {
     const clock = fixedClock('2026-10-15T12:00:00.000Z');
     const calls: string[] = [];
     const counting: EmailVerifier = {
@@ -653,39 +672,140 @@ describe('e-mail verification (BF-028)', () => {
         return fromReacher({ is_reachable: 'safe' });
       },
     };
-    const service = new EmailVerificationService(
-      [counting],
-      t.app.get<EmailVerdictCache>(EMAIL_VERDICT_CACHE),
-      { isSuppressed: async () => false },
-      new ValkeyRateLimiter(t.app.get<Redis>(VALKEY), clock, true),
-      t.app.get(WorkspaceDefaults),
-      clock,
-      { ...t.env, EMAIL_VERIFY_PER_DOMAIN_PER_MINUTE: 6 } as typeof t.env,
-    );
-    const verify = (email: string) => service.verify(org, email, new AbortController().signal);
+    // Two domains on one mail server, a third on another (documentation addresses allowed here).
+    const dns = {
+      resolveMx: async (domain: string) => [
+        {
+          exchange: domain.startsWith('other') ? 'mx.other-host.example' : 'mx.shared-host.example',
+          priority: 10,
+        },
+      ],
+      resolve4: async () => ['198.51.100.25'],
+      resolve6: async () => [],
+    };
+    const limiter = new ValkeyRateLimiter(t.app.get<Redis>(VALKEY), clock, true);
+    const service = (perMinute: number) =>
+      new EmailVerificationService(
+        [new PoliteMailServerVerifier(counting, { dns, limiter, perMinute, isPublic: () => true })],
+        t.app.get<EmailVerdictCache>(EMAIL_VERDICT_CACHE),
+        { isSuppressed: async () => false },
+        t.app.get(WorkspaceDefaults),
+        clock,
+        t.env,
+        createLogger({ service: 'test', level: 'fatal' }),
+      );
+    const polite = service(12);
+    const verify = (email: string, organizationId = org) =>
+      polite.verify(organizationId, email, new AbortController().signal);
     const burst = await Promise.all(
-      Array.from({ length: 8 }, async (_, i) => {
-        const email = `team${i}@burst-verify-enrich.com`;
-        return { email, ...(await verify(email)) };
-      }),
+      ['a@one-burst.example', 'b@two-burst.example', 'c@one-burst.example'].map(async (email) => ({
+        email,
+        ...(await verify(email)),
+      })),
     );
-    expect(burst.filter((o) => o.kind === 'verdict')).toHaveLength(6);
+    // One workspace gets one check per mail server at once (its half-rate share, capacity 1).
+    expect(burst.filter((o) => o.kind === 'verdict')).toHaveLength(1);
     const limited = burst.filter((o) => o.kind === 'rate_limited');
     expect(limited).toHaveLength(2);
     for (const outcome of limited) {
       expect(outcome.kind === 'rate_limited' && outcome.retryAfterMs).toBeGreaterThan(0);
       expect(outcome.kind === 'rate_limited' && outcome.retryAfterMs).toBeLessThanOrEqual(10_000);
     }
-    // Another domain has its own bucket.
-    expect((await verify('team@other-burst-verify-enrich.com')).kind).toBe('verdict');
-    // One token comes back every 10 s (6 per minute).
-    const [later, last] = limited.map((o) => o.email);
+    // Another mail server has its own buckets.
+    expect((await verify('d@other-burst.example')).kind).toBe('verdict');
+    // Another workspace still gets the server's remaining token.
+    expect((await verify('e@one-burst.example', outsiderOrg)).kind).toBe('verdict');
+    // The workspace's share comes back after 10 s (6 per minute for it, 12 for everyone).
     clock.advance(10_000);
-    expect((await verify(later ?? '')).kind).toBe('verdict');
-    expect((await verify(last ?? '')).kind).toBe('rate_limited');
+    const [next] = limited.map((o) => o.email);
+    expect((await verify(next ?? '')).kind).toBe('verdict');
     // A cached verdict needs no token.
-    expect((await verify(later ?? '')).kind).toBe('verdict');
-    expect(calls).toHaveLength(8);
+    const [first] = burst.filter((o) => o.kind === 'verdict').map((o) => o.email);
+    expect((await verify(first ?? '')).kind).toBe('verdict');
+    expect(calls).toHaveLength(4);
+  });
+
+  it('a step waiting for a busy mail server resumes and books each paid check once', async () => {
+    const id = await track({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
+    await db
+      .insert(businessContacts)
+      .values([
+        aContact({ businessId: id, value: 'paid@resume-verify-enrich.com' }),
+        aContact({ businessId: id, value: 'busy@resume-verify-enrich.com' }),
+      ]);
+    await owner
+      .post(`/v1/businesses/${id}/enrich`)
+      .send({ steps: ['email_verify'] })
+      .expect(201);
+    const run = await settled(owner, id);
+    expect(stepsOf(run)).toMatchObject({ email_verify: ['done', null] });
+    const [step] = await db
+      .select()
+      .from(enrichmentSteps)
+      .where(and(eq(enrichmentSteps.runId, run.id), eq(enrichmentSteps.step, 'email_verify')));
+    // Deferred once (no attempt used); the first pass's paid check came back from the cache the second time.
+    expect(step).toMatchObject({ deferrals: 1, attempt: 1 });
+    expect(step?.costUsd).toBeCloseTo(2 * VERIFY_COST);
+    const [row] = await db.select().from(enrichmentRuns).where(eq(enrichmentRuns.id, run.id));
+    expect(row?.costUsd).toBeCloseTo(2 * VERIFY_COST);
+    expect(row?.changedFields).toEqual(['contacts']);
+  });
+
+  it('never downgrades a verdict to "unknown", nor replaces it with an older one', async () => {
+    const id = await track({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
+    const address = 'kept@downgrade-verify-enrich.com';
+    await db.insert(businessContacts).values(aContact({ businessId: id, value: address }));
+    const record = t.app.get(RecordEmailVerificationCommand);
+    const valid = fromReacher({ is_reachable: 'safe' });
+    const at = new Date('2026-10-15T10:00:00.000Z');
+    expect(
+      await record.execute(id, address, { status: 'valid', details: valid.details, verifiedAt: at }),
+    ).toBe(true);
+    const unknown = fromReacher({ is_reachable: 'unknown' });
+    const later = new Date('2026-10-16T10:00:00.000Z');
+    expect(
+      await record.execute(id, address, { status: 'unknown', details: unknown.details, verifiedAt: later }),
+    ).toBe(false);
+    const older = new Date('2026-10-01T10:00:00.000Z');
+    const invalid = fromReacher({ is_reachable: 'invalid' });
+    expect(
+      await record.execute(id, address, { status: 'invalid', details: invalid.details, verifiedAt: older }),
+    ).toBe(false);
+    const [row] = await db.select().from(businessContacts).where(eq(businessContacts.businessId, id));
+    expect(row).toMatchObject({ verificationStatus: 'valid', verifiedAt: at });
+  });
+
+  it('the nightly refresh picks up inconclusive checks when due, and purges expired verdicts', async () => {
+    const id = await track({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
+    await db
+      .insert(businessContacts)
+      .values(aContact({ businessId: id, value: 'unknown@recheck-verify-enrich.com' }));
+    await owner
+      .post(`/v1/businesses/${id}/enrich`)
+      .send({ steps: ['email_verify'] })
+      .expect(201);
+    const run = await settled(owner, id);
+    const [step] = await db
+      .select()
+      .from(enrichmentSteps)
+      .where(and(eq(enrichmentSteps.runId, run.id), eq(enrichmentSteps.step, 'email_verify')));
+    const recheckAt = Date.parse(String(step?.outputRef?.recheckAt));
+    expect(recheckAt).toBeGreaterThan(Date.now());
+    const repo = t.app.get<EnrichmentRepository>(ENRICHMENT_REPOSITORY);
+    const candidates = (at: number) =>
+      repo.refreshCandidates(
+        org,
+        [{ step: 'email_verify', staleBefore: new Date(at - 60 * DAY_MS) }],
+        10_000,
+        new Date(at),
+      );
+    expect(await candidates(Date.now())).not.toContain(id);
+    expect(await candidates(recheckAt + 1_000)).toContain(id);
+
+    const cache = t.app.get<EmailVerdictCache>(EMAIL_VERDICT_CACHE);
+    expect(await cache.get('unknown@recheck-verify-enrich.com')).toBeDefined();
+    expect(await cache.purgeExpired(new Date(recheckAt + 1_000))).toBeGreaterThan(0);
+    expect(await cache.get('unknown@recheck-verify-enrich.com')).toBeUndefined();
   });
 
   it('guards the on-demand check and the SMTP diagnostic', async () => {
@@ -699,6 +819,13 @@ describe('e-mail verification (BF-028)', () => {
     await owner.post(`/v1/contacts/${phone.id}/verify`).expect(422);
     await owner.post(`/v1/contacts/${email.id}/verify`).expect(201);
     await settled(owner, id);
+    // On demand, the address is checked without crawling the site first.
+    const withSite = await track({ websiteUrl: 'https://www.verify-nocrawl-enrich.com/' });
+    const onSite = aContact({ businessId: withSite, value: 'hello@verify-nocrawl-enrich.com' });
+    await db.insert(businessContacts).values(onSite);
+    const verifying = await owner.post(`/v1/contacts/${onSite.id}/verify`).expect(201);
+    expect(stepsOf(verifying.body)).toEqual({ email_verify: ['queued', null] });
+    expect(stepsOf(await settled(owner, withSite))).toEqual({ email_verify: ['done', null] });
 
     await viewer.post('/v1/workspace/diagnostics/smtp-port').expect(403);
     const diagnostic = (await owner.post('/v1/workspace/diagnostics/smtp-port').expect(200)).body;

@@ -251,6 +251,10 @@ services:
     logging: *logging
     networks: [edge]
     profiles: [verify]
+    # RCH__HEADER_SECRET: only callers sending it (the API: REACHER_HEADER_SECRET in app.env) may use Reacher.
+    env_file:
+      - path: reacher.env
+        required: false
 
 networks:
   # Outbound access (providers, models, object storage) and Caddy's upstreams.

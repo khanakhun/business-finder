@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   chainOrder,
+  checksMailbox,
   disposableByClassification,
   fromDns,
   fromReacher,
@@ -10,7 +11,6 @@ import {
   isConclusive,
   mailProviderFromMx,
   verdictTtlDays,
-  withClassification,
 } from './email-verification.ts';
 
 // Contract tests: recorded-shape (synthetic, fake domains) Reacher and ZeroBounce answers → verdicts.
@@ -147,13 +147,13 @@ describe('classification over verifiers', () => {
       details: { checkedVia: 'classification', isDisposable: true },
     });
   });
+});
 
-  it('overrides a verifier that missed it, but never an invalid verdict', () => {
-    const valid = fromReacher(fixture('reacher-safe.json'));
-    expect(withClassification(valid, true).status).toBe('disposable');
-    expect(withClassification(valid, false)).toBe(valid);
-    const invalid = fromReacher(fixture('reacher-invalid.json'));
-    expect(withClassification(invalid, true).status).toBe('invalid');
+describe('checksMailbox', () => {
+  it('only mailbox-level verifiers do', () => {
+    expect(
+      ['reacher', 'zerobounce', 'dns', 'classification'].map((id) => checksMailbox(id as never)),
+    ).toEqual([true, true, false, false]);
   });
 });
 

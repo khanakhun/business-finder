@@ -6,17 +6,24 @@ import {
   fixedClock,
   ValidationError,
 } from '@bf/contracts';
-import { describe, expect, it, vi } from 'vitest';
+import { createLogger } from '@bf/observability';
+import { describe, expect, it } from 'vitest';
 import type { AppEnv } from '../../platform/config/app-env.ts';
-import type { RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
 import type { WorkspaceDefaults } from '../../workspace/index.ts';
-import { type EmailCheck, fromDns, fromReacher, fromZeroBounce } from '../domain/email-verification.ts';
+import {
+  type EmailCheck,
+  fromDns,
+  fromReacher,
+  fromZeroBounce,
+  MailServerBusyError,
+} from '../domain/email-verification.ts';
 import { EmailVerificationService } from './email-verification.service.ts';
 import type { CachedVerdict, EmailVerdictCache, EmailVerifier } from './ports.ts';
 
 const ORG = '00000000-0000-7000-8000-0000000000aa';
 const NOW = '2026-10-15T12:00:00.000Z';
 const DAY = 24 * 3_600_000;
+const ADDRESS = 'info@salon.example.com';
 
 const verifier = (
   id: EmailVerifierId,
@@ -42,52 +49,42 @@ const DNS_UNKNOWN = fromDns({ mx: ['mx.example.test'], nullMx: false, hasAddress
 const transient = new ExternalServiceError('reacher', 'timed out', {
   details: { reason: 'timeout', retryable: true },
 });
+const permanent = new ExternalServiceError('zerobounce', 'rejected the request', {
+  details: { reason: 'PROVIDER_ERROR', retryable: false },
+});
 
 function harness(
   verifiers: EmailVerifier[],
-  options: {
-    chain?: EmailVerifierId[];
-    wait?: number;
-    suppressed?: boolean;
-    cached?: CachedVerdict;
-  } = {},
+  options: { chain?: EmailVerifierId[]; suppressed?: boolean; cached?: CachedVerdict } = {},
 ) {
   const clock = fixedClock(NOW);
-  const store = new Map<string, CachedVerdict>(
-    options.cached ? [['info@salon.example.com', options.cached]] : [],
-  );
+  const store = new Map<string, CachedVerdict>(options.cached ? [[ADDRESS, options.cached]] : []);
   const cache: EmailVerdictCache = {
     get: async (email) => store.get(email),
     put: async (email, verdict) => {
       store.set(email, verdict);
     },
+    purgeExpired: async () => 0,
   };
-  const limiter = {
-    tryTake: vi.fn(async () => options.wait ?? 0),
-    acquire: vi.fn(),
-  } as unknown as RateLimiter;
   const defaults = {
     enrichmentSettings: async () => ({
       ...DEFAULT_ENRICHMENT_SETTINGS,
       emailVerifiers: options.chain ?? ['reacher', 'zerobounce', 'dns'],
     }),
   } as unknown as WorkspaceDefaults;
-  const env = {
-    EMAIL_VERIFY_PER_DOMAIN_PER_MINUTE: 6,
-    ENRICHMENT_TTL_EMAIL_VERIFY_DAYS: 60,
-  } as Partial<ApiEnv> as AppEnv;
+  const env = { ENRICHMENT_TTL_EMAIL_VERIFY_DAYS: 60 } as Partial<ApiEnv> as AppEnv;
   const service = new EmailVerificationService(
     verifiers,
     cache,
     { isSuppressed: async () => options.suppressed ?? false },
-    limiter,
     defaults,
     clock,
     env,
+    createLogger({ service: 'test', level: 'fatal' }),
   );
-  const verify = (email = 'info@salon.example.com') =>
-    service.verify(ORG, email, new AbortController().signal);
-  return { service, verify, store, limiter, clock };
+  const verify = (email = ADDRESS, cacheIt = true) =>
+    service.verify(ORG, email, new AbortController().signal, { cache: cacheIt });
+  return { service, verify, store, clock };
 }
 
 describe('EmailVerificationService', () => {
@@ -97,25 +94,32 @@ describe('EmailVerificationService', () => {
     const { verify, store } = harness([reacher, zerobounce, verifier('dns', DNS_UNKNOWN)]);
     const outcome = await verify('Info@Salon.example.com ');
     expect(outcome).toMatchObject({ kind: 'verdict', cached: false, costUsd: 0, check: { status: 'valid' } });
-    expect(reacher.calls).toEqual(['info@salon.example.com']);
+    expect(reacher.calls).toEqual([ADDRESS]);
     expect(zerobounce.calls).toEqual([]);
-    expect(store.get('info@salon.example.com')).toMatchObject({
+    expect(store.get(ADDRESS)).toMatchObject({
       inconclusiveStreak: 0,
       expiresAt: new Date(Date.parse(NOW) + 60 * DAY),
     });
   });
 
-  it('falls back down the chain: an inconclusive or failed verifier hands over to the next', async () => {
-    const reacher = verifier('reacher', REACHER_UNKNOWN);
-    const zerobounce = verifier('zerobounce', ZB_VALID);
-    const { verify } = harness([reacher, zerobounce, verifier('dns', DNS_UNKNOWN)]);
+  it('falls back down the chain: an inconclusive answer or a permanent failure hands over to the next', async () => {
+    const { verify } = harness([verifier('reacher', REACHER_UNKNOWN), verifier('zerobounce', ZB_VALID)]);
     expect(await verify()).toMatchObject({ check: { status: 'valid' }, costUsd: 0.008 });
-
-    const down = verifier('reacher', transient);
-    const { verify: verify2 } = harness([down, verifier('zerobounce', ZB_VALID)]);
-    expect(await verify2()).toMatchObject({
-      check: { status: 'valid', details: { checkedVia: 'zerobounce' } },
+    const misconfigured = harness([verifier('zerobounce', permanent), verifier('dns', DNS_UNKNOWN)], {
+      chain: ['zerobounce', 'dns'],
     });
+    expect(await misconfigured.verify()).toMatchObject({
+      check: { status: 'unknown', details: { checkedVia: 'dns' } },
+    });
+  });
+
+  it('a verifier that is down never turns into "unknown": the error propagates and nothing is cached', async () => {
+    const { verify, store } = harness([verifier('reacher', transient), verifier('dns', DNS_UNKNOWN)]);
+    await expect(verify()).rejects.toBe(transient);
+    expect(store.size).toBe(0);
+    // A conclusive answer after the failure is fine.
+    const recovered = harness([verifier('reacher', transient), verifier('zerobounce', ZB_VALID)]);
+    expect(await recovered.verify()).toMatchObject({ check: { status: 'valid' } });
   });
 
   it('skips verifiers this workspace cannot use and follows its order', async () => {
@@ -136,17 +140,17 @@ describe('EmailVerificationService', () => {
     ]);
     const first = await verify();
     expect(first).toMatchObject({ check: { status: 'unknown', details: { checkedVia: 'reacher' } } });
-    expect(store.get('info@salon.example.com')).toMatchObject({ inconclusiveStreak: 1 });
+    expect(store.get(ADDRESS)).toMatchObject({ inconclusiveStreak: 1 });
     expect(first.kind === 'verdict' && first.expiresAt).toEqual(new Date(Date.parse(NOW) + DAY));
     clock.advance(DAY);
     await verify();
-    expect(store.get('info@salon.example.com')).toMatchObject({
+    expect(store.get(ADDRESS)).toMatchObject({
       inconclusiveStreak: 2,
       expiresAt: new Date(Date.parse(NOW) + DAY + 2 * DAY),
     });
   });
 
-  it('answers from the cache while it is fresh (no verifier, no token, no cost)', async () => {
+  it('answers from the cache while it is fresh (no verifier, no cost)', async () => {
     const reacher = verifier('reacher', SAFE);
     const cached: CachedVerdict = {
       check: { ...ZB_VALID, costUsd: 0.008 },
@@ -154,7 +158,7 @@ describe('EmailVerificationService', () => {
       expiresAt: new Date('2026-11-30T00:00:00.000Z'),
       inconclusiveStreak: 0,
     };
-    const { verify, limiter } = harness([reacher], { cached });
+    const { verify } = harness([reacher], { cached });
     expect(await verify()).toMatchObject({
       kind: 'verdict',
       cached: true,
@@ -162,20 +166,35 @@ describe('EmailVerificationService', () => {
       checkedAt: cached.checkedAt,
     });
     expect(reacher.calls).toEqual([]);
-    expect(limiter.tryTake).not.toHaveBeenCalled();
+  });
+
+  it('a DNS-only "unknown" from another workspace never hides a mailbox check', async () => {
+    const cached: CachedVerdict = {
+      check: DNS_UNKNOWN,
+      checkedAt: new Date('2026-10-15T00:00:00.000Z'),
+      expiresAt: new Date('2026-10-16T00:00:00.000Z'),
+      inconclusiveStreak: 1,
+    };
+    const reacher = verifier('reacher', SAFE);
+    expect(await harness([reacher], { cached }).verify()).toMatchObject({
+      cached: false,
+      check: { status: 'valid' },
+    });
+    // A DNS-only workspace reuses it.
+    const dnsOnly = harness([verifier('dns', DNS_UNKNOWN)], { cached, chain: ['dns'] });
+    expect(await dnsOnly.verify()).toMatchObject({ cached: true });
   });
 
   it('checks an expired cache entry again', async () => {
-    const reacher = verifier('reacher', SAFE);
     const cached: CachedVerdict = {
       check: REACHER_UNKNOWN,
       checkedAt: new Date('2026-10-10T00:00:00.000Z'),
       expiresAt: new Date('2026-10-11T00:00:00.000Z'),
       inconclusiveStreak: 1,
     };
-    const { verify, store } = harness([reacher], { cached });
+    const { verify, store } = harness([verifier('reacher', SAFE)], { cached });
     expect(await verify()).toMatchObject({ cached: false, check: { status: 'valid' } });
-    expect(store.get('info@salon.example.com')?.inconclusiveStreak).toBe(0);
+    expect(store.get(ADDRESS)?.inconclusiveStreak).toBe(0);
   });
 
   it('never checks a suppressed address (before cache and verifiers)', async () => {
@@ -186,35 +205,39 @@ describe('EmailVerificationService', () => {
     expect(store.size).toBe(0);
   });
 
-  it('a disposable domain is classified without a check or a token', async () => {
+  it('a disposable domain is classified without a check', async () => {
     const reacher = verifier('reacher', SAFE);
-    const { verify, limiter, store } = harness([reacher]);
-    expect(await verify('promo@mailinator.com')).toMatchObject({
-      check: { status: 'disposable', details: { checkedVia: 'classification' } },
+    const { verify, store } = harness([reacher]);
+    expect(await verify('info@mailinator.com')).toMatchObject({
+      check: { status: 'disposable', details: { checkedVia: 'classification', isRoleAccount: true } },
     });
     expect(reacher.calls).toEqual([]);
-    expect(limiter.tryTake).not.toHaveBeenCalled();
-    expect(store.has('promo@mailinator.com')).toBe(true);
+    expect(store.has('info@mailinator.com')).toBe(true);
   });
 
-  it('takes a token from the recipient domain’s bucket and reports the wait when it is empty', async () => {
-    const reacher = verifier('reacher', SAFE);
-    const { verify, limiter } = harness([reacher], { wait: 7_000 });
+  it('reports a busy mail server without asking anyone else', async () => {
+    const zerobounce = verifier('zerobounce', ZB_VALID);
+    const { verify, store } = harness([verifier('reacher', new MailServerBusyError(7_000)), zerobounce]);
     expect(await verify()).toEqual({ kind: 'rate_limited', retryAfterMs: 7_000 });
-    expect(reacher.calls).toEqual([]);
-    expect(limiter.tryTake).toHaveBeenCalledWith('email-verify:salon.example.com', {
-      capacity: 6,
-      perSecond: 0.1,
-    });
+    expect(zerobounce.calls).toEqual([]);
+    expect(store.size).toBe(0);
   });
 
-  it('when every verifier fails, rethrows the last error (the engine retries transient ones) and caches nothing', async () => {
+  it('does not cache what it is told not to (name-pattern guesses)', async () => {
+    const { verify, store } = harness([verifier('reacher', SAFE)]);
+    expect(await verify('marie.curie@salon.example.com', false)).toMatchObject({
+      check: { status: 'valid' },
+    });
+    expect(store.size).toBe(0);
+  });
+
+  it('when every verifier fails, rethrows the last error and caches nothing', async () => {
     const { verify, store } = harness([verifier('reacher', transient), verifier('dns', transient)]);
     await expect(verify()).rejects.toBe(transient);
     expect(store.size).toBe(0);
-    const permanent = new ValidationError('bad');
-    const { verify: verify2 } = harness([verifier('reacher', permanent)], { chain: ['reacher'] });
-    await expect(verify2()).rejects.toBe(permanent);
+    const bad = new ValidationError('bad');
+    const { verify: verify2 } = harness([verifier('reacher', bad)], { chain: ['reacher'] });
+    await expect(verify2()).rejects.toBe(bad);
   });
 
   it('reports a chain with nothing usable', async () => {

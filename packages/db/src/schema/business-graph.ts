@@ -438,24 +438,3 @@ export const possibleDuplicates = pgTable(
     check('ck_possible_duplicates__score', sql`${table.score} BETWEEN 0 AND 1`),
   ],
 );
-
-/**
- * E-mail verification results by address (BF-028), shared by every business and workspace: a mailbox is checked
- * at most once per TTL (politeness towards mail servers, verifier costs).
- */
-export const emailVerificationCache = pgTable(
-  'email_verification_cache',
-  {
-    email: citext().primaryKey(),
-    status: text().$type<(typeof VERIFICATION_STATUSES)[number]>().notNull(),
-    details: jsonb().$type<EmailVerificationDetails>().notNull(),
-    costUsd: numeric({ precision: 12, scale: 6, mode: 'number' }).notNull().default(0),
-    checkedAt: tz().notNull(),
-    expiresAt: tz().notNull(),
-    /** Consecutive inconclusive checks (greylisting…): their re-check backs off (1, 2, 4… days). */
-    inconclusiveStreak: smallint().notNull().default(0),
-  },
-  (table) => [
-    check('ck_email_verification_cache__status', sql`${table.status} IN (${inList(VERIFICATION_STATUSES)})`),
-  ],
-);

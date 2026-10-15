@@ -12,7 +12,12 @@ import { OnDomainEvent } from '../../platform/events/on-domain-event.decorator.t
 import { LOGGER } from '../../platform/logging/logger.ts';
 import { WorkspaceDefaults } from '../../workspace/index.ts';
 import { StartEnrichmentCommand } from './enrichment.use-cases.ts';
-import { ENRICHMENT_REPOSITORY, type EnrichmentRepository } from './ports.ts';
+import {
+  EMAIL_VERDICT_CACHE,
+  type EmailVerdictCache,
+  ENRICHMENT_REPOSITORY,
+  type EnrichmentRepository,
+} from './ports.ts';
 import { StepRegistry } from './step-registry.ts';
 
 const DAY_MS = 24 * 3_600_000;
@@ -88,10 +93,14 @@ export class NightlyRefresh {
     private readonly start: StartEnrichmentCommand,
     private readonly defaults: WorkspaceDefaults,
     private readonly registry: StepRegistry,
+    @Inject(EMAIL_VERDICT_CACHE) private readonly verdicts: EmailVerdictCache,
   ) {}
 
   async run(day: string): Promise<{ readonly started: number }> {
     const now = this.clock.now().getTime();
+    // Retention: e-mail verdicts nobody may reuse any more (BF-028).
+    const purged = await this.verdicts.purgeExpired(new Date(now));
+    if (purged > 0) this.logger.info({ purged }, 'expired e-mail verdicts purged');
     // Every registered step, with its own freshness: later steps are refreshed without changing this code.
     const steps = [...this.registry.all().values()].map((step) => ({
       step: step.id,
@@ -110,7 +119,12 @@ export class NightlyRefresh {
       const limit = nightlyRefreshLimit - already;
       if (limit <= 0) continue;
       // Some candidates turn out to have nothing to do (a step that does not apply): look a little further.
-      const candidates = await this.runs.refreshCandidates(organizationId, steps, limit * CANDIDATE_FACTOR);
+      const candidates = await this.runs.refreshCandidates(
+        organizationId,
+        steps,
+        limit * CANDIDATE_FACTOR,
+        new Date(now),
+      );
       let startedHere = 0;
       for (const businessId of candidates) {
         if (startedHere >= limit) break;

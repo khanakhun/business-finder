@@ -43,6 +43,8 @@ export interface PlanInput {
   readonly now: Date;
   /** What is left of the workspace's monthly budget; null for no cap. */
   readonly remainingUsd: number | null;
+  /** Leave the requested steps' optional dependencies out (e.g. verify one e-mail without crawling the site). */
+  readonly withoutOptionalDependencies?: boolean;
 }
 
 export interface Plan {
@@ -54,6 +56,7 @@ export interface Plan {
 export function resolveOrder(
   requested: readonly EnrichmentStepId[],
   steps: ReadonlyMap<EnrichmentStepId, EnrichmentStep>,
+  options: { readonly withoutOptionalDependencies?: boolean } = {},
 ): EnrichmentStepId[] {
   const order: EnrichmentStepId[] = [];
   const state = new Map<EnrichmentStepId, 'visiting' | 'done'>();
@@ -66,7 +69,9 @@ export function resolveOrder(
       );
     }
     state.set(id, 'visiting');
-    const dependencies = [...(steps.get(id)?.dependsOn ?? [])].sort(byCatalogue);
+    const step = steps.get(id);
+    const optional = new Set(options.withoutOptionalDependencies ? (step?.optionalDependencies ?? []) : []);
+    const dependencies = [...(step?.dependsOn ?? [])].filter((d) => !optional.has(d)).sort(byCatalogue);
     for (const dependency of dependencies) visit(dependency, [...path, id]);
     state.set(id, 'done');
     order.push(id);
@@ -87,7 +92,10 @@ export function planRun(input: PlanInput): Plan {
   const requested = input.requested ?? [...input.steps.keys()];
   const planned = new Map<EnrichmentStepId, PlannedStep>();
   let estimatedUsd = 0;
-  for (const id of resolveOrder(requested, input.steps)) {
+  const order = resolveOrder(requested, input.steps, {
+    ...(input.withoutOptionalDependencies ? { withoutOptionalDependencies: true } : {}),
+  });
+  for (const id of order) {
     const step = input.steps.get(id);
     const dependsOn = step ? [...step.dependsOn] : [];
     const skip = (reason: EnrichmentSkipReason, inputHash: string | null = null): PlannedStep => ({

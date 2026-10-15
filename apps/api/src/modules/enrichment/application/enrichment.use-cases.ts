@@ -42,6 +42,8 @@ export interface StartRunInput {
   readonly steps?: readonly EnrichmentStepId[];
   readonly force: boolean;
   readonly idempotencyKey?: string | null;
+  /** Run only the requested steps and what they strictly need (no optional dependencies). */
+  readonly withoutOptionalDependencies?: boolean;
 }
 
 export type StartOutcome =
@@ -57,6 +59,7 @@ interface PlanOptions {
   readonly steps?: readonly EnrichmentStepId[];
   readonly force: boolean;
   readonly remaining: number | null;
+  readonly withoutOptionalDependencies?: boolean;
 }
 
 export function toRunView(run: RunRecord, steps: readonly StepRecord[]): EnrichmentRun {
@@ -113,6 +116,17 @@ export class EnrichmentPlanning {
     };
   }
 
+  /**
+   * Whether the workspace's monthly budget can still pay `usd` from what was actually spent (a guard around paid
+   * calls inside a running step: estimates already reserved the run's share).
+   */
+  async canSpend(organizationId: string, usd: number): Promise<boolean> {
+    const { monthlyBudgetUsd } = await this.defaults.enrichmentSettings(organizationId);
+    if (monthlyBudgetUsd === null) return true;
+    const spent = await this.runs.monthSpendUsd(organizationId, this.clock.now(), { actualOnly: true });
+    return spent + usd <= monthlyBudgetUsd + 1e-9;
+  }
+
   async plan(subject: EnrichmentSubject, options: PlanOptions): Promise<Plan> {
     return this.planWith(subject, await this.runs.latestOutputs(subject.businessId), options);
   }
@@ -130,6 +144,7 @@ export class EnrichmentPlanning {
       force: options.force,
       now: this.clock.now(),
       remainingUsd: options.remaining,
+      ...(options.withoutOptionalDependencies ? { withoutOptionalDependencies: true } : {}),
     });
   }
 }
@@ -193,6 +208,7 @@ export class StartEnrichmentCommand {
       ...(input.steps ? { steps: input.steps } : {}),
       force: input.force,
       remaining,
+      ...(input.withoutOptionalDependencies ? { withoutOptionalDependencies: true } : {}),
     });
     const interactive = input.trigger === 'manual';
     if (!interactive && !plan.steps.some((s) => s.status === 'queued')) {

@@ -1,8 +1,10 @@
 import type { ApiEnv } from '@bf/config';
 import type { Clock } from '@bf/contracts';
+import type { Logger } from '@bf/observability';
 import { type DynamicModule, Inject, Module, type OnModuleInit } from '@nestjs/common';
 import {
   BusinessGraphModule,
+  EmailContactsQuery,
   IngestSourceRecordCommand,
   RecordEmailVerificationCommand,
   ReplaceWebsiteMediaCommand,
@@ -10,7 +12,12 @@ import {
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
-import { RATE_LIMITER, ValkeyRateLimiter } from '../platform/rate-limit/valkey-rate-limiter.ts';
+import { LOGGER } from '../platform/logging/logger.ts';
+import {
+  RATE_LIMITER,
+  type RateLimiter,
+  ValkeyRateLimiter,
+} from '../platform/rate-limit/valkey-rate-limiter.ts';
 import { ARTIFACT_STORAGE, InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { RealtimeModule } from '../realtime/index.ts';
@@ -28,17 +35,19 @@ import {
   StartEnrichmentCommand,
 } from './application/enrichment.use-cases.ts';
 import {
-  EMAIL_CONTACT_READER,
   EMAIL_SUPPRESSION,
   EMAIL_VERDICT_CACHE,
   EMAIL_VERIFIER_LIST,
-  type EmailContactReader,
+  type EmailSuppressionCheck,
+  type EmailVerdictCache,
   type EmailVerifier,
   ENRICHMENT_QUEUE,
   ENRICHMENT_REPOSITORY,
   type EnrichmentQueue,
   NO_SOLICITATION_MARKERS,
   type NoSolicitationMarkers,
+  PERSONAL_ADDRESS_POLICY,
+  type PersonalAddressPolicy,
   RUN_PROGRESS,
   SITE_INTEL,
   type SiteIntelPort,
@@ -52,8 +61,8 @@ import { StepRegistry } from './application/step-registry.ts';
 import { VerifyContactCommand } from './application/verify-contact.command.ts';
 import { BullmqEnrichmentQueue } from './infrastructure/bullmq-enrichment-queue.ts';
 import {
-  DrizzleEmailContactReader,
   DrizzleEmailVerdictCache,
+  NoPersonalAddresses,
   NoSuppression,
 } from './infrastructure/drizzle-email-verification.ts';
 import { DrizzleEnrichmentRepository } from './infrastructure/drizzle-enrichment.repository.ts';
@@ -64,7 +73,10 @@ import {
 } from './infrastructure/drizzle-website.repository.ts';
 import {
   DnsMxVerifier,
+  dnsResolver,
+  FAKE_MAIL_DNS,
   FakeEmailVerifier,
+  PoliteMailServerVerifier,
   ReacherVerifier,
   ZeroBounceVerifier,
 } from './infrastructure/email-verifiers.ts';
@@ -103,16 +115,29 @@ function fakeEmailVerifierEnabled(env: ApiEnv): boolean {
   return true;
 }
 
-/** The verifier chain's links this deployment has (the workspace picks their order). */
-function emailVerifiers(env: ApiEnv, secrets: SecretResolver): EmailVerifier[] {
-  if (fakeEmailVerifierEnabled(env)) return [new FakeEmailVerifier(), new DnsMxVerifier()];
+/**
+ * The verifier chain's links this deployment has (the workspace picks their order). Reacher talks to recipients'
+ * mail servers: always behind the politeness decorator (public mail hosts only, a token per mail server).
+ */
+function emailVerifiers(
+  env: ApiEnv,
+  secrets: SecretResolver,
+  limiter: RateLimiter,
+  planning: EnrichmentPlanning,
+): EmailVerifier[] {
+  if (fakeEmailVerifierEnabled(env)) return [new FakeEmailVerifier(), new DnsMxVerifier(FAKE_MAIL_DNS)];
+  const dns = dnsResolver();
   return [
-    new ReacherVerifier(env.REACHER_URL, env.EMAIL_VERIFY_CONCURRENCY),
+    new PoliteMailServerVerifier(
+      new ReacherVerifier(env.REACHER_URL, env.EMAIL_VERIFY_CONCURRENCY, env.REACHER_HEADER_SECRET),
+      { dns, limiter, perMinute: env.EMAIL_VERIFY_PER_MAIL_SERVER_PER_MINUTE },
+    ),
     new ZeroBounceVerifier(
       (organizationId) => secrets.resolve(organizationId, 'zerobounce'),
       env.ENRICHMENT_EMAIL_VERIFY_COST_USD,
+      (organizationId, usd) => planning.canSpend(organizationId, usd),
     ),
-    new DnsMxVerifier(),
+    new DnsMxVerifier(dns),
   ];
 }
 
@@ -136,10 +161,13 @@ export class EnrichmentModule implements OnModuleInit {
     @Inject(APP_ENV) private readonly env: AppEnv,
     private readonly ingest: IngestSourceRecordCommand,
     private readonly emailVerification: EmailVerificationService,
-    @Inject(EMAIL_CONTACT_READER) private readonly emailContacts: EmailContactReader,
+    private readonly emailContacts: EmailContactsQuery,
     private readonly recordVerification: RecordEmailVerificationCommand,
     private readonly flags: FeatureFlagService,
     private readonly testers: ConnectionTesterRegistry,
+    @Inject(EMAIL_SUPPRESSION) private readonly suppression: EmailSuppressionCheck,
+    @Inject(LOGGER) private readonly logger: Logger,
+    @Inject(PERSONAL_ADDRESS_POLICY) private readonly personalAddresses: PersonalAddressPolicy,
   ) {}
 
   static forRoot(mode: AppMode): DynamicModule {
@@ -176,13 +204,18 @@ export class EnrichmentModule implements OnModuleInit {
         { provide: RUN_PROGRESS, useClass: RealtimeEnrichmentProgress },
         {
           provide: EMAIL_VERIFIER_LIST,
-          inject: [APP_ENV, SecretResolver],
-          useFactory: (env: AppEnv, secrets: SecretResolver) => emailVerifiers(env as ApiEnv, secrets),
+          inject: [APP_ENV, SecretResolver, RATE_LIMITER, EnrichmentPlanning],
+          useFactory: (
+            env: AppEnv,
+            secrets: SecretResolver,
+            limiter: RateLimiter,
+            planning: EnrichmentPlanning,
+          ) => emailVerifiers(env as ApiEnv, secrets, limiter, planning),
         },
         { provide: EMAIL_VERDICT_CACHE, useClass: DrizzleEmailVerdictCache },
-        { provide: EMAIL_CONTACT_READER, useClass: DrizzleEmailContactReader },
-        // DECISION(BF-028): no suppression lists before BF-049; the port is checked before every verification.
+        // DECISION(BF-028): no suppression lists and no personal-address policy before BF-049 (deny-all).
         { provide: EMAIL_SUPPRESSION, useClass: NoSuppression },
+        { provide: PERSONAL_ADDRESS_POLICY, useClass: NoPersonalAddresses },
         {
           provide: SMTP_PORT_PROBE,
           inject: [APP_ENV, CLOCK],
@@ -235,11 +268,15 @@ export class EnrichmentModule implements OnModuleInit {
         verification: this.emailVerification,
         record: this.recordVerification,
         patternGuessing: (organizationId) => this.flags.isEnabled(organizationId, 'emailPatternGuessing'),
+        personalAddresses: this.personalAddresses,
         clock: this.clock,
         ttlDays: env.ENRICHMENT_TTL_EMAIL_VERIFY_DAYS,
         unitCostUsd: env.ENRICHMENT_EMAIL_VERIFY_COST_USD,
       }),
     );
+    if (env.NODE_ENV === 'production' && this.suppression instanceof NoSuppression) {
+      this.logger.warn('e-mail verification runs without suppression lists (bound by BF-049)');
+    }
     if (!this.testers.has('zerobounce')) {
       this.testers.register('zerobounce', async ({ value, signal }) => {
         try {

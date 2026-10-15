@@ -70,6 +70,7 @@ const toStep = (s: StepRow): StepRecord => ({
   dependsOn: s.dependsOn,
   status: s.status,
   attempt: s.attempt,
+  deferrals: s.deferrals,
   inputHash: s.inputHash,
   outputRef: s.outputRef,
   estimatedUsd: Number(s.estimatedUsd),
@@ -271,11 +272,17 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
     return result;
   }
 
-  async monthSpendUsd(organizationId: string, at: Date): Promise<number> {
+  async monthSpendUsd(
+    organizationId: string,
+    at: Date,
+    options: { readonly actualOnly?: boolean } = {},
+  ): Promise<number> {
     const { start, end } = monthRange(at);
     const [row] = await this.x
       .select({
-        spent: sql<string>`coalesce(sum(CASE WHEN ${enrichmentRuns.status} IN ('queued', 'running')
+        spent: options.actualOnly
+          ? sql<string>`coalesce(sum(${enrichmentRuns.costUsd}), 0)`
+          : sql<string>`coalesce(sum(CASE WHEN ${enrichmentRuns.status} IN ('queued', 'running')
           THEN greatest(${enrichmentRuns.estimatedUsd}, ${enrichmentRuns.costUsd}) ELSE ${enrichmentRuns.costUsd} END), 0)`,
       })
       .from(enrichmentRuns)
@@ -339,15 +346,8 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
     stepRowId: string,
     error: string | null,
     _at: Date,
-    options: {
-      readonly refund?: boolean;
-      readonly notBefore?: Date;
-      readonly costUsd?: number;
-      readonly changedFields?: readonly string[];
-    } = {},
+    options: { readonly refund?: boolean; readonly notBefore?: Date; readonly deferred?: boolean } = {},
   ): Promise<StepRecord | undefined> {
-    const spent = options.costUsd ?? 0;
-    const changed = [...(options.changedFields ?? [])];
     const [row] = await this.x
       .update(enrichmentSteps)
       .set({
@@ -357,20 +357,28 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
         jobId: null,
         notBefore: options.notBefore ?? null,
         ...(options.refund ? { attempt: sql`greatest(${enrichmentSteps.attempt} - 1, 0)` } : {}),
-        ...(spent > 0 ? { costUsd: sql`${enrichmentSteps.costUsd} + ${spent}` } : {}),
+        ...(options.deferred ? { deferrals: sql`${enrichmentSteps.deferrals} + 1` } : {}),
       })
       .where(and(eq(enrichmentSteps.id, stepRowId), eq(enrichmentSteps.status, 'running')))
       .returning();
-    if (row && (spent > 0 || changed.length > 0)) {
-      await this.x
-        .update(enrichmentRuns)
-        .set({
-          costUsd: sql`${enrichmentRuns.costUsd} + ${spent}`,
-          changedFields: sql`ARRAY(SELECT DISTINCT f FROM unnest(${enrichmentRuns.changedFields} || ${textArray(changed)}) AS f ORDER BY f)`,
-        })
-        .where(eq(enrichmentRuns.id, row.runId));
-    }
     return row ? toStep(row) : undefined;
+  }
+
+  async addSpend(stepRowId: string, costUsd: number, changedFields: readonly string[]): Promise<void> {
+    const spent = Math.max(0, costUsd);
+    const [row] = await this.x
+      .update(enrichmentSteps)
+      .set({ costUsd: sql`${enrichmentSteps.costUsd} + ${spent}` })
+      .where(eq(enrichmentSteps.id, stepRowId))
+      .returning({ runId: enrichmentSteps.runId });
+    if (!row) return;
+    await this.x
+      .update(enrichmentRuns)
+      .set({
+        costUsd: sql`${enrichmentRuns.costUsd} + ${spent}`,
+        changedFields: sql`ARRAY(SELECT DISTINCT f FROM unnest(${enrichmentRuns.changedFields} || ${textArray([...changedFields])}) AS f ORDER BY f)`,
+      })
+      .where(eq(enrichmentRuns.id, row.runId));
   }
 
   async completeStep(stepRowId: string, completion: StepCompletion, at: Date): Promise<boolean> {
@@ -489,13 +497,19 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
     organizationId: string,
     steps: readonly { readonly step: EnrichmentStepId; readonly staleBefore: Date }[],
     limit: number,
+    now: Date,
   ): Promise<string[]> {
     if (steps.length === 0) return [];
+    // Fresh: the latest done output is within the TTL and does not ask for an earlier re-check (`recheckAt`).
     const stale = sql`EXISTS (
       SELECT 1 FROM unnest(${textArray(steps.map((s) => s.step))},
         ${timestampArray(steps.map((s) => s.staleBefore))}) AS t(step, stale_before)
-      WHERE NOT EXISTS (SELECT 1 FROM ${enrichmentSteps} es WHERE es.business_id = ${orgBusinesses.businessId}
-        AND es.step = t.step AND es.status = 'done' AND es.finished_at >= t.stale_before))`;
+      WHERE NOT EXISTS (SELECT 1 FROM (SELECT es.finished_at, es.output_ref FROM ${enrichmentSteps} es
+          WHERE es.business_id = ${orgBusinesses.businessId} AND es.step = t.step AND es.status = 'done'
+          ORDER BY es.finished_at DESC LIMIT 1) latest
+        WHERE latest.finished_at >= t.stale_before
+          AND (latest.output_ref->>'recheckAt' IS NULL
+            OR (latest.output_ref->>'recheckAt')::timestamptz > ${now.toISOString()}::timestamptz)))`;
     const lastRun = sql`(SELECT max(r.created_at) FROM ${enrichmentRuns} r
       WHERE r.business_id = ${orgBusinesses.businessId} AND r.triggered_by_org_id = ${organizationId})`;
     const rows = await this.x

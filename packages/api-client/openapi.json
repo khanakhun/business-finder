@@ -2171,6 +2171,13 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
             "type": "string"
           },
+          "isDisposable": {
+            "description": "email: a throw-away (disposable) domain.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "isFreeMail": {
             "description": "email: a free webmail domain (gmail.com, orange.fr…).",
             "type": [
@@ -2185,6 +2192,13 @@
           },
           "normalizedValue": {
             "type": "string"
+          },
+          "onWebsiteDomain": {
+            "description": "email: on the business’s own website domain; null without a website.",
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "personName": {
             "description": "Only when published by the business itself (data minimization).",
@@ -2293,6 +2307,8 @@
           "verifiedAt",
           "verificationDetails",
           "isFreeMail",
+          "isDisposable",
+          "onWebsiteDomain",
           "publishedContext",
           "firstSeenAt",
           "lastSeenAt"
@@ -14147,6 +14163,16 @@
             "description": "Problem details (RFC 9457)"
           },
           "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
             "content": {
               "application/problem+json": {
                 "schema": {

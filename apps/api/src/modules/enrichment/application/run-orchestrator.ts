@@ -18,6 +18,7 @@ import { isTransient } from '../../platform/resilience/resilience.ts';
 import {
   type EnrichmentStep,
   StepDeferredError,
+  StepInterruptedError,
   type StepOutput,
   type StepResult,
 } from '../domain/enrichment-step.ts';
@@ -294,6 +295,7 @@ export class EnrichmentOrchestrator {
         inputHash: step.inputHash ?? plugin.inputHash(subject),
         dependencies: await this.dependencyOutputs(run, plugin.dependsOn),
         signal,
+        deferrals: step.deferrals,
       });
       return result.outcome === 'done'
         ? {
@@ -318,6 +320,13 @@ export class EnrichmentOrchestrator {
     signal: AbortSignal,
   ): Promise<StepCompletion | 'released'> {
     const now = this.clock.now();
+    // Money a step spent before stopping is booked first, whatever happens next (retry, wait, failure, cancel).
+    if (error instanceof StepDeferredError || error instanceof StepInterruptedError) {
+      if (error.costUsd > 0 || error.changedFields.length > 0) {
+        await this.runs.addSpend(step.id, error.costUsd, error.changedFields);
+      }
+    }
+    if (error instanceof StepInterruptedError) return this.onFailure(run, step, error.cause, signal);
     if (signal.aborted) {
       // A cancelled run already skipped its steps. Otherwise the worker is stopping (deploy) or lost its lock:
       // give the attempt back and let another worker take the step now.
@@ -334,13 +343,12 @@ export class EnrichmentOrchestrator {
     }
     if (error instanceof BudgetExceededError) return { status: 'skipped', reason: 'budget', costUsd: 0 };
     if (error instanceof StepDeferredError) {
-      // The step asked to wait (politeness towards a third party): no attempt used, spent cost kept.
+      // The step asked to wait (politeness towards a third party): no attempt used; its spend is booked above.
       const delayMs = Math.min(MAX_DEFER_MS, Math.max(MIN_DEFER_MS, Math.ceil(error.retryAfterMs)));
       const released = await this.runs.releaseStep(step.id, null, now, {
         refund: true,
         notBefore: new Date(now.getTime() + delayMs),
-        costUsd: Math.max(0, error.costUsd),
-        changedFields: error.changedFields,
+        deferred: true,
       });
       if (released) {
         await this.queue.step(released, run.organizationId, run.trigger, {

@@ -101,6 +101,11 @@ export const ContactSchema = z
     verifiedAt: IsoDateTimeSchema.nullable(),
     verificationDetails: EmailVerificationDetailsSchema.nullable().describe('email: what the verifier saw.'),
     isFreeMail: z.boolean().nullable().describe('email: a free webmail domain (gmail.com, orange.fr…).'),
+    isDisposable: z.boolean().nullable().describe('email: a throw-away (disposable) domain.'),
+    onWebsiteDomain: z
+      .boolean()
+      .nullable()
+      .describe('email: on the business’s own website domain; null without a website.'),
     publishedContext: PublishedContextSchema.nullable().describe(
       'email: where the business published it on its own site.',
     ),

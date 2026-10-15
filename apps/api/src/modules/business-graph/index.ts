@@ -1,6 +1,10 @@
 // Public surface of the business-graph module: other modules import only from here.
 
 export {
+  EmailContactsQuery,
+  type EmailContactView,
+} from './application/contacts/email-contacts.query.ts';
+export {
   type EmailVerdict,
   RecordEmailVerificationCommand,
 } from './application/contacts/record-email-verification.command.ts';
@@ -39,8 +43,6 @@ export {
 export { BusinessGraphModule } from './business-graph.module.ts';
 export { EmailAddress } from './domain/value-objects/email-address.ts';
 export {
-  classifyEmail,
-  type EmailClassification,
   isDisposableDomain,
-  matchesWebsiteDomain,
+  isFreeMailDomain,
 } from './domain/value-objects/email-classification.ts';

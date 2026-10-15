@@ -35,8 +35,14 @@ export interface ContactRecord extends BusinessContactProps {
 
 export interface ContactRepository {
   listByBusiness(businessId: string): Promise<ContactRecord[]>;
+  getById(id: string): Promise<ContactRecord | undefined>;
+  /** Distinct names of people the business's contacts mention (at most `limit`). */
+  personNames(businessId: string, limit: number): Promise<string[]>;
   find(businessId: string, type: ContactType, normalizedValue: string): Promise<ContactRecord | undefined>;
-  /** Sets the verdict on the business's e-mail contact; false when there is none or nothing changed. */
+  /**
+   * Sets the verdict on the business's e-mail contact; false when there is none or nothing changed. A verdict older
+   * than the recorded one is ignored, and an inconclusive one (`unknown`) never replaces a conclusive one.
+   */
   recordVerification(
     businessId: string,
     email: string,

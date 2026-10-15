@@ -1,7 +1,9 @@
 import type { ApiEnv } from '@bf/config';
 import {
+  ConflictError,
   type EnrichmentRun,
   EnrichmentRunSchema,
+  ForbiddenError,
   NotFoundError,
   RateLimitedError,
   type SmtpPortDiagnostic,
@@ -22,9 +24,9 @@ import { VerifyContactCommand } from '../../application/verify-contact.command.t
 /** Seconds the port-25 diagnostic may take (DNS, then a TCP connect with its own 5 s timeout). */
 const PROBE_TIMEOUT_MS = 10_000;
 
-/** Routes guarantee an active workspace (`@RequirePermission`); reaching here without one is a wiring bug. */
+/** Routes guarantee an active workspace (`@RequirePermission`); without one the request is refused. */
 function workspaceOf(auth: AuthContext): string {
-  if (!auth.orgId) throw new Error('E-mail verification route reached without an active workspace');
+  if (!auth.orgId) throw new ForbiddenError('An active workspace is required.');
   return auth.orgId;
 }
 
@@ -48,7 +50,7 @@ export class EmailVerificationController {
       'run already open, 200). Addresses are checked at most once per TTL; fresh verdicts come from the cache.',
     operationId: 'verifyContact',
     response: { status: 201, schema: EnrichmentRunSchema },
-    errors: [401, 403, 404, 422, 429],
+    errors: [401, 403, 404, 409, 422, 429],
   })
   async verify(
     @Ctx() auth: AuthContext,
@@ -58,10 +60,18 @@ export class EmailVerificationController {
     const organizationId = workspaceOf(auth);
     const outcome = await this.verifyContact.execute({ organizationId, userId: auth.userId, contactId });
     if (outcome.kind === 'rejected') {
-      if (outcome.reason === 'busy') {
-        throw new RateLimitedError('Too many enrichments are waiting in this workspace; try again later.');
+      switch (outcome.reason) {
+        case 'busy':
+          throw new RateLimitedError('Too many enrichments are waiting in this workspace; try again later.');
+        case 'not_found':
+          throw new NotFoundError('Contact', contactId);
+        // Manual runs are created even when nothing can run (the run says why); kept for exhaustiveness.
+        case 'budget':
+        case 'nothing_to_do':
+          throw new ConflictError('E-mail verification cannot run now.', {
+            details: { reason: outcome.reason },
+          });
       }
-      throw new NotFoundError('Contact', contactId);
     }
     res.status(outcome.kind === 'started' ? 201 : 200);
     return this.queries.run(organizationId, outcome.run.id);

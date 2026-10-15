@@ -1930,11 +1930,15 @@ export type components = {
             firstSeenAt: string;
             /** Format: uuid */
             id: string;
+            /** @description email: a throw-away (disposable) domain. */
+            isDisposable: boolean | null;
             /** @description email: a free webmail domain (gmail.com, orange.fr…). */
             isFreeMail: boolean | null;
             /** Format: date-time */
             lastSeenAt: string;
             normalizedValue: string;
+            /** @description email: on the business’s own website domain; null without a website. */
+            onWebsiteDomain: boolean | null;
             /** @description Only when published by the business itself (data minimization). */
             personName: string | null;
             /** @description email: where the business published it on its own site. */
@@ -6160,6 +6164,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

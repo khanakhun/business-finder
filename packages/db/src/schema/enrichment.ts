@@ -1,6 +1,7 @@
 // Enrichment context (BF-027): runs and their steps (a DAG per run), and website snapshots from site intel.
 
 import {
+  type EmailVerificationDetails,
   ENRICHMENT_RUN_STATUSES,
   ENRICHMENT_SKIP_REASONS,
   ENRICHMENT_STEP_IDS,
@@ -12,6 +13,7 @@ import {
   type EnrichmentStepStatus,
   type EnrichmentTrigger,
   type SiteIntel,
+  VERIFICATION_STATUSES,
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
@@ -22,6 +24,7 @@ import {
   jsonb,
   numeric,
   pgTable,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -110,6 +113,8 @@ export const enrichmentSteps = pgTable(
     dependsOn: text().array().$type<EnrichmentStepId[]>().notNull().default(sql`ARRAY[]::text[]`),
     status: text().$type<EnrichmentStepStatus>().notNull().default('queued'),
     attempt: integer().notNull().default(0),
+    /** Times the step put itself back to wait (politeness, BF-028): bounded by the step, never an attempt. */
+    deferrals: integer().notNull().default(0),
     inputHash: text(),
     /** Pointers to what the step produced (a snapshot id, artifact keys), never page content. */
     outputRef: jsonb().$type<Record<string, unknown>>(),
@@ -216,3 +221,27 @@ export const noSolicitationMarkers = pgTable('no_solicitation_markers', {
   clearedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
   ...timestamps(),
 });
+
+/**
+ * E-mail verification verdicts (BF-028), shared by every business and workspace: a mailbox is asked at most once per
+ * TTL (politeness towards mail servers, verifier costs). Keyed by `sha256(lower(email))` — the address itself is never
+ * stored here; expired rows are purged.
+ */
+export const enrichmentEmailVerdicts = pgTable(
+  'enrichment_email_verdicts',
+  {
+    emailHash: text().primaryKey(),
+    status: text().$type<(typeof VERIFICATION_STATUSES)[number]>().notNull(),
+    details: jsonb().$type<EmailVerificationDetails>().notNull(),
+    costUsd: numeric({ precision: 12, scale: 6, mode: 'number' }).notNull().default(0),
+    checkedAt: tz().notNull(),
+    expiresAt: tz().notNull(),
+    /** Consecutive inconclusive checks (greylisting…): their re-check backs off (1, 2, 4… days). */
+    inconclusiveStreak: smallint().notNull().default(0),
+  },
+  (table) => [
+    index('idx_enrichment_email_verdicts__expires_at').on(table.expiresAt),
+    check('ck_enrichment_email_verdicts__status', sql`${table.status} IN (${inList(VERIFICATION_STATUSES)})`),
+    check('ck_enrichment_email_verdicts__email_hash', sql`${table.emailHash} ~ '^[0-9a-f]{64}$'`),
+  ],
+);

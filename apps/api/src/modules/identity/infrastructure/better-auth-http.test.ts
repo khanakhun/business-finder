@@ -40,11 +40,27 @@ describe('pinClientIp', () => {
     expect(req.headers['x-forwarded-for']).toBe('203.0.113.5');
   });
 
-  it('skips several trusted hops and junk entries', () => {
+  it('skips several trusted hops', () => {
     const chain = trustedProxyMatcher(['10.0.0.0/8']);
-    const req = request('10.0.0.1', '203.0.113.5, not-an-ip, 10.1.2.3');
+    const req = request('10.0.0.1', '203.0.113.5, 10.1.2.3');
     pinClientIp(req, chain);
     expect(req.headers['x-forwarded-for']).toBe('203.0.113.5');
+  });
+
+  it('stops at an unparsable hop instead of trusting what the client wrote before it', () => {
+    const chain = trustedProxyMatcher(['10.0.0.0/8']);
+    const req = request('10.0.0.1', '203.0.113.5, unknown, 10.1.2.3');
+    pinClientIp(req, chain);
+    expect(req.headers['x-forwarded-for']).toBe('10.1.2.3');
+  });
+
+  it('reads hops written with a port', () => {
+    const req = request('10.0.0.1', '203.0.113.5:51234');
+    pinClientIp(req, trusted);
+    expect(req.headers['x-forwarded-for']).toBe('203.0.113.5');
+    const v6 = request('10.0.0.1', '[2001:db8::7]:443');
+    pinClientIp(v6, trusted);
+    expect(v6.headers['x-forwarded-for']).toBe('2001:db8::7');
   });
 
   it('replaces a header sent by anyone else with their address (no spoofing past the rate limits)', () => {

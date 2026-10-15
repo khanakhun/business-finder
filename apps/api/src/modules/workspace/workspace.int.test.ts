@@ -186,6 +186,12 @@ describe('secrets', () => {
     const tested = await owner.post('/v1/workspace/secrets/google_places/test').expect(200);
     expect(tested.body).toMatchObject({ ok: true, source: 'workspace' });
     await owner.post('/v1/workspace/secrets/anthropic/test').expect(409);
+    // Failed attempts are audited too.
+    const failed = await owner.get('/v1/audit-logs?action=secrets.tested').expect(200);
+    expect(failed.body.items[0]).toMatchObject({
+      entityId: 'anthropic',
+      metadata: { outcome: 'error', code: 'CONFLICT' },
+    });
 
     await owner.delete('/v1/workspace/secrets/foursquare').expect(204);
     await owner.delete('/v1/workspace/secrets/foursquare').expect(404);
@@ -301,8 +307,18 @@ describe('master key rotation (pnpm secrets:rotate-master)', () => {
     expect(audit).toMatchObject({
       organizationId: null,
       actorType: 'system',
-      metadata: { rotated: 1, toVersion: 2 },
+      metadata: { rotated: 1, skipped: 0, toVersion: 2 },
     });
+  });
+
+  it('leaves a secret alone when it was replaced after being read (compare-and-set)', async () => {
+    const { DrizzleSecretsRepository } = await import('./infrastructure/drizzle-secrets.repository.ts');
+    const repository = new DrizzleSecretsRepository(db);
+    const [row] = await repository.listForRotation(3, 10);
+    if (!row) throw new Error('expected a secret');
+    const stale = { keyVersion: row.keyVersion, dekIv: Buffer.alloc(12, 0xee) };
+    const next = { keyVersion: 3, wrappedDek: row.wrappedDek, dekIv: row.dekIv, dekTag: row.dekTag };
+    expect(await repository.rewrap(row.id, stale, next)).toBe(false);
   });
 
   it('reports rows it cannot open instead of failing silently', async () => {

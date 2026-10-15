@@ -87,6 +87,7 @@ export class SecretsController {
   @Audited('secrets.tested', {
     entityType: 'secret',
     entityIdParam: 'name',
+    auditFailures: true,
     metadata: (result) => {
       const { ok, source } = result as SecretTestResult;
       return { ok, source };

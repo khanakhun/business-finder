@@ -68,10 +68,13 @@ export interface SecretsRepository {
   touch(organizationId: string, name: SecretName, at: Date): Promise<void>;
   /** Rows wrapped by another master key version, oldest id first, after `afterId`. */
   listForRotation(currentVersion: number, limit: number, afterId?: string): Promise<SecretRecord[]>;
-  /** Compare-and-set on `fromVersion` so concurrent rotations cannot clobber each other. */
+  /**
+   * Compare-and-set on the version **and** the data key nonce read (`expectedDekIv`, random per seal): a secret
+   * replaced meanwhile (e.g. by an instance still on the old key) is left alone instead of being corrupted.
+   */
   rewrap(
     id: string,
-    fromVersion: number,
+    expected: { readonly keyVersion: number; readonly dekIv: Buffer },
     to: {
       readonly keyVersion: number;
       readonly wrappedDek: Buffer;

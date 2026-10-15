@@ -74,3 +74,9 @@ $$;
 CREATE TRIGGER audit_logs_no_update_delete BEFORE UPDATE OR DELETE ON "audit_logs" FOR EACH ROW EXECUTE FUNCTION audit_logs_append_only();
 --> statement-breakpoint
 CREATE TRIGGER audit_logs_no_truncate BEFORE TRUNCATE ON "audit_logs" FOR EACH STATEMENT EXECUTE FUNCTION audit_logs_append_only();
+--> statement-breakpoint
+-- Fire even under session_replication_role = replica. The runtime role should also hold only SELECT/INSERT here and
+-- not own the table (so it cannot disable the triggers); separate migration/runtime roles come with BF-060.
+ALTER TABLE "audit_logs" ENABLE ALWAYS TRIGGER audit_logs_no_update_delete;
+--> statement-breakpoint
+ALTER TABLE "audit_logs" ENABLE ALWAYS TRIGGER audit_logs_no_truncate;

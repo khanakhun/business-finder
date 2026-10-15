@@ -83,8 +83,14 @@ export class InMemorySecrets implements SecretsRepository {
       .slice(0, limit);
   }
 
-  async rewrap(id: string, fromVersion: number, to: Parameters<SecretsRepository['rewrap']>[2]) {
-    const row = this.rows.find((r) => r.id === id && r.keyVersion === fromVersion);
+  async rewrap(
+    id: string,
+    expected: Parameters<SecretsRepository['rewrap']>[1],
+    to: Parameters<SecretsRepository['rewrap']>[2],
+  ) {
+    const row = this.rows.find(
+      (r) => r.id === id && r.keyVersion === expected.keyVersion && r.dekIv.equals(expected.dekIv),
+    );
     if (!row) return false;
     this.rows = this.rows.map((r) => (r === row ? { ...r, ...to } : r));
     return true;

@@ -40,24 +40,47 @@ export async function rotateMasterKey(
       // Concurrent runs take turns per batch; the compare-and-set in `rewrap` makes a lost race harmless.
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bf:secrets:rotate-master'))`);
       const rows = await secrets.listForRotation(current.version, batchSize, afterId);
+      let batchRotated = 0;
+      let batchSkipped = 0;
       for (const row of rows) {
         const from = keys.get(row.keyVersion);
         if (!from) {
           skippedVersions.set(row.keyVersion, (skippedVersions.get(row.keyVersion) ?? 0) + 1);
+          batchSkipped++;
           continue;
         }
         const rewrapped = rewrapSecret(row, { key: from, version: row.keyVersion }, current, {
           orgId: row.organizationId,
           name: row.name,
         });
-        const updated = await secrets.rewrap(row.id, row.keyVersion, {
-          keyVersion: current.version,
-          wrappedDek: rewrapped.wrappedDek,
-          dekIv: rewrapped.dekIv,
-          dekTag: rewrapped.dekTag,
-        });
-        if (updated) rotated++;
+        const updated = await secrets.rewrap(
+          row.id,
+          { keyVersion: row.keyVersion, dekIv: row.dekIv },
+          {
+            keyVersion: current.version,
+            wrappedDek: rewrapped.wrappedDek,
+            dekIv: rewrapped.dekIv,
+            dekTag: rewrapped.dekTag,
+          },
+        );
+        if (updated) batchRotated++;
       }
+      // Audited in the same transaction as the batch, so committed work is never missing from the log.
+      if (batchRotated > 0 || batchSkipped > 0) {
+        await new DrizzleAuditLogRepository(db).insert({
+          organizationId: null,
+          actorType: 'system',
+          actorId: 'cli:secrets:rotate-master',
+          action: 'secrets.master_key_rotated',
+          entityType: null,
+          entityId: null,
+          ip: null,
+          userAgent: null,
+          metadata: { toVersion: current.version, rotated: batchRotated, skipped: batchSkipped },
+          occurredAt: options.now?.() ?? new Date(),
+        });
+      }
+      rotated += batchRotated;
       return rows;
     });
     if (batch.length < batchSize) break;
@@ -70,20 +93,6 @@ export async function rotateMasterKey(
     skipped: [...skippedVersions.values()].reduce((sum, n) => sum + n, 0),
     skippedVersions: [...skippedVersions.keys()].sort(),
   };
-  if (report.rotated > 0 || report.skipped > 0) {
-    await new DrizzleAuditLogRepository(db).insert({
-      organizationId: null,
-      actorType: 'system',
-      actorId: 'cli:secrets:rotate-master',
-      action: 'secrets.master_key_rotated',
-      entityType: null,
-      entityId: null,
-      ip: null,
-      userAgent: null,
-      metadata: { ...report },
-      occurredAt: options.now?.() ?? new Date(),
-    });
-  }
   return report;
 }
 

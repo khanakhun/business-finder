@@ -6,6 +6,7 @@ import {
   ValidationError,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
+import { z } from 'zod';
 import type { AuthContext } from '../../platform/security/auth-context.ts';
 import { toAuditLogEntry } from './mappers.ts';
 import { AUDIT_LOG_REPOSITORY, type AuditLogRepository } from './ports.ts';
@@ -41,7 +42,7 @@ async function positionOf(cursor: string): Promise<{ occurredAt: Date; id: strin
   const data = await decodeCursor(cursor);
   const [at] = data.sort;
   const occurredAt = typeof at === 'string' ? new Date(at) : undefined;
-  if (!occurredAt || Number.isNaN(occurredAt.getTime())) {
+  if (!occurredAt || Number.isNaN(occurredAt.getTime()) || !z.uuid().safeParse(data.id).success) {
     throw new ValidationError('Invalid cursor.', [{ path: ['cursor'], message: 'Invalid cursor' }]);
   }
   return { occurredAt, id: data.id };

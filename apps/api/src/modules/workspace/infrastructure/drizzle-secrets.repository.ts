@@ -92,14 +92,20 @@ export class DrizzleSecretsRepository implements SecretsRepository {
 
   async rewrap(
     id: string,
-    fromVersion: number,
+    expected: Parameters<SecretsRepository['rewrap']>[1],
     to: Parameters<SecretsRepository['rewrap']>[2],
   ): Promise<boolean> {
     // updated_at stays: rotation does not change the value.
     const updated = await getExecutor(this.db)
       .update(secrets)
       .set(to)
-      .where(and(eq(secrets.id, id), eq(secrets.keyVersion, fromVersion)))
+      .where(
+        and(
+          eq(secrets.id, id),
+          eq(secrets.keyVersion, expected.keyVersion),
+          eq(secrets.dekIv, expected.dekIv),
+        ),
+      )
       .returning({ id: secrets.id });
     return updated.length > 0;
   }

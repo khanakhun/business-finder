@@ -370,5 +370,9 @@ describe('audit log', () => {
     await expect(query.execute(auth(), { limit: 2, cursor: 'garbage' })).rejects.toBeInstanceOf(
       ValidationError,
     );
+    // A well-formed cursor whose id is not a UUID is refused before it reaches the database.
+    const { encodeCursor } = await import('@bf/contracts');
+    const forged = await encodeCursor({ sort: ['2026-10-15T08:00:00.000Z'], id: "x' OR 1=1" });
+    await expect(query.execute(auth(), { limit: 2, cursor: forged })).rejects.toBeInstanceOf(ValidationError);
   });
 });

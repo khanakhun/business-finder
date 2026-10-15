@@ -13,6 +13,7 @@ import { LOGGER } from './modules/platform/logging/logger.ts';
 import {
   AUTH_RESOLVER,
   type AuthResolver,
+  getRequestAuth,
   setRequestAuth,
 } from './modules/platform/security/auth-context.ts';
 
@@ -69,7 +70,11 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   if (auth) app.use(betterAuthMiddleware(auth, (env as Partial<ApiEnv>).AUTH_TRUSTED_PROXIES ?? []));
   const resolver = optional<AuthResolver>(app, AUTH_RESOLVER);
   if (resolver) app.use(resolveCredentials(resolver, optional<Logger>(app, LOGGER)));
-  // Logo uploads are raw image bodies (Nest only parses JSON and forms). The use case enforces the real limit
-  // with a clear 422; this cap only stops oversized bodies early (413).
-  app.use('/v1/workspace/logo', raw({ type: () => true, limit: LOGO_MAX_BYTES * 2 }));
+  // Logo uploads are raw image bodies (Nest only parses JSON and forms), read only for authenticated PUTs. The
+  // use case enforces the real limit with a clear 422; this cap only stops oversized bodies early (413).
+  const logoBody = raw({ type: () => true, limit: LOGO_MAX_BYTES * 2 });
+  app.use('/v1/workspace/logo', (req: Request, res: Response, next: NextFunction) => {
+    if (req.method === 'PUT' && getRequestAuth(req).kind === 'authenticated') logoBody(req, res, next);
+    else next();
+  });
 }

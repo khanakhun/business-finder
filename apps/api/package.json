@@ -63,6 +63,7 @@
     "@bf/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@nestjs/testing": "catalog:",
+    "@opentelemetry/sdk-trace-base": "catalog:",
     "@types/express": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

@@ -5,6 +5,9 @@ export type AiImage = { readonly url: string } | { readonly bytes: Uint8Array; r
 
 /** Longest side sent to models unless the task says otherwise (legible, without paying for pixels). */
 export const DEFAULT_MAX_IMAGE_DIMENSION = 1568;
+/** Images per call and bytes per image (decode cost and provider limits). */
+export const MAX_IMAGES_PER_CALL = 8;
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 export interface PreparedImage {
   readonly image: URL | Uint8Array;
@@ -21,9 +24,14 @@ export async function prepareImage(
 ): Promise<PreparedImage> {
   if ('url' in image) {
     const url = new URL(image.url);
-    if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Image URLs must be http(s)');
-    return { image: url };
+    // The provider fetches it (never this process: see the gateway's `download` hook).
+    if (url.protocol !== 'https:' || url.username || url.password) {
+      throw new Error('Image URLs must be https without credentials');
+    }
+    return { image: url, mediaType: 'image/*' };
   }
+  if (image.bytes.byteLength > MAX_IMAGE_BYTES)
+    throw new Error(`Images must be at most ${MAX_IMAGE_BYTES} bytes`);
   const resized = await sharp(image.bytes, { limitInputPixels: 50_000_000 })
     .rotate()
     .resize({ width: maxDimension, height: maxDimension, fit: 'inside', withoutEnlargement: true })

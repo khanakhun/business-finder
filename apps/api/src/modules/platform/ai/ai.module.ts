@@ -102,6 +102,11 @@ export class AiModule {
               }),
               models,
               traceContent: env.AI_TRACE_CONTENT,
+              onUnpricedModel: (model) =>
+                logger.warn(
+                  { model },
+                  'no AI_PRICING entry for this model: its calls cost null and escape budgets',
+                ),
             });
           },
         },

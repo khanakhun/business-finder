@@ -25,8 +25,10 @@ async function main(): Promise<number> {
       record: { type: 'boolean', default: false },
     },
   });
-  if (!values.task) {
-    console.error('Usage: pnpm eval --task <name> [--model <id>] [--limit <n>] [--replay | --record]');
+  if (!values.task || !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(values.task)) {
+    console.error(
+      'Usage: pnpm eval --task <context.name> [--model <id>] [--limit <n>] [--replay | --record]',
+    );
     return 2;
   }
   const config = (await import(new URL(`evals/${values.task}/eval.config.ts`, ROOT).href))

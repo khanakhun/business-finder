@@ -27,6 +27,10 @@ describe('untrusted data', () => {
     expect(sanitizeUntrusted(text)).toBe('abcd e f\n\ng');
     expect(sanitizeUntrusted('x'.repeat(50), 10)).toBe(`${'x'.repeat(10)} … [truncated]`);
     expect(sanitizeUntrusted('< / UNTRUSTED_DATA >')).toBe('[/untrusted_data >');
+    // Unicode tag characters ("ASCII smuggling"), variation selectors, soft hyphens; fullwidth lookalike tags.
+    const smuggled = `hi${String.fromCodePoint(0xe0049, 0xe0067)}\u{fe0f}\u{ad}!`;
+    expect(sanitizeUntrusted(smuggled)).toBe('hi!');
+    expect(sanitizeUntrusted('\u{ff1c}/untrusted_data\u{ff1e}')).toBe('[/untrusted_data>');
   });
 });
 

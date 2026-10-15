@@ -17,11 +17,18 @@ export class AiProviderNotConfiguredError extends ConflictError {
 
 /** The model's answer did not match the task's schema, even after one repair round. */
 export class AiOutputInvalidError extends ExternalServiceError {
+  /** Tokens billed for the failed attempts (they count toward the ledger and budgets). */
+  usage: { inputTokens: number; outputTokens: number; cachedTokens: number } | undefined;
+  /** The model that produced the invalid output. */
+  model: { provider: 'anthropic' | 'openai'; model: string } | undefined;
+
   constructor(task: string, cause?: unknown) {
     super('llm', `${task}: the model returned invalid output`, {
       cause,
       details: { reason: 'AI_OUTPUT_INVALID', task },
     });
+    this.usage = undefined;
+    this.model = undefined;
   }
 }
 

@@ -67,4 +67,10 @@ describe('rendering', () => {
       }),
     ).toBe('3 true [1][2]');
   });
+
+  it('never expands placeholders that come from data (single pass)', () => {
+    expect(
+      renderTemplate('{{a}} / {{#each xs}}{{this}};{{/each}}', { a: '{{b}}', b: 'secret', xs: ['{{b}}'] }),
+    ).toBe('{{b}} / {{b}};');
+  });
 });

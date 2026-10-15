@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LedgerBudgetGuard, monthStart } from './ai-adapters.ts';
-import { maskPersonalData } from './langfuse.ts';
+import { MaskAiContentProcessor, maskPersonalData } from './langfuse.ts';
 
 describe('Langfuse masking', () => {
   it('masks emails and phone numbers anywhere in traced values', () => {
@@ -16,6 +16,23 @@ describe('Langfuse masking', () => {
       messages: [{ content: 'Tél. [phone]' }],
       tokens: 1200,
       year: 'Founded 1998',
+    });
+    expect(maskPersonalData('Tél 05 - 90 - 00 - 00 - 03 / (0590) 00.00.04')).toBe('Tél [phone] / [phone]');
+  });
+
+  it('masks AI body attributes on every span before export', () => {
+    const span = {
+      attributes: {
+        'ai.prompt.messages': '[{"content":"mail me at a@b.example.test"}]',
+        'ai.response.text': 'Call +590 590 00 00 01',
+        'http.url': 'https://a@b.example.test',
+      },
+    };
+    new MaskAiContentProcessor().onEnd(span as never);
+    expect(span.attributes).toEqual({
+      'ai.prompt.messages': '[{"content":"mail me at [email]"}]',
+      'ai.response.text': 'Call [phone]',
+      'http.url': 'https://a@b.example.test',
     });
   });
 });

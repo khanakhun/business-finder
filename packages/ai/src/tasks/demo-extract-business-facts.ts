@@ -41,7 +41,8 @@ export const DemoExtractBusinessFacts = defineTask({
   cacheScope: 'global',
   evalSet: 'demo.extract_business_facts',
   variables: (input) => ({
-    businessName: input.businessName,
+    // Names come from providers or crawls too: untrusted.
+    businessName: untrusted('provider:name', input.businessName, { maxChars: 200, id: 'name' }),
     page: untrusted(`website:${input.websiteUrl}`, input.pageText, { maxChars: 6_000, id: 'page' }),
   }),
 });

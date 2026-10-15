@@ -3,7 +3,6 @@ import { PromptError } from '../errors.ts';
 // Logic-less templates: `{{name}}`, `{{a.b}}`, and `{{#each list}}…{{/each}}` (inside: `{{this}}` or item fields).
 // A missing variable is an error, never an empty string (ai-engineering.md §3).
 
-const EACH = /\{\{#each ([a-zA-Z_][\w.]*)\}\}([\s\S]*?)\{\{\/each\}\}/g;
 const VARIABLE = /\{\{\s*([a-zA-Z_][\w.]*|this)\s*\}\}/g;
 
 function lookup(scope: unknown, path: string, template: string): unknown {
@@ -31,15 +30,24 @@ function substitute(text: string, scope: unknown, template: string): string {
   );
 }
 
+// One pass over the template: inserted values are never scanned again, so data containing "{{x}}" stays text.
+const TOKEN = /\{\{#each ([a-zA-Z_][\w.]*)\}\}([\s\S]*?)\{\{\/each\}\}|\{\{\s*([a-zA-Z_][\w.]*|this)\s*\}\}/g;
+
 export function renderTemplate(
   text: string,
   variables: Readonly<Record<string, unknown>>,
   template = 'prompt',
 ): string {
-  const expanded = text.replace(EACH, (_match, path: string, body: string) => {
-    const list = lookup(variables, path, template);
-    if (!Array.isArray(list)) throw new PromptError(`Prompt variable "${path}" must be a list for {{#each}}`);
-    return list.map((item) => substitute(body, item, template)).join('');
-  });
-  return substitute(expanded, variables, template);
+  return text.replace(
+    TOKEN,
+    (_match, eachPath: string | undefined, body: string | undefined, path: string | undefined) => {
+      if (eachPath !== undefined) {
+        const list = lookup(variables, eachPath, template);
+        if (!Array.isArray(list))
+          throw new PromptError(`Prompt variable "${eachPath}" must be a list for {{#each}}`);
+        return list.map((item) => substitute(body ?? '', item, template)).join('');
+      }
+      return scalar(lookup(variables, path as string, template), path as string, template);
+    },
+  );
 }

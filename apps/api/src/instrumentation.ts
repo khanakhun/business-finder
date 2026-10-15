@@ -3,7 +3,7 @@
 import { register } from 'node:module';
 import { aiEnv, coreEnv, loadEnv } from '@bf/config';
 import { initTelemetry } from '@bf/observability';
-import { langfuseProcessor } from './modules/platform/ai/langfuse.ts';
+import { langfuseProcessor, MaskAiContentProcessor } from './modules/platform/ai/langfuse.ts';
 
 // ESM auto-instrumentation (e.g. ioredis imported from ESM) needs the import-in-the-middle hook.
 register('@opentelemetry/instrumentation/hook.mjs', import.meta.url);
@@ -26,10 +26,12 @@ export const telemetry = initTelemetry({
   exporter: env.OTEL_EXPORTER_OTLP_ENDPOINT ? 'otlp' : 'none',
   ...(env.OTEL_EXPORTER_OTLP_ENDPOINT ? { otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT } : {}),
   shutdownOnSignals: true,
-  // LLM traces to Langfuse when configured (BF-013).
-  ...(env.LANGFUSE_PUBLIC_KEY && env.LANGFUSE_SECRET_KEY
-    ? {
-        spanProcessors: [
+  spanProcessors: [
+    // First, so no exporter sees unmasked prompt/response bodies (BF-013).
+    new MaskAiContentProcessor(),
+    // LLM traces to Langfuse when configured.
+    ...(env.LANGFUSE_PUBLIC_KEY && env.LANGFUSE_SECRET_KEY
+      ? [
           langfuseProcessor({
             publicKey: env.LANGFUSE_PUBLIC_KEY,
             secretKey: env.LANGFUSE_SECRET_KEY,
@@ -37,7 +39,7 @@ export const telemetry = initTelemetry({
             environment: env.NODE_ENV,
             release: env.APP_VERSION,
           }),
-        ],
-      }
-    : {}),
+        ]
+      : []),
+  ],
 });

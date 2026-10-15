@@ -23,6 +23,14 @@ const INVISIBLE: ReadonlyArray<readonly [number, number]> = [
   [0x2028, 0x202e],
   [0x2060, 0x206f],
   [0xfeff, 0xfeff],
+  // Soft hyphen, Arabic letter mark, Mongolian vowel separator, variation selectors, Unicode tag characters
+  // ("ASCII smuggling": invisible text models still read).
+  [0x00ad, 0x00ad],
+  [0x061c, 0x061c],
+  [0x180e, 0x180e],
+  [0xfe00, 0xfe0f],
+  [0xe0000, 0xe007f],
+  [0xe0100, 0xe01ef],
 ];
 const CONTROL = new RegExp(
   `[${INVISIBLE.map(([from, to]) => `\\u{${from.toString(16)}}-\\u{${to.toString(16)}}`).join('')}]`,
@@ -32,7 +40,8 @@ const CONTROL = new RegExp(
 /** Strips control/invisible characters, defuses block tags, collapses whitespace, truncates. */
 export function sanitizeUntrusted(text: string, maxChars = 8_000): string {
   const clean = text
-    .normalize('NFC')
+    // NFKC folds lookalikes (fullwidth ＜/＞) so they cannot spell the block tags.
+    .normalize('NFKC')
     .replace(CONTROL, '')
     // A crafted "</untrusted_data>" would otherwise end the block and smuggle instructions after it.
     .replace(/<\s*(\/?)\s*untrusted_data/gi, '[$1untrusted_data')

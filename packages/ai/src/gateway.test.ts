@@ -195,7 +195,14 @@ describe('structured output', () => {
     const haiku = new MockLanguageModelV4({ doGenerate: [answer('not json'), answer('still not json')] });
     const { gateway, calls } = setup({}, { 'anthropic:claude-haiku-5-5': haiku });
     await expect(gateway.run(Extract, { text: 'y' }, ctx)).rejects.toBeInstanceOf(AiOutputInvalidError);
-    expect(calls.at(-1)).toMatchObject({ status: 'error', errorCode: 'AI_OUTPUT_INVALID' });
+    // The tokens of both failed attempts were billed: they are recorded (and priced).
+    expect(calls.at(-1)).toMatchObject({
+      status: 'error',
+      errorCode: 'AI_OUTPUT_INVALID',
+      inputTokens: 200,
+      outputTokens: 40,
+      costUsd: 0.0004,
+    });
   });
 });
 
@@ -207,11 +214,18 @@ describe('resilience', () => {
       },
     });
     const mini = new MockLanguageModelV4({ doGenerate: answer('{"city":"Lorient"}') });
-    const { gateway, calls } = setup({}, { 'anthropic:claude-haiku-5-5': haiku, 'openai:gpt-5-mini': mini });
+    const onUnpricedModel = vi.fn();
+    const { gateway, calls } = setup(
+      { onUnpricedModel },
+      { 'anthropic:claude-haiku-5-5': haiku, 'openai:gpt-5-mini': mini },
+    );
     const result = await gateway.run(Extract, { text: 'z' }, ctx);
     expect(result).toMatchObject({ provider: 'openai', model: 'gpt-5-mini', output: { city: 'Lorient' } });
     expect(haiku.doGenerateCalls).toHaveLength(2); // first attempt + one retry
     expect(calls.at(-1)).toMatchObject({ status: 'ok', model: 'gpt-5-mini', costUsd: null });
+    expect(onUnpricedModel).toHaveBeenCalledWith('gpt-5-mini');
+    await gateway.run(Extract, { text: 'z2' }, ctx);
+    expect(onUnpricedModel).toHaveBeenCalledTimes(1);
   });
 
   it('reports unavailability when every model fails', async () => {
@@ -300,6 +314,33 @@ describe('text, streaming, vision, embeddings', () => {
     expect(file?.mediaType).toBe('image/jpeg');
     const meta = await sharp(Buffer.from(file?.data?.data ?? new Uint8Array())).metadata();
     expect(Math.max(meta.width ?? 0, meta.height ?? 0)).toBe(800);
+  });
+
+  it('passes image URLs to the provider (https only, never downloaded here) and caps image counts', async () => {
+    const sonnet = new MockLanguageModelV4({ doGenerate: answer('{"score":5}') });
+    const { gateway } = setup({}, { 'anthropic:claude-sonnet-5-5': sonnet });
+    await gateway.vision(
+      Look,
+      { input: { text: 'rate' }, images: [{ url: 'https://shots.example.test/a.png' }] },
+      ctx,
+    );
+    const content = JSON.stringify(sonnet.doGenerateCalls[0]?.prompt);
+    expect(content).toContain('https://shots.example.test/a.png');
+    expect(content).toContain('image/*');
+    await expect(
+      gateway.vision(Look, { input: { text: 'x' }, images: [{ url: 'http://169.254.169.254/latest' }] }, ctx),
+    ).rejects.toThrow(/https/);
+    await expect(
+      gateway.vision(
+        Look,
+        { input: { text: 'x' }, images: [{ url: 'https://user:pass@shots.example.test/a.png' }] },
+        ctx,
+      ),
+    ).rejects.toThrow(/credentials/);
+    const many = Array.from({ length: 9 }, (_, i) => ({ url: `https://shots.example.test/${i}.png` }));
+    await expect(gateway.vision(Look, { input: { text: 'x' }, images: many }, ctx)).rejects.toThrow(
+      /At most 8/,
+    );
   });
 
   it('embeds in batches and serves repeated texts from the cache', async () => {

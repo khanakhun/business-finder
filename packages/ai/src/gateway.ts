@@ -30,7 +30,13 @@ import {
 } from './resilience.ts';
 import { type AiProvider, type ModelRef, parseModelRef, type RoutingConfig, routeFor } from './routing.ts';
 import { activeTraceId, sdkTelemetry, withTaskSpan } from './telemetry.ts';
-import { type AiImage, DEFAULT_MAX_IMAGE_DIMENSION, prepareImage } from './vision.ts';
+import {
+  type AiImage,
+  DEFAULT_MAX_IMAGE_DIMENSION,
+  MAX_IMAGES_PER_CALL,
+  type PreparedImage,
+  prepareImage,
+} from './vision.ts';
 
 export interface AiContext {
   /** The workspace the call is for: keys, budget, cache scope and the ledger depend on it. */
@@ -125,6 +131,8 @@ export interface AiGatewayOptions {
   readonly budget?: BudgetGuard;
   /** Called when a workspace passes its soft budget (e.g. to record a warning event). */
   readonly onSoftBudget?: (orgId: string, task: string) => void;
+  /** Called once per model without a price in `pricing`: its calls cost null and escape budgets. */
+  readonly onUnpricedModel?: (model: string) => void;
   readonly models?: ModelFactory;
   readonly resilience?: ResilienceConfig;
   /** Send prompt and response bodies to tracing (Langfuse). Off by default: they may contain personal data. */
@@ -167,6 +175,17 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
   const policies = new ProviderPolicies(options.resilience ?? DEFAULT_RESILIENCE);
   const pricing = options.pricing ?? {};
   const traceContent = options.traceContent ?? false;
+
+  const unpriced = new Set<string>();
+  /** Cost of a call; unpriced models are reported once (their spend escapes budgets until priced). */
+  function price(model: string, usage: TokenUsage): number | null {
+    const cost = costUsd(pricing, model, usage);
+    if (cost === null && !unpriced.has(model)) {
+      unpriced.add(model);
+      options.onUnpricedModel?.(model);
+    }
+    return cost;
+  }
 
   async function record(call: LlmCall): Promise<void> {
     try {
@@ -238,6 +257,8 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
           abortSignal: signalFor(task, ctx, signal),
           // Retries are ours (jitter + breaker per provider).
           maxRetries: 0,
+          // Image URLs go to the provider as URLs: this process never fetches them (SSRF; AGENTS.md §8).
+          experimental_download: async (requested) => requested.map(() => null),
           telemetry: sdkTelemetry(task.name, traceContent),
         }),
       );
@@ -270,8 +291,14 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
           usage: addUsage(toUsage(failed.usage), toUsage(repaired.usage)),
         };
       } catch (repairError) {
-        if (isInvalidOutput(repairError)) throw new AiOutputInvalidError(task.name, repairError);
-        throw repairError;
+        if (!isInvalidOutput(repairError)) throw repairError;
+        const invalid = new AiOutputInvalidError(task.name, repairError);
+        invalid.usage = addUsage(
+          toUsage(failed.usage),
+          toUsage((repairError as NoObjectGeneratedError).usage),
+        );
+        invalid.model = ref;
+        throw invalid;
       }
     }
   }
@@ -338,14 +365,18 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
         }
       }
 
-      const prepared = await Promise.all(
-        images.map((image) =>
-          prepareImage(
+      if (images.length > MAX_IMAGES_PER_CALL)
+        throw new Error(`At most ${MAX_IMAGES_PER_CALL} images per call`);
+      // One at a time: decoding large images in parallel multiplies memory.
+      const prepared: PreparedImage[] = [];
+      for (const image of images) {
+        prepared.push(
+          await prepareImage(
             image,
             (task.kind === 'vision' ? task.maxImageDimension : undefined) ?? DEFAULT_MAX_IMAGE_DIMENSION,
           ),
-        ),
-      );
+        );
+      }
       const messages: ModelMessage[] = [
         prepared.length === 0
           ? { role: 'user', content: rendered.user }
@@ -367,7 +398,7 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
           generate<T>(task, ref, apiKey, ctx, rendered.system, messages),
         );
         const latencyMs = Math.round(performance.now() - started);
-        const cost = costUsd(pricing, attempt.ref.model, attempt.usage);
+        const cost = price(attempt.ref.model, attempt.usage);
         span.setAttributes({
           'ai.model': attempt.ref.model,
           'ai.usage.input_tokens': attempt.usage.inputTokens,
@@ -403,12 +434,16 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
           latencyMs,
         };
       } catch (error) {
+        // Billed tokens of failed attempts still count (ledger and budgets).
+        const billed = error instanceof AiOutputInvalidError ? error : undefined;
+        const ref = billed?.model ?? primary;
+        const usage = billed?.usage ?? ZERO_USAGE;
         await record({
           ...base,
-          provider: primary.provider,
-          model: primary.model,
-          ...ZERO_USAGE,
-          costUsd: null,
+          provider: ref.provider,
+          model: ref.model,
+          ...usage,
+          costUsd: billed?.usage ? price(ref.model, usage) : null,
           latencyMs: Math.round(performance.now() - started),
           status: 'error',
           errorCode: errorCode(error),
@@ -451,7 +486,7 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
           const [text, usage] = await Promise.all([stream.text, stream.usage]);
           const tokens = toUsage(usage);
           const latencyMs = Math.round(performance.now() - started);
-          const cost = costUsd(pricing, ref.model, tokens);
+          const cost = price(ref.model, tokens);
           await record({
             ...base,
             provider: ref.provider,
@@ -561,7 +596,7 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
         provider: ref.provider,
         model: ref.model,
         ...usage,
-        costUsd: costUsd(pricing, ref.model, usage),
+        costUsd: price(ref.model, usage),
         latencyMs: Math.round(performance.now() - started),
         status: misses.length === 0 ? 'cached' : 'ok',
         errorCode: null,

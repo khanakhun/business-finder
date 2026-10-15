@@ -20,6 +20,8 @@ Example (fake data): a page "Boulangerie du Port — ouvert 7h-13h tous les jour
 phones ["05 90 00 00 00"], openingHours "7h-13h tous les jours", services ["boulangerie"], languages ["fr"].
 
 # User
-Business: {{businessName}}
+Business name:
+{{businessName}}
 
+Website text:
 {{page}}

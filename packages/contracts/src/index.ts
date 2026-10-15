@@ -92,6 +92,8 @@ export {
 } from './business-graph/survivorship.ts';
 export {
   BUSINESS_SORTS,
+  type BusinessExportQuery,
+  BusinessExportQuerySchema,
   type BusinessFacets,
   BusinessFacetsSchema,
   type BusinessFilters,
@@ -105,6 +107,9 @@ export {
   BusinessSearchQuerySchema,
   type BusinessSort,
   CategoryFacetSchema,
+  CONTACT_EXPORT_FIELDS,
+  EXPORT_FIELDS,
+  type ExportField,
   RATING_BANDS,
   SearchEmbedBusinessJob,
 } from './business-search.ts';
@@ -406,6 +411,32 @@ export {
   type Result,
   unwrapOr,
 } from './result.ts';
+export {
+  type BusinessList,
+  type BusinessListPage,
+  BusinessListPageSchema,
+  BusinessListSchema,
+  type CreateListRequest,
+  CreateListRequestSchema,
+  type CreateSavedSearchRequest,
+  CreateSavedSearchRequestSchema,
+  type ListItemsRequest,
+  ListItemsRequestSchema,
+  type ListItemsResult,
+  ListItemsResultSchema,
+  SAVED_SEARCH_VISIBILITIES,
+  type SavedFilters,
+  SavedFiltersSchema,
+  type SavedSearch,
+  type SavedSearchPage,
+  SavedSearchPageSchema,
+  SavedSearchQuerySchema,
+  SavedSearchSchema,
+  type UpdateListRequest,
+  UpdateListRequestSchema,
+  type UpdateSavedSearchRequest,
+  UpdateSavedSearchRequestSchema,
+} from './saved-searches.ts';
 export {
   PAIN_SIGNALS,
   type PainSignal,

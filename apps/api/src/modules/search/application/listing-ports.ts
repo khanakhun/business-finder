@@ -1,6 +1,13 @@
 import type { BusinessFacets, BusinessListItem } from '@bf/contracts';
 import type { ListingPosition, ListingSort, ListingSpec } from '../domain/listing.ts';
 
+export interface ExportExtras {
+  readonly category: string | null;
+  readonly address: string | null;
+  readonly postalCode: string | null;
+  readonly email: string | null;
+}
+
 export interface ListingRow {
   readonly item: BusinessListItem;
   /** The sort key as a cursor stores it. */
@@ -22,6 +29,13 @@ export interface BusinessSearchRepository {
   rankFullText(spec: ListingSpec, q: string, limit: number): Promise<string[]>;
   rankTrigram(spec: ListingSpec, q: string, limit: number): Promise<string[]>;
   rankVector(spec: ListingSpec, vector: readonly number[], limit: number): Promise<string[]>;
+  /** How many businesses match (filters only; text is counted by ranking). */
+  count(spec: ListingSpec): Promise<number>;
+  /** Columns the CSV export adds to list items: category label, address, best email (when asked). */
+  exportExtras(
+    ids: readonly string[],
+    options: { readonly lang: 'en' | 'fr'; readonly email: boolean },
+  ): Promise<Map<string, ExportExtras>>;
   /** Facet counts; with `within`, only over those ids (the ranked text results). */
   facets(spec: ListingSpec, within: readonly string[] | null): Promise<BusinessFacets>;
 }

@@ -98,6 +98,7 @@ export const BusinessFiltersSchema = z.object({
   tier: many(z.enum(SCORE_TIERS), SCORE_TIERS.length),
   tag: many(z.string().min(1).max(50), 20).describe('Any of these tags.'),
   owner: z.uuid().optional().describe('Owner user id.'),
+  list: z.uuid().optional().describe('Businesses in this list (of the workspace).'),
   addedWithinDays: z.coerce.number().int().min(1).max(3_650).optional(),
   includeClosed: bool().describe('Include permanently closed businesses (excluded by default).'),
 });
@@ -113,6 +114,41 @@ export const BusinessSearchQuerySchema = BusinessFiltersSchema.extend({
     .describe('Default: `relevance` with `q` or keywords, else `-recent` (most recently tracked first).'),
 });
 export type BusinessSearchQuery = z.output<typeof BusinessSearchQuerySchema>;
+
+export const EXPORT_FIELDS = [
+  'id',
+  'name',
+  'category',
+  'website',
+  'locality',
+  'address',
+  'postal_code',
+  'country',
+  'lat',
+  'lng',
+  'rating',
+  'reviews',
+  'status',
+  'score',
+  'tier',
+  'tags',
+  'tracked_at',
+  // Contact points: only for callers allowed to contact businesses (`outreach:send`).
+  'phone',
+  'email',
+] as const;
+export type ExportField = (typeof EXPORT_FIELDS)[number];
+export const CONTACT_EXPORT_FIELDS: ReadonlySet<ExportField> = new Set(['phone', 'email']);
+
+/** `GET /v1/businesses/export.csv`: the listing's filters and sort, the columns, and the category label language. */
+export const BusinessExportQuerySchema = BusinessFiltersSchema.extend({
+  sort: BusinessSearchQuerySchema.shape.sort,
+  fields: many(z.enum(EXPORT_FIELDS), EXPORT_FIELDS.length).describe(
+    'Columns, in order. Default: every column the caller may export (contacts need `outreach:send`).',
+  ),
+  lang: z.enum(['en', 'fr']).default('en').describe('Language of category labels.'),
+});
+export type BusinessExportQuery = z.output<typeof BusinessExportQuerySchema>;
 
 export const BusinessListItemSchema = BusinessSummarySchema.extend({
   score: z.number().int().nullable(),

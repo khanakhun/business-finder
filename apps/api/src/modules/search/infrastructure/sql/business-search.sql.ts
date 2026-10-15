@@ -4,6 +4,8 @@ import {
   businesses,
   categories,
   geoAreas,
+  listItems,
+  lists,
   orgBusinesses,
 } from '@bf/db/schema';
 import { type SQL, sql } from 'drizzle-orm';
@@ -85,6 +87,11 @@ export function filterSql(spec: ListingSpec, omit?: FacetDimension): SQL {
     on('tier') && f.tier?.length ? sql`${orgBusinesses.tier} = ANY(${arrayOf(f.tier, 'text')})` : undefined,
     f.tag?.length ? sql`${orgBusinesses.tags} && ${arrayOf(f.tag, 'text')}` : undefined,
     f.owner ? sql`${orgBusinesses.ownerUserId} = ${f.owner}` : undefined,
+    f.list
+      ? sql`EXISTS (SELECT 1 FROM ${listItems} li JOIN ${lists} l ON l.id = li.list_id
+          WHERE li.list_id = ${f.list} AND l.organization_id = ${spec.organizationId}
+            AND li.business_id = ${businesses.id})`
+      : undefined,
     spec.addedSince
       ? sql`${orgBusinesses.createdAt} >= ${spec.addedSince.toISOString()}::timestamptz`
       : undefined,

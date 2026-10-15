@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq, type SQL, sql } from 'drizzle-orm';
 import { APP_ENV, type AppEnv } from '../../platform/config/app-env.ts';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
-import type { BusinessSearchRepository, ListingRow } from '../application/listing-ports.ts';
+import type { BusinessSearchRepository, ExportExtras, ListingRow } from '../application/listing-ports.ts';
 import type { FacetDimension, ListingPosition, ListingSort, ListingSpec } from '../domain/listing.ts';
 import {
   arrayOf,
@@ -152,6 +152,33 @@ export class DrizzleBusinessSearchRepository implements BusinessSearchRepository
         ORDER BY distance, id`)) as unknown as Array<{ id: string }>;
       return rows.map((r) => r.id);
     });
+  }
+
+  async count(spec: ListingSpec): Promise<number> {
+    const [row] = await getExecutor(this.db)
+      .select({ n: sql<number>`count(*)::int` })
+      .from(orgBusinesses)
+      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
+      .where(filterSql(spec));
+    return row?.n ?? 0;
+  }
+
+  async exportExtras(
+    ids: readonly string[],
+    options: { readonly lang: 'en' | 'fr'; readonly email: boolean },
+  ): Promise<Map<string, ExportExtras>> {
+    if (ids.length === 0) return new Map();
+    const rows = (await getExecutor(this.db).execute(sql`
+      SELECT b.id, c.labels->>${options.lang} AS category, b.formatted_address AS address, b.postal_code AS "postalCode",
+        ${
+          options.email
+            ? sql`(SELECT bc.value FROM ${businessContacts} bc WHERE bc.business_id = b.id AND bc.type = 'email'
+                ORDER BY (bc.verification_status = 'valid') DESC, bc.confidence DESC, bc.value LIMIT 1)`
+            : sql`NULL`
+        } AS email
+      FROM ${businesses} b LEFT JOIN ${categories} c ON c.id = b.primary_category_id
+      WHERE b.id = ANY(${arrayOf(ids, 'uuid')})`)) as unknown as Array<ExportExtras & { id: string }>;
+    return new Map(rows.map(({ id, ...extras }) => [id, extras]));
   }
 
   async facets(spec: ListingSpec, within: readonly string[] | null): Promise<BusinessFacets> {

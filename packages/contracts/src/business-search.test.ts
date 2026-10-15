@@ -52,3 +52,16 @@ describe('BusinessSearchQuerySchema', () => {
     expect(Object.keys(BusinessFiltersSchema.shape)).not.toContain('sort');
   });
 });
+
+describe('SavedFiltersSchema', () => {
+  it('accepts query-string filters and rejects unknown or invalid ones', async () => {
+    const { SavedFiltersSchema } = await import('./saved-searches.ts');
+    expect(SavedFiltersSchema.parse({ status: ['qualified'], q: 'spa' })).toEqual({
+      status: ['qualified'],
+      q: 'spa',
+    });
+    expect(SavedFiltersSchema.safeParse({ colour: 'red' }).success).toBe(false);
+    expect(SavedFiltersSchema.safeParse({ status: 'nope' }).success).toBe(false);
+    expect(SavedFiltersSchema.safeParse({ cursor: 'x' }).success).toBe(false);
+  });
+});

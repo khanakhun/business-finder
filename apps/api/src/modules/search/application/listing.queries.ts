@@ -99,6 +99,11 @@ export class ListingResolver {
     };
   }
 
+  /** How many businesses match: ranked text results, or a count over the filters. */
+  async count(spec: ListingSpec): Promise<number> {
+    return spec.text ? (await this.rank(spec)).length : this.repository.count(spec);
+  }
+
   /** Text results, best first: full text, name similarity and meaning, fused (empty without text). */
   async rank(spec: ListingSpec): Promise<Fused[]> {
     if (!spec.text) return [];

@@ -40,3 +40,14 @@ export interface BusinessSearchRepository {
   facets(spec: ListingSpec, within: readonly string[] | null): Promise<BusinessFacets>;
 }
 export const BUSINESS_SEARCH_REPOSITORY = Symbol('BusinessSearchRepository');
+
+/** Fused rankings for a short while, so the pages of one search (and its facets) see the same order. */
+export interface RankingCache {
+  get(key: string): Promise<ReadonlyArray<{ readonly id: string; readonly score: number }> | undefined>;
+  set(
+    key: string,
+    value: ReadonlyArray<{ readonly id: string; readonly score: number }>,
+    ttlSeconds: number,
+  ): Promise<void>;
+}
+export const RANKING_CACHE = Symbol('RankingCache');

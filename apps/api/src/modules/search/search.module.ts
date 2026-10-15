@@ -17,7 +17,7 @@ import {
   ListingResolver,
   SearchBusinessesQuery,
 } from './application/listing.queries.ts';
-import { BUSINESS_SEARCH_REPOSITORY } from './application/listing-ports.ts';
+import { BUSINESS_SEARCH_REPOSITORY, RANKING_CACHE } from './application/listing-ports.ts';
 import { SEARCH_INTENT_CACHE } from './application/ports.ts';
 import { SearchIntentService } from './application/search-intent.service.ts';
 import { BullmqEmbedQueue } from './infrastructure/bullmq-embed-queue.ts';
@@ -27,6 +27,7 @@ import {
   DrizzleListRepository,
   DrizzleSavedSearchRepository,
 } from './infrastructure/drizzle-collections.repository.ts';
+import { ValkeyRankingCache } from './infrastructure/valkey-ranking-cache.ts';
 import { ValkeySearchIntentCache } from './infrastructure/valkey-search-intent-cache.ts';
 import { BusinessesSearchController } from './interface/http/businesses-search.controller.ts';
 import { ListsController } from './interface/http/lists.controller.ts';
@@ -52,6 +53,7 @@ export class SearchModule {
       providers: [
         { provide: SEARCH_INTENT_CACHE, useClass: ValkeySearchIntentCache },
         { provide: BUSINESS_SEARCH_REPOSITORY, useClass: DrizzleBusinessSearchRepository },
+        { provide: RANKING_CACHE, useClass: ValkeyRankingCache },
         SearchIntentService,
         ListingResolver,
         SearchBusinessesQuery,

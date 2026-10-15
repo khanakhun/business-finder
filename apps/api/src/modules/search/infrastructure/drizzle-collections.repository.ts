@@ -89,6 +89,14 @@ export class DrizzleSavedSearchRepository implements SavedSearchRepository {
     return row ? toSavedSearch(row.row, row.createdAt) : undefined;
   }
 
+  async count(organizationId: string): Promise<number> {
+    const [row] = await getExecutor(this.db)
+      .select({ n: sql<number>`count(*)::int` })
+      .from(savedSearches)
+      .where(eq(savedSearches.organizationId, organizationId));
+    return row?.n ?? 0;
+  }
+
   async insert(
     record: Omit<SavedSearchRecord, 'createdAt' | 'updatedAt' | 'position' | 'lastRunAt'>,
   ): Promise<void> {

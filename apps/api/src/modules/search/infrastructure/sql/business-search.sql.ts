@@ -38,20 +38,49 @@ const hasContact = (type: 'email' | 'phone', verified = false) =>
     verified ? sql` AND bc.verification_status = 'valid'` : sql``
   })`;
 
-/** WHERE for a listing; `omit` drops one facet dimension's own filter (standard faceting). */
-export function filterSql(spec: ListingSpec, omit?: FacetDimension): SQL {
+/** The filters of the facet dimensions, each alone (absent when the filter is not set). */
+export function dimensionSql(spec: ListingSpec): Partial<Record<FacetDimension, SQL>> {
   const f = spec.filters;
-  const on = (dimension: FacetDimension) => omit !== dimension;
+  const dims: Partial<Record<FacetDimension, SQL>> = {};
+  if (f.category?.length) {
+    dims.category = sql`EXISTS (SELECT 1 FROM ${businessCategories} bcat JOIN ${categories} c ON c.id = bcat.category_id
+      WHERE bcat.business_id = ${businesses.id}
+        AND c.path <@ ARRAY(SELECT sel.path FROM ${categories} sel WHERE sel.id = ANY(${arrayOf(f.category, 'uuid')})))`;
+  }
+  // DECISION(BF-022): `weak` needs audit scores (BF-030/BF-031); until then it means "has a website".
+  if (f.website === 'none') dims.website = sql`${businesses.websiteUrl} IS NULL`;
+  if (f.website === 'has' || f.website === 'weak') dims.website = sql`${businesses.websiteUrl} IS NOT NULL`;
+  const rating = and([
+    f['rating[gte]'] !== undefined ? sql`${businesses.ratingAvg} >= ${f['rating[gte]']}` : undefined,
+    f['rating[lte]'] !== undefined ? sql`${businesses.ratingAvg} <= ${f['rating[lte]']}` : undefined,
+  ]);
+  if (f['rating[gte]'] !== undefined || f['rating[lte]'] !== undefined) dims.rating = rating;
+  if (f.hasEmail === true) dims.email = hasContact('email');
+  if (f.hasEmail === false) dims.email = sql`NOT ${hasContact('email')}`;
+  if (f.status?.length)
+    dims.status = sql`${orgBusinesses.pipelineStatus} = ANY(${arrayOf(f.status, 'text')})`;
+  if (f.tier?.length) dims.tier = sql`${orgBusinesses.tier} = ANY(${arrayOf(f.tier, 'text')})`;
+  return dims;
+}
+
+/**
+ * WHERE for a listing. `omit` drops one facet dimension's own filter (standard faceting); `'dimensions'` drops
+ * them all (the facets query evaluates each one as a flag instead).
+ */
+export function filterSql(spec: ListingSpec, omit?: FacetDimension | 'dimensions'): SQL {
+  const f = spec.filters;
   const hasPhone = sql`(${businesses.primaryPhoneE164} IS NOT NULL OR ${hasContact('phone')})`;
+  const dimensions =
+    omit === 'dimensions'
+      ? []
+      : Object.entries(dimensionSql(spec)).flatMap(([dimension, condition]) =>
+          dimension === omit ? [] : [condition],
+        );
   return and([
     sql`${orgBusinesses.organizationId} = ${spec.organizationId}`,
     sql`${businesses.mergedIntoId} IS NULL`,
     f.includeClosed ? undefined : sql`${businesses.operatingStatus} <> 'closed_permanently'`,
-    on('category') && f.category?.length
-      ? sql`EXISTS (SELECT 1 FROM ${businessCategories} bcat JOIN ${categories} c ON c.id = bcat.category_id
-          WHERE bcat.business_id = ${businesses.id}
-            AND c.path <@ ARRAY(SELECT sel.path FROM ${categories} sel WHERE sel.id = ANY(${arrayOf(f.category, 'uuid')})))`
-      : undefined,
+    ...dimensions,
     f.area
       ? sql`EXISTS (SELECT 1 FROM ${geoAreas} ga WHERE ga.id = ${f.area}
           AND (ga.organization_id IS NULL OR ga.organization_id = ${spec.organizationId})
@@ -59,32 +88,15 @@ export function filterSql(spec: ListingSpec, omit?: FacetDimension): SQL {
       : undefined,
     f.near ? sql`ST_DWithin(${businesses.location}, ${point(f.near)}, ${f.radiusKm * 1000})` : undefined,
     f.country ? sql`${businesses.countryCode} = ${f.country}` : undefined,
-    // DECISION(BF-022): `weak` needs audit scores (BF-030/BF-031); until then it means "has a website".
-    on('website') && f.website === 'none' ? sql`${businesses.websiteUrl} IS NULL` : undefined,
-    on('website') && (f.website === 'has' || f.website === 'weak')
-      ? sql`${businesses.websiteUrl} IS NOT NULL`
-      : undefined,
-    on('rating') && f['rating[gte]'] !== undefined
-      ? sql`${businesses.ratingAvg} >= ${f['rating[gte]']}`
-      : undefined,
-    on('rating') && f['rating[lte]'] !== undefined
-      ? sql`${businesses.ratingAvg} <= ${f['rating[lte]']}`
-      : undefined,
     f['reviews[gte]'] !== undefined ? sql`${businesses.ratingCount} >= ${f['reviews[gte]']}` : undefined,
     f['reviews[lte]'] !== undefined ? sql`${businesses.ratingCount} <= ${f['reviews[lte]']}` : undefined,
     f['score[gte]'] !== undefined ? sql`${orgBusinesses.score} >= ${f['score[gte]']}` : undefined,
     f['score[lte]'] !== undefined ? sql`${orgBusinesses.score} <= ${f['score[lte]']}` : undefined,
     f.price?.length ? sql`${businesses.priceLevel} = ANY(${arrayOf(f.price, 'smallint')})` : undefined,
-    on('email') && f.hasEmail === true ? hasContact('email') : undefined,
-    on('email') && f.hasEmail === false ? sql`NOT ${hasContact('email')}` : undefined,
     f.emailVerified === true ? hasContact('email', true) : undefined,
     f.emailVerified === false ? sql`NOT ${hasContact('email', true)}` : undefined,
     f.hasPhone === true ? hasPhone : undefined,
     f.hasPhone === false ? sql`NOT ${hasPhone}` : undefined,
-    on('status') && f.status?.length
-      ? sql`${orgBusinesses.pipelineStatus} = ANY(${arrayOf(f.status, 'text')})`
-      : undefined,
-    on('tier') && f.tier?.length ? sql`${orgBusinesses.tier} = ANY(${arrayOf(f.tier, 'text')})` : undefined,
     f.tag?.length ? sql`${orgBusinesses.tags} && ${arrayOf(f.tag, 'text')}` : undefined,
     f.owner ? sql`${orgBusinesses.ownerUserId} = ${f.owner}` : undefined,
     f.list
@@ -155,9 +167,13 @@ export function sortKeySql(sort: ListingSort, origin: ListingSpec['origin']): So
   }
 }
 
+/**
+ * Nulls last everywhere, the id tie-break in the same direction: exactly the order of the listing's indexes
+ * (Drizzle builds `.desc()` index columns as `DESC NULLS LAST`), so sorted pages walk an index without a Sort.
+ */
 export function orderSql(key: SortKeySql, sort: ListingSort): SQL {
   const direction = sql.raw(sort.direction === 'desc' ? 'DESC' : 'ASC');
-  return sql`${key.expr} ${direction} NULLS LAST, ${businesses.id} ${direction}`;
+  return sql`${key.expr} ${direction} NULLS LAST, ${businesses.id} ${direction} NULLS LAST`;
 }
 
 const typed = (key: SortKeySql, value: string | number) =>

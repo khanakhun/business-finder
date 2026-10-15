@@ -90,10 +90,9 @@ describe('saved searches', () => {
     const shared = await owner
       .post('/v1/saved-searches', { name: 'Everything', filters: {}, visibility: 'workspace' })
       .expect(201);
-    const seen = (await member.get('/v1/saved-searches').expect(200)).body.items.map(
-      (s: { name: string }) => s.name,
-    );
-    expect(seen).toEqual(['Everything']);
+    const page = (await member.get('/v1/saved-searches').expect(200)).body.items;
+    expect(page.map((s: { name: string }) => s.name)).toEqual(['Everything']);
+    expect(page[0].newMatches).toBeNull(); // counted by get/run only
     await member.get(`/v1/saved-searches/${mine.body.id}`).expect(404);
     expect((await member.get(`/v1/saved-searches/${shared.body.id}`).expect(200)).body.mine).toBe(false);
     await member.patch(`/v1/saved-searches/${shared.body.id}`, { name: 'Mine now' }).expect(403);
@@ -117,6 +116,17 @@ describe('saved searches', () => {
     expect(run.body.newMatches).toBe(1);
     const after = await owner.get(`/v1/saved-searches/${search.body.id}`).expect(200);
     expect(after.body).toMatchObject({ newMatches: 0, lastRunAt: '2026-10-14T12:00:00.000Z' });
+    // A shared search run by someone else does not reset its creator's count.
+    const shared = await owner
+      .post('/v1/saved-searches', { name: 'Shared', filters: {}, visibility: 'workspace' })
+      .expect(201);
+    expect((await member.post(`/v1/saved-searches/${shared.body.id}/run`).expect(200)).body.newMatches).toBe(
+      2,
+    );
+    expect((await owner.get(`/v1/saved-searches/${shared.body.id}`).expect(200)).body).toMatchObject({
+      newMatches: 2,
+      lastRunAt: null,
+    });
   });
 
   it('validates names, filters and pages', async () => {
@@ -195,7 +205,8 @@ describe('GET /v1/businesses/export.csv', () => {
     const res = await viewer.get('/v1/businesses/export.csv?fields=name,status&status=qualified').expect(200);
     expect(lines(res.text)).toEqual(['name,status', 'Salon Belle Mèche,qualified']);
     const defaults = await viewer.get('/v1/businesses/export.csv').expect(200);
-    expect(lines(defaults.text)[0]).not.toMatch(/email|phone/);
+    expect(lines(defaults.text)[0]).not.toMatch(/email/);
+    expect(lines(defaults.text)[0]).toMatch(/phone/); // the public phone, as the listing shows it
     await viewer.get('/v1/businesses/export.csv?fields=name,email').expect(403);
     await viewer.get('/v1/businesses/export.csv?area=0192a1b2-0000-7000-8000-000000000999').expect(404);
     await t.http.get('/v1/businesses/export.csv').expect(401);

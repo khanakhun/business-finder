@@ -2222,8 +2222,8 @@ export type components = {
             /** @description Whether the caller created it (only the creator may change it). */
             mine: boolean;
             name: string;
-            /** @description Businesses matching now that were tracked after `lastRunAt` (all matches if never run). */
-            newMatches: number;
+            /** @description Businesses matching now that were tracked after `lastRunAt` (all matches if never run). Computed by get and run only; null in lists (one count per search would be one ranking — and embedding — per row). */
+            newMatches: number | null;
             notifyNew: boolean;
             prompt: string | null;
             sort: ("relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name") | null;

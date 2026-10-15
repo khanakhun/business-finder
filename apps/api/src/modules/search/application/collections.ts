@@ -41,6 +41,9 @@ const workspaceOf = (auth: AuthContext): string => {
   return auth.orgId;
 };
 
+/** Per workspace: bounds the work behind the saved searches page. */
+export const MAX_SAVED_SEARCHES = 500;
+
 const CREATED_AT = /^(\d{4})-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
 
 async function createdPositionOf(cursor: string): Promise<CreatedPosition> {
@@ -80,7 +83,7 @@ export class SavedSearches {
       limit: page.limit + 1,
       ...(after ? { after } : {}),
     });
-    return pageOf(rows, page.limit, (row) => this.view(auth, row));
+    return pageOf(rows, page.limit, (row) => this.view(auth, row, false));
   }
 
   async get(auth: AuthContext, id: string): Promise<SavedSearch> {
@@ -89,6 +92,9 @@ export class SavedSearches {
 
   async create(auth: AuthContext, request: CreateSavedSearchRequest): Promise<SavedSearch> {
     const organizationId = workspaceOf(auth);
+    if ((await this.repository.count(organizationId)) >= MAX_SAVED_SEARCHES) {
+      throw new ConflictError(`A workspace keeps at most ${MAX_SAVED_SEARCHES} saved searches.`);
+    }
     const id = newId();
     await this.repository.insert({
       id,
@@ -116,11 +122,14 @@ export class SavedSearches {
     await this.repository.delete(workspaceOf(auth), id);
   }
 
-  /** Opening a saved search: "new matches" restart from now. Returns the counts as they were before. */
+  /**
+   * Opening a saved search: returns it with the new matches until now, and — when the caller created it — restarts
+   * the count from now (a shared search's count belongs to its creator, so others only read it).
+   */
   async run(auth: AuthContext, id: string): Promise<SavedSearch> {
     const record = await this.visible(auth, id);
     const view = await this.view(auth, record);
-    await this.repository.markRun(workspaceOf(auth), id, this.clock.now());
+    if (view.mine) await this.repository.markRun(workspaceOf(auth), id, this.clock.now());
     return view;
   }
 
@@ -139,7 +148,7 @@ export class SavedSearches {
     return record;
   }
 
-  private async view(auth: AuthContext, record: SavedSearchRecord): Promise<SavedSearch> {
+  private async view(auth: AuthContext, record: SavedSearchRecord, count = true): Promise<SavedSearch> {
     return {
       id: record.id,
       name: record.name,
@@ -150,7 +159,7 @@ export class SavedSearches {
       visibility: record.visibility,
       notifyNew: record.notifyNew,
       lastRunAt: record.lastRunAt?.toISOString() ?? null,
-      newMatches: await this.newMatches(record),
+      newMatches: count ? await this.newMatches(record) : null,
       createdBy: record.createdBy,
       mine: auth.userId !== null && record.createdBy === auth.userId,
       createdAt: record.createdAt.toISOString(),

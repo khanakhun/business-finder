@@ -30,7 +30,7 @@ import type {
 import { BusinessLists, SavedSearches } from './collections.ts';
 import { csvCell, ExportBusinesses } from './export-businesses.ts';
 import { BusinessFacetsQuery, ListingResolver, SearchBusinessesQuery } from './listing.queries.ts';
-import type { BusinessSearchRepository, ExportExtras, ListingRow } from './listing-ports.ts';
+import type { BusinessSearchRepository, ExportExtras, ListingRow, RankingCache } from './listing-ports.ts';
 
 // The search use cases over in-memory fakes (SQL and HTTP are covered by the integration suite).
 
@@ -117,12 +117,20 @@ function resolver(
       options.embed ??
       (async () => ({ vectors: [Array.from({ length: 1536 }, () => 0.01)], model: 'm', dims: 1536 })),
   } as unknown as AiGateway;
+  const store = new Map<string, Array<{ id: string; score: number }>>();
+  const cache: RankingCache = {
+    get: async (key) => store.get(key),
+    set: async (key, value) => {
+      store.set(key, [...value]);
+    },
+  };
   return new ListingResolver(
     repository,
     areas,
     ai,
     fixedClock(NOW),
     createLogger({ service: 'test', level: 'fatal' }),
+    cache,
   );
 }
 
@@ -174,6 +182,22 @@ describe('SearchBusinessesQuery', () => {
     expect(keywords.items.map((i) => i.id)).toEqual([id(1), id(2)]);
   });
 
+  it('pages one cached ranking even if embeddings fail between pages', async () => {
+    const { repository } = fakeRepository(3, { fullText: [id(1)], vector: [id(2), id(3)] });
+    let fail = false;
+    const listing = resolver(repository, {
+      embed: async () => {
+        if (fail) throw new BudgetExceededError('AI budget reached');
+        return { vectors: [Array.from({ length: 1536 }, () => 0.01)], model: 'm', dims: 1536 };
+      },
+    });
+    const search = new SearchBusinessesQuery(listing, repository);
+    const first = await search.execute(auth(), query({ q: 'spa', limit: '1' }));
+    fail = true;
+    const rest = await search.execute(auth(), query({ q: 'spa', limit: '5', cursor: first.nextCursor }));
+    expect([...first.items, ...rest.items].map((i) => i.id).sort()).toEqual([id(1), id(2), id(3)]);
+  });
+
   it('ranks without meaning when embeddings are unavailable, and rethrows other failures', async () => {
     const { repository, calls } = fakeRepository(2, { fullText: [id(1)] });
     const noBudget = resolver(repository, {
@@ -209,6 +233,34 @@ describe('SearchBusinessesQuery', () => {
     });
   });
 
+  it("ranks facets without the facet dimensions' own filters", async () => {
+    const { repository } = fakeRepository(3, { fullText: [id(1)] });
+    const seen: unknown[] = [];
+    const spy = {
+      ...repository,
+      rankFullText: async (spec: ListingSpec, q: string, limit: number) => {
+        seen.push(spec.filters);
+        return repository.rankFullText(spec, q, limit);
+      },
+    };
+    await new BusinessFacetsQuery(resolver(spy), spy).execute(
+      auth(),
+      query({
+        q: 'spa',
+        status: 'new',
+        tier: 'A',
+        website: 'none',
+        hasEmail: 'true',
+        'rating[gte]': '4',
+        tag: 'vip',
+      }),
+    );
+    expect(seen[0]).toMatchObject({ website: 'any', tag: ['vip'] });
+    expect(seen[0]).not.toHaveProperty('status');
+    expect(seen[0]).not.toHaveProperty('tier');
+    expect(seen[0]).not.toHaveProperty('hasEmail');
+  });
+
   it('counts facets over the ranked results when there is text', async () => {
     const { repository } = fakeRepository(3, { fullText: [id(1), id(3)] });
     const facets = new BusinessFacetsQuery(resolver(repository), repository);
@@ -220,6 +272,7 @@ describe('SearchBusinessesQuery', () => {
 function fakeSavedSearches() {
   const rows = new Map<string, SavedSearchRecord>();
   const repository: SavedSearchRepository = {
+    count: async () => rows.size,
     list: async (_org, viewer, page) =>
       [...rows.values()]
         .filter((r) => r.visibility === 'workspace' || r.createdBy === viewer)
@@ -335,7 +388,12 @@ describe('BusinessLists', () => {
         const set = items.get(listId) ?? new Set();
         items.set(listId, set);
         let added = 0;
-        for (const b of ids) if (tracked.has(b) && !set.has(b)) set.add(b), added++;
+        for (const b of ids) {
+          if (tracked.has(b) && !set.has(b)) {
+            set.add(b);
+            added++;
+          }
+        }
         return { added, notTracked: ids.filter((b) => !tracked.has(b)) };
       },
       removeItems: async (listId, ids) => ids.filter((b) => items.get(listId)?.delete(b)).length,
@@ -397,11 +455,12 @@ describe('ExportBusinesses', () => {
     const { service } = exporter(1);
     expect(service.fieldsFor(auth(), exportQuery({}))).toContain('email');
     expect(service.fieldsFor(auth(['business:read']), exportQuery({}))).not.toContain('email');
+    expect(service.fieldsFor(auth(['business:read']), exportQuery({}))).toContain('phone');
     expect(service.fieldsFor(auth(['business:read']), exportQuery({ fields: 'name,name,score' }))).toEqual([
       'name',
       'score',
     ]);
-    expect(() => service.fieldsFor(auth(['business:read']), exportQuery({ fields: 'phone' }))).toThrow(
+    expect(() => service.fieldsFor(auth(['business:read']), exportQuery({ fields: 'email' }))).toThrow(
       ForbiddenError,
     );
   });

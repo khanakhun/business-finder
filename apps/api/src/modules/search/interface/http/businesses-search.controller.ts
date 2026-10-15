@@ -90,7 +90,8 @@ export class BusinessesSearchController {
       if (!header.done) res.write(header.value);
       for await (const chunk of rows) {
         if (res.destroyed) break;
-        if (!res.write(chunk)) await once(res, 'drain');
+        // A client that stops reading and disconnects never drains: wait for either, then stop.
+        if (!res.write(chunk)) await Promise.race([once(res, 'drain'), once(res, 'close')]);
       }
       res.end();
     } catch (error) {

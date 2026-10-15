@@ -75,7 +75,7 @@ describe('sort and keyset', () => {
     const sort = { key: 'score', direction: 'desc' } as const;
     const key = sortKeySql(sort, null);
     expect(dialect.sqlToQuery(orderSql(key, sort)).sql).toBe(
-      '"org_businesses"."score" DESC NULLS LAST, "businesses"."id" DESC',
+      '"org_businesses"."score" DESC NULLS LAST, "businesses"."id" DESC NULLS LAST',
     );
     expect(dialect.sqlToQuery(keysetSql(key, sort, { sort: '-score', value: 40, id: ID }))).toMatchSnapshot();
     expect(dialect.sqlToQuery(keysetSql(key, sort, { sort: '-score', value: null, id: ID })).sql).toBe(

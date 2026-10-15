@@ -47,3 +47,20 @@ export interface ListingPosition {
 }
 
 export const sortName = (sort: ListingSort) => `${sort.direction === 'desc' ? '-' : ''}${sort.key}`;
+
+/**
+ * The spec without the filters of facet dimensions: what text is ranked over for facets, so that each dimension can
+ * then drop its own filter and still count the other values (`q=pizza&status=new` still shows `contacted`).
+ */
+export function withoutFacetFilters(spec: ListingSpec): ListingSpec {
+  const {
+    category: _category,
+    status: _status,
+    tier: _tier,
+    hasEmail: _hasEmail,
+    'rating[gte]': _min,
+    'rating[lte]': _max,
+    ...rest
+  } = spec.filters;
+  return { ...spec, filters: { ...rest, website: 'any' } };
+}

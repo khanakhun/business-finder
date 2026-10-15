@@ -45,8 +45,8 @@ exports[`filterSql > category 1`] = `
     "0192a1b2-0000-7000-8000-000000000001",
   ],
   "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND EXISTS (SELECT 1 FROM "business_categories" bcat JOIN "categories" c ON c.id = bcat.category_id
-          WHERE bcat.business_id = "businesses"."id"
-            AND c.path <@ ARRAY(SELECT sel.path FROM "categories" sel WHERE sel.id = ANY(ARRAY[$2]::uuid[])))",
+      WHERE bcat.business_id = "businesses"."id"
+        AND c.path <@ ARRAY(SELECT sel.path FROM "categories" sel WHERE sel.id = ANY(ARRAY[$2]::uuid[])))",
   "typings": [
     "none",
     "none",

@@ -5559,10 +5559,17 @@
             "type": "string"
           },
           "newMatches": {
-            "description": "Businesses matching now that were tracked after `lastRunAt` (all matches if never run).",
-            "maximum": 9007199254740991,
-            "minimum": 0,
-            "type": "integer"
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Businesses matching now that were tracked after `lastRunAt` (all matches if never run). Computed by get and run only; null in lists (one count per search would be one ranking — and embedding — per row)."
           },
           "notifyNew": {
             "type": "boolean"
@@ -8048,7 +8055,7 @@
                   "type": "array"
                 }
               ],
-              "description": "Columns, in order. Default: every column the caller may export (contacts need `outreach:send`)."
+              "description": "Columns, in order. Default: every column the caller may export (`email` needs `outreach:send`)."
             }
           },
           {

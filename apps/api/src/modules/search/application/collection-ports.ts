@@ -40,6 +40,7 @@ export interface SavedSearchRepository {
   ): Promise<SavedSearchRecord[]>;
   /** A saved search the viewer may see (shared, or private and theirs). */
   find(organizationId: string, viewerId: string | null, id: string): Promise<SavedSearchRecord | undefined>;
+  count(organizationId: string): Promise<number>;
   insert(
     record: Omit<SavedSearchRecord, 'createdAt' | 'updatedAt' | 'position' | 'lastRunAt'>,
   ): Promise<void>;

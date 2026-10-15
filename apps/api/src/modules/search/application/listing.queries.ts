@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type { AiGateway } from '@bf/ai';
 import {
   type BusinessFacets,
@@ -27,12 +28,20 @@ import {
   type ListingSpec,
   parseSort,
   sortName,
+  withoutFacetFilters,
 } from '../domain/listing.ts';
 import { type Fused, fuseRankings } from '../domain/rrf.ts';
-import { BUSINESS_SEARCH_REPOSITORY, type BusinessSearchRepository } from './listing-ports.ts';
+import {
+  BUSINESS_SEARCH_REPOSITORY,
+  type BusinessSearchRepository,
+  RANKING_CACHE,
+  type RankingCache,
+} from './listing-ports.ts';
 
 /** Candidates each text ranker contributes before fusion (BF-022). */
 export const RANKER_LIMIT = 200;
+/** How long a fused ranking is reused: long enough to page through one search, short enough to see new data. */
+const RANKING_TTL_SECONDS = 300;
 const DAY_MS = 86_400_000;
 
 const workspaceOf = (auth: AuthContext): string => {
@@ -78,6 +87,7 @@ export class ListingResolver {
     @Inject(AI_GATEWAY) private readonly ai: AiGateway,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
+    @Inject(RANKING_CACHE) private readonly cache: RankingCache,
   ) {}
 
   async spec(organizationId: string, filters: BusinessFilters): Promise<ListingSpec> {
@@ -104,9 +114,33 @@ export class ListingResolver {
     return spec.text ? (await this.rank(spec)).length : this.repository.count(spec);
   }
 
-  /** Text results, best first: full text, name similarity and meaning, fused (empty without text). */
+  /**
+   * Text results, best first: full text, name similarity and meaning, fused (empty without text). Cached for a few
+   * minutes per (workspace, filters, origin, recency): relevance cursors then page one stable order even if the
+   * embedding model becomes unavailable between pages, and the facets count the same results.
+   */
   async rank(spec: ListingSpec): Promise<Fused[]> {
     if (!spec.text) return [];
+    const key = createHash('sha256')
+      .update(
+        JSON.stringify([
+          spec.organizationId,
+          spec.filters,
+          spec.origin,
+          spec.addedSince?.toISOString() ?? null,
+        ]),
+      )
+      .digest('hex');
+    const cached = await this.cache.get(key);
+    if (cached) return [...cached];
+    const fused = await this.fuse({ ...spec, text: spec.text });
+    await this.cache.set(key, fused, RANKING_TTL_SECONDS);
+    return fused;
+  }
+
+  private async fuse(
+    spec: ListingSpec & { readonly text: NonNullable<ListingSpec['text']> },
+  ): Promise<Fused[]> {
     const { q, keywords } = spec.text;
     const fullText = q ?? keywords.join(' ');
     const rankings = await Promise.all([
@@ -198,10 +232,13 @@ export class BusinessFacetsQuery {
     @Inject(BUSINESS_SEARCH_REPOSITORY) private readonly repository: BusinessSearchRepository,
   ) {}
 
-  /** With text, facets count the ranked results, so they always agree with the list. */
+  /**
+   * With text, facets count the ranked results — ranked without the facet dimensions' own filters, so each
+   * dimension still shows its other values; every count still applies all the other filters.
+   */
   async execute(auth: AuthContext, filters: BusinessFilters): Promise<BusinessFacets> {
     const spec = await this.resolver.spec(workspaceOf(auth), filters);
-    const within = spec.text ? (await this.resolver.rank(spec)).map((r) => r.id) : null;
+    const within = spec.text ? (await this.resolver.rank(withoutFacetFilters(spec))).map((r) => r.id) : null;
     return this.repository.facets(spec, within);
   }
 }

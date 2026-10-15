@@ -133,18 +133,19 @@ export const EXPORT_FIELDS = [
   'tier',
   'tags',
   'tracked_at',
-  // Contact points: only for callers allowed to contact businesses (`outreach:send`).
+  // The business's public phone, as the listing shows it.
   'phone',
+  // Contact emails: only for callers allowed to contact businesses (`outreach:send`).
   'email',
 ] as const;
 export type ExportField = (typeof EXPORT_FIELDS)[number];
-export const CONTACT_EXPORT_FIELDS: ReadonlySet<ExportField> = new Set(['phone', 'email']);
+export const CONTACT_EXPORT_FIELDS: ReadonlySet<ExportField> = new Set(['email']);
 
 /** `GET /v1/businesses/export.csv`: the listing's filters and sort, the columns, and the category label language. */
 export const BusinessExportQuerySchema = BusinessFiltersSchema.extend({
   sort: BusinessSearchQuerySchema.shape.sort,
   fields: many(z.enum(EXPORT_FIELDS), EXPORT_FIELDS.length).describe(
-    'Columns, in order. Default: every column the caller may export (contacts need `outreach:send`).',
+    'Columns, in order. Default: every column the caller may export (`email` needs `outreach:send`).',
   ),
   lang: z.enum(['en', 'fr']).default('en').describe('Language of category labels.'),
 });

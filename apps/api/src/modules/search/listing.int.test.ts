@@ -389,5 +389,9 @@ describe('GET /v1/businesses/facets', () => {
   it('counts the ranked text results', async () => {
     const text = await facets('q=restaurant');
     expect(text.total).toBe((await list('q=restaurant')).items.length);
+    // A selected status still shows the other statuses of the ranked results.
+    const contacted = await facets('q=restaurant&status=contacted');
+    expect(contacted.total).toBe(1);
+    expect(contacted.pipelineStatuses.map((p) => p.value).sort()).toEqual(['contacted', 'new']);
   });
 });

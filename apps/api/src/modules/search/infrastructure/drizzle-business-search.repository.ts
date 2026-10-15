@@ -9,6 +9,7 @@ import type { BusinessSearchRepository, ExportExtras, ListingRow } from '../appl
 import type { FacetDimension, ListingPosition, ListingSort, ListingSpec } from '../domain/listing.ts';
 import {
   arrayOf,
+  dimensionSql,
   filterSql,
   keysetSql,
   orderSql,
@@ -58,6 +59,8 @@ const toItem = (row: ItemRow): BusinessListItem => ({
   distanceMeters: row.distanceMeters === null ? null : Math.round(row.distanceMeters),
 });
 
+const FLAGS: readonly FacetDimension[] = ['category', 'status', 'tier', 'website', 'email', 'rating'];
+
 const RATING_BAND = sql<string>`CASE
   WHEN ${businesses.ratingAvg} IS NULL THEN 'none'
   WHEN ${businesses.ratingAvg} < 3 THEN 'lt3'
@@ -78,18 +81,77 @@ export class DrizzleBusinessSearchRepository implements BusinessSearchRepository
     after: ListingPosition | null,
     limit: number,
   ): Promise<ListingRow[]> {
+    const rows = await this.pageQuery(spec, sort, after, limit);
+    return rows.map(({ cursorValue, ...row }) => ({
+      item: toItem(row),
+      cursorValue: (cursorValue as string | number | null) ?? null,
+    }));
+  }
+
+  // Query builders are public so the EXPLAIN tests check the plans of exactly what runs (BF-022).
+
+  pageQuery(spec: ListingSpec, sort: ListingSort, after: ListingPosition | null, limit: number) {
     const key = sortKeySql(sort, spec.origin);
-    const rows = await getExecutor(this.db)
+    return getExecutor(this.db)
       .select({ ...itemColumns(spec.origin), cursorValue: key.cursorValue })
       .from(orgBusinesses)
       .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
       .where(after ? sql`${filterSql(spec)} AND ${keysetSql(key, sort, after)}` : filterSql(spec))
       .orderBy(orderSql(key, sort))
       .limit(limit);
-    return rows.map(({ cursorValue, ...row }) => ({
-      item: toItem(row),
-      cursorValue: (cursorValue as string | number | null) ?? null,
-    }));
+  }
+
+  fullTextQuery(spec: ListingSpec, q: string, limit: number) {
+    const query = tsQuery(q);
+    return getExecutor(this.db)
+      .select({ id: businesses.id })
+      .from(orgBusinesses)
+      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
+      .where(sql`${filterSql(spec)} AND ${businesses.searchTsv} @@ ${query}`)
+      .orderBy(sql`ts_rank_cd(${businesses.searchTsv}, ${query}) DESC, ${businesses.id}`)
+      .limit(limit);
+  }
+
+  /** Word similarity: "lulu" finds "Chez Lulu"; `<%` uses the trigram GIN index on normalized_name. */
+  trigramQuery(spec: ListingSpec, q: string, limit: number) {
+    const text = sql`f_unaccent(lower(${q}))`;
+    return getExecutor(this.db)
+      .select({ id: businesses.id })
+      .from(orgBusinesses)
+      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
+      .where(sql`${filterSql(spec)} AND ${text} <% ${businesses.normalizedName}`)
+      .orderBy(sql`word_similarity(${text}, ${businesses.normalizedName}) DESC, ${businesses.id}`)
+      .limit(limit);
+  }
+
+  /** Nearest vectors of the configured model (run with the session settings `rankVector` sets). */
+  vectorQuery(spec: ListingSpec, vector: readonly number[], limit: number): SQL {
+    if (vector.length !== EMBEDDING_DIMENSIONS || !vector.every(Number.isFinite)) {
+      throw new Error(`Query embedding must have ${EMBEDDING_DIMENSIONS} finite dimensions`);
+    }
+    const literal = sql`${`[${vector.join(',')}]`}::vector`;
+    return sql`
+        WITH nearest AS MATERIALIZED (
+          SELECT ${businesses.id} AS id, ${businesses.embedding} <=> ${literal} AS distance
+          FROM ${orgBusinesses} JOIN ${businesses} ON ${businesses.id} = ${orgBusinesses.businessId}
+          WHERE ${filterSql(spec)} AND ${businesses.embedding} IS NOT NULL
+            -- Vectors from another model are not comparable: they wait for pnpm search:reindex.
+            AND ${businesses.embeddingModel} = ${this.env.AI_EMBEDDING_MODEL}
+          ORDER BY distance
+          LIMIT ${limit}
+        )
+        SELECT id FROM nearest WHERE distance <= ${this.env.SEARCH_VECTOR_MAX_DISTANCE}
+        ORDER BY distance, id`;
+  }
+
+  /** Session settings for vector ranking (inside a transaction). */
+  vectorSettings(): SQL[] {
+    return [
+      sql.raw(`SET LOCAL hnsw.ef_search = ${Math.trunc(this.env.SEARCH_HNSW_EF_SEARCH)}`),
+      // Filtered HNSW scans can run out of candidates; iterative scans keep going (pgvector ≥ 0.8). Relaxed order
+      // is re-sorted by the query.
+      sql`SET LOCAL hnsw.iterative_scan = 'relaxed_order'`,
+    ];
   }
 
   async byIds(spec: ListingSpec, ids: readonly string[]): Promise<BusinessListItem[]> {
@@ -103,53 +165,18 @@ export class DrizzleBusinessSearchRepository implements BusinessSearchRepository
   }
 
   async rankFullText(spec: ListingSpec, q: string, limit: number): Promise<string[]> {
-    const query = tsQuery(q);
-    const rows = await getExecutor(this.db)
-      .select({ id: businesses.id })
-      .from(orgBusinesses)
-      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
-      .where(sql`${filterSql(spec)} AND ${businesses.searchTsv} @@ ${query}`)
-      .orderBy(sql`ts_rank_cd(${businesses.searchTsv}, ${query}) DESC, ${businesses.id}`)
-      .limit(limit);
-    return rows.map((r) => r.id);
+    return (await this.fullTextQuery(spec, q, limit)).map((r) => r.id);
   }
 
   async rankTrigram(spec: ListingSpec, q: string, limit: number): Promise<string[]> {
-    // Word similarity: "lulu" finds "Chez Lulu"; `<%` uses the trigram GIN index on normalized_name.
-    const text = sql`f_unaccent(lower(${q}))`;
-    const rows = await getExecutor(this.db)
-      .select({ id: businesses.id })
-      .from(orgBusinesses)
-      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
-      .where(sql`${filterSql(spec)} AND ${text} <% ${businesses.normalizedName}`)
-      .orderBy(sql`word_similarity(${text}, ${businesses.normalizedName}) DESC, ${businesses.id}`)
-      .limit(limit);
-    return rows.map((r) => r.id);
+    return (await this.trigramQuery(spec, q, limit)).map((r) => r.id);
   }
 
   async rankVector(spec: ListingSpec, vector: readonly number[], limit: number): Promise<string[]> {
-    if (vector.length !== EMBEDDING_DIMENSIONS || !vector.every(Number.isFinite)) {
-      throw new Error(`Query embedding must have ${EMBEDDING_DIMENSIONS} finite dimensions`);
-    }
-    const literal = sql`${`[${vector.join(',')}]`}::vector`;
-    const efSearch = Math.trunc(this.env.SEARCH_HNSW_EF_SEARCH);
+    const query = this.vectorQuery(spec, vector, limit);
     return runInTransaction(this.db, async (tx) => {
-      // Filtered HNSW scans can run out of candidates; iterative scans keep going (pgvector ≥ 0.8). Relaxed order
-      // is re-sorted below.
-      await tx.execute(sql.raw(`SET LOCAL hnsw.ef_search = ${efSearch}`));
-      await tx.execute(sql`SET LOCAL hnsw.iterative_scan = 'relaxed_order'`);
-      const rows = (await tx.execute(sql`
-        WITH nearest AS MATERIALIZED (
-          SELECT ${businesses.id} AS id, ${businesses.embedding} <=> ${literal} AS distance
-          FROM ${orgBusinesses} JOIN ${businesses} ON ${businesses.id} = ${orgBusinesses.businessId}
-          WHERE ${filterSql(spec)} AND ${businesses.embedding} IS NOT NULL
-            -- Vectors from another model are not comparable: they wait for pnpm search:reindex.
-            AND ${businesses.embeddingModel} = ${this.env.AI_EMBEDDING_MODEL}
-          ORDER BY distance
-          LIMIT ${limit}
-        )
-        SELECT id FROM nearest WHERE distance <= ${this.env.SEARCH_VECTOR_MAX_DISTANCE}
-        ORDER BY distance, id`)) as unknown as Array<{ id: string }>;
+      for (const setting of this.vectorSettings()) await tx.execute(setting);
+      const rows = (await tx.execute(query)) as unknown as Array<{ id: string }>;
       return rows.map((r) => r.id);
     });
   }
@@ -181,73 +208,136 @@ export class DrizzleBusinessSearchRepository implements BusinessSearchRepository
     return new Map(rows.map(({ id, ...extras }) => [id, extras]));
   }
 
+  /**
+   * Every facet in one statement (one snapshot, one scan): the matching rows are computed once with the
+   * non-dimension filters, each dimension filter becomes a flag, and each dimension counts the rows passing every
+   * flag but its own (GROUPING SETS). Categories roll up through ltree prefixes (top level, and the level below each
+   * selected category).
+   */
   async facets(spec: ListingSpec, within: readonly string[] | null): Promise<BusinessFacets> {
-    const where = (omit?: FacetDimension): SQL =>
-      within
-        ? sql`${filterSql(spec, omit)} AND ${businesses.id} = ANY(${arrayOf(within, 'uuid')})`
-        : filterSql(spec, omit);
-    const counts = async (dimension: FacetDimension, value: SQL, extra?: { order: SQL; limit: number }) => {
-      const rows = await getExecutor(this.db)
-        .select({ value: sql<string>`${value}`, count: sql<number>`count(*)::int` })
-        .from(orgBusinesses)
-        .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
-        .where(where(dimension))
-        .groupBy(sql`1`)
-        .orderBy(extra?.order ?? sql`2 DESC, 1`)
-        .limit(extra?.limit ?? 50);
-      return rows.filter((r) => r.value !== null);
-    };
-    const hasEmail = sql`EXISTS (SELECT 1 FROM ${businessContacts} bc WHERE bc.business_id = ${businesses.id} AND bc.type = 'email')`;
-    const [total, categoryCounts, pipelineStatuses, tiers, website, email, ratingBands, localities] =
-      await Promise.all([
-        getExecutor(this.db)
-          .select({ n: sql<number>`count(*)::int` })
-          .from(orgBusinesses)
-          .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
-          .where(where())
-          .then((rows) => rows[0]?.n ?? 0),
-        this.categoryFacet(spec, where('category')),
-        counts('status', sql`${orgBusinesses.pipelineStatus}`),
-        counts('tier', sql`coalesce(${orgBusinesses.tier}, 'none')`),
-        counts('website', sql`CASE WHEN ${businesses.websiteUrl} IS NULL THEN 'none' ELSE 'has' END`),
-        counts('email', sql`CASE WHEN ${hasEmail} THEN 'has' ELSE 'none' END`),
-        counts('rating', RATING_BAND),
-        counts('locality', sql`${businesses.locality}`, { order: sql`2 DESC, 1`, limit: 21 }),
-      ]);
-    return {
-      total,
-      categories: categoryCounts,
-      pipelineStatuses,
-      tiers,
-      website,
-      email,
-      ratingBands,
-      localities: localities.slice(0, 20),
-    };
-  }
-
-  /** Top-level categories plus the children of selected ones, each counting its whole subtree. */
-  private async categoryFacet(spec: ListingSpec, where: SQL): Promise<BusinessFacets['categories']> {
+    const dims = dimensionSql(spec);
+    const flag = (d: Exclude<FacetDimension, 'category' | 'locality'>) => dims[d] ?? sql`TRUE`;
+    const others = (d: FacetDimension | null) =>
+      sql.join(
+        FLAGS.filter((f) => f !== d).map((f) => sql.raw(`f_${f}`)),
+        sql` AND `,
+      );
     const selected = spec.filters.category ?? [];
-    const rows = (await getExecutor(this.db).execute(sql`
-      WITH matching AS (
-        SELECT ${businesses.id} AS id
+    // JIT compilation of this large aggregate costs ~0.4 s at 200k rows, more than the query itself.
+    const rows = await runInTransaction(this.db, async (tx) => {
+      await tx.execute(sql`SET LOCAL jit = off`);
+      await tx.execute(sql`SET LOCAL work_mem = '64MB'`);
+      return (await tx.execute(sql`
+      WITH matching AS MATERIALIZED (
+        SELECT ${businesses.id} AS id,
+          ${orgBusinesses.pipelineStatus} AS status,
+          coalesce(${orgBusinesses.tier}, 'none') AS tier,
+          CASE WHEN ${businesses.websiteUrl} IS NULL THEN 'none' ELSE 'has' END AS website,
+          CASE WHEN EXISTS (SELECT 1 FROM ${businessContacts} bc WHERE bc.business_id = ${businesses.id} AND bc.type = 'email')
+            THEN 'has' ELSE 'none' END AS email,
+          ${RATING_BAND} AS rating,
+          ${businesses.locality} AS locality,
+          ${selected.length > 0 ? sql`in_category.business_id IS NOT NULL` : sql`TRUE`} AS f_category,
+          ${flag('status')} AS f_status, ${flag('tier')} AS f_tier,
+          ${flag('website')} AS f_website, ${flag('email')} AS f_email, ${flag('rating')} AS f_rating
         FROM ${orgBusinesses} JOIN ${businesses} ON ${businesses.id} = ${orgBusinesses.businessId}
-        WHERE ${where}
+        ${
+          // The category flag as one hash join rather than a subquery per row.
+          selected.length > 0
+            ? sql`LEFT JOIN (
+                SELECT DISTINCT bcat.business_id FROM ${businessCategories} bcat JOIN ${categories} c ON c.id = bcat.category_id
+                WHERE c.path <@ ARRAY(SELECT sel.path FROM ${categories} sel WHERE sel.id = ANY(${arrayOf(selected, 'uuid')}))
+              ) in_category ON in_category.business_id = ${businesses.id}`
+            : sql``
+        }
+        WHERE ${filterSql(spec, 'dimensions')}${within ? sql` AND ${businesses.id} = ANY(${arrayOf(within, 'uuid')})` : sql``}
       ),
-      facet AS (
-        SELECT id, slug, labels, parent_id, path FROM ${categories}
-        WHERE is_active AND (nlevel(path) = 1${
-          selected.length > 0 ? sql` OR parent_id = ANY(${arrayOf(selected, 'uuid')})` : sql``
+      simple AS (
+        SELECT
+          CASE WHEN GROUPING(status) = 0 THEN 'status' WHEN GROUPING(tier) = 0 THEN 'tier'
+            WHEN GROUPING(website) = 0 THEN 'website' WHEN GROUPING(email) = 0 THEN 'email'
+            WHEN GROUPING(rating) = 0 THEN 'rating' WHEN GROUPING(locality) = 0 THEN 'locality' ELSE 'total' END AS dim,
+          coalesce(status, tier, website, email, rating, locality) AS value,
+          CASE WHEN GROUPING(status) = 0 THEN count(*) FILTER (WHERE ${others('status')})
+            WHEN GROUPING(tier) = 0 THEN count(*) FILTER (WHERE ${others('tier')})
+            WHEN GROUPING(website) = 0 THEN count(*) FILTER (WHERE ${others('website')})
+            WHEN GROUPING(email) = 0 THEN count(*) FILTER (WHERE ${others('email')})
+            WHEN GROUPING(rating) = 0 THEN count(*) FILTER (WHERE ${others('rating')})
+            ELSE count(*) FILTER (WHERE ${others(null)}) END AS n
+        FROM matching
+        GROUP BY GROUPING SETS ((status), (tier), (website), (email), (rating), (locality), ())
+      ),
+      category_prefixes AS (
+        -- Category → the facet categories it rolls up into (a few hundred rows): its top-level ancestor, and the
+        -- child of a selected category it sits under.
+        SELECT c.id, subpath(c.path, 0, 1) AS prefix FROM ${categories} c
+        ${
+          selected.length > 0
+            ? sql`UNION ALL
+        SELECT c.id, subpath(c.path, 0, nlevel(sel.path) + 1) FROM ${categories} sel
+        JOIN ${categories} c ON c.path <@ sel.path AND nlevel(c.path) > nlevel(sel.path)
+        WHERE sel.id = ANY(${arrayOf(selected, 'uuid')})`
+            : sql``
+        }
+      ),
+      prefixes AS (
+        SELECT DISTINCT cp.prefix, m.id
+        FROM matching m
+        JOIN ${businessCategories} bcat ON bcat.business_id = m.id
+        JOIN category_prefixes cp ON cp.id = bcat.category_id
+        WHERE ${others('category')}
+      ),
+      category AS (
+        SELECT 'category' AS dim, f.id::text AS value, count(*) AS n
+        FROM prefixes JOIN ${categories} f ON f.path = prefixes.prefix
+        WHERE f.is_active AND (nlevel(f.path) = 1${
+          selected.length > 0 ? sql` OR f.parent_id = ANY(${arrayOf(selected, 'uuid')})` : sql``
         })
+        GROUP BY f.id
       )
-      SELECT facet.id, facet.slug, facet.labels, facet.parent_id AS "parentId", count(DISTINCT matching.id)::int AS count
-      FROM facet
-      JOIN ${categories} sub ON sub.path <@ facet.path
-      JOIN ${businessCategories} bcat ON bcat.category_id = sub.id
-      JOIN matching ON matching.id = bcat.business_id
-      GROUP BY facet.id, facet.slug, facet.labels, facet.parent_id
-      ORDER BY count DESC, facet.slug`)) as unknown as BusinessFacets['categories'];
-    return rows;
+      SELECT dim, value, n::int AS n FROM simple WHERE n > 0 AND (value IS NOT NULL OR dim = 'total')
+      UNION ALL SELECT dim, value, n::int FROM category`)) as unknown as Array<{
+        dim: FacetDimension | 'locality' | 'total';
+        value: string | null;
+        n: number;
+      }>;
+    });
+    const of = (dim: string) =>
+      rows
+        .filter((r) => r.dim === dim)
+        .map((r) => ({ value: r.value as string, count: r.n }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+    const categoryCounts = of('category');
+    const labels =
+      categoryCounts.length === 0
+        ? []
+        : await getExecutor(this.db)
+            .select({
+              id: categories.id,
+              slug: categories.slug,
+              labels: categories.labels,
+              parentId: categories.parentId,
+            })
+            .from(categories)
+            .where(
+              sql`${categories.id} = ANY(${arrayOf(
+                categoryCounts.map((c) => c.value),
+                'uuid',
+              )})`,
+            );
+    const byId = new Map(labels.map((c) => [c.id, c]));
+    return {
+      total: rows.find((r) => r.dim === 'total')?.n ?? 0,
+      categories: categoryCounts.flatMap((c) => {
+        const category = byId.get(c.value);
+        return category ? [{ ...category, count: c.count }] : [];
+      }),
+      pipelineStatuses: of('status'),
+      tiers: of('tier'),
+      website: of('website'),
+      email: of('email'),
+      ratingBands: of('rating'),
+      localities: of('locality').slice(0, 20),
+    };
   }
 }

@@ -45,7 +45,11 @@ export const SavedSearchSchema = z
       .number()
       .int()
       .nonnegative()
-      .describe('Businesses matching now that were tracked after `lastRunAt` (all matches if never run).'),
+      .nullable()
+      .describe(
+        'Businesses matching now that were tracked after `lastRunAt` (all matches if never run). Computed by get and' +
+          ' run only; null in lists (one count per search would be one ranking — and embedding — per row).',
+      ),
     createdBy: z.uuid().nullable(),
     mine: z.boolean().describe('Whether the caller created it (only the creator may change it).'),
     createdAt: IsoDateTimeSchema,

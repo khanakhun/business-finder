@@ -268,13 +268,15 @@ jobs:
         env:
           RANGE: ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '' }}
         run: |
-          curl -fsSL -o /tmp/gitleaks.tar.gz \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -fsSL -o /tmp/gitleaks.sums \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          (cd /tmp && grep " gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz$" gitleaks.sums | sha256sum -c -)
-          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
-          /tmp/gitleaks git --redact --verbose --exit-code 1 ${RANGE:+--log-opts="$RANGE"} .
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          dir="$RUNNER_TEMP/gitleaks" && mkdir -p "$dir"
+          # Keep the release file name: the checksum list refers to it.
+          curl -fsSL -o "$dir/$tarball" "$base/$tarball"
+          curl -fsSL -o "$dir/checksums.txt" "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          (cd "$dir" && grep " $tarball\$" checksums.txt | sha256sum -c -)
+          tar -xzf "$dir/$tarball" -C "$dir" gitleaks
+          "$dir/gitleaks" git --redact --verbose --exit-code 1 ${RANGE:+--log-opts="$RANGE"} .
       - name: OSV-Scanner (pnpm-lock.yaml, uv.lock)
         uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         with:

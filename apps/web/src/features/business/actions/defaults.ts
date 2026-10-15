@@ -1,0 +1,76 @@
+import {
+  GlobeIcon,
+  LayoutTemplateIcon,
+  MailIcon,
+  MessageCircleIcon,
+  PhoneIcon,
+  SparklesIcon,
+} from 'lucide-react';
+import { safeWebUrl } from '@/features/search/safe-url.ts';
+import { quickActions } from './registry.ts';
+
+/** `wa.me` takes the international number without `+` or separators. */
+export function whatsAppUrl(phone: string | null): string | null {
+  const digits = phone?.replace(/\D/g, '') ?? '';
+  return digits.length >= 6 ? `https://wa.me/${digits}` : null;
+}
+
+let registered = false;
+
+/** The quick actions BF-024 ships (idempotent). Placeholders are replaced by id by the tickets that own them. */
+export function registerDefaultQuickActions(): void {
+  if (registered) return;
+  registered = true;
+  quickActions.register({
+    id: 'business.open-website',
+    labelKey: 'business.actions.openWebsite',
+    icon: GlobeIcon,
+    order: 10,
+    hidden: ({ business }) => safeWebUrl(business.websiteUrl) === null,
+    href: ({ business }) => safeWebUrl(business.websiteUrl),
+  });
+  quickActions.register({
+    id: 'business.call',
+    labelKey: 'business.actions.call',
+    icon: PhoneIcon,
+    order: 20,
+    hidden: ({ business }) => !business.primaryPhone,
+    disabledReason: ({ crm }) => (crm.doNotContact ? 'business.actions.doNotContact' : null),
+    href: ({ business }) => `tel:${business.primaryPhone?.replace(/[^\d+]/g, '')}`,
+  });
+  quickActions.register({
+    // BF-057 replaces this with a prepared message.
+    id: 'business.whatsapp',
+    labelKey: 'business.actions.whatsApp',
+    icon: MessageCircleIcon,
+    order: 30,
+    hidden: ({ business }) => whatsAppUrl(business.primaryPhone) === null,
+    disabledReason: ({ crm }) => (crm.doNotContact ? 'business.actions.doNotContact' : null),
+    href: ({ business }) => whatsAppUrl(business.primaryPhone),
+  });
+  quickActions.register({
+    id: 'enrichment.enrich',
+    labelKey: 'business.actions.enrich',
+    icon: SparklesIcon,
+    order: 40,
+    permission: 'business:write',
+    disabledReason: () => 'business.actions.comingEnrichment',
+  });
+  quickActions.register({
+    id: 'sites.generate',
+    labelKey: 'business.actions.generateSite',
+    icon: LayoutTemplateIcon,
+    order: 50,
+    permission: 'sites:generate',
+    disabledReason: () => 'business.actions.comingSites',
+  });
+  quickActions.register({
+    id: 'outreach.send-email',
+    labelKey: 'business.actions.sendEmail',
+    icon: MailIcon,
+    order: 60,
+    permission: 'outreach:send',
+    disabledReason: ({ crm }) =>
+      crm.doNotContact ? 'business.actions.doNotContact' : 'business.actions.comingOutreach',
+  });
+}

@@ -24,7 +24,8 @@
     "settings": "Paramètres",
     "collapse": "Réduire la barre latérale",
     "expand": "Déployer la barre latérale",
-    "label": "Navigation principale"
+    "label": "Navigation principale",
+    "tasks": "Tâches"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -757,7 +758,7 @@
       "open": "Ouvrir",
       "openWebsite": "Ouvrir le site",
       "summary": "Résumé",
-      "detailSoon": "La fiche complète arrive avec le CRM."
+      "openPage": "Ouvrir la fiche"
     },
     "facets": {
       "title": "Affiner",
@@ -802,7 +803,6 @@
       "enroll": "Écrire ou inscrire",
       "forbidden": "Vous n’avez pas l’autorisation",
       "selectFirst": "Sélectionnez d’abord des entreprises",
-      "needsCrm": "Disponible avec les fiches entreprises (CRM)",
       "comingSites": "Disponible avec la génération de sites",
       "comingOutreach": "Disponible avec la prospection",
       "done": "{count, plural, one {Fait pour # entreprise} other {Fait pour # entreprises}}",
@@ -925,5 +925,287 @@
       "lists": "Listes"
     },
     "error": "Impossible de charger les résultats"
+  },
+  "business": {
+    "title": "Entreprise",
+    "error": "Impossible de charger l’entreprise",
+    "rating": "{rating} ({count, plural, one {# avis} other {# avis}})",
+    "lostBecause": "Perdue : {reason}",
+    "disqualifiedBecause": "Disqualifiée : {reason}",
+    "tabs": {
+      "overview": "Aperçu",
+      "contacts": "Contacts",
+      "activity": "Activité"
+    },
+    "actions": {
+      "label": "Actions rapides",
+      "openWebsite": "Ouvrir le site",
+      "call": "Appeler",
+      "whatsApp": "WhatsApp",
+      "enrich": "Enrichir",
+      "generateSite": "Générer un site",
+      "sendEmail": "Envoyer un e-mail",
+      "doNotContact": "Marquée « ne pas contacter »",
+      "comingEnrichment": "Disponible avec l’enrichissement",
+      "comingSites": "Disponible avec la génération de sites",
+      "comingOutreach": "Disponible avec la prospection"
+    },
+    "status": {
+      "refused": "Ce changement n’est pas possible depuis le statut actuel. La page affiche maintenant le dernier statut.",
+      "moved": "Passée en {status}",
+      "reasonTitle": "Pourquoi {status} ?",
+      "reasonDescription": "Vos collègues voient cette raison sur l’entreprise et dans son historique.",
+      "moveTo": "Passer en {status}",
+      "change": "Statut de {name} : {status}. Changer de statut",
+      "moveLabel": "Passer en",
+      "needsReason": "Raison requise"
+    },
+    "reason": {
+      "label": "Raison",
+      "cancel": "Annuler"
+    },
+    "owner": {
+      "label": "Responsable",
+      "nobody": "Aucun responsable"
+    },
+    "tags": {
+      "label": "Étiquettes",
+      "remove": "Retirer l’étiquette {tag}",
+      "none": "Aucune étiquette",
+      "new": "Nouvelle étiquette",
+      "add": "Ajouter",
+      "addTag": "Ajouter une étiquette"
+    },
+    "doNotContact": {
+      "label": "Ne pas contacter",
+      "marked": "Marquée « ne pas contacter » : la prospection l’ignorera",
+      "cleared": "« Ne pas contacter » retiré",
+      "title": "Marquer « ne pas contacter »",
+      "description": "La prospection ignore cette entreprise dans toutes les boîtes et séquences. Indiquez pourquoi, pour qui lira ceci plus tard.",
+      "confirm": "Marquer « ne pas contacter »"
+    },
+    "sources": {
+      "google_places": "Google Places",
+      "overture": "Overture",
+      "foursquare": "Foursquare",
+      "osm": "OpenStreetMap",
+      "gmaps_scraper": "Extraction Maps",
+      "website": "Site web",
+      "manual": "Ajout manuel",
+      "import": "Import"
+    },
+    "provenance": {
+      "detail": "Confiance {confidence}, vu le {date}"
+    },
+    "operating": {
+      "operational": "Ouverte",
+      "closed_temporarily": "Fermée temporairement",
+      "closed_permanently": "Fermée définitivement",
+      "unknown": "Inconnu"
+    },
+    "overview": {
+      "facts": "Informations",
+      "name": "Nom",
+      "status": "État",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "website": "Site web",
+      "rating": "Note",
+      "ratingValue": "{rating} sur {count, plural, one {# avis} other {# avis}}",
+      "categories": "Catégories",
+      "contacts": "Contacts",
+      "contactsSummary": "{emails, plural, =0 {Aucun e-mail} one {# e-mail} other {# e-mails}}, {phones, plural, =0 {aucun téléphone} one {# téléphone} other {# téléphones}}",
+      "quality": "Qualité des données",
+      "qualityValue": "{score} / 100",
+      "seen": "Vue",
+      "seenValue": "Première fois le {first}, dernière le {last}",
+      "unknown": "Inconnu",
+      "none": "Aucun",
+      "location": "Emplacement",
+      "noLocation": "Pas encore d’emplacement",
+      "hours": "Horaires",
+      "noHours": "Pas encore d’horaires",
+      "closed": "Fermé"
+    },
+    "contacts": {
+      "error": "Impossible de charger les contacts",
+      "emptyTitle": "Aucun contact",
+      "empty": "L’enrichissement trouve les e-mails et numéros publiés par l’entreprise. Vous pouvez aussi en ajouter un.",
+      "caption": "Contacts de l’entreprise",
+      "type": "Type",
+      "value": "Contact",
+      "verification": "Vérification",
+      "source": "Source",
+      "added": "Contact ajouté",
+      "addTitle": "Ajouter un contact",
+      "add": "Ajouter le contact",
+      "addHint": "Uniquement les coordonnées publiées par l’entreprise. Notez les noms des personnes dans les notes."
+    },
+    "contactTypes": {
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "website_form": "Formulaire de contact",
+      "social": "Réseau social"
+    },
+    "verification": {
+      "unknown": "Non vérifié",
+      "valid": "Valide",
+      "invalid": "Invalide",
+      "catch_all": "Catch-all",
+      "risky": "Risqué",
+      "disposable": "Jetable"
+    },
+    "notes": {
+      "deleted": "Note supprimée",
+      "someone": "Un ancien membre",
+      "byline": "{author}, {when}",
+      "pinned": "Épinglée",
+      "unpin": "Désépingler la note",
+      "pin": "Épingler la note",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "title": "Notes",
+      "new": "Nouvelle note",
+      "placeholder": "Écrire une note (markdown)…",
+      "hint": "Le markdown fonctionne. Ctrl+Entrée ajoute la note.",
+      "add": "Ajouter la note",
+      "empty": "Aucune note pour l’instant."
+    },
+    "tasks": {
+      "completed": "Terminée : {title}",
+      "reopen": "Rouvrir {title}",
+      "complete": "Marquer {title} comme terminée",
+      "overdue": "En retard, prévue {when}",
+      "noDue": "Sans échéance",
+      "title": "Tâches ouvertes",
+      "empty": "Rien à faire sur cette entreprise.",
+      "new": "Nouvelle tâche",
+      "placeholder": "Rappeler lundi…",
+      "type": "Type",
+      "due": "Échéance",
+      "assignee": "Attribuée à",
+      "me": "Moi",
+      "add": "Ajouter la tâche",
+      "added": "Tâche ajoutée : {title}"
+    },
+    "taskTypes": {
+      "call": "Appel",
+      "email": "E-mail",
+      "visit": "Visite",
+      "follow_up": "Relance",
+      "other": "Autre"
+    },
+    "activity": {
+      "status": "Passée de {from} à {to}",
+      "statusAutomatic": "Passée de {from} à {to} automatiquement",
+      "someone": "Un ancien membre",
+      "owner": "Attribuée à {name}",
+      "ownerCleared": "Responsable retiré",
+      "tagsAdded": "Étiquetée {tags}.",
+      "tagsRemoved": "Étiquettes retirées : {tags}.",
+      "doNotContactOn": "Marquée « ne pas contacter »",
+      "doNotContactOff": "« Ne pas contacter » retiré",
+      "noteAdded": "A ajouté une note",
+      "tracked": "A commencé à suivre l’entreprise",
+      "merged": "A fusionné un doublon dans cette entreprise",
+      "taskCreated": "A créé la tâche {title}",
+      "taskCompleted": "A terminé la tâche {title}",
+      "apiKey": "Une clé d’API",
+      "system": "Business Finder",
+      "generic": "Événement {type}",
+      "title": "Historique",
+      "empty": "Rien ne s’est encore passé.",
+      "more": "Afficher plus ancien",
+      "updated": "{count, plural, one {# information mise} other {# informations mises}} à jour sur l’entreprise"
+    },
+    "duplicates": {
+      "label": "Doublons possibles",
+      "maybe": "Peut-être la même entreprise que {name} {locality} ({score} % de correspondance)",
+      "compare": "Comparer",
+      "dismissed": "Marquées comme entreprises différentes",
+      "merged": "Entreprises fusionnées",
+      "fields": {
+        "name": "Nom",
+        "category": "Catégorie",
+        "address": "Adresse",
+        "phone": "Téléphone",
+        "website": "Site web",
+        "rating": "Note"
+      },
+      "title": "Même entreprise ?",
+      "description": "{score} % de correspondance. Gardez-en une : l’autre y est fusionnée avec ses sources, notes, tâches et historique.",
+      "reasons": "Pourquoi elles se ressemblent",
+      "thisOne": "Cette entreprise",
+      "otherOne": "Doublon possible",
+      "dismiss": "Entreprises différentes",
+      "keep": "Garder {name}"
+    },
+    "bulk": {
+      "tagsTitle": "Étiquettes de {count, plural, one {# entreprise} other {# entreprises}}",
+      "tagsDescription": "Séparez les étiquettes par des virgules.",
+      "addTags": "Ajouter des étiquettes",
+      "removeTags": "Retirer des étiquettes",
+      "cancel": "Annuler",
+      "apply": "Appliquer",
+      "statusTitle": "Statut de {count, plural, one {# entreprise} other {# entreprises}}",
+      "statusDescription": "Chaque entreprise ne change que si son statut actuel le permet ; les autres restent telles quelles.",
+      "status": "Nouveau statut",
+      "reason": "Raison",
+      "tooMany": "Sélectionnez au plus 1 000 entreprises"
+    }
+  },
+  "pipeline": {
+    "title": "Suivi commercial",
+    "description": "Glissez une entreprise vers son étape suivante. Seuls les changements permis par son statut sont ouverts.",
+    "filters": "Filtres du tableau",
+    "owner": "Responsable",
+    "anyOwner": "Tous les responsables",
+    "mine": "Les miennes",
+    "tier": "Rang",
+    "anyTier": "Tous les rangs",
+    "tierValue": "Rang {tier}",
+    "anyCategory": "Toutes les catégories",
+    "tag": "Étiquette",
+    "error": "Impossible de charger le pipeline",
+    "score": "Score {score}",
+    "count": "{count, plural, one {# entreprise} other {# entreprises}}",
+    "more": "{count, plural, one {# de plus dans la recherche} other {# de plus dans la recherche}}",
+    "emptyColumn": "Aucune entreprise ici",
+    "moved": "{name} passée en {status}",
+    "refused": "Une entreprise ne peut pas passer de {from} à {to}",
+    "reasonTitle": "Pourquoi {status} ?",
+    "reasonDescription": "Vos collègues voient cette raison sur l’entreprise et dans son historique.",
+    "moveTo": "Passer en {status}",
+    "a11y": {
+      "picked": "{name} saisie",
+      "over": "Au-dessus de {status}",
+      "dropped": "Déposée dans {status}",
+      "cancelled": "Déplacement annulé",
+      "instructions": "Glissez avec la souris ou le doigt. Au clavier, ouvrez plutôt le menu de statut de la carte."
+    },
+    "category": "Catégorie"
+  },
+  "tasks": {
+    "title": "Tâches",
+    "description": "Ce que vous avez à faire, le plus urgent d’abord.",
+    "windows": {
+      "overdue": "En retard",
+      "today": "Aujourd’hui",
+      "upcoming": "À venir",
+      "done": "Terminées"
+    },
+    "error": "Impossible de charger les tâches",
+    "empty": {
+      "overdue": "Rien en retard",
+      "today": "Rien pour aujourd’hui",
+      "upcoming": "Rien de prévu",
+      "done": "Aucune tâche terminée"
+    },
+    "emptyHint": "Ajoutez des tâches depuis la fiche d’une entreprise, onglet Activité.",
+    "toPipeline": "Ouvrir le pipeline",
+    "more": "Afficher plus"
   }
 }

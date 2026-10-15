@@ -60,6 +60,9 @@ catalog:
   # BF-023: URL state and the map (MapLibre via react-map-gl's maplibre entry; no Mapbox token).
   nuqs: 2.10.1
   react-map-gl: 8.1.3
+  # BF-024: kanban drag and drop; notes markdown (no raw HTML: react-markdown never renders it).
+  '@dnd-kit/core': 6.3.1
+  react-markdown: 10.1.0
   maplibre-gl: 6.12.0
   openapi-typescript: 7.13.0
   openapi-fetch: 0.17.0

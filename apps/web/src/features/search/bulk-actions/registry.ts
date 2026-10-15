@@ -1,4 +1,5 @@
 import type { Permission } from '@bf/contracts';
+import type * as React from 'react';
 
 // Bulk actions on selected search results (BF-023). The page renders whatever is registered, so later tickets add
 // actions (create sites, enroll in a sequence…) by registering them — never by editing the page.
@@ -83,7 +84,28 @@ export function bulkActionsFor(context: BulkActionContext): BulkActionAvailabili
     });
 }
 
+/** A dialog an action opens through `ui.dialog(id, props)`; it resolves the action with `onClose(result)`. */
+export type BulkDialog = React.ComponentType<{
+  readonly props: Record<string, unknown>;
+  readonly onClose: (result: unknown) => void;
+}>;
+
+const dialogs = new Map<string, BulkDialog>();
+
+/** Registers (or replaces) the dialog rendered for `ui.dialog(id)`. */
+export function registerBulkDialog(id: string, dialog: BulkDialog): () => void {
+  dialogs.set(id, dialog);
+  return () => {
+    if (dialogs.get(id) === dialog) dialogs.delete(id);
+  };
+}
+
+export function bulkDialog(id: string): BulkDialog | undefined {
+  return dialogs.get(id);
+}
+
 /** Test helper: forget every registration. */
 export function resetBulkActions(): void {
   registry.clear();
+  dialogs.clear();
 }

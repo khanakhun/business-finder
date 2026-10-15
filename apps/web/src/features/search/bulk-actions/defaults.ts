@@ -1,3 +1,4 @@
+import { registerCrmBulkActions } from '@/features/business/bulk-actions.tsx';
 import { type BulkAction, registerBulkAction } from './registry.ts';
 
 // The bulk actions BF-023 ships. Later tickets register theirs the same way (and replace the placeholders by id).
@@ -30,25 +31,6 @@ const actions: BulkAction[] = [
       return null;
     },
   },
-  // The CRM (BF-024) owns pipeline transitions and tags: it replaces these by id with working actions.
-  {
-    id: 'crm.set-tags',
-    labelKey: 'search.bulk.tags',
-    icon: 'tags',
-    permission: 'business:write',
-    order: 30,
-    disabledReason: () => 'search.bulk.needsCrm',
-    run: async () => null,
-  },
-  {
-    id: 'crm.set-status',
-    labelKey: 'search.bulk.status',
-    icon: 'kanban',
-    permission: 'business:write',
-    order: 40,
-    disabledReason: () => 'search.bulk.needsCrm',
-    run: async () => null,
-  },
   {
     id: 'sites.create',
     labelKey: 'search.bulk.createSites',
@@ -76,4 +58,6 @@ export function registerDefaultBulkActions(): void {
   if (registered) return;
   registered = true;
   for (const action of actions) registerBulkAction(action);
+  // Tags and pipeline status (BF-024).
+  registerCrmBulkActions();
 }

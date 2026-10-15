@@ -18,6 +18,12 @@ export default mergeConfig(
       // Feature logic (URL state, registries); feature components and hooks are covered by Playwright.
       'src/features/search/url-state.ts',
       'src/features/search/bulk-actions/registry.ts',
+      'src/features/business/actions/registry.ts',
+      'src/features/business/actions/defaults.ts',
+      'src/features/business/tabs/registry.ts',
+      'src/features/business/tags.ts',
+      'src/features/business/markdown.tsx',
+      'src/features/pipeline/move-card.ts',
     ],
   }),
   {

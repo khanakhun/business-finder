@@ -26,6 +26,23 @@ describe('api client', () => {
     expect(queryKeys.taxonomy.tree('fr')).toEqual(['taxonomy', 'tree', 'fr']);
     expect(queryKeys.discovery.providers()).toEqual(['discovery', 'providers']);
     expect(queryKeys.discovery.scraper()).toEqual(['discovery', 'scraper']);
+    // Every business query starts with ['business', id]: one invalidation refreshes the whole page (BF-024).
+    const id = 'b1';
+    for (const key of [
+      queryKeys.business.detail(id),
+      queryKeys.business.crm(id),
+      queryKeys.business.contacts(id),
+      queryKeys.business.notes(id),
+      queryKeys.business.tasks(id),
+      queryKeys.business.activities(id),
+      queryKeys.business.duplicates(id),
+    ])
+      expect(key.slice(0, 2)).toEqual(['business', id]);
+    expect(queryKeys.identity.teammates()).toEqual(['identity', 'teammates']);
+    expect(queryKeys.crm.board({ owner: 'me' })).toEqual(['crm', 'board', { owner: 'me' }]);
+    expect(queryKeys.crm.tasks({ due: 'today' })).toEqual(['crm', 'tasks', { due: 'today' }]);
+    expect(queryKeys.search.lists()).toEqual(['search', 'lists']);
+    expect(queryKeys.workspace.settings()).toEqual(['workspace', 'settings']);
     expect(queryKeys.taxonomy.mappings('needs_review', 'en')).toEqual([
       'taxonomy',
       'mappings',

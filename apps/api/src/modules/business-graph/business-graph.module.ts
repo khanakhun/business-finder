@@ -7,6 +7,10 @@ import {
 } from './application/business.commands.ts';
 import { GetBusinessDetailQuery, ListContactsQuery } from './application/business.queries.ts';
 import {
+  ReplaceWebsiteMediaCommand,
+  WEBSITE_MEDIA_REPOSITORY,
+} from './application/media/replace-website-media.command.ts';
+import {
   BUSINESS_READ_MODEL,
   BUSINESS_REPOSITORY,
   CONTACT_REPOSITORY,
@@ -39,6 +43,7 @@ import { DrizzleBusinessReadModel } from './infrastructure/drizzle-business-read
 import { DrizzleContactRepository } from './infrastructure/drizzle-contact.repository.ts';
 import { DrizzleOrgBusinessRepository } from './infrastructure/drizzle-org-business.repository.ts';
 import { DrizzleSourceRecordRepository } from './infrastructure/drizzle-source-record.repository.ts';
+import { DrizzleWebsiteMediaRepository } from './infrastructure/media/drizzle-website-media.repository.ts';
 import { DrizzleMergeRepository } from './infrastructure/resolution/drizzle-merge.repository.ts';
 import { DrizzleResolutionRepository } from './infrastructure/resolution/drizzle-resolution.repository.ts';
 import { DrizzleTaxonomyRepository } from './infrastructure/taxonomy/drizzle-taxonomy.repository.ts';
@@ -92,6 +97,8 @@ export class BusinessGraphModule {
         { provide: RESOLUTION_REPOSITORY, useClass: DrizzleResolutionRepository },
         GoldenRecordWriter,
         IngestSourceRecordCommand,
+        ReplaceWebsiteMediaCommand,
+        { provide: WEBSITE_MEDIA_REPOSITORY, useClass: DrizzleWebsiteMediaRepository },
         IngestBatchCommand,
         { provide: MERGE_REPOSITORY, useClass: DrizzleMergeRepository },
         MergeBusinessesCommand,
@@ -117,6 +124,7 @@ export class BusinessGraphModule {
         CategoryClassifier,
         CategoryCandidateSearch,
         IngestSourceRecordCommand,
+        ReplaceWebsiteMediaCommand,
         IngestBatchCommand,
       ],
     };

@@ -144,13 +144,15 @@ export function unionContacts(sources: readonly NormalizedSource[]): GoldenConta
   const contacts = new Map<string, GoldenContact>();
   for (const source of ordered) {
     const fromSite = source.provider === 'website';
-    const sourceUrl = fromSite ? (source.website?.canonical ?? null) : null;
-    const entries: Array<[ContactType, string]> = [
-      ...source.phones.map((p) => ['phone', p.e164] as [ContactType, string]),
-      ...source.emails.map((e) => ['email', e.value] as [ContactType, string]),
-      ...source.socials.map((s) => ['social', s.url] as [ContactType, string]),
+    const siteUrl = fromSite ? (source.website?.canonical ?? null) : null;
+    const entries: Array<[ContactType, string, string | undefined]> = [
+      ...source.phones.map((p) => ['phone', p.e164, p.pageUrl] as [ContactType, string, string | undefined]),
+      ...source.emails.map((e) => ['email', e.value, e.pageUrl] as [ContactType, string, string | undefined]),
+      ...source.socials.map((s) => ['social', s.url, s.pageUrl] as [ContactType, string, string | undefined]),
     ];
-    for (const [type, value] of entries) {
+    for (const [type, value, pageUrl] of entries) {
+      // The page that shows it, when the crawl says (else the site itself).
+      const sourceUrl = fromSite ? (pageUrl ?? siteUrl) : null;
       const key = `${type}\u0000${value.toLowerCase()}`;
       const existing = contacts.get(key);
       if (!existing) {

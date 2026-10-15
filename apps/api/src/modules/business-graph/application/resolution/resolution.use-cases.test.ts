@@ -225,12 +225,30 @@ describe('IngestSourceRecordCommand', () => {
     expect(calls).toContain(`dup:${result.businessId}:${id(3)}`);
   });
 
+  it("links a crawl of a business's own website to that business, without matching", async () => {
+    const { command, calls, resolution } = ingestHarness({ candidates: [] });
+    const result = await command.execute(record({ provider: 'website', providerRef: 'site/1' }), {
+      orgId: ORG,
+      targetBusinessId: id(7),
+    });
+    expect(result).toMatchObject({ outcome: 'merged', businessId: id(7), changedFields: [] });
+    expect(resolution.findCandidateIds).not.toHaveBeenCalled();
+    expect(calls).toContain(`link:${id(7)}:1`);
+    expect(calls).toContain(`write:${id(7)}:false`);
+  });
+
   it('recomputes the linked business when a known record changes', async () => {
     const { command, calls } = ingestHarness({
       existing: { id: 's1', businessId: id(4), contentHash: 'old', normalized: null },
     });
     const result = await command.execute(record({ provider: 'manual', providerRef: 'm-1' }), { orgId: ORG });
-    expect(result).toEqual({ outcome: 'merged', businessId: id(4), sourceId: 's1', possibleDuplicates: [] });
+    expect(result).toEqual({
+      outcome: 'merged',
+      businessId: id(4),
+      sourceId: 's1',
+      possibleDuplicates: [],
+      changedFields: [],
+    });
     expect(calls).toContain(`write:${id(4)}:false`);
   });
 

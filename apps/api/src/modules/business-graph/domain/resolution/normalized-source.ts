@@ -34,7 +34,12 @@ export interface NormalizedSource {
   readonly countryCode: string | null;
   readonly location: { readonly lat: number; readonly lng: number } | null;
   readonly address: { readonly components: Partial<PostalAddressShape>; readonly formatted: string } | null;
-  readonly phones: ReadonlyArray<{ readonly e164: string; readonly type: PhoneType }>;
+  /** `pageUrl`: where a crawled website shows the contact (BF-027); absent for other sources. */
+  readonly phones: ReadonlyArray<{
+    readonly e164: string;
+    readonly type: PhoneType;
+    readonly pageUrl?: string;
+  }>;
   readonly website: {
     readonly canonical: string;
     readonly host: string;
@@ -42,8 +47,16 @@ export interface NormalizedSource {
     readonly shared: boolean;
     readonly matchKey: string;
   } | null;
-  readonly emails: ReadonlyArray<{ readonly value: string; readonly subtype: EmailSubtype }>;
-  readonly socials: ReadonlyArray<{ readonly url: string; readonly network: string }>;
+  readonly emails: ReadonlyArray<{
+    readonly value: string;
+    readonly subtype: EmailSubtype;
+    readonly pageUrl?: string;
+  }>;
+  readonly socials: ReadonlyArray<{
+    readonly url: string;
+    readonly network: string;
+    readonly pageUrl?: string;
+  }>;
   readonly hours: ReadonlyArray<{
     readonly weekday: number;
     readonly opensAt: string;
@@ -99,10 +112,15 @@ export function normalizeSource(
           return { components: { ...value.components }, formatted: value.formatted };
         })
       : null;
+  const pages = new Map((record.contactPages ?? []).map((c) => [c.value, c.pageUrl]));
+  const onPage = (raw: string) => {
+    const pageUrl = pages.get(raw);
+    return pageUrl ? { pageUrl } : {};
+  };
   const phones = uniqueBy(
     record.phones.flatMap((raw) => {
       const phone = attempt(dropped, 'phone', () => PhoneNumber.parse(raw, countryCode ?? undefined));
-      return phone ? [{ e164: phone.e164, type: phone.type }] : [];
+      return phone ? [{ e164: phone.e164, type: phone.type, ...onPage(raw) }] : [];
     }),
     (p) => p.e164,
   );
@@ -112,14 +130,14 @@ export function normalizeSource(
   const emails = uniqueBy(
     record.emails.flatMap((raw) => {
       const email = attempt(dropped, 'email', () => EmailAddress.parse(raw));
-      return email ? [{ value: email.value, subtype: email.subtype }] : [];
+      return email ? [{ value: email.value, subtype: email.subtype, ...onPage(raw) }] : [];
     }),
     (e) => e.value,
   );
   const socials = uniqueBy(
     record.socials.flatMap((raw) => {
       const social = attempt(dropped, 'social', () => normalizeContact('social', raw, countryCode));
-      return social ? [{ url: social.normalizedValue, network: social.subtype }] : [];
+      return social ? [{ url: social.normalizedValue, network: social.subtype, ...onPage(raw) }] : [];
     }),
     (s) => s.url,
   );

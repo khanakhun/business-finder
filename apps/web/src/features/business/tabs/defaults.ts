@@ -21,6 +21,15 @@ export function registerDefaultTabs(): void {
     component: dynamic(() => import('./contacts.tsx').then((m) => m.ContactsTab), { loading: TabSkeleton }),
   });
   businessTabs.register({
+    // BF-027 (BF-030 adds the audit to it).
+    id: 'website',
+    labelKey: 'business.tabs.website',
+    order: 25,
+    component: dynamic(() => import('@/features/enrichment/website-tab.tsx').then((m) => m.WebsiteTab), {
+      loading: TabSkeleton,
+    }),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

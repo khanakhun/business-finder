@@ -24,7 +24,12 @@ export interface QuickAction {
   disabledReason?(context: QuickActionContext): string | null;
   /** A link action (opens in a new tab when external). */
   href?(context: QuickActionContext): string | null;
-  run?(context: QuickActionContext): void | Promise<void>;
+  run?(context: QuickActionContext, ui: QuickActionUi): void | Promise<void>;
+}
+
+/** What the header gives a running action: messages in the user's language (for its toast). */
+export interface QuickActionUi {
+  t(key: string, values?: Record<string, string | number>): string;
 }
 
 export const quickActions = createRegistry<QuickAction>();

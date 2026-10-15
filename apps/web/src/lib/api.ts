@@ -50,6 +50,8 @@ export const queryKeys = {
     tasks: (id: string) => ['business', id, 'tasks'] as const,
     activities: (id: string) => ['business', id, 'activities'] as const,
     duplicates: (id: string) => ['business', id, 'duplicates'] as const,
+    enrichment: (id: string) => ['business', id, 'enrichment'] as const,
+    website: (id: string) => ['business', id, 'website'] as const,
   }),
   crm: defineQueryKeys('crm', {
     board: (filters: Readonly<Record<string, string>>) => ['crm', 'board', filters] as const,

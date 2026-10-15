@@ -758,7 +758,8 @@
       "open": "Ouvrir",
       "openWebsite": "Ouvrir le site",
       "summary": "Résumé",
-      "openPage": "Ouvrir la fiche"
+      "openPage": "Ouvrir la fiche",
+      "enrichment": "Enrichissement"
     },
     "facets": {
       "title": "Affiner",
@@ -808,7 +809,8 @@
       "done": "{count, plural, one {Fait pour # entreprise} other {Fait pour # entreprises}}",
       "partial": "{done} faites, {failed} inchangées",
       "exporting": "Votre export se télécharge",
-      "tooMany": "Exportez au plus 200 lignes sélectionnées, ou annulez la sélection pour tout exporter"
+      "tooMany": "Exportez au plus 200 lignes sélectionnées, ou annulez la sélection pour tout exporter",
+      "enrich": "Enrichir"
     },
     "lists": {
       "title": "Listes",
@@ -935,7 +937,8 @@
     "tabs": {
       "overview": "Aperçu",
       "contacts": "Contacts",
-      "activity": "Activité"
+      "activity": "Activité",
+      "website": "Site web"
     },
     "actions": {
       "label": "Actions rapides",
@@ -946,7 +949,6 @@
       "generateSite": "Générer un site",
       "sendEmail": "Envoyer un e-mail",
       "doNotContact": "Marquée « ne pas contacter »",
-      "comingEnrichment": "Disponible avec l’enrichissement",
       "comingSites": "Disponible avec la génération de sites",
       "comingOutreach": "Disponible avec la prospection"
     },
@@ -1207,5 +1209,133 @@
     "emptyHint": "Ajoutez des tâches depuis la fiche d’une entreprise, onglet Activité.",
     "toPipeline": "Ouvrir le pipeline",
     "more": "Afficher plus"
+  },
+  "enrichment": {
+    "title": "Enrichissement",
+    "neverRun": "Pas encore enrichie.",
+    "runStatus": "{status} · {when}",
+    "enrichNow": "Enrichir maintenant",
+    "rerun": "Relancer",
+    "cancel": "Arrêter",
+    "stepsLegend": "Étapes à lancer",
+    "fresh": "à jour",
+    "comingSoon": "bientôt",
+    "started": "Enrichissement lancé",
+    "startFailed": "L'enrichissement n'a pas pu démarrer. Réessayez.",
+    "steps": {
+      "site_intel": "Analyse du site",
+      "email_verify": "Vérification des e-mails",
+      "reviews": "Avis",
+      "psi": "PageSpeed",
+      "vision_audit": "Audit visuel"
+    },
+    "runStatuses": {
+      "queued": "En attente",
+      "running": "En cours",
+      "completed": "Terminé",
+      "partially_completed": "Terminé en partie",
+      "failed": "Échoué",
+      "cancelled": "Arrêté"
+    },
+    "stepStatuses": {
+      "queued": "En attente",
+      "running": "En cours",
+      "done": "Fait",
+      "skipped": "Ignorée",
+      "failed": "Échouée"
+    },
+    "skipReasons": {
+      "fresh": "encore à jour",
+      "no_website": "pas de site",
+      "not_applicable": "ne s’applique pas",
+      "dependency_failed": "une étape requise a échoué",
+      "dependency_skipped": "une étape requise n’a pas tourné",
+      "budget": "budget mensuel atteint",
+      "cancelled": "arrêtée",
+      "not_registered": "pas encore disponible"
+    },
+    "noSolicitation": {
+      "title": "Cette entreprise refuse le démarchage",
+      "description": "Son site l’indique. La prospection vers elle est bloquée ; vérifiez avant tout contact."
+    },
+    "site": {
+      "title": "Site web",
+      "reachability": "État",
+      "finalUrl": "Adresse",
+      "crawled": "Lu",
+      "https": "HTTPS",
+      "tls": "Certificat valide",
+      "mixedContent": "Contenu non sécurisé",
+      "languages": "Langues",
+      "copyright": "Année du copyright",
+      "viewport": "Affichage mobile",
+      "smallText": "Petits textes sur mobile",
+      "weight": "Poids de l’accueil",
+      "kb": "{kb} Ko"
+    },
+    "reachability": {
+      "ok": "En ligne",
+      "redirected": "En ligne (redirigé)",
+      "not_found": "Introuvable",
+      "server_error": "Erreur du serveur",
+      "timeout": "Trop lent à répondre",
+      "dns_error": "Le domaine ne répond pas",
+      "tls_error": "Problème de certificat",
+      "parked": "Parqué ou à vendre",
+      "blocked": "A bloqué notre visite"
+    },
+    "contacts": {
+      "title": "Contacts sur le site",
+      "none": "Aucun e-mail ni téléphone trouvé sur le site.",
+      "onPage": "vu sur cette page",
+      "socials": "Réseaux sociaux"
+    },
+    "tools": {
+      "title": "Outils et technologies",
+      "booking": "Réservation",
+      "ordering": "Commande",
+      "chat": "Messagerie",
+      "analytics": "Mesure et publicité",
+      "tech": "Technologies"
+    },
+    "screenshots": {
+      "title": "Captures d'écran",
+      "desktop": "Capture d'écran du site sur ordinateur",
+      "mobile": "Capture d'écran du site sur mobile"
+    },
+    "auditComing": "Les scores de performance et les constats de design arrivent avec l’audit du site.",
+    "emptyTitle": "Site pas encore analysé",
+    "empty": "Enrichissez l’entreprise pour lire son site : contacts, outils, langues et captures.",
+    "noWebsite": "Aucun site connu pour cette entreprise.",
+    "error": "Les informations du site n’ont pas pu être chargées.",
+    "yes": "Oui",
+    "no": "Non",
+    "unknown": "Inconnu",
+    "none": "Aucun",
+    "bulk": {
+      "title": "{count, plural, one {Enrichir # entreprise} other {Enrichir # entreprises}}",
+      "description": "Chaque entreprise reçoit toutes les étapes disponibles ; celles encore à jour sont ignorées.",
+      "estimating": "Estimation…",
+      "willRun": "{step} : {count, plural, one {# exécution} other {# exécutions}}",
+      "cost": "Coût estimé : {cost}",
+      "budget": "Reste ce mois-ci : {left}",
+      "noBudget": "Pas de limite mensuelle",
+      "overBudget": "Plus que le budget mensuel restant : certaines entreprises seront ignorées.",
+      "start": "Enrichir",
+      "cancel": "Annuler",
+      "started": "{count, plural, one {Enrichissement lancé pour # entreprise} other {Enrichissement lancé pour # entreprises}}",
+      "partial": "{started} lancés, {rejected} non lancés (budget, à jour ou non suivie)",
+      "failed": "L'enrichissement n'a pas pu démarrer. Réessayez.",
+      "tooMany": "Sélectionnez au plus 500 entreprises",
+      "estimateFailed": "L'estimation n'a pas pu être calculée. Réessayez."
+    },
+    "listing": {
+      "none": "Pas enrichie",
+      "queued": "Enrichissement en attente",
+      "running": "Enrichissement…",
+      "done": "Enrichie",
+      "partial": "Enrichie en partie",
+      "failed": "Enrichissement échoué"
+    }
   }
 }

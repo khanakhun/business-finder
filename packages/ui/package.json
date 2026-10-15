@@ -11,6 +11,7 @@
     ".": "./src/index.ts",
     "./styles.css": "./src/styles/globals.css",
     "./components/*": "./src/components/*.tsx",
+    "./data-table": "./src/data-table/data-table.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts"
   },

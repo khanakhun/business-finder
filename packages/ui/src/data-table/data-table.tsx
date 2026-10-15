@@ -17,6 +17,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { cn } from '../lib/utils.ts';
 import { useVirtualRows } from './use-virtual-rows.ts';
 
+export type { ColumnDef, RowSelectionState, SortingState, VisibilityState } from '@tanstack/react-table';
+
 export interface DataTableProps<TRow> {
   readonly columns: ColumnDef<TRow, unknown>[];
   readonly data: readonly TRow[];
@@ -35,6 +37,14 @@ export interface DataTableProps<TRow> {
   /** Virtualise rows above this count (long result lists). */
   readonly virtualizeAbove?: number;
   readonly onRowClick?: (row: TRow) => void;
+  /** Called when the scroll nears the end (load the next page). */
+  readonly onEndReached?: () => void;
+  /** Pointer enters/leaves a row (e.g. to highlight it on a map). */
+  readonly onRowHover?: (row: TRow | null) => void;
+  /** Row shown as highlighted (hovered elsewhere, e.g. its map marker). */
+  readonly highlightedRowId?: string | null;
+  /** Keyboard cursor (j/k): marked and kept in view. */
+  readonly activeRowId?: string | null;
   readonly caption?: string;
   readonly className?: string;
 }
@@ -55,6 +65,10 @@ export function DataTable<TRow>(props: DataTableProps<TRow>) {
     onRowSelectionChange,
     virtualizeAbove = 200,
     onRowClick,
+    onEndReached,
+    onRowHover,
+    highlightedRowId,
+    activeRowId,
     caption,
     className,
   } = props;
@@ -79,12 +93,24 @@ export function DataTable<TRow>(props: DataTableProps<TRow>) {
   const rows = table.getRowModel().rows;
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const virtual = useVirtualRows({ count: rows.length, scrollRef, enabled: rows.length > virtualizeAbove });
+  const activeIndex = activeRowId ? rows.findIndex((row) => row.id === activeRowId) : -1;
+  React.useEffect(() => {
+    if (activeIndex < 0) return;
+    virtual.scrollToIndex(activeIndex);
+  }, [activeIndex, virtual.scrollToIndex]);
+  const onScroll = onEndReached
+    ? (event: React.UIEvent<HTMLDivElement>) => {
+        const el = event.currentTarget;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 400) onEndReached();
+      }
+    : undefined;
 
   if (data.length === 0) return <>{empty}</>;
 
   return (
     <div
       ref={scrollRef}
+      onScroll={onScroll}
       className={cn(
         'overflow-auto rounded-lg border bg-surface',
         virtual.enabled && 'max-h-[70vh]',
@@ -132,12 +158,18 @@ export function DataTable<TRow>(props: DataTableProps<TRow>) {
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() ? 'selected' : undefined}
+                data-active={row.id === activeRowId ? 'true' : undefined}
+                data-highlighted={row.id === highlightedRowId ? 'true' : undefined}
+                aria-current={row.id === activeRowId ? 'true' : undefined}
                 className={cn(
                   // The waterline marks the selected row, as it marks the active nav item.
                   'data-[state=selected]:bg-lagoon-wash data-[state=selected]:shadow-[inset_2px_0_0_var(--lagoon)]',
+                  'data-[highlighted=true]:bg-buoy-wash data-[active=true]:outline-2 data-[active=true]:-outline-offset-2 data-[active=true]:outline-lagoon',
                   onRowClick && 'cursor-pointer',
                 )}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                onPointerEnter={onRowHover ? () => onRowHover(row.original) : undefined}
+                onPointerLeave={onRowHover ? () => onRowHover(null) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

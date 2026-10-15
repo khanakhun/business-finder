@@ -10,7 +10,7 @@
         "$TURBO_ROOT$/packages/contracts/fixtures/**",
         "$TURBO_ROOT$/.env.example"
       ],
-      "outputs": []
+      "outputs": ["coverage/**"]
     }
   }
 }

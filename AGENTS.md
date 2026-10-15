@@ -52,6 +52,7 @@ These are created by BF-001/BF-002 and must keep working. If a command you need 
 | Start infrastructure | `pnpm infra:up` / `pnpm infra:down` / `pnpm infra:reset` |
 | Run everything in dev | `pnpm dev` |
 | Lint + typecheck + unit tests (all) | `pnpm verify` |
+| Module boundaries (AGENTS §3) | `pnpm check:boundaries` |
 | Only affected packages | `pnpm turbo run lint typecheck test --filter=...[origin/main]` |
 | Integration tests (Testcontainers) | `pnpm test:int` |
 | E2E (Playwright) | `pnpm e2e` |

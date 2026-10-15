@@ -1,0 +1,9 @@
+# OSV-Scanner exceptions (CI `security` job). Each entry needs a reason and an expiry; when it expires the scan
+# fails again and the exception must be re-justified or the dependency fixed.
+
+[[IgnoredVulns]]
+id = "GHSA-67mh-4wv8-2f99"
+ignoreUntil = 2027-01-15
+reason = """esbuild 0.18.20 is a dev-only transitive dependency (drizzle-kit → @esbuild-kit/esm-loader). The \
+advisory concerns esbuild's `serve` dev server (permissive CORS); nothing here runs it. Remove once drizzle-kit \
+drops @esbuild-kit."""

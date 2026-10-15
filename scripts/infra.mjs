@@ -89,8 +89,10 @@ async function up(profiles, { composeEnv, generated, ports, projectName }) {
   console.log(`Starting project "${projectName}" (${services.join(', ')}) …`);
 
   const profileArgs = profiles.flatMap((p) => ['--profile', p]);
+  // CI builds the custom images once with a layer cache and sets BF_INFRA_SKIP_BUILD=1 to reuse them.
+  const buildArgs = process.env.BF_INFRA_SKIP_BUILD === '1' ? [] : ['--build'];
   const status = compose(
-    [...profileArgs, 'up', '--detach', '--build', '--wait', '--wait-timeout', String(WAIT_TIMEOUT_S)],
+    [...profileArgs, 'up', '--detach', ...buildArgs, '--wait', '--wait-timeout', String(WAIT_TIMEOUT_S)],
     composeEnv,
   );
   if (status !== 0) {

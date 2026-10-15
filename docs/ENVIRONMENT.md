@@ -152,8 +152,9 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `ENRICHMENT_TTL_VISION_AUDIT_DAYS` | App-specific | api, worker | no | `30` |  | Days a visual audit result stays fresh. |
 | `ENRICHMENT_SITE_INTEL_COST_USD` | App-specific | api, worker | no | `0` |  | Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0). |
 | `REACHER_URL` | App-specific | api, worker | no |  |  | Self-hosted Reacher backend (compose profile `verify`; needs outbound port 25). Unset: skipped. |
+| `REACHER_HEADER_SECRET` | App-specific | api, worker | no |  | yes | Shared secret Reacher requires in `x-reacher-secret` (its `RCH__HEADER_SECRET`). |
 | `ENRICHMENT_EMAIL_VERIFY_COST_USD` | App-specific | api, worker | no | `0.008` |  | Estimated cost of one commercial e-mail verification (ZeroBounce), for budgets. |
-| `EMAIL_VERIFY_PER_DOMAIN_PER_MINUTE` | App-specific | api, worker | no | `6` |  | Mailbox checks per recipient domain per minute (politeness towards mail servers). |
+| `EMAIL_VERIFY_PER_MAIL_SERVER_PER_MINUTE` | App-specific | api, worker | no | `6` |  | Mailbox checks per mail server per minute, all workspaces together (one workspace gets half); politeness. |
 | `EMAIL_VERIFY_CONCURRENCY` | App-specific | api, worker | no | `4` |  | SMTP mailbox checks (Reacher) running at once per worker process. |
 | `ENRICHMENT_REFRESH_HOUR_UTC` | App-specific | api, worker | no | `3` |  | Hour (UTC) of the nightly refresh of stale enrichment. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |

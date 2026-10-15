@@ -29,7 +29,8 @@
 | **Site intel** | Result of crawling a business website: pages, contacts, socials, structured data, tech stack, signals, screenshots. |
 | **Website audit** | Scored assessment of a website: PageSpeed (mobile/desktop), vision grade, findings with severity, overall quality. |
 | **Pain signal** | A tagged problem evidenced by reviews or audits (e.g. `booking_friction`, `unreachable_by_phone`, `site_outdated`). |
-| **Contact** | An email, phone, WhatsApp, social profile or contact form of a business, with role (`generic` like info@ vs `personal`), verification status and provenance. |
+| **Contact** | An email, phone, WhatsApp, social profile or contact form of a business, with role (`generic` like info@ vs `personal`), verification status and provenance. E-mails also carry where the business's own site publishes them (page kind: contact, home, footer, legal, other; found as mailto, text, JSON-LD…), whether the domain is free webmail, and what the verifier saw (BF-028). |
+| **Verification status** | A verifier's verdict on an e-mail: `valid` (mailbox exists), `invalid` (does not, or the domain takes no mail — also spam traps), `catch_all` (the domain accepts anything), `risky` (role accounts, uncertain answers), `disposable` (throw-away domain), `unknown` (not checked, or the server would not say). Verdicts are shared by address across workspaces (keyed by a hash, never the address) and reused for 60 days; an inconclusive one never replaces a conclusive one. |
 | **Offer** | What we sell: `new_website`, `website_redesign`, `ai_receptionist`, `booking_system`, `local_seo`. Scoring profiles are per offer. |
 | **Feature vector** | Typed, versioned set of features computed for a business at a point in time (e.g. `has_website`, `psi_mobile_perf`, `review_count_log`). |
 | **Scoring profile** | Versioned configuration that turns a feature vector into a score: weights, transforms, gates, tier thresholds. Rule-based or model-based. |
@@ -220,7 +221,8 @@ stateDiagram-v2
 Steps (`queued → running → done | skipped | failed`) form a DAG per run (`depends_on`): a step runs once its
 dependencies are terminal; a failed dependency skips it (`dependency_failed`), one skipped for any reason but freshness
 too (`dependency_skipped`). A step is `fresh` (not repeated without `force`) while its last output has the same input
-hash and is within the step's TTL. One open run per business and workspace.
+hash and is within the step's TTL. One open run per business and workspace. An *optional* dependency only orders a step
+(its outcome never skips it), and a step can defer itself without using an attempt (BF-028).
 
 ## 4. Domain events
 

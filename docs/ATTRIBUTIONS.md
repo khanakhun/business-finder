@@ -13,6 +13,7 @@ in-app attributions page (BF-061) renders this list; keep it in sync when adding
 | Foursquare OS Places (Hugging Face, gated) | `foursquare` discovery provider (BF-019) | Apache-2.0 | "Copyright 2024 Foursquare Labs, Inc." with the licence/NOTICE |
 | OpenStreetMap via Overpass | `osm` discovery provider (BF-019) | ODbL 1.0 | "© OpenStreetMap contributors" linking to https://www.openstreetmap.org/copyright |
 | Google Places API (New) | `google_places` provider (BF-018) | Google Maps Platform terms (not open) | "Google Maps" (logo where possible) next to Google content |
+| disposable-email-domains list (`business-graph/domain/value-objects/disposable-domains.data.ts`, pinned commit) | Disposable e-mail classification (BF-028) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | None required; credited as "disposable-email-domains contributors" |
 | Google Maps scraper (gosom, self-hosted, off by default) | `gmaps_scraper` provider (BF-019) | No licence (likely breaches Google ToS) | Not attributable: never published; records expire after 30 days |
 
 Derived databases built from ODbL data (e.g. area outlines exported from `geo_areas`) must stay under the ODbL when

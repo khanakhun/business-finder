@@ -102,6 +102,31 @@ describe('eval runner', () => {
     expect(failing.failures).toEqual(['n.exact: 0.500 < 0.9']);
   });
 
+  it('leaves rows a scorer does not apply to out of its mean', async () => {
+    // Precision-style metric: only rows whose output is odd are judged.
+    const oddIsOne = {
+      name: 'odd.precision',
+      score: (output: unknown) => ((output as { n: number }).n % 2 === 1 ? 1 : null),
+    };
+    const judged = defineEval({ task: Task, scorers: [oddIsOne], thresholds: { 'odd.precision': 0.5 } });
+    const report = await runEval(judged, rows, { gateway, model: 'm', mode: 'test' });
+    // Rows 1, 3 and 2 (→ 99) apply; the failed row counts 0: (1 + 1 + 1 + 0) / 4.
+    expect(report.means['odd.precision']).toBe(0.75);
+    const none = await runEval(
+      judged,
+      [rows[1] as (typeof rows)[number]].map((r) => ({ ...r, input: { n: 4 } })),
+      {
+        gateway,
+        model: 'm',
+        mode: 'test',
+      },
+    );
+    expect(none.means['odd.precision']).toBe(1); // nothing to judge
+    const empty = await runEval(judged, [], { gateway, model: 'm', mode: 'test' });
+    expect(empty.means['odd.precision']).toBe(0); // no rows never passes a threshold
+    expect(empty.failures).toEqual(['odd.precision: 0.000 < 0.5']);
+  });
+
   it('rejects thresholds for unknown scorers', () => {
     expect(() => defineEval({ ...config, thresholds: { 'nope.f1': 1 } })).toThrow(/unknown scorer/);
   });

@@ -15,10 +15,13 @@ export interface ScoreContext {
   readonly orgId: string | null;
 }
 
-/** A metric in [0, 1] for one row (Strategy). `name` keys thresholds, e.g. `phones.f1`. */
+/**
+ * A metric in [0, 1] for one row (Strategy). `name` keys thresholds, e.g. `phones.f1`. `null` means the metric does
+ * not apply to the row (e.g. precision on rows that predicted nothing): it is left out of that scorer's mean.
+ */
 export interface Scorer {
   readonly name: string;
-  score(output: unknown, row: EvalRow, context: ScoreContext): Promise<number> | number;
+  score(output: unknown, row: EvalRow, context: ScoreContext): Promise<number | null> | number | null;
 }
 
 /** Value at a dotted path (`a.b.0.c`); undefined when absent. */

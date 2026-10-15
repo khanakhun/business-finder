@@ -61,7 +61,7 @@
 
 | Aggregate | Root | Key invariants |
 |---|---|---|
-| Business | `Business` | Exactly one primary category; location has valid coordinates; `merged_into_id` set ⇒ record is read-only; provenance exists for every non-null golden field. |
+| Business | `Business` | At most one primary category (exactly one once classified — BF-015; a partial unique index enforces it); location has valid coordinates (never `0,0`); `merged_into_id` set ⇒ record is read-only; provenance exists for every non-null golden field. |
 | OrgBusiness | `OrgBusiness` | Status transitions follow §3.1; `do_not_contact = true` ⇒ no outbound message can be queued. |
 | DiscoveryRun | `DiscoveryRun` | Cost never exceeds `budgetUsd` (tasks halt at the cap); terminal states are immutable. |
 | ScoringProfile | `ScoringProfile` | Weights reference registered features; versions are immutable once used; exactly one active version per profile. |

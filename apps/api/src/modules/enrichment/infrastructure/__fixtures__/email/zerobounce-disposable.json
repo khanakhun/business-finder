@@ -1,0 +1,14 @@
+{
+  "address": "x@throwaway.example.net",
+  "status": "do_not_mail",
+  "sub_status": "disposable",
+  "free_email": false,
+  "did_you_mean": null,
+  "account": "x",
+  "domain": "throwaway.example.net",
+  "domain_age_days": "30",
+  "smtp_provider": "",
+  "mx_found": "true",
+  "mx_record": "mx.throwaway.example.net",
+  "processed_at": "2026-10-15 12:00:00.000"
+}

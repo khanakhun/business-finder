@@ -5,6 +5,7 @@ import {
   isReadable,
   leftTheSite,
   parseOpeningHours,
+  publishedPageKind,
   siteHost,
   siteName,
   websiteMedia,
@@ -112,7 +113,12 @@ describe('websiteSourceRecord', () => {
       address: { formatted: '1 rue de la Plage, 97133, Gustavia', countryCode: 'BL' },
       contactPages: [
         { value: '+590590270000', pageUrl: 'https://www.cafe.example.com/' },
-        { value: 'hello@cafe.example.com', pageUrl: 'https://www.cafe.example.com/contact' },
+        {
+          value: 'hello@cafe.example.com',
+          pageUrl: 'https://www.cafe.example.com/contact',
+          pageKind: 'contact',
+          foundAs: 'jsonld',
+        },
       ],
     });
     expect(() => SourceRecordSchema.parse(record)).not.toThrow();
@@ -201,5 +207,35 @@ describe('what the site says about itself', () => {
     expect(websiteMedia(sold)).toEqual([]);
     // Same domain, other host or scheme: still the business's site.
     expect(leftTheSite(intel({ finalUrl: 'https://shop.cafe.example.com/' }))).toBe(false);
+  });
+});
+
+describe('publishedPageKind', () => {
+  const page = (url: string, kind: SiteIntel['pages'][number]['kind']) => ({
+    url,
+    kind,
+    title: null,
+    metaDescription: null,
+    lang: null,
+    h1: null,
+    wordCount: 10,
+    markdownKey: null,
+  });
+  const pages = [
+    page('https://s.example.com/', 'home'),
+    page('https://s.example.com/mentions-legales', 'legal'),
+    page('https://s.example.com/menu', 'menu'),
+    page('https://s.example.com/nous-contacter', 'contact'),
+  ];
+
+  it.each([
+    ['https://s.example.com/', false, 'home'],
+    ['https://s.example.com/mentions-legales', false, 'legal'],
+    ['https://s.example.com/nous-contacter', false, 'contact'],
+    ['https://s.example.com/menu', false, 'other'],
+    ['https://s.example.com/not-crawled', false, 'other'],
+    ['https://s.example.com/', true, 'contact'],
+  ] as const)('%s (on contact page: %s) → %s', (pageUrl, onContactPage, kind) => {
+    expect(publishedPageKind({ pages }, { pageUrl, onContactPage })).toBe(kind);
   });
 });

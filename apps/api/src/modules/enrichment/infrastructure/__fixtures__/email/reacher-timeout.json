@@ -1,0 +1,15 @@
+{
+  "input": "resa@hotel-baie.example.com",
+  "is_reachable": "unknown",
+  "misc": { "is_disposable": false, "is_role_account": true, "gravatar_url": null, "haveibeenpwned": null },
+  "mx": { "accepts_mail": true, "records": ["mail.hotel-baie.example.com."] },
+  "smtp": { "type": "SmtpError", "message": "Timeout(Duration { secs: 30, nanos: 0 })" },
+  "syntax": {
+    "address": "resa@hotel-baie.example.com",
+    "domain": "hotel-baie.example.com",
+    "is_valid_syntax": true,
+    "username": "resa",
+    "normalized_email": "resa@hotel-baie.example.com",
+    "suggestion": null
+  }
+}

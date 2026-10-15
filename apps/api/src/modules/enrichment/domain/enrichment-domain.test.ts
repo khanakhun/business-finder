@@ -130,6 +130,18 @@ describe('planRun', () => {
     ]);
   });
 
+  it('never skips a step for an optional dependency that does not run', () => {
+    const verify: EnrichmentStep = {
+      ...step('email_verify', { dependsOn: ['site_intel'] }),
+      optionalDependencies: ['site_intel'],
+    };
+    const plan = planRun({ ...base, steps: registry(step('site_intel', { applies: 'no_website' }), verify) });
+    expect(plan.steps.map((s) => [s.step, s.status, s.skipReason])).toEqual([
+      ['site_intel', 'skipped', 'no_website'],
+      ['email_verify', 'queued', null],
+    ]);
+  });
+
   it('keeps within the remaining monthly budget, cheapest dependencies first', () => {
     const steps = registry(
       step('site_intel', { cost: 0.01 }),
@@ -186,6 +198,15 @@ describe('run state', () => {
     });
     // Not part of the run (fresh before it): does not block.
     expect(readiness(psi, [psi])).toEqual({ kind: 'ready' });
+    // An optional dependency only orders the step: it waits for it, whatever its outcome.
+    const optional = new Set(['site_intel'] as const);
+    expect(readiness(psi, [site, psi], optional)).toEqual({ kind: 'waiting' });
+    for (const outcome of [
+      { status: 'failed' as const, skipReason: null },
+      { status: 'skipped' as const, skipReason: 'no_website' as const },
+    ]) {
+      expect(readiness(psi, [{ ...site, ...outcome }, psi], optional)).toEqual({ kind: 'ready' });
+    }
   });
 
   it('ends a run from its step outcomes', () => {

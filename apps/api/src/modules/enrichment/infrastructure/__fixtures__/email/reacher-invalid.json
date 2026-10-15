@@ -1,0 +1,21 @@
+{
+  "input": "nobody@salon-ondine.example.com",
+  "is_reachable": "invalid",
+  "misc": { "is_disposable": false, "is_role_account": false, "gravatar_url": null, "haveibeenpwned": null },
+  "mx": { "accepts_mail": true, "records": ["mx1.mail.ovh.net."] },
+  "smtp": {
+    "can_connect_smtp": true,
+    "has_full_inbox": false,
+    "is_catch_all": false,
+    "is_deliverable": false,
+    "is_disabled": false
+  },
+  "syntax": {
+    "address": "nobody@salon-ondine.example.com",
+    "domain": "salon-ondine.example.com",
+    "is_valid_syntax": true,
+    "username": "nobody",
+    "normalized_email": "nobody@salon-ondine.example.com",
+    "suggestion": null
+  }
+}

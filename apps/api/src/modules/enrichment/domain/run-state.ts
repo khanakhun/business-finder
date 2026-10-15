@@ -45,16 +45,22 @@ export type Readiness =
 /**
  * Whether a queued step can run: a failed dependency skips it (`dependency_failed`); a dependency skipped for any
  * reason but freshness skips it too (`dependency_skipped`); it waits while a dependency is not terminal. A
- * dependency that is not part of the run (planned away as fresh before this run) does not block.
+ * dependency that is not part of the run (planned away as fresh before this run) does not block, nor does an
+ * `optional` one (it only orders the step).
  */
-export function readiness(step: StepState, all: readonly StepState[]): Readiness {
+export function readiness(
+  step: StepState,
+  all: readonly StepState[],
+  optional: ReadonlySet<EnrichmentStepId> = new Set(),
+): Readiness {
   const byStep = new Map(all.map((s) => [s.step, s]));
   let waiting = false;
   for (const id of step.dependsOn) {
     const dependency = byStep.get(id);
     if (!dependency) continue;
-    if (dependency.status === 'failed') return { kind: 'skip', reason: 'dependency_failed' };
-    if (dependency.status === 'skipped' && dependency.skipReason !== 'fresh') {
+    if (!optional.has(id) && dependency.status === 'failed')
+      return { kind: 'skip', reason: 'dependency_failed' };
+    if (!optional.has(id) && dependency.status === 'skipped' && dependency.skipReason !== 'fresh') {
       return { kind: 'skip', reason: 'dependency_skipped' };
     }
     if (!isTerminalStep(dependency.status)) waiting = true;

@@ -102,7 +102,9 @@ export function planRun(input: PlanInput): Plan {
       planned.set(id, skip('not_registered'));
       continue;
     }
+    const optional = new Set(step.optionalDependencies ?? []);
     const blocked = dependsOn
+      .filter((dependency) => !optional.has(dependency))
       .map((dependency) => planned.get(dependency))
       .find((dependency) => dependency?.status === 'skipped' && dependency.skipReason !== 'fresh');
     if (blocked) {

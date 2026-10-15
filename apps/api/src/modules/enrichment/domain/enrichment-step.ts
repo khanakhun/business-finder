@@ -55,6 +55,11 @@ export interface StepRateLimit {
 export interface EnrichmentStep {
   readonly id: EnrichmentStepId;
   readonly dependsOn: readonly EnrichmentStepId[];
+  /**
+   * Dependencies (among `dependsOn`) that only order this step: it runs after them whatever their outcome — a
+   * skipped or failed one never skips it (e.g. e-mails known without a website are still verified).
+   */
+  readonly optionalDependencies?: readonly EnrichmentStepId[];
   readonly costCategory: EnrichmentCostCategory;
   /** Days an output stays fresh (configuration). */
   readonly ttlDays: number;
@@ -68,4 +73,21 @@ export interface EnrichmentStep {
   /** Overrides the TTL rule when a step knows better (e.g. an output older than its source). */
   isStale?(last: StepOutput, now: Date): boolean;
   execute(execution: StepExecution): Promise<StepResult>;
+}
+
+/**
+ * Thrown by a step that has to wait (a per-domain politeness bucket is empty): the engine puts it back in the queue
+ * for `retryAfterMs` without using an attempt, and books the cost already spent and the fields already changed on the
+ * run. Work done before stays done — a step must make re-running safe (BF-028).
+ */
+export class StepDeferredError extends Error {
+  constructor(
+    readonly retryAfterMs: number,
+    readonly costUsd: number,
+    readonly changedFields: readonly string[] = [],
+    message = 'Step deferred',
+  ) {
+    super(message);
+    this.name = 'StepDeferredError';
+  }
 }

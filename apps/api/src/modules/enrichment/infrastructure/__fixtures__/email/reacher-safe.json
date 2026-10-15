@@ -1,0 +1,24 @@
+{
+  "input": "contact@salon-ondine.example.com",
+  "is_reachable": "safe",
+  "misc": { "is_disposable": false, "is_role_account": true, "gravatar_url": null, "haveibeenpwned": null },
+  "mx": {
+    "accepts_mail": true,
+    "records": ["aspmx.l.google.com.", "alt1.aspmx.l.google.com."]
+  },
+  "smtp": {
+    "can_connect_smtp": true,
+    "has_full_inbox": false,
+    "is_catch_all": false,
+    "is_deliverable": true,
+    "is_disabled": false
+  },
+  "syntax": {
+    "address": "contact@salon-ondine.example.com",
+    "domain": "salon-ondine.example.com",
+    "is_valid_syntax": true,
+    "username": "contact",
+    "normalized_email": "contact@salon-ondine.example.com",
+    "suggestion": null
+  }
+}

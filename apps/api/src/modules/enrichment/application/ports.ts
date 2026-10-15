@@ -1,11 +1,15 @@
 import type {
+  EmailVerifierId,
   EnrichmentRunStatus,
   EnrichmentSkipReason,
   EnrichmentStepId,
   EnrichmentStepStatus,
   EnrichmentTrigger,
   SiteIntel,
+  SMTP_PROBE_ERRORS,
+  VerificationStatus,
 } from '@bf/contracts';
+import type { EmailCheck } from '../domain/email-verification.ts';
 import type { EnrichmentSubject, StepOutput } from '../domain/enrichment-step.ts';
 
 // Ports of the enrichment module (BF-027).
@@ -126,7 +130,14 @@ export interface EnrichmentRepository {
     stepRowId: string,
     error: string | null,
     at: Date,
-    options?: { readonly refund?: boolean; readonly notBefore?: Date },
+    options?: {
+      readonly refund?: boolean;
+      readonly notBefore?: Date;
+      /** Cost already spent by the released attempt (a deferred step), booked on the step and its run. */
+      readonly costUsd?: number;
+      /** Golden-record fields the released attempt already changed (added to the run's). */
+      readonly changedFields?: readonly string[];
+    },
   ): Promise<StepRecord | undefined>;
   /** running → terminal, adding its cost and changed fields to the run; false when it was not running. */
   completeStep(stepRowId: string, completion: StepCompletion, at: Date): Promise<boolean>;
@@ -264,3 +275,75 @@ export interface NoSolicitationMarker {
   readonly snippet: string | null;
   readonly clearedAt: Date | null;
 }
+
+// E-mail verification (BF-028).
+
+export type SmtpProbeError = (typeof SMTP_PROBE_ERRORS)[number];
+
+/** One verifier of the chain (Adapter): Reacher, a commercial API, DNS. */
+export interface EmailVerifier {
+  readonly id: EmailVerifierId;
+  /** Whether this deployment (and workspace: its key) can use it at all. */
+  available(organizationId: string): Promise<boolean>;
+  /** Checks one normalized address. Throws on failure (transient errors are typed `ExternalServiceError`). */
+  verify(
+    email: string,
+    context: { readonly organizationId: string; readonly signal: AbortSignal },
+  ): Promise<EmailCheck>;
+}
+export const EMAIL_VERIFIER_LIST = Symbol('EmailVerifierList');
+
+export interface CachedVerdict {
+  readonly check: EmailCheck;
+  readonly checkedAt: Date;
+  readonly expiresAt: Date;
+  /** Consecutive inconclusive checks (backoff); 0 after a conclusive one. */
+  readonly inconclusiveStreak: number;
+}
+
+/** Verdicts by address, shared by every workspace: a mailbox is asked at most once per TTL. */
+export interface EmailVerdictCache {
+  get(email: string): Promise<CachedVerdict | undefined>;
+  put(email: string, verdict: CachedVerdict): Promise<void>;
+}
+export const EMAIL_VERDICT_CACHE = Symbol('EmailVerdictCache');
+
+/**
+ * Addresses that must not be checked (unsubscribed, objected): looked up before any verifier is called. No-op
+ * until outreach suppression lists exist (BF-049).
+ */
+export interface EmailSuppressionCheck {
+  isSuppressed(organizationId: string, email: string): Promise<boolean>;
+}
+export const EMAIL_SUPPRESSION = Symbol('EmailSuppressionCheck');
+
+/** A business's e-mail contact as verification sees it (read-only view of business-graph contacts). */
+export interface EmailContactView {
+  readonly id: string;
+  readonly businessId: string;
+  readonly email: string;
+  readonly verificationStatus: VerificationStatus;
+  readonly verifiedAt: Date | null;
+}
+
+export interface EmailContactReader {
+  listForBusiness(businessId: string): Promise<EmailContactView[]>;
+  /** Any contact by id (its type tells whether it can be verified). */
+  find(
+    contactId: string,
+  ): Promise<{ readonly id: string; readonly businessId: string; readonly type: string } | undefined>;
+  /** Names of people the business's contacts mention (pattern guessing). */
+  personNames(businessId: string): Promise<string[]>;
+}
+export const EMAIL_CONTACT_READER = Symbol('EmailContactReader');
+
+/** Port 25 towards a large mail provider's MX (Settings → Integrations diagnostic). */
+export interface SmtpPortProbe {
+  probe(signal: AbortSignal): Promise<{
+    readonly reachable: boolean;
+    readonly host: string | null;
+    readonly latencyMs: number | null;
+    readonly error: SmtpProbeError | null;
+  }>;
+}
+export const SMTP_PORT_PROBE = Symbol('SmtpPortProbe');

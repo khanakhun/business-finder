@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { setTransactionalDb } from '../../platform/db/transactional.ts';
 import type { EventRecorder } from '../../platform/events/event-recorder.ts';
 import type { RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
-import type { EnrichmentStep } from '../domain/enrichment-step.ts';
+import { type EnrichmentStep, StepDeferredError } from '../domain/enrichment-step.ts';
 import type {
   EnrichmentQueue,
   EnrichmentRepository,
@@ -233,6 +233,32 @@ describe('EnrichmentOrchestrator.executeStep', () => {
     expect(queue.step).toHaveBeenCalledWith(expect.objectContaining({ attempt: 0 }), 'org-1', 'manual', {
       delayMs: 60_000,
       retryKey: `cb${NOW.getTime()}`,
+    });
+  });
+
+  it('requeues a step that defers itself, without an attempt, booking what it spent and changed', async () => {
+    const { orchestrator, runs, queue } = harness(async () => {
+      throw new StepDeferredError(9_000, 0.016, ['contacts']);
+    });
+    await orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(runs.releaseStep).toHaveBeenCalledWith('step-1', null, NOW, {
+      refund: true,
+      notBefore: new Date(NOW.getTime() + 9_000),
+      costUsd: 0.016,
+      changedFields: ['contacts'],
+    });
+    expect(queue.step).toHaveBeenCalledWith(expect.objectContaining({ attempt: 0 }), 'org-1', 'manual', {
+      delayMs: 9_000,
+      retryKey: `df${NOW.getTime()}`,
+    });
+    // Bounded: never sooner than a second, never later than ten minutes.
+    const late = harness(async () => {
+      throw new StepDeferredError(3_600_000, 0);
+    });
+    await late.orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(late.queue.step).toHaveBeenCalledWith(expect.anything(), 'org-1', 'manual', {
+      delayMs: 600_000,
+      retryKey: `df${NOW.getTime()}`,
     });
   });
 

@@ -339,8 +339,15 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
     stepRowId: string,
     error: string | null,
     _at: Date,
-    options: { readonly refund?: boolean; readonly notBefore?: Date } = {},
+    options: {
+      readonly refund?: boolean;
+      readonly notBefore?: Date;
+      readonly costUsd?: number;
+      readonly changedFields?: readonly string[];
+    } = {},
   ): Promise<StepRecord | undefined> {
+    const spent = options.costUsd ?? 0;
+    const changed = [...(options.changedFields ?? [])];
     const [row] = await this.x
       .update(enrichmentSteps)
       .set({
@@ -350,9 +357,19 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
         jobId: null,
         notBefore: options.notBefore ?? null,
         ...(options.refund ? { attempt: sql`greatest(${enrichmentSteps.attempt} - 1, 0)` } : {}),
+        ...(spent > 0 ? { costUsd: sql`${enrichmentSteps.costUsd} + ${spent}` } : {}),
       })
       .where(and(eq(enrichmentSteps.id, stepRowId), eq(enrichmentSteps.status, 'running')))
       .returning();
+    if (row && (spent > 0 || changed.length > 0)) {
+      await this.x
+        .update(enrichmentRuns)
+        .set({
+          costUsd: sql`${enrichmentRuns.costUsd} + ${spent}`,
+          changedFields: sql`ARRAY(SELECT DISTINCT f FROM unnest(${enrichmentRuns.changedFields} || ${textArray(changed)}) AS f ORDER BY f)`,
+        })
+        .where(eq(enrichmentRuns.id, row.runId));
+    }
     return row ? toStep(row) : undefined;
   }
 
@@ -361,7 +378,8 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
       .update(enrichmentSteps)
       .set({
         status: completion.status,
-        costUsd: completion.costUsd,
+        // Adds to what deferred attempts already booked.
+        costUsd: sql`${enrichmentSteps.costUsd} + ${completion.costUsd}`,
         finishedAt: at,
         heartbeatAt: null,
         jobId: null,

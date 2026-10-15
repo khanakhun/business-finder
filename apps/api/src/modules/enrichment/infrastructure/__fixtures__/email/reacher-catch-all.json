@@ -1,0 +1,21 @@
+{
+  "input": "anything@villa-corail.example.com",
+  "is_reachable": "risky",
+  "misc": { "is_disposable": false, "is_role_account": false, "gravatar_url": null, "haveibeenpwned": null },
+  "mx": { "accepts_mail": true, "records": ["villa-corail-example-com.mail.protection.outlook.com."] },
+  "smtp": {
+    "can_connect_smtp": true,
+    "has_full_inbox": false,
+    "is_catch_all": true,
+    "is_deliverable": true,
+    "is_disabled": false
+  },
+  "syntax": {
+    "address": "anything@villa-corail.example.com",
+    "domain": "villa-corail.example.com",
+    "is_valid_syntax": true,
+    "username": "anything",
+    "normalized_email": "anything@villa-corail.example.com",
+    "suggestion": null
+  }
+}

@@ -76,11 +76,22 @@ describe('notifications', () => {
     // (The member joining may have notified the owner meanwhile.)
     expect((await unread(owner)).items.map((n) => n.id)).not.toContain(first.id);
 
+    const beforeTests = (await unread(owner)).items.filter((n) => n.type === 'system_test').length;
     await owner.post('/v1/notifications/test').expect(202);
     await owner.post('/v1/notifications/test').expect(202);
+    // Wait for everything in flight: both test notifications and the member-joined one (all asynchronous).
     await expect
-      .poll(async () => (await unread(owner)).unreadCount, { timeout: 10_000 })
-      .toBeGreaterThanOrEqual(2);
+      .poll(
+        async () => {
+          const items = (await unread(owner)).items;
+          return (
+            items.filter((n) => n.type === 'system_test').length >= beforeTests + 2 &&
+            items.some((n) => n.type === 'member_joined')
+          );
+        },
+        { timeout: 15_000 },
+      )
+      .toBe(true);
     await owner.post('/v1/notifications/read-all').expect(204);
     expect((await unread(owner)).unreadCount).toBe(0);
     const all = await owner.get('/v1/notifications?limit=2').expect(200);

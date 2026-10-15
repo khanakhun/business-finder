@@ -98,6 +98,7 @@ export class GoldenRecordWriter {
       if (
         current &&
         (current.publishedOnSite || !contact.publishedOnSite) &&
+        (current.publishedContext !== null || contact.publishedContext === null) &&
         current.confidence >= contact.confidence
       ) {
         continue;
@@ -109,6 +110,7 @@ export class GoldenRecordWriter {
         source: contact.source,
         sourceUrl: contact.sourceUrl,
         publishedOnSite: contact.publishedOnSite,
+        publishedContext: contact.publishedContext,
         confidence: contact.confidence,
         submittedByOrgId: contact.submittedByOrgId,
       });

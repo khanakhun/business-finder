@@ -14,6 +14,9 @@ export const toContact = (record: ContactRecord): Contact => ({
   confidence: record.confidence,
   verificationStatus: record.verificationStatus,
   verifiedAt: record.verifiedAt?.toISOString() ?? null,
+  verificationDetails: record.verificationDetails,
+  isFreeMail: record.isFreeMail,
+  publishedContext: record.publishedContext,
   firstSeenAt: record.firstSeenAt.toISOString(),
   lastSeenAt: record.lastSeenAt.toISOString(),
 });

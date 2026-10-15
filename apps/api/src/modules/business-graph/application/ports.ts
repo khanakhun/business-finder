@@ -1,4 +1,11 @@
-import type { AddedVia, BusinessDetail, ContactType, PipelineStatus, SourceProvider } from '@bf/contracts';
+import type {
+  AddedVia,
+  BusinessDetail,
+  ContactType,
+  EmailVerificationDetails,
+  PipelineStatus,
+  SourceProvider,
+} from '@bf/contracts';
 import type { Business } from '../domain/business.entity.ts';
 import type { BusinessContactProps } from '../domain/business-contact.ts';
 
@@ -21,6 +28,7 @@ export const BUSINESS_REPOSITORY = Symbol('BusinessRepository');
 export interface ContactRecord extends BusinessContactProps {
   readonly verificationStatus: 'unknown' | 'valid' | 'invalid' | 'catch_all' | 'risky' | 'disposable';
   readonly verifiedAt: Date | null;
+  readonly verificationDetails: EmailVerificationDetails | null;
   readonly firstSeenAt: Date;
   readonly lastSeenAt: Date;
 }
@@ -28,6 +36,17 @@ export interface ContactRecord extends BusinessContactProps {
 export interface ContactRepository {
   listByBusiness(businessId: string): Promise<ContactRecord[]>;
   find(businessId: string, type: ContactType, normalizedValue: string): Promise<ContactRecord | undefined>;
+  /** Sets the verdict on the business's e-mail contact; false when there is none or nothing changed. */
+  recordVerification(
+    businessId: string,
+    email: string,
+    verdict: {
+      readonly status: ContactRecord['verificationStatus'];
+      readonly details: EmailVerificationDetails;
+      readonly verifiedAt: Date;
+      readonly isFreeMail: boolean;
+    },
+  ): Promise<boolean>;
 }
 export const CONTACT_REPOSITORY = Symbol('ContactRepository');
 

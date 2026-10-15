@@ -6,6 +6,7 @@ import {
   TrackBusinessCommand,
 } from './application/business.commands.ts';
 import { GetBusinessDetailQuery, ListContactsQuery } from './application/business.queries.ts';
+import { RecordEmailVerificationCommand } from './application/contacts/record-email-verification.command.ts';
 import {
   ReplaceWebsiteMediaCommand,
   WEBSITE_MEDIA_REPOSITORY,
@@ -98,6 +99,7 @@ export class BusinessGraphModule {
         GoldenRecordWriter,
         IngestSourceRecordCommand,
         ReplaceWebsiteMediaCommand,
+        RecordEmailVerificationCommand,
         { provide: WEBSITE_MEDIA_REPOSITORY, useClass: DrizzleWebsiteMediaRepository },
         IngestBatchCommand,
         { provide: MERGE_REPOSITORY, useClass: DrizzleMergeRepository },
@@ -125,6 +127,7 @@ export class BusinessGraphModule {
         CategoryCandidateSearch,
         IngestSourceRecordCommand,
         ReplaceWebsiteMediaCommand,
+        RecordEmailVerificationCommand,
         IngestBatchCommand,
       ],
     };

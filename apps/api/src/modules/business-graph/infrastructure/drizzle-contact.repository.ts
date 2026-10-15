@@ -2,7 +2,7 @@ import type { ContactType } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { businessContacts } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { ContactRecord, ContactRepository } from '../application/ports.ts';
 
@@ -17,10 +17,13 @@ export const toContactRecord = (row: typeof businessContacts.$inferSelect): Cont
   source: row.source,
   sourceUrl: row.sourceUrl,
   publishedOnSite: row.publishedOnSite,
+  publishedContext: row.publishedContext,
+  isFreeMail: row.isFreeMail,
   confidence: row.confidence,
   submittedByOrgId: row.submittedByOrgId,
   verificationStatus: row.verificationStatus,
   verifiedAt: row.verifiedAt,
+  verificationDetails: row.verificationDetails,
   firstSeenAt: row.firstSeenAt,
   lastSeenAt: row.lastSeenAt,
 });
@@ -54,5 +57,36 @@ export class DrizzleContactRepository implements ContactRepository {
         ),
       );
     return row ? toContactRecord(row) : undefined;
+  }
+
+  async recordVerification(
+    businessId: string,
+    email: string,
+    verdict: Parameters<ContactRepository['recordVerification']>[2],
+  ): Promise<boolean> {
+    const details = JSON.stringify(verdict.details);
+    const rows = await getExecutor(this.db)
+      .update(businessContacts)
+      .set({
+        verificationStatus: verdict.status,
+        verificationDetails: verdict.details,
+        verifiedAt: verdict.verifiedAt,
+        isFreeMail: verdict.isFreeMail,
+      })
+      .where(
+        and(
+          eq(businessContacts.businessId, businessId),
+          eq(businessContacts.type, 'email'),
+          eq(businessContacts.normalizedValue, email),
+          or(
+            sql`${businessContacts.verificationStatus} IS DISTINCT FROM ${verdict.status}`,
+            sql`${businessContacts.verifiedAt} IS DISTINCT FROM ${verdict.verifiedAt.toISOString()}::timestamptz`,
+            sql`${businessContacts.verificationDetails} IS DISTINCT FROM ${details}::jsonb`,
+            sql`${businessContacts.isFreeMail} IS DISTINCT FROM ${verdict.isFreeMail}`,
+          ),
+        ),
+      )
+      .returning({ id: businessContacts.id });
+    return rows.length > 0;
   }
 }

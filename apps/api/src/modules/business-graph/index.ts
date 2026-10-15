@@ -1,6 +1,10 @@
 // Public surface of the business-graph module: other modules import only from here.
 
 export {
+  type EmailVerdict,
+  RecordEmailVerificationCommand,
+} from './application/contacts/record-email-verification.command.ts';
+export {
   ReplaceWebsiteMediaCommand,
   type WebsiteMediaItem,
 } from './application/media/replace-website-media.command.ts';
@@ -33,3 +37,10 @@ export {
   type ProviderCategory,
 } from './application/taxonomy/category-classifier.ts';
 export { BusinessGraphModule } from './business-graph.module.ts';
+export { EmailAddress } from './domain/value-objects/email-address.ts';
+export {
+  classifyEmail,
+  type EmailClassification,
+  isDisposableDomain,
+  matchesWebsiteDomain,
+} from './domain/value-objects/email-classification.ts';

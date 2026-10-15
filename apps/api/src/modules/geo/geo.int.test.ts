@@ -76,6 +76,7 @@ beforeAll(async () => {
     mailer,
     valkeyDb: 3,
     env: {
+      GEOCODER_PROVIDER: 'nominatim',
       NOMINATIM_BASE_URL: nominatimUrl,
       NOMINATIM_CONTACT_EMAIL: 'ops@example.test',
     },

@@ -33,6 +33,8 @@ export const TEST_ENV = {
   INTEL_SHARED_SECRET: 'test-intel-secret-test-intel-secret-00',
   // Supertest connects from loopback: treat it as the reverse proxy so tests can set per-user client IPs.
   AUTH_TRUSTED_PROXIES: '127.0.0.1,::1',
+  // No real geocoding from tests: the geo tests point Nominatim at a local server explicitly.
+  GEOCODER_PROVIDER: 'none',
 } as const;
 
 export interface TestAppOptions {

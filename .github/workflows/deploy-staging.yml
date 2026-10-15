@@ -1,0 +1,131 @@
+# Deploys every green main build to staging (BF-025, docs/runbooks/staging-setup.md): the images CI pushed for that
+# commit are pulled on the server, migrations run, containers update, and the health gate (through Caddy) decides
+# between keeping the release and rolling back to the previous tag. One deploy at a time.
+#
+# Trust: the deploy script and compose file always come from main (this workflow's own checkout), the image sha must
+# be a commit of main, and the SSH key can only run the forced command infra/deploy/ssh-command.sh on the server
+# (current, upload, login, logout, deploy <sha>). Restrict the `staging` environment to the main branch.
+#
+# Repository configuration (Settings → Environments → staging, deployment branches: main only):
+#   secrets  STAGING_HOST, STAGING_USER, STAGING_SSH_KEY (deploy key, private), STAGING_KNOWN_HOSTS (ssh-keyscan
+#            output, verified out of band — never fetched during the job)
+#   vars     STAGING_BASE_DOMAIN (app.<it> and api.<it>)
+name: deploy-staging
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Git sha of a main commit whose images to deploy (default — the latest main commit)
+        required: false
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # The server logs in to GHCR with this job's token to pull the images.
+  packages: read
+
+jobs:
+  deploy:
+    name: deploy (staging)
+    if: >-
+      github.ref == 'refs/heads/main' && (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.event == 'push' &&
+         github.event.workflow_run.head_repository.full_name == github.repository)
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://app.${{ vars.STAGING_BASE_DOMAIN }}
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}
+      BASE_DOMAIN: ${{ vars.STAGING_BASE_DOMAIN }}
+      MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Validate the tag
+        run: |
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "image_tag must be a full git sha"; exit 1; }
+          [ -n "$BASE_DOMAIN" ] || { echo "vars.STAGING_BASE_DOMAIN is not set"; exit 1; }
+
+      # main itself (never the image commit): the scripts that run on the server are the reviewed ones.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: The image sha must be a commit of main
+        run: |
+          git merge-base --is-ancestor "$IMAGE_TAG" HEAD \
+            || { echo "$IMAGE_TAG is not on main: refusing to deploy it"; exit 1; }
+
+      - name: SSH key and pinned host key
+        env:
+          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          STAGING_KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$STAGING_SSH_KEY" > ~/.ssh/staging
+          printf '%s\n' "$STAGING_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/staging ~/.ssh/known_hosts
+          {
+            echo "Host staging"
+            echo "  HostName $STAGING_HOST"
+            echo "  User $STAGING_USER"
+            echo "  IdentityFile ~/.ssh/staging"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+            echo "  UserKnownHostsFile ~/.ssh/known_hosts"
+            echo "  ConnectTimeout 15"
+            echo "  ServerAliveInterval 30"
+          } > ~/.ssh/config
+
+      # workflow_run gives no order guarantee: an older build finishing late must not replace a newer release.
+      - id: order
+        name: Skip a build older than the deployed one
+        run: |
+          current="$(ssh staging current || true)"
+          echo "deployed: ${current:-none}"
+          if [ "$MANUAL" != true ] && [[ "$current" =~ ^[0-9a-f]{40}$ ]] && [ "$current" != "$IMAGE_TAG" ] \
+             && git merge-base --is-ancestor "$IMAGE_TAG" "$current" 2>/dev/null; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$IMAGE_TAG is older than the deployed $current: skipped"
+          fi
+
+      - name: Upload the compose file and deploy script (from main)
+        if: steps.order.outputs.skip != 'true'
+        run: |
+          tar -C infra -cf - --transform 's#^.*/##' compose/docker-compose.prod.yml deploy/deploy.sh \
+            | ssh staging upload "$IMAGE_TAG"
+
+      - name: Pull access to GHCR on the server (this job's token)
+        if: steps.order.outputs.skip != 'true'
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+        run: printf '%s' "$REGISTRY_TOKEN" | ssh staging login "$REGISTRY_USER"
+
+      - name: Deploy (migrate, start, health gate, automatic rollback)
+        if: steps.order.outputs.skip != 'true'
+        run: ssh staging deploy "$IMAGE_TAG"
+
+      - name: Forget the registry token and the SSH key
+        if: always()
+        run: |
+          [ -f ~/.ssh/staging ] && { ssh staging logout || true; }
+          rm -f ~/.ssh/staging ~/.ssh/config
+
+      - name: Smoke test from outside
+        if: steps.order.outputs.skip != 'true'
+        run: node scripts/smoke-staging.mjs "https://app.${BASE_DOMAIN}" "https://api.${BASE_DOMAIN}" "$IMAGE_TAG"

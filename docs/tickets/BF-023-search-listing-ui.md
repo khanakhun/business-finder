@@ -73,12 +73,51 @@ apps/web/src/features/search/{prompt-bar.tsx, intent-chips/*, results-table.tsx,
 - E2E (Playwright, fake providers): FR prompt → chips → results; edit category chip → results change; save search → reload page → restored; select 3 rows → add to list; discovery estimate → start → progress → results appear → completion toast; map toggle shows markers; keyboard navigation; axe checks.
 
 ## Acceptance criteria
-- [ ] `/search` supports prompt → editable chips → results (table + map) with facets, EN/FR.
-- [ ] URL fully represents the search; back/forward and sharing work.
-- [ ] Saved searches and lists usable end-to-end.
-- [ ] Bulk actions via registry (list, tags, status, export) with permissions.
-- [ ] Discovery panel with estimate, live progress, cancel; results stream into the table.
-- [ ] E2E and a11y tests pass.
+- [x] `/search` supports prompt → editable chips → results (table + map) with facets, EN/FR.
+- [x] URL fully represents the search; back/forward and sharing work.
+- [x] Saved searches and lists usable end-to-end.
+- [ ] Bulk actions via registry (list, tags, status, export) with permissions. *List and export work; tags and
+  status are registered but disabled until the CRM APIs exist (BF-024 replaces them by id) — see the notes.*
+- [x] Discovery panel with estimate, live progress, cancel; results stream into the table.
+- [x] E2E and a11y tests pass.
+
+## Implementation notes (BF-023)
+- **URL is the state** (`features/search/url-state.ts`, nuqs): filter parameters use the API's own names
+  (`category`, `rating[gte]`, `status`…), so the URL, the `GET /v1/businesses` call and a saved search share one
+  shape; plus `prompt`, `sort`, `view`, `mode` and `run` (a discovery run the table follows). The cursor is *not*
+  in the URL: the table scrolls infinitely, pages are client-side. One nuqs instance serves the whole page
+  (context) and every update merges into the full state — a partial nuqs update let the router's lagging search
+  params drop other keys (Next 16 shallow `pushState`).
+- **Prompt → chips**: parsing (`POST /v1/search/intent`) replaces the filters with the intent's; editing chips never
+  re-parses. Ambiguous places come back as clarification options; picking one sets the place. Places resolve to a
+  stored area (`area=`) or a point and radius (`near=`, `radiusKm=`). Pain signals, languages and price levels from
+  the intent wait for later tickets' filters.
+- **Table**: `@bf/ui` DataTable (now exported as `@bf/ui/data-table`) with virtualisation, infinite scroll
+  (`onEndReached`), a keyboard cursor (`activeRowId`) and hover sync with the map (`highlightedRowId`). Rows open a
+  summary sheet until the business page exists (BF-024). Score/last-activity columns are hidden by default.
+- **API additions** (BF-022 contracts): list items carry `hasEmail` and `addedVia`; the listing takes an `id` filter
+  (≤ 200, exporting a selection) and a `run` filter (businesses a discovery run added: `added_ref`).
+- **Map**: MapLibre via `react-map-gl/maplibre`, loaded only when opened; style from `NEXT_PUBLIC_MAP_STYLE_URL`
+  (OpenFreeMap by default; the CSP allows its origin and blob workers). MapLibre's worker is served from
+  `/maplibre/` (copied by `scripts/next.mjs`; the bundle cannot resolve it next to the module). Clusters, area
+  outline, rectangle/polygon drawing that saves a workspace area (`POST /v1/geo/areas`) and searches inside it.
+- **Facets**: counts from `/facets`; clicks toggle filters. Places have no API filter, so a place applies as a
+  keyword (the full-text document includes locality).
+- **Bulk actions**: `registerBulkAction({ id, labelKey, icon, permission, order, allowEmptySelection,
+  disabledReason, run })`; the bar hides actions the user may not do and explains disabled ones in a tooltip.
+  Shipped: add to list (dialog, create inline), export CSV (selection by id, else every result). Registered
+  placeholders: tags and status (`crm.set-tags`, `crm.set-status` — the CRM owns transitions, BF-024), create sites
+  (BF-046), email/enroll (M4).
+- **Discovery panel**: ready providers (toggle), budget, auto-enrich, estimate → start (idempotency key) → live
+  progress from realtime events plus polling (2 s) as a fallback, cancel; the table follows the run (`run=` filter,
+  refreshed on progress); a completion toast for runs started in this tab.
+- **Keyboard**: `/` prompt, `j`/`k` move, `x` select, `Enter` open, `m` table/map, `s` save; ignored while typing or
+  with a dialog open (Enter/x also when a control has focus). A new query clears the selection. Website links are
+  rendered only for http(s) URLs (provider data is untrusted). Palette commands: new search, run discovery, saved searches, lists.
+- **Toasts**: `ToastHost` loads sonner explicitly instead of `React.lazy` — the lazy boundary's retry stayed pending
+  on `/search`, so no toast ever showed there.
+- **Follow-ups**: tags/status bulk actions (BF-024); saved-search notifications; drawing on touch devices; map
+  markers for more than the loaded pages; INP measurement under load.
 
 ## Agent prompt
 ```text

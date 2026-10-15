@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type * as React from 'react';
 import { AppShell } from '@/components/shell/app-shell.tsx';
 import { WorkspaceGate } from '@/components/shell/workspace-gate.tsx';
@@ -16,7 +17,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <SessionProvider me={me}>
       <RealtimeProvider enabled={me.activeOrganization !== null}>
         <AppShell>
-          <WorkspaceGate>{children}</WorkspaceGate>
+          <WorkspaceGate>
+            {/* URL state (search filters, views) for every dashboard page. */}
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </WorkspaceGate>
         </AppShell>
       </RealtimeProvider>
     </SessionProvider>

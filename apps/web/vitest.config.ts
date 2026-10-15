@@ -10,7 +10,15 @@ export default mergeConfig(
     plugins: [react()],
     setupFiles: ['./src/test-setup.ts'],
     // Logic is unit-tested; pages and shell composition are covered by Playwright (pnpm e2e).
-    coverageInclude: ['src/lib/**', 'src/i18n/locales.ts', 'src/proxy.ts', 'src/components/states/**'],
+    coverageInclude: [
+      'src/lib/**',
+      'src/i18n/locales.ts',
+      'src/proxy.ts',
+      'src/components/states/**',
+      // Feature logic (URL state, registries); feature components and hooks are covered by Playwright.
+      'src/features/search/url-state.ts',
+      'src/features/search/bulk-actions/registry.ts',
+    ],
   }),
   {
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },

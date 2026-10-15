@@ -9,6 +9,10 @@ export const webPublicEnv = z.object({
     .url()
     .default('http://localhost:3000')
     .describe('Dashboard URL used by the browser.'),
+  NEXT_PUBLIC_MAP_STYLE_URL: z
+    .url()
+    .default('https://tiles.openfreemap.org/styles/liberty')
+    .describe('MapLibre style for the search map (OpenFreeMap by default: free, no key, OSM attribution).'),
 });
 
 export const webEnv = z.object({

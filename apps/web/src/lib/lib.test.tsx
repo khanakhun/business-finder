@@ -53,6 +53,19 @@ describe('buildCsp', () => {
     expect(csp).toContain('upgrade-insecure-requests');
   });
 
+  it('lets the search map load tiles from its origin and run blob workers', () => {
+    const map = buildCsp('n', {
+      dev: false,
+      apiOrigin: 'https://api.example',
+      https: true,
+      mapOrigin: 'https://tiles.example',
+    });
+    expect(map).toContain("connect-src 'self' https://api.example https://tiles.example");
+    expect(map).toContain("img-src 'self' blob: data: https://tiles.example");
+    expect(map).toContain("worker-src 'self' blob:");
+    expect(csp).not.toContain('tiles.example');
+  });
+
   it('allows eval and websockets only in development, and skips upgrades over http', () => {
     const dev = buildCsp('n', { dev: true, apiOrigin: 'http://localhost:4000', https: false });
     expect(dev).toContain("'unsafe-eval'");

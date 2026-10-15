@@ -31,6 +31,14 @@ export const queryKeys = {
   discovery: defineQueryKeys('discovery', {
     providers: () => ['discovery', 'providers'] as const,
     scraper: () => ['discovery', 'scraper'] as const,
+    run: (id: string) => ['discovery', 'run', id] as const,
+  }),
+  search: defineQueryKeys('search', {
+    listing: (query: Readonly<Record<string, string | string[]>>) => ['search', 'listing', query] as const,
+    facets: (query: Readonly<Record<string, string | string[]>>) => ['search', 'facets', query] as const,
+    saved: () => ['search', 'saved'] as const,
+    lists: () => ['search', 'lists'] as const,
+    list: (id: string) => ['search', 'list', id] as const,
   }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,

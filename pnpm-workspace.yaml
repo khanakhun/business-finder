@@ -57,6 +57,10 @@ catalog:
   # Ticket/ARCHITECTURE specify v8; v9 (Aug 2026) changes the API.
   '@tanstack/react-table': 8.21.3
   '@tanstack/react-virtual': 3.14.19
+  # BF-023: URL state and the map (MapLibre via react-map-gl's maplibre entry; no Mapbox token).
+  nuqs: 2.10.1
+  react-map-gl: 8.1.3
+  maplibre-gl: 6.12.0
   openapi-typescript: 7.13.0
   openapi-fetch: 0.17.0
   radix-ui: 1.8.1

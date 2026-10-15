@@ -56,3 +56,6 @@ packages/ai/evals/reports/*
 
 # Open-data extracts cached by services/intel (BF-019)
 services/intel/.cache/
+
+# Copied from maplibre-gl by apps/web/scripts/next.mjs (BF-023).
+apps/web/public/maplibre/

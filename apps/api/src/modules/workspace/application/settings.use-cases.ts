@@ -68,6 +68,8 @@ export class UpdateSettingsCommand {
     const patch = {
       ...sent,
       ...(body.features ? { features: { ...current.features, ...body.features } } : {}),
+      // Discovery choices merge too: sending only the Google tier keeps the provider order.
+      ...(body.discovery ? { discovery: { ...current.discovery, ...definedOnly(body.discovery) } } : {}),
     } as OrgSettingsPatch;
     const saved = await this.settings.upsert(orgId, patch, auth.userId);
     await this.audit.record({
@@ -75,11 +77,18 @@ export class UpdateSettingsCommand {
       action: 'settings.updated',
       entityType: 'org_settings',
       entityId: orgId,
-      metadata: { changed: Object.keys(sent).sort(), ...(body.features ? { features: body.features } : {}) },
+      metadata: {
+        changed: Object.keys(sent).sort(),
+        ...(body.features ? { features: body.features } : {}),
+        ...(body.discovery ? { discovery: Object.keys(definedOnly(body.discovery)).sort() } : {}),
+      },
     });
     return toOrgSettings(saved, this.env);
   }
 }
+
+const definedOnly = <T extends object>(value: T): Partial<T> =>
+  Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as Partial<T>;
 
 @Injectable()
 export class LogoUseCases {

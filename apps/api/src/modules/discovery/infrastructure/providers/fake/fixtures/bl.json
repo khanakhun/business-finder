@@ -1,0 +1,235 @@
+[
+  {
+    "providerRef": "fake:bl-001",
+    "name": "Restaurant Fictif La Plage",
+    "providerCategories": [
+      {
+        "key": "restaurant"
+      }
+    ],
+    "location": {
+      "lat": 17.8995,
+      "lng": -62.834
+    },
+    "address": {
+      "city": "Saint-Jean",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 01"],
+    "website": "https://la-plage-fictif.example"
+  },
+  {
+    "providerRef": "fake:bl-002",
+    "name": "Café Exemple Gustavia",
+    "providerCategories": [
+      {
+        "key": "cafe"
+      }
+    ],
+    "location": {
+      "lat": 17.8968,
+      "lng": -62.8503
+    },
+    "address": {
+      "city": "Gustavia",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 02"]
+  },
+  {
+    "providerRef": "fake:bl-003",
+    "name": "Boulangerie Démo Lorient",
+    "providerCategories": [
+      {
+        "key": "bakery"
+      }
+    ],
+    "location": {
+      "lat": 17.904,
+      "lng": -62.818
+    },
+    "address": {
+      "city": "Lorient",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": []
+  },
+  {
+    "providerRef": "fake:bl-004",
+    "name": "Hôtel Imaginaire Flamands",
+    "providerCategories": [
+      {
+        "key": "lodging"
+      }
+    ],
+    "location": {
+      "lat": 17.9148,
+      "lng": -62.856
+    },
+    "address": {
+      "city": "Flamands",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": [],
+    "website": "https://hotel-imaginaire.example"
+  },
+  {
+    "providerRef": "fake:bl-005",
+    "name": "Spa Fictif Grand Cul-de-Sac",
+    "providerCategories": [
+      {
+        "key": "spa"
+      }
+    ],
+    "location": {
+      "lat": 17.9095,
+      "lng": -62.7975
+    },
+    "address": {
+      "city": "Grand Cul-de-Sac",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 05"]
+  },
+  {
+    "providerRef": "fake:bl-006",
+    "name": "Location Voitures Test",
+    "providerCategories": [
+      {
+        "key": "car_rental"
+      }
+    ],
+    "location": {
+      "lat": 17.901,
+      "lng": -62.842
+    },
+    "address": {
+      "city": "Saint-Jean",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 06"],
+    "website": "https://voitures-test.example"
+  },
+  {
+    "providerRef": "fake:bl-007",
+    "name": "Agence Immobilière Exemple",
+    "providerCategories": [
+      {
+        "key": "real_estate_agency"
+      }
+    ],
+    "location": {
+      "lat": 17.8975,
+      "lng": -62.849
+    },
+    "address": {
+      "city": "Gustavia",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": []
+  },
+  {
+    "providerRef": "fake:bl-008",
+    "name": "Boutique Démo Mode",
+    "providerCategories": [
+      {
+        "key": "clothing_store"
+      }
+    ],
+    "location": {
+      "lat": 17.896,
+      "lng": -62.851
+    },
+    "address": {
+      "city": "Gustavia",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": [],
+    "website": "https://boutique-demo.example"
+  },
+  {
+    "providerRef": "fake:bl-009",
+    "name": "Plombier Fictif Corossol",
+    "providerCategories": [
+      {
+        "key": "plumber"
+      }
+    ],
+    "location": {
+      "lat": 17.9005,
+      "lng": -62.864
+    },
+    "address": {
+      "city": "Corossol",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 09"]
+  },
+  {
+    "providerRef": "fake:bl-010",
+    "name": "Électricien Exemple Vitet",
+    "providerCategories": [
+      {
+        "key": "electrician"
+      }
+    ],
+    "location": {
+      "lat": 17.907,
+      "lng": -62.812
+    },
+    "address": {
+      "city": "Vitet",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 10"]
+  },
+  {
+    "providerRef": "fake:bl-011",
+    "name": "Restaurant Test Gouverneur",
+    "providerCategories": [
+      {
+        "key": "restaurant"
+      }
+    ],
+    "location": {
+      "lat": 17.884,
+      "lng": -62.838
+    },
+    "address": {
+      "city": "Gouverneur",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": []
+  },
+  {
+    "providerRef": "fake:bl-012",
+    "name": "Pizzeria Imaginaire",
+    "providerCategories": [
+      {
+        "key": "restaurant"
+      }
+    ],
+    "location": {
+      "lat": 17.8972,
+      "lng": -62.8495
+    },
+    "address": {
+      "city": "Gustavia",
+      "postalCode": "97133",
+      "countryCode": "BL"
+    },
+    "phones": ["+590 590 00 01 12"],
+    "website": "https://pizzeria-imaginaire.example"
+  }
+]

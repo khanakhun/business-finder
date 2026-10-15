@@ -1,6 +1,6 @@
 // Workspace context (BF-011): per-workspace settings, the encrypted secrets vault, the append-only audit log.
 
-import type { FeatureFlags, Locale, PostalAddress, SenderDefaults } from '@bf/contracts';
+import type { DiscoverySettings, FeatureFlags, Locale, PostalAddress, SenderDefaults } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
   check,
@@ -39,6 +39,8 @@ export const orgSettings = pgTable('org_settings', {
   /** Country hint for location resolution (BF-017). */
   defaultCountryCode: text(),
   senderDefaults: jsonb().$type<SenderDefaults>().notNull().default({}),
+  /** Discovery choices (BF-018): provider order, disabled providers, Google field tier, monthly budget. */
+  discovery: jsonb().$type<Partial<DiscoverySettings>>().notNull().default({}),
   features: jsonb().$type<FeatureFlags>().notNull().default({}),
   updatedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
   ...timestamps(),

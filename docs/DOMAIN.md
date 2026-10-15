@@ -12,7 +12,7 @@
 | **Member / Role** | A user in a workspace with role `owner`, `admin`, `member` or `viewer`. Permissions derive from role (see `@bf/contracts/permissions`). |
 | **Business** (golden record) | One real-world business, deduplicated across sources. Global (shared by all workspaces). |
 | **Source record** | A provider's raw view of a business (Google place, Overture place, Foursquare place, crawled website…), stored with payload, provenance and retention TTL. |
-| **Provider** | An adapter that returns source records for a search (category × area). Has capabilities, cost model, rate limits and licensing rules. |
+| **Provider** | An adapter that returns source records for a search (category × area). Has capabilities, cost model, rate limits and licensing rules. Selected per workspace by preference order, settings, configured secrets and monthly budget; every call is metered (`provider_usage`, per SKU, after the billing account's free allowance). |
 | **Provenance** | For each golden-record field: which source, which source id, confidence, observed-at. |
 | **Entity resolution** | Normalize → block → match → merge pipeline that maps source records to golden records. |
 | **Survivorship** | Rules choosing each golden field's value among a business's sources: manual first, then a per-field provider priority, confidence, recency (`SURVIVORSHIP_PRIORITY` in @bf/contracts). Golden records are recomputed from all linked sources, so they never depend on ingestion order. |

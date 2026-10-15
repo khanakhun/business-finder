@@ -70,11 +70,11 @@ A well-indexed, provenance-aware schema for businesses, their sources, contacts,
 - Integration: repository round-trips; optimistic concurrency; detail query org scoping (404 for untracked); manual business + contact creation; geography stored and read with correct lat/lng.
 
 ## Acceptance criteria
-- [ ] Tables, indexes and migration created; `pnpm db:check` clean.
-- [ ] Value objects normalize and validate as specified (tests).
-- [ ] `Business` aggregate enforces invariants and emits events.
-- [ ] Detail and track endpoints with permissions and org scoping (tests for 403/404).
-- [ ] Test factories available for later tickets.
+- [x] Tables, indexes and migration created; `pnpm db:check` clean.
+- [x] Value objects normalize and validate as specified (tests).
+- [x] `Business` aggregate enforces invariants and emits events.
+- [x] Detail and track endpoints with permissions and org scoping (tests for 403/404).
+- [x] Test factories available for later tickets.
 
 ## Agent prompt
 ```text
@@ -97,3 +97,44 @@ Verify: pnpm verify && pnpm test:int && pnpm db:check.
 ## References
 - ADR-0008 · docs/ARCHITECTURE.md §6 · docs/DOMAIN.md
 - libphonenumber-js: https://gitlab.com/catamphetamine/libphonenumber-js · tldts: https://github.com/remusao/tldts
+
+## Implementation notes
+- **Versions** (each published ≥ 1 week before use): `libphonenumber-js` 1.13.15 (`/max` metadata for type
+  detection), `tldts` 7.4.18; both used only inside value objects.
+- **Split**: part 1/2 data model (contracts, schema + migration 0006, value objects, `Business` aggregate,
+  `@bf/testing` factories); part 2/2 API (ports, Drizzle repositories, read model, use cases, controller).
+- **Schema**: new tables follow coding-standards §5 naming (`idx_`/`uq_`/`ck_`; earlier tables use Postgres-style
+  names — see QUESTIONS.md). Enum columns have CHECK constraints built from the `@bf/contracts` lists (sources
+  included, so a new provider needs a migration). Drizzle Kit quotes parameterized custom types, so
+  `geography(Point,4326)` is unquoted by hand in 0006. `business_sources.business_id` is nullable (BF-016 persists a
+  source before matching). `possible_duplicates` stores each pair once (`a < b`). `categories` is a skeleton;
+  `businesses.primary_category_id` FK is already in place. Manual sources/contacts carry `submitted_by_org_id`
+  (attribution per ADR-0008, never returned by the API).
+- **Domain**: value objects reject with `InvalidValueError` (422, `reason: INVALID_<KIND>`). `WebsiteUrl` keeps scheme
+  and host in `canonical`, strips tracking params, rejects IP literals, custom ports and non-ICANN domains; shared
+  hosts (`*.wixsite.com`, social networks…) get no registrable domain for matching (`matchKey` uses host + first
+  path segment). `BusinessName` strips legal forms at the end, and only unambiguous French forms at the start
+  (`Sci Fi Café`, `Beach Club Spa` survive). Social contacts: allow-listed networks, business pages only
+  (`linkedin.com/in/…`, `facebook.com/profile.php` rejected). `GeoPoint` rejects `(0, 0)`.
+- **Aggregate**: `updateField(value, provenance, survivorship?)` with a default strategy (manual wins, then
+  confidence, then recency; full rules in BF-016); provenance kept for every non-null golden field (checked on
+  rehydrate); losing observations still update `last_seen_at`; ratings rounded to the column's precision. Events:
+  `business.created` (initial values and contacts folded in), one `business.updated` per save with the changed
+  fields, `business.merged`. Merged records are read-only. "Exactly one primary category" is "at most one" until
+  BF-015 classifies (partial unique index; DOMAIN.md updated).
+- **Persistence**: `save()` inserts new aggregates (`isNew`, not `version = 0`), updates changed rows with
+  `WHERE version = n` (stale → `ConcurrentModificationError`, 409), and upserts contacts on their own key —
+  adding a contact does not bump the version, so concurrent additions never conflict. Contact upserts keep the
+  first source, raise confidence and set `published_on_site` once any source saw it on the site.
+- **API**: `GET /v1/businesses` (tracked, newest first, keyset cursor with microsecond precision),
+  `POST /v1/businesses`, `GET /v1/businesses/:id`, `POST /v1/businesses/:id/track` (201 added / 200 already tracked,
+  409 for merged records), `GET|POST /v1/businesses/:id/contacts`. Everything except track returns 404 unless the
+  workspace tracks the business. Manual add, track and contact add are audit-logged. Manual contacts accept no
+  person names (contacts are shared facts). `CreateManualBusinessCommand` has a `TODO(BF-016)` to go through
+  ingestion.
+- **Performance**: detail read model p95 3.1 ms, HTTP p95 8.6 ms locally (requirement < 50 ms).
+- **Reviews** (fixed): IP/port websites, social allow-list and personal profiles, workspace attribution, cursor
+  bounds, contact-only saves, `isNew`, verbatim manual address, legal-form stripping, rating precision, contact
+  provenance refresh, `website_host` and listing indexes, source CHECKs, track audit.
+- **Tests**: API 291 unit (business-graph domain 81, 92% branches) / 106 integration (14 business-graph),
+  `@bf/testing` factories 5.

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "seafood restaurants with a score above 70",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "preschool",
+        "labelEn": "Preschool",
+        "labelFr": "École maternelle",
+        "path": "education › school › preschool"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "car_dealer",
+        "labelEn": "Car dealer",
+        "labelFr": "Concessionnaire automobile",
+        "path": "automotive_transport › automotive_services › car_dealer"
+      },
+      {
+        "id": "metalwork",
+        "labelEn": "Metalwork",
+        "labelFr": "Ferronnerie et métallerie",
+        "path": "home_construction › structural_work › metalwork"
+      },
+      {
+        "id": "real_estate",
+        "labelEn": "Real estate",
+        "labelFr": "Immobilier",
+        "path": "real_estate"
+      },
+      {
+        "id": "boat_excursion",
+        "labelEn": "Boat trips & excursions",
+        "labelFr": "Excursions en mer",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "paddle_kayak_rental",
+        "labelEn": "Paddle & kayak rental",
+        "labelFr": "Location de paddle et kayak",
+        "path": "marine_nautical › water_sports › paddle_kayak_rental"
+      },
+      {
+        "id": "dental",
+        "labelEn": "Dental care",
+        "labelFr": "Soins dentaires",
+        "path": "health_medical › dental"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["seafood_restaurant"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": 70,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "les agences à Saint-Jean",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "videographer",
+        "labelEn": "Videographer",
+        "labelFr": "Vidéaste",
+        "path": "events_creative › photo_video › videographer"
+      },
+      {
+        "id": "travel_agency",
+        "labelEn": "Travel agency",
+        "labelFr": "Agence de voyages",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "real_estate_agency",
+        "labelEn": "Real estate agency",
+        "labelFr": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "marketing_agency",
+        "labelEn": "Marketing agency",
+        "labelFr": "Agence de communication",
+        "path": "technology_media › marketing_agency"
+      },
+      {
+        "id": "art_gallery",
+        "labelEn": "Art gallery",
+        "labelFr": "Galerie d'art",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "car_wash",
+        "labelEn": "Car wash",
+        "labelFr": "Station de lavage",
+        "path": "automotive_transport › automotive_services › car_wash"
+      },
+      {
+        "id": "osteopath",
+        "labelEn": "Osteopath",
+        "labelFr": "Ostéopathe",
+        "path": "health_medical › paramedical › osteopath"
+      },
+      {
+        "id": "dermatologist",
+        "labelEn": "Dermatologist",
+        "labelFr": "Dermatologue",
+        "path": "health_medical › medical_specialists › dermatologist"
+      },
+      {
+        "id": "automotive_services",
+        "labelEn": "Automotive services",
+        "labelFr": "Services automobiles",
+        "path": "automotive_transport › automotive_services"
+      },
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "credit_broker",
+        "labelEn": "Mortgage & credit broker",
+        "labelFr": "Courtier en crédit",
+        "path": "finance_insurance › credit_broker"
+      },
+      {
+        "id": "design_engineering",
+        "labelEn": "Design & engineering",
+        "labelFr": "Conception et ingénierie",
+        "path": "home_construction › design_engineering"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": [],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": {
+      "question": "Quel type voulez-vous dire ?",
+      "options": ["Agences immobilières", "Agences de voyage", "Agences de communication"]
+    },
+    "confidence": 0.4,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "pisciniers et paysagistes à Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "pool_services",
+        "labelEn": "Pool services",
+        "labelFr": "Piscines",
+        "path": "home_services › pool_services"
+      },
+      {
+        "id": "pool_maintenance",
+        "labelEn": "Pool maintenance",
+        "labelFr": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "pool_construction",
+        "labelEn": "Pool builder",
+        "labelFr": "Construction de piscines",
+        "path": "home_services › pool_services › pool_construction"
+      },
+      {
+        "id": "garden_services",
+        "labelEn": "Garden & outdoor",
+        "labelFr": "Jardin et extérieurs",
+        "path": "home_services › garden_services"
+      },
+      {
+        "id": "landscaping",
+        "labelEn": "Landscaping",
+        "labelFr": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "recruitment_agency",
+        "labelEn": "Recruitment & staffing agency",
+        "labelFr": "Agence de recrutement et d'intérim",
+        "path": "professional_services › business_services › recruitment_agency"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "home_services",
+        "labelEn": "Home & personal services",
+        "labelFr": "Services à domicile et à la personne",
+        "path": "home_services"
+      },
+      {
+        "id": "repairs_maintenance",
+        "labelEn": "Repairs & maintenance",
+        "labelFr": "Dépannage et entretien",
+        "path": "home_services › repairs_maintenance"
+      },
+      {
+        "id": "tree_care",
+        "labelEn": "Tree care",
+        "labelFr": "Élagage",
+        "path": "home_services › garden_services › tree_care"
+      },
+      {
+        "id": "international_school",
+        "labelEn": "Private & international school",
+        "labelFr": "École privée et internationale",
+        "path": "education › school › international_school"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["pool_services", "landscaping"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

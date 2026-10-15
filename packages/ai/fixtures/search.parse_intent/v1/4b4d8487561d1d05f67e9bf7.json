@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "hair salons and cafés in Gustavia without a website",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "hair_salon",
+        "labelEn": "Hair salon",
+        "labelFr": "Salon de coiffure",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "general_contractor",
+        "labelEn": "General contractor",
+        "labelFr": "Entreprise générale du bâtiment",
+        "path": "home_construction › structural_work › general_contractor"
+      },
+      {
+        "id": "braiding_salon",
+        "labelEn": "Braiding & natural hair salon",
+        "labelFr": "Salon de tresses et coiffure afro",
+        "path": "beauty_wellness › hair_services › braiding_salon"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "labelEn": "Mobile hairdresser",
+        "labelFr": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      },
+      {
+        "id": "marina",
+        "labelEn": "Marina",
+        "labelFr": "Port de plaisance",
+        "path": "marine_nautical › boating_services › marina"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "barber",
+        "labelEn": "Barber",
+        "labelFr": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hair_salon", "cafe"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

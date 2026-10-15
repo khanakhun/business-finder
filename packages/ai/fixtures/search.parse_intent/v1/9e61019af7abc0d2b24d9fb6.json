@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "bike rentals in Rotterdam rated below 3.5",
+    "language": "en",
+    "defaultCountry": "NL",
+    "candidates": [
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "motorcycle_shop",
+        "labelEn": "Motorcycle & scooter shop",
+        "labelFr": "Concession moto et scooter",
+        "path": "automotive_transport › automotive_services › motorcycle_shop"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "bike_rental",
+        "labelEn": "Bike rental",
+        "labelFr": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "dog_trainer",
+        "labelEn": "Dog trainer",
+        "labelFr": "Éducateur canin",
+        "path": "pets_animals › dog_trainer"
+      },
+      {
+        "id": "sign_maker",
+        "labelEn": "Signs & signage",
+        "labelFr": "Enseignes et signalétique",
+        "path": "professional_services › business_services › sign_maker"
+      },
+      {
+        "id": "vehicle_rental",
+        "labelEn": "Vehicle rental",
+        "labelFr": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "business_consultant",
+        "labelEn": "Business consultant",
+        "labelFr": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "concierge",
+        "labelEn": "Concierge service",
+        "labelFr": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "graphic_designer",
+        "labelEn": "Graphic designer",
+        "labelFr": "Graphiste",
+        "path": "technology_media › graphic_designer"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bike_rental"],
+    "keywords": [],
+    "locationText": "Rotterdam",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": 3.5,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

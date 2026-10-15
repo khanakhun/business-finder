@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "shops in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "freight_forwarder",
+        "labelEn": "Freight forwarder",
+        "labelFr": "Transitaire",
+        "path": "automotive_transport › logistics › freight_forwarder"
+      },
+      {
+        "id": "retail_shopping",
+        "labelEn": "Retail & shopping",
+        "labelFr": "Commerces",
+        "path": "retail_shopping"
+      },
+      {
+        "id": "podiatrist",
+        "labelEn": "Podiatrist",
+        "labelFr": "Pédicure-podologue",
+        "path": "health_medical › paramedical › podiatrist"
+      },
+      {
+        "id": "medical_laboratory",
+        "labelEn": "Medical laboratory",
+        "labelFr": "Laboratoire d'analyses médicales",
+        "path": "health_medical › medical_laboratory"
+      },
+      {
+        "id": "villa_caretaking",
+        "labelEn": "Villa caretaking",
+        "labelFr": "Gardiennage de villas",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "catering",
+        "labelEn": "Catering",
+        "labelFr": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "handyman",
+        "labelEn": "Handyman",
+        "labelFr": "Homme toutes mains",
+        "path": "home_services › repairs_maintenance › handyman"
+      },
+      {
+        "id": "beauty_wellness",
+        "labelEn": "Beauty & wellness",
+        "labelFr": "Beauté et bien-être",
+        "path": "beauty_wellness"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "fire_station",
+        "labelEn": "Fire station",
+        "labelFr": "Caserne de pompiers",
+        "path": "public_community › fire_station"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["retail_shopping"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

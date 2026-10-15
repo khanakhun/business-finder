@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "wedding planners and photographers in St Barth",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "craft_artisan",
+        "labelEn": "Artisan crafts",
+        "labelFr": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "wedding_planner",
+        "labelEn": "Wedding planner",
+        "labelFr": "Wedding planner",
+        "path": "events_creative › events › wedding_planner"
+      },
+      {
+        "id": "photographer",
+        "labelEn": "Photographer",
+        "labelFr": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "videographer",
+        "labelEn": "Videographer",
+        "labelFr": "Vidéaste",
+        "path": "events_creative › photo_video › videographer"
+      },
+      {
+        "id": "party_rental",
+        "labelEn": "Event rental",
+        "labelFr": "Location de matériel événementiel",
+        "path": "events_creative › events › party_rental"
+      },
+      {
+        "id": "personal_trainer",
+        "labelEn": "Personal trainer",
+        "labelFr": "Coach sportif",
+        "path": "sports_fitness › personal_trainer"
+      },
+      {
+        "id": "tiling",
+        "labelEn": "Tiling & flooring",
+        "labelFr": "Carrelage et revêtements de sol",
+        "path": "home_construction › finishing_trades › tiling"
+      },
+      {
+        "id": "photo_video",
+        "labelEn": "Photo & video",
+        "labelFr": "Photo et vidéo",
+        "path": "events_creative › photo_video"
+      },
+      {
+        "id": "crossfit_box",
+        "labelEn": "CrossFit box",
+        "labelFr": "Salle de CrossFit",
+        "path": "sports_fitness › crossfit_box"
+      },
+      {
+        "id": "event_planner",
+        "labelEn": "Event planner",
+        "labelFr": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      },
+      {
+        "id": "events",
+        "labelEn": "Events",
+        "labelFr": "Événementiel",
+        "path": "events_creative › events"
+      },
+      {
+        "id": "event_venue",
+        "labelEn": "Event venue",
+        "labelFr": "Salle de réception",
+        "path": "events_creative › events › event_venue"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["wedding_planner", "photographer"],
+    "keywords": [],
+    "locationText": "St Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "plombiers et électriciens à Saint-Barth avec un numéro de téléphone",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "events",
+        "labelEn": "Events",
+        "labelFr": "Événementiel",
+        "path": "events_creative › events"
+      },
+      {
+        "id": "plumber",
+        "labelEn": "Plumber",
+        "labelFr": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "electrician",
+        "labelEn": "Electrician",
+        "labelFr": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      },
+      {
+        "id": "post_office",
+        "labelEn": "Post office",
+        "labelFr": "Bureau de poste",
+        "path": "public_community › post_office"
+      },
+      {
+        "id": "gift_shop",
+        "labelEn": "Gift & souvenir shop",
+        "labelFr": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "pool_maintenance",
+        "labelEn": "Pool maintenance",
+        "labelFr": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "auto_repair",
+        "labelEn": "Auto repair",
+        "labelFr": "Garage automobile",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "carpentry",
+        "labelEn": "Carpentry & joinery",
+        "labelFr": "Menuiserie",
+        "path": "home_construction › finishing_trades › carpentry"
+      },
+      {
+        "id": "tobacco_newsstand",
+        "labelEn": "Tobacconist & newsagent",
+        "labelFr": "Tabac-presse",
+        "path": "retail_shopping › leisure_gifts › tobacco_newsstand"
+      },
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "hvac",
+        "labelEn": "Air conditioning & HVAC",
+        "labelFr": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["plumber", "electrician"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": true,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

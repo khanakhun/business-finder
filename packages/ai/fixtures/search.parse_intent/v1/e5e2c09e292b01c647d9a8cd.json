@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "fleuristes dans le 75011",
+    "language": "fr",
+    "defaultCountry": "FR",
+    "candidates": [
+      {
+        "id": "home_care",
+        "labelEn": "Home care",
+        "labelFr": "Aide à domicile",
+        "path": "home_services › personal_services › home_care"
+      },
+      {
+        "id": "florist",
+        "labelEn": "Florist",
+        "labelFr": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "dance_school",
+        "labelEn": "Dance school",
+        "labelFr": "École de danse",
+        "path": "sports_fitness › dance_school"
+      },
+      {
+        "id": "health_medical",
+        "labelEn": "Health & medical",
+        "labelFr": "Santé",
+        "path": "health_medical"
+      },
+      {
+        "id": "events",
+        "labelEn": "Events",
+        "labelFr": "Événementiel",
+        "path": "events_creative › events"
+      },
+      {
+        "id": "martial_arts",
+        "labelEn": "Martial arts school",
+        "labelFr": "Club d'arts martiaux",
+        "path": "sports_fitness › martial_arts"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "leisure_gifts",
+        "labelEn": "Gifts & leisure",
+        "labelFr": "Loisirs et cadeaux",
+        "path": "retail_shopping › leisure_gifts"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "bookstore",
+        "labelEn": "Bookstore",
+        "labelFr": "Librairie",
+        "path": "retail_shopping › leisure_gifts › bookstore"
+      },
+      {
+        "id": "villa_rental_agency",
+        "labelEn": "Villa rental agency",
+        "labelFr": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "toy_store",
+        "labelEn": "Toy store",
+        "labelFr": "Magasin de jouets",
+        "path": "retail_shopping › leisure_gifts › toy_store"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["florist"],
+    "keywords": [],
+    "locationText": "75011",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

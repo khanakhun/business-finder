@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "bijouteries à Gustavia avec plus de 50 avis",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "roofing",
+        "labelEn": "Roofing",
+        "labelFr": "Couverture et charpente",
+        "path": "home_construction › structural_work › roofing"
+      },
+      {
+        "id": "jewelry_store",
+        "labelEn": "Jewelry store",
+        "labelFr": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "shoe_store",
+        "labelEn": "Shoe store",
+        "labelFr": "Magasin de chaussures",
+        "path": "retail_shopping › fashion › shoe_store"
+      },
+      {
+        "id": "place_of_worship",
+        "labelEn": "Place of worship",
+        "labelFr": "Lieu de culte",
+        "path": "public_community › place_of_worship"
+      },
+      {
+        "id": "events",
+        "labelEn": "Events",
+        "labelFr": "Événementiel",
+        "path": "events_creative › events"
+      },
+      {
+        "id": "organic_store",
+        "labelEn": "Organic store",
+        "labelFr": "Magasin bio",
+        "path": "retail_shopping › food_retail › organic_store"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "fashion_boutique",
+        "labelEn": "Fashion boutique",
+        "labelFr": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "legal_services",
+        "labelEn": "Legal services",
+        "labelFr": "Services juridiques",
+        "path": "professional_services › legal_services"
+      },
+      {
+        "id": "duty_free_shop",
+        "labelEn": "Duty-free shop",
+        "labelFr": "Boutique hors taxes",
+        "path": "retail_shopping › duty_free_shop"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["jewelry_store"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": 51,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

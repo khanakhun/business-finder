@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants in Saint-Jean where booking is a hassle",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "preschool",
+        "labelEn": "Preschool",
+        "labelFr": "École maternelle",
+        "path": "education › school › preschool"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "electronics_store",
+        "labelEn": "Electronics store",
+        "labelFr": "Magasin d'électronique",
+        "path": "retail_shopping › electronics › electronics_store"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "kitesurfing",
+        "labelEn": "Kitesurfing & windsurfing",
+        "labelFr": "Kitesurf et planche à voile",
+        "path": "marine_nautical › water_sports › kitesurfing"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "medical_laboratory",
+        "labelEn": "Medical laboratory",
+        "labelFr": "Laboratoire d'analyses médicales",
+        "path": "health_medical › medical_laboratory"
+      },
+      {
+        "id": "pool_maintenance",
+        "labelEn": "Pool maintenance",
+        "labelFr": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": ["booking_friction"],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -59,6 +59,11 @@ export {
 } from './routing.ts';
 export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
 export {
+  ParseSearchIntentInput,
+  ParseSearchIntentOutput,
+  SearchParseIntent,
+} from './tasks/search-parse-intent.ts';
+export {
   ClassifyBusinessInput,
   ClassifyBusinessOutput,
   NO_CATEGORY,

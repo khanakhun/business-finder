@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "anything selling hammocks in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "web_agency",
+        "labelEn": "Web agency",
+        "labelFr": "Agence web",
+        "path": "technology_media › web_agency"
+      },
+      {
+        "id": "electronics_store",
+        "labelEn": "Electronics store",
+        "labelFr": "Magasin d'électronique",
+        "path": "retail_shopping › electronics › electronics_store"
+      },
+      {
+        "id": "recruitment_agency",
+        "labelEn": "Recruitment & staffing agency",
+        "labelFr": "Agence de recrutement et d'intérim",
+        "path": "professional_services › business_services › recruitment_agency"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "dermatologist",
+        "labelEn": "Dermatologist",
+        "labelFr": "Dermatologue",
+        "path": "health_medical › medical_specialists › dermatologist"
+      },
+      {
+        "id": "swimming_pool",
+        "labelEn": "Swimming pool",
+        "labelFr": "Piscine",
+        "path": "sports_fitness › swimming_pool"
+      },
+      {
+        "id": "cooking_school",
+        "labelEn": "Cooking classes",
+        "labelFr": "Cours de cuisine",
+        "path": "education › cooking_school"
+      },
+      {
+        "id": "accountant",
+        "labelEn": "Accountant",
+        "labelFr": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "boat_excursion",
+        "labelEn": "Boat trips & excursions",
+        "labelFr": "Excursions en mer",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "butcher",
+        "labelEn": "Butcher",
+        "labelFr": "Boucherie",
+        "path": "retail_shopping › food_retail › butcher"
+      },
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": [],
+    "keywords": ["hammocks"],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

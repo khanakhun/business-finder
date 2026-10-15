@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "rooftop bars in 10001 rated below 4",
+    "language": "en",
+    "defaultCountry": "US",
+    "candidates": [
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "government_office",
+        "labelEn": "Government office",
+        "labelFr": "Administration",
+        "path": "public_community › government_office"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "media_outlet",
+        "labelEn": "Media outlet",
+        "labelFr": "Presse et médias",
+        "path": "technology_media › media_outlet"
+      },
+      {
+        "id": "aparthotel",
+        "labelEn": "Aparthotel",
+        "labelFr": "Résidence hôtelière",
+        "path": "lodging › aparthotel"
+      },
+      {
+        "id": "ambulance_service",
+        "labelEn": "Ambulance service",
+        "labelFr": "Ambulancier",
+        "path": "health_medical › ambulance_service"
+      },
+      {
+        "id": "pool_maintenance",
+        "labelEn": "Pool maintenance",
+        "labelFr": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "japanese_restaurant",
+        "labelEn": "Japanese restaurant",
+        "labelFr": "Restaurant japonais",
+        "path": "food_drink › restaurant › japanese_restaurant"
+      },
+      {
+        "id": "tailor",
+        "labelEn": "Tailor & alterations",
+        "labelFr": "Retouches et couture",
+        "path": "home_services › personal_services › tailor"
+      },
+      {
+        "id": "wine_bar",
+        "labelEn": "Wine bar",
+        "labelFr": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bar"],
+    "keywords": ["rooftop"],
+    "locationText": "10001",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": 4,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

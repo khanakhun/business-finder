@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "hôtels à Gustavia dont le site est en anglais",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "pet_store",
+        "labelEn": "Pet store",
+        "labelFr": "Animalerie",
+        "path": "pets_animals › pet_store"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "dermatologist",
+        "labelEn": "Dermatologist",
+        "labelFr": "Dermatologue",
+        "path": "health_medical › medical_specialists › dermatologist"
+      },
+      {
+        "id": "home_construction",
+        "labelEn": "Construction & renovation",
+        "labelFr": "Construction et rénovation",
+        "path": "home_construction"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "optician",
+        "labelEn": "Optician",
+        "labelFr": "Opticien",
+        "path": "health_medical › optician"
+      },
+      {
+        "id": "gas_station",
+        "labelEn": "Gas station",
+        "labelFr": "Station-service",
+        "path": "automotive_transport › automotive_services › gas_station"
+      },
+      {
+        "id": "beauty_salon",
+        "labelEn": "Beauty salon",
+        "labelFr": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "radiology_center",
+        "labelEn": "Radiology center",
+        "labelFr": "Cabinet de radiologie",
+        "path": "health_medical › medical_specialists › radiology_center"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hotel"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "has",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": ["en"],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

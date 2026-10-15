@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants à Saint-Jean avec une note inférieure à 4",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "telecom_provider",
+        "labelEn": "Telecom & internet provider",
+        "labelFr": "Opérateur télécom et internet",
+        "path": "technology_media › telecom_provider"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "home_decor_store",
+        "labelEn": "Home decor store",
+        "labelFr": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      },
+      {
+        "id": "business_consultant",
+        "labelEn": "Business consultant",
+        "labelFr": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "leather_goods_store",
+        "labelEn": "Leather goods & bags",
+        "labelFr": "Maroquinerie",
+        "path": "retail_shopping › fashion › leather_goods_store"
+      },
+      {
+        "id": "food_truck",
+        "labelEn": "Food truck",
+        "labelFr": "Food truck",
+        "path": "food_drink › quick_service › food_truck"
+      },
+      {
+        "id": "real_estate",
+        "labelEn": "Real estate",
+        "labelFr": "Immobilier",
+        "path": "real_estate"
+      },
+      {
+        "id": "glazing",
+        "labelEn": "Glazing & windows",
+        "labelFr": "Vitrerie et miroiterie",
+        "path": "home_construction › finishing_trades › glazing"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": 4,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

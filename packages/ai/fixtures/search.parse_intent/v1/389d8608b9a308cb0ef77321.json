@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "newest real estate agencies added this month",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "real_estate",
+        "labelEn": "Real estate",
+        "labelFr": "Immobilier",
+        "path": "real_estate"
+      },
+      {
+        "id": "real_estate_agency",
+        "labelEn": "Real estate agency",
+        "labelFr": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "amusement_park",
+        "labelEn": "Amusement park",
+        "labelFr": "Parc de loisirs",
+        "path": "tourism_leisure › attractions_entertainment › amusement_park"
+      },
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "photographer",
+        "labelEn": "Photographer",
+        "labelFr": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "airline",
+        "labelEn": "Airline",
+        "labelFr": "Compagnie aérienne",
+        "path": "automotive_transport › passenger_transport › airline"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "property_management",
+        "labelEn": "Property management",
+        "labelFr": "Gestion locative",
+        "path": "real_estate › property_management"
+      },
+      {
+        "id": "real_estate_appraiser",
+        "labelEn": "Real estate appraiser",
+        "labelFr": "Expert immobilier",
+        "path": "real_estate › real_estate_appraiser"
+      },
+      {
+        "id": "home_care",
+        "labelEn": "Home care",
+        "labelFr": "Aide à domicile",
+        "path": "home_services › personal_services › home_care"
+      },
+      {
+        "id": "art_school",
+        "labelEn": "Art & craft classes",
+        "labelFr": "Cours d'art et ateliers créatifs",
+        "path": "education › art_school"
+      },
+      {
+        "id": "surf_shop",
+        "labelEn": "Surf shop",
+        "labelFr": "Surf shop",
+        "path": "retail_shopping › fashion › surf_shop"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["real_estate_agency"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": 30
+    },
+    "sort": {
+      "field": "recent",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

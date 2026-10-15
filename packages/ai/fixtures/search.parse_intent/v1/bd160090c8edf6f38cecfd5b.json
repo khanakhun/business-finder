@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "de nouveaux salons de manucure que je n'ai pas encore à Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "radiology_center",
+        "labelEn": "Radiology center",
+        "labelFr": "Cabinet de radiologie",
+        "path": "health_medical › medical_specialists › radiology_center"
+      },
+      {
+        "id": "nail_salon",
+        "labelEn": "Nail salon",
+        "labelFr": "Onglerie",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      },
+      {
+        "id": "beauty_services",
+        "labelEn": "Beauty care",
+        "labelFr": "Esthétique",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "catering",
+        "labelEn": "Catering",
+        "labelFr": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "lawyer",
+        "labelEn": "Lawyer",
+        "labelFr": "Avocat",
+        "path": "professional_services › legal_services › lawyer"
+      },
+      {
+        "id": "waxing_salon",
+        "labelEn": "Hair removal",
+        "labelFr": "Épilation",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "chandlery",
+        "labelEn": "Ship chandler",
+        "labelFr": "Accastillage",
+        "path": "marine_nautical › boating_services › chandlery"
+      },
+      {
+        "id": "lash_brow_bar",
+        "labelEn": "Lash & brow bar",
+        "labelFr": "Bar à cils et sourcils",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "pastry_shop",
+        "labelEn": "Pastry shop",
+        "labelFr": "Pâtisserie",
+        "path": "food_drink › pastry_shop"
+      },
+      {
+        "id": "beauty_salon",
+        "labelEn": "Beauty salon",
+        "labelFr": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "sound_lighting",
+        "labelEn": "Sound & lighting",
+        "labelFr": "Sonorisation et éclairage",
+        "path": "events_creative › events › sound_lighting"
+      },
+      {
+        "id": "graphic_designer",
+        "labelEn": "Graphic designer",
+        "labelFr": "Graphiste",
+        "path": "technology_media › graphic_designer"
+      }
+    ]
+  },
+  "output": {
+    "mode": "discover",
+    "categoryIds": ["nail_salon"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

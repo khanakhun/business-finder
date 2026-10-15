@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "agences de location de villas à St Barth avec un site lent et un e-mail",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "villa_rental_agency",
+        "labelEn": "Villa rental agency",
+        "labelFr": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "tobacco_newsstand",
+        "labelEn": "Tobacconist & newsagent",
+        "labelFr": "Tabac-presse",
+        "path": "retail_shopping › leisure_gifts › tobacco_newsstand"
+      },
+      {
+        "id": "cigar_shop",
+        "labelEn": "Cigar shop",
+        "labelFr": "Cave à cigares",
+        "path": "retail_shopping › leisure_gifts › cigar_shop"
+      },
+      {
+        "id": "computer_repair",
+        "labelEn": "Computer & phone repair",
+        "labelFr": "Réparation informatique et téléphonie",
+        "path": "technology_media › computer_repair"
+      },
+      {
+        "id": "food_retail",
+        "labelEn": "Food shops",
+        "labelFr": "Alimentation",
+        "path": "retail_shopping › food_retail"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      },
+      {
+        "id": "retail_shopping",
+        "labelEn": "Retail & shopping",
+        "labelFr": "Commerces",
+        "path": "retail_shopping"
+      },
+      {
+        "id": "landscaping",
+        "labelEn": "Landscaping",
+        "labelFr": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["villa_rental_agency"],
+    "keywords": [],
+    "locationText": "St Barth",
+    "filters": {
+      "website": "weak",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

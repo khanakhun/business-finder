@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "hotels in Gustavia with an English website",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "barber",
+        "labelEn": "Barber",
+        "labelFr": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "events_creative",
+        "labelEn": "Events & creative",
+        "labelFr": "Événementiel et création",
+        "path": "events_creative"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      },
+      {
+        "id": "business_services",
+        "labelEn": "Business services",
+        "labelFr": "Services aux entreprises",
+        "path": "professional_services › business_services"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "attractions_entertainment",
+        "labelEn": "Attractions & entertainment",
+        "labelFr": "Loisirs et divertissements",
+        "path": "tourism_leisure › attractions_entertainment"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "babysitting",
+        "labelEn": "Childcare & babysitting",
+        "labelFr": "Garde d'enfants",
+        "path": "home_services › personal_services › babysitting"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hotel"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "has",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": ["en"],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "beauty salons in Saint-Jean with a phone but no email and at least 10 reviews",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "nail_salon",
+        "labelEn": "Nail salon",
+        "labelFr": "Onglerie",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      },
+      {
+        "id": "beauty_salon",
+        "labelEn": "Beauty salon",
+        "labelFr": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "beauty_services",
+        "labelEn": "Beauty care",
+        "labelFr": "Esthétique",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "motorcycle_shop",
+        "labelEn": "Motorcycle & scooter shop",
+        "labelFr": "Concession moto et scooter",
+        "path": "automotive_transport › automotive_services › motorcycle_shop"
+      },
+      {
+        "id": "boating_services",
+        "labelEn": "Boating services",
+        "labelFr": "Services nautiques",
+        "path": "marine_nautical › boating_services"
+      },
+      {
+        "id": "passenger_transport",
+        "labelEn": "Passenger transport",
+        "labelFr": "Transport de personnes",
+        "path": "automotive_transport › passenger_transport"
+      },
+      {
+        "id": "legal_services",
+        "labelEn": "Legal services",
+        "labelFr": "Services juridiques",
+        "path": "professional_services › legal_services"
+      },
+      {
+        "id": "event_planner",
+        "labelEn": "Event planner",
+        "labelFr": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      },
+      {
+        "id": "daycare",
+        "labelEn": "Daycare",
+        "labelFr": "Crèche",
+        "path": "education › daycare"
+      },
+      {
+        "id": "lash_brow_bar",
+        "labelEn": "Lash & brow bar",
+        "labelFr": "Bar à cils et sourcils",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "waxing_salon",
+        "labelEn": "Hair removal",
+        "labelFr": "Épilation",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "kids_activities",
+        "labelEn": "Kids activities",
+        "labelFr": "Activités pour enfants",
+        "path": "tourism_leisure › attractions_entertainment › kids_activities"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["beauty_salon"],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": 10,
+      "maxReviews": null,
+      "hasEmail": false,
+      "hasPhone": true,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "traiteurs et chefs à domicile en Guadeloupe",
+    "language": "fr",
+    "defaultCountry": "GP",
+    "candidates": [
+      {
+        "id": "freight_forwarder",
+        "labelEn": "Freight forwarder",
+        "labelFr": "Transitaire",
+        "path": "automotive_transport › logistics › freight_forwarder"
+      },
+      {
+        "id": "catering",
+        "labelEn": "Catering",
+        "labelFr": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "private_chef",
+        "labelEn": "Private chef",
+        "labelFr": "Chef à domicile",
+        "path": "food_drink › private_chef"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "printing",
+        "labelEn": "Printing",
+        "labelFr": "Imprimerie",
+        "path": "professional_services › business_services › printing"
+      },
+      {
+        "id": "toy_store",
+        "labelEn": "Toy store",
+        "labelFr": "Magasin de jouets",
+        "path": "retail_shopping › leisure_gifts › toy_store"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "babysitting",
+        "labelEn": "Childcare & babysitting",
+        "labelFr": "Garde d'enfants",
+        "path": "home_services › personal_services › babysitting"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["catering", "private_chef"],
+    "keywords": [],
+    "locationText": "Guadeloupe",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "les boulangeries les mieux notées de Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "kitesurfing",
+        "labelEn": "Kitesurfing & windsurfing",
+        "labelFr": "Kitesurf et planche à voile",
+        "path": "marine_nautical › water_sports › kitesurfing"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "craft_artisan",
+        "labelEn": "Artisan crafts",
+        "labelFr": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "technology_media",
+        "labelEn": "Technology & media",
+        "labelFr": "Numérique et médias",
+        "path": "technology_media"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "real_estate_agency",
+        "labelEn": "Real estate agency",
+        "labelFr": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "import_export",
+        "labelEn": "Import-export",
+        "labelFr": "Import-export",
+        "path": "industry_trade › import_export"
+      },
+      {
+        "id": "vegetarian_restaurant",
+        "labelEn": "Vegetarian restaurant",
+        "labelFr": "Restaurant végétarien",
+        "path": "food_drink › restaurant › vegetarian_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "perfume_cosmetics_store",
+        "labelEn": "Perfume & cosmetics store",
+        "labelFr": "Parfumerie",
+        "path": "retail_shopping › perfume_cosmetics_store"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bakery"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "rating",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "poseurs de volets anticycloniques à Saint-Barthélemy",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "plumber",
+        "labelEn": "Plumber",
+        "labelFr": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "hurricane_shutters",
+        "labelEn": "Hurricane shutters & closures",
+        "labelFr": "Volets anticycloniques et fermetures",
+        "path": "home_construction › finishing_trades › hurricane_shutters"
+      },
+      {
+        "id": "physiotherapist",
+        "labelEn": "Physiotherapist",
+        "labelFr": "Masseur-kinésithérapeute",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "graphic_designer",
+        "labelEn": "Graphic designer",
+        "labelFr": "Graphiste",
+        "path": "technology_media › graphic_designer"
+      },
+      {
+        "id": "sign_maker",
+        "labelEn": "Signs & signage",
+        "labelFr": "Enseignes et signalétique",
+        "path": "professional_services › business_services › sign_maker"
+      },
+      {
+        "id": "business_consultant",
+        "labelEn": "Business consultant",
+        "labelFr": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "roofing",
+        "labelEn": "Roofing",
+        "labelFr": "Couverture et charpente",
+        "path": "home_construction › structural_work › roofing"
+      },
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "hvac",
+        "labelEn": "Air conditioning & HVAC",
+        "labelFr": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "craft_artisan",
+        "labelEn": "Artisan crafts",
+        "labelFr": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "artist_studio",
+        "labelEn": "Artist studio",
+        "labelFr": "Atelier d'artiste",
+        "path": "events_creative › arts_crafts › artist_studio"
+      },
+      {
+        "id": "electrician",
+        "labelEn": "Electrician",
+        "labelFr": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hurricane_shutters"],
+    "keywords": [],
+    "locationText": "Saint-Barthélemy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

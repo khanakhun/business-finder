@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "mes prospects de tier A parmi les hôtels",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "greengrocer",
+        "labelEn": "Greengrocer",
+        "labelFr": "Primeur",
+        "path": "retail_shopping › food_retail › greengrocer"
+      },
+      {
+        "id": "medical_clinic",
+        "labelEn": "Medical clinic",
+        "labelFr": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "sport_fishing",
+        "labelEn": "Sport fishing",
+        "labelFr": "Pêche au gros",
+        "path": "marine_nautical › sport_fishing"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "home_services",
+        "labelEn": "Home & personal services",
+        "labelFr": "Services à domicile et à la personne",
+        "path": "home_services"
+      },
+      {
+        "id": "bailiff",
+        "labelEn": "Bailiff",
+        "labelFr": "Commissaire de justice",
+        "path": "professional_services › legal_services › bailiff"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["hotel"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": ["A"],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

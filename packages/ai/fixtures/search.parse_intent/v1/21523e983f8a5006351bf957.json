@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restos créoles à Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "post_office",
+        "labelEn": "Post office",
+        "labelFr": "Bureau de poste",
+        "path": "public_community › post_office"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "leather_goods_store",
+        "labelEn": "Leather goods & bags",
+        "labelFr": "Maroquinerie",
+        "path": "retail_shopping › fashion › leather_goods_store"
+      },
+      {
+        "id": "preschool",
+        "labelEn": "Preschool",
+        "labelFr": "École maternelle",
+        "path": "education › school › preschool"
+      },
+      {
+        "id": "condominium_manager",
+        "labelEn": "Condominium manager",
+        "labelFr": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "farm",
+        "labelEn": "Farm",
+        "labelFr": "Exploitation agricole",
+        "path": "industry_trade › farm"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "lash_brow_bar",
+        "labelEn": "Lash & brow bar",
+        "labelFr": "Bar à cils et sourcils",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "landscaping",
+        "labelEn": "Landscaping",
+        "labelFr": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["creole_restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

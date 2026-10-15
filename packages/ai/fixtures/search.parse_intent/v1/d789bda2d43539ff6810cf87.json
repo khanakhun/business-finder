@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "villa caretaking companies in St Barth without a website",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "pool_services",
+        "labelEn": "Pool services",
+        "labelFr": "Piscines",
+        "path": "home_services › pool_services"
+      },
+      {
+        "id": "property_management",
+        "labelEn": "Property management",
+        "labelFr": "Gestion locative",
+        "path": "real_estate › property_management"
+      },
+      {
+        "id": "house_cleaning",
+        "labelEn": "House cleaning",
+        "labelFr": "Ménage à domicile",
+        "path": "home_services › cleaning_services › house_cleaning"
+      },
+      {
+        "id": "villa_caretaking",
+        "labelEn": "Villa caretaking",
+        "labelFr": "Gardiennage de villas",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "garden_services",
+        "labelEn": "Garden & outdoor",
+        "labelFr": "Jardin et extérieurs",
+        "path": "home_services › garden_services"
+      },
+      {
+        "id": "electrician",
+        "labelEn": "Electrician",
+        "labelFr": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      },
+      {
+        "id": "home_services",
+        "labelEn": "Home & personal services",
+        "labelFr": "Services à domicile et à la personne",
+        "path": "home_services"
+      },
+      {
+        "id": "library",
+        "labelEn": "Library",
+        "labelFr": "Médiathèque",
+        "path": "public_community › library"
+      },
+      {
+        "id": "campground",
+        "labelEn": "Campground",
+        "labelFr": "Camping",
+        "path": "lodging › campground"
+      },
+      {
+        "id": "design_engineering",
+        "labelEn": "Design & engineering",
+        "labelFr": "Conception et ingénierie",
+        "path": "home_construction › design_engineering"
+      },
+      {
+        "id": "translation_service",
+        "labelEn": "Translation service",
+        "labelFr": "Traduction et interprétariat",
+        "path": "professional_services › business_services › translation_service"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["villa_caretaking"],
+    "keywords": [],
+    "locationText": "St Barth",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

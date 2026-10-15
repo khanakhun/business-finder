@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "quincailleries à Bordeaux sans site",
+    "language": "fr",
+    "defaultCountry": "FR",
+    "candidates": [
+      {
+        "id": "auto_parts",
+        "labelEn": "Auto parts store",
+        "labelFr": "Pièces auto",
+        "path": "automotive_transport › automotive_services › auto_parts"
+      },
+      {
+        "id": "hardware_store",
+        "labelEn": "Hardware store",
+        "labelFr": "Quincaillerie",
+        "path": "home_construction › construction_supplies › hardware_store"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "labelEn": "Electrical & plumbing supplies",
+        "labelFr": "Fournitures électriques et sanitaires",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      },
+      {
+        "id": "steakhouse",
+        "labelEn": "Steakhouse & grill",
+        "labelFr": "Grill et steakhouse",
+        "path": "food_drink › restaurant › steakhouse"
+      },
+      {
+        "id": "computer_repair",
+        "labelEn": "Computer & phone repair",
+        "labelFr": "Réparation informatique et téléphonie",
+        "path": "technology_media › computer_repair"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "building_supplies",
+        "labelEn": "Building supplies",
+        "labelFr": "Négoce de matériaux",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "health_medical",
+        "labelEn": "Health & medical",
+        "labelFr": "Santé",
+        "path": "health_medical"
+      },
+      {
+        "id": "construction_supplies",
+        "labelEn": "Building supplies & hardware",
+        "labelFr": "Matériaux et quincaillerie",
+        "path": "home_construction › construction_supplies"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hardware_store"],
+    "keywords": [],
+    "locationText": "Bordeaux",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

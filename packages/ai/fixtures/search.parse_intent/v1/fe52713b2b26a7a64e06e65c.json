@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "best rated bakeries in Saint-Barth",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "villa_rental_agency",
+        "labelEn": "Villa rental agency",
+        "labelFr": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "wealth_management",
+        "labelEn": "Wealth management",
+        "labelFr": "Gestion de patrimoine",
+        "path": "finance_insurance › wealth_management"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "picture_framing",
+        "labelEn": "Picture framing",
+        "labelFr": "Encadrement",
+        "path": "events_creative › arts_crafts › picture_framing"
+      },
+      {
+        "id": "live_music_venue",
+        "labelEn": "Concert venue",
+        "labelFr": "Salle de concert",
+        "path": "tourism_leisure › attractions_entertainment › live_music_venue"
+      },
+      {
+        "id": "painter",
+        "labelEn": "Painter & decorator",
+        "labelFr": "Peintre en bâtiment",
+        "path": "home_construction › finishing_trades › painter"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "sports_fitness",
+        "labelEn": "Sports & fitness",
+        "labelFr": "Sport et fitness",
+        "path": "sports_fitness"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bakery"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "rating",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

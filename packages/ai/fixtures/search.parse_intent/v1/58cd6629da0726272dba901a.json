@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants et bars à Gustavia avec un e-mail, sans site, moins de 4 étoiles",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "solar_installer",
+        "labelEn": "Solar installer",
+        "labelFr": "Installateur solaire",
+        "path": "home_construction › finishing_trades › solar_installer"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "wine_bar",
+        "labelEn": "Wine bar",
+        "labelFr": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "language_school",
+        "labelEn": "Language school",
+        "labelFr": "École de langues",
+        "path": "education › language_school"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant", "bar"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": 4,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

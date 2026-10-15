@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "salles de sport avec un site obsolète",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "pharmacy",
+        "labelEn": "Pharmacy",
+        "labelFr": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "sports_fitness",
+        "labelEn": "Sports & fitness",
+        "labelFr": "Sport et fitness",
+        "path": "sports_fitness"
+      },
+      {
+        "id": "place_of_worship",
+        "labelEn": "Place of worship",
+        "labelFr": "Lieu de culte",
+        "path": "public_community › place_of_worship"
+      },
+      {
+        "id": "yoga_studio",
+        "labelEn": "Yoga studio",
+        "labelFr": "Studio de yoga",
+        "path": "sports_fitness › yoga_studio"
+      },
+      {
+        "id": "finance_insurance",
+        "labelEn": "Finance & insurance",
+        "labelFr": "Banque et assurance",
+        "path": "finance_insurance"
+      },
+      {
+        "id": "shoe_repair",
+        "labelEn": "Shoe repair & key cutting",
+        "labelFr": "Cordonnerie",
+        "path": "home_services › personal_services › shoe_repair"
+      },
+      {
+        "id": "security_services",
+        "labelEn": "Security & alarm systems",
+        "labelFr": "Sécurité et surveillance",
+        "path": "home_services › security_services"
+      },
+      {
+        "id": "asian_restaurant",
+        "labelEn": "Asian restaurant",
+        "labelFr": "Restaurant asiatique",
+        "path": "food_drink › restaurant › asian_restaurant"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "pilates_studio",
+        "labelEn": "Pilates studio",
+        "labelFr": "Studio de Pilates",
+        "path": "sports_fitness › pilates_studio"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["gym"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "weak",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

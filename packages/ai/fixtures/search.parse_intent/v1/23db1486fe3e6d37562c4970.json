@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants vegan à Saint-Barthélemy",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "vegetarian_restaurant",
+        "labelEn": "Vegetarian restaurant",
+        "labelFr": "Restaurant végétarien",
+        "path": "food_drink › restaurant › vegetarian_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "pharmacy",
+        "labelEn": "Pharmacy",
+        "labelFr": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "surf_shop",
+        "labelEn": "Surf shop",
+        "labelFr": "Surf shop",
+        "path": "retail_shopping › fashion › surf_shop"
+      },
+      {
+        "id": "pest_control",
+        "labelEn": "Pest control",
+        "labelFr": "Dératisation et désinsectisation",
+        "path": "home_services › repairs_maintenance › pest_control"
+      },
+      {
+        "id": "painter",
+        "labelEn": "Painter & decorator",
+        "labelFr": "Peintre en bâtiment",
+        "path": "home_construction › finishing_trades › painter"
+      },
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "arts_crafts",
+        "labelEn": "Arts & crafts",
+        "labelFr": "Arts et artisanat",
+        "path": "events_creative › arts_crafts"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["vegetarian_restaurant"],
+    "keywords": ["vegan"],
+    "locationText": "Saint-Barthélemy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

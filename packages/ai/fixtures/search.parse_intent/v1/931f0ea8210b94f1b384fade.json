@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "cafes in st jean",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "logistics",
+        "labelEn": "Logistics & delivery",
+        "labelFr": "Logistique et livraison",
+        "path": "automotive_transport › logistics"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "language_school",
+        "labelEn": "Language school",
+        "labelFr": "École de langues",
+        "path": "education › language_school"
+      },
+      {
+        "id": "videographer",
+        "labelEn": "Videographer",
+        "labelFr": "Vidéaste",
+        "path": "events_creative › photo_video › videographer"
+      },
+      {
+        "id": "nonprofit_association",
+        "labelEn": "Nonprofit",
+        "labelFr": "Association",
+        "path": "public_community › nonprofit_association"
+      },
+      {
+        "id": "home_decor_store",
+        "labelEn": "Home decor store",
+        "labelFr": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["cafe"],
+    "keywords": [],
+    "locationText": "st jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

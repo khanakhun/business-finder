@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "spas in Lorient with fewer than 20 reviews",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "nurse",
+        "labelEn": "Home nurse",
+        "labelFr": "Infirmier libéral",
+        "path": "health_medical › paramedical › nurse"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "mobile_phone_store",
+        "labelEn": "Mobile phone store",
+        "labelFr": "Boutique de téléphonie",
+        "path": "retail_shopping › electronics › mobile_phone_store"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "wellness",
+        "labelEn": "Wellness",
+        "labelFr": "Bien-être",
+        "path": "beauty_wellness › wellness"
+      },
+      {
+        "id": "reflexology",
+        "labelEn": "Reflexology & energy healing",
+        "labelFr": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "car_dealer",
+        "labelEn": "Car dealer",
+        "labelFr": "Concessionnaire automobile",
+        "path": "automotive_transport › automotive_services › car_dealer"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["spa"],
+    "keywords": [],
+    "locationText": "Lorient",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": 19,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

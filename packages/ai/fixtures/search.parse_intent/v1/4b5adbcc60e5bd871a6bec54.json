@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "loueurs de scooters injoignables par téléphone",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "personal_services",
+        "labelEn": "Personal services",
+        "labelFr": "Services à la personne",
+        "path": "home_services › personal_services"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "waxing_salon",
+        "labelEn": "Hair removal",
+        "labelFr": "Épilation",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "psychologist",
+        "labelEn": "Psychologist",
+        "labelFr": "Psychologue",
+        "path": "health_medical › paramedical › psychologist"
+      },
+      {
+        "id": "vehicle_rental",
+        "labelEn": "Vehicle rental",
+        "labelFr": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "bike_rental",
+        "labelEn": "Bike rental",
+        "labelFr": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      },
+      {
+        "id": "industry_trade",
+        "labelEn": "Industry & trade",
+        "labelFr": "Industrie et négoce",
+        "path": "industry_trade"
+      },
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "dog_trainer",
+        "labelEn": "Dog trainer",
+        "labelFr": "Éducateur canin",
+        "path": "pets_animals › dog_trainer"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["scooter_rental"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": ["unreachable_by_phone"],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

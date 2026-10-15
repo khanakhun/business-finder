@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "bars in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "glazing",
+        "labelEn": "Glazing & windows",
+        "labelFr": "Vitrerie et miroiterie",
+        "path": "home_construction › finishing_trades › glazing"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "golf_course",
+        "labelEn": "Golf course",
+        "labelFr": "Golf",
+        "path": "sports_fitness › golf_course"
+      },
+      {
+        "id": "wine_bar",
+        "labelEn": "Wine bar",
+        "labelFr": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "leather_goods_store",
+        "labelEn": "Leather goods & bags",
+        "labelFr": "Maroquinerie",
+        "path": "retail_shopping › fashion › leather_goods_store"
+      },
+      {
+        "id": "secondary_school",
+        "labelEn": "Secondary school",
+        "labelFr": "Collège et lycée",
+        "path": "education › school › secondary_school"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "aesthetic_medicine",
+        "labelEn": "Aesthetic medicine",
+        "labelFr": "Médecine esthétique",
+        "path": "health_medical › medical_specialists › aesthetic_medicine"
+      },
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "casino",
+        "labelEn": "Casino",
+        "labelFr": "Casino",
+        "path": "tourism_leisure › attractions_entertainment › casino"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bar"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

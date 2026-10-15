@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "dentistes à Saint-Barthélemy avec un e-mail vérifié",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "art_gallery",
+        "labelEn": "Art gallery",
+        "labelFr": "Galerie d'art",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "dentist",
+        "labelEn": "Dentist",
+        "labelFr": "Chirurgien-dentiste",
+        "path": "health_medical › dental › dentist"
+      },
+      {
+        "id": "sport_fishing",
+        "labelEn": "Sport fishing",
+        "labelFr": "Pêche au gros",
+        "path": "marine_nautical › sport_fishing"
+      },
+      {
+        "id": "scuba_diving",
+        "labelEn": "Scuba diving",
+        "labelFr": "Plongée sous-marine",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "events",
+        "labelEn": "Events",
+        "labelFr": "Événementiel",
+        "path": "events_creative › events"
+      },
+      {
+        "id": "organic_store",
+        "labelEn": "Organic store",
+        "labelFr": "Magasin bio",
+        "path": "retail_shopping › food_retail › organic_store"
+      },
+      {
+        "id": "daycare",
+        "labelEn": "Daycare",
+        "labelFr": "Crèche",
+        "path": "education › daycare"
+      },
+      {
+        "id": "commercial_cleaning",
+        "labelEn": "Commercial cleaning",
+        "labelFr": "Nettoyage professionnel",
+        "path": "home_services › cleaning_services › commercial_cleaning"
+      },
+      {
+        "id": "dental",
+        "labelEn": "Dental care",
+        "labelFr": "Soins dentaires",
+        "path": "health_medical › dental"
+      },
+      {
+        "id": "aparthotel",
+        "labelEn": "Aparthotel",
+        "labelFr": "Résidence hôtelière",
+        "path": "lodging › aparthotel"
+      },
+      {
+        "id": "orthodontist",
+        "labelEn": "Orthodontist",
+        "labelFr": "Orthodontiste",
+        "path": "health_medical › dental › orthodontist"
+      },
+      {
+        "id": "construction_supplies",
+        "labelEn": "Building supplies & hardware",
+        "labelFr": "Matériaux et quincaillerie",
+        "path": "home_construction › construction_supplies"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["dentist"],
+    "keywords": [],
+    "locationText": "Saint-Barthélemy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": true,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

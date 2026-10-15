@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "plumbers and electricians in Saint-Barth with a phone number",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "marine_nautical",
+        "labelEn": "Marine & nautical",
+        "labelFr": "Nautisme",
+        "path": "marine_nautical"
+      },
+      {
+        "id": "electrician",
+        "labelEn": "Electrician",
+        "labelFr": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      },
+      {
+        "id": "plumber",
+        "labelEn": "Plumber",
+        "labelFr": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "tour_operator",
+        "labelEn": "Tour operator",
+        "labelFr": "Tour-opérateur",
+        "path": "tourism_leisure › travel_services › tour_operator"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "midwife",
+        "labelEn": "Midwife",
+        "labelFr": "Sage-femme",
+        "path": "health_medical › paramedical › midwife"
+      },
+      {
+        "id": "it_services",
+        "labelEn": "IT services",
+        "labelFr": "Services informatiques",
+        "path": "technology_media › it_services"
+      },
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "carpentry",
+        "labelEn": "Carpentry & joinery",
+        "labelFr": "Menuiserie",
+        "path": "home_construction › finishing_trades › carpentry"
+      },
+      {
+        "id": "hvac",
+        "labelEn": "Air conditioning & HVAC",
+        "labelFr": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "live_music_venue",
+        "labelEn": "Concert venue",
+        "labelFr": "Salle de concert",
+        "path": "tourism_leisure › attractions_entertainment › live_music_venue"
+      },
+      {
+        "id": "home_construction",
+        "labelEn": "Construction & renovation",
+        "labelFr": "Construction et rénovation",
+        "path": "home_construction"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["plumber", "electrician"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": true,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

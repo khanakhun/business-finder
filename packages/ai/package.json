@@ -18,6 +18,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "catalog:",
     "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/otel": "catalog:",
     "@bf/contracts": "workspace:*",
     "@opentelemetry/api": "catalog:",
     "ai": "catalog:",

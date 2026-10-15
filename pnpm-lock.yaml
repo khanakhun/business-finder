@@ -12,6 +12,9 @@ catalogs:
     '@ai-sdk/openai':
       specifier: 4.0.91
       version: 4.0.91
+    '@ai-sdk/otel':
+      specifier: 1.0.135
+      version: 1.0.135
     '@aws-sdk/client-s3':
       specifier: 3.1148.0
       version: 3.1148.0
@@ -45,6 +48,9 @@ catalogs:
     '@hookform/resolvers':
       specifier: 5.9.1
       version: 5.9.1
+    '@langfuse/otel':
+      specifier: 5.13.1
+      version: 5.13.1
     '@nestjs/bullmq':
       specifier: 12.0.0
       version: 12.0.0
@@ -341,6 +347,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: 'catalog:'
         version: 3.1148.0
+      '@bf/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@bf/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -368,6 +377,9 @@ importers:
       '@bull-board/nestjs':
         specifier: 'catalog:'
         version: 9.10.4(@bull-board/api@9.10.4(@bull-board/ui@9.10.4(bullmq@6.3.15(ioredis@6.0.0))(typescript@6.0.3))(bullmq@6.3.15(ioredis@6.0.0))(typescript@6.0.3))(@nestjs/bull-shared@12.0.0(@nestjs/common@12.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.1.3))(@nestjs/common@12.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.1.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@langfuse/otel':
+        specifier: 'catalog:'
+        version: 5.13.1(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/otlp-exporter-base@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))
       '@nestjs/bullmq':
         specifier: 'catalog:'
         version: 12.0.0(@nestjs/common@12.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.1.3)(bullmq@6.3.15(ioredis@6.0.0))
@@ -477,6 +489,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.4(vitest@5.0.4)
+      ai:
+        specifier: 'catalog:'
+        version: 7.0.135(zod@4.6.7)
       otplib:
         specifier: 'catalog:'
         version: 13.5.0
@@ -604,6 +619,9 @@ importers:
       '@ai-sdk/openai':
         specifier: 'catalog:'
         version: 4.0.91(zod@4.6.7)
+      '@ai-sdk/otel':
+        specifier: 'catalog:'
+        version: 1.0.135(zod@4.6.7)
       '@bf/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1113,6 +1131,10 @@ packages:
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/otel@1.0.135':
+    resolution: {integrity: sha512-SYD83OEhGVYSeXHsCVO7xlIbD39meglwI9xqoKw1I4b3IAuMFxyUCyHWojsmSoZq2+2K0954xg/0DsyYk6r/zg==}
+    engines: {node: '>=22'}
 
   '@ai-sdk/provider-utils@5.0.58':
     resolution: {integrity: sha512-iXSwKR/7LpHzAlyrUl+bTinwzmZ3Nmup1viwPisM5Gn5cogRdIG4rV9w1ZDuKFcrXyu/AeVs42E1CX/0aNwrfQ==}
@@ -2503,6 +2525,21 @@ packages:
 
   '@kwsites/file-exists@1.1.1':
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
+
+  '@langfuse/core@5.14.0':
+    resolution: {integrity: sha512-E64XSrRcfddqi76Y0bqi8UYQZfQcChPXb4Ezz4XbQysS3p9Zjqiip3Chv4+Lov374vprjGSorx3CjXjior2CmA==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+
+  '@langfuse/otel@5.13.1':
+    resolution: {integrity: sha512-uz7CeY/L6wI+Mp13zW4EQJrZzvFf4zuHIRF0/Ndhf2V0KLo7/8bzgtyFzqKApj9o0w9e8CDnVs/P4r/VHO8YDg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+      '@opentelemetry/core': ^2.0.1
+      '@opentelemetry/exporter-trace-otlp-http': '>=0.202.0 <1.0.0'
+      '@opentelemetry/otlp-exporter-base': '>=0.202.0 <1.0.0'
+      '@opentelemetry/sdk-trace-base': ^2.0.1
 
   '@lukeed/csprng@1.1.0':
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
@@ -7632,6 +7669,14 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.58(zod@4.6.7)
       zod: 4.6.7
 
+  '@ai-sdk/otel@1.0.135(zod@4.6.7)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.26
+      '@opentelemetry/api': 1.9.1
+      ai: 7.0.135(zod@4.6.7)
+    transitivePeerDependencies:
+      - zod
+
   '@ai-sdk/provider-utils@5.0.58(zod@4.6.7)':
     dependencies:
       '@ai-sdk/provider': 4.0.26
@@ -8868,6 +8913,19 @@ snapshots:
       debug: 4.4.3(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
+
+  '@langfuse/core@5.14.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@opentelemetry/api': 1.9.1
+
+  '@langfuse/otel@5.13.1(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/exporter-trace-otlp-http@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/otlp-exporter-base@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))':
+    dependencies:
+      '@langfuse/core': 5.14.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/api': 1.9.1
+      '@opentelemetry/core': 2.12.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/exporter-trace-otlp-http': 0.223.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/otlp-exporter-base': 0.223.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
 
   '@lukeed/csprng@1.1.0': {}
 

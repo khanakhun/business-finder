@@ -114,6 +114,20 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
   `bf_outbox_pending_events`, `bf_events_handled_total`.
 - Owners can re-deliver an event to a subscriber: `POST /v1/events/{eventId}/replay`.
 
+## AI (BF-013)
+
+- Inject the gateway: `@Inject(AI_GATEWAY) private readonly ai: AiGateway` (`platform/ai/ai.module.ts`) and call
+  `ai.run(Task, input, { orgId })` / `stream` / `embed` / `vision`. Tasks, prompts and evals live in `@bf/ai`
+  (see `packages/ai/README.md`); feature modules never import provider SDKs.
+- Keys: the workspace vault (`anthropic`, `openai` secrets), else `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`.
+  Missing → `AiProviderNotConfiguredError` (409, `reason: AI_PROVIDER_NOT_CONFIGURED`, `secretName`).
+- Every call writes an `llm_calls` row (tokens, cost from `AI_PRICING`, latency, status); responses are cached in
+  Valkey per task/prompt version/model/input. Monthly budgets per workspace: `AI_BUDGET_MONTHLY_SOFT_USD`
+  (records `ai.budget_soft_limit_reached` once a month) and `_HARD_USD` (non-essential tasks get 402).
+- `GET /v1/ai/usage` (`settings:manage`): totals by task, model and day, plus the month-to-date spend.
+- Tracing: AI SDK spans via `@ai-sdk/otel`; Langfuse when `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` are set (only
+  LLM spans; bodies only with `AI_TRACE_CONTENT=true`, emails/phones masked).
+
 ## Adding things
 
 **A module.** `pnpm gen:module lead-capture` writes contracts, all four layers, a Drizzle repository stub, a

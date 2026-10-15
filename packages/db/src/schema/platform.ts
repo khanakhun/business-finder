@@ -3,7 +3,8 @@
 
 import type { Actor } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
-import { index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { check, index, integer, jsonb, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { id } from '../columns.ts';
 
 const tz = () => timestamp({ withTimezone: true });
 
@@ -39,5 +40,35 @@ export const outboxEvents = pgTable(
     // The relay only ever scans pending events.
     index('outbox_events_pending_idx').on(table.availableAt).where(sql`${table.dispatchedAt} IS NULL`),
     index('outbox_events_occurred_at_idx').on(table.occurredAt),
+  ],
+);
+
+/**
+ * LLM call ledger (BF-013): one row per gateway call (and per cache hit), for cost, budgets and usage reports.
+ * No foreign key: spend history outlives workspaces.
+ */
+export const llmCalls = pgTable(
+  'llm_calls',
+  {
+    id: id(),
+    organizationId: uuid(),
+    task: text().notNull(),
+    promptVersion: integer(),
+    provider: text().notNull(),
+    model: text().notNull(),
+    inputTokens: integer().notNull().default(0),
+    outputTokens: integer().notNull().default(0),
+    cachedTokens: integer().notNull().default(0),
+    /** USD; null when the model has no configured price. */
+    costUsd: numeric({ precision: 12, scale: 6, mode: 'number' }),
+    latencyMs: integer().notNull(),
+    status: text().$type<'ok' | 'cached' | 'error'>().notNull(),
+    errorCode: text(),
+    traceId: text(),
+    createdAt: tz().notNull().defaultNow(),
+  },
+  (table) => [
+    index('llm_calls_organization_id_created_at_idx').on(table.organizationId, table.createdAt),
+    check('llm_calls_status_check', sql`${table.status} IN ('ok', 'cached', 'error')`),
   ],
 );

@@ -36,6 +36,13 @@
       "when": 1792035083574,
       "tag": "0004_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792037658595,
+      "tag": "0005_llm_calls",
+      "breakpoints": true
     }
   ]
 }

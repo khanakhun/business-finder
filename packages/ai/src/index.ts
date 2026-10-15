@@ -58,5 +58,6 @@ export {
   routeFor,
 } from './routing.ts';
 export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
+export { registerAiTelemetry } from './telemetry.ts';
 export { sanitizeUntrusted, UNTRUSTED_DATA_RULES, type UntrustedOptions, untrusted } from './untrusted.ts';
 export { type AiImage, DEFAULT_MAX_IMAGE_DIMENSION } from './vision.ts';

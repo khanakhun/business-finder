@@ -1,4 +1,18 @@
+import { OpenTelemetry } from '@ai-sdk/otel';
 import { type Span, SpanStatusCode, trace } from '@opentelemetry/api';
+import { registerTelemetry } from 'ai';
+
+let registered = false;
+
+/**
+ * Emits AI SDK calls (provider requests, tokens, finish reasons) as OpenTelemetry spans, exported with the app's
+ * other spans (and to Langfuse when configured). Call once per process; later calls are no-ops.
+ */
+export function registerAiTelemetry(): void {
+  if (registered) return;
+  registerTelemetry(new OpenTelemetry());
+  registered = true;
+}
 
 const tracer = () => trace.getTracer('@bf/ai');
 

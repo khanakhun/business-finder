@@ -22,6 +22,7 @@ export function SettingsNav() {
     { href: '/settings/features', label: t('features'), show: canManageSettings },
     { href: '/settings/api-keys', label: t('apiKeys'), show: canManageSettings },
     { href: '/settings/audit', label: t('audit'), show: canManageSettings },
+    { href: '/settings/taxonomy', label: t('taxonomy'), show: canManageSettings },
   ].filter((item) => item.show);
   return (
     <nav aria-label={t('label')} className="mb-6 flex gap-1 overflow-x-auto border-b">

@@ -8,7 +8,7 @@ export default defineVitestConfig({
   setupFiles: ['./src/test-setup.ts'],
   // Tests cover what this package adds; the shadcn primitives are vendored upstream code.
   coverageInclude: [
-    'src/components/{error-state,empty-state,page-header,keyboard-shortcut,combobox}.tsx',
+    'src/components/{error-state,empty-state,page-header,keyboard-shortcut,combobox,category-picker}.tsx',
     'src/data-table/**',
     'src/lib/**',
   ],

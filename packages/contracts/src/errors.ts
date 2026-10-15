@@ -115,6 +115,14 @@ export class ConflictError extends DomainError {
   readonly code = 'CONFLICT';
 }
 
+/** No valid session or API key (401). */
+export class UnauthenticatedError extends DomainError {
+  readonly code = 'UNAUTHENTICATED';
+  constructor(message = 'Authentication required.', options?: DomainErrorOptions) {
+    super(message, options);
+  }
+}
+
 export class ForbiddenError extends DomainError {
   readonly code = 'FORBIDDEN';
 }

@@ -3,10 +3,13 @@ import { newId } from '@bf/contracts';
 import { withLogContext } from '@bf/observability';
 import { Injectable, type NestMiddleware } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
+import { type AuthContext, getRequestAuth } from '../security/auth-context.ts';
 
-/** Per-request facts available anywhere in the call chain (ARCHITECTURE §5.3). Auth fields arrive in BF-010. */
+/** Per-request facts available anywhere in the call chain (ARCHITECTURE §5.3). */
 export interface RequestContext {
   readonly requestId: string;
+  /** The authenticated caller, if any (resolved before Nest middleware, see http.ts). */
+  readonly auth?: AuthContext;
   readonly orgId?: string;
   readonly userId?: string;
 }
@@ -31,6 +34,14 @@ export class RequestContextMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
     const requestId = resolveRequestId(req.headers[REQUEST_ID_HEADER]);
     res.setHeader(REQUEST_ID_HEADER, requestId);
-    storage.run({ requestId }, () => withLogContext({ requestId }, next));
+    const resolution = getRequestAuth(req);
+    const auth = resolution.kind === 'authenticated' ? resolution.auth : undefined;
+    const ids = {
+      ...(auth?.userId ? { userId: auth.userId } : {}),
+      ...(auth?.orgId ? { orgId: auth.orgId } : {}),
+    };
+    storage.run({ requestId, ...(auth ? { auth } : {}), ...ids }, () =>
+      withLogContext({ requestId, ...ids }, next),
+    );
   }
 }

@@ -88,6 +88,12 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `OPENAI_API_KEY` | AI providers | api, worker | no |  | yes | OpenAI API key (LLM gateway, Codex engine). |
 | `AI_MODEL_OVERRIDES` | AI providers | api, worker | no |  |  | JSON map overriding the prompt registry model per task, e.g. {"classify":"<model-id>"}. |
 | `BETTER_AUTH_SECRET` | Auth & secrets | api, worker | yes |  | yes | Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32 |
+| `SIGNUP_MODE` | Auth & secrets | api, worker | no |  |  | Who may create an account. Default: invite_only in production, open otherwise. |
+| `SIGNUP_ALLOWED_EMAIL_DOMAINS` | Auth & secrets | api, worker | no |  |  | Comma-separated email domains that may self-register when SIGNUP_MODE=allowlist. |
+| `AUTH_COOKIE_DOMAIN` | Auth & secrets | api, worker | no |  |  | Parent domain shared by app. and api. for the session cookie (e.g. example.com). Unset = host-only. |
+| `AUTH_CHECK_PWNED` | Auth & secrets | api, worker | no | `true` |  | Reject passwords found in known breaches (k-anonymity queries to api.pwnedpasswords.com). |
+| `GOOGLE_CLIENT_ID` | Auth & secrets | api, worker | no |  |  | Google OAuth client id; Google sign-in is off when unset. |
+| `GOOGLE_CLIENT_SECRET` | Auth & secrets | api, worker | no |  | yes | Google OAuth client secret. |
 | `SECRETS_MASTER_KEY` | Auth & secrets | api, worker | yes |  | yes | Master key wrapping workspace secret data keys (AES-256-GCM). Generate: openssl rand -base64 32 |
 | `SMTP_URL` | System mail | api, worker | yes (infra:up) |  | yes | System mail transport (verification, invites). Mailpit locally. May embed credentials. |
 | `MAIL_FROM` | System mail | api, worker | no | `Business Finder <no-reply@localhost>` |  | From header for system emails. Never used for prospect outreach. |
@@ -97,8 +103,6 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
-| `BULL_BOARD_USER` | App-specific | api | no |  |  | Basic-auth user for the queue dashboard (/admin/queues). Unset = dashboard off. |
-| `BULL_BOARD_PASSWORD` | App-specific | api | no |  | yes | Basic-auth password for the queue dashboard, ≥ 12 chars. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |
 | `WEB_PORT` | App-specific | web | no | `3000` |  | HTTP port of apps/web. Set by infra:up from BF_PORT_OFFSET. |

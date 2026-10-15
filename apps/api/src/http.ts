@@ -1,7 +1,52 @@
+import { AUTH_BASE_PATH } from '@bf/auth';
+import type { Logger } from '@bf/observability';
 import type { INestApplication } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
+import { type Auth, BETTER_AUTH } from './modules/identity/infrastructure/better-auth.provider.ts';
+import { betterAuthMiddleware } from './modules/identity/infrastructure/better-auth-http.ts';
 import type { AppEnv } from './modules/platform/config/app-env.ts';
+import { LOGGER } from './modules/platform/logging/logger.ts';
+import {
+  AUTH_RESOLVER,
+  type AuthResolver,
+  setRequestAuth,
+} from './modules/platform/security/auth-context.ts';
+
+/** A provider of the identity module, or undefined when the app was composed without it. */
+function optional<T>(app: INestApplication, token: symbol): T | undefined {
+  try {
+    return app.get<T>(token, { strict: false });
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Resolves the session cookie / API key once per request, before Nest's middleware, guards and Bull Board, so
+ * all of them see the same caller (`getRequestAuth`). A failed check is treated as invalid credentials (401 on
+ * protected routes), never as anonymous access.
+ */
+function resolveCredentials(resolver: AuthResolver, logger: Logger | undefined) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    if (req.path.startsWith(`${AUTH_BASE_PATH}/`)) {
+      next();
+      return;
+    }
+    resolver.resolve(req).then(
+      (resolution) => {
+        setRequestAuth(req, resolution);
+        next();
+      },
+      (error: unknown) => {
+        logger?.error({ err: error }, 'credential check failed');
+        setRequestAuth(req, { kind: 'invalid', reason: 'credential check failed' });
+        next();
+      },
+    );
+  };
+}
 
 /** HTTP-level setup shared by main.ts, openapi.ts and tests, so they all see the same routes. */
 export function configureHttp(app: INestApplication, env: AppEnv): void {
@@ -17,4 +62,9 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   });
   app.use(helmet());
   app.enableCors({ origin: [env.APP_URL], credentials: true });
+  // Registered before app.init(), so these run ahead of Nest's body parsers: Better Auth reads the raw body.
+  const auth = optional<Auth>(app, BETTER_AUTH);
+  if (auth) app.use(betterAuthMiddleware(auth));
+  const resolver = optional<AuthResolver>(app, AUTH_RESOLVER);
+  if (resolver) app.use(resolveCredentials(resolver, optional<Logger>(app, LOGGER)));
 }

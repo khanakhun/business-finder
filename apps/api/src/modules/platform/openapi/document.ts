@@ -9,6 +9,11 @@ export function buildOpenApiDocument(app: INestApplication, version: string): Op
     .setTitle('Business Finder API')
     .setDescription('REST API (/v1). Errors are RFC 9457 problem+json; see docs/conventions/api.md.')
     .setVersion(version)
+    // Session cookie set by Better Auth (/api/auth/*), or an organization API key.
+    .addCookieAuth('bf.session_token', { type: 'apiKey', in: 'cookie' }, 'session')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', description: 'Organization API key (bf_…)' }, 'apiKey')
+    .addSecurityRequirements('session')
+    .addSecurityRequirements('apiKey')
     .build();
   const document = SwaggerModule.createDocument(app, config, {
     operationIdFactory: (controllerKey, methodKey) =>

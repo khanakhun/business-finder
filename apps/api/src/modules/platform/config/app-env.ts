@@ -25,25 +25,13 @@ const OPENAPI_ENV = {
   INTEL_SHARED_SECRET: 'openapi-placeholder-not-a-secret-000000',
 } as const;
 
-/** Thrown at boot in production until real authentication exists. */
-export class ProductionWithoutAuthError extends Error {
-  constructor() {
-    super('Refusing to start with NODE_ENV=production: authentication is not implemented yet (BF-010).');
-    this.name = 'ProductionWithoutAuthError';
-  }
-}
-
 export function loadAppEnv(mode: 'worker', source?: Record<string, string | undefined>): WorkerEnv;
 export function loadAppEnv(mode: 'http' | 'openapi', source?: Record<string, string | undefined>): ApiEnv;
 export function loadAppEnv(mode: AppMode, source?: Record<string, string | undefined>): AppEnv {
   const from = source ? { env: source, files: [] } : {};
-  const env =
-    mode === 'openapi'
-      ? apiEnv.parse(OPENAPI_ENV)
-      : mode === 'worker'
-        ? loadEnvOrExit(workerEnv, { label: 'worker', ...from })
-        : loadEnvOrExit(apiEnv, { label: 'api', ...from });
-  // DECISION(BF-006): every /v1 route is open until BF-010 adds auth, so production boots are blocked outright.
-  if (env.NODE_ENV === 'production') throw new ProductionWithoutAuthError();
-  return env;
+  return mode === 'openapi'
+    ? apiEnv.parse(OPENAPI_ENV)
+    : mode === 'worker'
+      ? loadEnvOrExit(workerEnv, { label: 'worker', ...from })
+      : loadEnvOrExit(apiEnv, { label: 'api', ...from });
 }

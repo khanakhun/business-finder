@@ -49,3 +49,7 @@ infra/compose/data/
 # agent workspaces
 .claude/settings.local.json
 tmp/
+
+# Eval reports (attach them to PRs; not versioned)
+packages/ai/evals/reports/*
+!packages/ai/evals/reports/.gitkeep

@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Sunset Grill",
+    "websiteUrl": "https://sunset-grill.example.test",
+    "pageText": "Sunset Grill — fresh fish, burgers, cocktails at sunset. Dinner every day from 6pm. Reservations: book@sunset-grill.example.test"
+  },
+  "output": {
+    "phones": [],
+    "emails": ["book@sunset-grill.example.test"],
+    "openingHours": "every day from 6pm",
+    "services": ["fresh fish", "burgers"],
+    "languages": ["en"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

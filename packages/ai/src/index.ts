@@ -1,0 +1,62 @@
+// @bf/ai — the only package that calls model providers (ADR-0011). See README.md.
+export { embeddingCacheKey, responseCacheKey, stableStringify } from './cache.ts';
+export {
+  addUsage,
+  costUsd,
+  type ModelPricing,
+  ModelPricingSchema,
+  type TokenUsage,
+  ZERO_USAGE,
+} from './cost.ts';
+export {
+  AI_TIERS,
+  type AiTask,
+  type AiTier,
+  defineTask,
+  getTask,
+  type ObjectTask,
+  registeredTasks,
+  type TextTask,
+  type VisionTask,
+} from './define-task.ts';
+export {
+  AiOutputInvalidError,
+  AiProviderNotConfiguredError,
+  AiProviderUnavailableError,
+  PromptError,
+} from './errors.ts';
+export {
+  type AiContext,
+  type AiGateway,
+  type AiGatewayOptions,
+  type AiResult,
+  type AiStream,
+  createAiGateway,
+  type EmbedOptions,
+  type EmbedResult,
+  type ModelFactory,
+  PROVIDER_SECRETS,
+  providerModels,
+} from './gateway.ts';
+export type { AiCache, BudgetGuard, BudgetState, KeyResolver, LlmCall, LlmCallRecorder } from './ports.ts';
+export {
+  DEFAULT_PROMPTS_DIR,
+  loadPromptRegistry,
+  type Prompt,
+  type PromptRegistry,
+  parsePrompt,
+} from './prompts/registry.ts';
+export { renderTemplate } from './prompts/render.ts';
+export { DEFAULT_RESILIENCE, isRetryableProviderError, type ResilienceConfig } from './resilience.ts';
+export {
+  type AiProvider,
+  DEFAULT_EMBEDDING_MODEL,
+  DEFAULT_TIERS,
+  type ModelRef,
+  parseModelRef,
+  type RoutingConfig,
+  routeFor,
+} from './routing.ts';
+export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
+export { sanitizeUntrusted, UNTRUSTED_DATA_RULES, type UntrustedOptions, untrusted } from './untrusted.ts';
+export { type AiImage, DEFAULT_MAX_IMAGE_DIMENSION } from './vision.ts';

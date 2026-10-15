@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Lagoon Boat Rentals",
+    "websiteUrl": "https://lagoon-boats.example.test",
+    "pageText": "Lagoon Boat Rentals. Half-day and full-day boat rentals, snorkeling trips. Open Monday to Saturday, 8am-5pm. Call +590 590 00 00 02 or write to hello@lagoon-boats.example.test"
+  },
+  "output": {
+    "phones": ["+590 590 00 00 02"],
+    "emails": ["hello@lagoon-boats.example.test"],
+    "openingHours": "Monday to Saturday, 8am-5pm",
+    "services": ["boat rentals", "snorkeling trips"],
+    "languages": ["en"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

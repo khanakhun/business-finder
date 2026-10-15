@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Atelier Bleu",
+    "websiteUrl": "https://atelier-bleu.example.test",
+    "pageText": "Atelier Bleu. Bientôt en ligne."
+  },
+  "output": {
+    "phones": [],
+    "emails": [],
+    "openingHours": null,
+    "services": [],
+    "languages": ["fr"],
+    "warnings": [],
+    "confidence": 0.5
+  }
+}

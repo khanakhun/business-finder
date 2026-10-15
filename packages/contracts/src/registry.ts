@@ -2,6 +2,11 @@ import { z } from 'zod';
 import { ProblemDetailsSchema } from './errors.ts';
 import { LatLngSchema } from './geo.ts';
 import { EchoRequestSchema, EchoResponseSchema } from './intel.ts';
+import {
+  OpenDataPlaceSchema,
+  OpenDataSearchRequestSchema,
+  OpenDataSearchResponseSchema,
+} from './open-data.ts';
 
 /** Languages schemas can be exported to. `python` → services/intel Pydantic models (BF-008). */
 export const EXPORT_TARGETS = ['python'] as const;
@@ -45,6 +50,22 @@ exportSchema(EchoResponseSchema, {
   id: 'EchoResponse',
   exportTo: ['python'],
   description: 'POST /v1/echo response on services/intel.',
+});
+
+exportSchema(OpenDataSearchRequestSchema, {
+  id: 'OpenDataSearchRequest',
+  exportTo: ['python'],
+  description: 'POST /v1/open-data/places/search request on services/intel.',
+});
+exportSchema(OpenDataPlaceSchema, {
+  id: 'OpenDataPlace',
+  exportTo: ['python'],
+  description: 'A place from an open dataset, as services/intel normalizes it.',
+});
+exportSchema(OpenDataSearchResponseSchema, {
+  id: 'OpenDataSearchResponse',
+  exportTo: ['python'],
+  description: 'POST /v1/open-data/places/search response on services/intel.',
 });
 
 export const JSON_SCHEMA_BASE = 'https://schemas.business-finder.dev/';

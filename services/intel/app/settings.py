@@ -66,6 +66,23 @@ class Settings(BaseSettings):
     intel_fetch_timeout_seconds: Annotated[float, Field(gt=0, le=300)] = 20.0
     intel_fetch_max_bytes: Annotated[int, Field(gt=0)] = 10_485_760
 
+    # Open data (BF-019): DuckDB over Overture / Foursquare parquet, with regional extracts cached.
+    open_data_cache_dir: Annotated[str, Field(min_length=1)] = ".cache/open-data"
+    open_data_object_cache: Flag = False
+    open_data_extension_dir: Annotated[str, Field(min_length=1)] | None = None
+    open_data_cache_max_mb: Annotated[int, Field(ge=100, le=1_000_000)] = 5_120
+    open_data_query_timeout_seconds: Annotated[float, Field(gt=0, le=600)] = 120.0
+    open_data_memory_limit: Annotated[str, Field(pattern=r"^\d+(MB|GB)$")] = "1GB"
+    overture_release: Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}\.\d{1,3}$")] | None = None
+    overture_stac_url: AnyHttpUrl = AnyHttpUrl("https://stac.overturemaps.org/catalog.json")
+    overture_source_url: Annotated[str, Field(min_length=1)] = (
+        "s3://overturemaps-us-west-2/release/{release}/theme=places/type=place/*.parquet"
+    )
+    foursquare_release: Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}$")] = "2026-09-15"
+    foursquare_source_url: Annotated[str, Field(min_length=1)] = (
+        "hf://datasets/foursquare/fsq-os-places/release/dt={release}/places/parquet/*.parquet"
+    )
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

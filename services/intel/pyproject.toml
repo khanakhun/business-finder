@@ -19,6 +19,7 @@ dependencies = [
   "opentelemetry-instrumentation-httpx==0.66b1",
   # The image installs the matching Chromium (`playwright install`); crawling arrives in BF-026.
   "playwright>=1.64.0,<2",
+  "duckdb>=1.5.6,<1.6",
 ]
 
 [dependency-groups]
@@ -64,7 +65,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S104", "S105", "S106", "S603", "ANN", "PLR0915", "TRY301"]
+# S608: tests build parquet fixtures with SQL they write themselves.
+"tests/**" = ["S101", "S104", "S105", "S106", "S603", "S608", "ANN", "PLR0915", "TRY301"]
 "scripts/**" = ["S603", "S607", "T201"]
 
 [tool.mypy]

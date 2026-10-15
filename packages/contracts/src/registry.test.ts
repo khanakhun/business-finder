@@ -14,7 +14,10 @@ describe('JSON Schema export', () => {
       'jsonschema/python/OpenDataSearchRequest.json',
       'jsonschema/python/OpenDataSearchResponse.json',
       'jsonschema/python/ProblemDetails.json',
+      'jsonschema/python/SiteIntel.json',
+      'jsonschema/python/SiteIntelRequest.json',
       'error-codes.json',
+      'no-solicitation-phrases.json',
     ]);
   });
 

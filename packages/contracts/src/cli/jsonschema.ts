@@ -1,11 +1,13 @@
 // pnpm contracts:jsonschema [--check] — writes generated/jsonschema/<target>/<Id>.json for every opted-in schema
-// plus generated/error-codes.json (the error registry, for non-TypeScript services), and removes stale files.
+// plus generated/error-codes.json (the error registry, for non-TypeScript services) and
+// generated/no-solicitation-phrases.json (BF-026), and removes stale files.
 // --check exits 1 instead of writing when the committed files are out of date.
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ERROR_CODES, ERROR_TYPE_BASE } from '../errors.ts';
 import { buildJsonSchemas, EXPORT_TARGETS, sortKeys } from '../registry.ts';
+import { NO_SOLICITATION_PHRASES } from '../site-intel.ts';
 
 const OUT_DIR = fileURLToPath(new URL('../../generated', import.meta.url));
 
@@ -20,6 +22,7 @@ export function expectedFiles(): Map<string, string> {
     }
   }
   files.set('error-codes.json', json(sortKeys({ typeBase: ERROR_TYPE_BASE, codes: ERROR_CODES })));
+  files.set('no-solicitation-phrases.json', json(sortKeys(NO_SOLICITATION_PHRASES)));
   return files;
 }
 

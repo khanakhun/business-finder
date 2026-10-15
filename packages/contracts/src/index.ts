@@ -529,6 +529,16 @@ export {
   WebsiteFilterSchema,
 } from './search-intent.ts';
 export {
+  EMAIL_SOURCES,
+  NO_SOLICITATION_PHRASES,
+  SITE_REACHABILITY,
+  type SiteIntel,
+  type SiteIntelRequest,
+  SiteIntelRequestSchema,
+  SiteIntelSchema,
+  SitePageKindSchema,
+} from './site-intel.ts';
+export {
   type PingJobsAccepted,
   PingJobsAcceptedSchema,
   type PingJobsRequest,

@@ -145,6 +145,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |
+| `API_INTERNAL_URL` | App-specific | web | no |  |  | The API as the web server reaches it (internal network, e.g. http://api:4000). Default: API_URL. |
 | `WEB_PORT` | App-specific | web | no | `3000` |  | HTTP port of apps/web. Set by infra:up from BF_PORT_OFFSET. |
 | `NEXT_PUBLIC_API_URL` | App-specific | web | no | `http://localhost:4000` |  | API base URL used by the browser. |
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |

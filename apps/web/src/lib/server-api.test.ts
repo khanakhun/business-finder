@@ -11,7 +11,7 @@ vi.mock('react', async (original) => ({
   cache: (fn: unknown) => fn,
 }));
 
-const { serverGet } = await import('./server-api.ts');
+const { forwardedHeaders, serverGet } = await import('./server-api.ts');
 
 describe('serverGet', () => {
   const fetch = vi.fn<typeof globalThis.fetch>();
@@ -43,5 +43,13 @@ describe('serverGet', () => {
     cookie.value = null;
     expect(await serverGet('/v1/x')).toEqual({ ok: false, status: 401 });
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("forwards the visitor's address only when a proxy reported it", () => {
+    expect(forwardedHeaders(new Headers({ cookie: 'a=b', 'x-forwarded-for': '203.0.113.7' }))).toEqual({
+      cookie: 'a=b',
+      'x-forwarded-for': '203.0.113.7',
+    });
+    expect(forwardedHeaders(new Headers({ cookie: 'a=b' }))).toEqual({ cookie: 'a=b' });
   });
 });

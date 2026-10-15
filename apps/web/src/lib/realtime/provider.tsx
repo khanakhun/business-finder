@@ -3,6 +3,7 @@
 import type { RealtimeEvent } from '@bf/contracts';
 import { type QueryClient, type QueryKey, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
+import { publicEnv } from '../public-env.ts';
 import { RESYNC_EVENT, realtimeInvalidations } from './invalidations.ts';
 
 type Handler = (event: RealtimeEvent) => void;
@@ -130,11 +131,7 @@ export function RealtimeProvider({
 }) {
   const queryClient = useQueryClient();
   const [connection] = React.useState(
-    () =>
-      new RealtimeConnection(
-        `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/v1/realtime`,
-        queryClient,
-      ),
+    () => new RealtimeConnection(`${publicEnv().apiUrl}/v1/realtime`, queryClient),
   );
   React.useEffect(() => {
     if (!enabled) return;

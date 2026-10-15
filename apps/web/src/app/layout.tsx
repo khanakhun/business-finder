@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import type * as React from 'react';
+import { serverPublicEnv } from '@/lib/public-env.ts';
 import { Providers } from './providers.tsx';
 import './globals.css';
 
@@ -27,7 +28,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} className={font.variable} suppressHydrationWarning>
       <body>
         <NextIntlClientProvider>
-          <Providers nonce={nonce}>{children}</Providers>
+          <Providers nonce={nonce} publicEnv={serverPublicEnv()}>
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

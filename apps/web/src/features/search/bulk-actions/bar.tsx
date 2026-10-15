@@ -28,6 +28,7 @@ import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
 import { apiClient, queryKeys } from '@/lib/api.ts';
+import { publicEnv } from '@/lib/public-env.ts';
 import { useSession } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { ADD_TO_LIST_DIALOG, registerDefaultBulkActions } from './defaults.ts';
@@ -50,7 +51,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 /** Starts a download of an API path (the session cookie travels with a top-level navigation). */
 export function downloadFromApi(path: string, query: Readonly<Record<string, string | string[]>>): void {
-  const url = new URL(path, process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000');
+  const url = new URL(path, publicEnv().apiUrl);
   for (const [key, value] of Object.entries(query)) {
     for (const v of Array.isArray(value) ? value : [value]) url.searchParams.append(key, v);
   }

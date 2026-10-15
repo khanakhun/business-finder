@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -16,6 +17,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // The Docker image (infra/docker/web) runs the self-contained server; `pnpm start` keeps `next start`.
+  ...(process.env.NEXT_OUTPUT === 'standalone'
+    ? { output: 'standalone', outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)) }
+    : {}),
   // Workspace packages are consumed as TypeScript source (packages/README.md).
   transpilePackages: ['@bf/ui', '@bf/api-client'],
   poweredByHeader: false,

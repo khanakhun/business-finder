@@ -1,12 +1,13 @@
 'use client';
 
 import { type ApiClient, createApiClient, defineQueryKeys } from '@bf/api-client';
+import { publicEnv } from './public-env.ts';
 
 let client: ApiClient | undefined;
 
-/** The browser's API client (one per tab). Base URL is inlined at build time from NEXT_PUBLIC_API_URL. */
+/** The browser's API client (one per tab), on the deployment's API URL (`publicEnv`, read at run time). */
 export function apiClient(): ApiClient {
-  client ??= createApiClient({ baseUrl: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000' });
+  client ??= createApiClient({ baseUrl: publicEnv().apiUrl });
   return client;
 }
 

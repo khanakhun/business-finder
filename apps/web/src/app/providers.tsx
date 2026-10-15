@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import * as React from 'react';
 import { CommandRegistryProvider } from '@/lib/commands.tsx';
+import { type PublicEnv, setPublicEnv } from '@/lib/public-env.ts';
 import { ToastHost } from '@/lib/toast.tsx';
 
 const ReactQueryDevtools =
@@ -17,10 +18,15 @@ const ReactQueryDevtools =
 export function Providers({
   children,
   nonce,
+  publicEnv,
 }: {
   readonly children: React.ReactNode;
   readonly nonce: string | undefined;
+  /** This deployment's public URLs, read by the server at run time (lib/public-env.ts). */
+  readonly publicEnv: PublicEnv;
 }) {
+  // During render, so it is in place before any child renders or runs an effect (idempotent).
+  setPublicEnv(publicEnv);
   const [queryClient] = React.useState(
     () =>
       new QueryClient({

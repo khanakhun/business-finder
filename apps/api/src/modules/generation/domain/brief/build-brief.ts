@@ -133,12 +133,22 @@ const INVISIBLE = new RegExp(
   'gu',
 );
 
+/** Markup out of operator text: tags, then any angle bracket left (they could reopen a tag or a data block). */
+function stripMarkup(text: string): string {
+  let previous: string;
+  let current = text;
+  do {
+    previous = current;
+    current = current.replace(/<\/?[a-z_]+[^<>]*>/gi, '');
+  } while (current !== previous);
+  return current.replace(/[<>]/g, '');
+}
+
 function sanitizeInstructions(text: string | undefined): string | null {
   if (!text) return null;
-  const clean = text
-    .normalize('NFKC')
+  // Normalized first: full-width brackets become < > before markup is stripped.
+  const clean = stripMarkup(text.normalize('NFKC'))
     .replace(INVISIBLE, '')
-    .replace(/<\/?[a-z_]+[^>]*>/gi, '')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 500);

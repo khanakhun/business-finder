@@ -122,25 +122,33 @@ const GENERIC_TLDS =
   // Endings of the local market (villas, boats, beauty, food).
   'villas|villa|luxury|yachts|boats|boutique|beauty|spa|hair|salon|bio|voyage|holiday|rentals|house|homes|estate|' +
   'properties|studio|design|agency|services|menu|pizza|wine|bike|fit|ski|surf|golf|events|photo|tours|beach';
+/** Country endings that sell one-letter names (`x.cc`, `t.co`), and the endings link shorteners use. */
+const SHORT_NAME_TLDS =
+  'cc|gg|am|to|tv|ai|ws|fm|la|sh|gd|nu|mp|ly|me|io|co|de|fr|uk|us|eu|so|im|is|it|be|nl|es';
+
 /**
  * A domain: labels of two or more characters before any ending (a label after `.`, `_` or `*` too: `m.evil.com`,
- * `x_evil.com`, `*.evil.com`), or a one-character name before a generic ending (`x.com`, `t.me`). Abbreviations
- * (`p.ex.`) stay text.
+ * `x_evil.com`, `*.evil.com`); a one-character name before a generic or short-name ending (`x.com`, `t.me`, `x.cc`),
+ * or before any ending when a path follows (`j.mp/promo`). Abbreviations (`p.ex.`) stay text. Every repetition is
+ * bounded (labels of 63, ten dots): a match may start at any label, so an unbounded chain would be quadratic.
  */
 const DOMAIN = new RegExp(
-  `(?<![\\p{L}\\p{N}@-])(?:[\\p{L}\\p{N}-]{2,}(?:\\.[\\p{L}\\p{N}-]+)*\\.(?:[a-z]{2}|${GENERIC_TLDS}|xn--[a-z0-9-]+|[\\p{Script=Cyrillic}\\p{Script=Greek}\\p{Script=Arabic}\\p{Script=Han}\\p{Script=Hangul}]{2,})|[\\p{L}\\p{N}]\\.(?:${GENERIC_TLDS}))(?![\\p{L}\\p{N}-])`,
+  `(?<![\\p{L}\\p{N}@-])(?:[\\p{L}\\p{N}-]{2,63}(?:\\.[\\p{L}\\p{N}-]{1,63}){0,10}\\.(?:[a-z]{2}|${GENERIC_TLDS}|xn--[a-z0-9-]{1,59}|[\\p{Script=Cyrillic}\\p{Script=Greek}\\p{Script=Arabic}\\p{Script=Han}\\p{Script=Hangul}]{2,63})|[\\p{L}\\p{N}]\\.(?:${GENERIC_TLDS}|${SHORT_NAME_TLDS})|[\\p{L}\\p{N}]\\.[a-z]{2,63}(?=/))(?![\\p{L}\\p{N}-])`,
   'iu',
 );
 
 const MIDDLE_DOT_DOMAIN = new RegExp(
-  `(?<![\\p{L}\\p{N}-])[\\p{L}\\p{N}-]{2,}·(?:${GENERIC_TLDS})(?![\\p{L}\\p{N}-])`,
+  `(?<![\\p{L}\\p{N}-])[\\p{L}\\p{N}-]{2,63}·(?:${GENERIC_TLDS})(?![\\p{L}\\p{N}-])`,
   'iu',
 );
 
 /** A web address in prose: a scheme, `//host`, `www.`, or a domain (look-alike dots and full-width letters folded). */
 export function hasWebAddress(text: string): boolean {
   // Look-alike dots read as dots; bullet-like dots as the middle dot (inclusive writing: client•es).
+  // Combining marks dropped first: `evil.\u034Fcom` and `évil.com` read as `evil.com`.
   const folded = text
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
     .normalize('NFKC')
     .replace(/[。．｡․]/g, '.')
     .replace(/[‧∙⋅•・⸱]/g, '·');

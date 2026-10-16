@@ -211,6 +211,16 @@ describe('validateSite', () => {
     expect(found(spec)).toContain('unknown_page@pages.1.blocks.2.props.body.fr');
   });
 
+  it.each([
+    'Visitez evil.\u034Fcom',
+    'evil.\uFE0Fcom',
+    'evil.\u{E0100}com',
+    'Appelez le \u0660\u0666\u0669\u0660 12 34 56',
+    'Depuis \u0967\u096F\u096F\u096E',
+  ])('refuses hidden marks and look-alike digits in text: %j', (title) => {
+    expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).toBeNull();
+  });
+
   it('warns about texts outside their recommended length', () => {
     const issues = validateSite(
       with_((s) => Object.assign(s.seo.description, { en: 'Too short.' })),
@@ -479,6 +489,11 @@ describe('validateSite', () => {
     'see _.evil.com',
     'see x_evil.com',
     'see ..evil.com',
+    'Voir j.mp/promo',
+    'Voir w.wiki/promo',
+    'Voir x.cc',
+    'Le Z.Bar',
+    'Visitez évil.com',
     'see javascript:evil.com@a.bc',
     'evil・com',
     'evil･com',
@@ -515,7 +530,14 @@ describe('validateSite', () => {
   });
 
   it('validates a near-maximal hostile spec quickly (no quadratic pattern)', () => {
-    const fillers = ['a'.repeat(4900), 'a.'.repeat(2450), 'a@'.repeat(2450)];
+    const fillers = [
+      'a'.repeat(4900),
+      'a.'.repeat(2450),
+      'a@'.repeat(2450),
+      'a1.'.repeat(1633),
+      'abc.'.repeat(1225),
+      'aé.'.repeat(1633),
+    ];
     const spec = with_((s) => {
       for (let n = 0; n < 5; n += 1) {
         s.pages.push({
@@ -532,7 +554,7 @@ describe('validateSite', () => {
               id: `rich-x${n}${String(j).padStart(2, '0')}`,
               type: 'rich_text' as const,
               variant: 'narrow' as const,
-              props: { body: L(fillers[j % 3] ?? '') },
+              props: { body: L(fillers[j % fillers.length] ?? '') },
             })),
           ],
         });

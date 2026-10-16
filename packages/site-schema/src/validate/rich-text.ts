@@ -24,8 +24,12 @@ export interface RichTextResult {
 /** A valid link: a bounded label without brackets or line breaks, then a page target (global: replace only). */
 const PAGE_LINK = /\[([^[\]\n]{0,200})\]\(page:([a-z][a-z0-9-]{1,31})\)/g;
 
-/** The text with its valid page links replaced by their labels (what the words say). */
-export const withoutPageLinks = (text: string) => text.replace(PAGE_LINK, '$1');
+/**
+ * The text with its valid page links replaced by their labels (what the words say); `separator` around each label
+ * keeps it from joining the text next to it (`[evil.com](page:home)@x.fr` is not the address `evil.com@x.fr`).
+ */
+export const withoutPageLinks = (text: string, separator = '') =>
+  text.replace(PAGE_LINK, `${separator}$1${separator}`);
 
 const FORBIDDEN_LINE: readonly [RegExp, string][] = [
   [/^\s{0,3}#{1,6}(\s|$)/, 'headings are not allowed (the page has one heading: its hero)'],
@@ -176,4 +180,19 @@ export function parseRichText(text: string): RichTextResult {
     }
   }
   return { blocks, problems: [...problems], pageIds };
+}
+
+const inlineText = (nodes: readonly Inline[]): string =>
+  nodes.map((node) => (node.type === 'text' ? node.text : inlineText(node.children))).join('');
+
+/**
+ * The words a reader sees in rich text: link labels and emphasis joined to their neighbours, markup gone
+ * (`evil[.com](page:home)` and `*evil*.com` read `evil.com`), one line per paragraph or list item. The validators read
+ * this, not the markup.
+ */
+export function richTextWords(text: string): string {
+  return parseRichText(text)
+    .blocks.flatMap((block) => (block.type === 'paragraph' ? [block.children] : block.items))
+    .map(inlineText)
+    .join('\n');
 }

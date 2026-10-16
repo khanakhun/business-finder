@@ -259,6 +259,51 @@ describe('validateSite', () => {
     ).not.toBeNull();
   });
 
+  it.each([
+    'Voir evil[.](page:home)com',
+    'Voir evil[](page:home).com',
+    'Voir evil[.com](page:home)',
+    'Voir [evil](page:home).com',
+    'Voir evil.[com](page:home)',
+    'Voir ev[il](page:home).com',
+    'Voir *evil*.com',
+    'Voir evil.*com*',
+    'Voir ev*il.c*om',
+  ])('reads rich text as the reader sees it: %j', (body) => {
+    const spec = with_((s) =>
+      s.pages[1]?.blocks.push({
+        id: 'rich-serv7',
+        type: 'rich_text',
+        variant: 'narrow',
+        props: { body: L(body) },
+      }),
+    );
+    expect(found(spec)).toContain('external_url@pages.1.blocks.2.props.body.fr');
+  });
+
+  it('refuses an address hidden in the brand name and says where handles go', () => {
+    expect(found(with_((s) => Object.assign(s.brand, { name: 'Le@Bonito.St Barth' })))).toContain(
+      'external_url@brand.name',
+    );
+    const issues = validateSite(
+      with_((s) => Object.assign(s.seo.title, { en: 'Follow @nikki.beach — Salon Lumière' })),
+      OPTIONS,
+    );
+    expect(issues[0]?.message).toContain('contact.socials');
+  });
+
+  it('keeps a page link label apart from the text next to it', () => {
+    const spec = with_((s) =>
+      s.pages[1]?.blocks.push({
+        id: 'rich-serv8',
+        type: 'rich_text',
+        variant: 'narrow',
+        props: { body: L('Voir [evil.com](page:home)@x.fr') },
+      }),
+    );
+    expect(found(spec)).toContain('external_url@pages.1.blocks.2.props.body.fr');
+  });
+
   it('warns about texts outside their recommended length', () => {
     const issues = validateSite(
       with_((s) => Object.assign(s.seo.description, { en: 'Too short.' })),
@@ -509,6 +554,9 @@ describe('validateSite', () => {
     'Chez M.Dupont',
     'S.A.R.L. au capital de 10 000 €',
     'Version 1.2.3, note 4.8/5',
+    'bonjour (at) salon-lumiere.example',
+    'bonjour @ salon-lumiere.example',
+    'Suivez-nous @salon.lumiere',
     'Nos client·es sont ravi·es',
     'Nos client•es et ami‧es',
     'x </ y',
@@ -540,6 +588,11 @@ describe('validateSite', () => {
     'Voir x.cc',
     'Le Z.Bar',
     'Visitez évil.com',
+    'Suivez-nous @evil.com',
+    'Suivez-nous @salon.fr sur Instagram',
+    'Ecrivez a bonjour @evil.com/promo',
+    'evil.com@_.fr',
+    'bonjour@salon-lumiere.example_evil.com',
     'see javascript:evil.com@a.bc',
     'evil・com',
     'evil･com',

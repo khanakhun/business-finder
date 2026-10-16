@@ -5,9 +5,10 @@ import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
 import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
+import { emailPattern } from './email.ts';
 import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
-import { HTML_TAG, parseRichText, withoutPageLinks } from './rich-text.ts';
+import { HTML_TAG, parseRichText, richTextWords, withoutPageLinks } from './rich-text.ts';
 import { isCta, isLocalized, type Path, walk } from './walk.ts';
 
 // The semantic validator (BF-033): what the schema cannot say. Each rule is a small function over the parsed spec
@@ -319,8 +320,13 @@ const skipped = (path: Path) => {
   if (LOCALES.has(key)) return true;
   return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
 };
-/** An e-mail address (anchored and bounded: linear on long words). */
-const EMAIL = /(?<![\w.+-])([\w.+-]{1,64})@[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}/g;
+/**
+ * E-mail addresses (the facts validator's shared pattern).
+ * DECISION(BF-033): an address, plain or spelled out, is left to `validateFacts` (it must be the contact e-mail
+ * fact) unless it is dressed as a web address. A site is checked for invented addresses with a registry:
+ * `applyAndValidate` requires one, so every engine and editor path checks them.
+ */
+const EMAIL = emailPattern();
 /** A URL scheme (`http:`, `javascript:`…): an e-mail after one in the same word is a URL's user part. */
 const URL_SCHEME = /(?:^|[^\w+.-])(?:https?|ftps?|sftp|wss?|file|javascript|data|intent|ssh|smb):/i;
 
@@ -380,22 +386,34 @@ const urlsRule: Rule = (spec, options) => {
       spec.pages[Number(i)]?.blocks[Number(j)]?.type === 'rich_text'
     );
   };
+  /** Fields the facts validator compares whole to their facts (an e-mail in them is not left to it). */
+  const comparedWhole = (path: Path) =>
+    path[0] === 'brand' || (path[0] === 'contact' && path[1] === 'address');
+  const words = (text: string, keepEmails: boolean) =>
+    text
+      .normalize('NFKC')
+      .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
+        keepEmails || dressedEmail(local, whole.slice(0, offset)) ? address : ' ',
+      )
+      // Any other `@` starts a handle, not an address: what follows it is read as a word (`@evil.com` is a domain).
+      .replace(/@/g, ' ');
   const scan = (text: string, path: Path) => {
-    // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
+    // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused. Its words
+    // are read as rendered (labels and emphasis joined) and with each label apart, so neither form hides an address.
     const rich = isRichText(path);
     // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
     // is not: folded first, then judged by `www.` or what is just before it (`/`, `\\`, a URL scheme).
-    const words = (rich ? withoutPageLinks(text) : text)
-      .normalize('NFKC')
-      .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
-        dressedEmail(local, whole.slice(0, offset)) ? address : '',
-      );
-    if (hasWebAddress(words)) {
+    const forms = rich ? [...new Set([richTextWords(text), withoutPageLinks(text, ' ')])] : [text];
+    const found = forms.map((form) => words(form, comparedWhole(path))).find(hasWebAddress);
+    if (found !== undefined) {
+      const handle = /(?:^|[\s(])@[\p{L}\p{N}_.-]+\.[\p{L}\p{N}]/u.test(text.normalize('NFKC'));
       issues.push(
         error(
           path,
           'external_url',
-          'Remove the web address from the text (use an action instead); if it is not one, put a space after the full stop.',
+          handle
+            ? 'Remove the handle from the text: social profiles go in contact.socials (a dotted handle reads as a web address).'
+            : 'Remove the web address from the text (use an action instead); if it is not one, put a space after the full stop.',
         ),
       );
     }

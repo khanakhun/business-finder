@@ -84,9 +84,9 @@ describe('fixture sites', () => {
   });
 
   it('has a test for every fixture file', () => {
-    const files = readdirSync(new URL('../fixtures', import.meta.url)).map((file) =>
-      file.replace(/\.json$/, ''),
-    );
+    const files = readdirSync(new URL('../fixtures', import.meta.url))
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => file.replace(/\.json$/, ''));
     expect(files.sort()).toEqual(
       [
         'salon-gustavia',

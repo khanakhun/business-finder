@@ -1,0 +1,49 @@
+{
+  "facts": [
+    {
+      "id": "business.name",
+      "kind": "business_name",
+      "value": "Island Villas",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "email.main",
+      "kind": "email",
+      "value": "stay@island-villas.example",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "whatsapp.main",
+      "kind": "whatsapp",
+      "value": "+590 690 00 04 04",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "address.main",
+      "kind": "address",
+      "value": "Lorient, 97133 Saint-Barthélemy",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "booking.url",
+      "kind": "booking_url",
+      "value": "https://book.island-villas.example/stays",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "team.1",
+      "kind": "team_member",
+      "value": {
+        "name": "Léa M.",
+        "role": "Manager"
+      },
+      "source": "website",
+      "confidence": 0.95
+    }
+  ]
+}

@@ -21,7 +21,9 @@ import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
 import { MAX_IMAGE_PIXELS, sniffImageType } from '../domain/image-type.ts';
 import {
   ASSET_PROCESSING_QUEUE,
+  ASSET_SOURCING_QUEUE,
   type AssetProcessingQueue,
+  type AssetSourcingQueue,
   IMAGE_PROCESSOR,
   type ImageProcessor,
   PUBLIC_FILES,
@@ -60,7 +62,7 @@ export function variantWidths(width: number): number[] {
   return steps;
 }
 
-const toAsset = (asset: StoredAsset): SiteAsset => ({
+export const toAsset = (asset: StoredAsset): SiteAsset => ({
   id: asset.id,
   siteId: asset.siteId as SiteId | null,
   status: asset.status,
@@ -78,6 +80,12 @@ const toAsset = (asset: StoredAsset): SiteAsset => ({
   licenseDetails: asset.licenseDetails,
   alt: asset.alt,
   dominantColors: asset.dominantColors,
+  kind: asset.kind,
+  source: asset.source,
+  restrictions: asset.restrictions,
+  focalPoint: asset.focalPoint,
+  analysis: (asset.analysis as SiteAsset['analysis']) ?? null,
+  ownership: (asset.ownership as SiteAsset['ownership']) ?? null,
   createdAt: asset.createdAt.toISOString(),
 });
 
@@ -101,6 +109,8 @@ export class SiteAssetCommands {
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(DB_CLIENT) private readonly db: DbClient,
     @Optional() @Inject(LOGGER) private readonly logger?: Logger,
+    /** The analysis after processing (BF-038): absent in unit tests of the upload flow. */
+    @Optional() @Inject(ASSET_SOURCING_QUEUE) private readonly sourcing?: AssetSourcingQueue,
   ) {}
 
   /** Best effort: a file left behind is logged (to be found and removed), never a reason to fail the caller. */
@@ -314,6 +324,12 @@ export class SiteAssetCommands {
         for (const variant of variants) await this.discard(this.publicFiles, asset.id, variant.key);
       return 'skipped';
     }
+    // Tags and alt texts follow; a failure to queue it never fails the image (it can be analysed later).
+    await this.sourcing
+      ?.analyze(asset.id, asset.organizationId)
+      .catch((error: unknown) =>
+        this.logger?.warn({ assetId: asset.id, err: error }, 'site image analysis not queued'),
+      );
     return 'ready';
   }
 

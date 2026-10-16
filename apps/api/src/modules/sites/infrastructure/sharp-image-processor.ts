@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import type { ImageProcessor } from '../application/ports.ts';
+import { DHASH_HEIGHT, DHASH_WIDTH, dhash, laplacianVariance } from '../domain/assets/dhash.ts';
 import { DECODABLE_FORMATS, MAX_IMAGE_PIXELS } from '../domain/image-type.ts';
 
 /** Decoding stops on corrupt data and above the pixel limit (decompression bombs). */
@@ -23,6 +24,46 @@ export class SharpImageProcessor implements ImageProcessor {
   async inspect(image: Buffer): Promise<{ width: number; height: number }> {
     const metadata = await checkedFormat(image);
     return { width: metadata.autoOrient.width, height: metadata.autoOrient.height };
+  }
+
+  async measure(image: Buffer) {
+    const metadata = await checkedFormat(image);
+    const grey = await decode(image)
+      .autoOrient()
+      .greyscale()
+      .resize(DHASH_WIDTH, DHASH_HEIGHT, { fit: 'fill' })
+      .raw()
+      .toBuffer();
+    const sample = await decode(image)
+      .autoOrient()
+      .greyscale()
+      .resize({ width: 512, height: 512, fit: 'inside' })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    // The saliency crop of a square: its attention point is in the scaled (pre-crop) frame.
+    const side = 256;
+    const { width, height } = metadata.autoOrient;
+    const scale = side / Math.min(width, height);
+    const crop = await decode(image)
+      .autoOrient()
+      .resize(side, side, { fit: 'cover', position: sharp.strategy.attention })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const info = crop.info as typeof crop.info & { attentionX?: number; attentionY?: number };
+    const unit = (value: number) => Math.min(1, Math.max(0, Math.round(value * 100) / 100));
+    return {
+      dhash: dhash(new Uint8Array(grey)),
+      sharpness: laplacianVariance(new Uint8Array(sample.data), sample.info.width, sample.info.height),
+      focalPoint: {
+        x: unit((info.attentionX ?? (width * scale) / 2) / (width * scale)),
+        y: unit((info.attentionY ?? (height * scale) / 2) / (height * scale)),
+      },
+    };
+  }
+
+  async rasterizeSvg(svg: string, width: number): Promise<Buffer> {
+    // Our own SVG (paths only, no external references): rendered by librsvg, written as PNG without metadata.
+    return sharp(Buffer.from(svg), { limitInputPixels: MAX_IMAGE_PIXELS }).resize({ width }).png().toBuffer();
   }
 
   async variants(image: Buffer, widths: readonly number[]) {

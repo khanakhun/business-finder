@@ -39,7 +39,16 @@ import { businesses } from './business-graph.ts';
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(', '));
 const tz = () => timestamp({ withTimezone: true });
 
-export const SITE_ASSET_LICENSES = ['owner_site', 'stock', 'ai_generated', 'uploaded'] as const;
+export const SITE_ASSET_LICENSES = [
+  'owner_site',
+  'stock',
+  'ai_generated',
+  'uploaded',
+  'system_generated',
+] as const;
+/** How an image reached the library (BF-038). */
+export const SITE_ASSET_SOURCES = ['upload', 'owner_site', 'stock', 'ai', 'wordmark'] as const;
+export type SiteAssetSourceKind = (typeof SITE_ASSET_SOURCES)[number];
 export type SiteAssetLicense = (typeof SITE_ASSET_LICENSES)[number];
 
 /** A site: one business's preview website in one workspace. Its content is the current version. */
@@ -187,6 +196,20 @@ export const siteAssets = pgTable(
     alt: jsonb().$type<Record<string, string>>(),
     dominantColors: jsonb().$type<string[]>(),
     focalPoint: jsonb().$type<{ x: number; y: number }>(),
+    /** A photo (`image`) or the business's logo (`logo`, e.g. found on its site or our wordmark). */
+    kind: text().$type<'image' | 'logo'>().notNull().default('image'),
+    /** How it reached the library (BF-038): an upload, the owner's site, stock, AI, our wordmark. */
+    source: text().$type<SiteAssetSourceKind>().notNull().default('upload'),
+    /** Where it was found (owner-site and stock images): with `sha256`/`dhash`, re-collecting skips it. */
+    sourceUrl: text(),
+    /** 64-bit difference hash (hex): near-duplicates are within a Hamming distance of 6. */
+    dhash: text(),
+    /** `preview_only` until the business confirms it owns an owner-site image. */
+    restrictions: jsonb().$type<'preview_only'[]>().notNull().default([]),
+    /** Who confirmed ownership, how and when (lifts `preview_only`). */
+    ownership: jsonb().$type<{ confirmedAt: string; confirmedBy: string | null; method: string }>(),
+    /** What the vision model saw (tags, quality, hero suitability) and the sharpness measure. */
+    analysis: jsonb().$type<Record<string, unknown>>(),
     /** `pending` until the upload is finalized and processed. */
     status: text().$type<'pending' | 'processing' | 'ready' | 'failed'>().notNull().default('pending'),
     /** When processing started (a job that died leaves it: past a while the image counts as failed). */
@@ -203,6 +226,12 @@ export const siteAssets = pgTable(
     uniqueIndex('uq_site_assets__storage_key').on(table.storageKey),
     check('ck_site_assets__license', sql`${table.license} IN (${inList(SITE_ASSET_LICENSES)})`),
     check('ck_site_assets__status', sql`${table.status} IN ('pending', 'processing', 'ready', 'failed')`),
+    check('ck_site_assets__source', sql`${table.source} IN (${inList(SITE_ASSET_SOURCES)})`),
+    check('ck_site_assets__kind', sql`${table.kind} IN ('image', 'logo')`),
+    // One copy of a source image per site (re-collecting is idempotent).
+    uniqueIndex('uq_site_assets__site_id_source_url')
+      .on(table.siteId, table.sourceUrl)
+      .where(sql`${table.sourceUrl} IS NOT NULL`),
   ],
 );
 

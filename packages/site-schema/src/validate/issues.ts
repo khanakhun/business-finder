@@ -28,6 +28,8 @@ export const ISSUE_CODES = [
   'contrast_low',
   'external_url',
   'asset_host',
+  'asset_hotlink',
+  'asset_preview_only',
   'social_host',
   'no_contact_channel',
   'block_requirement',

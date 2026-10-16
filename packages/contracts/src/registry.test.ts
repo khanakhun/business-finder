@@ -9,6 +9,7 @@ describe('JSON Schema export', () => {
     expect([...expectedFiles().keys()]).toEqual([
       'jsonschema/python/EchoRequest.json',
       'jsonschema/python/EchoResponse.json',
+      'jsonschema/python/ImageFetchRequest.json',
       'jsonschema/python/LatLng.json',
       'jsonschema/python/OpenDataPlace.json',
       'jsonschema/python/OpenDataSearchRequest.json',

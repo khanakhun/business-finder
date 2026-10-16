@@ -5,6 +5,7 @@ import {
   SITE_ASSET_LICENSES,
   SITE_ASSET_MAX_BYTES,
   SITE_ASSET_MIME_TYPES,
+  SITE_UPLOAD_LICENSES,
   type SiteAsset,
 } from '@bf/contracts';
 import { type Asset, LIMITS, type LocalizedText, type SiteLocale } from '@bf/site-schema';
@@ -352,6 +353,10 @@ export function AssetPicker({
                               <Badge variant="destructive">{t('restricted')}</Badge>
                             ) : asset.status !== 'ready' ? (
                               <Badge variant="secondary">{t(`status.${asset.status}`)}</Badge>
+                            ) : asset.restrictions.includes('preview_only') ? (
+                              <Badge variant="outline" title={t('previewOnlyHelp')}>
+                                {t('previewOnly')}
+                              </Badge>
                             ) : null}
                           </button>
                         </li>
@@ -526,7 +531,7 @@ function UploadForm({
           onChange={(event) => setLicense(event.target.value as CreateSiteAssetUploadRequest['license'] | '')}
         >
           <option value="">{t('chooseLicense')}</option>
-          {SITE_ASSET_LICENSES.map((value) => (
+          {SITE_UPLOAD_LICENSES.map((value) => (
             <option key={value} value={value}>
               {t(`licenses.${value}`)}
             </option>

@@ -5,9 +5,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { setTransactionalDb } from '../../platform/db/transactional.ts';
 import { InMemoryObjectStorage } from '../../platform/storage/object-storage.ts';
 import { InMemoryPublicFiles } from '../infrastructure/site-asset-storage.ts';
-import type { AssetStatus, ImageProcessor, SiteAssetsRepository, StoredAsset } from './ports.ts';
+import type { ImageProcessor } from './ports.ts';
 import { SiteAssetCommands, variantWidths } from './site-assets.ts';
-import { InMemorySitesRepository } from './testing.ts';
+import { InMemoryAssets, InMemorySitesRepository } from './testing.ts';
 
 const ORG = '0199e0a0-0000-7000-8000-000000000001';
 const actor = { organizationId: ORG, userId: null };
@@ -15,70 +15,6 @@ const PNG = Buffer.concat([
   Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
   Buffer.alloc(56, 1),
 ]);
-
-/** Site assets in memory, with the compare-and-set the database applies. */
-class InMemoryAssets implements SiteAssetsRepository {
-  readonly rows = new Map<string, StoredAsset>();
-  async insert(asset: Parameters<SiteAssetsRepository['insert']>[0]): Promise<StoredAsset> {
-    const { createdBy: _createdBy, ...rest } = asset;
-    const row: StoredAsset = {
-      ...rest,
-      status: 'pending',
-      width: null,
-      height: null,
-      publicUrl: null,
-      variants: null,
-      dominantColors: null,
-      sha256: null,
-      processingStartedAt: null,
-      createdAt: new Date('2026-10-14T12:00:00.000Z'),
-    };
-    this.rows.set(row.id, row);
-    return row;
-  }
-  async get(organizationId: string, siteId: string, assetId: string) {
-    const row = this.rows.get(assetId);
-    return row?.organizationId === organizationId && row.siteId === siteId ? row : undefined;
-  }
-  async byId(assetId: string) {
-    return this.rows.get(assetId);
-  }
-  async list() {
-    return [...this.rows.values()];
-  }
-  lock(organizationId: string, siteId: string, assetId: string) {
-    return this.get(organizationId, siteId, assetId);
-  }
-  async failStale(cutoffs: { startedBefore: Date; createdBefore: Date }) {
-    const stale = [...this.rows.values()].filter(
-      (row) =>
-        row.status === 'processing' &&
-        (row.processingStartedAt
-          ? row.processingStartedAt < cutoffs.startedBefore
-          : row.createdAt < cutoffs.createdBefore),
-    );
-    for (const row of stale) this.rows.set(row.id, { ...row, status: 'failed' });
-    return stale;
-  }
-  async transition(
-    assetId: string,
-    from: readonly AssetStatus[],
-    changes: Partial<StoredAsset>,
-    startedAt?: Date,
-  ) {
-    const row = this.rows.get(assetId);
-    if (!row || !from.includes(row.status)) return false;
-    if (startedAt && row.processingStartedAt?.getTime() !== startedAt.getTime()) return false;
-    this.rows.set(assetId, { ...row, ...changes });
-    return true;
-  }
-  async referenced() {
-    return false;
-  }
-  async delete(assetId: string) {
-    this.rows.delete(assetId);
-  }
-}
 
 const images: ImageProcessor = {
   inspect: async () => ({ width: 1000, height: 600 }),
@@ -88,6 +24,8 @@ const images: ImageProcessor = {
       { width, format: 'avif' as const, body: Buffer.from(`avif-${width}`) },
     ]),
   dominantColors: async () => ['#c2410c'],
+  measure: async () => ({ dhash: '0f0f0f0f0f0f0f0f', sharpness: 500, focalPoint: { x: 0.5, y: 0.5 } }),
+  rasterizeSvg: async () => Buffer.from('png'),
 };
 
 const fakeDb = { transaction: (fn: (tx: unknown) => Promise<unknown>) => fn({}) } as unknown as DbClient;

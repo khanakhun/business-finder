@@ -2,6 +2,8 @@ import {
   type Clock,
   type OrgId,
   type SiteId,
+  SitesAssetAnalyzeJob,
+  SitesAssetCollectJob,
   SitesAssetProcessJob,
   SitesExpireJob,
   SitesRevalidateJob,
@@ -14,7 +16,12 @@ import { Inject, Injectable, type OnApplicationBootstrap, type OnApplicationShut
 import type { Queue } from 'bullmq';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
-import type { AssetProcessingQueue, SiteRevalidation, SiteScreenshotQueue } from '../application/ports.ts';
+import type {
+  AssetProcessingQueue,
+  AssetSourcingQueue,
+  SiteRevalidation,
+  SiteScreenshotQueue,
+} from '../application/ports.ts';
 
 /** Revalidations go through a job: retried with backoff while the renderer is down. */
 @Injectable()
@@ -98,6 +105,45 @@ export class BullmqAssetProcessingQueue implements AssetProcessingQueue {
     });
   }
 }
+
+/** Collections are one job per site and hour (a second refresh within the hour is the same job); analyses once. */
+@Injectable()
+export class BullmqAssetSourcingQueue implements AssetSourcingQueue {
+  private readonly collects: TypedProducer<typeof SitesAssetCollectJob>;
+  private readonly analyses: TypedProducer<typeof SitesAssetAnalyzeJob>;
+
+  constructor(
+    @InjectQueue(QUEUES.sitesAssetCollect.name) collect: Queue,
+    @InjectQueue(QUEUES.sitesAssetAnalyze.name) analyze: Queue,
+    @Inject(CLOCK) private readonly clock: Clock,
+  ) {
+    this.collects = new TypedProducer(collect, SitesAssetCollectJob);
+    this.analyses = new TypedProducer(analyze, SitesAssetAnalyzeJob);
+  }
+
+  async collect(organizationId: string, siteId: string): Promise<void> {
+    const hour = this.clock.now().toISOString().slice(0, 13);
+    await this.collects.add({
+      orgId: organizationId as OrgId,
+      idempotencyKey: `asset-collect:${siteId}:${hour}`,
+      organizationId,
+      siteId: siteId as SiteId,
+    });
+  }
+
+  async analyze(assetId: string, organizationId: string): Promise<void> {
+    await this.analyses.add({
+      orgId: organizationId as OrgId,
+      idempotencyKey: `asset-analyze:${assetId}`,
+      assetId,
+    });
+  }
+}
+
+export const OPENAPI_SOURCING_QUEUE: AssetSourcingQueue = {
+  collect: async () => {},
+  analyze: async () => {},
+};
 
 /** How long after a publication its pictures are taken (the renderer's revalidation runs first); tests set 0. */
 export const SCREENSHOT_DELAY_MS = Symbol('ScreenshotDelayMs');

@@ -90,14 +90,20 @@ export function toSpecAsset(
   const attribution = asset.licenseDetails?.attributionText ?? asset.licenseDetails?.author;
   const candidate = {
     id: mintAssetId(new Set(spec.assets.map((existing) => existing.id))),
-    kind: 'image' as const,
+    kind: asset.kind === 'logo' ? ('logo' as const) : ('image' as const),
     url: asset.publicUrl,
     width: asset.width,
     height: asset.height,
     alt: options.alt ?? altFor(asset, spec.locales),
     license: asset.license,
     ...(attribution ? { attribution: attribution.slice(0, 200) } : {}),
-    ...(options.focalPoint ? { focalPoint: options.focalPoint } : {}),
+    // An owner-site image whose ownership is not confirmed stays preview-only in the spec (refused on a live site).
+    ...(asset.restrictions.length > 0 ? { restrictions: [...asset.restrictions] } : {}),
+    ...(options.focalPoint
+      ? { focalPoint: options.focalPoint }
+      : asset.focalPoint
+        ? { focalPoint: asset.focalPoint }
+        : {}),
     ...(asset.dominantColors?.length ? { dominantColors: asset.dominantColors.slice(0, 5) } : {}),
   };
   const parsed = AssetSchema.safeParse(candidate);

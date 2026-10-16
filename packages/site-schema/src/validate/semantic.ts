@@ -25,6 +25,13 @@ export interface ValidateOptions {
   readonly bookingHosts?: readonly string[];
   /** `preview` (the default): the site must keep `noindex` and the preview banner on. */
   readonly mode?: 'preview' | 'published';
+  /**
+   * Stock providers' CDN hosts an image may be hotlinked from (when its provider's terms require hotlinking,
+   * BF-038). None by default: every image is on our storage.
+   */
+  readonly hotlinkHosts?: readonly string[];
+  /** `live`: the publication is the business's live site, where `preview_only` images are refused (BF-062). */
+  readonly environment?: 'preview' | 'live';
 }
 
 type Rule = (spec: SiteSpec, options: ValidateOptions) => Issue[];
@@ -343,9 +350,30 @@ function dressedEmail(local: string, before: string): boolean {
 const urlsRule: Rule = (spec, options) => {
   const issues: Issue[] = [];
   for (const [i, asset] of spec.assets.entries()) {
-    if (!hostAllowed(asset.url, options.assetHosts, { subdomains: false }))
+    if ((asset.hosting ?? 'self') === 'hotlink') {
+      // Hotlinking is a stock provider's requirement, never a way around our storage.
+      if (
+        asset.license !== 'stock' ||
+        !hostAllowed(asset.url, options.hotlinkHosts ?? [], { subdomains: false })
+      )
+        issues.push(
+          error(
+            ['assets', i, 'hosting'],
+            'asset_hotlink',
+            'Only stock images from an allowed provider CDN may be hotlinked; upload this one to our storage.',
+          ),
+        );
+    } else if (!hostAllowed(asset.url, options.assetHosts, { subdomains: false }))
       issues.push(
         error(['assets', i, 'url'], 'asset_host', 'Upload the image to our storage and use that URL.'),
+      );
+    if (options.environment === 'live' && asset.restrictions?.includes('preview_only'))
+      issues.push(
+        error(
+          ['assets', i, 'restrictions'],
+          'asset_preview_only',
+          "This image comes from the business's website and its ownership is not confirmed: confirm it, or replace the image, before going live.",
+        ),
       );
   }
   const booking = spec.contact.bookingUrl;

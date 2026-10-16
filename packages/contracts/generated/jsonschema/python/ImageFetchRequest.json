@@ -1,0 +1,32 @@
+{
+  "$id": "https://schemas.business-finder.dev/ImageFetchRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/image-fetch request on services/intel (one image through the SSRF guard).",
+  "properties": {
+    "maxBytes": {
+      "default": 15728640,
+      "maximum": 15728640,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "timeoutSeconds": {
+      "default": 20,
+      "maximum": 60,
+      "minimum": 5,
+      "type": "integer"
+    },
+    "url": {
+      "description": "The image URL (http or https), as found on the business website.",
+      "maxLength": 2000,
+      "type": "string"
+    }
+  },
+  "required": [
+    "url",
+    "maxBytes",
+    "timeoutSeconds"
+  ],
+  "title": "ImageFetchRequest",
+  "type": "object"
+}

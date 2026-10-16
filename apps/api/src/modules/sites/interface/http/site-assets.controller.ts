@@ -1,9 +1,13 @@
 import {
+  ConfirmAssetOwnershipRequestSchema,
   CreateSiteAssetUploadRequestSchema,
   type SiteAsset,
   type SiteAssetList,
   SiteAssetListSchema,
   SiteAssetSchema,
+  type SiteAssetSuggestions,
+  SiteAssetSuggestionsQuerySchema,
+  SiteAssetSuggestionsSchema,
   type SiteAssetUpload,
   SiteAssetUploadSchema,
 } from '@bf/contracts';
@@ -17,6 +21,7 @@ import {
   ParseEnumPipe,
   ParseUUIDPipe,
   Post,
+  Query,
   Res,
   StreamableFile,
 } from '@nestjs/common';
@@ -27,11 +32,14 @@ import { Ctx, RequirePermission } from '../../../platform/security/auth.decorato
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
+import { AssetSourcing } from '../../application/asset-sourcing.ts';
 import { SiteAssetCommands } from '../../application/site-assets.ts';
 import { SiteThumbnailCommands } from '../../application/site-thumbnails.ts';
 import { actorOf } from './sites.controller.ts';
 
 class UploadBody extends zodDto(CreateSiteAssetUploadRequestSchema) {}
+class SuggestionsQuery extends zodDto(SiteAssetSuggestionsQuerySchema) {}
+class OwnershipBody extends zodDto(ConfirmAssetOwnershipRequestSchema) {}
 
 const THUMBNAIL_KINDS = { desktop: 'desktop', mobile: 'mobile' } as const;
 
@@ -45,7 +53,59 @@ export class SiteAssetsController {
   constructor(
     private readonly assets: SiteAssetCommands,
     private readonly thumbnails: SiteThumbnailCommands,
+    private readonly sourcing: AssetSourcing,
   ) {}
+
+  @Get(':id/asset-suggestions')
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary: 'The site’s images ranked for a role (hero, gallery…), with the reasons',
+    operationId: 'suggestSiteAssets',
+    query: SuggestionsQuery,
+    response: { status: 200, schema: SiteAssetSuggestionsSchema },
+    errors: [400, 401, 403, 404],
+  })
+  async suggestions(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) siteId: string,
+    @Query() query: SuggestionsQuery,
+  ): Promise<SiteAssetSuggestions> {
+    return this.sourcing.suggestions(actorOf(auth), siteId, query);
+  }
+
+  @Post(':id/assets/refresh')
+  @HttpCode(202)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary: 'Collect the business’s images again (its website, a wordmark when it has no logo)',
+    operationId: 'refreshSiteAssets',
+    response: { status: 202, schema: null },
+    errors: [401, 403, 404],
+  })
+  async refresh(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) siteId: string): Promise<void> {
+    await this.sourcing.refresh(actorOf(auth), siteId);
+  }
+
+  @Post(':id/assets/:assetId/confirm-ownership')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @RequirePermission('sites:publish')
+  @ApiRoute({
+    summary: 'Record that the business owns an image from its website (lifts preview_only)',
+    operationId: 'confirmSiteAssetOwnership',
+    body: OwnershipBody,
+    response: { status: 200, schema: SiteAssetSchema },
+    errors: [400, 401, 403, 404, 409],
+  })
+  async confirmOwnership(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) siteId: string,
+    @Param('assetId', ParseUUIDPipe) assetId: string,
+    @Body() body: OwnershipBody,
+  ): Promise<SiteAsset> {
+    return this.sourcing.confirmOwnership(actorOf(auth), siteId, assetId, body);
+  }
 
   @Get(':id/assets')
   @RequirePermission('sites:read')

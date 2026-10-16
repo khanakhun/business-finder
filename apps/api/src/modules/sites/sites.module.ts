@@ -1,12 +1,25 @@
+import type { AiGateway } from '@bf/ai';
 import type { ApiEnv } from '@bf/config';
+import type { DbClient } from '@bf/db';
 import { type DynamicModule, Module } from '@nestjs/common';
+import { AI_GATEWAY } from '../platform/ai/ai.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
+import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import {
+  AssetSourcing,
+  IMAGE_ANALYZER,
+  IMAGE_FETCHER,
+  OWNER_SITE_IMAGES,
+  WORDMARK_MAKER,
+} from './application/asset-sourcing.ts';
+import {
   ASSET_PROCESSING_QUEUE,
+  ASSET_SOURCING_QUEUE,
   IMAGE_PROCESSOR,
+  type ImageProcessor,
   PUBLIC_FILES,
   SITE_ARTIFACTS,
   SITE_ASSETS_REPOSITORY,
@@ -32,12 +45,22 @@ import { SiteQueries } from './application/sites.queries.ts';
 import { SiteRenderSubscriber } from './application/sites.subscribers.ts';
 import { sitesShareCookieDomain } from './domain/hosting.ts';
 import {
+  AiImageAnalyzer,
+  DrizzleOwnerSiteImages,
+  FakeImageAnalyzer,
+  FakeImageFetcher,
+  IntelImageFetcher,
+  OpentypeWordmarkMaker,
+} from './infrastructure/assets/sourcing.adapters.ts';
+import {
   BullmqAssetProcessingQueue,
+  BullmqAssetSourcingQueue,
   BullmqSiteRevalidation,
   BullmqSiteScreenshotQueue,
   OPENAPI_ASSET_QUEUE,
   OPENAPI_SCREENSHOT_QUEUE,
   OPENAPI_SITE_REVALIDATION,
+  OPENAPI_SOURCING_QUEUE,
   SCREENSHOT_DELAY_MS,
   SITES_EXPIRY_AUTOSTART,
   SITES_VIEWS_AUTOSTART,
@@ -62,6 +85,8 @@ import { PublicSiteViewsController } from './interface/http/public-site-views.co
 import { SiteAssetsController } from './interface/http/site-assets.controller.ts';
 import { SitesController } from './interface/http/sites.controller.ts';
 import {
+  SitesAssetAnalyzeProcessor,
+  SitesAssetCollectProcessor,
   SitesAssetProcessProcessor,
   SitesExpireProcessor,
   SitesRevalidateProcessor,
@@ -123,6 +148,7 @@ export class SitesModule {
           ? [
               { provide: SITE_REVALIDATION, useValue: OPENAPI_SITE_REVALIDATION },
               { provide: ASSET_PROCESSING_QUEUE, useValue: OPENAPI_ASSET_QUEUE },
+              { provide: ASSET_SOURCING_QUEUE, useValue: OPENAPI_SOURCING_QUEUE },
               { provide: SITE_SCREENSHOT_QUEUE, useValue: OPENAPI_SCREENSHOT_QUEUE },
               { provide: SITE_ORIGINALS, useValue: new InMemoryObjectStorage() },
               { provide: SITE_ARTIFACTS, useValue: new InMemoryObjectStorage() },
@@ -132,6 +158,7 @@ export class SitesModule {
           : [
               { provide: SITE_REVALIDATION, useClass: BullmqSiteRevalidation },
               { provide: ASSET_PROCESSING_QUEUE, useClass: BullmqAssetProcessingQueue },
+              { provide: ASSET_SOURCING_QUEUE, useClass: BullmqAssetSourcingQueue },
               { provide: SITE_SCREENSHOT_QUEUE, useClass: BullmqSiteScreenshotQueue },
               { provide: SCREENSHOT_DELAY_MS, useValue: 15_000 },
               {
@@ -185,6 +212,30 @@ export class SitesModule {
               : new IntelSiteScreenshotter(intel),
         },
         IntelClient,
+        // Image sourcing (BF-038): fakes (no network, no model) only where the site intel is faked (tests, E2E).
+        {
+          provide: OWNER_SITE_IMAGES,
+          inject: [DB_CLIENT],
+          useFactory: (db: DbClient) => new DrizzleOwnerSiteImages(db),
+        },
+        {
+          provide: IMAGE_FETCHER,
+          inject: [APP_ENV, IntelClient],
+          useFactory: (env: AppEnv, intel: IntelClient) =>
+            fakeScreenshots(env as ApiEnv) ? new FakeImageFetcher() : new IntelImageFetcher(intel),
+        },
+        {
+          provide: WORDMARK_MAKER,
+          inject: [IMAGE_PROCESSOR],
+          useFactory: (images: ImageProcessor) => new OpentypeWordmarkMaker(images),
+        },
+        {
+          provide: IMAGE_ANALYZER,
+          inject: [APP_ENV, AI_GATEWAY],
+          useFactory: (env: AppEnv, gateway: AiGateway) =>
+            fakeScreenshots(env as ApiEnv) ? new FakeImageAnalyzer() : new AiImageAnalyzer(gateway),
+        },
+        AssetSourcing,
         { provide: SITE_INSIGHTS, useClass: SiteInsightsReader },
         SiteCommands,
         SiteQueries,
@@ -203,6 +254,8 @@ export class SitesModule {
               SitesExpiryScheduler,
               { provide: SITES_EXPIRY_AUTOSTART, useValue: true },
               SitesAssetProcessProcessor,
+              SitesAssetCollectProcessor,
+              SitesAssetAnalyzeProcessor,
               SitesScreenshotProcessor,
               SitesViewsFlushProcessor,
               SitesViewsFlushScheduler,

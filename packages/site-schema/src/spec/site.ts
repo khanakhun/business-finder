@@ -64,6 +64,10 @@ export const SiteSpecSchema = z
           })
           .strict()
           .describe('The contact form.'),
+        labelAiImages: z
+          .boolean()
+          .optional()
+          .describe('Label AI-generated images "Illustration" (default true).'),
       })
       .strict()
       .describe('Site-wide settings. A preview keeps noindex and the preview banner on.'),

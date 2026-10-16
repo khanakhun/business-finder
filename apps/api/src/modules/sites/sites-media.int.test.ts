@@ -3,7 +3,14 @@ import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { newId, signSiteViewToken } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
-import { businesses, orgBusinesses, outboxEvents, siteAssets, siteViewDaily } from '@bf/db/schema';
+import {
+  businesses,
+  orgBusinesses,
+  outboxEvents,
+  siteAssets,
+  siteViewDaily,
+  websiteSnapshots,
+} from '@bf/db/schema';
 import { QUEUES } from '@bf/queue';
 import { aBusiness } from '@bf/testing';
 import { getQueueToken } from '@nestjs/bullmq';
@@ -123,7 +130,13 @@ beforeAll(async () => {
       { token: SITES_VIEWS_AUTOSTART, value: false },
     ],
   });
-  for (const queue of [QUEUES.sitesAssetProcess.name, QUEUES.sitesScreenshot.name, QUEUES.sitesViews.name])
+  for (const queue of [
+    QUEUES.sitesAssetProcess.name,
+    QUEUES.sitesScreenshot.name,
+    QUEUES.sitesViews.name,
+    QUEUES.sitesAssetCollect.name,
+    QUEUES.sitesAssetAnalyze.name,
+  ])
     await worker.get<Queue>(getQueueToken(queue)).obliterate({ force: true });
   member = await signUpVerified(t, mailer, 'member@media.test', 'Mia Member');
   org = await createWorkspace(member, 'Agence Media');
@@ -253,6 +266,107 @@ describe('site images', () => {
     const left = (await member.get(`/v1/sites/${site.id}/assets`).expect(200)).body.items;
     expect(left.map((item: { id: string }) => item.id)).toEqual([assetId]);
   });
+});
+
+describe('image sourcing (BF-038)', () => {
+  /** A crawl of the site's business, as BF-026 stores it: two photos, a provider photo and a logo. */
+  async function crawled(siteId: string) {
+    const [site] = await db.execute<{ business_id: string }>(
+      sql`SELECT business_id FROM sites WHERE id = ${siteId}`,
+    );
+    const empty = {};
+    await db.insert(websiteSnapshots).values({
+      businessId: site?.business_id as string,
+      url: 'https://salon-lumiere.example/',
+      fetchedAt: new Date(NOW_ISO),
+      reachability: 'ok',
+      tls: empty as never,
+      security: empty as never,
+      languages: empty as never,
+      pages: [],
+      contacts: empty as never,
+      socials: [],
+      booking: empty as never,
+      ordering: empty as never,
+      chat: empty as never,
+      analytics: empty as never,
+      tech: [],
+      freshness: empty as never,
+      mobile: empty as never,
+      performanceHints: empty as never,
+      links: empty as never,
+      noSolicitation: empty as never,
+      logoCandidates: [
+        { url: 'https://salon-lumiere.example/logo.png', source: 'img-logo', width: 400, height: 160 },
+      ],
+      imageCandidates: [
+        { url: 'https://salon-lumiere.example/img/terrasse.jpg', alt: 'Terrasse', width: 1600, height: 1000 },
+        { url: 'https://salon-lumiere.example/img/salon.jpg', alt: null, width: 1600, height: 1000 },
+        { url: 'https://lh3.googleusercontent.com/p/abc=w800', alt: null, width: 800, height: 600 },
+      ],
+      warnings: [],
+      contentHash: 'test',
+    });
+  }
+
+  it('collects the website’s images through the worker, preview-only, then ranks and analyses them', async () => {
+    const site = await newSite('Salon Sources');
+    await crawled(site.id);
+    await member.post(`/v1/sites/${site.id}/assets/refresh`, {}).expect(202);
+    const ready = await eventually(async () => {
+      const { body } = await member.get(`/v1/sites/${site.id}/assets`).expect(200);
+      const items = body.items as { status: string; source: string; kind: string; analysis: unknown }[];
+      return items.length === 3 && items.every((item) => item.status === 'ready' && item.analysis)
+        ? items
+        : undefined;
+      // Processing (WebP + AVIF variants) and analysis of three images: slow on a CI runner.
+    }, 60_000);
+    expect(ready.map((item) => item.kind).sort()).toEqual(['image', 'image', 'logo']);
+    const rows = await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id));
+    // The provider photo never reached the library.
+    expect(rows.some((row) => row.sourceUrl?.includes('googleusercontent'))).toBe(false);
+    for (const row of rows) {
+      expect(row).toMatchObject({
+        source: 'owner_site',
+        license: 'owner_site',
+        restrictions: ['preview_only'],
+      });
+      expect(row.alt).toMatchObject({ fr: expect.any(String), en: expect.any(String) });
+    }
+    const { body: hero } = await member.get(`/v1/sites/${site.id}/asset-suggestions?role=hero`).expect(200);
+    expect(hero.items).toHaveLength(2);
+    expect(hero.items[0].reasons.length).toBeGreaterThan(0);
+
+    // Collecting again adds nothing (one copy per source URL), and no wordmark: a logo was found.
+    await member.post(`/v1/sites/${site.id}/assets/refresh`, {}).expect(202);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id))).toHaveLength(3);
+
+    // Ownership: confirmed by someone who may publish, recorded with its method, preview_only lifted.
+    const image = rows.find((row) => row.kind === 'image');
+    await viewer
+      .post(`/v1/sites/${site.id}/assets/${image?.id}/confirm-ownership`, { method: 'claim_form' })
+      .expect(403);
+    const { body: confirmed } = await member
+      .post(`/v1/sites/${site.id}/assets/${image?.id}/confirm-ownership`, { method: 'claim_form' })
+      .expect(200);
+    expect(confirmed.restrictions).toEqual([]);
+    expect(confirmed.ownership).toMatchObject({ method: 'claim_form' });
+    await outsider.get(`/v1/sites/${site.id}/asset-suggestions?role=hero`).expect(404);
+  }, 120_000);
+
+  it('draws a wordmark when the business has no logo and no website', async () => {
+    const site = await newSite('Salon Sans Logo');
+    await member.post(`/v1/sites/${site.id}/assets/refresh`, {}).expect(202);
+    const marks = await eventually(async () => {
+      const rows = await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id));
+      return rows.length === 2 && rows.every((row) => row.status === 'ready') ? rows : undefined;
+    }, 60_000);
+    expect(marks.map((row) => [row.kind, row.source, row.license])).toEqual([
+      ['logo', 'wordmark', 'system_generated'],
+      ['logo', 'wordmark', 'system_generated'],
+    ]);
+  }, 120_000);
 });
 
 describe('image permissions and refusals', () => {

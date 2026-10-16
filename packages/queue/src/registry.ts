@@ -78,6 +78,12 @@ export const QUEUES = {
     concurrency: 4,
   },
   sitesExpire: { name: 'sites-expire', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  /** Image processing of uploaded site assets (sharp: CPU-bound, a few at a time). */
+  sitesAssetProcess: { name: 'sites-asset-process', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** Thumbnails of published sites (services/intel takes the pictures). */
+  sitesScreenshot: { name: 'sites-screenshot', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** Views flush (Valkey → site_view_daily) and the hourly `site.viewed` events, every 5 minutes. */
+  sitesViews: { name: 'sites-views', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

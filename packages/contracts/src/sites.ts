@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { constantTimeEqual, fromBase64Url, hmacSha256, toBase64Url } from './encoding.ts';
 import { defineEvent } from './events.ts';
 import { BusinessId, SiteId } from './ids.ts';
 import { defineJob } from './jobs.ts';
@@ -106,10 +107,39 @@ export const SiteSummarySchema = z
   .meta({ id: 'SiteSummary' });
 export type SiteSummary = z.infer<typeof SiteSummarySchema>;
 
+/** Desktop and mobile pictures of a site's published home page (for cards), when taken. */
+export const SiteThumbnailsSchema = z
+  .object({
+    publicationId: z.uuid(),
+    takenAt: z.iso.datetime(),
+    desktop: z.boolean(),
+    mobile: z.boolean(),
+  })
+  .meta({ id: 'SiteThumbnails' });
+export type SiteThumbnails = z.infer<typeof SiteThumbnailsSchema>;
+
+/** A site's views over recent days (unique visitors are an estimate; no IP or user agent is ever stored). */
+export const SiteViewStatsSchema = z
+  .object({
+    last7Days: z.object({
+      pageViews: z.number().int().nonnegative(),
+      uniqueEstimate: z.number().int().nonnegative(),
+    }),
+    last30Days: z.object({
+      pageViews: z.number().int().nonnegative(),
+      uniqueEstimate: z.number().int().nonnegative(),
+    }),
+  })
+  .meta({ id: 'SiteViewStats' });
+export type SiteViewStats = z.infer<typeof SiteViewStatsSchema>;
+
 export const SiteDetailSchema = SiteSummarySchema.extend({
   currentVersionSummary: SiteVersionSummarySchema.nullable(),
   /** Active publications (one per environment at most). */
   publications: z.array(SitePublicationSchema),
+  /** Desktop and mobile pictures of the published home page, when taken. */
+  thumbnails: SiteThumbnailsSchema.nullable(),
+  views: SiteViewStatsSchema,
 }).meta({ id: 'SiteDetail' });
 export type SiteDetail = z.infer<typeof SiteDetailSchema>;
 
@@ -284,3 +314,135 @@ export const SitesRevalidateJob = defineJob('sites-revalidate', 'revalidate', {
 
 /** Ends the active previews whose expiry has passed (enqueued hourly, one job per hour). */
 export const SitesExpireJob = defineJob('sites-expire', 'expire', {});
+
+// ── Part 2: assets, screenshots, views ────────────────────────────────────────────────────────────────────────
+
+export const SITE_ASSET_LICENSES = ['owner_site', 'stock', 'ai_generated', 'uploaded'] as const;
+export const SiteAssetLicenseSchema = z.enum(SITE_ASSET_LICENSES);
+export const SITE_ASSET_STATUSES = ['pending', 'processing', 'ready', 'failed'] as const;
+/** Image types a site accepts (sniffed from the bytes at finalize, not trusted from the request). */
+export const SITE_ASSET_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const;
+export const SITE_ASSET_MAX_BYTES = 15 * 1024 * 1024;
+
+const localizedAlt = z.record(z.string().regex(/^[a-z]{2}$/), z.string().trim().min(1).max(150));
+
+export const SiteAssetSchema = z
+  .object({
+    id: z.uuid(),
+    siteId: SiteId.nullable(),
+    status: z.enum(SITE_ASSET_STATUSES),
+    mime: z.string(),
+    width: z.number().int().positive().nullable(),
+    height: z.number().int().positive().nullable(),
+    bytes: z.number().int().nonnegative().nullable(),
+    /** The public URL of its default variant (1200 px WebP, or smaller for small images), once processed. */
+    publicUrl: z.url().nullable(),
+    variants: z.array(
+      z.object({ width: z.number().int().positive(), format: z.enum(['webp', 'avif']), url: z.url() }),
+    ),
+    license: SiteAssetLicenseSchema,
+    licenseDetails: z.record(z.string(), z.string()).nullable(),
+    alt: localizedAlt.nullable(),
+    dominantColors: z.array(z.string().regex(/^#[0-9a-f]{6}$/)).nullable(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'SiteAsset' });
+export type SiteAsset = z.infer<typeof SiteAssetSchema>;
+
+export const SiteAssetListSchema = z
+  .object({ items: z.array(SiteAssetSchema) })
+  .meta({ id: 'SiteAssetList' });
+export type SiteAssetList = z.infer<typeof SiteAssetListSchema>;
+
+export const CreateSiteAssetUploadRequestSchema = z
+  .object({
+    mime: z.enum(SITE_ASSET_MIME_TYPES),
+    bytes: z.number().int().min(1).max(SITE_ASSET_MAX_BYTES),
+    /** Where the image comes from: required (BF-038 licensing). */
+    license: SiteAssetLicenseSchema,
+    licenseDetails: z
+      .object({
+        author: z.string().trim().max(120).optional(),
+        sourceUrl: z.url().max(500).optional(),
+        attributionText: z.string().trim().max(200).optional(),
+        provider: z.string().trim().max(60).optional(),
+      })
+      .strict()
+      .optional(),
+    alt: localizedAlt.optional(),
+  })
+  .meta({ id: 'CreateSiteAssetUploadRequest' });
+export type CreateSiteAssetUploadRequest = z.infer<typeof CreateSiteAssetUploadRequestSchema>;
+
+export const SiteAssetUploadSchema = z
+  .object({
+    asset: SiteAssetSchema,
+    /** A presigned URL: PUT the bytes there with these headers before it expires, then finalize. */
+    uploadUrl: z.url(),
+    method: z.literal('PUT'),
+    headers: z.record(z.string(), z.string()),
+    expiresAt: z.iso.datetime(),
+  })
+  .meta({ id: 'SiteAssetUpload' });
+export type SiteAssetUpload = z.infer<typeof SiteAssetUploadSchema>;
+
+/** A page view sent by the renderer's beacon (anonymous): the site's token, the page, its language, a campaign. */
+export const SiteViewBeaconSchema = z
+  .object({
+    token: z.string().min(10).max(200),
+    pageId: z.string().regex(/^[a-z][a-z0-9-]{1,31}$/),
+    locale: z.string().regex(/^[a-z]{2}$/),
+    /** The outreach campaign reference (`?c=` of the link in an e-mail), when present. */
+    c: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{1,64}$/)
+      .optional(),
+  })
+  .meta({ id: 'SiteViewBeacon' });
+export type SiteViewBeacon = z.infer<typeof SiteViewBeaconSchema>;
+
+const VIEW_TOKEN_PREFIX = 'v1';
+
+/**
+ * The token a published page carries for its view beacon (BF-036 signs it, the API verifies it):
+ * `v1.<siteId>.<base64url(hmac_sha256(secret, "site-view:" + siteId))>`. It names the site, so a beacon cannot count
+ * views for another one; it is not a secret from visitors.
+ */
+export async function signSiteViewToken(siteId: string, secret: string): Promise<string> {
+  const mac = await hmacSha256(secret, `site-view:${siteId}`);
+  return `${VIEW_TOKEN_PREFIX}.${siteId}.${toBase64Url(mac)}`;
+}
+
+/** The site a view token names, when its signature is valid. */
+export async function verifySiteViewToken(token: string, secret: string): Promise<string | undefined> {
+  const [prefix, siteId, signature, ...rest] = token.split('.');
+  if (prefix !== VIEW_TOKEN_PREFIX || !siteId || !signature || rest.length > 0) return undefined;
+  if (!SiteId.safeParse(siteId).success) return undefined;
+  const given = fromBase64Url(signature);
+  if (!given) return undefined;
+  return constantTimeEqual(given, await hmacSha256(secret, `site-view:${siteId}`)) ? siteId : undefined;
+}
+
+/** Views of a site during one UTC hour, aggregated (scoring's engagement feature, analytics). */
+export const SiteViewed = defineEvent(
+  'site.viewed',
+  1,
+  z.object({
+    ...sitePayload,
+    hourStart: z.iso.datetime(),
+    pageViews: z.number().int().positive(),
+    uniqueEstimate: z.number().int().nonnegative(),
+  }),
+);
+
+/** Strips, resizes and re-encodes an uploaded image into its public variants. */
+export const SitesAssetProcessJob = defineJob('sites-asset-process', 'process', { assetId: z.uuid() });
+
+/** Takes desktop and mobile pictures of a newly published site (for the dashboard's cards). */
+export const SitesScreenshotJob = defineJob('sites-screenshot', 'capture', {
+  siteId: SiteId,
+  publicationId: z.uuid(),
+});
+
+/** Writes the views counted in Valkey to the database, and the hourly `site.viewed` events (every 5 minutes). */
+export const SitesViewsFlushJob = defineJob('sites-views', 'flush', {});

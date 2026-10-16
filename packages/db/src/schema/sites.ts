@@ -59,6 +59,13 @@ export const sites = pgTable(
     /** The current version (null until the first one); set by the API in the transaction that inserts it. */
     currentVersionId: uuid().references((): AnyPgColumn => siteVersions.id, { onDelete: 'set null' }),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    /** Desktop and mobile pictures of the published home page (artifacts bucket keys), BF-035 part 2. */
+    thumbnails: jsonb().$type<{
+      publicationId: string;
+      takenAt: string;
+      desktopKey: string | null;
+      mobileKey: string | null;
+    }>(),
     ...timestamps(),
   },
   (table) => [
@@ -182,11 +189,17 @@ export const siteAssets = pgTable(
     focalPoint: jsonb().$type<{ x: number; y: number }>(),
     /** `pending` until the upload is finalized and processed. */
     status: text().$type<'pending' | 'processing' | 'ready' | 'failed'>().notNull().default('pending'),
+    /** When processing started (a job that died leaves it: past a while the image counts as failed). */
+    processingStartedAt: timestamp({ withTimezone: true }),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
     createdAt: tz().notNull().defaultNow(),
   },
   (table) => [
     index('idx_site_assets__organization_id_site_id').on(table.organizationId, table.siteId),
+    // The hourly sweep of images whose processing job died.
+    index('idx_site_assets__processing')
+      .on(table.processingStartedAt)
+      .where(sql`${table.status} = 'processing'`),
     uniqueIndex('uq_site_assets__storage_key').on(table.storageKey),
     check('ck_site_assets__license', sql`${table.license} IN (${inList(SITE_ASSET_LICENSES)})`),
     check('ck_site_assets__status', sql`${table.status} IN ('pending', 'processing', 'ready', 'failed')`),
@@ -210,4 +223,16 @@ export const siteViewDaily = pgTable(
     primaryKey({ name: 'pk_site_view_daily', columns: [table.siteId, table.day] }),
     check('ck_site_view_daily__counts', sql`${table.pageViews} >= 0 AND ${table.uniqueEstimate} >= 0`),
   ],
+);
+
+/** The hours whose `site.viewed` event is recorded (BF-035): one event per site and hour, whatever the flushes. */
+export const siteViewHours = pgTable(
+  'site_view_hours',
+  {
+    siteId: uuid()
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    hourStart: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+  },
+  (table) => [primaryKey({ name: 'pk_site_view_hours', columns: [table.siteId, table.hourStart] })],
 );

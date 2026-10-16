@@ -7,8 +7,9 @@ import { getRequestContext } from '../context/request-context.ts';
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
   protected override async getTracker(req: Request): Promise<string> {
-    const userId = getRequestContext()?.userId;
-    return userId ? `user:${userId}` : `ip:${req.ip ?? 'unknown'}`;
+    const context = getRequestContext();
+    // The client's address behind AUTH_TRUSTED_PROXIES (Express's `req.ip` would be the proxy's: one limit for all).
+    return context?.userId ? `user:${context.userId}` : `ip:${context?.ip ?? req.ip ?? 'unknown'}`;
   }
 }
 

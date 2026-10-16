@@ -14,7 +14,13 @@ import { migrateSpec } from '@bf/site-schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { diffSpecs } from '../domain/version-diff.ts';
 import { toSiteDetail, toSiteSummary, toVersion, toVersionSummary } from './mappers.ts';
-import { SITES_REPOSITORY, type SitesRepository, type StoredSite } from './ports.ts';
+import {
+  SITE_INSIGHTS,
+  SITES_REPOSITORY,
+  type SiteInsights,
+  type SitesRepository,
+  type StoredSite,
+} from './ports.ts';
 
 /** A cursor's position: a microsecond UTC timestamp and a UUID (anything else is a tampered cursor). */
 const CREATED_AT_KEY = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
@@ -26,7 +32,10 @@ const invalidCursor = () =>
 /** Reads of the sites module (BF-035): sites, their versions and the differences between versions. */
 @Injectable()
 export class SiteQueries {
-  constructor(@Inject(SITES_REPOSITORY) private readonly repository: SitesRepository) {}
+  constructor(
+    @Inject(SITES_REPOSITORY) private readonly repository: SitesRepository,
+    @Inject(SITE_INSIGHTS) private readonly insights: SiteInsights,
+  ) {}
 
   async list(organizationId: string, query: SiteListQuery): Promise<SitePage> {
     let after: { createdAtKey: string; id: string } | undefined;
@@ -57,7 +66,12 @@ export class SiteQueries {
     const current = site.currentVersionId
       ? await this.repository.version(site.id, site.currentVersionId)
       : undefined;
-    return toSiteDetail(site, current, await this.repository.activePublications(site.id));
+    const [publications, thumbnails, views] = await Promise.all([
+      this.repository.activePublications(site.id),
+      this.insights.thumbnails(site.id),
+      this.insights.views(site.id),
+    ]);
+    return toSiteDetail(site, current, publications, { thumbnails, views });
   }
 
   async versions(

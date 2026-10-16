@@ -18,7 +18,7 @@ import { MAX_SITES_PER_BUSINESS, SiteCommands } from './sites.commands.ts';
 import { SiteQueries } from './sites.queries.ts';
 import { SiteRenderSubscriber } from './sites.subscribers.ts';
 import { checkSpec } from './spec-check.ts';
-import { InMemorySitesRepository } from './testing.ts';
+import { InMemorySitesRepository, NO_INSIGHTS } from './testing.ts';
 
 const fixtures = join(
   dirname(createRequire(import.meta.url).resolve('@bf/site-schema/package.json')),
@@ -50,7 +50,7 @@ beforeEach(() => {
   revalidation = { revalidate: vi.fn(async () => undefined) };
   clock = fixedClock('2026-10-14T12:00:00.000Z');
   commands = new SiteCommands(repository, hosting, clock, logger, events as unknown as EventRecorder);
-  queries = new SiteQueries(repository);
+  queries = new SiteQueries(repository, NO_INSIGHTS);
 });
 
 const eventTypes = () =>
@@ -118,7 +118,7 @@ describe('SiteCommands', () => {
   });
 
   it('creates a site with a first version, idempotently per business, and refuses an untracked business', async () => {
-    const { siteId, businessId, v1 } = await siteWithVersion();
+    const { siteId, businessId } = await siteWithVersion();
     expect(eventTypes()).toEqual(['site.created', 'site.version.created']);
     expect(await commands.create(actor, { businessId })).toEqual({ siteId, created: false });
     // A spec for a business that has a site is a conflict, not dropped silently.

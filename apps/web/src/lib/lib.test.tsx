@@ -53,6 +53,17 @@ describe('buildCsp', () => {
     expect(csp).toContain('upgrade-insecure-requests');
   });
 
+  it('lets the site editor upload images to object storage only when configured (BF-037)', () => {
+    const uploads = buildCsp('n', {
+      dev: false,
+      apiOrigin: 'https://api.example',
+      https: true,
+      uploadsOrigin: 'https://s3.example',
+    });
+    expect(uploads).toContain("connect-src 'self' https://api.example https://s3.example");
+    expect(csp).not.toContain('s3.example');
+  });
+
   it('lets the search map load tiles from its origin and run blob workers', () => {
     const map = buildCsp('n', {
       dev: false,

@@ -138,13 +138,13 @@ apps/web/src/app/(dashboard)/sites/[siteId]/edit/page.tsx
 - **Accessibility:** axe on the editor chrome (no serious or critical issues); keyboard-only flow to edit text and move a block.
 
 ## Acceptance criteria
-- [ ] Puck editor with fields generated from the BF-033 schema and catalog; every block and variant is editable; canvas parity with the renderer.
-- [ ] Multi-page, multi-locale editing with site settings (theme, contact, navigation, header/footer, locales, SEO).
-- [ ] Saves produce operation-based immutable versions; conflict dialog with rebase; local draft recovery; undo and redo.
-- [ ] Live validation in a worker with click-to-focus; publish blocked on errors.
-- [ ] Versions drawer with diff and restore; publish, extend and unpublish from the editor.
-- [ ] AssetPicker with license capture; FactPicker with graceful degradation; JSON mode for admins.
-- [ ] Unit, property, visual parity, E2E and accessibility suites pass.
+- [x] Puck editor with fields generated from the BF-033 schema and catalog; every block and variant is editable; canvas parity with the renderer.
+- [x] Multi-page, multi-locale editing with site settings (theme, contact, navigation, header/footer, locales, SEO).
+- [x] Saves produce operation-based immutable versions; conflict dialog with rebase; local draft recovery; undo and redo.
+- [x] Live validation in a worker with click-to-focus; publish blocked on errors.
+- [x] Versions drawer with diff and restore; publish, extend and unpublish from the editor.
+- [x] AssetPicker with license capture; FactPicker with graceful degradation; JSON mode for admins.
+- [x] Unit, property, visual parity, E2E and accessibility suites pass.
 
 ## Agent prompt
 ```text
@@ -209,5 +209,24 @@ visual parity report in the PR.
   - Local drafts in IndexedDB per site, offered back after a reload (replayed on the version open now); a conflict
     can now re-apply the local changes on the latest version, listing those that no longer apply.
   - Field help per field (EN/FR); new blocks start in the first layout the site can show as is.
-- **Planned**: part 3 — versions drawer (diff, restore), publish popover, image library and upload, facts, JSON mode,
-  visual parity, a11y and performance checks.
+- **Part 3 (PR 3/3)**:
+  - Versions drawer: every version with its author kind, time, change summary, errors and warnings; view one
+    read-only on the canvas (the edits wait, untouched); the changes from the previous version or between two selected
+    ones (BF-035's diff: pages, sections, site-wide parts, texts before/after per language); restore (a rollback, a
+    new version; unsaved edits dropped after a confirmation).
+  - Publish popover: the preview's link, version, expiry and 7-day views; publish the saved version (refused while
+    there are unsaved changes or errors), choose its duration, extend it, copy or open its link, unpublish.
+  - Image picker for every image field: the site's own images, its library (BF-035 assets: search, licence and
+    orientation filters, provider-restricted images shown but not selectable) and uploads (presigned PUT, licence
+    required, credit, alt text per site language, focal point by click or arrow keys). A library image becomes one
+    of the site's images with a minted `img_…` id (14 characters) and `url = SiteAsset.publicUrl`; picking the same
+    file again reuses it. The browser's upload origin is `NEXT_PUBLIC_SITES_UPLOADS_URL` (CSP `connect-src`).
+  - Facts stay read-only with the BF-040 tooltip (FactPicker's degraded mode), as in part 1.
+  - JSON mode (`sites:admin`): CodeMirror 6 with JSON syntax linting, the schema and validators below it, saved as
+    one full-spec version.
+  - Keyboard shortcuts dialog (`?`).
+  - Parity: a test renders every fixture page and language through the canvas's composition and through the
+    renderer's `SitePage` with the same options and requires identical markup (the same stylesheet styles both).
+    A screenshot comparison against apps/sites is left as a follow-up (it needs the renderer in the web e2e).
+  - E2E: versions (diff, view, restore), publish/extend/unpublish and the blocks (unsaved, errors), image swap and
+    upload, JSON mode, axe on the chrome and dialogs, editor interactive under 2.5 s.

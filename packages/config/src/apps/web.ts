@@ -20,6 +20,13 @@ export const webPublicEnv = z.object({
     .url()
     .default('https://assets.sites.localhost')
     .describe("Public base URL of site images (SITES_ASSETS_BASE_URL): the site editor's canvas shows them."),
+  NEXT_PUBLIC_SITES_UPLOADS_URL: z
+    .url()
+    .optional()
+    .describe(
+      'Object storage as browsers reach it (the S3 endpoint): the site editor uploads images there with presigned ' +
+        'PUTs (BF-037). Unset: no upload from the browser. Written by infra:up locally.',
+    ),
 });
 
 export const webEnv = z.object({

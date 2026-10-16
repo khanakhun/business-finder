@@ -179,6 +179,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |
 | `NEXT_PUBLIC_MAP_STYLE_URL` | App-specific | web | no | `https://tiles.openfreemap.org/styles/liberty` |  | MapLibre style for the search map (OpenFreeMap by default: free, no key, OSM attribution). |
 | `NEXT_PUBLIC_SITES_ASSETS_BASE_URL` | App-specific | web | no | `https://assets.sites.localhost` |  | Public base URL of site images (SITES_ASSETS_BASE_URL): the site editor's canvas shows them. |
+| `NEXT_PUBLIC_SITES_UPLOADS_URL` | App-specific | web | no |  |  | Object storage as browsers reach it (the S3 endpoint): the site editor uploads images there with presigned PUTs (BF-037). Unset: no upload from the browser. Written by infra:up locally. |
 | `SITES_PORT` | App-specific | sites | no | `3100` |  | HTTP port of apps/sites. Set by infra:up from BF_PORT_OFFSET. |
 | `SITES_PREVIEW_ACTIONS` | App-specific | sites | no | `false` |  | Previews show "This is my business" and "Not interested" (the renderer's /claim and /opt-out pages, BF-048); off until they exist. |
 | `INTEL_HOST` | App-specific | intel | no | `127.0.0.1` |  | Interface services/intel binds to (0.0.0.0 inside its container). |

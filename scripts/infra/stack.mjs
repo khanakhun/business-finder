@@ -130,6 +130,8 @@ export function derivedEnv({ ports, env, projectName, offset, profiles = [] }) {
     SITES_INTERNAL_URL: `http://127.0.0.1:${ports.SITES_PORT}`,
     NEXT_PUBLIC_APP_URL: `http://localhost:${ports.WEB_PORT}`,
     NEXT_PUBLIC_API_URL: `http://localhost:${ports.API_PORT}`,
+    // The site editor's image uploads (presigned PUTs from the browser, BF-037).
+    NEXT_PUBLIC_SITES_UPLOADS_URL: `http://127.0.0.1:${ports.BF_S3_PORT}`,
   };
 }
 

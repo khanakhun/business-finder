@@ -315,6 +315,49 @@ describe('validateFacts', () => {
     expect(found(spec, facts)).toEqual([]);
   });
 
+  it.each([
+    'Appelez le 06 12 - 34 56 78',
+    'Appelez le 0690 - 99 88 77',
+    'Appelez le 0590 27 / 00 00',
+    'Tél. 0690 – 12 34 56',
+  ])('checks a number split by a separator as one number: %j', (subtitle) => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: subtitle, en: 'Call us' };
+    expect(found(spec)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+  });
+
+  it('reads a French-plan number by its prefix, not by the site’s country', () => {
+    // Martinique on a BL site, Guadeloupe on a mainland site: both are the facts they name.
+    const martinique = withFacts([fact('phone.mq', 'phone', '+596 696 12 34 56')]);
+    const bl = salon();
+    hero(bl).subtitle = { fr: 'Appelez le 0696 12 34 56', en: 'Call +596 696 12 34 56' };
+    expect(found(bl, martinique)).toEqual([]);
+    const guadeloupe = withFacts([fact('phone.gp', 'phone', '+590 690 12 34 56')]);
+    const mainland = salon();
+    if (mainland.contact.address) mainland.contact.address.country = 'FR';
+    hero(mainland).subtitle = { fr: 'Appelez le 0690 12 34 56', en: 'Call 0690 12 34 56' };
+    expect(found(mainland, guadeloupe).filter((issue) => issue.includes('subtitle'))).toEqual([]);
+    // Another Martinique number is not the fact.
+    const other = salon();
+    hero(other).subtitle = { fr: 'Appelez le 0696 12 34 57', en: 'Call us' };
+    expect(found(other, martinique)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+  });
+
+  it('quotes a review with its emoji, with or without the presentation selector', () => {
+    const facts = {
+      facts: registry().facts.map((f) =>
+        f.id === 'review.1'
+          ? { ...f, value: { ...(f.value as object), quote: 'Coupe parfaite, merci \u2764\uFE0F' } }
+          : f,
+      ),
+    };
+    for (const quote of ['Coupe parfaite, merci \u2764\uFE0F', 'Coupe parfaite, merci \u2764']) {
+      const spec = salon();
+      testimonial(spec).quote.fr = quote;
+      expect(found(spec, facts as FactRegistry)).toEqual([]);
+    }
+  });
+
   it('still checks a year or number written next to a phone number', () => {
     const spec = salon();
     hero(spec).subtitle = {

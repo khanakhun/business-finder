@@ -102,6 +102,8 @@ const digits = (value: string) => value.normalize('NFKC').replace(/\D/g, '');
 const norm = (value: string) =>
   value
     .normalize('NFKC')
+    // Emoji presentation selectors are invisible: `❤️` and `❤` are the same text.
+    .replace(/[\uFE0E\uFE0F]/g, '')
     .toLowerCase()
     .replace(/[\p{P}\p{S}]+/gu, ' ')
     .replace(/\s+/g, ' ')
@@ -112,22 +114,44 @@ const mailbox = (value: string) => value.normalize('NFKC').trim().toLowerCase();
 const dialled = (raw: string) =>
   digits(raw.normalize('NFKC').replace(/^(\s*(?:\+|00)\s*\d{1,3}\s*)\(\s*0\s*\)/, '$1')).replace(/^00/, '');
 
+const FRENCH_PLAN = ['FR', 'GP', 'BL', 'MF', 'MQ', 'GF', 'RE', 'YT', 'PM'];
+/**
+ * France and its overseas departments share one national plan (`0…`, ten digits): the territory is in the prefix, not
+ * in the site's country (a mainland mobile on a BL site is French, a `0696` number is Martinique's). GP, BL and MF
+ * share +590, RE and YT +262; anything else is mainland France.
+ */
+const OVERSEAS_PREFIXES: readonly (readonly [string, CountryCode])[] = [
+  ['0590', 'GP'],
+  ['0690', 'GP'],
+  ['0691', 'GP'],
+  ['0596', 'MQ'],
+  ['0696', 'MQ'],
+  ['0697', 'MQ'],
+  ['0594', 'GF'],
+  ['0694', 'GF'],
+  ['0262', 'RE'],
+  ['0263', 'RE'],
+  ['0692', 'RE'],
+  ['0693', 'RE'],
+  ['0269', 'YT'],
+  ['0639', 'YT'],
+];
+
 /** A number in E.164, read as the business's country writes it (national formats, `(0)`, `00`); else undefined. */
 function e164(raw: string, country: string | undefined): string | undefined {
   const text = raw.normalize('NFKC');
-  const parsed = parsePhoneNumberFromString(text, country as CountryCode | undefined);
-  if (parsed?.isValid()) return parsed.number;
-  // France and its overseas departments share one numbering plan: a mainland mobile (`06…`) on a BL site is French.
   if (country && FRENCH_PLAN.includes(country)) {
-    for (const other of FRENCH_PLAN) {
-      const candidate = parsePhoneNumberFromString(text, other as CountryCode);
-      if (candidate?.isValid()) return candidate.number;
+    const national = dialled(text);
+    if (/^0\d{9}$/.test(national)) {
+      const territory = OVERSEAS_PREFIXES.find(([prefix]) => national.startsWith(prefix))?.[1] ?? 'FR';
+      const parsed = parsePhoneNumberFromString(national, territory);
+      if (parsed?.isValid()) return parsed.number;
     }
   }
+  const parsed = parsePhoneNumberFromString(text, country as CountryCode | undefined);
+  if (parsed?.isValid()) return parsed.number;
   return parsed?.isPossible() ? parsed.number : undefined;
 }
-
-const FRENCH_PLAN = ['FR', 'GP', 'BL', 'MF', 'MQ', 'GF', 'RE', 'YT', 'PM'];
 
 /**
  * Two phone numbers are the same line: the same E.164 number once read as the business's country writes numbers
@@ -145,7 +169,7 @@ const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]
 const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
 /** A phone-like run (bounded: a long run is read as several, each refused unless a fact). */
-const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,30}\d/g;
+const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./–-]{6,30}\d/g;
 /** The separator of two numbers side by side (`0590 27 00 00 / 0690 12 34 56`), kept by `split`. */
 const PAIR = /([ \u00A0\u202F]{1,3}[/–-][ \u00A0\u202F]{1,3})/;
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
@@ -218,18 +242,43 @@ export function literals(input: string): Literals {
     },
   );
   const phones: string[] = [];
-  // Two numbers side by side are two literals; a shorter part (`Depuis 1987 - 0590…`) stays in the text, so its year
-  // or number is still checked.
-  text = text.replace(PHONE, (match) =>
-    match
-      .split(PAIR)
-      .map((part, i) => {
-        if (i % 2 === 1 || digits(part).length < 8) return part;
+  // Two numbers side by side are two literals. Short parts next to each other are one number (`06 12 - 34 56 78`
+  // is a phone, not two harmless fragments); a short part alone (`Depuis 1987 - 0590…`) stays in the text, so its
+  // year or number is still checked.
+  text = text.replace(PHONE, (match) => {
+    const pieces = match.split(PAIR);
+    let out = '';
+    let group = '';
+    let groupDigits = 0;
+    const flush = () => {
+      if (groupDigits >= 8) {
+        phones.push(group.trim());
+        out += blank(group);
+      } else out += group;
+      group = '';
+      groupDigits = 0;
+    };
+    for (let k = 0; k < pieces.length; k += 2) {
+      const part = pieces[k] ?? '';
+      const separator = k > 0 ? (pieces[k - 1] ?? '') : '';
+      const count = digits(part).length;
+      if (count >= 8) {
+        flush();
+        out += separator;
         phones.push(part.trim());
-        return blank(part);
-      })
-      .join(''),
-  );
+        out += blank(part);
+      } else if (group) {
+        group += separator + part;
+        groupDigits += count;
+      } else {
+        out += separator;
+        group = part;
+        groupDigits = count;
+      }
+    }
+    flush();
+    return out;
+  });
   for (const match of text.matchAll(YEAR)) years.push(Number(match[1]));
   return { phones, emails, prices, years };
 }

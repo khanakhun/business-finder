@@ -70,6 +70,12 @@ jobs:
               - '!**/*.md'
             sites:
               - 'packages/{site-blocks,site-schema}/**'
+              # Dependency, Node and job changes move pixels too (Tailwind, React, Playwright, fonts).
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - '.nvmrc'
+              - '.github/workflows/ci.yml'
+              - '.github/actions/setup/**'
               - '!**/*.md'
 
   quality:
@@ -269,7 +275,8 @@ jobs:
     name: sites
     needs: changes
     if: needs.changes.outputs.sites == 'true'
-    runs-on: ubuntu-latest
+    # Pinned: pixel baselines depend on the OS's text rendering (ubuntu-latest moves to a new release).
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

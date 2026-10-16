@@ -10,7 +10,8 @@ export default defineConfig({
   testDir: './suites',
   fullyParallel: true,
   forbidOnly: ci,
-  retries: ci ? 1 : 0,
+  // No retries: a flaky capture is a bug to fix, not to retry.
+  retries: 0,
   reporter: ci ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]] : 'list',
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
   expect: {

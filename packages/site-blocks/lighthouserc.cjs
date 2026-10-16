@@ -28,6 +28,11 @@ module.exports = {
         'categories:performance': atLeast(0.95),
         'categories:accessibility': atLeast(0.95),
         'categories:best-practices': atLeast(0.95),
+        // The ticket's budgets: static blocks ship no script, images are sized (no layout shift), pages stay light.
+        'resource-summary:script:count': ['error', { maxNumericValue: 0 }],
+        'cumulative-layout-shift': ['error', { maxNumericValue: 0.02 }],
+        'unsized-images': ['error', { minScore: 1 }],
+        'total-byte-weight': ['error', { maxNumericValue: 800_000 }],
       },
     },
     upload: { target: 'filesystem', outputDir: 'reports' },

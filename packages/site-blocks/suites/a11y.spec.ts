@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page, test } from '@playwright/test';
-import { FIXTURES, PAGES, VIEWPORTS } from './targets.ts';
+import { BLOCK_VARIANTS, FIXTURES, PAGES, VIEWPORTS } from './targets.ts';
 
 // Accessibility (BF-034): axe on every page of every fixture site, in two styles, on desktop and with the mobile
 // menu open. No serious or critical violation is allowed.
@@ -34,7 +34,7 @@ for (const fixture of FIXTURES) {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto(`/sites/${fixture}/coastal/`);
     const toggle = page.locator('button[popovertarget="bf-mobile-menu"]:not([popovertargetaction])');
-    if ((await toggle.count()) === 0) return;
+    await expect(toggle).toHaveCount(1);
     await toggle.click();
     await expect(page.locator('#bf-mobile-menu')).toBeVisible();
     const results = await scan(page);
@@ -53,3 +53,29 @@ test('the skip link is the first stop and lands on the content', async ({ page }
   await page.keyboard.press('Enter');
   await expect(page.locator('#main')).toBeFocused();
 });
+
+test('the gallery viewer opens from the keyboard, passes axe, and gives focus back on Escape', async ({
+  page,
+}) => {
+  await page.setViewportSize(VIEWPORTS.desktop);
+  await page.goto('/gallery/blocks/modern/gallery/grid.html');
+  const photo = page.locator('button.bf-zoom').first();
+  await photo.focus();
+  await page.keyboard.press('Enter');
+  const viewer = page.locator('.bf-lightbox:popover-open');
+  await expect(viewer).toBeVisible();
+  await expect(viewer.getByRole('button')).toBeFocused();
+  expect(serious((await scan(page)).violations)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(viewer).toHaveCount(0);
+  await expect(photo).toBeFocused();
+});
+
+// Every variant, including those no fixture page uses (one style: the markup is the same in every style).
+for (const { type, variant } of BLOCK_VARIANTS) {
+  test(`block ${type} · ${variant}`, async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await page.goto(`/gallery/blocks/modern/${type}/${variant}.html`);
+    expect(serious((await scan(page)).violations)).toEqual([]);
+  });
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fixture, TEST_CSS } from '../test-utils.tsx';
-import { renderStaticPage, renderStaticSite, staticPath } from './render-static-page.tsx';
+import { faviconHref, renderStaticPage, renderStaticSite, staticPath } from './render-static-page.tsx';
 
 const salon = fixture('salon-gustavia');
 
@@ -74,6 +74,20 @@ describe('renderStaticPage', () => {
     const { html } = renderStaticPage(official, 'home', 'fr', { css: TEST_CSS, preview: true });
     expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
     expect(html).toContain('bf-preview-banner');
+  });
+
+  it('gives the site an inline icon from its initial and colour, drawing nothing else from the spec', () => {
+    const { html } = renderStaticPage(salon, 'home', 'fr', { css: TEST_CSS });
+    const href = html.match(/<link rel="icon" href="([^"]+)">/)?.[1] ?? '';
+    expect(href).toMatch(/^data:image\/svg\+xml,/);
+    const svg = decodeURIComponent(href.replace('data:image/svg+xml,', '').replaceAll('&amp;', '&'));
+    expect(svg).toContain(`fill='${salon.theme.palette.primary}'`);
+    expect(svg).toContain('>S</text>');
+    const hostile = faviconHref({
+      ...salon,
+      brand: { ...salon.brand, name: '"><img src=x onerror=alert(1)>' },
+    });
+    expect(decodeURIComponent(hostile)).not.toContain('<img');
   });
 
   it('throws for a page the site does not have, and for a spec the schema refuses', () => {

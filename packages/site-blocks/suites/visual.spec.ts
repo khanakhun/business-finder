@@ -5,7 +5,14 @@ import { BLOCK_STYLES, BLOCK_VARIANTS, FIXTURES, STYLES, VIEWPORTS } from './tar
 // variant in two styles. Fonts are loaded before each capture; nothing on these pages moves.
 
 async function settle(page: Page) {
-  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  // Every image loaded before the capture, lazy ones too (a longer page must not show empty boxes).
+  await page.evaluate(async () => {
+    for (const image of document.images) image.loading = 'eager';
+    await Promise.all([...document.images].map((image) => image.decode().catch(() => undefined)));
+  });
   await page.waitForLoadState('networkidle');
 }
 

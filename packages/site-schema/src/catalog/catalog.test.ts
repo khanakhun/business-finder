@@ -1,4 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { BLOCK_TYPES, BlockSchema, blockVariants } from '../spec/blocks/index.ts';
 import { SiteSpecSchema } from '../spec/site.ts';
@@ -40,22 +42,28 @@ describe('block catalog', () => {
     }
   });
 
-  it('has a thumbnail for every block variant (pnpm --filter @bf/site-blocks thumbnails)', () => {
-    for (const type of BLOCK_TYPES)
-      for (const variant of blockVariants(type))
-        expect(
-          existsSync(new URL(`../../generated/catalog/${thumbnailPath(type, variant)}`, import.meta.url)),
-          `${type}/${variant}`,
-        ).toBe(true);
+  it('has a thumbnail for every block variant and none other (pnpm --filter @bf/site-blocks thumbnails)', () => {
+    const expected = BLOCK_TYPES.flatMap((type) =>
+      blockVariants(type).map((variant) => thumbnailPath(type, variant)),
+    );
+    for (const path of expected)
+      expect(existsSync(new URL(`../../generated/catalog/${path}`, import.meta.url)), path).toBe(true);
+    // No thumbnail of a removed or renamed variant is left behind.
+    const thumbnails = new URL('../../generated/catalog/thumbnails/', import.meta.url);
+    const found = readdirSync(thumbnails, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map(
+        (entry) => `thumbnails/${relative(fileURLToPath(thumbnails), join(entry.parentPath, entry.name))}`,
+      );
+    expect(found.sort()).toEqual([...expected].sort());
   });
 
   it('matches the committed markdown, with no stale file (run pnpm site-schema:catalog)', () => {
     const files = catalogFiles(examples);
     // The markdown files (the thumbnails/ folder next to them is the block library's, BF-034).
-    const markdown = readdirSync(new URL('../../generated/catalog/', import.meta.url)).filter((file) =>
-      file.endsWith('.md'),
-    );
-    expect(markdown.sort()).toEqual([...files.keys()].sort());
+    const entries = readdirSync(new URL('../../generated/catalog/', import.meta.url));
+    // Only the markdown files and the thumbnails folder: no stray file.
+    expect(entries.sort()).toEqual([...files.keys(), 'thumbnails'].sort());
     for (const [file, content] of files) {
       expect(readFileSync(new URL(`../../generated/catalog/${file}`, import.meta.url), 'utf8'), file).toBe(
         content,

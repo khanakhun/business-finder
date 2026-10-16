@@ -49,7 +49,7 @@ export function serve(root: string, port: number) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [dir = 'dist/sites', port = '4410'] = process.argv.slice(2);
+  const [dir = 'dist', port = '4410'] = process.argv.slice(2);
   serve(dir, Number(port));
   console.log(`Serving ${dir} on http://127.0.0.1:${port}`);
 }

@@ -36,16 +36,62 @@ export function galleryExamples(): Map<BlockType, Example> {
   return examples;
 }
 
-/** One block variant in one style, as markup inside a themed `.bf-site`. */
-export function renderVariant(example: Example, variant: string, style: StyleFamilyId): string {
-  const spec: SiteSpec = { ...example.spec, theme: { ...example.spec.theme, style } };
-  const page = spec.pages.find((candidate) => candidate.id === example.pageId) ?? spec.pages[0];
+/**
+ * A fixture's example made to show `variant`: the content the variant draws on, when the fixture block lacks it (an
+ * image for the CTA banner, an embeddable booking page, photos on service cards), and a block id of its own (so one
+ * gallery page never repeats an element id).
+ */
+export function variantExample(example: Example, variant: string): Example {
+  const images = example.spec.assets.filter((asset) => asset.kind !== 'logo').map((asset) => asset.id);
+  let spec = example.spec;
+  let block = {
+    ...example.block,
+    id: `${example.block.id}-${variant.replaceAll('_', '-')}`,
+    variant,
+  } as Block;
+  if (block.type === 'cta_banner' && variant === 'image' && !block.props.imageAssetId && images[0])
+    block = { ...block, props: { ...block.props, imageAssetId: images[0] } };
+  if (block.type === 'services' && variant === 'cards' && images.length > 0)
+    block = {
+      ...block,
+      props: {
+        ...block.props,
+        items: block.props.items.map((item, i) => ({
+          ...item,
+          imageAssetId: item.imageAssetId ?? images[i % images.length],
+        })),
+      },
+    };
+  if (block.type === 'booking' && variant === 'embed')
+    spec = {
+      ...spec,
+      contact: {
+        ...spec.contact,
+        bookingUrl: {
+          value: 'https://calendly.com/example-salon',
+          factId: spec.contact.bookingUrl?.factId ?? 'booking.main',
+        },
+      },
+    };
+  return { ...example, spec, block };
+}
+
+/** One block variant in one style, as markup inside a themed `.bf-site` (a `main` landmark on its own page). */
+export function renderVariant(
+  example: Example,
+  variant: string,
+  style: StyleFamilyId,
+  standalone = true,
+): string {
+  const shown = variantExample(example, variant);
+  const spec: SiteSpec = { ...shown.spec, theme: { ...shown.spec.theme, style } };
+  const page = spec.pages.find((candidate) => candidate.id === shown.pageId) ?? spec.pages[0];
   if (!page) throw new Error('A fixture has no page');
   const ctx = createRenderContext(spec, page, spec.defaultLocale, {
     assetsResolver: placeholderResolver('/assets/'),
     mode: 'development',
   });
-  const block = { ...example.block, variant } as Block;
+  const content = <BlockRenderer block={shown.block} ctx={ctx} index={1} tone="base" />;
   return renderToStaticMarkup(
     <div
       className="bf-site"
@@ -53,9 +99,7 @@ export function renderVariant(example: Example, variant: string, style: StyleFam
       style={themeToCssVars(spec.theme) as CSSProperties}
       {...themeDataAttributes(spec.theme)}
     >
-      <main>
-        <BlockRenderer block={block} ctx={ctx} index={1} tone="base" />
-      </main>
+      {standalone ? <main>{content}</main> : content}
     </div>,
   );
 }
@@ -81,14 +125,16 @@ export function galleryFiles(): Map<string, string> {
       const example = examples.get(type);
       if (!example) throw new Error(`No fixture has a ${type} block`);
       for (const variant of blockVariants(type)) {
-        const markup = renderVariant(example, variant, style);
         sections.push(
-          `<div class="gallery-label" id="${type}-${variant}">${type} · ${variant}</div>${markup}`,
+          `<div class="gallery-label" id="${type}-${variant}">${type} · ${variant}</div>${renderVariant(example, variant, style, false)}`,
         );
-        files.set(`blocks/${style}/${type}/${variant}.html`, page(`${type} · ${variant} · ${style}`, markup));
+        files.set(
+          `blocks/${style}/${type}/${variant}.html`,
+          page(`${type} · ${variant} · ${style}`, renderVariant(example, variant, style)),
+        );
       }
     }
-    files.set(`${style}/index.html`, page(`Blocks · ${style}`, sections.join('\n')));
+    files.set(`${style}/index.html`, page(`Blocks · ${style}`, `<main>${sections.join('\n')}</main>`));
   }
   const links = STYLE_FAMILY_IDS.map((style) => `<li><a href="/gallery/${style}/">${style}</a></li>`).join(
     '',

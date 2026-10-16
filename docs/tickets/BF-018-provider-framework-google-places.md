@@ -74,11 +74,36 @@ modules/discovery/
 - Integration: usage meter aggregation; rate limiter behavior under burst (fake clock).
 
 ## Acceptance criteria
-- [ ] Provider framework with capabilities, licensing, cost model, selection policy, rate limiting, resilience and usage metering.
-- [ ] Google Places provider (Text + Nearby) with tiered field masks, pagination, mapping and licensing-aware retention.
-- [ ] Connection test for the Google key in Settings → Integrations.
-- [ ] Fake provider for tests/E2E.
-- [ ] `providers/google-places/README.md` documents verified pricing/terms with date.
+- [x] Provider framework with capabilities, licensing, cost model, selection policy, rate limiting, resilience and usage metering.
+- [x] Google Places provider (Text + Nearby) with tiered field masks, pagination, mapping and licensing-aware retention.
+- [x] Connection test for the Google key in Settings → Integrations.
+- [x] Fake provider for tests/E2E.
+- [x] `providers/google-places/README.md` documents verified pricing/terms with date.
+
+## Implementation notes (BF-018)
+- **Contracts** (`discovery.ts`, `discovery-settings.ts`): provider ids (incl. test-only `fake`), field tiers,
+  tiles (circle | bbox), capabilities, licensing, cost model (SKUs with first-tier price + free monthly calls),
+  intent, query, page, provider summaries, usage report; `org_settings.discovery` (provider order, disabled
+  providers, Google field tier — default `pro`, monthly budget); `ProviderNotConfiguredError` (names the secret).
+- **Framework** (`modules/discovery`): `DiscoveryProvider` port (`buildQueries`, `skuFor`, `maxPages`, `fetchPage`,
+  `testConnection`), `ProviderRegistry`, `ProviderSelectionService` + pure `selectProviders` (preference order,
+  feature flag, disabled, secret, capability fit, budget — every exclusion has a reason), `ProviderQueryBuilder`
+  (category → provider keys from active mappings incl. descendants), `ProviderCostEstimator` (free allowances per
+  billing account), `GuardedProvider` decorator: credential (vault → deployment key) → monthly budget → per attempt
+  rate-limit tokens (per key + fair share per workspace on the shared key) → resilience (retries on 429/5xx
+  honouring Retry-After ≤ 30 s, breaker per billing account, timeout per attempt) → metering.
+- **Metering**: `provider_usage` per workspace × provider × SKU × UTC day × billing scope (workspace id or
+  `global`); cost after the account's free monthly calls, computed under an advisory lock.
+- **Google Places** (verified 2026-10-15, README): Nearby for category-only circles, Text Search (rectangle
+  restriction, one type per call, 3 pages × 20) otherwise; tiered field masks (no Atmosphere fields); mapping to
+  `SourceRecord` validated against the contract (http(s) links only, bounded text); records expire after 30 days
+  and keep only `{ id }` as raw payload; key test via the free IDs-only Text Search.
+- **Fake provider**: fictional BL fixtures (`provider: 'import'`), registered only in tests or with
+  `FAKE_DISCOVERY_PROVIDER` (refused in production).
+- **APIs**: `GET /v1/discovery/providers` (`discovery:run`), `GET /v1/discovery/usage` (`settings:manage`).
+- **Open (QUESTIONS.md)**: Google terms allow caching lat/lng 30 days and storing place ids only, and restrict
+  "listings or directory" use — legal decision needed, and the retention purge (BF-060) must exist before Google
+  runs are enabled in production.
 
 ## Agent prompt
 ```text

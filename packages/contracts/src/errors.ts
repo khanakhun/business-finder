@@ -14,6 +14,7 @@ export const ERROR_CODES = {
   INVALID_STATE_TRANSITION: { status: 409, title: 'Invalid state transition' },
   RATE_LIMITED: { status: 429, title: 'Too many requests' },
   BUDGET_EXCEEDED: { status: 402, title: 'Budget exceeded' },
+  DISCOVERY_PROVIDER_NOT_CONFIGURED: { status: 409, title: 'Discovery provider not configured' },
   EXTERNAL_SERVICE_FAILED: { status: 502, title: 'External service failed' },
   INTERNAL: { status: 500, title: 'Internal error' },
 } as const satisfies Record<string, { status: number; title: string }>;
@@ -157,6 +158,16 @@ export class ExternalServiceError extends DomainError {
   readonly code = 'EXTERNAL_SERVICE_FAILED';
   constructor(service: string, message: string, options?: DomainErrorOptions) {
     super(`${service}: ${message}`, { ...options, details: { service, ...options?.details } });
+  }
+}
+
+/** A provider was asked to run without its credential: the message names the vault secret to set. */
+export class ProviderNotConfiguredError extends DomainError {
+  readonly code = 'DISCOVERY_PROVIDER_NOT_CONFIGURED';
+  constructor(provider: string, secretName: string) {
+    super(`The ${provider} provider needs the "${secretName}" secret (Settings → Integrations).`, {
+      details: { reason: 'SECRET_NOT_SET', provider, secretName },
+    });
   }
 }
 

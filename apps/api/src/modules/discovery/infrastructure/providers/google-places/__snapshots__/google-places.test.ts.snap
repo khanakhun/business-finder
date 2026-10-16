@@ -1,0 +1,161 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`mapping > normalizes a recorded Text Search page 1`] = `
+[
+  {
+    "address": {
+      "city": "Gustavia",
+      "countryCode": "BL",
+      "formatted": "12 Rue de l'Exemple, Gustavia 97133, Saint-Barthélemy",
+      "line1": "12 Rue de l'Exemple",
+      "postalCode": "97133",
+    },
+    "attributes": {
+      "googleMapsUri": "https://maps.google.com/?cid=1000000000000000001",
+      "primaryType": "cafe",
+      "utcOffsetMinutes": -240,
+    },
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "hours": [
+      {
+        "closesAt": "18:30",
+        "opensAt": "07:00",
+        "weekday": 0,
+      },
+      {
+        "closesAt": "14:00",
+        "opensAt": "08:00",
+        "weekday": 5,
+      },
+    ],
+    "location": {
+      "lat": 17.8963,
+      "lng": -62.8499,
+    },
+    "name": "Café Fictif du Port",
+    "operatingStatus": "operational",
+    "phones": [
+      "+590 590 00 00 01",
+    ],
+    "priceLevel": 2,
+    "provider": "google_places",
+    "providerCategories": [
+      {
+        "key": "cafe",
+        "label": "Café",
+      },
+      {
+        "key": "coffee_shop",
+      },
+      {
+        "key": "food_store",
+      },
+      {
+        "key": "food",
+      },
+    ],
+    "providerRef": "ChIJFakePlace0000000000001",
+    "rating": 4.6,
+    "raw": {
+      "id": "ChIJFakePlace0000000000001",
+    },
+    "reviewCount": 128,
+    "website": "https://cafe-fictif.example",
+  },
+  {
+    "address": {
+      "city": "Saint-Jean",
+      "countryCode": "BL",
+      "formatted": "Route de Saint-Jean, Saint-Jean 97133, Saint-Barthélemy",
+      "line1": "Route de Saint-Jean",
+      "postalCode": "97133",
+    },
+    "attributes": {
+      "googleMapsUri": "https://maps.google.com/?cid=1000000000000000002",
+      "primaryType": "bakery",
+    },
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "location": {
+      "lat": 17.9022,
+      "lng": -62.8272,
+    },
+    "name": "Boulangerie Imaginaire",
+    "operatingStatus": "closed_temporarily",
+    "phones": [],
+    "provider": "google_places",
+    "providerCategories": [
+      {
+        "key": "bakery",
+      },
+      {
+        "key": "food_store",
+      },
+    ],
+    "providerRef": "ChIJFakePlace0000000000002",
+    "raw": {
+      "id": "ChIJFakePlace0000000000002",
+    },
+  },
+  {
+    "attributes": {},
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "hours": [
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 0,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 1,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 2,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 3,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 4,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 5,
+      },
+      {
+        "closesAt": "23:59",
+        "opensAt": "00:00",
+        "weekday": 6,
+      },
+    ],
+    "location": {
+      "lat": 17.91,
+      "lng": -62.84,
+    },
+    "name": "Snack Ouvert 24h (fictif)",
+    "operatingStatus": "operational",
+    "phones": [],
+    "provider": "google_places",
+    "providerCategories": [
+      {
+        "key": "meal_takeaway",
+      },
+    ],
+    "providerRef": "ChIJFakePlace0000000000003",
+    "raw": {
+      "id": "ChIJFakePlace0000000000003",
+    },
+  },
+]
+`;

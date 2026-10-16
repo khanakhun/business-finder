@@ -1,6 +1,7 @@
 import type {
   AuditActorType,
   AuditLogQuery,
+  DiscoverySettings,
   FeatureFlags,
   Locale,
   PostalAddress,
@@ -22,6 +23,7 @@ export interface OrgSettingsRecord {
   readonly timezone: string;
   readonly defaultCountryCode: string | null;
   readonly senderDefaults: SenderDefaults;
+  readonly discovery: Partial<DiscoverySettings>;
   readonly features: FeatureFlags;
   readonly updatedAt: Date | null;
 }

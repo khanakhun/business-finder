@@ -16,6 +16,7 @@ class ErrorCodeInfo(NamedTuple):
 ERROR_CODES: Final[dict[Code, ErrorCodeInfo]] = {
     Code.BUDGET_EXCEEDED: ErrorCodeInfo(402, "Budget exceeded"),
     Code.CONFLICT: ErrorCodeInfo(409, "Conflict"),
+    Code.DISCOVERY_PROVIDER_NOT_CONFIGURED: ErrorCodeInfo(409, "Discovery provider not configured"),
     Code.EXTERNAL_SERVICE_FAILED: ErrorCodeInfo(502, "External service failed"),
     Code.FORBIDDEN: ErrorCodeInfo(403, "Forbidden"),
     Code.IDEMPOTENCY_KEY_REUSED: ErrorCodeInfo(409, "Idempotency key reused with a different request"),

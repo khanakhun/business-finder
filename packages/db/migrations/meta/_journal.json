@@ -71,6 +71,13 @@
       "when": 1792066006253,
       "tag": "0009_geo_areas",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792067202930,
+      "tag": "0010_provider_usage",
+      "breakpoints": true
     }
   ]
 }

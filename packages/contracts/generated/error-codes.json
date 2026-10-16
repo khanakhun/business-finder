@@ -8,6 +8,10 @@
       "status": 409,
       "title": "Conflict"
     },
+    "DISCOVERY_PROVIDER_NOT_CONFIGURED": {
+      "status": 409,
+      "title": "Discovery provider not configured"
+    },
     "EXTERNAL_SERVICE_FAILED": {
       "status": 502,
       "title": "External service failed"

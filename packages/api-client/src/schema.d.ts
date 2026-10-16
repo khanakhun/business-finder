@@ -276,6 +276,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/discovery/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Discovery providers for this workspace: status, capabilities, licensing and cost model */
+        get: operations["listDiscoveryProviders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider calls, results and estimated cost per day, provider and SKU */
+        get: operations["getDiscoveryUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/events/{eventId}/replay": {
         parameters: {
             query?: never;
@@ -1080,6 +1114,38 @@ export type components = {
             postalCode?: string;
             websiteUrl?: string;
         };
+        DiscoveryProviderList: {
+            items: components["schemas"]["DiscoveryProviderSummary"][];
+        };
+        DiscoveryProviderSummary: {
+            capabilities: components["schemas"]["ProviderCapabilities"];
+            costModel: components["schemas"]["ProviderCostModel"];
+            /** @enum {string} */
+            id: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake";
+            label: string;
+            licensing: components["schemas"]["ProviderLicensing"];
+            /** @description Position in the workspace preference order (0 first). */
+            preferenceRank: number;
+            /** @description Vault secret the provider needs, if any. */
+            secretName: string | null;
+            /**
+             * @description ready; not_configured (its secret is missing); disabled (by the workspace); unavailable (feature off).
+             * @enum {string}
+             */
+            status: "ready" | "not_configured" | "disabled" | "unavailable";
+        };
+        DiscoverySettings: {
+            disabledProviders: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+            /**
+             * @description Response detail requested from Google Places (and so its SKU).
+             * @enum {string}
+             */
+            googleFieldTier: "essentials" | "pro" | "enterprise";
+            /** @description Provider spend allowed per calendar month (UTC); null for no workspace cap. */
+            monthlyBudgetUsd: number | null;
+            /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
+            providerOrder: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+        };
         FeatureFlags: {
             [key: string]: boolean;
         };
@@ -1330,6 +1396,7 @@ export type components = {
             agencyName: string | null;
             /** @description Country hint for resolving places typed without one (BL for a Saint-Barth agency). */
             defaultCountryCode: string | null;
+            discovery: components["schemas"]["DiscoverySettings"];
             features: {
                 [key: string]: components["schemas"]["FeatureFlagState"];
             };
@@ -1410,7 +1477,7 @@ export type components = {
         /** @description RFC 9457 problem details (application/problem+json). */
         ProblemDetails: {
             /** @enum {string} */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "IDEMPOTENCY_KEY_REUSED" | "INVALID_STATE_TRANSITION" | "RATE_LIMITED" | "BUDGET_EXCEEDED" | "EXTERNAL_SERVICE_FAILED" | "INTERNAL";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "IDEMPOTENCY_KEY_REUSED" | "INVALID_STATE_TRANSITION" | "RATE_LIMITED" | "BUDGET_EXCEEDED" | "DISCOVERY_PROVIDER_NOT_CONFIGURED" | "EXTERNAL_SERVICE_FAILED" | "INTERNAL";
             detail?: string;
             errors?: {
                 message: string;
@@ -1433,6 +1500,66 @@ export type components = {
             /** @description The provider's id for the record the value came from. */
             sourceRef: string | null;
             value: unknown;
+        };
+        ProviderCapabilities: {
+            bbox: boolean;
+            /** @description Filters by provider category keys. */
+            categoryFilter: boolean;
+            circle: boolean;
+            /** @description Most results one query can return across pages: reaching it means the tile is saturated. */
+            maxResultsPerQuery: number;
+            pagination: boolean;
+            polygon: boolean;
+            /** @description Accepts free-text keywords. */
+            textQuery: boolean;
+        };
+        ProviderCostModel: {
+            /** @constant */
+            currency: "USD";
+            notes: string;
+            perResultUsd: number | null;
+            skus: components["schemas"]["ProviderSku"][];
+        };
+        ProviderLicensing: {
+            attributionRequired: boolean;
+            attributionText: string | null;
+            commercialUseAllowed: boolean;
+            notes: string;
+            /** @description How long fetched content may be kept; null when there is no limit. */
+            retentionDays: number | null;
+            /** @description Fields that may be kept indefinitely even when content expires (e.g. the place id). */
+            storableFields: string[];
+        };
+        ProviderSku: {
+            /** @description Calls per month at no charge (per billing account). */
+            freeMonthlyCalls: number;
+            label: string;
+            /** @description Price per 1,000 calls at the first volume tier. */
+            perThousandUsd: number;
+            /** @description Provider billing SKU, e.g. `text_search_pro`. */
+            sku: string;
+        };
+        ProviderUsageReport: {
+            /** Format: date */
+            from: string;
+            rows: components["schemas"]["ProviderUsageRow"][];
+            /** Format: date */
+            to: string;
+            totals: {
+                calls: number;
+                costUsd: number;
+                results: number;
+            };
+        };
+        ProviderUsageRow: {
+            calls: number;
+            costUsd: number;
+            /** Format: date */
+            day: string;
+            /** @enum {string} */
+            provider: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake";
+            results: number;
+            sku: string;
         };
         PutSecretRequest: {
             value: string;
@@ -1546,6 +1673,18 @@ export type components = {
         UpdateOrgSettingsRequest: {
             agencyName?: string | null;
             defaultCountryCode?: string | null;
+            discovery?: {
+                disabledProviders?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+                /**
+                 * @description Response detail requested from Google Places (and so its SKU).
+                 * @enum {string}
+                 */
+                googleFieldTier?: "essentials" | "pro" | "enterprise";
+                /** @description Provider spend allowed per calendar month (UTC); null for no workspace cap. */
+                monthlyBudgetUsd?: number | null;
+                /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
+                providerOrder?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+            };
             features?: components["schemas"]["FeatureFlags"];
             legalName?: string | null;
             locales?: ("fr" | "en")[];
@@ -2838,6 +2977,121 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CategorySearchResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listDiscoveryProviders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryProviderList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getDiscoveryUsage: {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderUsageReport"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Problem details (RFC 9457) */

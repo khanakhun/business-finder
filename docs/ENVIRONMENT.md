@@ -123,6 +123,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_MAPS_SCRAPER` | Feature flags | api, worker | no | `false` |  | Enable the self-hosted Google Maps scraper provider. |
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
+| `FAKE_DISCOVERY_PROVIDER` | Feature flags | api, worker | no | `false` |  | Register the fixture discovery provider (tests and E2E only; refused in production). |
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
@@ -130,6 +131,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NOMINATIM_BASE_URL` | App-specific | api, worker | no | `https://nominatim.openstreetmap.org` |  | Nominatim endpoint; point it at a self-hosted instance for volume. |
 | `GEOCODER_LOOKUPS_PER_MINUTE` | App-specific | api, worker | no | `20` |  | External geocoder lookups each workspace may trigger per minute (cache hits are free). |
 | `NOMINATIM_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address sent to Nominatim (User-Agent and `email` parameter), required by its policy. |
+| `DISCOVERY_APPLY_FREE_TIER` | App-specific | api, worker | no | `true` |  | Count providers' free monthly allowances (per billing account) before estimating cost. |
+| `GOOGLE_PLACES_REQUESTS_PER_SECOND` | App-specific | api, worker | no | `5` |  | Client-side cap on Google Places calls per second, per API key (Google allows ~100/s). |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

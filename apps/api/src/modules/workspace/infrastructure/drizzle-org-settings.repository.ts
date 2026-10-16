@@ -18,6 +18,7 @@ const toRecord = (row: typeof orgSettings.$inferSelect): OrgSettingsRecord => ({
   timezone: row.timezone,
   defaultCountryCode: row.defaultCountryCode,
   senderDefaults: row.senderDefaults,
+  discovery: row.discovery,
   features: row.features,
   updatedAt: row.updatedAt,
 });

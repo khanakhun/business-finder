@@ -1,0 +1,163 @@
+{
+  "places": [
+    {
+      "id": "ChIJFakePlace0000000000001",
+      "displayName": {
+        "text": "Café Fictif du Port",
+        "languageCode": "fr"
+      },
+      "formattedAddress": "12 Rue de l'Exemple, Gustavia 97133, Saint-Barthélemy",
+      "addressComponents": [
+        {
+          "longText": "12",
+          "shortText": "12",
+          "types": ["street_number"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "Rue de l'Exemple",
+          "shortText": "Rue de l'Exemple",
+          "types": ["route"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "Gustavia",
+          "shortText": "Gustavia",
+          "types": ["locality", "political"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "97133",
+          "shortText": "97133",
+          "types": ["postal_code"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "Saint-Barthélemy",
+          "shortText": "BL",
+          "types": ["country", "political"],
+          "languageCode": "fr"
+        }
+      ],
+      "location": {
+        "latitude": 17.8963,
+        "longitude": -62.8499
+      },
+      "types": ["cafe", "coffee_shop", "food_store", "food", "point_of_interest", "establishment"],
+      "primaryType": "cafe",
+      "primaryTypeDisplayName": {
+        "text": "Café",
+        "languageCode": "fr"
+      },
+      "businessStatus": "OPERATIONAL",
+      "googleMapsUri": "https://maps.google.com/?cid=1000000000000000001",
+      "utcOffsetMinutes": -240,
+      "websiteUri": "https://cafe-fictif.example",
+      "internationalPhoneNumber": "+590 590 00 00 01",
+      "nationalPhoneNumber": "0590 00 00 01",
+      "rating": 4.6,
+      "userRatingCount": 128,
+      "priceLevel": "PRICE_LEVEL_MODERATE",
+      "regularOpeningHours": {
+        "openNow": true,
+        "periods": [
+          {
+            "open": {
+              "day": 1,
+              "hour": 7,
+              "minute": 0
+            },
+            "close": {
+              "day": 1,
+              "hour": 18,
+              "minute": 30
+            }
+          },
+          {
+            "open": {
+              "day": 6,
+              "hour": 8,
+              "minute": 0
+            },
+            "close": {
+              "day": 6,
+              "hour": 14,
+              "minute": 0
+            }
+          }
+        ],
+        "weekdayDescriptions": ["lundi: 07:00–18:30"]
+      }
+    },
+    {
+      "id": "ChIJFakePlace0000000000002",
+      "displayName": {
+        "text": "Boulangerie Imaginaire",
+        "languageCode": "fr"
+      },
+      "formattedAddress": "Route de Saint-Jean, Saint-Jean 97133, Saint-Barthélemy",
+      "addressComponents": [
+        {
+          "longText": "Route de Saint-Jean",
+          "shortText": "Route de Saint-Jean",
+          "types": ["route"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "Saint-Jean",
+          "shortText": "Saint-Jean",
+          "types": ["locality", "political"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "97133",
+          "shortText": "97133",
+          "types": ["postal_code"],
+          "languageCode": "fr"
+        },
+        {
+          "longText": "Saint-Barthélemy",
+          "shortText": "BL",
+          "types": ["country", "political"],
+          "languageCode": "fr"
+        }
+      ],
+      "location": {
+        "latitude": 17.9022,
+        "longitude": -62.8272
+      },
+      "types": ["bakery", "food_store", "point_of_interest"],
+      "primaryType": "bakery",
+      "businessStatus": "CLOSED_TEMPORARILY",
+      "googleMapsUri": "https://maps.google.com/?cid=1000000000000000002"
+    },
+    {
+      "id": "ChIJFakePlace0000000000003",
+      "displayName": {
+        "text": "Snack Ouvert 24h (fictif)"
+      },
+      "location": {
+        "latitude": 17.91,
+        "longitude": -62.84
+      },
+      "types": ["meal_takeaway"],
+      "regularOpeningHours": {
+        "periods": [
+          {
+            "open": {
+              "day": 0,
+              "hour": 0,
+              "minute": 0
+            }
+          }
+        ]
+      },
+      "businessStatus": "OPERATIONAL"
+    },
+    {
+      "id": "ChIJFakePlace0000000000004",
+      "formattedAddress": "No name: dropped"
+    }
+  ],
+  "nextPageToken": "FAKE_NEXT_PAGE_TOKEN_1"
+}

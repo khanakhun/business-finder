@@ -787,6 +787,12 @@ importers:
       '@bf/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@bf/site-blocks':
+        specifier: workspace:*
+        version: link:../../packages/site-blocks
+      '@bf/site-schema':
+        specifier: workspace:*
+        version: link:../../packages/site-schema
       '@bf/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -838,6 +844,9 @@ importers:
       uqr:
         specifier: 'catalog:'
         version: 0.1.3
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
     devDependencies:
       '@axe-core/playwright':
         specifier: 'catalog:'
@@ -884,6 +893,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.4(vitest@5.0.4)
+      fast-check:
+        specifier: 'catalog:'
+        version: 4.10.2
       happy-dom:
         specifier: 'catalog:'
         version: 21.0.1

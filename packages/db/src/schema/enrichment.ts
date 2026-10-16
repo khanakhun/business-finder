@@ -12,8 +12,13 @@ import {
   type EnrichmentStepId,
   type EnrichmentStepStatus,
   type EnrichmentTrigger,
+  type Finding,
+  type PsiResult,
   type SiteIntel,
   VERIFICATION_STATUSES,
+  type VisionGrade,
+  WEBSITE_STATUSES,
+  type WebsiteStatus,
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
@@ -243,5 +248,36 @@ export const enrichmentEmailVerdicts = pgTable(
     index('idx_enrichment_email_verdicts__expires_at').on(table.expiresAt),
     check('ck_enrichment_email_verdicts__status', sql`${table.status} IN (${inList(VERIFICATION_STATUSES)})`),
     check('ck_enrichment_email_verdicts__email_hash', sql`${table.emailHash} ~ '^[0-9a-f]{64}$'`),
+  ],
+);
+
+/**
+ * One audit per website snapshot (BF-030), filled in by the `psi` and `vision_audit` steps (each writes its part and
+ * recomputes findings, score and status from what is there). `is_latest` marks the business's newest snapshot's
+ * audit: search filters and scoring read it.
+ */
+export const websiteAudits = pgTable(
+  'website_audits',
+  {
+    id: id(),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    snapshotId: uuid()
+      .notNull()
+      .references(() => websiteSnapshots.id, { onDelete: 'cascade' }),
+    psi: jsonb().$type<PsiResult>(),
+    vision: jsonb().$type<VisionGrade>(),
+    findings: jsonb().$type<Finding[]>().notNull().default([]),
+    qualityScore: smallint(),
+    websiteStatus: text().$type<WebsiteStatus>().notNull(),
+    isLatest: boolean().notNull().default(true),
+    ...timestamps(),
+  },
+  (table) => [
+    uniqueIndex('uq_website_audits__snapshot_id').on(table.snapshotId),
+    index('idx_website_audits__business_id_latest').on(table.businessId).where(sql`${table.isLatest}`),
+    check('ck_website_audits__website_status', sql`${table.websiteStatus} IN (${inList(WEBSITE_STATUSES)})`),
+    check('ck_website_audits__quality_score', sql`${table.qualityScore} BETWEEN 0 AND 100`),
   ],
 );

@@ -144,8 +144,11 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
         0,
         copy(operation.page),
       );
-      if (operation.navigation) next.navigation = copy(operation.navigation);
-      return [{ op: 'removePage', pageId: operation.page.id }];
+      if (!operation.navigation) return [{ op: 'removePage', pageId: operation.page.id }];
+      // The menu it replaced comes back with the removal (one inverse operation).
+      const before = copy(next.navigation);
+      next.navigation = copy(operation.navigation);
+      return [{ op: 'removePage', pageId: operation.page.id, navigation: before }];
     }
     case 'removePage': {
       const index = pageIndex(next, operation.pageId);
@@ -160,9 +163,19 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
           uses.map((path) => ({ path, message: 'opens this page' })),
         );
       }
+      if (operation.navigation?.items.some((item) => item.pageId === operation.pageId)) {
+        throw new OperationError('page_in_use', `The menu given still opens page "${operation.pageId}".`, [
+          { path: ['navigation'], message: 'opens this page' },
+        ]);
+      }
       const [page] = next.pages.splice(index, 1) as [Page];
       const navigation = copy(next.navigation);
-      next.navigation.items = next.navigation.items.filter((item) => item.pageId !== operation.pageId);
+      next.navigation = operation.navigation
+        ? copy(operation.navigation)
+        : {
+            ...next.navigation,
+            items: next.navigation.items.filter((item) => item.pageId !== operation.pageId),
+          };
       // One inverse operation (a batch's inverse is never longer than the batch).
       return [{ op: 'addPage', page, index, navigation }];
     }

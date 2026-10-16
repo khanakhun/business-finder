@@ -65,7 +65,32 @@ describe('operations', () => {
         index: 1,
       },
     ],
+    [
+      'addPage (with a new menu)',
+      salon,
+      {
+        op: 'addPage',
+        page: {
+          ...structuredClone(at(salon.pages[1])),
+          id: 'offers',
+          slug: 'offres',
+          blocks: [ctaBanner('cta-offer2')],
+        },
+        navigation: {
+          items: [{ pageId: 'offers', label: L('Offres') }, ...[...salon.navigation.items].reverse()],
+        },
+      },
+    ],
     ['removePage (and its menu item)', salon, { op: 'removePage', pageId: 'services' }],
+    [
+      'removePage (with the menu given)',
+      salon,
+      {
+        op: 'removePage',
+        pageId: 'services',
+        navigation: { items: salon.navigation.items.filter((item) => item.pageId !== 'services').reverse() },
+      },
+    ],
     ['renamePage', salon, { op: 'renamePage', pageId: 'services', title: L('Tarifs'), slug: 'tarifs' }],
     ['reorderPages', salon, { op: 'reorderPages', order: ['home', 'contact', 'services'] }],
     ['addBlock', salon, { op: 'addBlock', pageId: 'home', block: ctaBanner('cta-home9'), index: 1 }],
@@ -202,6 +227,12 @@ describe('operations', () => {
   it.each<[string, SiteSpec, Operation, string]>([
     ['an unknown page', salon, { op: 'removePage', pageId: 'nowhere' }, 'page_not_found'],
     ['a page still opened by an action', cafe, { op: 'removePage', pageId: 'menu' }, 'page_in_use'],
+    [
+      'a page the given menu still opens',
+      salon,
+      { op: 'removePage', pageId: 'services', navigation: salon.navigation },
+      'page_in_use',
+    ],
     [
       'an unknown block',
       salon,
@@ -488,6 +519,17 @@ function pick(spec: SiteSpec, [kind, a, b]: readonly [number, number, number], n
           blocks: [{ id: `hero-prop${n}`, type: 'hero', variant: 'minimal', props: { title: L('Prop') } }],
         },
         index: a % (spec.pages.length + 1),
+        // Sometimes with a new menu (reversed, the new page first): its inverse must restore the old one.
+        ...(b % 2 === 0
+          ? {
+              navigation: {
+                items: [
+                  { pageId: `prop-${n}`, label: L('Prop') },
+                  ...[...spec.navigation.items].reverse(),
+                ].slice(0, 7),
+              },
+            }
+          : {}),
       };
     case 15:
       return image

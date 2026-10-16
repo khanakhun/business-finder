@@ -5,6 +5,7 @@ import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
 import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
+import { EMAIL_AT } from './email.ts';
 import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
 import { HTML_TAG, parseRichText, withoutPageLinks } from './rich-text.ts';
@@ -319,8 +320,11 @@ const skipped = (path: Path) => {
   if (LOCALES.has(key)) return true;
   return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
 };
-/** An e-mail address (anchored and bounded: linear on long words). */
-const EMAIL = /(?<![\w.+-])([\w.+-]{1,64})@[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}/g;
+/** An e-mail address, also spelled out (anchored and bounded: linear on long words). */
+const EMAIL = new RegExp(
+  String.raw`(?<![\w.+-])([\w.+-]{1,64})${EMAIL_AT}[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}`,
+  'gi',
+);
 /** A URL scheme (`http:`, `javascript:`…): an e-mail after one in the same word is a URL's user part. */
 const URL_SCHEME = /(?:^|[^\w+.-])(?:https?|ftps?|sftp|wss?|file|javascript|data|intent|ssh|smb):/i;
 

@@ -209,6 +209,40 @@ describe('validateFacts', () => {
     expect(found(spelled)).toEqual([]);
   });
 
+  it('matches national numbers without a trunk 0 and the "(0)" style, not a 00 prefix as a trunk', () => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: 'Appelez le (212) 555-0100', en: 'Call +44 (0)20 7946 0000' };
+    const facts = withFacts([
+      fact('phone.us', 'phone', '+12125550100'),
+      fact('phone.uk', 'phone', '+442079460000'),
+    ]);
+    expect(found(spec, facts)).toEqual([]);
+    const contact = salon();
+    if (contact.contact.phone) contact.contact.phone.value = '+12125550100';
+    const national = {
+      facts: registry().facts.map((f) => (f.kind === 'phone' ? { ...f, value: '(212) 555-0100' } : f)),
+    };
+    expect(found(contact, national)).not.toContain('fact_mismatch@contact.phone');
+    // `0044…` is international (`00` is no trunk 0): equal to `+44…`, and not cut to `044…`.
+    const prefixed = salon();
+    hero(prefixed).subtitle = { fr: 'Appelez le 0044 20 7946 0000', en: 'Call 0044 20 7946 0001' };
+    expect(found(prefixed, facts)).toEqual(['unsupported_literal@pages.0.blocks.0.props.subtitle.en']);
+  });
+
+  it('takes years only from what facts state as years, and phone-like ids whole', () => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: 'Depuis 1800, RCS 123-456-789.', en: 'Since 1800, N° 12/345/678.' };
+    const facts = withFacts([
+      fact('other.clients', 'other', '1 800 clients satisfaits'),
+      fact('legal.rcs', 'legal_id', 'RCS 123-456-789'),
+      fact('legal.no', 'legal_id', 'N° 12/345/678'),
+    ]);
+    expect(validateFacts(spec, facts).map((issue) => issue.message)).toEqual([
+      'Remove the year 1800: it is not a fact.',
+      'Remove the year 1800: it is not a fact.',
+    ]);
+  });
+
   it('refuses a registry with two facts of the same id', () => {
     const facts = registry().facts;
     expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);
@@ -263,8 +297,11 @@ describe('literals', () => {
     });
   });
 
-  it('finds e-mail addresses spelled out', () => {
-    expect(literals('faux @ exemple.fr, faux(at)exemple.fr, faux [at] exemple.fr').emails).toHaveLength(3);
+  it('finds e-mail addresses spelled out, in any case, but not a handle after a word', () => {
+    expect(
+      literals('faux @ exemple.fr, faux(at)exemple.fr, faux [at] exemple.fr, faux (AT) exemple.fr').emails,
+    ).toHaveLength(4);
+    expect(literals('Suivez-nous @salon.lumiere sur Instagram').emails).toEqual([]);
   });
 
   it('finds unicode and full-width e-mail addresses', () => {

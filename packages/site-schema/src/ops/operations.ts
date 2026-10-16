@@ -46,8 +46,9 @@ export const BaseOperationSchema = z.discriminatedUnion('op', [
   ),
   op(
     'removePage',
-    { pageId: PageIdSchema },
-    'Remove a page and its menu items. Refused while an action or a rich-text link still opens it.',
+    { pageId: PageIdSchema, navigation: NavigationSchema.optional() },
+    'Remove a page and its menu items (or set the menu without it, when given). Refused while an action or a ' +
+      'rich-text link still opens it.',
   ),
   op(
     'renamePage',

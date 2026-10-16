@@ -15,8 +15,10 @@ const expected = catalogFiles(examplesFrom(sites));
 const listed = (): string[] => {
   try {
     return readdirSync(dir);
-  } catch {
-    return [];
+  } catch (error) {
+    // Only a missing folder is "no files yet" (under --check nothing is created).
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw error;
   }
 };
 // --check never writes.

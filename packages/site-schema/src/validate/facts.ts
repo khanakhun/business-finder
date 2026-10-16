@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { FactIdSchema, SiteLocaleSchema } from '../spec/localized.ts';
 import type { SiteSpec } from '../spec/site.ts';
+import { EMAIL_AT, unspell } from './email.ts';
 import { error, type Issue } from './issues.ts';
 import { type Path, walk } from './walk.ts';
 
@@ -103,19 +104,24 @@ const norm = (value: string) =>
     .replace(/[\p{P}\p{S}]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-/** The national number: the last 9 digits (country code and trunk 0 dropped; FR, BL and most of Europe). */
 /** For comparing e-mail addresses: compatibility forms and case folded, nothing else (`jean.dupont` ≠ `jean@dupont`). */
 const mailbox = (value: string) => value.normalize('NFKC').trim().toLowerCase();
+/** A number as dialled: digits only, a `(0)` after the country code dropped (`+44 (0)20…`), no `00` prefix. */
+const dialled = (raw: string) =>
+  digits(raw.normalize('NFKC').replace(/^(\s*(?:\+|00)\s*\d{1,3}\s*)\(\s*0\s*\)/, '$1')).replace(/^00/, '');
+const international = (raw: string) => /^\s*(?:\+|00)/.test(raw.normalize('NFKC'));
 /**
- * Two phone numbers are the same line: equal digits, or one written nationally (a trunk `0`) whose number without it
- * ends the other (`0590 00 01 01` and `+590 590 00 01 01`). Full international numbers must be equal (`+1 212…` is not
- * `+1 312…`).
+ * Two phone numbers are the same line: equal digits, or one written nationally (no `+` or `00`; one trunk `0`
+ * dropped) whose 8+ digits end the other (`0590 00 01 01` and `+590 590 00 01 01`, `(212) 555-0100` and
+ * `+1 212 555 0100`). Two international numbers must be equal (`+1 212…` is not `+1 312…`).
  */
 function samePhone(a: string, b: string): boolean {
-  const [da, db] = [digits(a).replace(/^00/, ''), digits(b).replace(/^00/, '')];
+  const [da, db] = [dialled(a), dialled(b)];
   if (da === db) return true;
-  const national = (value: string, raw: string) =>
-    /^\s*\(?0/.test(raw.normalize('NFKC')) ? value.slice(1) : null;
+  const national = (value: string, raw: string) => {
+    if (international(raw)) return null;
+    return /^\s*\(?0(?!0)/.test(raw.normalize('NFKC')) ? value.slice(1) : value;
+  };
   const na = national(da, a);
   const nb = national(db, b);
   return (
@@ -129,8 +135,10 @@ const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
 const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,}\d/g;
 /** E-mail addresses, also spelled out against scrapers (`name @ domain.fr`, `name(at)domain.fr`). */
-const EMAIL_LITERAL =
-  /[\p{L}\p{N}._%+-]{1,64}(?:\s{0,2}@\s{0,2}|\s?[([]at[)\]]\s?)[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}/gu;
+const EMAIL_LITERAL = new RegExp(
+  String.raw`[\p{L}\p{N}._%+-]{1,64}${EMAIL_AT}[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}`,
+  'giu',
+);
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
 
 const currencyOf = (mark: string) => {
@@ -405,6 +413,8 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
             at('members', n),
             member.factId,
             ['team_member'],
+            // DECISION(BF-033): a role matches when one of its languages states the fact's role. Role facts are in one
+            // language, so the other languages (translations) cannot be checked; BF-034 shows them as translations.
             (f) =>
               norm(f.value.name) === norm(member.name) &&
               (f.value.role === undefined ||
@@ -444,18 +454,17 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   // Numbers a fact states in its own text (a legal notice's SIRET, a share capital, an award's year): whole numbers
   // only, and only from the kinds that state numbers in prose — never a phone, address or hours fact's digits.
   const stating = registry.facts.filter((fact) => ['legal_id', 'award', 'other'].includes(fact.kind));
+  const stated = stating.map((fact) => ({ text: String(fact.value), found: literals(String(fact.value)) }));
   const statedNumbers = new Set(
-    stating.flatMap((fact) =>
-      [
-        ...String(fact.value)
-          .normalize('NFKC')
-          .matchAll(/\d+(?:[ \u00A0\u202F.,]\d+)*/g),
-      ].map((m) => digits(m[0])),
-    ),
+    stated.flatMap(({ text, found }) => [
+      ...[...text.normalize('NFKC').matchAll(/\d+(?:[ \u00A0\u202F.,]\d+)*/g)].map((m) => digits(m[0])),
+      // Ids written like phone numbers (`RCS 123-456-789`, `N° 12/345/678`) match whole.
+      ...found.phones.map(digits),
+    ]),
   );
-  for (const fact of stating)
-    for (const year of literals(String(fact.value)).years) statedNumbers.add(String(year));
-  const statedPrices = stating.flatMap((fact) => literals(String(fact.value)).prices);
+  // Years only from what the facts state as years (`1 800 clients` is not the year 1800).
+  const statedYears = new Set(stated.flatMap(({ found }) => found.years));
+  const statedPrices = stated.flatMap(({ found }) => found.prices);
   for (const { text, path } of texts(spec)) {
     const found = literals(text);
     for (const phone of found.phones) {
@@ -466,8 +475,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
     }
     for (const email of found.emails) {
       // A spelled-out address (`name (at) domain`) is compared as written with `@`.
-      const spelled = email.replace(/\s{0,2}@\s{0,2}|\s?[([]at[)\]]\s?/i, '@');
-      if (!emails.includes(mailbox(spelled)))
+      if (!emails.includes(mailbox(unspell(email))))
         issues.push(
           error(path, 'unsupported_literal', `Remove the e-mail address "${email}": it is not a fact.`),
         );
@@ -485,7 +493,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
         );
     }
     for (const year of found.years) {
-      if (!years.includes(year) && !statedNumbers.has(String(year)))
+      if (!years.includes(year) && !statedYears.has(year))
         issues.push(error(path, 'unsupported_literal', `Remove the year ${year}: it is not a fact.`));
     }
   }

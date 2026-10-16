@@ -83,7 +83,7 @@ ignore_errors = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-addopts = "--strict-markers --cov=app --cov-report=term-missing:skip-covered --cov-fail-under=85"
+addopts = "--strict-markers --cov=app --cov-report=term-missing:skip-covered --cov-report=json:coverage/coverage.json --cov-fail-under=85"
 filterwarnings = ["error"]
 
 [tool.coverage.run]

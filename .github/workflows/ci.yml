@@ -1,0 +1,354 @@
+# CI for every pull request and every push to main (docs/CI.md). Pull requests run only what they affect
+# (Turborepo `--filter=...[base]` plus path filters); main runs everything and then publishes images.
+# Jobs whose target does not exist yet (e2e, a Dockerfile, services/intel) skip themselves.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Superseded PR runs are cancelled; runs on main always finish (they publish images).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+  TURBO_TELEMETRY_DISABLED: "1"
+  DO_NOT_TRACK: "1"
+  # Optional Turborepo remote cache: set the TURBO_TOKEN secret and TURBO_TEAM variable to enable it.
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  # PRs: only packages changed since the base commit, and their dependents. main: everything.
+  TURBO_FILTER: ${{ github.event_name == 'pull_request' && format('--filter=...[{0}]', github.event.pull_request.base.sha) || '' }}
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ github.event_name == 'push' || steps.filter.outputs.code == 'true' }}
+      # Changed AND present: jobs for artifacts later tickets add (hashFiles() is not available in job `if`).
+      db: ${{ steps.present.outputs.db == 'true' && (github.event_name == 'push' || steps.filter.outputs.db == 'true') }}
+      e2e: ${{ steps.present.outputs.e2e == 'true' && (github.event_name == 'push' || steps.filter.outputs.e2e == 'true') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: present
+        name: Which targets exist yet
+        run: |
+          exists() { if [ -e "$1" ]; then echo true; else echo false; fi; }
+          echo "db=$(exists packages/db/package.json)" >> "$GITHUB_OUTPUT"
+          echo "e2e=$(exists apps/web/playwright.config.ts)" >> "$GITHUB_OUTPUT"
+      - id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          # A file matches a filter only if it matches every pattern (so `!` patterns exclude).
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '**'
+              - '!docs/**'
+              - '!**/*.md'
+              - '!.github/ISSUE_TEMPLATE/**'
+            db:
+              - 'packages/db/**'
+            e2e:
+              - '{apps/web,apps/api,packages,infra}/**'
+              - '!**/*.md'
+
+  quality:
+    name: quality
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # affected detection compares with the PR base commit
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: quality
+      - name: Root files (configs, scripts)
+        run: pnpm turbo run lint:root test:root --filter=//
+      - name: Lint, typecheck, unit tests (with coverage gates)
+        run: pnpm turbo run lint typecheck test ${TURBO_FILTER:+"$TURBO_FILTER"}
+      - name: Coverage summary
+        if: always()
+        run: node scripts/ci/coverage-summary.mjs
+      - name: Upload coverage and test reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: |
+            */*/coverage/coverage-summary.json
+            */*/coverage/coverage.json
+            */*/reports/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  integration:
+    name: integration
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: integration
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build the Postgres test image once (layer cache)
+        if: hashFiles('infra/docker/postgres/Dockerfile') != ''
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: infra/docker/postgres
+          load: true
+          tags: bf-postgres-test:ci
+          cache-from: type=gha,scope=postgres
+          cache-to: type=gha,scope=postgres,mode=max
+      - name: Integration tests (Testcontainers)
+        env:
+          BF_TEST_PG_IMAGE: bf-postgres-test:ci
+        run: pnpm turbo run test:int ${TURBO_FILTER:+"$TURBO_FILTER"}
+
+  generated:
+    name: generated
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: generated
+      - name: Regenerate (each step skipped until its script exists)
+        run: |
+          for script in api:codegen contracts:py env:doc env:example; do
+            if jq -e --arg s "$script" '.scripts[$s]' package.json > /dev/null; then
+              echo "::group::pnpm $script"
+              pnpm run "$script"
+              echo "::endgroup::"
+            else
+              echo "skip: no '$script' script yet"
+            fi
+          done
+      - name: Generated files must be committed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            git --no-pager diff --stat
+            echo "::error::Generated files are stale. Run the generators listed above locally and commit the result."
+            exit 1
+          fi
+      - name: Module generator templates still compile, lint and pass their tests
+        if: hashFiles('tools/generators/module/check.mjs') != ''
+        run: pnpm gen:module:check
+
+  db:
+    name: db
+    needs: changes
+    if: needs.changes.outputs.db == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: db
+      - name: Migration journal consistent and no unmigrated schema changes
+        run: pnpm db:check
+
+  boundaries:
+    name: boundaries
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: boundaries
+      - name: Module boundaries (AGENTS.md §3)
+        run: pnpm check:boundaries
+
+  e2e:
+    name: e2e
+    needs: changes
+    if: needs.changes.outputs.e2e == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: e2e
+      - name: Throwaway secrets for this run
+        run: |
+          {
+            echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)"
+            echo "SECRETS_MASTER_KEY=$(openssl rand -base64 32)"
+            echo "INTEL_SHARED_SECRET=$(openssl rand -hex 32)"
+          } > .env
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Postgres image (same layer cache as integration)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: infra/docker/postgres
+          load: true
+          # The tag docker-compose.yml expects, so `infra:up` reuses it instead of rebuilding.
+          tags: bf-postgres:17-3.5-pgvector-0.8.7
+          cache-from: type=gha,scope=postgres
+      - name: Infrastructure, migrations, seed
+        env:
+          BF_INFRA_SKIP_BUILD: "1"
+        run: |
+          pnpm infra:up
+          pnpm db:migrate
+          if jq -e '.scripts["db:seed"]' package.json > /dev/null; then pnpm db:seed; fi
+      - name: Playwright browsers
+        run: pnpm --filter @bf/web exec playwright install --with-deps chromium
+      - name: Playwright (no retries — flaky tests are bugs)
+        run: pnpm turbo run e2e --filter=@bf/web -- --retries=0
+      - name: Upload traces and screenshots
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright
+          path: |
+            apps/web/test-results/
+            apps/web/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Infrastructure logs
+        if: failure()
+        run: docker compose --project-name bf --file infra/compose/docker-compose.yml logs --tail 200 || true
+
+  security:
+    name: security
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITLEAKS_VERSION: 8.30.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: gitleaks (PR commits on pull requests, full history on main)
+        env:
+          RANGE: ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '' }}
+        run: |
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          dir="$RUNNER_TEMP/gitleaks" && mkdir -p "$dir"
+          # Keep the release file name: the checksum list refers to it.
+          curl -fsSL -o "$dir/$tarball" "$base/$tarball"
+          curl -fsSL -o "$dir/checksums.txt" "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          (cd "$dir" && grep " $tarball\$" checksums.txt | sha256sum -c -)
+          tar -xzf "$dir/$tarball" -C "$dir" gitleaks
+          "$dir/gitleaks" git --redact --verbose --exit-code 1 ${RANGE:+--log-opts="$RANGE"} .
+      - name: OSV-Scanner (pnpm-lock.yaml, uv.lock)
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
+        with:
+          scan-args: |-
+            --recursive
+            ./
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: security
+          install: "false"
+      - name: pnpm audit --prod (advisory)
+        continue-on-error: true
+        run: pnpm audit --prod
+
+  images:
+    name: images
+    needs: [quality, integration]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: plan
+        name: Images whose Dockerfile exists (infra/docker/images.json)
+        run: |
+          matrix=$(jq -c '.images[]' infra/docker/images.json | while read -r image; do
+            if [ -f "$(jq -r .dockerfile <<<"$image")" ]; then echo "$image"; fi
+          done | jq -sc .)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          jq . <<<"$matrix"
+
+  publish:
+    name: publish (${{ matrix.image.name }})
+    needs: images
+    if: needs.images.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.images.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/bf-${{ matrix.image.name }}
+          tags: |
+            type=sha,format=long,prefix=
+            type=raw,value=main
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.image.context }}
+          file: ${{ matrix.image.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image.name }}
+          cache-to: type=gha,scope=${{ matrix.image.name }},mode=max
+          provenance: true
+          sbom: true

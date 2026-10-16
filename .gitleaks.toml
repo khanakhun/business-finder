@@ -1,0 +1,11 @@
+# gitleaks configuration (CI `security` job). Extends the default rules; allowlist entries must be narrow and
+# explained. Never allowlist a path to hide a real secret — rotate it and rewrite history instead.
+title = "business-finder"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Prose matched by generic-api-key (e.g. 'S3-compatible storage' in docs), not credentials."
+regexTarget = "secret"
+regexes = ['''^S3-compatible$''']

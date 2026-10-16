@@ -63,11 +63,11 @@ A fast, cached GitHub Actions pipeline that runs only what a PR affects, enforce
 - Pipeline exercised on this PR: green run; a temporary commit with a boundary violation shows a red `boundaries` job (then reverted) — link both runs in the PR.
 
 ## Acceptance criteria
-- [ ] CI runs on PRs and `main`, with caching and affected-only execution on PRs.
-- [ ] Jobs auto-skip when their target (e.g. `apps/web/e2e`, a Dockerfile) does not exist yet.
-- [ ] Boundary violations, stale generated code and migration drift fail CI.
-- [ ] gitleaks and OSV scans run; CodeQL configured; Renovate configured.
-- [ ] `docs/CI.md` lists required checks for branch protection.
+- [x] CI runs on PRs and `main`, with caching and affected-only execution on PRs.
+- [x] Jobs auto-skip when their target (e.g. `apps/web/e2e`, a Dockerfile) does not exist yet.
+- [x] Boundary violations, stale generated code and migration drift fail CI.
+- [x] gitleaks and OSV scans run; CodeQL configured; Renovate configured.
+- [x] `docs/CI.md` lists required checks for branch protection.
 
 ## Agent prompt
 ```text
@@ -89,3 +89,33 @@ Verify: open the PR and link a green run; demonstrate a failing boundaries run w
 ## References
 - AGENTS.md §3–§4 · docs/conventions/testing.md §8 · docs/conventions/security.md §9
 - Turborepo in CI: https://turborepo.com/docs/crafting-your-repository/constructing-ci · Testcontainers on GitHub Actions: https://node.testcontainers.org/ · gitleaks: https://github.com/gitleaks/gitleaks · OSV-Scanner: https://google.github.io/osv-scanner/
+
+## Implementation notes
+- **Actions (pinned by SHA)**: checkout v7.0.1, setup-node v7.1.0, pnpm/action-setup v6.1.0 (reads `packageManager`),
+  cache v6.1.0, setup-uv v10.3.0, paths-filter v4.0.3, setup-buildx v4.4.1, build-push v7.4.0, login v4.6.0,
+  metadata v6.2.0, upload-artifact v7.0.2, osv-scanner-action v2.7.0, codeql-action v4.38.3; gitleaks CLI 8.30.1
+  (checksum-verified download, so full history can be scanned on `main` — the action only scans the push range).
+  Workflows lint clean with actionlint 1.7.12 (+ shellcheck).
+- **Affected-only**: `turbo run … --filter=...[<PR base sha>]` (the PR base, not `origin/main`, so stacked PRs
+  work); root tasks run separately with `--filter=//`. Docs-only PRs run `changes` + `security` only.
+- **Auto-skip**: `changes` reports which targets exist (`hashFiles()` is not available in job-level `if`);
+  generators run only if their script exists; images come from `infra/docker/images.json`, filtered to existing
+  Dockerfiles (api/web/sites/agent-runner listed ahead of their tickets).
+- **Postgres image** built once per job with the Buildx GHA cache (scope `postgres`), passed to Testcontainers via
+  `BF_TEST_PG_IMAGE`; `infra:up` gained `BF_INFRA_SKIP_BUILD=1` so E2E reuses it instead of compiling pgvector.
+- **Boundaries**: `scripts/check-boundaries.mjs` (TypeScript pre-processor for imports, data-driven rule table,
+  0.3 s on the repo) + 7 node:test cases on generated fixture trees. Rules: app→app, package→app, contracts leaf
+  (src only — tool configs may use @bf/testing), pure domain (frameworks/DB/HTTP/outer layers), no server packages
+  in apps/web.
+- **Security exceptions**: `.gitleaks.toml` allowlists the prose value `S3-compatible` (a generic-api-key false
+  positive in docs); `osv-scanner.toml` ignores GHSA-67mh-4wv8-2f99 (dev-only esbuild 0.18 via drizzle-kit; affects
+  esbuild's `serve` only) until 2027-01-15. `pnpm audit --prod` is advisory.
+- **Found while running the pipeline in a clean checkout**: `@bf/config`'s repo-root test assumed the clone folder
+  name; an empty `biome.jsonc.tmp` had been committed in BF-007. Both fixed. First GitHub run also caught a bug in
+  my gitleaks step (checksum file name), fixed.
+- **Verification (no PR possible from here)**: a temporary commit added `bf-009-ci-pipeline` to the push trigger;
+  run 38658177302 was fully green (quality, integration, e2e, generated, db, boundaries, security); run 38661866837
+  with a deliberate domain violation showed a red `boundaries`; both temporary commits are reverted.
+- **Renovate** chosen over Dependabot (pnpm catalogs, `uv.lock`, Docker digests, grouping); needs the Renovate
+  GitHub App installed by the owner.
+

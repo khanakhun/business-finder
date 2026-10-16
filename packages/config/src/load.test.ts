@@ -1,6 +1,6 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { EnvValidationError, findRepoRoot, loadEnv, loadEnvOrExit, readRawEnv, redact } from './load.ts';
@@ -154,7 +154,8 @@ describe('redact', () => {
 
 describe('findRepoRoot', () => {
   it('finds the workspace root from a nested directory', () => {
-    expect(findRepoRoot(import.meta.dirname)).toMatch(/business-finder$/);
+    // packages/config/src → repo root; not the folder name, which depends on where the repo is cloned.
+    expect(findRepoRoot(import.meta.dirname)).toBe(resolve(import.meta.dirname, '../../..'));
   });
 
   it('returns the start directory when there is no workspace above it', () => {

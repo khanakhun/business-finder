@@ -1,0 +1,15 @@
+{
+  "$comment": "Images the CI `publish` job builds and pushes to ghcr.io/<owner>/bf-<name> on main (docs/CI.md). Entries whose Dockerfile does not exist yet are skipped, so future images can be listed ahead of their ticket.",
+  "images": [
+    {
+      "name": "postgres",
+      "dockerfile": "infra/docker/postgres/Dockerfile",
+      "context": "infra/docker/postgres"
+    },
+    { "name": "intel", "dockerfile": "infra/docker/intel/Dockerfile", "context": "." },
+    { "name": "api", "dockerfile": "infra/docker/api/Dockerfile", "context": "." },
+    { "name": "web", "dockerfile": "infra/docker/web/Dockerfile", "context": "." },
+    { "name": "sites", "dockerfile": "infra/docker/sites/Dockerfile", "context": "." },
+    { "name": "agent-runner", "dockerfile": "services/agent-runner/Dockerfile", "context": "." }
+  ]
+}

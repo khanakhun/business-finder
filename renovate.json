@@ -1,0 +1,50 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Dependency updates (BF-009, docs/CI.md#dependency-updates). Weekly, grouped, digests pinned.",
+  "extends": [
+    "config:recommended",
+    ":semanticCommitTypeAll(chore)",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "docker:pinDigests"
+  ],
+  "timezone": "America/St_Barthelemy",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 8,
+  "labels": ["dependencies"],
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": { "enabled": true, "schedule": ["before 6am on the first day of the month"] },
+  "packageRules": [
+    {
+      "description": "Patch updates of dev tooling merge themselves once CI is green.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    { "groupName": "GitHub Actions", "matchManagers": ["github-actions"] },
+    { "groupName": "Docker base images", "matchDatasources": ["docker"] },
+    { "groupName": "intel (Python)", "matchFileNames": ["services/intel/**"] },
+    { "groupName": "NestJS", "matchPackageNames": ["@nestjs/**"] },
+    { "groupName": "OpenTelemetry", "matchPackageNames": ["@opentelemetry/**", "opentelemetry-**"] },
+    {
+      "groupName": "Next.js and React",
+      "matchPackageNames": ["next", "react", "react-dom", "@types/react", "@types/react-dom"]
+    },
+    {
+      "groupName": "Testing",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/**",
+        "@playwright/test",
+        "playwright",
+        "@testing-library/**",
+        "testcontainers"
+      ]
+    },
+    { "groupName": "Lint and format", "matchPackageNames": ["@biomejs/biome", "ruff", "mypy"] },
+    {
+      "description": "TypeScript 7 lacks the stable compiler API our tooling needs (DECISION(BF-001)).",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7"
+    }
+  ]
+}

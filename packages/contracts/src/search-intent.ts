@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PipelineStatusSchema } from './business.ts';
 import { AreaCandidateSchema, LocationResolutionSchema } from './geo-areas.ts';
 import { LocaleSchema } from './i18n.ts';
+import { PAIN_SIGNAL_TAGS, PainSignalTagSchema } from './reviews.ts';
 
 // Search intent (BF-021, DOMAIN.md glossary): the structured reading of a natural-language prompt, shown to the
 // user as editable chips. A pure description: translating it into a query is BF-022's job.
@@ -17,23 +18,9 @@ export const WebsiteFilterSchema = z
   .enum(WEBSITE_FILTERS)
   .describe('`weak`: has a site that audits rate poorly (slow, outdated, not mobile friendly).');
 
-/** Pain-signal keys (DOMAIN.md; labels and offer relevance arrive with review mining, BF-029). */
-export const PAIN_SIGNALS = [
-  'booking_friction',
-  'unreachable_by_phone',
-  'slow_or_no_reply',
-  'website_broken_or_outdated',
-  'no_online_menu_or_prices',
-  'hard_to_find_info',
-  'language_barrier',
-  'payment_friction',
-  'long_wait_times',
-  'inconsistent_hours',
-  'poor_communication',
-  'positive_strong_reputation',
-  'other',
-] as const;
-export const PainSignalSchema = z.enum(PAIN_SIGNALS);
+/** Pain-signal keys: the review-mining taxonomy (BF-029, `PAIN_SIGNAL_DEFINITIONS` holds labels and offers). */
+export const PAIN_SIGNALS = PAIN_SIGNAL_TAGS;
+export const PainSignalSchema = PainSignalTagSchema;
 export type PainSignal = z.infer<typeof PainSignalSchema>;
 
 export const SCORE_TIERS = ['A', 'B', 'C', 'X'] as const;

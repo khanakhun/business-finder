@@ -2,7 +2,7 @@ import { embedOrigins } from '@bf/site-blocks';
 import { type NextRequest, NextResponse } from 'next/server';
 import { buildSiteCsp } from './lib/csp.ts';
 import { sitesEnvironment } from './lib/env.ts';
-import { siteHostname } from './lib/host.ts';
+import { siteHostname, underSitesDomain } from './lib/host.ts';
 import { localeOfPath, resolveRoute } from './lib/locale-routing.ts';
 import { cleanHeaders } from './lib/proxy-headers.ts';
 import { siteScheme } from './lib/seo.ts';
@@ -29,9 +29,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const env = sitesEnvironment();
   const hostname = siteHostname(request.headers.get('host'), env.SITES_BASE_DOMAIN);
-  // The internal routes answer only on the internal address (the API, the container's health check): under a site's
-  // hostname they are site paths like any other, whatever proxy sits in front.
-  if (INTERNAL.has(pathname) && !hostname) return NextResponse.next({ request: { headers: requestHeaders } });
+  // The internal routes answer only on the internal address (the API, the container's health check): under the sites
+  // domain (any name, a valid site label or not) they are site paths like any other, whatever proxy sits in front.
+  if (INTERNAL.has(pathname) && !underSitesDomain(request.headers.get('host'), env.SITES_BASE_DOMAIN))
+    return NextResponse.next({ request: { headers: requestHeaders } });
   const robots = { 'X-Robots-Tag': 'noindex, nofollow' };
   const rewrite = (path: string, extra: Record<string, string> = {}) => {
     for (const [name, value] of Object.entries(extra)) requestHeaders.set(name, value);
@@ -91,5 +92,6 @@ function safeDecode(segment: string): string {
 export const config = {
   // Every path but Next's built files: the proxy itself lets the exact internal routes through on the internal address
   // only, so a look-alike path (`/api/revalidatex`, `/-/x`) is a site path like any other.
-  matcher: [{ source: '/((?!_next/static|_next/image).*)' }],
+  // (`_next/static/` with its slash: `/_next/staticx` is a site path; the renderer uses no `next/image`.)
+  matcher: [{ source: '/((?!_next/static/).*)' }],
 };

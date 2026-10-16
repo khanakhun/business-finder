@@ -8,7 +8,7 @@ import { preferredLocale } from './accept-language.ts';
 import { cacheUntil, STALE_GRACE_MS, TENANT_TTL_MS, UNKNOWN_TTL_MS } from './cache-policy.ts';
 import { readCappedText } from './capped-body.ts';
 import { buildSiteCsp } from './csp.ts';
-import { siteHostname } from './host.ts';
+import { siteHostname, underSitesDomain } from './host.ts';
 import { pageAlternates, resolveRoute } from './locale-routing.ts';
 import { NonceCache } from './nonce-cache.ts';
 import { REVALIDATE_PATH, revalidate, revalidateNonces } from './revalidate.ts';
@@ -23,6 +23,25 @@ const fixtures = join(
 );
 const fixture = (name: string): SiteSpec =>
   SiteSpecSchema.parse(JSON.parse(readFileSync(join(fixtures, `${name}.json`), 'utf8')));
+
+describe('underSitesDomain', () => {
+  it.each([
+    'sites.example',
+    'a.sites.example',
+    'A_B.Sites.Example:443',
+    '-x.sites.example.',
+    'a.b.sites.example',
+  ])('counts %s as under the sites domain (no internal route there)', (host) => {
+    expect(underSitesDomain(host, 'sites.example')).toBe(true);
+  });
+
+  it.each([null, '', 'sites:3000', '127.0.0.1:3100', 'localhost:3100', 'evilsites.example'])(
+    'counts %s as the internal address',
+    (host) => {
+      expect(underSitesDomain(host, 'sites.example')).toBe(false);
+    },
+  );
+});
 
 describe('siteHostname', () => {
   it.each([

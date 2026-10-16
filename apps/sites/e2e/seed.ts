@@ -41,13 +41,17 @@ export const db = (label = 'The e2e seed'): DbClient => {
       return '';
     }
   })();
-  if (process.env.NODE_ENV === 'production' || !['127.0.0.1', 'localhost', '[::1]'].includes(host))
+  const production = [env.NODE_ENV, process.env.NODE_ENV].includes('production');
+  if (production || !['127.0.0.1', 'localhost', '[::1]'].includes(host))
     throw new Error(`${label} writes to local databases only, not ${host || 'an unset DATABASE_URL'}.`);
   return createDb({ url, max: 2 });
 };
 
+/** The client or one of its transactions: a seed runs in one, so a failed run leaves nothing half-written. */
+export type SeedClient = Pick<DbClient, 'select' | 'insert' | 'update' | 'delete'>;
+
 /** Deletes a seeded workspace and the businesses of its sites (a site's business is not owned by the workspace). */
-export async function dropWorkspace(client: DbClient, slug: string): Promise<void> {
+export async function dropWorkspace(client: SeedClient, slug: string): Promise<void> {
   const [org] = await client
     .select({ id: organization.id })
     .from(organization)
@@ -65,7 +69,7 @@ export async function dropWorkspace(client: DbClient, slug: string): Promise<voi
 const uuid = () => crypto.randomUUID();
 
 async function publish(
-  client: DbClient,
+  client: SeedClient,
   orgId: string,
   input: { slug: string; fixtureName: string; expiresAt: Date; status?: 'active' | 'unpublished' },
 ): Promise<{ siteId: string; versionId: string; publicationId: string }> {
@@ -100,7 +104,7 @@ async function publish(
 
 /** A new version of a site, made current (as the API's save does). */
 export async function addVersion(
-  client: DbClient,
+  client: SeedClient,
   siteId: string,
   spec: Record<string, unknown>,
   versionNumber: number,
@@ -121,37 +125,39 @@ export async function addVersion(
 }
 
 export async function seed(): Promise<void> {
-  const client = db();
+  const connection = db();
   try {
-    await dropWorkspace(client, ORG_SLUG);
-    const orgId = uuid();
-    await client.insert(organization).values({ id: orgId, name: 'Workspace E2E', slug: ORG_SLUG });
-    await client
-      .insert(orgSettings)
-      .values({ organizationId: orgId, agencyName: AGENCY.name, websiteUrl: AGENCY.url });
-    const day = 86_400_000;
-    await publish(client, orgId, {
-      slug: SLUGS.active,
-      fixtureName: 'salon-gustavia',
-      expiresAt: new Date(Date.now() + 30 * day),
-    });
-    await publish(client, orgId, {
-      slug: SLUGS.revalidated,
-      fixtureName: 'salon-gustavia',
-      expiresAt: new Date(Date.now() + 30 * day),
-    });
-    await publish(client, orgId, {
-      slug: SLUGS.expired,
-      fixtureName: 'cafe-saint-jean',
-      expiresAt: new Date(Date.now() - day),
-    });
-    await publish(client, orgId, {
-      slug: SLUGS.unpublished,
-      fixtureName: 'hardware-store-lorient',
-      expiresAt: new Date(Date.now() + day),
-      status: 'unpublished',
+    await connection.transaction(async (client) => {
+      await dropWorkspace(client, ORG_SLUG);
+      const orgId = uuid();
+      await client.insert(organization).values({ id: orgId, name: 'Workspace E2E', slug: ORG_SLUG });
+      await client
+        .insert(orgSettings)
+        .values({ organizationId: orgId, agencyName: AGENCY.name, websiteUrl: AGENCY.url });
+      const day = 86_400_000;
+      await publish(client, orgId, {
+        slug: SLUGS.active,
+        fixtureName: 'salon-gustavia',
+        expiresAt: new Date(Date.now() + 30 * day),
+      });
+      await publish(client, orgId, {
+        slug: SLUGS.revalidated,
+        fixtureName: 'salon-gustavia',
+        expiresAt: new Date(Date.now() + 30 * day),
+      });
+      await publish(client, orgId, {
+        slug: SLUGS.expired,
+        fixtureName: 'cafe-saint-jean',
+        expiresAt: new Date(Date.now() - day),
+      });
+      await publish(client, orgId, {
+        slug: SLUGS.unpublished,
+        fixtureName: 'hardware-store-lorient',
+        expiresAt: new Date(Date.now() + day),
+        status: 'unpublished',
+      });
     });
   } finally {
-    await closeDb(client);
+    await closeDb(connection);
   }
 }

@@ -77,12 +77,12 @@ modules/sites/
 - Integration: version immutability (UPDATE rejected), optimistic concurrency conflict, publish invalid → rejected, rollback, expiry job, renderer view returns only active publications and is readable by `bf_sites_ro` but not writable, asset finalize with wrong MIME rejected, views counting + HLL estimates + no raw IP persisted.
 
 ## Acceptance criteria
-- [ ] Sites/versions/publications/assets/views tables with immutability and grants.
-- [ ] Commands for create/version/ops/publish/extend/unpublish/rollback/archive with permissions and events.
+- [x] Sites/versions/publications/assets/views tables with immutability and grants.
+- [x] Commands for create/version/ops/publish/extend/unpublish/rollback/archive with permissions and events.
 - [ ] Renderer read model + HMAC revalidation + screenshot thumbnails.
 - [ ] Asset upload pipeline with licensing and processing.
 - [ ] Privacy-preserving view analytics and hourly `site.viewed` events.
-- [ ] Preview expiry job.
+- [x] Preview expiry job.
 
 ## Agent prompt
 ```text
@@ -104,3 +104,33 @@ Verify: pnpm verify && pnpm test:int.
 ## References
 - ADR-0004 · ADR-0009 · docs/DOMAIN.md §3.4 · docs/ARCHITECTURE.md §10
 - Valkey HyperLogLog: https://valkey.io/commands/pfadd/ · sharp: https://sharp.pixelplumbing.com/
+
+## Implementation notes
+
+**Part 1 (sites, versions, publications):**
+- Migration 0026: `sites`, `site_versions`, `site_publications`, `site_assets`, `site_view_daily`; versions are
+  immutable in the database (a trigger allows only setting `quality` once); one active publication per site and
+  environment and per hostname (partial unique indexes); the renderer's read model `renderer_published_sites`
+  (active publications of non-archived sites, with business and agency names, the spec and `noindex`) granted to
+  `bf_sites_ro` with the public columns of `site_assets` — the role reads nothing else and writes nothing (tested).
+  Foreign keys among versions and publications are `NO ACTION` so deleting a site removes everything at once.
+- Domain: slugs (name + locality, French accents transliterated, ≤ 40 characters, reserved and offensive words
+  avoided, numbered on collision), the structural version diff (pages, blocks added/removed/moved/changed by id,
+  text edits per locale with excerpts, site-wide sections), the publication policy (status from active
+  publications, expiry and extension capped at 90 days).
+- Commands (`sites:generate` to create and edit, `sites:publish` to publish, extend, unpublish and archive):
+  create (idempotent per business unless `forceNew`), versions from a whole spec or from BF-033 operations
+  (atomic), rollback, preview publish/extend/unpublish, archive; every edit locks the site row and checks the base
+  version (`SITE_VERSION_CONFLICT`, 409, with `currentVersionId`); specs are upcast and validated (errors → 422 with
+  each issue's path and code, warnings stored with the version); publishing re-validates the version. Events:
+  `site.created`, `site.version.created`, `site.published`, `site.unpublished`, `site.expired`, `site.archived`.
+- Renderer revalidation: a `sites-revalidate` job POSTs `{ tags: ["site:<id>", "host:<hostname>"] }` to
+  `SITES_INTERNAL_URL/api/revalidate`, signed like internal calls (`SITES_REVALIDATE_SECRET`; skipped when unset,
+  required in production). Expiry: the worker enqueues `sites-expire` once per UTC hour.
+- Decisions: versions are validated in `published` mode (the same version may later go live); the renderer forces
+  `noindex` and the banner on previews (the view's `noindex`). Facts validation (strict mode) waits for the fact
+  registry (BF-040). Preview URLs are `https://<slug>.<SITES_BASE_DOMAIN>/`.
+
+**Part 2 (planned):** asset upload/finalize/processing, screenshot thumbnails, view analytics and hourly
+`site.viewed` events.
+

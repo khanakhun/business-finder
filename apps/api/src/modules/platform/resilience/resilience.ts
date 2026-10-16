@@ -36,6 +36,18 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 30_000,
   },
+  /**
+   * The site renderer's revalidation (BF-035): an internal call, short; its job retries with backoff while the
+   * renderer is down, so one quick retry here is enough.
+   */
+  'sites-revalidate': {
+    timeoutMs: 5_000,
+    maxRetries: 1,
+    initialDelayMs: 300,
+    maxDelayMs: 1_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 30_000,
+  },
   /** External geocoders (BF-017): short, few retries — users wait for location resolution. */
   geocoder: {
     timeoutMs: 8_000,

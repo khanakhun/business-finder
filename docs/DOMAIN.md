@@ -243,6 +243,7 @@ Envelope (in `@bf/contracts/events`): `{ id, type, version, occurredAt, orgId | 
 | `org_business.tracked` | business-graph, discovery | scoring (first scores) |
 | `org_business.status_changed` | crm | outreach (stop sequences on lost/disqualified), analytics |
 | `generation.job.status_changed` | generation | realtime, notifications (batch complete), analytics |
+| `site.created` / `site.archived` | sites | realtime, analytics |
 | `site.version.created` | sites | generation (quality gates), realtime |
 | `site.published` / `site.unpublished` / `site.expired` | sites | sites renderer (revalidate), screenshot job, realtime |
 | `site.lead.captured` | sites | crm (status → engaged, task), notifications, outreach (stop sequences, attribution), analytics |

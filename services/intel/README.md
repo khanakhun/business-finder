@@ -89,6 +89,30 @@ origin, caller headers (credentials, cookies) are dropped and a request body is 
 record fetched URLs without their query string (tokens often live there). BF-026 applies the same
 `ip_policy` rules to Playwright request interception.
 
+## Website intelligence (`POST /v1/site-intel`, BF-026)
+
+Crawls a business website and returns a `SiteIntel` bundle (contract in `packages/contracts/src/site-intel.ts`):
+reachability, TLS/security, key pages, languages, JSON-LD, contacts (incl. Cloudflare and `[at]`/`[dot]`
+obfuscation), socials, booking/ordering/chat/analytics providers, technologies, freshness, mobile, performance hints,
+broken links, no-solicitation statements, logo/image candidates, and the keys of screenshots (WebP) and per-page
+markdown stored under the caller's `artifactPrefix` in the artifacts bucket.
+
+- **SSRF**: Chromium is launched behind a dead proxy and never opens a connection itself. Every request it makes is
+  intercepted and fetched by `safe_fetch` (public addresses only, DNS-pinned, size and time caps). Navigation
+  redirects are resolved by `safe_fetch` before Chromium loads the final URL (Chromium does not re-route a redirect
+  it is handed — it fails closed against the dead proxy). WebSockets are closed, service workers blocked.
+- **Politeness**: `robots.txt` for `SITE_INTEL_USER_AGENT` (see `docs/bot.md`), `Crawl-delay` up to 5 s, same-site
+  only (registrable domain, offline public-suffix list), at most `maxPages` pages, one page at a time.
+- **Extractors** (`app/services/site_intel/extractors/`) are pure functions over parsed pages: add one by writing a
+  function and calling it from `service.py`'s bundle.
+- **Technologies**: the webappanalyzer database is vendored in `app/vendor/webappanalyzer` (GPL-3.0, see its LICENSE;
+  update with `uv run python scripts/update_webappanalyzer.py <sha>`). JS globals and CSS selectors are evaluated in
+  the page from that list only.
+- **Results** are cached in memory for 10 minutes per identical request. Unreachable, parked, blocked or
+  robots-disallowed sites are answers (`reachability`), not errors.
+- **Tests** crawl synthetic fixture sites (`tests/fixtures/sites/*`) served on loopback by `tests/site_server.py`; a
+  test resolver maps `*.test` to 127.0.0.1 and nothing else resolves.
+
 ## Container image
 
 `infra/docker/intel/Dockerfile` (build context: repo root): `python:3.13-slim` (trixie) + uv, dependencies from

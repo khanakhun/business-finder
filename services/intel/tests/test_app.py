@@ -53,6 +53,14 @@ class TestHealth:
             "durationMs": 0,
         }
 
+    def test_ready_starts_the_crawler_browser_unless_disabled(
+        self, settings: Settings, tracer_provider: TracerProvider
+    ) -> None:
+        enabled = settings.model_copy(update={"site_intel_browser_check": True})
+        app = create_app(enabled, tracer_provider=tracer_provider)
+        assert [i.name for i in app.state.health_indicators] == ["browser"]
+        assert create_app(settings, tracer_provider=tracer_provider).state.health_indicators == []
+
     async def test_a_timeout_inside_a_check_is_reported_as_its_own_error(self) -> None:
         async def client_timeout() -> None:
             raise TimeoutError("connect timeout")

@@ -15,7 +15,7 @@ async def live() -> dict[str, str]:
 
 @router.get("/health/ready")
 async def ready(request: Request) -> JSONResponse:
-    """503 when a critical dependency is down. intel has none yet; BF-026 adds object storage."""
+    """503 when a critical dependency is down: the crawler's browser (BF-026) must start."""
     report = await aggregate_health(request.app.state.health_indicators)
     return JSONResponse(report, status_code=503 if report["status"] == "down" else 200)
 

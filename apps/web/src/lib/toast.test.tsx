@@ -10,7 +10,9 @@ describe('ToastHost', () => {
     // Not awaited inside act(): the host has to render before getToast() resolves.
     const shown = getToast().then((toast) => toast('Saved'));
 
-    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    // The toaster is imported on first use: under a loaded machine (the whole verify in parallel) that can take
+    // longer than findByText's default second.
+    expect(await screen.findByText('Saved', undefined, { timeout: 5_000 })).toBeInTheDocument();
     await shown;
   });
 });

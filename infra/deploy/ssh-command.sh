@@ -27,13 +27,15 @@ case "${verb:-}" in
     [[ "${arg:-}" =~ ^[0-9a-f]{40}$ ]] || deny
     tmp="$(mktemp -d)"
     trap 'rm -rf "$tmp"' EXIT
-    # At most 1 MB, only the two expected members, as plain files (never links).
-    head -c 1048576 | tar -x -C "$tmp" --no-same-owner --no-same-permissions docker-compose.prod.yml deploy.sh
-    for file in docker-compose.prod.yml deploy.sh; do
+    # At most 1 MB, only the expected members, as plain files (never links).
+    head -c 1048576 | tar -x -C "$tmp" --no-same-owner --no-same-permissions \
+      docker-compose.prod.yml seccomp-chromium.json deploy.sh
+    for file in docker-compose.prod.yml seccomp-chromium.json deploy.sh; do
       [ -f "$tmp/$file" ] && [ ! -L "$tmp/$file" ] || deny
     done
     install -d -m 0755 "$dir/releases/$arg"
     install -m 0644 "$tmp/docker-compose.prod.yml" "$dir/releases/$arg/docker-compose.prod.yml"
+    install -m 0644 "$tmp/seccomp-chromium.json" "$dir/releases/$arg/seccomp-chromium.json"
     install -m 0755 "$tmp/deploy.sh" "$dir/deploy.sh"
     ;;
   login)

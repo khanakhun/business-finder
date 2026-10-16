@@ -158,6 +158,12 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `INTEL_MAX_REQUEST_BYTES` | App-specific | intel | no | `1048576` |  | Largest request body accepted on /v1, checked before authentication (bytes). |
 | `INTEL_FETCH_TIMEOUT_SECONDS` | App-specific | intel | no | `20` |  | Total time budget of one safe_fetch call, redirects included. |
 | `INTEL_FETCH_MAX_BYTES` | App-specific | intel | no | `10485760` |  | Largest response body safe_fetch accepts after decompression (bytes). |
+| `SITE_INTEL_USER_AGENT` | App-specific | intel | no | `BusinessFinderBot/1.0 (+https://github.com/khanakhun/business-finder/blob/main/docs/bot.md)` |  | User agent of the website crawler (BF-026): identifiable, with a page explaining the bot. |
+| `SITE_INTEL_MAX_CONTEXTS` | App-specific | intel | no | `2` |  | Concurrent browser contexts per intel process (each is a crawl or a mobile render). |
+| `SITE_INTEL_RESOURCE_MAX_BYTES` | App-specific | intel | no | `5242880` |  | Largest single resource (page, script, image) the crawler fetches (bytes). |
+| `SITE_INTEL_RESOURCE_TIMEOUT_SECONDS` | App-specific | intel | no | `15` |  | Time budget of one resource fetched for the crawler. |
+| `SITE_INTEL_CHROMIUM_SANDBOX` | App-specific | intel | no | `true` |  | Keep Chromium's own sandbox (needs user namespaces: the production seccomp profile allows them). |
+| `SITE_INTEL_BROWSER_CHECK` | App-specific | intel | no | `true` |  | Readiness (/health/ready) includes starting the crawler browser: a host that cannot run it fails the deploy. |
 | `OPEN_DATA_CACHE_DIR` | App-specific | intel | no | `.cache/open-data` |  | Local directory for regional open-data extracts (BF-019), relative to services/intel. |
 | `OPEN_DATA_OBJECT_CACHE` | App-specific | intel | no | `false` |  | Also keep regional extracts in the artifacts bucket (open-data/…), shared by intel replicas. |
 | `OPEN_DATA_EXTENSION_DIR` | App-specific | intel | no |  |  | DuckDB extension directory (the image pre-installs httpfs there); DuckDB default when unset. |

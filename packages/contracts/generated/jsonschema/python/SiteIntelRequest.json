@@ -1,0 +1,85 @@
+{
+  "$id": "https://schemas.business-finder.dev/SiteIntelRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/site-intel request on services/intel.",
+  "properties": {
+    "artifactPrefix": {
+      "description": "Object-storage key prefix chosen by the caller (in the artifacts bucket).",
+      "maxLength": 200,
+      "pattern": "^[a-z0-9][a-z0-9_-]*(\\/[a-z0-9][a-z0-9_-]*)*$",
+      "type": "string"
+    },
+    "countryHint": {
+      "description": "ISO 3166-1 alpha-2 country of the business (reads national phone formats: BL, FR…).",
+      "pattern": "^[A-Z]{2}$",
+      "type": "string"
+    },
+    "localesHint": {
+      "default": [],
+      "items": {
+        "pattern": "^[a-z]{2}$",
+        "type": "string"
+      },
+      "maxItems": 5,
+      "type": "array"
+    },
+    "maxPages": {
+      "default": 6,
+      "maximum": 12,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "screenshots": {
+      "additionalProperties": false,
+      "default": {
+        "desktop": true,
+        "fullPage": false,
+        "mobile": true
+      },
+      "properties": {
+        "desktop": {
+          "type": "boolean"
+        },
+        "fullPage": {
+          "type": "boolean"
+        },
+        "mobile": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "desktop",
+        "mobile",
+        "fullPage"
+      ],
+      "type": "object"
+    },
+    "timeoutSeconds": {
+      "default": 60,
+      "maximum": 120,
+      "minimum": 10,
+      "type": "integer"
+    },
+    "url": {
+      "description": "The website to analyse (http or https).",
+      "maxLength": 2000,
+      "type": "string"
+    },
+    "userAgent": {
+      "description": "Overrides the configured crawler user agent.",
+      "maxLength": 200,
+      "type": "string"
+    }
+  },
+  "required": [
+    "url",
+    "artifactPrefix",
+    "maxPages",
+    "localesHint",
+    "screenshots",
+    "timeoutSeconds"
+  ],
+  "title": "SiteIntelRequest",
+  "type": "object"
+}

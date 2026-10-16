@@ -1,0 +1,1117 @@
+{
+  "$id": "https://schemas.business-finder.dev/SiteIntel.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/site-intel response: what a business website says about it.",
+  "properties": {
+    "analytics": {
+      "additionalProperties": false,
+      "properties": {
+        "ga4": {
+          "type": "boolean"
+        },
+        "gtm": {
+          "type": "boolean"
+        },
+        "metaPixel": {
+          "type": "boolean"
+        },
+        "others": {
+          "items": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "tiktokPixel": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ga4",
+        "gtm",
+        "metaPixel",
+        "tiktokPixel",
+        "others"
+      ],
+      "type": "object"
+    },
+    "booking": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "evidence": {
+                "description": "What matched (a host, a script, a link) — never page text.",
+                "maxLength": 300,
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 100,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "evidence"
+            ],
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        }
+      },
+      "required": [
+        "providers"
+      ],
+      "type": "object"
+    },
+    "chat": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "evidence": {
+                "description": "What matched (a host, a script, a link) — never page text.",
+                "maxLength": 300,
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 100,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "evidence"
+            ],
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        }
+      },
+      "required": [
+        "providers"
+      ],
+      "type": "object"
+    },
+    "contacts": {
+      "additionalProperties": false,
+      "properties": {
+        "contactForms": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "anyOf": [
+                  {
+                    "maxLength": 2000,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pageUrl": {
+                "maxLength": 2000,
+                "type": "string"
+              }
+            },
+            "required": [
+              "pageUrl",
+              "action"
+            ],
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "emails": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "email": {
+                "maxLength": 254,
+                "type": "string"
+              },
+              "onContactPage": {
+                "type": "boolean"
+              },
+              "pageUrl": {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "mailto",
+                  "text",
+                  "jsonld",
+                  "cfemail",
+                  "obfuscated"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "email",
+              "source",
+              "pageUrl",
+              "onContactPage"
+            ],
+            "type": "object"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "phones": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "e164": {
+                "maxLength": 20,
+                "type": "string"
+              },
+              "isWhatsApp": {
+                "type": "boolean"
+              },
+              "pageUrl": {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              "raw": {
+                "maxLength": 60,
+                "type": "string"
+              }
+            },
+            "required": [
+              "e164",
+              "raw",
+              "pageUrl",
+              "isWhatsApp"
+            ],
+            "type": "object"
+          },
+          "maxItems": 30,
+          "type": "array"
+        },
+        "whatsappLinks": {
+          "items": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        }
+      },
+      "required": [
+        "emails",
+        "phones",
+        "whatsappLinks",
+        "contactForms"
+      ],
+      "type": "object"
+    },
+    "durationMs": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "fetchedAt": {
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string"
+    },
+    "finalUrl": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "freshness": {
+      "additionalProperties": false,
+      "properties": {
+        "copyrightYear": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "httpLastModified": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latestDatedContent": {
+          "anyOf": [
+            {
+              "format": "date",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sitemapLastmod": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "copyrightYear",
+        "httpLastModified",
+        "sitemapLastmod",
+        "latestDatedContent"
+      ],
+      "type": "object"
+    },
+    "httpStatus": {
+      "anyOf": [
+        {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "imageCandidates": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url",
+          "alt",
+          "width",
+          "height"
+        ],
+        "type": "object"
+      },
+      "maxItems": 20,
+      "type": "array"
+    },
+    "jsonLd": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Postal address flattened to one line."
+          },
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 254,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "geo": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lng": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lng"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "openingHours": {
+            "description": "openingHoursSpecification / openingHours, one line each.",
+            "items": {
+              "maxLength": 200,
+              "type": "string"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "priceRange": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sameAs": {
+            "items": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "servesCuisine": {
+            "items": {
+              "maxLength": 100,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "telephone": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "description": "schema.org @type (first one when several).",
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "name",
+          "telephone",
+          "email",
+          "address",
+          "geo",
+          "openingHours",
+          "priceRange",
+          "sameAs",
+          "servesCuisine"
+        ],
+        "type": "object"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "languages": {
+      "additionalProperties": false,
+      "properties": {
+        "declared": {
+          "items": {
+            "maxLength": 35,
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "detected": {
+          "items": {
+            "maxLength": 5,
+            "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array"
+        },
+        "hasLanguageSwitcher": {
+          "type": "boolean"
+        },
+        "hreflang": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "lang": {
+                "maxLength": 35,
+                "type": "string"
+              },
+              "url": {
+                "maxLength": 2000,
+                "type": "string"
+              }
+            },
+            "required": [
+              "lang",
+              "url"
+            ],
+            "type": "object"
+          },
+          "maxItems": 30,
+          "type": "array"
+        }
+      },
+      "required": [
+        "declared",
+        "detected",
+        "hreflang",
+        "hasLanguageSwitcher"
+      ],
+      "type": "object"
+    },
+    "links": {
+      "additionalProperties": false,
+      "properties": {
+        "brokenCount": {
+          "description": "Among a bounded sample of internal links.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "internalCount": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "internalCount",
+        "brokenCount"
+      ],
+      "type": "object"
+    },
+    "logoCandidates": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "height": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "enum": [
+              "link-icon",
+              "og:image",
+              "img-logo"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url",
+          "source",
+          "width",
+          "height"
+        ],
+        "type": "object"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "mobile": {
+      "additionalProperties": false,
+      "properties": {
+        "fontSizeIssues": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "hasViewportMeta": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "hasViewportMeta",
+        "fontSizeIssues"
+      ],
+      "type": "object"
+    },
+    "noSolicitation": {
+      "additionalProperties": false,
+      "properties": {
+        "checked": {
+          "description": "A live page of the business (2xx, reachability ok or redirected) was read. `false` — blocked, bot wall, error page, parked, unreachable, social-only — means nothing is known: outreach must treat the business as not checked (manual review), never as \"no statement\".",
+          "type": "boolean"
+        },
+        "detected": {
+          "type": "boolean"
+        },
+        "pageUrl": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "phrases": {
+          "items": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "snippet": {
+          "anyOf": [
+            {
+              "maxLength": 400,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "At most 30 words around the first match."
+        }
+      },
+      "required": [
+        "checked",
+        "detected",
+        "phrases",
+        "pageUrl",
+        "snippet"
+      ],
+      "type": "object"
+    },
+    "ordering": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "evidence": {
+                "description": "What matched (a host, a script, a link) — never page text.",
+                "maxLength": 300,
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 100,
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "evidence"
+            ],
+            "type": "object"
+          },
+          "maxItems": 20,
+          "type": "array"
+        }
+      },
+      "required": [
+        "providers"
+      ],
+      "type": "object"
+    },
+    "pages": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "h1": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kind": {
+            "enum": [
+              "home",
+              "contact",
+              "about",
+              "services",
+              "menu",
+              "booking",
+              "legal",
+              "other"
+            ],
+            "type": "string"
+          },
+          "lang": {
+            "anyOf": [
+              {
+                "maxLength": 35,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "markdownKey": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metaDescription": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "wordCount": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "url",
+          "kind",
+          "title",
+          "metaDescription",
+          "lang",
+          "h1",
+          "wordCount",
+          "markdownKey"
+        ],
+        "type": "object"
+      },
+      "maxItems": 12,
+      "type": "array"
+    },
+    "performanceHints": {
+      "additionalProperties": false,
+      "properties": {
+        "domContentLoadedMs": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pageWeightKb": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestCount": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "pageWeightKb",
+        "requestCount",
+        "domContentLoadedMs"
+      ],
+      "type": "object"
+    },
+    "reachability": {
+      "enum": [
+        "ok",
+        "redirected",
+        "not_found",
+        "server_error",
+        "timeout",
+        "dns_error",
+        "tls_error",
+        "parked",
+        "blocked"
+      ],
+      "type": "string"
+    },
+    "requestedUrl": {
+      "maxLength": 2000,
+      "type": "string"
+    },
+    "screenshots": {
+      "additionalProperties": false,
+      "properties": {
+        "desktopKey": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fullPageKey": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mobileKey": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "desktopKey",
+        "mobileKey",
+        "fullPageKey"
+      ],
+      "type": "object"
+    },
+    "security": {
+      "additionalProperties": false,
+      "properties": {
+        "hsts": {
+          "type": "boolean"
+        },
+        "https": {
+          "type": "boolean"
+        },
+        "mixedContent": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "https",
+        "hsts",
+        "mixedContent"
+      ],
+      "type": "object"
+    },
+    "socialOnly": {
+      "description": "The \"website\" is a social profile or link page; it was not crawled.",
+      "type": "boolean"
+    },
+    "socials": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "handle": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "network": {
+            "maxLength": 40,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "network",
+          "url",
+          "handle"
+        ],
+        "type": "object"
+      },
+      "maxItems": 30,
+      "type": "array"
+    },
+    "tech": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "items": {
+              "maxLength": 100,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "confidence": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "categories",
+          "confidence"
+        ],
+        "type": "object"
+      },
+      "maxItems": 100,
+      "type": "array"
+    },
+    "tls": {
+      "additionalProperties": false,
+      "properties": {
+        "expiresAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "issuer": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "valid": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "valid",
+        "expiresAt",
+        "issuer"
+      ],
+      "type": "object"
+    },
+    "warnings": {
+      "items": {
+        "maxLength": 300,
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array"
+    }
+  },
+  "required": [
+    "requestedUrl",
+    "finalUrl",
+    "httpStatus",
+    "fetchedAt",
+    "reachability",
+    "socialOnly",
+    "tls",
+    "security",
+    "pages",
+    "languages",
+    "jsonLd",
+    "contacts",
+    "socials",
+    "booking",
+    "ordering",
+    "chat",
+    "analytics",
+    "tech",
+    "freshness",
+    "mobile",
+    "performanceHints",
+    "links",
+    "noSolicitation",
+    "logoCandidates",
+    "imageCandidates",
+    "screenshots",
+    "warnings",
+    "durationMs"
+  ],
+  "title": "SiteIntel",
+  "type": "object"
+}

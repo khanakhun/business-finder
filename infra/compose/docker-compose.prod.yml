@@ -126,6 +126,11 @@ services:
   intel:
     <<: *hardened
     image: ${IMAGE_REGISTRY:?}/bf-intel:${IMAGE_TAG:?}
+    # Chromium keeps its own sandbox: Docker's default seccomp profile plus the user-namespace syscalls it needs
+    # (scripts/infra/seccomp-chromium.mjs), shipped next to this file.
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=${RELEASE_DIR:?}/seccomp-chromium.json
     env_file: intel.env
     environment:
       NODE_ENV: production

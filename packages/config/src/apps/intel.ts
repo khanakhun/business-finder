@@ -54,6 +54,38 @@ export const intelServiceEnv = z.object({
     .positive()
     .default(10_485_760)
     .describe('Largest response body safe_fetch accepts after decompression (bytes).'),
+  SITE_INTEL_USER_AGENT: z
+    .string()
+    .min(8)
+    .max(200)
+    .default('BusinessFinderBot/1.0 (+https://github.com/khanakhun/business-finder/blob/main/docs/bot.md)')
+    .describe('User agent of the website crawler (BF-026): identifiable, with a page explaining the bot.'),
+  SITE_INTEL_MAX_CONTEXTS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(16)
+    .default(2)
+    .describe('Concurrent browser contexts per intel process (each is a crawl or a mobile render).'),
+  SITE_INTEL_RESOURCE_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(52_428_800)
+    .default(5_242_880)
+    .describe('Largest single resource (page, script, image) the crawler fetches (bytes).'),
+  SITE_INTEL_RESOURCE_TIMEOUT_SECONDS: z.coerce
+    .number()
+    .positive()
+    .max(60)
+    .default(15)
+    .describe('Time budget of one resource fetched for the crawler.'),
+  SITE_INTEL_CHROMIUM_SANDBOX: booleanFlag(true).describe(
+    "Keep Chromium's own sandbox (needs user namespaces: the production seccomp profile allows them).",
+  ),
+  SITE_INTEL_BROWSER_CHECK: booleanFlag(true).describe(
+    'Readiness (/health/ready) includes starting the crawler browser: a host that cannot run it fails the deploy.',
+  ),
   OPEN_DATA_CACHE_DIR: z
     .string()
     .min(1)

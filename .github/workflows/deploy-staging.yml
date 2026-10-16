@@ -106,7 +106,8 @@ jobs:
       - name: Upload the compose file and deploy script (from main)
         if: steps.order.outputs.skip != 'true'
         run: |
-          tar -C infra -cf - --transform 's#^.*/##' compose/docker-compose.prod.yml deploy/deploy.sh \
+          tar -C infra -cf - --transform 's#^.*/##' compose/docker-compose.prod.yml \
+            compose/seccomp-chromium.json deploy/deploy.sh \
             | ssh staging upload "$IMAGE_TAG"
 
       - name: Pull access to GHCR on the server (this job's token)

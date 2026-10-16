@@ -7,6 +7,7 @@ import {
   OpenDataSearchRequestSchema,
   OpenDataSearchResponseSchema,
 } from './open-data.ts';
+import { SiteIntelRequestSchema, SiteIntelSchema } from './site-intel.ts';
 
 /** Languages schemas can be exported to. `python` → services/intel Pydantic models (BF-008). */
 export const EXPORT_TARGETS = ['python'] as const;
@@ -66,6 +67,17 @@ exportSchema(OpenDataSearchResponseSchema, {
   id: 'OpenDataSearchResponse',
   exportTo: ['python'],
   description: 'POST /v1/open-data/places/search response on services/intel.',
+});
+
+exportSchema(SiteIntelRequestSchema, {
+  id: 'SiteIntelRequest',
+  exportTo: ['python'],
+  description: 'POST /v1/site-intel request on services/intel.',
+});
+exportSchema(SiteIntelSchema, {
+  id: 'SiteIntel',
+  exportTo: ['python'],
+  description: 'POST /v1/site-intel response: what a business website says about it.',
 });
 
 export const JSON_SCHEMA_BASE = 'https://schemas.business-finder.dev/';

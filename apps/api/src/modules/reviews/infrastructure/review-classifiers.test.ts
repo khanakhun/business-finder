@@ -88,7 +88,13 @@ describe('LlmReviewClassifier', () => {
     expect(run).toHaveBeenCalledTimes(3);
     await classifier.classify('org-b', reviews.slice(0, 2), context);
     expect(run).toHaveBeenCalledTimes(4);
-    expect(reviewKey(reviews[0] as PreparedReview)).not.toContain('Review number');
+    // Stable, and different when anything the prompt sees changes.
+    const review = reviews[0] as PreparedReview;
+    const key = reviewKey(review, context);
+    expect(reviewKey(review, context)).toBe(key);
+    expect(reviewKey({ ...review, rating: 3 }, context)).not.toBe(key);
+    expect(reviewKey(review, { ...context, locale: 'fr' })).not.toBe(key);
+    expect(reviewKey(review, { ...context, categoryLabel: 'Bar' })).not.toBe(key);
   });
 
   it('maps each answer to its own review, and calls the model only for uncached ones', async () => {

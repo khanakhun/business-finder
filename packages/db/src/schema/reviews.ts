@@ -123,6 +123,10 @@ export const businessRatingObservations = pgTable(
     ),
     check('ck_business_rating_observations__avg', sql`${table.avg} BETWEEN 0 AND 5`),
     check('ck_business_rating_observations__count', sql`${table.count} >= 0`),
+    // A workspace deleted cascades here cheaply.
+    index('idx_business_rating_observations__organization_id')
+      .on(table.organizationId)
+      .where(sql`${table.organizationId} IS NOT NULL`),
     foreignKey({
       name: 'fk_business_rating_observations__organization_id',
       columns: [table.organizationId],

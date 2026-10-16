@@ -430,31 +430,37 @@ describe('retention', () => {
 
     // Past the Google expiry, before the purge: the pasted part is still shown, Google's is not.
     const started = clock.now();
-    clock.set(new Date((row?.expiresAt ?? new Date()).getTime() + 60_000));
-    const shown = (await owner.get(`/v1/businesses/${id}/review-insights`).expect(200)).body.insights;
-    // Google's rating observations expired with it: no rating is shown from them.
-    expect(shown).toMatchObject({
-      sources: ['manual'],
-      sampleSize: 1,
-      expiresAt: null,
-      ratingSnapshot: null,
-    });
-    expect(JSON.stringify(shown.evidence)).not.toContain('google_places');
+    try {
+      clock.set(new Date((row?.expiresAt ?? new Date()).getTime() + 60_000));
+      const shown = (await owner.get(`/v1/businesses/${id}/review-insights`).expect(200)).body.insights;
+      // Google's rating observations expired with it: no rating is shown from them.
+      expect(shown).toMatchObject({
+        sources: ['manual'],
+        sampleSize: 1,
+        expiresAt: null,
+        ratingSnapshot: null,
+      });
+      expect(JSON.stringify(shown.evidence)).not.toContain('google_places');
 
-    const purge = worker.get(NightlyMaintenance).all().get('review_insights_retention');
-    expect(purge).toBeDefined();
-    await purge?.(clock.now());
-    const [after] = await db.select().from(reviewInsights).where(eq(reviewInsights.businessId, id));
-    expect(after?.sources).toEqual(['manual']);
-    expect(Object.keys(after?.sourceStats ?? {})).toEqual(['manual']);
-    expect(after?.expiresAt).toBeNull();
-    expect(JSON.stringify(after?.evidence)).not.toContain('google_places');
-    expect(
-      await db.select().from(businessRatingObservations).where(eq(businessRatingObservations.businessId, id)),
-    ).toEqual([]);
-    await revokeGoogle();
-    // Back to the present for whatever runs next.
-    clock.set(started);
+      const purge = worker.get(NightlyMaintenance).all().get('review_insights_retention');
+      expect(purge).toBeDefined();
+      await purge?.(clock.now());
+      const [after] = await db.select().from(reviewInsights).where(eq(reviewInsights.businessId, id));
+      expect(after?.sources).toEqual(['manual']);
+      expect(Object.keys(after?.sourceStats ?? {})).toEqual(['manual']);
+      expect(after?.expiresAt).toBeNull();
+      expect(JSON.stringify(after?.evidence)).not.toContain('google_places');
+      expect(
+        await db
+          .select()
+          .from(businessRatingObservations)
+          .where(eq(businessRatingObservations.businessId, id)),
+      ).toEqual([]);
+      await revokeGoogle();
+    } finally {
+      // Back to the present for whatever runs next.
+      clock.set(started);
+    }
   });
 });
 

@@ -1,5 +1,5 @@
 {
-  "id": "f7f7ac2c-0b9c-46c7-8492-44184a6c33bd",
+  "id": "4d4516a9-ace5-4338-bcbb-3fb892f0c472",
   "prevId": "f79cc18d-ab5e-4655-8dc5-9af2f695c66d",
   "version": "7",
   "dialect": "postgresql",
@@ -6388,6 +6388,22 @@
           ],
           "isUnique": false,
           "where": "\"business_rating_observations\".\"expires_at\" IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_business_rating_observations__organization_id": {
+          "name": "idx_business_rating_observations__organization_id",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"business_rating_observations\".\"organization_id\" IS NOT NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}

@@ -117,11 +117,25 @@ describe('resilience', () => {
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
-  it('neither retries nor counts a cancellation (AbortError)', async () => {
-    const abort = Object.assign(new Error('aborted'), { name: 'AbortError' });
-    const fn = vi.fn().mockRejectedValue(abort);
-    await expect(buildPolicy(fast).execute(fn)).rejects.toBe(abort);
-    expect(fn).toHaveBeenCalledTimes(1);
+  it('neither retries nor counts a cancellation (aborted fetch, cancelled job)', async () => {
+    const policy = buildPolicy({ ...fast, breakerThreshold: 2 });
+    for (const name of ['AbortError', 'JobCancelledError', 'AbortError']) {
+      // The caller's signal aborts the request itself (as adapters do), with this reason.
+      const controller = new AbortController();
+      const cancelled = Object.assign(new Error('cancelled'), { name });
+      const fn = vi.fn(
+        ({ signal }: { signal: AbortSignal }) =>
+          new Promise((_, reject) => {
+            const both = AbortSignal.any([signal, controller.signal]);
+            both.addEventListener('abort', () => reject(cancelled), { once: true });
+            controller.abort(cancelled);
+          }),
+      );
+      await expect(policy.execute(fn)).rejects.toBe(cancelled);
+      expect(fn).toHaveBeenCalledTimes(1);
+    }
+    // Three cancellations, threshold two: the breaker is still closed.
+    expect(await policy.execute(async () => 'ok')).toBe('ok');
   });
 
   it('does not retry client-side domain errors', async () => {

@@ -241,7 +241,7 @@ export class ReviewMiningService {
       );
     }
     // After the rows: a classification still running for this source forgets its own verdicts (see `analyze`).
-    await this.classifier.forget(organizationId, source);
+    await this.forgetVerdicts(organizationId, source);
     return forgotten;
   }
 

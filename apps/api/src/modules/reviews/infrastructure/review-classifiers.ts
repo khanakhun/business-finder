@@ -29,10 +29,7 @@ const TAGS = new Set<string>(PAIN_SIGNAL_TAGS);
  */
 export const reviewKey = (
   review: PreparedReview,
-  context: { readonly locale: string; readonly categoryLabel: string | null } = {
-    locale: 'en',
-    categoryLabel: null,
-  },
+  context: { readonly locale: string; readonly categoryLabel: string | null },
 ): string =>
   createHash('sha256')
     .update(
@@ -59,6 +56,8 @@ export class LlmReviewClassifier implements ReviewClassifier {
   constructor(
     private readonly gateway: AiGateway,
     private readonly cache: ReviewClassificationCache,
+    /** A failing cache is a miss; this says so (a dead cache silently costs money). */
+    private readonly onCacheError: (operation: 'read' | 'write', error: unknown) => void = () => {},
   ) {}
 
   async classify(
@@ -74,9 +73,10 @@ export class LlmReviewClassifier implements ReviewClassifier {
     // Per source: a source turned off forgets its verdicts without touching the others'.
     const keys = reviews.map((review) => `${context.source}:${reviewKey(review, context)}`);
     // The cache only saves money: a failing cache is a miss, never a failed classification.
-    const cached = await this.cache
-      .getMany(organizationId, keys)
-      .catch(() => new Map<string, CachedVerdict>());
+    const cached = await this.cache.getMany(organizationId, keys).catch((error: unknown) => {
+      this.onCacheError('read', error);
+      return new Map<string, CachedVerdict>();
+    });
     const verdicts = new Map<string, CachedVerdict>();
     for (const [key, verdict] of cached) verdicts.set(key, verdict);
     const missing = reviews.flatMap((review, index) =>
@@ -130,7 +130,9 @@ export class LlmReviewClassifier implements ReviewClassifier {
       });
       // Cached batch by batch: a later failure does not make a retry pay for these again.
       if (fresh.size > 0) {
-        await this.cache.setMany(organizationId, fresh, CACHE_TTL_SECONDS).catch(() => undefined);
+        await this.cache
+          .setMany(organizationId, fresh, CACHE_TTL_SECONDS)
+          .catch((error: unknown) => this.onCacheError('write', error));
       }
     }
     const first = verdicts.values().next().value as CachedVerdict | undefined;

@@ -136,11 +136,13 @@ export class ReviewsModule implements OnModuleInit {
         },
         {
           provide: REVIEW_CLASSIFIER,
-          inject: [APP_ENV, AI_GATEWAY, REVIEW_CLASSIFICATION_CACHE],
-          useFactory: (env: AppEnv, gateway: AiGateway, cache: ReviewClassificationCache) =>
+          inject: [APP_ENV, AI_GATEWAY, REVIEW_CLASSIFICATION_CACHE, LOGGER],
+          useFactory: (env: AppEnv, gateway: AiGateway, cache: ReviewClassificationCache, logger: Logger) =>
             fakeReviewsEnabled(env as ApiEnv)
               ? new FakeReviewClassifier()
-              : new LlmReviewClassifier(gateway, cache),
+              : new LlmReviewClassifier(gateway, cache, (operation, error) =>
+                  logger.warn({ operation, error: (error as Error)?.name }, 'review verdict cache failed'),
+                ),
         },
         {
           provide: REVIEW_SOURCE_ADAPTERS,

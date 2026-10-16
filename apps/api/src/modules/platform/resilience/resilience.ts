@@ -137,11 +137,16 @@ export type ResiliencePolicyName = keyof typeof RESILIENCE_POLICIES;
 export const isTransient = (error: unknown): boolean =>
   !(error instanceof DomainError) || (error.httpStatus >= 500 && error.details?.retryable !== false);
 
+/** Errors a cancelled caller sees (not failures of the dependency). */
+export const isCancellation = (error: unknown): boolean =>
+  error instanceof Error && CANCELLATIONS.has(error.name);
+const CANCELLATIONS = new Set(['AbortError', 'JobCancelledError']);
+
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
-  // A cancellation (the caller's signal) is not an outage: never retried, never counted by the breaker.
-  const transient = handleWhen(
-    (error) => isTransient(error) && !(error instanceof Error && error.name === 'AbortError'),
-  );
+  // A cancellation (the caller's signal: fetch's AbortError, or the reason it was aborted with, e.g. a cancelled
+  // job) is not an outage: never retried, never counted by the breaker. Callers keep their signal in the call
+  // itself, not `execute`'s (cockatiel's timeout would turn the abort into a TaskCancelledError that counts).
+  const transient = handleWhen((error) => isTransient(error) && !isCancellation(error));
   return wrap(
     retry(transient, {
       maxAttempts: config.maxRetries,

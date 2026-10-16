@@ -154,6 +154,8 @@ describe('ScraperReviewsSource', () => {
       return 'OK';
     },
     del: async (key: string) => (store.delete(key) ? 1 : 0),
+    eval: async (_script: string, _keys: number, key: string, value: string) =>
+      store.get(key) === value && store.delete(key) ? 1 : 0,
     zadd: async (_key: string, score: number, member: string) => {
       tracked.set(member, score);
       return 1;

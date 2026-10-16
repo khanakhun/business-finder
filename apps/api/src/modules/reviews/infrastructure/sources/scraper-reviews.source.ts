@@ -22,6 +22,9 @@ const UserReview = z
   .passthrough();
 const MAX_ROWS = 50;
 const MAX_CSV_BYTES = 5_000_000;
+/** Deletes KEYS[1] only while it still holds ARGV[1] (compare-and-delete). */
+const DELETE_IF_VALUE =
+  "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 /** Every job created and not yet confirmed deleted (score: creation time). */
 const JOBS_TO_DELETE = 'bf:reviews:scraper-jobs';
 /** How long the scraper job id is remembered (its time budget plus margin). */
@@ -172,7 +175,10 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     } finally {
       // Not on the step's signal: a cancelled run still removes what it read. A failed delete leaves the job
       // tracked for the nightly sweep.
-      if (finished && (await this.deleteJob(job))) await this.options.valkey.del(key);
+      // Only this job's key: another run may already have started a new job for the business.
+      if (finished && (await this.deleteJob(job))) {
+        await this.options.valkey.eval(DELETE_IF_VALUE, 1, key, job);
+      }
     }
   }
 
@@ -194,9 +200,15 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
    */
   async deleteStaleJobs(now: Date): Promise<number> {
     const before = now.getTime() - (this.options.maxTimeSeconds + 3_600) * 1_000;
-    const stale = await this.options.valkey.zrangebyscore(JOBS_TO_DELETE, 0, before, 'LIMIT', 0, 500);
     let deleted = 0;
-    for (const job of stale) if (await this.deleteJob(job)) deleted += 1;
+    // Batches of 500 until none is left, or a batch the scraper refused entirely (down: try again tomorrow).
+    for (let batch = 0; batch < 100; batch++) {
+      const stale = await this.options.valkey.zrangebyscore(JOBS_TO_DELETE, 0, before, 'LIMIT', 0, 500);
+      let done = 0;
+      for (const job of stale) if (await this.deleteJob(job)) done += 1;
+      deleted += done;
+      if (stale.length < 500 || done === 0) break;
+    }
     return deleted;
   }
 
@@ -257,10 +269,9 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
       }
       return read(response);
     };
-    // The caller's signal also cancels the policy's backoff waits.
-    return policyFor(retry ? 'maps-scraper' : 'maps-scraper-create').execute(
-      ({ signal: attempt }) => exchange(attempt),
-      signal,
+    // The caller's signal stays in the request only (see `buildPolicy`): a cancellation never counts as an outage.
+    return policyFor(retry ? 'maps-scraper' : 'maps-scraper-create').execute(({ signal: attempt }) =>
+      exchange(attempt),
     );
   }
 }

@@ -21,6 +21,8 @@ export default defineConfig({
   projects: [
     { name: 'visual', testMatch: /visual\.spec\.ts/ },
     { name: 'a11y', testMatch: /a11y\.spec\.ts/ },
+    // Writes the catalog's thumbnails; run on demand (`thumbnails`), not by `playwright test` in CI.
+    ...(process.env.BF_THUMBNAILS ? [{ name: 'thumbnails', testMatch: /thumbnails\.spec\.ts/ }] : []),
   ],
   webServer: {
     command: `node --import tsx src/cli/serve.ts dist ${port}`,

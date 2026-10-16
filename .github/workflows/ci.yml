@@ -39,6 +39,7 @@ jobs:
       # Changed AND present: jobs for artifacts later tickets add (hashFiles() is not available in job `if`).
       db: ${{ steps.present.outputs.db == 'true' && (github.event_name == 'push' || steps.filter.outputs.db == 'true') }}
       e2e: ${{ steps.present.outputs.e2e == 'true' && (github.event_name == 'push' || steps.filter.outputs.e2e == 'true') }}
+      sites: ${{ steps.present.outputs.sites == 'true' && (github.event_name == 'push' || steps.filter.outputs.sites == 'true') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -49,6 +50,7 @@ jobs:
           exists() { if [ -e "$1" ]; then echo true; else echo false; fi; }
           echo "db=$(exists packages/db/package.json)" >> "$GITHUB_OUTPUT"
           echo "e2e=$(exists apps/web/playwright.config.ts)" >> "$GITHUB_OUTPUT"
+          echo "sites=$(exists packages/site-blocks/playwright.config.ts)" >> "$GITHUB_OUTPUT"
       - id: filter
         if: github.event_name == 'pull_request'
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -65,6 +67,9 @@ jobs:
               - 'packages/db/**'
             e2e:
               - '{apps/web,apps/api,packages,infra}/**'
+              - '!**/*.md'
+            sites:
+              - 'packages/{site-blocks,site-schema}/**'
               - '!**/*.md'
 
   quality:
@@ -257,6 +262,41 @@ jobs:
       - name: Infrastructure logs
         if: failure()
         run: docker compose --project-name bf --file infra/compose/docker-compose.yml logs --tail 200 || true
+
+  # The site block library's browser suites (BF-034): visual regression, axe and Lighthouse budgets on static renders
+  # of the fixture sites. Baselines are rendered on Linux (this runner).
+  sites:
+    name: sites
+    needs: changes
+    if: needs.changes.outputs.sites == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: sites
+      - name: Stylesheet, fixture renders and gallery
+        run: pnpm --filter @bf/site-blocks prepare:suites
+      - name: Playwright browsers
+        run: pnpm --filter @bf/site-blocks exec playwright install --with-deps chromium
+      - name: Visual regression and accessibility (no retries — flaky tests are bugs)
+        run: pnpm --filter @bf/site-blocks exec playwright test --retries=0
+      - name: Lighthouse budgets
+        run: pnpm --filter @bf/site-blocks test:lighthouse
+      - name: Upload diffs and reports
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-blocks
+          path: |
+            packages/site-blocks/test-results/
+            packages/site-blocks/playwright-report/
+            packages/site-blocks/.lighthouseci/reports/
+          if-no-files-found: ignore
+          retention-days: 14
 
   security:
     name: security

@@ -24,7 +24,8 @@
     "prepare:suites": "pnpm build && tsx src/cli/render-sites.ts && tsx src/cli/gallery.tsx --no-serve",
     "test:visual": "playwright test --project visual",
     "test:a11y": "playwright test --project a11y",
-    "test:lighthouse": "mkdir -p .lighthouseci && cd .lighthouseci && lhci autorun --config=../lighthouserc.cjs"
+    "test:lighthouse": "mkdir -p .lighthouseci && cd .lighthouseci && lhci autorun --config=../lighthouserc.cjs",
+    "thumbnails": "BF_THUMBNAILS=1 playwright test --project thumbnails"
   },
   "dependencies": {
     "@bf/site-schema": "workspace:*",

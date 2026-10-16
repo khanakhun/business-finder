@@ -254,7 +254,8 @@ describe('GET /v1/businesses', () => {
     ['category with its subcategories', `category=${'restaurant'}`, ['pizzeria', 'creole']],
     ['several categories', 'category=cafe,hair_salon', ['cafe', 'salon']],
     ['no website', 'website=none', ['cafe']],
-    ['a website (weak until audits exist)', 'website=weak', ['pizzeria', 'creole', 'salon']],
+    // `weak` reads the latest website audit (BF-030): none here (website-audit.int.test.ts covers the rest).
+    ['a weak website', 'website=weak', []],
     ['rating ≥ 4', 'rating[gte]=4', ['creole', 'salon']],
     ['reviews ≤ 60', 'reviews[lte]=60', ['creole', 'cafe']],
     ['with an email', 'hasEmail=true', ['creole', 'salon']],

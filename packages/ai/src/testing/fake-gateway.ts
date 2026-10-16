@@ -32,7 +32,8 @@ export interface FakeAiGateway extends AiGateway {
   readonly calls: Array<{ readonly task: string; readonly input: unknown; readonly orgId: string | null }>;
 }
 
-const digestImage = (image: AiImage) =>
+/** How a vision fixture identifies an image (a URL, or a hash of the bytes). */
+export const digestImage = (image: AiImage) =>
   'url' in image ? image.url : createHash('sha256').update(image.bytes).digest('hex');
 
 /** Record/replay gateway for tests and CI evals: never touches the network in replay mode. */

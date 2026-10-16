@@ -66,11 +66,56 @@ Two enrichment steps (`psi`, `vision_audit`) and a deterministic findings engine
 - E2E: Website tab shows audit for a seeded business.
 
 ## Acceptance criteria
-- [ ] `psi` and `vision_audit` steps registered; audits stored with PSI, vision, findings, quality score and status.
-- [ ] Findings registry with ≥ 20 rules and EN/FR texts.
-- [ ] `website=weak` filter works in listing search.
-- [ ] Website tab displays the full audit.
-- [ ] Vision eval meets thresholds.
+- [x] `psi` and `vision_audit` steps registered; audits stored with PSI, vision, findings, quality score and status.
+- [x] Findings registry with ≥ 20 rules and EN/FR texts.
+- [x] `website=weak` filter works in listing search.
+- [x] Website tab displays the full audit.
+- [ ] Vision eval meets thresholds. *(Met on simulated replay answers only — no model key; a recorded run is pending.)*
+
+## Implementation notes
+
+- **Steps** (`enrichment/infrastructure/steps/website-audit.steps.ts`): `psi` (depends on `site_intel`) and
+  `vision_audit` (depends on `site_intel`, optionally on `psi`). Both write their part of the snapshot's audit through
+  `WebsiteAuditService` (advisory lock per business; a part that could not be measured keeps an earlier measurement
+  of the same snapshot, per PageSpeed strategy) and recompute findings, score and status. The latest audit is the
+  one of the business's newest crawl, whatever order snapshots are written in. Outages and quotas: the part is left
+  out and the step asks for a re-check within the hour (never rethrown); configuration errors (refused key, no model
+  key) fail the step. Unreachable, parked and social-only sites get a presence-only audit without calling anything.
+  DECISION: a crawl marked `blocked` is never measured, not even by PageSpeed, and is never `weak`: `blocked` also
+  stands for a robots.txt opt-out of our bot and for addresses the SSRF guard refused. URLs sent to Google and to
+  the model lose credentials, query and fragment.
+- **DECISION — no website**: `none` is never stored (no crawl, no audit). `GET /v1/businesses/:id/website-audit`
+  returns `status: 'none'` for a business without a website, so scoring (BF-031) and outreach read one field.
+- **PageSpeed** (verified 2026-10-16): `GET pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed` with
+  `strategy` MOBILE|DESKTOP and `category` PERFORMANCE, ACCESSIBILITY, BEST_PRACTICES, SEO; the key travels in the
+  documented `key` query parameter (span URLs are redacted). Default quota per third-party sources: 25,000/day and
+  400/100 s — configurable (`PAGESPEED_RATE_PER_MINUTE` 200, `PAGESPEED_DAILY_QUOTA` 24,000), enforced by per-key
+  token buckets in Valkey (both runs taken at once, all or none; a step waiting for the minute bucket backs off from
+  1 s to a minute with jitter, about 10 minutes in all, then is re-checked later). Lighthouse's own failures
+  ("Lighthouse returned error", 400 or 500) belong to the site: never retried nor counted by the shared breaker.
+  Only a compact result is stored (DECISION: no full Lighthouse report in object storage).
+- **Vision**: `website.vision_grade` (smart tier, 8 anchored criteria with evidence, EN/FR summary), screenshots
+  resized to ≤ 1,700 px (mobile 390 px at 2×), only this business's artifacts; no response cache (the gateway never caches a call
+  with images). A failed paid call (invalid output) still books its cost on the run.
+- **Findings**: 28 rules (≥ 20 required), registry and EN/FR texts in `@bf/contracts` (`FINDING_DEFINITIONS`) for the
+  web, outreach (BF-051) and briefs (BF-040). Category facts: the primary category's attributes inherited from its
+  ancestors; menus matter for `food_drink`. Site languages come from the text and hreflang (a theme's declared
+  `lang` only when nothing was detected).
+- **Quality score**: weighted mean of vision overall ×10 (0.40), mobile performance (0.25), accessibility (0.15), SEO
+  (0.10), best practices (0.10) — renormalized over what was measured, desktop standing in for missing mobile — minus
+  penalties critical 15 / major 6 / minor 2, capped at 40; null when nothing was measured. Status: presence first,
+  then strong ≥ 80, ok 60–79, weak < 60; unmeasured readable sites are weak with a critical or two major findings.
+- **Search**: `website=weak` matches the latest audit's `weak` or `broken` (DECISION: a broken site is weak too).
+- **DECISION — "latest-audit view"** is an `is_latest` flag with a partial index (maintained on write) instead of a
+  SQL view: search and scoring read it with an index lookup.
+- **Eval**: 15 synthetic sites (5 good, 5 average, 5 poor; fictional, inline CSS, no third-party content) rendered to
+  30 screenshots; replay answers are **simulated** (within band 0.867, pairwise 0.973) — run
+  `pnpm eval --task website.vision_grade --record` with a key.
+- **Tests**: `StepRegistry.replace` lets the engine suite script `psi`/`vision_audit` (no unregistered id is left);
+  the audit suite uses Valkey DB 17 and one clock shared by app and worker. E2E servers run `FAKE_WEBSITE_AUDIT`.
+- **Also fixed here**: a realtime stream refused at first (429: five streams per user, hit by parallel E2E workers)
+  refetches everything once it opens (missed events cannot be replayed); an already-cancelled caller never takes the
+  breaker's half-open trial (BF-029 follow-up).
 
 ## Agent prompt
 ```text

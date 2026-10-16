@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Villa Mango Paradise (fictional)",
+      "category": "Villa rental",
+      "url": "https://villa-mango-paradise.example"
+    },
+    "images": [
+      "dbc40aacdaa729a42817230c15e10c2fcc3c5dacb9b623793fc95aeb96c53b9a",
+      "17da693e3f9aa3842d1279705d5bd2d49579862ffeab7e591b74532eb702d492"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 2,
+        "evidence": "Dark purple page with ridged table borders, a letter-spaced red title and striped placeholder boxes."
+      },
+      "visual_hierarchy": {
+        "score": 3,
+        "evidence": "The large red title is clear, but below it the content is a dense table with no headings."
+      },
+      "mobile_usability": {
+        "score": 1,
+        "evidence": "Wide fixed page scaled onto the phone; text is microscopic and most of the screen is empty purple."
+      },
+      "readability": {
+        "score": 1,
+        "evidence": "Dim purple text on dark purple is nearly invisible; one long run-on paragraph in small serif."
+      },
+      "imagery_quality": {
+        "score": 2,
+        "evidence": "Three striped boxes labelled with file names like \"image.jpg\" instead of villa photos."
+      },
+      "trust_signals": {
+        "score": 2,
+        "evidence": "Shows \"page last updated 03/2011\" and \"under construction\"; only an e-mail address is visible."
+      },
+      "cta_clarity": {
+        "score": 2,
+        "evidence": "Tiny blue \"click here\" links next to a red \"NEW!! SPECIAL OFFER\" label; no booking button."
+      },
+      "brand_consistency": {
+        "score": 2,
+        "evidence": "Red title, bright green subtitle and dim serif body clash with no consistent palette."
+      }
+    },
+    "overall": 2,
+    "summary": {
+      "en": "Outdated, nearly unreadable villa page with placeholder images, an old update date and no clear booking path. Unusable on mobile.",
+      "fr": "Page de villa obsolète et presque illisible, avec des images factices, une date de mise à jour ancienne et aucun parcours de réservation. Inutilisable sur mobile."
+    },
+    "warnings": []
+  }
+}

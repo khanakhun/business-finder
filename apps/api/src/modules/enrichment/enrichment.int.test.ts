@@ -125,8 +125,9 @@ function testStep(
   };
 }
 
-// Placeholders under step ids no ticket has shipped yet (`reviews` is real since BF-029; move these on when
-// BF-030 ships `psi` and `vision_audit`).
+// Scripted steps that replace the real `psi` and `vision_audit` (BF-030) in this suite's apps: the engine's
+// behaviour (dependencies, failures, cancellation, budgets) is tested on them; the real audit steps have their own
+// suite (website-audit.int.test.ts).
 const TEST_STEPS = () => [
   testStep('psi', { cost: 0.05 }),
   testStep('vision_audit', { dependsOn: ['site_intel', 'psi'] }),
@@ -163,8 +164,8 @@ beforeAll(async () => {
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, { mailer, env: ENV, overrides: OVERRIDES });
   for (const step of TEST_STEPS()) {
-    t.app.get(StepRegistry).register(step);
-    worker.get(StepRegistry).register(step);
+    t.app.get(StepRegistry).replace(step);
+    worker.get(StepRegistry).replace(step);
   }
   owner = await signUpVerified(t, mailer, 'owner@enrich.test', 'Olga Owner');
   org = await createWorkspace(owner, 'Agence Enrich');

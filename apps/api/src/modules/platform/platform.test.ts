@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { loadAppEnv } from './config/app-env.ts';
 import { resolveRequestId } from './context/request-context.ts';
 import { toProblem } from './errors/problem-details.filter.ts';
+import { ValkeyRateLimiter } from './rate-limit/valkey-rate-limiter.ts';
 import { buildPolicy, executeWithSignal, isTransient, WithResilience } from './resilience/resilience.ts';
 import { zodDto } from './validation/zod-dto.ts';
 import { ZodValidationPipe } from './validation/zod-validation.pipe.ts';
@@ -146,6 +147,30 @@ describe('resilience', () => {
     await expect(executeWithSignal(policy, undefined, async () => 'ok')).rejects.toThrow(/circuit/i);
   });
 
+  it('never starts a call for an already-cancelled caller (the half-open trial stays for a real caller)', async () => {
+    const policy = buildPolicy({ ...fast, maxRetries: 0, breakerThreshold: 1, halfOpenAfterMs: 20 });
+    await expect(
+      executeWithSignal(policy, undefined, async () => {
+        throw new Error('down');
+      }),
+    ).rejects.toThrow('down');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    // Half-open: a cancelled job must not take the trial (cockatiel would close the breaker on its cancellation).
+    const caller = new AbortController();
+    const reason = Object.assign(new Error('cancelled'), { name: 'JobCancelledError' });
+    caller.abort(reason);
+    const fn = vi.fn(async () => 'never');
+    await expect(executeWithSignal(policy, caller.signal, fn)).rejects.toBe(reason);
+    expect(fn).not.toHaveBeenCalled();
+    // The next real call is the trial: it fails and the breaker opens again.
+    await expect(
+      executeWithSignal(policy, undefined, async () => {
+        throw new Error('still down');
+      }),
+    ).rejects.toThrow('still down');
+    await expect(executeWithSignal(policy, undefined, async () => 'ok')).rejects.toThrow(/circuit/i);
+  });
+
   it('does not retry client-side domain errors', async () => {
     const fn = vi.fn().mockRejectedValue(new ValidationError('bad'));
     await expect(buildPolicy(fast).execute(fn)).rejects.toThrow(ValidationError);
@@ -211,5 +236,19 @@ describe('loadAppEnv', () => {
 
   it('needs no environment in openapi mode', () => {
     expect(loadAppEnv('openapi').NODE_ENV).toBe('development');
+  });
+});
+
+describe('ValkeyRateLimiter', () => {
+  it('refuses a token cost that could never be served, before calling Valkey', async () => {
+    const valkey = { eval: vi.fn(async () => 0) };
+    const limiter = new ValkeyRateLimiter(valkey as never, { now: () => new Date() });
+    for (const cost of [0, -1, 1.5, 3]) {
+      await expect(limiter.tryTake('k', { capacity: 2, perSecond: 1, cost })).rejects.toBeInstanceOf(
+        RangeError,
+      );
+    }
+    expect(valkey.eval).not.toHaveBeenCalled();
+    expect(await limiter.tryTake('k', { capacity: 2, perSecond: 1, cost: 2 })).toBe(0);
   });
 });

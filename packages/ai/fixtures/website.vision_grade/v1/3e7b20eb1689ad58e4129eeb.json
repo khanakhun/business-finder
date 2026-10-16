@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Hibiscus Coiffure (fictif)",
+      "category": "Hair salon",
+      "url": "https://hibiscus-coiffure.example"
+    },
+    "images": [
+      "c99c96920621285b3d69b01fb19f9bec5183a9954079cb45022ae7a49666cb17",
+      "e8477e3f19b9a1e6f99225fca94f67414e76e46ed38eeabf04c42a507a3167a9"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 4,
+        "evidence": "Pink header bar with a plain centered title, pipe-separated nav and a single bordered content box; dated."
+      },
+      "visual_hierarchy": {
+        "score": 5,
+        "evidence": "Large title and \"Bienvenue au salon !\" heading lead into a price list with little visual emphasis."
+      },
+      "mobile_usability": {
+        "score": 3,
+        "evidence": "On mobile the fixed-width box overflows; the heading, prices and booking link are cut off at the right edge."
+      },
+      "readability": {
+        "score": 5,
+        "evidence": "Grey 12–13px text on white; the price list is readable on desktop but small."
+      },
+      "imagery_quality": {
+        "score": 5,
+        "evidence": "Pink gradient panel with a scissors drawing; generic, no photos of hairstyles or the salon."
+      },
+      "trust_signals": {
+        "score": 4,
+        "evidence": "Hours, phone and address only in a small grey footer line; no reviews."
+      },
+      "cta_clarity": {
+        "score": 3,
+        "evidence": "Only an underlined pink link \"Prendre rendez-vous par téléphone\" below the price list."
+      },
+      "brand_consistency": {
+        "score": 7,
+        "evidence": "Pink is used consistently for the header, links and headings."
+      }
+    },
+    "overall": 5,
+    "summary": {
+      "en": "Dated single-box salon page with useful prices and a consistent pink theme, but it is cut off on mobile and offers only a phone-booking link.",
+      "fr": "Page de salon datée, en un seul bloc, avec des tarifs utiles et un thème rose cohérent, mais coupée sur mobile et limitée à un lien de réservation par téléphone."
+    },
+    "warnings": []
+  }
+}

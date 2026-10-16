@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Villa Ciel Turquoise (fictional)",
+      "category": "Villa rental",
+      "url": "https://villa-ciel-turquoise.example"
+    },
+    "images": [
+      "35fcc302cd015df8b6d73b8592bcb838cb456a224a4a78f5481f993651412b47",
+      "8462d18fe81d6b2458e2b34bde0dd0ce2674b2809ac7bd9ddce783b1f3e34508"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 9,
+        "evidence": "Full-bleed gradient hero with a large light headline and a spaced uppercase kicker; minimal layout."
+      },
+      "visual_hierarchy": {
+        "score": 8,
+        "evidence": "Kicker, headline, subline and white button stack clearly; the stats row below is easy to scan."
+      },
+      "mobile_usability": {
+        "score": 8,
+        "evidence": "Hero text and a full-width \"Check availability\" button fit the phone; nav links hidden with no menu icon."
+      },
+      "readability": {
+        "score": 7,
+        "evidence": "White text over the gradient reads well, though the spaced-out uppercase kicker is small."
+      },
+      "imagery_quality": {
+        "score": 6,
+        "evidence": "Hero is an abstract gradient with a sun circle; no photos of the villa or pool are visible."
+      },
+      "trust_signals": {
+        "score": 8,
+        "evidence": "4.9 star rating from 146 stays, a quoted guest review, \"since 2012\" and a contact line."
+      },
+      "cta_clarity": {
+        "score": 9,
+        "evidence": "High-contrast white \"Check availability\" button with a secondary \"View rates\" link."
+      },
+      "brand_consistency": {
+        "score": 8,
+        "evidence": "Teal palette and spaced wordmark carried from the hero into the stats numbers."
+      }
+    },
+    "overall": 8,
+    "summary": {
+      "en": "Clean, modern villa page with a strong availability CTA and clear key facts. It relies on an abstract gradient instead of real photos of the property.",
+      "fr": "Page de villa moderne et épurée, avec un appel à l'action clair pour les disponibilités et des chiffres clés lisibles. Elle utilise un dégradé abstrait au lieu de vraies photos de la propriété."
+    },
+    "warnings": []
+  }
+}

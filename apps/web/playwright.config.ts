@@ -29,7 +29,8 @@ export default defineConfig({
       // The fake discovery provider (fixture businesses, no cost, no network) backs the search e2e (BF-023);
       // the fake site intel (a readable site derived from the URL, no crawl) the enrichment e2e (BF-027), and the
       // fake e-mail verifier (a verdict from the address, no SMTP or DNS) the contacts e2e (BF-028), and the fake
-      // review sources and classifier (no Google, scraper or model call) the reviews e2e (BF-029).
+      // review sources and classifier (no Google, scraper or model call) the reviews e2e (BF-029), and the fake
+      // PageSpeed and vision grader (no Google or model call) the website audit e2e (BF-030).
       env: {
         AUTH_TRUSTED_PROXIES: '127.0.0.1,::1',
         FAKE_CONNECTION_TESTS: 'true',
@@ -37,6 +38,7 @@ export default defineConfig({
         FAKE_SITE_INTEL: 'true',
         FAKE_EMAIL_VERIFIER: 'true',
         FAKE_REVIEWS: 'true',
+        FAKE_WEBSITE_AUDIT: 'true',
       },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
@@ -50,6 +52,7 @@ export default defineConfig({
         FAKE_SITE_INTEL: 'true',
         FAKE_EMAIL_VERIFIER: 'true',
         FAKE_REVIEWS: 'true',
+        FAKE_WEBSITE_AUDIT: 'true',
       },
       url: workerMetricsUrl,
       reuseExistingServer: !ci,

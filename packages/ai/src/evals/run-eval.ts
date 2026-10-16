@@ -54,7 +54,17 @@ export async function runEval(
       const row = rows[index] as EvalRow;
       const started = performance.now();
       try {
-        const result = await options.gateway.run(config.task, row.input as never, { orgId: null });
+        const result =
+          config.task.kind === 'vision'
+            ? await options.gateway.vision(
+                config.task,
+                {
+                  input: (row.input as { input: unknown }).input as never,
+                  images: config.images ? await config.images(row) : [],
+                },
+                { orgId: null },
+              )
+            : await options.gateway.run(config.task, row.input as never, { orgId: null });
         const scores: Record<string, number> = {};
         for (const scorer of config.scorers) {
           const value = await scorer.score(result.output, row, {

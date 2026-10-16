@@ -4,6 +4,8 @@ import {
   BulkEnrichResponseSchema,
   type BusinessEnrichment,
   BusinessEnrichmentSchema,
+  type BusinessWebsiteAudit,
+  BusinessWebsiteAuditSchema,
   EnrichBusinessRequestSchema,
   type EnrichmentEstimate,
   EnrichmentEstimateSchema,
@@ -145,6 +147,23 @@ export class BusinessEnrichmentController {
     @Param('id', ParseUUIDPipe) businessId: string,
   ): Promise<WebsiteSnapshot> {
     return this.queries.website(workspaceOf(auth), businessId);
+  }
+
+  @Get(':id/website-audit')
+  // Every role holds business:read; another workspace's business is a 404 (tested).
+  @RequirePermission('business:read')
+  @ApiRoute({
+    summary:
+      'The audit of the business website at its latest crawl: PageSpeed, visual grade, findings, status',
+    operationId: 'getBusinessWebsiteAudit',
+    response: { status: 200, schema: BusinessWebsiteAuditSchema },
+    errors: [401, 403, 404],
+  })
+  websiteAudit(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) businessId: string,
+  ): Promise<BusinessWebsiteAudit> {
+    return this.queries.websiteAudit(workspaceOf(auth), businessId);
   }
 
   @Get(':id/website/screenshots/:kind')

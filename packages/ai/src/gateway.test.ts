@@ -194,7 +194,10 @@ describe('structured output', () => {
   it('fails with AiOutputInvalidError after a failed repair, and records the error', async () => {
     const haiku = new MockLanguageModelV4({ doGenerate: [answer('not json'), answer('still not json')] });
     const { gateway, calls } = setup({}, { 'anthropic:claude-haiku-5-5': haiku });
-    await expect(gateway.run(Extract, { text: 'y' }, ctx)).rejects.toBeInstanceOf(AiOutputInvalidError);
+    const error = await gateway.run(Extract, { text: 'y' }, ctx).catch((caught: unknown) => caught);
+    expect(error).toBeInstanceOf(AiOutputInvalidError);
+    // The caller can book what the failed attempts cost.
+    expect((error as AiOutputInvalidError).costUsd).toBe(0.0004);
     // The tokens of both failed attempts were billed: they are recorded (and priced).
     expect(calls.at(-1)).toMatchObject({
       status: 'error',

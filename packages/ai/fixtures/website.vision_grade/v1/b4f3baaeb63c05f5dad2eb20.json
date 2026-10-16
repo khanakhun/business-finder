@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Spa Lumière Salée (fictif)",
+      "category": "Spa",
+      "url": "https://spa-lumiere-salee.example"
+    },
+    "images": [
+      "1ed723c17deb7cbbaf2510abc7822f012f2c85f8dbf32828c5399eb14278ca08",
+      "ef4a4bf796b60504a57a0244990a2e050575111a766c37584cd6f9418dab5717"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 7,
+        "evidence": "Arched image frame and serif headline feel calm and current, but the overall layout is fairly plain."
+      },
+      "visual_hierarchy": {
+        "score": 7,
+        "evidence": "Centered wordmark and nav, then headline and button; the large arch image competes for attention."
+      },
+      "mobile_usability": {
+        "score": 7,
+        "evidence": "Mobile stacks the arch image above the text with a full-width button; the image takes much of the screen."
+      },
+      "readability": {
+        "score": 8,
+        "evidence": "Large serif headline and sans-serif body in muted brown on cream; comfortable text sizes."
+      },
+      "imagery_quality": {
+        "score": 6,
+        "evidence": "Arch is a beige gradient with a single leaf drawing; pleasant but no photos of the treatment rooms."
+      },
+      "trust_signals": {
+        "score": 8,
+        "evidence": "Gold stars with 4,9 and 210 reviews, opening hours, \"Depuis 2015\" and an address with phone."
+      },
+      "cta_clarity": {
+        "score": 7,
+        "evidence": "Brown uppercase \"Prendre rendez-vous\" button is clear but lacks contrast against the beige palette."
+      },
+      "brand_consistency": {
+        "score": 8,
+        "evidence": "Muted brown and beige palette and the serif wordmark are applied consistently."
+      }
+    },
+    "overall": 7,
+    "summary": {
+      "en": "Calm, coherent spa homepage with visible reviews and a booking button. The CTA is understated and the imagery is a simple illustration.",
+      "fr": "Page d'accueil de spa apaisante et cohérente, avec des avis visibles et un bouton de rendez-vous. L'appel à l'action reste discret et le visuel se limite à une illustration simple."
+    },
+    "warnings": []
+  }
+}

@@ -15,6 +15,8 @@ export const COALESCE_MS = 500;
 /**
  * One EventSource per tab on `/v1/realtime`. The browser reconnects by itself (sending `Last-Event-ID`); when it
  * gives up (e.g. after a 401/429), we reconnect with exponential backoff and pass the last id as a query parameter.
+ * Without a last id (the first connection was refused), missed events cannot be replayed: everything is refetched
+ * once the stream opens.
  */
 export class RealtimeConnection {
   private source: EventSource | undefined;
@@ -64,8 +66,14 @@ export class RealtimeConnection {
     this.listening.clear();
     for (const type of [RESYNC_EVENT, ...Object.keys(realtimeInvalidations), ...this.handlers.keys()])
       this.listen(type);
+    // Once per source: its later native reconnects resume with Last-Event-ID (or the server sends a resync).
+    let recovering = this.attempt > 0 && this.lastEventId === undefined;
     source.onopen = () => {
       this.attempt = 0;
+      if (recovering) {
+        recovering = false;
+        void this.queryClient.invalidateQueries();
+      }
     };
     source.onerror = () => {
       // CONNECTING: the browser is retrying on its own. CLOSED: it gave up, so we take over.

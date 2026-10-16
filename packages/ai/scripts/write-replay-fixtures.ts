@@ -4,7 +4,9 @@
 // --record`) replace them.
 import { readFileSync } from 'node:fs';
 import type { EvalConfig } from '../src/evals/define-eval.ts';
+import type { EvalRow } from '../src/evals/scorers.ts';
 import { loadPromptRegistry } from '../src/index.ts';
+import { digestImage } from '../src/testing/fake-gateway.ts';
 import { fixturePath, writeFixture } from '../src/testing/fixtures.ts';
 
 const task = process.argv[2];
@@ -27,7 +29,14 @@ const promptVersion = loadPromptRegistry().get(config.task.prompt).version;
 for (const [index, row] of rows.entries()) {
   const answer = outputs[index];
   if (answer?.id !== row.id) throw new Error(`Row ${index}: expected ${row.id}, got ${answer?.id}`);
-  const input = config.task.input.parse(row.input);
+  // Vision rows hold `{ input, images }`: the fixture is keyed like the fake gateway keys it (image digests).
+  const input =
+    config.task.kind === 'vision'
+      ? {
+          input: config.task.input.parse((row.input as { input: unknown }).input),
+          images: (config.images ? await config.images(row as EvalRow) : []).map(digestImage),
+        }
+      : config.task.input.parse(row.input);
   const output = 'output' in config.task ? config.task.output.parse(answer.output) : answer.output;
   writeFixture(fixturePath(new URL('fixtures/', root).pathname, task, promptVersion, input), {
     task,

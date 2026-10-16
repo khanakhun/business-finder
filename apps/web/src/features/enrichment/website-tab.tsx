@@ -20,6 +20,7 @@ import { publicEnv } from '@/lib/public-env.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useBusinessEnrichment, useCancelRun, useEnrich, useWebsite } from './api.ts';
+import { AuditPanel } from './audit-panel.tsx';
 
 const OPEN = new Set(['queued', 'running']);
 
@@ -376,9 +377,6 @@ function SnapshotView({
             </CardContent>
           </Card>
         ) : null}
-        <Card className="lg:col-span-2 border-dashed">
-          <CardContent className="py-4 text-sm text-muted-foreground">{t('auditComing')}</CardContent>
-        </Card>
       </div>
     </div>
   );
@@ -392,6 +390,7 @@ export function WebsiteTab({ business }: BusinessTabProps) {
   return (
     <div className="space-y-6">
       <EnrichPanel businessId={business.id} />
+      <AuditPanel businessId={business.id} hasWebsite={Boolean(business.websiteUrl)} />
       {website.isError ? (
         <ErrorState
           problem={toProblemLike(website.error, t('error'))}

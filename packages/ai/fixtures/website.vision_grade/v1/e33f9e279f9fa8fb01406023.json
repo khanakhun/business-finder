@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Bazar des Îles (fictif)",
+      "category": "Souvenir shop",
+      "url": "https://bazar-des-iles.example"
+    },
+    "images": [
+      "c7fabc87d6b53f498016e9e3f39ce7363ac55ad113a54c86169a9e2c2d01886c",
+      "61bbc658be7050fda910b9f058b99077cde296bf3714f232f66cb0d2e533c418"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 3,
+        "evidence": "Orange and lime color bars with stacked mismatched fonts; looks like an old hand-built page."
+      },
+      "visual_hierarchy": {
+        "score": 4,
+        "evidence": "Big green title and pink product banner are clear, followed by a row of placeholder tiles."
+      },
+      "mobile_usability": {
+        "score": 3,
+        "evidence": "Fixed wide layout is shrunk on the phone; the three-column text becomes tiny and most of the screen is empty."
+      },
+      "readability": {
+        "score": 3,
+        "evidence": "Light tan monospace text on peach in three justified columns is hard to read."
+      },
+      "imagery_quality": {
+        "score": 3,
+        "evidence": "Six grey dotted tiles labelled \"photo_produit_1\" to \"photo_produit_6\" instead of product photos."
+      },
+      "trust_signals": {
+        "score": 4,
+        "evidence": "Phone and e-mail in a red footer bar, but the \"site en construction\" notice is prominent."
+      },
+      "cta_clarity": {
+        "score": 3,
+        "evidence": "No shop or visit button; the footer only lists contact details."
+      },
+      "brand_consistency": {
+        "score": 4,
+        "evidence": "Orange and lime are bold but clash with pink and red; sans-serif headings differ from the monospace body."
+      }
+    },
+    "overall": 4,
+    "summary": {
+      "en": "Cluttered souvenir shop page with clashing colors, placeholder product tiles and hard-to-read text. Contact details exist but there is no clear action.",
+      "fr": "Page de boutique de souvenirs surchargée, aux couleurs criardes, avec des vignettes produits factices et un texte difficile à lire. Les coordonnées sont là mais sans action claire."
+    },
+    "warnings": []
+  }
+}

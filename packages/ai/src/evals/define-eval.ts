@@ -1,9 +1,15 @@
-import type { ObjectTask, TextTask } from '../define-task.ts';
-import type { AggregateScorer, Scorer } from './scorers.ts';
+import type { ObjectTask, TextTask, VisionTask } from '../define-task.ts';
+import type { AiImage } from '../vision.ts';
+import type { AggregateScorer, EvalRow, Scorer } from './scorers.ts';
 
 /** `evals/<task>/eval.config.ts` default export: the task, its scorers and the minimum mean score per scorer. */
 export interface EvalConfig {
-  readonly task: ObjectTask | TextTask;
+  readonly task: ObjectTask | TextTask | VisionTask;
+  /**
+   * Vision tasks: the row's images (its `input` is then `{ input, images }`, images being paths the config
+   * resolves, e.g. relative to the dataset).
+   */
+  readonly images?: (row: EvalRow) => Promise<AiImage[]>;
   readonly scorers: readonly Scorer[];
   /** Dataset-level metrics (macro-F1, mean absolute error…) computed over every row at once. */
   readonly aggregates?: readonly AggregateScorer[];

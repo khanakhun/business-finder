@@ -102,12 +102,13 @@ test('works a business: search → page → status → note → task → /tasks'
 
   // My tasks: no due date → upcoming; complete inline.
   await page.goto('/tasks?due=upcoming');
-  const row = page.getByRole('listitem').filter({ hasText: taskTitle });
+  // In the page, not the toasts (a toast is a list item too).
+  const row = page.getByRole('main').getByRole('listitem').filter({ hasText: taskTitle });
   await expect(row.getByRole('link', { name })).toBeVisible();
   await row.getByRole('checkbox', { name: `Mark ${taskTitle} done` }).click();
   await expect(page.getByText(`Done: ${taskTitle}`)).toBeVisible();
   await page.getByRole('tab', { name: 'Done' }).click();
-  await expect(page.getByRole('listitem').filter({ hasText: taskTitle })).toBeVisible();
+  await expect(page.getByRole('main').getByRole('listitem').filter({ hasText: taskTitle })).toBeVisible();
 });
 
 test('kanban: drag along allowed moves, refuse the others, keyboard alternative', async ({ page }) => {

@@ -15,6 +15,15 @@ export class StepRegistry {
     this.steps.set(step.id, step);
   }
 
+  /**
+   * Swaps a registered step for another with the same id — tests script engine behaviour (fail, block, cost) on real
+   * step ids once every id has a real step (BF-030). Production code registers, never replaces.
+   */
+  replace(step: EnrichmentStep): void {
+    if (!this.steps.has(step.id)) throw new Error(`Enrichment step ${step.id} is not registered`);
+    this.steps.set(step.id, step);
+  }
+
   get(id: EnrichmentStepId): EnrichmentStep | undefined {
     return this.steps.get(id);
   }

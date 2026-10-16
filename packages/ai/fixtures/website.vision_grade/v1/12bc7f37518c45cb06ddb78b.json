@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Capt'n Joe Fishing Trips (fictional)",
+      "category": "Fishing charter",
+      "url": "https://captn-joe-fishing.example"
+    },
+    "images": [
+      "1a82085e63619999d01bd6a87bfad8e9557c4e9e74e4aeeaf30ba5519ed40137",
+      "725423314bed0fa6d2b937cc374b9e1b1b283eb4d973454bea2091e15794f2c6"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 1,
+        "evidence": "Rainbow gradient header on saturated blue, an \"UNDER CONSTRUCTION\" banner and a row of ASCII fish."
+      },
+      "visual_hierarchy": {
+        "score": 2,
+        "evidence": "Header and construction banner dominate; the actual offer is a small line under broken images."
+      },
+      "mobile_usability": {
+        "score": 2,
+        "evidence": "Fixed wide layout shrinks on the phone; the text below the images becomes unreadable."
+      },
+      "readability": {
+        "score": 1,
+        "evidence": "Dark grey and blue serif text on a bright blue background is barely visible."
+      },
+      "imagery_quality": {
+        "score": 1,
+        "evidence": "Four white boxes reading \"X broken image\" and \"[photo coming soon]\"."
+      },
+      "trust_signals": {
+        "score": 2,
+        "evidence": "Phone number is buried in low-contrast text next to \"no refunds\"; no reviews or address."
+      },
+      "cta_clarity": {
+        "score": 2,
+        "evidence": "No button; the only action is \"call\" inside a hard-to-read sentence."
+      },
+      "brand_consistency": {
+        "score": 2,
+        "evidence": "Rainbow, blue, yellow and green clash; the header font differs from the serif and monospace text."
+      }
+    },
+    "overall": 2,
+    "summary": {
+      "en": "Unfinished-looking charter page: garish colors, broken image boxes, an under-construction banner and barely visible text with no clear action.",
+      "fr": "Page de sorties en mer qui semble inachevée : couleurs criardes, images cassées, bandeau « en construction » et texte à peine visible, sans action claire."
+    },
+    "warnings": []
+  }
+}

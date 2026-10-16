@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Island Wheels Rental (fictional)",
+      "category": "Car rental",
+      "url": "https://island-wheels.example"
+    },
+    "images": [
+      "220885b7ef48f22ca0cca86ab85957d2c740f4bdc8fb717a41129a287af22096",
+      "176bb35826fdb4f427bd3ba006db816a604895579643e4f36499478f23b6d92b"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 5,
+        "evidence": "Plain blue header bar, underlined nav links and a bordered price table; dated but tidy."
+      },
+      "visual_hierarchy": {
+        "score": 6,
+        "evidence": "\"Welcome to Island Wheels\" heading, car drawing, then text and price table read in a logical order."
+      },
+      "mobile_usability": {
+        "score": 8,
+        "evidence": "On mobile the layout stacks into one readable column with full-width form inputs."
+      },
+      "readability": {
+        "score": 8,
+        "evidence": "Body text and the price table are clearly sized with good contrast on white."
+      },
+      "imagery_quality": {
+        "score": 6,
+        "evidence": "Flat red car drawing on a sky and road background; simple placeholder-like art."
+      },
+      "trust_signals": {
+        "score": 6,
+        "evidence": "Phone in the header, hours and address in the footer; no reviews or ratings shown."
+      },
+      "cta_clarity": {
+        "score": 6,
+        "evidence": "\"Request a quote\" form is visible but its grey \"Send\" button is small and low-emphasis."
+      },
+      "brand_consistency": {
+        "score": 6,
+        "evidence": "Blue header and headings are consistent; the logo is plain bold text."
+      }
+    },
+    "overall": 7,
+    "summary": {
+      "en": "Clear, usable rental page with visible prices and a quote form that adapts well to mobile. The visual style is plain and the call to action is weak.",
+      "fr": "Page de location claire et utilisable, avec des tarifs visibles et un formulaire de devis qui s'adapte bien au mobile. Le style reste basique et l'appel à l'action est faible."
+    },
+    "warnings": []
+  }
+}

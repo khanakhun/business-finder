@@ -17,6 +17,27 @@ export const enrichmentEnv = z.object({
     .max(1)
     .default(0)
     .describe('Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0).'),
+  ENRICHMENT_VISION_AUDIT_COST_USD: z.coerce
+    .number()
+    .min(0)
+    .max(1)
+    .default(0.02)
+    .describe('Estimated cost of one visual audit (smart-tier vision model, two screenshots), for budgets.'),
+  PAGESPEED_RATE_PER_MINUTE: z.coerce
+    .number()
+    .int()
+    // Each audit takes two runs (mobile and desktop) at once.
+    .min(2)
+    .max(10_000)
+    .default(200)
+    .describe('PageSpeed Insights runs per minute per key (Google default: 400 per 100 s; keep headroom).'),
+  PAGESPEED_DAILY_QUOTA: z.coerce
+    .number()
+    .int()
+    .min(2)
+    .max(10_000_000)
+    .default(24_000)
+    .describe('PageSpeed Insights runs per day per key (Google default: 25,000 per project).'),
   ENRICHMENT_REVIEWS_LLM_COST_USD: z.coerce
     .number()
     .min(0)

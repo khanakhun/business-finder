@@ -367,6 +367,17 @@ downgrading a conclusive one. A step stopped after paying (cancel, deferral) boo
 /v1/contacts/:id/verify` starts an `email_verify` run; `POST /v1/workspace/diagnostics/smtp-port` tells whether port
 25 is open. Request URLs in traces are redacted (keys and addresses in query strings).
 
+**Website audit (BF-030).** `psi` runs after the crawl: PageSpeed Insights v5 (mobile and desktop, all four
+categories) with the workspace's `pagespeed` key (or the deployment's), under per-key token buckets per minute and
+per day (the step defers, bounded). `vision_audit` runs after the crawl and PageSpeed (optional dependency): the
+crawl's screenshots (artifacts bucket, this business's prefix only) are graded by `website.vision_grade` (smart-tier
+vision, anchored 8-criteria rubric with evidence). Each step writes its part of the snapshot's `website_audits` row
+under an advisory lock and recomputes, with pure rules, the findings (Rules Engine / Specification, 28 codes), the
+quality score (documented weighted composite) and the website status; the audit of the newest audited snapshot is
+`is_latest` (search `website=weak`, scoring BF-031). Unreachable, parked, social-only and blocked sites get a
+presence-only audit. Outages and quotas leave a part out and ask for a re-check within the hour; configuration
+errors (a refused key, no model key) fail the step.
+
 **Review mining (BF-029).** The `reviews` module registers the `reviews` step with the enrichment registry. Review
 text is licensed content, so every source sits behind a per-workspace **licensing gate** (Policy): Google Places
 reviews (Place Details `reviews,rating,userRatingCount`, at most 5, Enterprise + Atmosphere SKU) only after a

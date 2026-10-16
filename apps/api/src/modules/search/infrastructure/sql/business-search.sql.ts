@@ -1,3 +1,4 @@
+import { WEAK_WEBSITE_STATUSES } from '@bf/contracts';
 import {
   businessCategories,
   businessContacts,
@@ -7,6 +8,7 @@ import {
   listItems,
   lists,
   orgBusinesses,
+  websiteAudits,
 } from '@bf/db/schema';
 import { type SQL, sql } from 'drizzle-orm';
 import type { FacetDimension, ListingPosition, ListingSort, ListingSpec } from '../../domain/listing.ts';
@@ -47,9 +49,15 @@ export function dimensionSql(spec: ListingSpec): Partial<Record<FacetDimension, 
       WHERE bcat.business_id = ${businesses.id}
         AND c.path <@ ARRAY(SELECT sel.path FROM ${categories} sel WHERE sel.id = ANY(${arrayOf(f.category, 'uuid')})))`;
   }
-  // DECISION(BF-022): `weak` needs audit scores (BF-030/BF-031); until then it means "has a website".
   if (f.website === 'none') dims.website = sql`${businesses.websiteUrl} IS NULL`;
-  if (f.website === 'has' || f.website === 'weak') dims.website = sql`${businesses.websiteUrl} IS NOT NULL`;
+  if (f.website === 'has') dims.website = sql`${businesses.websiteUrl} IS NOT NULL`;
+  // `weak` (BF-030): the latest website audit rates the site poorly (or the site is broken).
+  // DECISION(BF-030): a read of enrichment's `website_audits` table (like the enrichment read models): the listing
+  // filter needs it in the same query, and only enrichment writes it.
+  if (f.website === 'weak') {
+    dims.website = sql`EXISTS (SELECT 1 FROM ${websiteAudits} wa WHERE wa.business_id = ${businesses.id}
+      AND wa.is_latest AND wa.website_status = ANY(${arrayOf(WEAK_WEBSITE_STATUSES, 'text')}))`;
+  }
   const rating = and([
     f['rating[gte]'] !== undefined ? sql`${businesses.ratingAvg} >= ${f['rating[gte]']}` : undefined,
     f['rating[lte]'] !== undefined ? sql`${businesses.ratingAvg} <= ${f['rating[lte]']}` : undefined,

@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Le Petit Corail (fictif)",
+      "category": "Restaurant",
+      "url": "https://le-petit-corail.example"
+    },
+    "images": [
+      "17a42cd2b30004ba2f80fefb934a45d54fb2b6790ef1884eef131fdffa1616cc",
+      "6554395fadf2a71c1051a4f9017df8b8fd1375f157c20a6976418f0d2c0b73e7"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 9,
+        "evidence": "Flat design with rounded cards and pill buttons on a warm sand background; contemporary sans-serif type."
+      },
+      "visual_hierarchy": {
+        "score": 9,
+        "evidence": "Large bold headline, short lead, then one coral button; info cards sit clearly below the hero."
+      },
+      "mobile_usability": {
+        "score": 9,
+        "evidence": "Mobile collapses to one column with a full-width booking button; header keeps only logo and Réserver."
+      },
+      "readability": {
+        "score": 9,
+        "evidence": "Dark text on cream with generous line height; body copy comfortably sized on both viewports."
+      },
+      "imagery_quality": {
+        "score": 7,
+        "evidence": "Illustrated beach scene with a plate and fish graphic; tidy but abstract, no real food photography."
+      },
+      "trust_signals": {
+        "score": 9,
+        "evidence": "Five gold stars with 4,8/5 and 320 reviews, \"depuis 2009\", plus hours, address and phone cards."
+      },
+      "cta_clarity": {
+        "score": 10,
+        "evidence": "Coral \"Réserver une table\" button in the hero, repeated as a \"Réserver\" button in the header."
+      },
+      "brand_consistency": {
+        "score": 9,
+        "evidence": "Teal and coral logo colors reused in headings, buttons and the illustration throughout."
+      }
+    },
+    "overall": 9,
+    "summary": {
+      "en": "Modern, well-structured restaurant homepage with a prominent booking button, visible reviews and a clean mobile layout. Only the illustrated hero lacks real food photos.",
+      "fr": "Page d'accueil moderne et bien structurée, avec un bouton de réservation très visible, des avis affichés et une version mobile propre. Seule l'illustration remplace de vraies photos des plats."
+    },
+    "warnings": []
+  }
+}

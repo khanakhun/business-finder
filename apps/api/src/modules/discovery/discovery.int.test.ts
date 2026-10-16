@@ -110,6 +110,19 @@ describe('rate limiter', () => {
     now += 10_000;
     for (let i = 0; i < 3; i++) expect(await limiter.tryTake(key, limit)).toBe(0);
   });
+
+  it('takes several tokens all or none', async () => {
+    let now = Date.parse('2026-10-15T12:00:00Z');
+    const limiter = new ValkeyRateLimiter(t.app.get<Redis>(VALKEY), { now: () => new Date(now) }, true);
+    const key = `test:${crypto.randomUUID()}`;
+    const limit = { capacity: 3, perSecond: 2, cost: 2 };
+    expect(await limiter.tryTake(key, limit)).toBe(0);
+    // One token left: two cannot be taken, and the one left is kept (the wait is for the second).
+    expect(await limiter.tryTake(key, limit)).toBe(500);
+    expect(await limiter.tryTake(key, { capacity: 3, perSecond: 2 })).toBe(0);
+    now += 1_000;
+    expect(await limiter.tryTake(key, limit)).toBe(0);
+  });
 });
 
 describe('category keys', () => {

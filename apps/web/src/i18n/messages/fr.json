@@ -1422,7 +1422,6 @@
       "desktop": "Capture d'écran du site sur ordinateur",
       "mobile": "Capture d'écran du site sur mobile"
     },
-    "auditComing": "Les scores de performance et les constats de design arrivent avec l’audit du site.",
     "emptyTitle": "Site pas encore analysé",
     "empty": "Enrichissez l’entreprise pour lire son site : contacts, outils, langues et captures.",
     "noWebsite": "Aucun site connu pour cette entreprise.",
@@ -1455,6 +1454,85 @@
       "done": "Enrichie",
       "partial": "Enrichie en partie",
       "failed": "Enrichissement échoué"
+    },
+    "audit": {
+      "title": "Audit du site",
+      "empty": "Pas encore d’audit : lancez-en un pour mesurer vitesse, design et conversion.",
+      "noWebsite": "Aucun site à auditer.",
+      "run": "Lancer l’audit",
+      "rerun": "Relancer l’audit",
+      "started": "Audit lancé.",
+      "failed": "L’audit n’a pas pu démarrer.",
+      "loadFailed": "L’audit n’a pas pu être chargé.",
+      "qualityLabel": "Score de qualité {value} sur 100",
+      "qualityUnknown": "Score de qualité non mesuré",
+      "auditedAt": "Audité {when}",
+      "statuses": {
+        "none": "Pas de site",
+        "parked": "Domaine parqué",
+        "social_only": "Réseau social uniquement",
+        "broken": "En panne",
+        "weak": "Faible",
+        "ok": "Correct",
+        "strong": "Solide"
+      },
+      "psi": {
+        "mobile": "PageSpeed — mobile",
+        "desktop": "PageSpeed — ordinateur",
+        "notMeasured": "Non mesuré (la page n’a pas pu être analysée).",
+        "categories": {
+          "performance": "Performance",
+          "accessibility": "Accessibilité",
+          "bestPractices": "Bonnes pratiques",
+          "seo": "SEO"
+        },
+        "metrics": {
+          "lcpMs": "Affichage du contenu principal",
+          "cls": "Décalage de mise en page",
+          "inpMs": "Réactivité aux interactions (utilisateurs réels)",
+          "tbtMs": "Temps de blocage total",
+          "fcpMs": "Premier affichage",
+          "speedIndexMs": "Indice de vitesse",
+          "ttfbMs": "Temps de réponse du serveur"
+        },
+        "ratings": {
+          "good": "bon",
+          "needs_improvement": "à améliorer",
+          "poor": "mauvais"
+        },
+        "seconds": "{value} s",
+        "milliseconds": "{value} ms",
+        "opportunities": "Principales améliorations",
+        "savings": "−{value} s"
+      },
+      "vision": {
+        "title": "Note visuelle",
+        "notGraded": "Non notée (pas de capture de la page).",
+        "overall": "Globale {value}/10",
+        "criteriaLabel": "Critères de la grille",
+        "criteria": {
+          "modernity": "Modernité",
+          "visual_hierarchy": "Hiérarchie visuelle",
+          "mobile_usability": "Usage sur mobile",
+          "readability": "Lisibilité",
+          "imagery_quality": "Visuels",
+          "trust_signals": "Signaux de confiance",
+          "cta_clarity": "Appel à l’action",
+          "brand_consistency": "Cohérence de marque"
+        }
+      },
+      "findings": {
+        "title": "Constats ({count})",
+        "none": "Rien à signaler.",
+        "severities": {
+          "critical": "Critique",
+          "major": "Majeur",
+          "minor": "Mineur",
+          "info": "Information"
+        },
+        "evidence": "Constaté :",
+        "recommendation": "À faire :"
+      }
     }
   },
   "reviews": {

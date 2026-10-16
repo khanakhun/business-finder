@@ -380,6 +380,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses/{id}/website-audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The audit of the business website at its latest crawl: PageSpeed, visual grade, findings, status */
+        get: operations["getBusinessWebsiteAudit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/website/screenshots/{kind}": {
         parameters: {
             query?: never;
@@ -1933,6 +1950,10 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        BusinessWebsiteAudit: {
+            audit: components["schemas"]["WebsiteAudit"] | null;
+            status: ("none" | "parked" | "social_only" | "broken" | "weak" | "ok" | "strong") | null;
+        };
         CategoryAttributes: {
             [key: string]: boolean;
         };
@@ -2922,6 +2943,36 @@ export type components = {
             results: number;
             sku: string;
         };
+        PsiResult: {
+            desktop: components["schemas"]["PsiStrategyResult"] | null;
+            mobile: components["schemas"]["PsiStrategyResult"] | null;
+        };
+        PsiStrategyResult: {
+            /** Format: date-time */
+            fetchedAt: string;
+            lighthouseVersion: string | null;
+            metrics: {
+                cls: number | null;
+                fcpMs: number | null;
+                inpMs: number | null;
+                lcpMs: number | null;
+                speedIndexMs: number | null;
+                tbtMs: number | null;
+                ttfbMs: number | null;
+            };
+            opportunities: {
+                id: string;
+                savingsBytes: number | null;
+                savingsMs: number | null;
+                title: string;
+            }[];
+            scores: {
+                accessibility: number | null;
+                bestPractices: number | null;
+                performance: number | null;
+                seo: number | null;
+            };
+        };
         PublishedContext: {
             foundAs: ("mailto" | "text" | "jsonld" | "cfemail" | "obfuscated") | null;
             /** @enum {string} */
@@ -3374,6 +3425,56 @@ export type components = {
             sort?: ("relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name") | null;
             /** @enum {string} */
             visibility?: "private" | "workspace";
+        };
+        VisionGrade: {
+            criteria: {
+                [key: string]: {
+                    /** @description What is visible in the screenshots that justifies the score. */
+                    evidence: string;
+                    score: number;
+                };
+            };
+            /** Format: date-time */
+            gradedAt: string;
+            model: string;
+            overall: number;
+            promptVersion: number;
+            summary: {
+                en: string;
+                fr: string;
+            };
+        };
+        WebsiteAudit: {
+            /** Format: uuid */
+            businessId: string;
+            /** Format: date-time */
+            createdAt: string;
+            findings: components["schemas"]["WebsiteFinding"][];
+            /** Format: uuid */
+            id: string;
+            psi: components["schemas"]["PsiResult"] | null;
+            /** @description Null when neither PageSpeed nor the vision grade could measure the site. */
+            qualityScore: number | null;
+            /** Format: uuid */
+            snapshotId: string;
+            /** Format: date-time */
+            updatedAt: string;
+            vision: components["schemas"]["VisionGrade"] | null;
+            /** @enum {string} */
+            websiteStatus: "none" | "parked" | "social_only" | "broken" | "weak" | "ok" | "strong";
+        };
+        WebsiteFinding: {
+            /** @enum {string} */
+            code: "parked_domain" | "social_only" | "site_broken" | "no_https" | "certificate_invalid" | "certificate_expiring" | "mixed_content" | "no_viewport_meta" | "poor_mobile_usability" | "slow_lcp_mobile" | "layout_shift" | "low_performance_score" | "heavy_page" | "no_contact_visible" | "no_contact_form" | "no_online_booking" | "no_online_menu" | "missing_english" | "missing_french" | "weak_call_to_action" | "stale_copyright" | "outdated_jquery" | "outdated_wordpress" | "dated_design" | "broken_links" | "low_seo_score" | "low_accessibility_score" | "no_solicitation_notice";
+            evidence: string;
+            metric: {
+                name: string;
+                threshold: number;
+                value: number;
+            } | null;
+            offerRelevance: ("new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo")[];
+            /** @enum {string} */
+            severity: "critical" | "major" | "minor" | "info";
         };
         WebsiteSnapshot: {
             analytics: {
@@ -5548,6 +5649,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WebsiteSnapshot"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessWebsiteAudit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessWebsiteAudit"];
                 };
             };
             /** @description Problem details (RFC 9457) */

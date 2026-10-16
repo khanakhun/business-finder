@@ -280,9 +280,14 @@ exports[`filterSql > website weak 1`] = `
 {
   "params": [
     "0192a1b2-0000-7000-8000-0000000000aa",
+    "weak",
+    "broken",
   ],
-  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."website_url" IS NOT NULL",
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND EXISTS (SELECT 1 FROM "website_audits" wa WHERE wa.business_id = "businesses"."id"
+      AND wa.is_latest AND wa.website_status = ANY(ARRAY[$2, $3]::text[]))",
   "typings": [
+    "none",
+    "none",
     "none",
   ],
 }

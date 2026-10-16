@@ -1,5 +1,6 @@
 import {
   type BusinessEnrichment,
+  type BusinessWebsiteAudit,
   type Clock,
   ConflictError,
   ENRICHMENT_STEP_IDS,
@@ -33,6 +34,7 @@ import {
   type WebsiteSnapshotRepository,
 } from './ports.ts';
 import { StepRegistry } from './step-registry.ts';
+import { WebsiteAuditService } from './website-audit.service.ts';
 
 export interface StartRunInput {
   readonly organizationId: string;
@@ -302,7 +304,32 @@ export class EnrichmentQueries {
     @Inject(NO_SOLICITATION_MARKERS) private readonly markers: NoSolicitationMarkers,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly registry: StepRegistry,
+    private readonly audits: WebsiteAuditService,
   ) {}
+
+  /** The audit of the latest crawl (BF-030), or null before the first audit; `none` without a website. */
+  async websiteAudit(organizationId: string, businessId: string): Promise<BusinessWebsiteAudit> {
+    await this.assertTracked(organizationId, businessId);
+    const audit = await this.audits.latest(businessId);
+    const subject = await this.subjects.subject(businessId);
+    return {
+      status: subject?.websiteUrl ? (audit?.websiteStatus ?? null) : 'none',
+      audit: audit
+        ? {
+            id: audit.id,
+            businessId: audit.businessId,
+            snapshotId: audit.snapshotId,
+            psi: audit.psi,
+            vision: audit.vision,
+            findings: audit.findings,
+            qualityScore: audit.qualityScore,
+            websiteStatus: audit.websiteStatus,
+            createdAt: audit.createdAt.toISOString(),
+            updatedAt: audit.updatedAt.toISOString(),
+          }
+        : null,
+    };
+  }
 
   async run(organizationId: string, runId: string): Promise<EnrichmentRun> {
     const run = await this.runs.findRun(runId);

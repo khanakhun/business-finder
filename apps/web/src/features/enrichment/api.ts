@@ -4,6 +4,7 @@ import { ApiError } from '@bf/api-client';
 import type {
   BulkEnrichResponse,
   BusinessEnrichment,
+  BusinessWebsiteAudit,
   EnrichmentEstimate,
   EnrichmentRun,
   EnrichmentStepId,
@@ -37,6 +38,16 @@ export function useWebsite(id: string) {
         throw error;
       }
     },
+  });
+}
+
+/** The audit of the latest crawl (BF-030), or null before the first one. */
+export function useWebsiteAudit(id: string) {
+  return useQuery({
+    queryKey: queryKeys.business.websiteAudit(id),
+    queryFn: async () =>
+      (await apiClient().GET('/v1/businesses/{id}/website-audit', { params: { path: { id } } }))
+        .data as BusinessWebsiteAudit,
   });
 }
 

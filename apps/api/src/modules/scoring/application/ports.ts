@@ -57,8 +57,8 @@ export interface ScoringRepository {
   /** A profile the workspace may see (built-in or its own). */
   profile(organizationId: string, profileId: string): Promise<ProfileRecord | undefined>;
   /**
-   * A profile the workspace may see, read under a row lock until the transaction ends: `update` for changes to it
-   * (archive, versions), `share` to rely on it staying as read (making it the primary profile).
+   * A profile read under a row lock until the transaction ends: `update` for changes to one of the workspace's own
+   * (archive, versions), `share` to rely on a profile it may see staying as read (making it the primary profile).
    */
   lockProfile(
     organizationId: string,
@@ -68,7 +68,7 @@ export interface ScoringRepository {
   /** Profiles the workspace created that are not archived (the ones scored). */
   countActiveOwnProfiles(organizationId: string): Promise<number>;
   /** Serializes creating and unarchiving profiles in the workspace until the transaction ends (exact cap). */
-  lockProfileCreation(organizationId: string): Promise<void>;
+  lockProfileCap(organizationId: string): Promise<void>;
   version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined>;
   /** Creates the built-in profiles and versions that do not exist yet (idempotent); returns the ones it activated. */
   ensureBuiltins(

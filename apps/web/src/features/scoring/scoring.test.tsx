@@ -89,9 +89,9 @@ describe('waterfallSteps', () => {
   });
 
   it('rounds to a tenth of a point, and keeps only the total when nothing contributes', () => {
-    expect(waterfallSteps([contribution('has_phone', 2.345)], 2, String, labels)[0]).toMatchObject({
-      delta: 2.3,
-    });
+    const rounded = waterfallSteps([contribution('has_phone', 2.345)], 2, String, labels);
+    expect(rounded).toHaveLength(2);
+    expect(rounded[0]).toMatchObject({ delta: 2.3 });
     expect(waterfallSteps([], 0, String, labels)).toEqual([
       { label: 'Score', base: 0, delta: 0, kind: 'total' },
     ]);

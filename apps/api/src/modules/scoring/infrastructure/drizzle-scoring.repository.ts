@@ -134,10 +134,16 @@ export class DrizzleScoringRepository implements ScoringRepository {
     profileId: string,
     mode: 'update' | 'share',
   ): Promise<ProfileRecord | undefined> {
+    // An update lock only ever takes the workspace's own row (built-in rows are shared by every workspace).
     const query = getExecutor(this.db)
       .select()
       .from(scoringProfiles)
-      .where(and(eq(scoringProfiles.id, profileId), visibleTo(organizationId)));
+      .where(
+        and(
+          eq(scoringProfiles.id, profileId),
+          mode === 'update' ? eq(scoringProfiles.organizationId, organizationId) : visibleTo(organizationId),
+        ),
+      );
     const [row] = await (mode === 'update' ? query.for('update') : query.for('share'));
     return row ? toProfile(row) : undefined;
   }
@@ -150,7 +156,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return row?.n ?? 0;
   }
 
-  async lockProfileCreation(organizationId: string): Promise<void> {
+  async lockProfileCap(organizationId: string): Promise<void> {
     await getExecutor(this.db).execute(
       sql`SELECT pg_advisory_xact_lock(hashtextextended(${`bf:scoring-profiles:${organizationId}`}, 0))`,
     );

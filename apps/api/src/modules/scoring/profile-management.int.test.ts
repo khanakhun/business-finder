@@ -203,17 +203,19 @@ describe('workspace scoring profiles', () => {
     expect(versions.map((v: { version: number }) => v.version)).toEqual([4, 3, 2, 1]);
   });
 
-  it('caps the profiles a workspace creates', async () => {
-    for (const name of ['Second', 'Third']) {
-      await owner
-        .post('/v1/scoring/profiles')
-        .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name })
-        .expect(201);
-    }
+  it('caps the profiles a workspace creates, also under concurrent creates', async () => {
     await owner
       .post('/v1/scoring/profiles')
-      .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name: 'Fourth' })
-      .expect(409);
+      .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name: 'Second' })
+      .expect(201);
+    // One place left: of two creates at once, one gets it.
+    const racing = await Promise.all(
+      ['Third', 'Third bis'].map((name) =>
+        owner.post('/v1/scoring/profiles').send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name }),
+      ),
+    );
+    expect(racing.map((response) => response.status).sort()).toEqual([201, 409]);
+    expect(racing.find((response) => response.status === 409)?.body.detail).toMatch(/at most 3 of its own/);
   });
 
   it('renames and archives (an archived profile is no longer scored; the primary cannot be archived)', async () => {
@@ -259,7 +261,11 @@ describe('workspace scoring profiles', () => {
       .post('/v1/scoring/profiles')
       .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name: 'Fourth' })
       .expect(201);
-    await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: false }).expect(409);
+    const refused = await owner
+      .patch(`/v1/scoring/profiles/${profileId}`)
+      .send({ archived: false })
+      .expect(409);
+    expect(refused.body.detail).toMatch(/archive one first/);
     await owner.patch(`/v1/scoring/profiles/${fourth.body.id}`).send({ archived: true }).expect(200);
     const before = await lastComputed(profileId);
     await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: false }).expect(200);

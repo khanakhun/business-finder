@@ -43,7 +43,8 @@ export function waterfallSteps(
   }
   // Decided like the engine (whole points of the unrounded sum): only the bounds or a gate change the score; a gap
   // left by the steps' rounding is not an adjustment.
-  const sum = ordered.reduce((total, contribution) => total + contribution.contribution, 0);
+  // In the engine's order (the API's): floating-point sums depend on it.
+  const sum = contributions.reduce((total, contribution) => total + contribution.contribution, 0);
   if (Math.round(sum) !== score) {
     steps.push({
       label: labels.adjustment,

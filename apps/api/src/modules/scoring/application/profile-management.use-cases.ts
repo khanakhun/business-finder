@@ -153,7 +153,7 @@ export class ScoringProfileCommands {
    * counted under a workspace lock so concurrent creates and unarchives cannot pass the cap.
    */
   private async assertRoomForProfile(organizationId: string): Promise<void> {
-    await this.repository.lockProfileCreation(organizationId);
+    await this.repository.lockProfileCap(organizationId);
     if (
       (await this.repository.countActiveOwnProfiles(organizationId)) >=
       this.env.SCORING_MAX_WORKSPACE_PROFILES

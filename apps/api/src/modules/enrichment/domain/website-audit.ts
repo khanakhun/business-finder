@@ -498,7 +498,8 @@ export interface AuditOutcome {
 
 export function assessWebsite(facts: AuditFacts): AuditOutcome {
   // A blocked crawl (bot wall, robots.txt opt-out, refused address) yields nothing, whatever parts are stored: an
-  // opt-out must never become findings, a score or a sales argument.
+  // opt-out must never become findings, a score or a sales argument. (Exclusive with parked and social-only crawls by
+  // construction: one reachability per crawl.)
   if (facts.snapshot.reachability === 'blocked')
     return { findings: [], qualityScore: null, websiteStatus: 'ok' };
   const findings = evaluateFindings(facts);

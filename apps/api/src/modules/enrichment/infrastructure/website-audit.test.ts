@@ -470,6 +470,18 @@ describe('screenshot and URL guards', () => {
     expect(request.images).toHaveLength(1);
     expect(request.input.businessName).toHaveLength(200);
     expect(request.input).toMatchObject({ url: 'https://bistro.example/' });
+    // A crawled path of any length reaches the model capped.
+    await grader.grade(
+      'org',
+      snapshot({
+        finalUrl: `https://bistro.example/${'a'.repeat(700)}`,
+        screenshots: { desktopKey: 'sites/biz-1/desktop.jpg', mobileKey: null, fullPageKey: null },
+      }),
+      { displayName: 'B', categoryLabel: null },
+      new AbortController().signal,
+    );
+    const long = (vision.mock.calls[1] as unknown as [unknown, { input: { url: string } }])[1];
+    expect(long.input.url).toHaveLength(500);
     expect(warnings).toHaveBeenCalledWith(1);
     // Another business's key is never read.
     expect(

@@ -239,31 +239,42 @@ export function defaultItem(field: FieldSpec & { kind: 'array' }, ctx: DefaultsC
 }
 
 /**
- * The props of a new block of `type` for this site (its required fields filled: texts in the default language, the
- * site's images, a button to the home page), or undefined when the site cannot fill it (fewer images than the block
+ * A new block of `type` for this site: its props (required fields filled: texts in the default language, the site's
+ * images, a button to the home page) and the first layout the site can show as is (a layout needing an image the
+ * block has not, say, comes after one without); undefined when the site cannot fill it (fewer images than the block
  * needs, a fact, or what the validator requires of the site for this block: hours, an address, a booking page…).
  */
-export function defaultBlockProps(
+export function defaultBlock(
   type: BlockType,
   ctx: DefaultsContext,
-): Record<string, unknown> | undefined {
+): { readonly variant: string; readonly props: Record<string, unknown> } | undefined {
   const props = filled(() => defaultsOf(describeBlockFields(type), ctx, imagesOf(ctx.spec)));
-  if (!props) return undefined;
   const page = ctx.spec.pages[0];
-  if (!page) return undefined;
-  const block = { id: 'candidate-block', type, variant: blockVariants(type)[0], props } as Block;
-  const candidate = {
-    ...ctx.spec,
-    pages: [{ ...page, blocks: [...page.blocks, block] }, ...ctx.spec.pages.slice(1)],
-  };
-  const at = page.blocks.length;
+  if (!props || !page) return undefined;
   const hosts = [...new Set(ctx.spec.assets.map((asset) => new URL(asset.url).hostname))];
-  const refused = validateSite(candidate, { assetHosts: hosts, mode: 'preview' }).some(
-    (issue) =>
-      issue.code === 'block_requirement' &&
-      issue.path[0] === 'pages' &&
-      issue.path[1] === 0 &&
-      issue.path[3] === at,
-  );
-  return refused ? undefined : props;
+  const at = page.blocks.length;
+  const variants = blockVariants(type);
+  for (const variant of variants) {
+    const block = { id: 'candidate-block', type, variant, props } as Block;
+    const candidate = {
+      ...ctx.spec,
+      pages: [{ ...page, blocks: [...page.blocks, block] }, ...ctx.spec.pages.slice(1)],
+    };
+    // What depends on the layout (an image, a button) or on the site (its requirements); texts are written later.
+    const errors = validateSite(candidate, { assetHosts: hosts, mode: 'preview' }).filter(
+      (issue) =>
+        issue.severity === 'error' &&
+        ['block_requirement', 'image_missing', 'cta_missing'].includes(issue.code) &&
+        issue.path[0] === 'pages' &&
+        issue.path[1] === 0 &&
+        issue.path[3] === at,
+    );
+    // The site lacks what this block shows (every layout needs it).
+    if (errors.some((issue) => issue.code === 'block_requirement')) return undefined;
+    if (errors.length === 0) return { variant, props };
+  }
+  return { variant: variants[0] as string, props };
 }
+
+/** The props of `defaultBlock` (its first workable layout aside). */
+export const defaultBlockProps = (type: BlockType, ctx: DefaultsContext) => defaultBlock(type, ctx)?.props;

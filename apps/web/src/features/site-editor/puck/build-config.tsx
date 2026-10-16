@@ -14,7 +14,7 @@ import type * as React from 'react';
 import type { BlockItemProps, PageRootProps } from '../adapters/spec-to-puck.ts';
 import { CanvasBlock, CanvasRoot } from './canvas.tsx';
 import {
-  defaultBlockProps,
+  defaultBlock,
   defaultItem,
   describeBlockFields,
   type FieldSpec,
@@ -194,12 +194,12 @@ export function buildPuckConfig(site: SiteSpec, labels: ConfigLabels): Config {
       },
     };
     for (const field of describeBlockFields(type)) fields[field.key] = toPuckField(field, labels, site);
-    const defaults = defaultBlockProps(type, { spec: site, placeholder: labels.placeholder });
+    const defaults = defaultBlock(type, { spec: site, placeholder: labels.placeholder });
     if (defaults) offered.push(type);
     components[type] = {
       label: labels.block(type),
       fields,
-      defaultProps: { variant: blockVariants(type)[0], ...(defaults ?? {}) },
+      defaultProps: { ...(defaults?.props ?? {}), variant: defaults?.variant ?? blockVariants(type)[0] },
       render: (props) => <CanvasBlock type={type} props={props as unknown as BlockItemProps} />,
     };
   }

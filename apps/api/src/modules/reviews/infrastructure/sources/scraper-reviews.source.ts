@@ -2,7 +2,7 @@ import { type Clock, ExternalServiceError } from '@bf/contracts';
 import type { Redis } from 'ioredis';
 import { z } from 'zod';
 import { csvObjects, readCapped } from '../../../discovery/index.ts';
-import { policyFor } from '../../../platform/resilience/resilience.ts';
+import { isTransient, policyFor } from '../../../platform/resilience/resilience.ts';
 import type { ReviewFetch, ReviewFetchContext, ReviewSourceAdapter } from '../../application/ports.ts';
 import type { SourceReview } from '../../domain/review.ts';
 
@@ -22,6 +22,8 @@ const UserReview = z
   .passthrough();
 const MAX_ROWS = 50;
 const MAX_CSV_BYTES = 5_000_000;
+/** Every job created and not yet confirmed deleted (score: creation time). */
+const JOBS_TO_DELETE = 'bf:reviews:scraper-jobs';
 /** How long the scraper job id is remembered (its time budget plus margin). */
 const JOB_KEY_MARGIN_SECONDS = 900;
 const SEARCH_RADIUS_M = 300;
@@ -100,32 +102,53 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     const job = await this.options.valkey.get(key);
     if (!job) {
       const id = await this.create(subject.displayName, subject.location, subject.locale, signal);
-      await this.options.valkey.set(key, id, 'EX', this.options.maxTimeSeconds + JOB_KEY_MARGIN_SECONDS);
+      // Every job is tracked until the scraper confirms its deletion (nightly sweep: `deleteStaleJobs`).
+      await this.options.valkey.zadd(JOBS_TO_DELETE, this.options.clock.now().getTime(), id);
+      const set = await this.options.valkey.set(
+        key,
+        id,
+        'EX',
+        this.options.maxTimeSeconds + JOB_KEY_MARGIN_SECONDS,
+        'NX',
+      );
+      // Another run for the business started a job first: ours is not needed.
+      if (set === null) await this.deleteJob(id);
       return { kind: 'pending', retryAfterMs: 60_000 };
     }
-    const state = JobState.safeParse(
-      await this.call(`/api/v1/jobs/${encodeURIComponent(job)}`, signal, {}, (r) =>
-        r.json().catch(() => undefined),
-      ),
-    );
-    if (!state.success) throw new ExternalServiceError('maps-scraper', 'unexpected job state');
-    const status = state.data.Status.toLowerCase();
-    if (status !== 'ok' && status !== 'failed') return { kind: 'pending', retryAfterMs: 30_000 };
     // Finished jobs are deleted from the scraper (it keeps review text and reviewer names on disk) and forgotten here;
-    // a transient download failure keeps both, so the next attempt reads the same job instead of scraping again.
-    let finished = status === 'failed';
+    // a transient failure keeps both, so the next attempt reads the same job instead of scraping again.
+    let finished = false;
     try {
+      const state = await this.call(`/api/v1/jobs/${encodeURIComponent(job)}`, signal, {}, async (r) =>
+        JobState.safeParse(await r.json().catch(() => undefined)),
+      ).catch((error: unknown) => {
+        // The scraper no longer knows the job: start afresh next time.
+        if ((error as { details?: { status?: number } }).details?.status === 404) {
+          finished = true;
+          throw new ExternalServiceError('maps-scraper', 'job gone', { details: { retryable: true } });
+        }
+        throw error;
+      });
+      if (!state.success) throw new ExternalServiceError('maps-scraper', 'unexpected job state');
+      const status = state.data.Status.toLowerCase();
+      if (status !== 'ok' && status !== 'failed') return { kind: 'pending', retryAfterMs: 30_000 };
       if (status === 'failed') {
+        finished = true;
         throw new ExternalServiceError('maps-scraper', 'job failed', { details: { retryable: false } });
       }
-      const rows = csvObjects(
-        await this.call(`/api/v1/jobs/${encodeURIComponent(job)}/download`, signal, {}, (r) =>
+      let csv: string;
+      try {
+        csv = await this.call(`/api/v1/jobs/${encodeURIComponent(job)}/download`, signal, {}, (r) =>
           readCapped(r, MAX_CSV_BYTES),
-        ),
-        MAX_ROWS,
-      );
+        );
+      } catch (error) {
+        // A download that may work next time: wait for it (bounded by the step's deferrals) on the same job.
+        if (!signal.aborted && isTransient(error)) return { kind: 'pending', retryAfterMs: 30_000 };
+        throw error;
+      }
+      // Downloaded: whatever happens next (even a CSV that does not parse), the job is done.
       finished = true;
-      const row = businessRow(rows, subject);
+      const row = businessRow(csvObjects(csv, MAX_ROWS), subject);
       if (!row) return { kind: 'none' };
       const avg = Number(row.review_rating);
       const count = Number(row.review_count);
@@ -143,21 +166,38 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
         },
       };
     } catch (error) {
-      // A response the scraper will never fix (4xx, too large, failed job) ends the job too.
+      // A response the scraper will never fix (4xx, too large) ends the job too.
       if ((error as { details?: { retryable?: boolean } }).details?.retryable === false) finished = true;
       throw error;
     } finally {
-      if (finished) {
-        const deleted = await this.call(
-          `/api/v1/jobs/${encodeURIComponent(job)}`,
-          signal,
-          { method: 'DELETE' },
-          async () => true,
-        ).catch(() => false);
-        // A job the scraper could not delete stays known: the next attempt retries the delete.
-        if (deleted) await this.options.valkey.del(key);
-      }
+      // Not on the step's signal: a cancelled run still removes what it read. A failed delete leaves the job
+      // tracked for the nightly sweep.
+      if (finished && (await this.deleteJob(job))) await this.options.valkey.del(key);
     }
+  }
+
+  /** Deletes a job from the scraper (gone already counts) and stops tracking it; false when the scraper failed. */
+  private async deleteJob(job: string): Promise<boolean> {
+    const deleted = await this.call(
+      `/api/v1/jobs/${encodeURIComponent(job)}`,
+      AbortSignal.timeout(15_000),
+      { method: 'DELETE' },
+      async () => true,
+    ).catch((error: unknown) => (error as { details?: { status?: number } }).details?.status === 404);
+    if (deleted) await this.options.valkey.zrem(JOBS_TO_DELETE, job);
+    return deleted;
+  }
+
+  /**
+   * Nightly sweep: jobs older than their time budget (plus an hour) that were never deleted — a run cancelled, a
+   * deferral cap reached, a scraper down at the time — are deleted now. Returns how many went.
+   */
+  async deleteStaleJobs(now: Date): Promise<number> {
+    const before = now.getTime() - (this.options.maxTimeSeconds + 3_600) * 1_000;
+    const stale = await this.options.valkey.zrangebyscore(JOBS_TO_DELETE, 0, before, 'LIMIT', 0, 500);
+    let deleted = 0;
+    for (const job of stale) if (await this.deleteJob(job)) deleted += 1;
+    return deleted;
   }
 
   private async create(
@@ -212,11 +252,15 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
       });
       if (!response.ok) {
         throw new ExternalServiceError('maps-scraper', `answered ${response.status}`, {
-          details: { retryable: response.status >= 500 },
+          details: { retryable: response.status >= 500, status: response.status },
         });
       }
       return read(response);
     };
-    return retry ? policyFor('maps-scraper').execute(({ signal: attempt }) => exchange(attempt)) : exchange();
+    // The caller's signal also cancels the policy's backoff waits.
+    return policyFor(retry ? 'maps-scraper' : 'maps-scraper-create').execute(
+      ({ signal: attempt }) => exchange(attempt),
+      signal,
+    );
   }
 }

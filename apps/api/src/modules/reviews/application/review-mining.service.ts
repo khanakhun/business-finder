@@ -17,6 +17,7 @@ import { detectLanguage } from '../domain/language.ts';
 import { stripPersonalDetails } from '../domain/personal-details.ts';
 import { ratingSummary } from '../domain/rating-trend.ts';
 import type { ClassifiedReview, PreparedReview, ReviewBatch } from '../domain/review.ts';
+import { SpentBeforeFailureError } from './errors.ts';
 import {
   RATING_OBSERVATIONS,
   type RatingObservationRepository,
@@ -99,6 +100,7 @@ export class ReviewMiningService {
     if (batch.rating && batch.source !== 'manual') {
       await this.ratings.record(
         subject.businessId,
+        organizationId,
         { source: batch.source, ...batch.rating, observedAt: batch.fetchedAt },
         expiresAt,
       );
@@ -118,9 +120,10 @@ export class ReviewMiningService {
         ...(options.signal ? { signal: options.signal } : {}),
       })
       .catch(async (error: unknown) => {
-        // Batches classified before the failure are cached: a gate closed meanwhile must not keep them.
+        // Batches classified before the failure are cached: a gate closed meanwhile must not keep them. The
+        // original error (and the cost it carries) is always what propagates.
         if (options.allowed && !(await options.allowed().catch(() => false))) {
-          await this.classifier.forget(organizationId, batch.source);
+          await this.forgetVerdicts(organizationId, batch.source);
         }
         throw error;
       });
@@ -149,13 +152,21 @@ export class ReviewMiningService {
       model: result.model,
       promptVersion: result.promptVersion,
     });
-    const merged = await this.merge(
-      organizationId,
-      subject.businessId,
-      batch.source,
-      contribution,
-      options.allowed,
-    );
+    let merged: { readonly stored: boolean; readonly insights: CombinedInsights | null };
+    try {
+      merged = await this.merge(
+        organizationId,
+        subject.businessId,
+        batch.source,
+        contribution,
+        options.allowed,
+      );
+    } catch (error) {
+      // The model was paid for: the caller books it whatever failed after.
+      throw result.costUsd > 0 ? new SpentBeforeFailureError(error, result.costUsd) : error;
+    }
+    // Outside the transaction (a key scan must not hold the source's lock): verdicts of a dropped contribution go.
+    if (!merged.stored) await this.forgetVerdicts(organizationId, batch.source);
     return {
       analysed: merged.stored ? classified.length : 0,
       ...(merged.stored ? {} : { dropped: true }),
@@ -164,12 +175,20 @@ export class ReviewMiningService {
     };
   }
 
+  /** Forgets cached verdicts of a source; a cache failure is logged (by class), never thrown over the real error. */
+  private async forgetVerdicts(organizationId: string, source: ReviewSource): Promise<void> {
+    await this.classifier.forget(organizationId, source).catch((error: unknown) => {
+      this.logger.warn({ source, error: (error as Error)?.name }, 'review verdict cache forget failed');
+    });
+  }
+
   /**
    * The insights from the contributions still live at `now`, with the rating of the sources this workspace uses
    * (another workspace's Google key, or a source turned off or expired here, does not feed it). Writes nothing: the
    * read side uses it between an expiry and the nightly purge.
    */
   async combinedAt(
+    organizationId: string,
     businessId: string,
     contributions: Contributions,
     now: Date,
@@ -182,7 +201,7 @@ export class ReviewMiningService {
       ...Object.keys(live),
     ]);
     const rating = ratingSummary(
-      (await this.ratings.list(businessId, now)).filter((o) => used.has(o.source)),
+      (await this.ratings.list(businessId, organizationId, now)).filter((o) => used.has(o.source)),
     );
     return combineInsights(contributions, rating, now);
   }
@@ -196,6 +215,7 @@ export class ReviewMiningService {
     const now = this.clock.now();
     await this.ratings.record(
       subject.businessId,
+      null,
       { source: 'golden_record', ...subject.rating, observedAt: now },
       expiryOf('google_places', now),
     );
@@ -213,6 +233,12 @@ export class ReviewMiningService {
       const done = await this.forgetChunk(organizationId, source);
       forgotten += done;
       if (done < FORGET_CHUNK) break;
+    }
+    if (forgotten >= FORGET_CHUNK * MAX_FORGET_CHUNKS) {
+      this.logger.warn(
+        { source, forgotten },
+        'review source forget stopped at its cap; the rest expires with retention',
+      );
     }
     // After the rows: a classification still running for this source forgets its own verdicts (see `analyze`).
     await this.classifier.forget(organizationId, source);
@@ -266,7 +292,6 @@ export class ReviewMiningService {
     await this.insights.lockSource(organizationId, source, 'shared');
     if (allowed && !(await allowed())) {
       this.logger.info({ businessId, source }, 'review source turned off meanwhile: contribution dropped');
-      await this.classifier.forget(organizationId, source);
       return {
         stored: false,
         insights: (await this.insights.find(organizationId, businessId))?.combined ?? null,
@@ -307,7 +332,7 @@ export class ReviewMiningService {
     contributions: Contributions,
     now: Date,
   ): Promise<CombinedInsights | null> {
-    const combined = await this.combinedAt(businessId, contributions, now);
+    const combined = await this.combinedAt(organizationId, businessId, contributions, now);
     if (!combined) {
       await this.insights.delete(organizationId, businessId);
       return null;

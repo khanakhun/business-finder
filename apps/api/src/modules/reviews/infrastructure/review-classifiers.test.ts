@@ -2,7 +2,7 @@ import type { AiGateway, ExtractPainSignalsInput, ExtractPainSignalsOutput } fro
 import { fixedClock } from '@bf/contracts';
 import { createLogger } from '@bf/observability';
 import { describe, expect, it, vi } from 'vitest';
-import { ClassificationInterruptedError } from '../application/errors.ts';
+import { SpentBeforeFailureError } from '../application/errors.ts';
 import type {
   CachedVerdict,
   ReviewClassificationCache,
@@ -132,8 +132,8 @@ describe('LlmReviewClassifier', () => {
     const classifier = new LlmReviewClassifier({ run } as unknown as AiGateway, cache);
     const reviews = Array.from({ length: 30 }, (_, i) => prepared(`Review ${i}`));
     const error = await classifier.classify('org', reviews, context).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(ClassificationInterruptedError);
-    expect((error as ClassificationInterruptedError).costUsd).toBeCloseTo(0.001);
+    expect(error).toBeInstanceOf(SpentBeforeFailureError);
+    expect((error as SpentBeforeFailureError).costUsd).toBeCloseTo(0.001);
     expect(cache.store.size).toBe(20);
     // A source turned off forgets its verdicts only.
     await classifier.forget('org', 'manual');

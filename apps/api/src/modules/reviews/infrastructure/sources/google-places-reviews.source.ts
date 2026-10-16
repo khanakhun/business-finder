@@ -1,6 +1,7 @@
 import { type Clock, ExternalServiceError, RateLimitedError } from '@bf/contracts';
 import { z } from 'zod';
 import { WithResilience } from '../../../platform/resilience/resilience.ts';
+import { SpentBeforeFailureError } from '../../application/errors.ts';
 import type { ReviewFetch, ReviewFetchContext, ReviewSourceAdapter } from '../../application/ports.ts';
 import type { SourceReview } from '../../domain/review.ts';
 
@@ -71,9 +72,13 @@ export class GooglePlacesReviewsSource implements ReviewSourceAdapter {
     if (!response.ok) throw toError(response);
     const parsed = PlaceReviews.safeParse(json);
     if (!parsed.success) {
-      throw new ExternalServiceError('google-places', 'unexpected response', {
-        details: { reason: 'UNEXPECTED_RESPONSE', retryable: false },
-      });
+      // Google billed the answer even though we cannot use it: the step books it.
+      throw new SpentBeforeFailureError(
+        new ExternalServiceError('google-places', 'unexpected response', {
+          details: { reason: 'UNEXPECTED_RESPONSE', retryable: false },
+        }),
+        this.options.costUsd,
+      );
     }
     const reviews: SourceReview[] = parsed.data.reviews.flatMap((review) => {
       const text = review.originalText ?? review.text;

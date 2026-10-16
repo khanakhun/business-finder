@@ -166,8 +166,17 @@ export class DrizzleReviewInsightsRepository implements ReviewInsightsRepository
 export class DrizzleRatingObservations implements RatingObservationRepository {
   constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
 
-  async record(businessId: string, observation: RatingObservation, expiresAt: Date | null): Promise<void> {
+  async record(
+    businessId: string,
+    organizationId: string | null,
+    observation: RatingObservation,
+    expiresAt: Date | null,
+  ): Promise<void> {
     const x = getExecutor(this.db);
+    const owner =
+      organizationId === null
+        ? isNull(businessRatingObservations.organizationId)
+        : eq(businessRatingObservations.organizationId, organizationId);
     const [recent] = await x
       .select({ id: businessRatingObservations.id })
       .from(businessRatingObservations)
@@ -175,6 +184,7 @@ export class DrizzleRatingObservations implements RatingObservationRepository {
         and(
           eq(businessRatingObservations.businessId, businessId),
           eq(businessRatingObservations.source, observation.source),
+          owner,
           gt(
             businessRatingObservations.observedAt,
             new Date(observation.observedAt.getTime() - OBSERVATION_DEDUP_MS),
@@ -185,6 +195,7 @@ export class DrizzleRatingObservations implements RatingObservationRepository {
     if (recent) return;
     await x.insert(businessRatingObservations).values({
       businessId,
+      organizationId,
       source: observation.source,
       avg: observation.avg,
       count: observation.count,
@@ -193,13 +204,18 @@ export class DrizzleRatingObservations implements RatingObservationRepository {
     });
   }
 
-  async list(businessId: string, now: Date): Promise<RatingObservation[]> {
+  async list(businessId: string, organizationId: string, now: Date): Promise<RatingObservation[]> {
     const rows = await getExecutor(this.db)
       .select()
       .from(businessRatingObservations)
       .where(
         and(
           eq(businessRatingObservations.businessId, businessId),
+          // The golden record's (shared) and this workspace's own.
+          or(
+            isNull(businessRatingObservations.organizationId),
+            eq(businessRatingObservations.organizationId, organizationId),
+          ),
           or(isNull(businessRatingObservations.expiresAt), gt(businessRatingObservations.expiresAt, now)),
           sql`${businessRatingObservations.observedAt} <= ${now.toISOString()}::timestamptz`,
         ),

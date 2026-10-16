@@ -104,9 +104,18 @@ export const RESILIENCE_POLICIES = {
   },
   /** The self-hosted scraper's job API (BF-029 review jobs), per request; job creation is never retried. */
   'maps-scraper': {
-    // A result download (up to 5 MB) included.
-    timeoutMs: 90_000,
+    // Just above the adapter's own 60 s per request (a result download of up to 5 MB included).
+    timeoutMs: 65_000,
     maxRetries: 1,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
+  /** Scraper job creation (BF-029): never retried (a POST that timed out may have created a job), but breaker-guarded. */
+  'maps-scraper-create': {
+    timeoutMs: 65_000,
+    maxRetries: 0,
     initialDelayMs: 1_000,
     maxDelayMs: 5_000,
     breakerThreshold: 5,
@@ -129,7 +138,10 @@ export const isTransient = (error: unknown): boolean =>
   !(error instanceof DomainError) || (error.httpStatus >= 500 && error.details?.retryable !== false);
 
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
-  const transient = handleWhen(isTransient);
+  // A cancellation (the caller's signal) is not an outage: never retried, never counted by the breaker.
+  const transient = handleWhen(
+    (error) => isTransient(error) && !(error instanceof Error && error.name === 'AbortError'),
+  );
   return wrap(
     retry(transient, {
       maxAttempts: config.maxRetries,

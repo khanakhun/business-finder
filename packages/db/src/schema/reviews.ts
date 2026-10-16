@@ -16,6 +16,7 @@ import {
 import { sql } from 'drizzle-orm';
 import {
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -89,7 +90,10 @@ export const reviewInsights = pgTable(
   ],
 );
 
-/** Ratings seen over time (trend), kept within the source's retention. Public provider facts: not per workspace. */
+/**
+ * Ratings seen over time (trend), kept within the source's retention. A review source's observations belong to the
+ * workspace whose gate (and key) fetched them; the golden record's are shared (`organization_id` null).
+ */
 export const businessRatingObservations = pgTable(
   'business_rating_observations',
   {
@@ -97,6 +101,8 @@ export const businessRatingObservations = pgTable(
     businessId: uuid()
       .notNull()
       .references(() => businesses.id, { onDelete: 'cascade' }),
+    // FK declared below with a short name (the generated one exceeds Postgres's 63 characters).
+    organizationId: uuid(),
     source: text().$type<RatingObservationSource>().notNull(),
     avg: real().notNull(),
     count: integer().notNull(),
@@ -117,6 +123,15 @@ export const businessRatingObservations = pgTable(
     ),
     check('ck_business_rating_observations__avg', sql`${table.avg} BETWEEN 0 AND 5`),
     check('ck_business_rating_observations__count', sql`${table.count} >= 0`),
+    foreignKey({
+      name: 'fk_business_rating_observations__organization_id',
+      columns: [table.organizationId],
+      foreignColumns: [organization.id],
+    }).onDelete('cascade'),
+    check(
+      'ck_business_rating_observations__organization',
+      sql`(${table.source} = 'golden_record') = (${table.organizationId} IS NULL)`,
+    ),
   ],
 );
 

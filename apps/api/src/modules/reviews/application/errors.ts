@@ -1,13 +1,13 @@
 /**
- * Classification stopped part-way (a later batch failed): what the earlier batches cost is booked by the caller,
- * and their verdicts are already cached.
+ * A failure after money was spent (a billed provider answer, model batches): the caller books `costUsd` whatever
+ * happens next. Classifier verdicts already paid for are cached.
  */
-export class ClassificationInterruptedError extends Error {
+export class SpentBeforeFailureError extends Error {
   constructor(
     override readonly cause: unknown,
     readonly costUsd: number,
   ) {
-    super('Review classification interrupted', { cause });
-    this.name = 'ClassificationInterruptedError';
+    super('Failed after spending', { cause });
+    this.name = 'SpentBeforeFailureError';
   }
 }

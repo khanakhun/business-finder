@@ -173,5 +173,10 @@ export class ReviewsModule implements OnModuleInit {
       }),
     );
     this.maintenance.register('review_insights_retention', (now) => this.mining.purgeExpired(now));
+    const scraper = this.adapters.find((adapter) => adapter instanceof ScraperReviewsSource);
+    if (scraper instanceof ScraperReviewsSource) {
+      // Scraper jobs hold review text and names on the scraper's disk: none outlives its run for long.
+      this.maintenance.register('review_scraper_jobs', (now) => scraper.deleteStaleJobs(now));
+    }
   }
 }

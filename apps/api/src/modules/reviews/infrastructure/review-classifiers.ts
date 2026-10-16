@@ -7,7 +7,7 @@ import {
 } from '@bf/ai';
 import { evidenceProblem, PAIN_SIGNAL_TAGS, type PainSignalTag, type ReviewSource } from '@bf/contracts';
 import type { Redis } from 'ioredis';
-import { ClassificationInterruptedError } from '../application/errors.ts';
+import { SpentBeforeFailureError } from '../application/errors.ts';
 import type {
   CachedVerdict,
   ClassificationResult,
@@ -23,10 +23,27 @@ import type { PreparedReview } from '../domain/review.ts';
 const CACHE_TTL_SECONDS = 30 * 24 * 3600;
 const TAGS = new Set<string>(PAIN_SIGNAL_TAGS);
 
-/** Cache key of a review: the prompt, the anonymized text and the rating (never the text itself). */
-export const reviewKey = (review: PreparedReview): string =>
+/**
+ * Cache key of a review: everything the prompt sees for it — prompt version, reader locale, category, rating and the
+ * anonymized text — hashed (never the text itself).
+ */
+export const reviewKey = (
+  review: PreparedReview,
+  context: { readonly locale: string; readonly categoryLabel: string | null } = {
+    locale: 'en',
+    categoryLabel: null,
+  },
+): string =>
   createHash('sha256')
-    .update(`${ReviewsExtractPainSignals.prompt}\n${review.rating ?? ''}\n${review.text}`)
+    .update(
+      [
+        ReviewsExtractPainSignals.prompt,
+        context.locale,
+        context.categoryLabel ?? '',
+        review.rating ?? '',
+        review.text,
+      ].join('\n'),
+    )
     .digest('hex');
 
 /** A model paraphrase we may keep: anonymized again, short, not a quote of the review. */
@@ -55,8 +72,11 @@ export class LlmReviewClassifier implements ReviewClassifier {
     },
   ): Promise<ClassificationResult> {
     // Per source: a source turned off forgets its verdicts without touching the others'.
-    const keys = reviews.map((review) => `${context.source}:${reviewKey(review)}`);
-    const cached = await this.cache.getMany(organizationId, keys);
+    const keys = reviews.map((review) => `${context.source}:${reviewKey(review, context)}`);
+    // The cache only saves money: a failing cache is a miss, never a failed classification.
+    const cached = await this.cache
+      .getMany(organizationId, keys)
+      .catch(() => new Map<string, CachedVerdict>());
     const verdicts = new Map<string, CachedVerdict>();
     for (const [key, verdict] of cached) verdicts.set(key, verdict);
     const missing = reviews.flatMap((review, index) =>
@@ -85,7 +105,7 @@ export class LlmReviewClassifier implements ReviewClassifier {
         )
         .catch((error: unknown) => {
           // Earlier batches are paid for and cached: the caller books their cost.
-          throw costUsd > 0 ? new ClassificationInterruptedError(error, costUsd) : error;
+          throw costUsd > 0 ? new SpentBeforeFailureError(error, costUsd) : error;
         });
       costUsd += result.costUsd ?? 0;
       model = result.model;
@@ -109,7 +129,9 @@ export class LlmReviewClassifier implements ReviewClassifier {
         fresh.set(key, verdict);
       });
       // Cached batch by batch: a later failure does not make a retry pay for these again.
-      if (fresh.size > 0) await this.cache.setMany(organizationId, fresh, CACHE_TTL_SECONDS);
+      if (fresh.size > 0) {
+        await this.cache.setMany(organizationId, fresh, CACHE_TTL_SECONDS).catch(() => undefined);
+      }
     }
     const first = verdicts.values().next().value as CachedVerdict | undefined;
     return {

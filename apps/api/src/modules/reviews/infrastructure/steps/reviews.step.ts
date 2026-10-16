@@ -10,14 +10,14 @@ import {
   type StepResult,
 } from '../../../enrichment/index.ts';
 import { isTransient } from '../../../platform/resilience/resilience.ts';
-import { ClassificationInterruptedError } from '../../application/errors.ts';
+import { SpentBeforeFailureError } from '../../application/errors.ts';
 import type { ReviewSourceAdapter, ReviewSubjectReader } from '../../application/ports.ts';
 import type { ReviewGates } from '../../application/review-gates.ts';
 import type { ReviewMiningService } from '../../application/review-mining.service.ts';
 
 /** An outage, a quota or a transient failure: the source is re-checked within the hour. */
 function willRecover(error: unknown): boolean {
-  const cause = error instanceof ClassificationInterruptedError ? error.cause : error;
+  const cause = error instanceof SpentBeforeFailureError ? error.cause : error;
   return cause instanceof RateLimitedError || isTransient(cause);
 }
 
@@ -37,7 +37,8 @@ export const MAX_DEFERRALS = 20;
 /** When a source that failed (outage, quota) is due again. */
 const RETRY_LATER_MS = 3_600_000;
 
-type SourceOutcome = 'analysed' | 'no_reviews' | 'budget' | 'failed' | 'timed_out';
+/** `gate_closed`: the source was turned off while its reviews were being analysed (nothing kept). */
+type SourceOutcome = 'analysed' | 'no_reviews' | 'budget' | 'failed' | 'timed_out' | 'gate_closed';
 
 export interface ReviewsStepOptions {
   readonly gates: Pick<ReviewGates, 'allowedSources' | 'isAllowed'>;
@@ -138,11 +139,15 @@ export class ReviewsStep implements EnrichmentStep {
         });
         spent += outcome.costUsd;
         analysed += outcome.analysed;
-        outcomes[adapter.source] = outcome.analysed > 0 ? 'analysed' : 'no_reviews';
+        outcomes[adapter.source] = outcome.dropped
+          ? 'gate_closed'
+          : outcome.analysed > 0
+            ? 'analysed'
+            : 'no_reviews';
       } catch (error) {
         if (error instanceof StepDeferredError) throw error;
         // Model batches paid before the failure are booked.
-        if (error instanceof ClassificationInterruptedError) spent += error.costUsd;
+        if (error instanceof SpentBeforeFailureError) spent += error.costUsd;
         // A stop (cancel, shutdown) ends the step after booking what it spent.
         if (signal.aborted)
           throw new StepInterruptedError(error, spent, analysed > 0 ? ['review_insights'] : []);

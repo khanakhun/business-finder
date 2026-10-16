@@ -125,9 +125,15 @@ export interface ReviewInsightsRepository {
 export const REVIEW_INSIGHTS = Symbol('REVIEW_INSIGHTS');
 
 export interface RatingObservationRepository {
-  record(businessId: string, observation: RatingObservation, expiresAt: Date | null): Promise<void>;
-  /** Observations not expired at `now` and not after it. */
-  list(businessId: string, now: Date): Promise<RatingObservation[]>;
+  /** `organizationId`: the workspace whose source fetched it; null for the golden record's (shared). */
+  record(
+    businessId: string,
+    organizationId: string | null,
+    observation: RatingObservation,
+    expiresAt: Date | null,
+  ): Promise<void>;
+  /** The golden record's and the workspace's own observations, not expired at `now` and not after it. */
+  list(businessId: string, organizationId: string, now: Date): Promise<RatingObservation[]>;
   purgeExpired(now: Date): Promise<number>;
 }
 export const RATING_OBSERVATIONS = Symbol('RATING_OBSERVATIONS');

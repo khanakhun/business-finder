@@ -249,6 +249,9 @@ describe('licensing gates', () => {
       .from(businessRatingObservations)
       .where(eq(businessRatingObservations.businessId, id));
     expect(observations.map((o) => o.source).sort()).toEqual(['golden_record', 'google_places']);
+    // A source's observation belongs to the workspace that fetched it; the golden record's is shared.
+    expect(observations.find((o) => o.source === 'google_places')?.organizationId).toBe(org);
+    expect(observations.find((o) => o.source === 'golden_record')?.organizationId).toBeNull();
     expect(observations.every((o) => o.expiresAt !== null)).toBe(true);
 
     // Re-running replaces the Google contribution (not doubled) and adds no same-day observation.
@@ -426,6 +429,7 @@ describe('retention', () => {
     expect(row?.expiresAt).not.toBeNull();
 
     // Past the Google expiry, before the purge: the pasted part is still shown, Google's is not.
+    const started = clock.now();
     clock.set(new Date((row?.expiresAt ?? new Date()).getTime() + 60_000));
     const shown = (await owner.get(`/v1/businesses/${id}/review-insights`).expect(200)).body.insights;
     // Google's rating observations expired with it: no rating is shown from them.
@@ -449,6 +453,8 @@ describe('retention', () => {
       await db.select().from(businessRatingObservations).where(eq(businessRatingObservations.businessId, id)),
     ).toEqual([]);
     await revokeGoogle();
+    // Back to the present for whatever runs next.
+    clock.set(started);
   });
 });
 

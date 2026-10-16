@@ -117,6 +117,13 @@ describe('resilience', () => {
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
+  it('neither retries nor counts a cancellation (AbortError)', async () => {
+    const abort = Object.assign(new Error('aborted'), { name: 'AbortError' });
+    const fn = vi.fn().mockRejectedValue(abort);
+    await expect(buildPolicy(fast).execute(fn)).rejects.toBe(abort);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
   it('does not retry client-side domain errors', async () => {
     const fn = vi.fn().mockRejectedValue(new ValidationError('bad'));
     await expect(buildPolicy(fast).execute(fn)).rejects.toThrow(ValidationError);

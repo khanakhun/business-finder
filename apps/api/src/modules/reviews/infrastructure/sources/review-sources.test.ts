@@ -145,13 +145,22 @@ describe('GooglePlacesReviewsSource', () => {
 
 describe('ScraperReviewsSource', () => {
   const store = new Map<string, string>();
+  const tracked = new Map<string, number>();
   const valkey = {
     get: async (key: string) => store.get(key) ?? null,
-    set: async (key: string, value: string) => {
+    set: async (key: string, value: string, ...args: unknown[]) => {
+      if (args.includes('NX') && store.has(key)) return null;
       store.set(key, value);
       return 'OK';
     },
     del: async (key: string) => (store.delete(key) ? 1 : 0),
+    zadd: async (_key: string, score: number, member: string) => {
+      tracked.set(member, score);
+      return 1;
+    },
+    zrem: async (_key: string, member: string) => (tracked.delete(member) ? 1 : 0),
+    zrangebyscore: async (_key: string, min: number, max: number) =>
+      [...tracked].filter(([, score]) => score >= min && score <= max).map(([member]) => member),
   } as unknown as Redis;
   const source = () =>
     new ScraperReviewsSource({ clock: fixedClock(NOW), baseUrl, maxTimeSeconds: 180, valkey });
@@ -210,38 +219,70 @@ describe('ScraperReviewsSource', () => {
     expect(store.size).toBe(0);
   });
 
-  it('deletes finished jobs from the scraper, keeps a job whose download failed, and never retries a create', async () => {
-    let download = 0;
+  it('waits on the same job when its download fails, then deletes it; a create is never retried', async () => {
+    let failures = 0;
     handler = (req, res) => {
       if (req.method === 'DELETE') return json(res, 200, {});
       if (req.url === '/api/v1/jobs/job-7') return json(res, 200, { Status: 'ok' });
-      download += 1;
-      if (download === 1) return json(res, 503, {});
+      if (failures < 2) {
+        failures += 1;
+        return json(res, 503, {});
+      }
       res.writeHead(200, { 'Content-Type': 'text/csv' });
       res.end(CSV);
     };
     store.set('bf:reviews:scraper-job:org:b1', 'job-7');
-    // The first download answers 503 twice (one retry): the job and its key stay for the next attempt.
-    handler = ((inner) => (req: IncomingMessage, res: ServerResponse, body: string) => {
-      if (req.url === '/api/v1/jobs/job-7/download' && download < 2) {
-        download += 1;
-        return json(res, 503, {});
-      }
-      inner(req, res, body);
-    })(handler);
-    await expect(source().fetch(context())).rejects.toBeInstanceOf(ExternalServiceError);
+    tracked.set('job-7', NOW.getTime());
+    // 503 twice (one retry): the step waits for the same job.
+    expect(await source().fetch(context())).toEqual({ kind: 'pending', retryAfterMs: 30_000 });
     expect(requests.filter((r) => r.method === 'DELETE')).toEqual([]);
     expect(store.get('bf:reviews:scraper-job:org:b1')).toBe('job-7');
-    // Next attempt: same job, read, then deleted from the scraper and forgotten.
+    // Next attempt: same job, read, then deleted from the scraper and no longer tracked.
     expect((await source().fetch(context())).kind).toBe('reviews');
     expect(requests.filter((r) => r.method === 'DELETE').map((r) => r.url)).toEqual(['/api/v1/jobs/job-7']);
     expect(store.size).toBe(0);
+    expect(tracked.has('job-7')).toBe(false);
     expect(requests.filter((r) => r.method === 'POST')).toEqual([]);
 
     requests.length = 0;
     handler = (_req, res) => json(res, 503, {});
     await expect(source().fetch(context())).rejects.toBeInstanceOf(ExternalServiceError);
     expect(requests.filter((r) => r.method === 'POST')).toHaveLength(1);
+  });
+
+  it('keeps one job per business when two runs start at once, and forgets a job the scraper lost', async () => {
+    let next = 0;
+    handler = (req, res) => {
+      if (req.method === 'DELETE') return json(res, 200, {});
+      if (req.method === 'POST') return json(res, 201, { id: `job-n${++next}` });
+      return json(res, 404, {});
+    };
+    store.set('bf:reviews:scraper-job:org:b1', 'job-first');
+    // Another run's key won the race after our GET: our new job is deleted at once.
+    const raced = source();
+    (raced as unknown as { options: { valkey: Redis } }).options.valkey = {
+      ...valkey,
+      get: async () => null,
+    } as unknown as Redis;
+    expect((await raced.fetch(context())).kind).toBe('pending');
+    expect(requests.some((r) => r.method === 'DELETE' && r.url === '/api/v1/jobs/job-n1')).toBe(true);
+    expect(store.get('bf:reviews:scraper-job:org:b1')).toBe('job-first');
+    // The scraper no longer knows job-first: forgotten, re-checked later (retryable).
+    const gone = await source()
+      .fetch(context())
+      .catch((e: unknown) => e);
+    expect((gone as ExternalServiceError).details?.retryable).toBe(true);
+    expect(store.has('bf:reviews:scraper-job:org:b1')).toBe(false);
+  });
+
+  it('sweeps stale jobs nightly (gone ones included)', async () => {
+    tracked.clear();
+    tracked.set('job-old', NOW.getTime() - 3 * 3_600_000);
+    tracked.set('job-gone', NOW.getTime() - 3 * 3_600_000);
+    tracked.set('job-new', NOW.getTime());
+    handler = (req, res) => (req.url === '/api/v1/jobs/job-gone' ? json(res, 404, {}) : json(res, 200, {}));
+    expect(await source().deleteStaleJobs(NOW)).toBe(2);
+    expect([...tracked.keys()]).toEqual(['job-new']);
   });
 
   it('fails a failed job, and has nothing for a business without location or row', async () => {

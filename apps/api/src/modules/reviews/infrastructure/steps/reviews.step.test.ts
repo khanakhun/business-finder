@@ -2,7 +2,7 @@ import { ExternalServiceError, fixedClock, RateLimitedError, type ReviewSourceGa
 import { createLogger } from '@bf/observability';
 import { describe, expect, it, vi } from 'vitest';
 import { StepDeferredError, type StepExecution, StepInterruptedError } from '../../../enrichment/index.ts';
-import { ClassificationInterruptedError } from '../../application/errors.ts';
+import { SpentBeforeFailureError } from '../../application/errors.ts';
 import type { ReviewFetch, ReviewSourceAdapter, ReviewSubject } from '../../application/ports.ts';
 import type { ReviewBatch } from '../../domain/review.ts';
 import { MAX_DEFERRALS, ReviewsStep } from './reviews.step.ts';
@@ -180,7 +180,7 @@ describe('ReviewsStep', () => {
       0.025,
     );
     const { step, mining } = setup({ gates: [gate('google_places')], adapters: [google] });
-    mining.analyze.mockRejectedValueOnce(new ClassificationInterruptedError(new Error('model down'), 0.001));
+    mining.analyze.mockRejectedValueOnce(new SpentBeforeFailureError(new Error('model down'), 0.001));
     const result = await step.execute(execution());
     expect(result).toMatchObject({
       outcome: 'done',

@@ -46,7 +46,7 @@ export class ReviewInsightsQuery {
     const combined = !row
       ? null
       : expired
-        ? await this.mining.combinedAt(businessId, row.contributions, now)
+        ? await this.mining.combinedAt(organizationId, businessId, row.contributions, now)
         : row.combined;
     return {
       insights: combined ? toReviewInsights(businessId, combined) : null,

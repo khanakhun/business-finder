@@ -1,3 +1,4 @@
+import type { VerifiedSiteFact } from '@bf/ai';
 import type { Provenance, RegistryFact, RegistryFactKind, SourceProvider } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import {
@@ -9,6 +10,7 @@ import {
   factRegistrySnapshots,
   orgBusinesses,
   orgBusinessFacts,
+  siteFactExtractions,
   websiteSnapshots,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
@@ -22,11 +24,13 @@ import type {
 } from '../application/facts.ports.ts';
 import { sourceOfProvider } from '../domain/facts/fact-usage.ts';
 import type { Observation } from '../domain/facts/registry.ts';
+import { phoneE164 } from './site-facts.adapters.ts';
 
 // The fact registry's adapters (BF-040). Observations come from the golden record (its fields' provenance), the
-// contacts and hours (each with its provider), the primary category and the latest crawl of the business's website.
+// contacts and hours (each with its provider), the primary category, the latest crawl of the business's website and
+// the verified extraction of its pages.
 // DECISION(BF-040): the crawl's JSON-LD is not stored on `website_snapshots`, so no `jsonld` facts yet; the
-// owner-site extraction of part 2 reads the pages.
+// owner-site extraction reads the pages instead.
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 const LOGO_RANK = { 'img-logo': 0, 'og:image': 1, 'link-icon': 2 } as const;
@@ -68,6 +72,7 @@ export class DrizzleFactSources implements FactSourcesReader {
         lat: sql<number | null>`ST_Y(${businesses.location}::geometry)`,
         lng: sql<number | null>`ST_X(${businesses.location}::geometry)`,
         shortDescription: businesses.shortDescription,
+        countryCode: businesses.countryCode,
         attributes: businesses.attributes,
         updatedAt: businesses.updatedAt,
       })
@@ -105,7 +110,7 @@ export class DrizzleFactSources implements FactSourcesReader {
         observedAt: iso(business.updatedAt),
       });
 
-    const [contacts, hours, category, snapshot] = await Promise.all([
+    const [contacts, hours, category, snapshot, extraction] = await Promise.all([
       this.x.select().from(businessContacts).where(eq(businessContacts.businessId, businessId)),
       this.x
         .select()
@@ -130,6 +135,12 @@ export class DrizzleFactSources implements FactSourcesReader {
         .where(eq(websiteSnapshots.businessId, businessId))
         .orderBy(desc(websiteSnapshots.fetchedAt))
         .limit(1),
+      this.x
+        .select({ facts: siteFactExtractions.facts, observedAt: siteFactExtractions.observedAt })
+        .from(siteFactExtractions)
+        .where(eq(siteFactExtractions.businessId, businessId))
+        .orderBy(desc(siteFactExtractions.observedAt), desc(siteFactExtractions.createdAt))
+        .limit(1),
     ]);
 
     for (const contact of contacts) {
@@ -141,7 +152,7 @@ export class DrizzleFactSources implements FactSourcesReader {
               network: contact.subtype !== 'unknown' ? contact.subtype : networkOf(contact.value),
               url: contact.value,
             }
-          : contact.type === 'email'
+          : contact.type === 'email' || contact.type === 'phone' || contact.type === 'whatsapp'
             ? contact.normalizedValue
             : contact.value;
       observed.push({
@@ -197,6 +208,23 @@ export class DrizzleFactSources implements FactSourcesReader {
       const [logo] = [...crawl.logoCandidates].sort((a, b) => LOGO_RANK[a.source] - LOGO_RANK[b.source]);
       if (logo) observed.push({ ...seen, kind: 'logo', value: logo.url, sourceRef: page, confidence: 0.7 });
     }
+
+    // What the owner's pages state, verified against them (BF-040 extraction): the best provenance there is.
+    const [extracted] = extraction;
+    for (const fact of (extracted?.facts ?? []) as VerifiedSiteFact[])
+      observed.push({
+        kind: fact.kind,
+        value:
+          (fact.kind === 'phone' || fact.kind === 'whatsapp') && typeof fact.value === 'string'
+            ? phoneE164(fact.value, business.countryCode)
+            : fact.value,
+        ...(fact.locale ? { locale: fact.locale } : {}),
+        source: 'owner_site',
+        sourceRef: fact.pageUrl,
+        evidence: fact.evidence,
+        confidence: 0.85,
+        observedAt: iso(extracted?.observedAt ?? business.updatedAt),
+      });
     return observed;
   }
 }

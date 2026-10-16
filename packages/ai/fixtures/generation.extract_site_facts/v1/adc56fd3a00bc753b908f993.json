@@ -1,0 +1,322 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Horizon Immobilier SBH",
+    "businessCategory": "Agence immobilière",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://horizonimmo-sbh.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Horizon Immobilier SBH\n\nVente et location à Saint-Barthélemy depuis 1996 / Sales and rentals in Saint-Barthélemy since 1996\n\n## Nos services / Our services\n\n- Vente de villas et appartements / Villa and apartment sales\n- Location à l’année / Long-term rentals\n- Gestion de biens / Property management\n- Estimation gratuite / Free valuation\n\n## L’équipe / The team\n\n- Philippe Danet, directeur / managing director\n- Emma Rousseau, négociatrice / sales agent\n- Karim Bensaïd, gestion locative / rentals manager\n\n## Horaires / Hours\n\nLundi – vendredi / Monday – Friday : 9h – 12h30, 14h – 17h30 / 9am – 12:30pm, 2pm – 5:30pm\n\nHorizon Immobilier SBH, Rue de la République, 97133 Gustavia\nTél. / Phone : 05 90 00 50 12 · contact@horizonimmo-sbh.example\n\nNous parlons français, anglais et espagnol / We speak French, English and Spanish.\n\nCarte professionnelle CPI 0000 0000 000 000 000 — Membre FNAIM\n\n© Horizon Immobilier SBH — Honoraires / Fees — Mentions légales / Legal notice"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Vente et location à Saint-Barthélemy depuis 1996 / Sales and rentals in Saint-Barthélemy since 1996",
+        "text": "Sales and rentals in Saint-Barthélemy since 1996",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sales and rentals in Saint-Barthélemy since 1996",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1996,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Vente de villas et appartements / Villa and apartment sales",
+        "text": "Villa and apartment sales",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Location à l’année / Long-term rentals",
+        "text": "Long-term rentals",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Gestion de biens / Property management",
+        "text": "Property management",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Estimation gratuite / Free valuation",
+        "text": "Free valuation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Location saisonnière / Seasonal villa rentals",
+        "text": "Seasonal villa rentals",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Philippe Danet, directeur / managing director",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Philippe Danet",
+          "role": "managing director"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Emma Rousseau, négociatrice / sales agent",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Emma Rousseau",
+          "role": "sales agent"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Karim Bensaïd, gestion locative / rentals manager",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Karim Bensaïd",
+          "role": "rentals manager"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lundi – vendredi / Monday – Friday : 9h – 12h30, 14h – 17h30 / 9am – 12:30pm, 2pm – 5:30pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "mon",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "tue",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "wed",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "thu",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "fri",
+            "opens": "14:00",
+            "closes": "17:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Horizon Immobilier SBH, Rue de la République, 97133 Gustavia",
+        "text": "Rue de la République, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lundi – vendredi / Monday – Friday : 9h – 12h30",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "10:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. / Phone : 05 90 00 50 12",
+        "text": "05 90 00 50 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@horizonimmo-sbh.example",
+        "text": "contact@horizonimmo-sbh.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Spanish.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Spanish.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Spanish.",
+        "text": "Spanish",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

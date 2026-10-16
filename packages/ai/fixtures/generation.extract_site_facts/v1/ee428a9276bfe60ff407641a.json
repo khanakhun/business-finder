@@ -1,0 +1,338 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Kafé Kréyol",
+    "businessCategory": "Café",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://kafekreyol.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Kafé Kréyol\n\nCafé, jus frais et petits-déjeuners créoles à Lorient / Coffee, fresh juices and Creole breakfasts in Lorient\n\n## Horaires / Hours\n\nDu lundi au samedi de 6h30 à 14h / Monday to Saturday, 6:30am to 2pm. Fermé le dimanche / Closed on Sunday.\n\n## La carte / Menu\n\n- Café créole (café, cannelle, muscade) / Creole coffee — 3,50 €\n- Jus de fruits pressés / Fresh-pressed juices — 6 €\n- Bokit (sandwich frit garni) / Bokit (filled fried bread) — 9 €\n- Petit-déjeuner créole complet / Full Creole breakfast — 15 €\n- Pain perdu à la banane / Banana French toast — 8 €\n\n## Infos / Info\n\nTerrasse ombragée / Shaded terrace. Wifi gratuit / Free wifi.\n\nKafé Kréyol, Lorient, 97133 Saint-Barthélemy · 05 90 00 47 89\n\nEspèces et cartes / Cash and cards.\n\n© Kafé Kréyol"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Café, jus frais et petits-déjeuners créoles à Lorient / Coffee, fresh juices and Creole breakfasts in Lorient",
+        "text": "Coffee, fresh juices and Creole breakfasts in Lorient",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi de 6h30 à 14h / Monday to Saturday, 6:30am to 2pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "tue",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "wed",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "thu",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "fri",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "sat",
+            "opens": "06:30",
+            "closes": "14:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Café créole (café, cannelle, muscade) / Creole coffee — 3,50 €",
+        "text": "Creole coffee",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Café créole (café, cannelle, muscade) / Creole coffee — 3,50 €",
+        "text": null,
+        "price": {
+          "amount": 3.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Creole coffee"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Jus de fruits pressés / Fresh-pressed juices — 6 €",
+        "text": "Fresh-pressed juices",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Jus de fruits pressés / Fresh-pressed juices — 6 €",
+        "text": null,
+        "price": {
+          "amount": 6,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Fresh-pressed juices"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Bokit (sandwich frit garni) / Bokit (filled fried bread) — 9 €",
+        "text": "Bokit",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "bonjour@kafekreyol.example",
+        "text": "bonjour@kafekreyol.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Bokit (sandwich frit garni) / Bokit (filled fried bread) — 9 €",
+        "text": null,
+        "price": {
+          "amount": 9,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Bokit"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Petit-déjeuner créole complet / Full Creole breakfast — 15 €",
+        "text": "Full Creole breakfast",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Petit-déjeuner créole complet / Full Creole breakfast — 15 €",
+        "text": null,
+        "price": {
+          "amount": 15,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Full Creole breakfast"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Pain perdu à la banane / Banana French toast — 8 €",
+        "text": "Banana French toast",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Pain perdu à la banane / Banana French toast — 8 €",
+        "text": null,
+        "price": {
+          "amount": 8,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Banana French toast"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Kafé Kréyol, Lorient, 97133 Saint-Barthélemy",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2012,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Terrasse ombragée / Shaded terrace.",
+        "text": "Shaded terrace",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Wifi gratuit / Free wifi.",
+        "text": "Free wifi",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Kafé Kréyol, Lorient, 97133 Saint-Barthélemy",
+        "text": "Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Saint-Barthélemy · 05 90 00 47 89",
+        "text": "05 90 00 47 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Espèces et cartes / Cash and cards.",
+        "text": "Cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Espèces et cartes / Cash and cards.",
+        "text": "cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Reef Runner Charters",
+    "businessCategory": "Boat charter",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://reefrunner.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Charters](/charters) · [The boat](/boat) · [Book](/book)\n\n# Reef Runner Charters\n\nPrivate day charters and sunset cruises from Gustavia harbour on a 38-foot center console.\n\n## Charters\n\n- Full day (8 hours), up to 10 guests — $2,400\n- Half day (4 hours), up to 10 guests — $1,400\n- Sunset cruise (2 hours) — $800\n- Day trip to Saint-Martin or Anguilla — $3,200, plus customs fees\n\nAll charters include captain, fuel, snorkel gear, towels, water and soft drinks. Lunch can be arranged from €35 per person.\n\n## The boat\n\nReef Runner is a 2019 38-foot center console with twin 300 hp engines, a shade top, a marine head and a Bluetooth sound system.\n\n## Your captain\n\nCaptain Ben Carter has run charters in the Caribbean since 2006 and holds a USCG 100-ton license.\n\n## Book\n\nBook on our calendar: https://fareharbor.example/reefrunner\nQuestions? WhatsApp +590 690 00 30 12 or email ben@reefrunner.example\n\nWe operate every day, weather permitting, from 8am to 7pm.\n\nPayment by card or bank transfer; a 30% deposit secures your date.\n\n© Reef Runner Charters · Terms"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Private day charters and sunset cruises from Gustavia harbour on a 38-foot center console.",
+        "text": "Private day charters and sunset cruises from Gustavia harbour on a 38-foot center console.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Full day (8 hours), up to 10 guests — $2,400",
+        "text": "Full day (8 hours), up to 10 guests",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Full day (8 hours), up to 10 guests — $2,400",
+        "text": null,
+        "price": {
+          "amount": 2400,
+          "currency": "USD",
+          "unit": null,
+          "item": "Full day charter"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Half day (4 hours), up to 10 guests — $1,400",
+        "text": "Half day (4 hours), up to 10 guests",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Half day (4 hours), up to 10 guests — $1,400",
+        "text": null,
+        "price": {
+          "amount": 1400,
+          "currency": "USD",
+          "unit": null,
+          "item": "Half day charter"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Sunset cruise (2 hours) — $800",
+        "text": "Sunset cruise (2 hours)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sunset cruise (2 hours) — $800",
+        "text": null,
+        "price": {
+          "amount": 800,
+          "currency": "USD",
+          "unit": null,
+          "item": "Sunset cruise"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Reef Runner is a 2019 38-foot center console",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2006,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Day trip to Saint-Martin or Anguilla — $3,200, plus customs fees",
+        "text": "Day trip to Saint-Martin or Anguilla",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Day trip to Saint-Martin or Anguilla — $3,200, plus customs fees",
+        "text": null,
+        "price": {
+          "amount": 3200,
+          "currency": "USD",
+          "unit": null,
+          "item": "Day trip to Saint-Martin or Anguilla"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lunch can be arranged from €35 per person.",
+        "text": null,
+        "price": {
+          "amount": 35,
+          "currency": "EUR",
+          "unit": "per person",
+          "item": "Lunch"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "All charters include captain, fuel, snorkel gear, towels, water and soft drinks.",
+        "text": "snorkel gear, towels, water and soft drinks",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Captain Ben Carter has run charters in the Caribbean since 2006",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Ben Carter",
+          "role": "Captain"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Deep-sea fishing charter — $2,800",
+        "text": "Deep-sea fishing charter",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Book on our calendar: https://fareharbor.example/reefrunner",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://fareharbor.example/reefrunner",
+          "provider": "FareHarbor"
+        }
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Questions? WhatsApp +590 690 00 30 12",
+        "text": "+590 690 00 30 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "or email ben@reefrunner.example",
+        "text": "ben@reefrunner.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "We operate every day, weather permitting, from 8am to 7pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Payment by card or bank transfer",
+        "text": "card",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Payment by card or bank transfer",
+        "text": "bank transfer",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

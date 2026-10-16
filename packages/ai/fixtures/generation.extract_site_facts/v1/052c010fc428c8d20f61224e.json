@@ -1,0 +1,274 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Catamaran Alizé Excursions",
+    "businessCategory": "Excursions en bateau",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://catamaranalize.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Excursions](/excursions) · [Privatisation](/privatisation) · [Contact](/contact)\n\n# Catamaran Alizé Excursions\n\nJournées en catamaran autour de Saint-Barth : baignade, snorkeling, déjeuner à bord et coucher de soleil.\n\n## Nos sorties\n\n- Journée complète (9h–17h), déjeuner et boissons compris — 190 € par personne\n- Demi-journée snorkeling à Colombier (13h30–17h30) — 110 € par personne\n- Sunset cruise avec champagne (17h–19h30) — 95 € par personne\n- Enfants de moins de 12 ans : moitié prix\n\n## Privatisation\n\nLe catamaran (12 passagers maximum) se privatise à partir de 2 400 € la journée, skipper et hôtesse compris.\n\n## Le bateau\n\nCatamaran de 14 m, construit en 2016, équipé de deux cabines, d’un filet avant et d’une plateforme de baignade. Masques, tubas et paddles à bord.\n\n## Réservation\n\nDépart du ponton de Gustavia. Réservation sur https://www.getyourguide.example/catamaran-alize ou par WhatsApp au +590 690 00 17 89.\n\nCapitaine : Yoann Bernier, skipper professionnel depuis 2009.\n\nNous parlons français et anglais.\n\nCe site utilise des cookies. © Catamaran Alizé Excursions — CGV"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Journées en catamaran autour de Saint-Barth : baignade, snorkeling, déjeuner à bord et coucher de soleil.",
+        "text": "Journées en catamaran autour de Saint-Barth : baignade, snorkeling, déjeuner à bord et coucher de soleil.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Journée complète (9h–17h), déjeuner et boissons compris — 190 € par personne",
+        "text": "Journée complète",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Journée complète (9h–17h), déjeuner et boissons compris — 190 € par personne",
+        "text": null,
+        "price": {
+          "amount": 190,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Journée complète"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Demi-journée snorkeling à Colombier (13h30–17h30) — 110 € par personne",
+        "text": "Demi-journée snorkeling à Colombier",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Demi-journée snorkeling à Colombier (13h30–17h30) — 110 € par personne",
+        "text": null,
+        "price": {
+          "amount": 110,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Demi-journée snorkeling"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Sunset cruise avec champagne (17h–19h30) — 95 € par personne",
+        "text": "Sunset cruise avec champagne",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Enfants de moins de 12 ans : moitié prix",
+        "text": null,
+        "price": {
+          "amount": 55,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Demi-journée snorkeling enfant"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sunset cruise avec champagne (17h–19h30) — 95 € par personne",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Sunset cruise"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Le catamaran (12 passagers maximum) se privatise à partir de 2 400 € la journée",
+        "text": "Le catamaran se privatise",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "se privatise à partir de 2 400 € la journée, skipper et hôtesse compris.",
+        "text": null,
+        "price": {
+          "amount": 2400,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "Privatisation"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Masques, tubas et paddles à bord.",
+        "text": "Masques, tubas et paddles à bord",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Catamaran de 14 m, construit en 2016",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2009,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservation sur https://www.getyourguide.example/catamaran-alize",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.getyourguide.example/catamaran-alize",
+          "provider": "GetYourGuide"
+        }
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "ou par WhatsApp au +590 690 00 17 89.",
+        "text": "+590 690 00 17 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Capitaine : Yoann Bernier, skipper professionnel depuis 2009.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Yoann Bernier",
+          "role": "skipper professionnel"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,381 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Bijouterie Perle des Îles",
+    "businessCategory": "Bijouterie",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://perledesiles.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Collections](/collections) · [Atelier](/atelier) · [Contact](/contact)\n\n# Bijouterie Perle des Îles\n\nBijoux en or et perles de Tahiti, créés dans notre atelier de Gustavia depuis 1986.\n\n## Nos services\n\n- Création sur mesure (bagues de fiançailles, alliances)\n- Réparation et remise à taille de bijoux\n- Enfilage de colliers de perles\n- Rachat d’or\n- Gravure\n\n## L’atelier\n\nFondée en 1986 par Georges Aubin, la maison est aujourd’hui dirigée par sa fille Marion Aubin, joaillière diplômée de l’École Boulle.\n\n## Horaires\n\nDu lundi au samedi, de 9h30 à 13h et de 15h à 19h. Ouvert le dimanche matin en haute saison.\n\n## Contact\n\nBijouterie Perle des Îles, Rue de la République, 97133 Gustavia\nTél. : 05 90 00 21 23\natelier@perledesiles.example\n\nPaiement par carte, espèces et virement. Détaxe pour les visiteurs hors Union européenne.\n\nNous parlons français, anglais et espagnol.\n\n© Bijouterie Perle des Îles — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Bijoux en or et perles de Tahiti, créés dans notre atelier de Gustavia depuis 1986.",
+        "text": "Bijoux en or et perles de Tahiti, créés dans notre atelier de Gustavia depuis 1986.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Création sur mesure (bagues de fiançailles, alliances)",
+        "text": "Création sur mesure",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Réparation et remise à taille de bijoux",
+        "text": "Réparation et remise à taille de bijoux",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Enfilage de colliers de perles",
+        "text": "Enfilage de colliers de perles",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Rachat d’or",
+        "text": "Rachat d’or",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gravure",
+        "text": "Gravure",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 1986 par Georges Aubin",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1986,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Réparation de montres et changement de piles",
+        "text": "Réparation de montres",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 1986 par Georges Aubin",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Georges Aubin",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "dirigée par sa fille Marion Aubin, joaillière diplômée de l’École Boulle.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Marion Aubin",
+          "role": "joaillière"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi, de 9h30 à 13h et de 15h à 19h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "mon",
+            "opens": "15:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "tue",
+            "opens": "15:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "wed",
+            "opens": "15:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "thu",
+            "opens": "15:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "fri",
+            "opens": "15:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "sat",
+            "opens": "15:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Bijouterie Perle des Îles, Rue de la République, 97133 Gustavia",
+        "text": "Rue de la République, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 21 23",
+        "text": "05 90 00 21 23",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "atelier@perledesiles.example",
+        "text": "atelier@perledesiles.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces et virement.",
+        "text": "carte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert le dimanche matin en haute saison.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "09:30",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces et virement.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces et virement.",
+        "text": "virement",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Détaxe pour les visiteurs hors Union européenne.",
+        "text": "Détaxe pour les visiteurs hors Union européenne",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "espagnol",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

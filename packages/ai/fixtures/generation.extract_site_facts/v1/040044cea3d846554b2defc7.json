@@ -1,0 +1,408 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Spa de la Pointe",
+    "businessCategory": "Spa",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://spadelapointe.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Soins](/soins) · [Contact](/contact) · FR | EN\n\n# Spa de la Pointe\n\n**Un havre de paix entre Gustavia et Gouverneur.**\n\nMassages, hammam, sauna et soins du corps dans un jardin tropical. Notre équipe de praticiennes diplômées vous reçoit sur rendez-vous, sept jours sur sept.\n\n## Nos soins\n\n- Massage relaxant aux huiles tièdes — 60 min — 130 €\n- Massage deep tissue — 60 min — 140 €\n- Massage en duo — 60 min — 250 € pour deux\n- Gommage corps au sel de Saline — 45 min — 95 €\n- Accès hammam et sauna — 35 € par personne, 2 h\n\nTous nos massages sont aussi proposés à domicile, dans votre villa, avec un supplément de 40 € par déplacement.\n\n## Horaires\n\nOuvert tous les jours de 10h à 20h, sur rendez-vous uniquement.\n\n## Réservation\n\nRéservez par téléphone au 05 90 00 01 23, par WhatsApp au +590 690 00 78 90 ou par e-mail à bonjour@spadelapointe.example.\n\nNous parlons français et anglais.\n\nChemin de la Pointe, 97133 Gustavia\n\nParking privé. Chèques cadeaux disponibles à l’accueil.\n\nMentions légales · CGV · © Spa de la Pointe"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Un havre de paix entre Gustavia et Gouverneur.",
+        "text": "Un havre de paix entre Gustavia et Gouverneur.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massages, hammam, sauna et soins du corps dans un jardin tropical.",
+        "text": "Massages",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage relaxant aux huiles tièdes — 60 min — 130 €",
+        "text": "Massage relaxant aux huiles tièdes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage relaxant aux huiles tièdes — 60 min — 130 €",
+        "text": null,
+        "price": {
+          "amount": 130,
+          "currency": "EUR",
+          "unit": "60 min",
+          "item": "Massage relaxant aux huiles tièdes"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage deep tissue — 60 min — 140 €",
+        "text": "Massage deep tissue",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage deep tissue — 60 min — 140 €",
+        "text": null,
+        "price": {
+          "amount": 140,
+          "currency": "EUR",
+          "unit": "60 min",
+          "item": "Massage deep tissue"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage en duo — 60 min — 250 € pour deux",
+        "text": "Massage en duo",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage en duo — 60 min — 250 € pour deux",
+        "text": null,
+        "price": {
+          "amount": 250,
+          "currency": "EUR",
+          "unit": "pour deux",
+          "item": "Massage en duo"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage deep tissue — 60 min — 140 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "60 min",
+          "item": "Massage deep tissue"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gommage corps au sel de Saline — 45 min — 95 €",
+        "text": "Gommage corps au sel de Saline",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Gommage corps au sel de Saline — 45 min — 95 €",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": "45 min",
+          "item": "Gommage corps au sel de Saline"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Accès hammam et sauna — 35 € par personne, 2 h",
+        "text": "Accès hammam et sauna",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Accès hammam et sauna — 35 € par personne, 2 h",
+        "text": null,
+        "price": {
+          "amount": 35,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Accès hammam et sauna"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Tous nos massages sont aussi proposés à domicile, dans votre villa",
+        "text": "Massages à domicile, dans votre villa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "avec un supplément de 40 € par déplacement.",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "unit": "par déplacement",
+          "item": "supplément déplacement"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert tous les jours de 10h à 20h, sur rendez-vous uniquement.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "tue",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "wed",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "thu",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "fri",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sat",
+            "opens": "10:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sun",
+            "opens": "10:00",
+            "closes": "20:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Notre équipe de praticiennes diplômées vous reçoit sur rendez-vous",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Élodie Renard",
+          "role": "praticienne"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservez par téléphone au 05 90 00 01 23",
+        "text": "05 90 00 01 23",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "par WhatsApp au +590 690 00 78 90",
+        "text": "+590 690 00 78 90",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "par e-mail à bonjour@spadelapointe.example.",
+        "text": "bonjour@spadelapointe.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Chemin de la Pointe, 97133 Gustavia",
+        "text": "Chemin de la Pointe, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Parking privé.",
+        "text": "Parking privé",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

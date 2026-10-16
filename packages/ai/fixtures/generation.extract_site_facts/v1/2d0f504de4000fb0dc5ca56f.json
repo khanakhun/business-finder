@@ -1,0 +1,425 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Plongée Bleu Caraïbes",
+    "businessCategory": "Centre de plongée",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://plongeebleucaraibes.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Plongée Bleu Caraïbes\n\nCentre de plongée PADI à Gustavia, dans la réserve naturelle de Saint-Barthélemy.\n\nDeux sorties par jour, groupes de 6 plongeurs maximum, moniteurs diplômés d’État.\n\n## Prestations\n\n- Baptême de plongée (dès 8 ans) : 95 €\n- Plongée exploration (équipement inclus) : 80 €\n- Forfait 5 plongées : 360 €\n- Formation Open Water (3 à 4 jours) : 520 €\n- Sortie snorkeling (2 h) : 55 € par personne\n\n## Horaires et départs\n\nDéparts à 9h et 14h, du mardi au dimanche. Le centre est ouvert de 8h à 17h.\n\n## L’équipe\n\nNicolas Ferrand, directeur et instructeur PADI, et Léa Tessier, monitrice BPJEPS, vous accompagnent depuis 2010.\n\nPrix « Centre de l’année » de la fédération locale en 2022.\n\n## Infos\n\nQuai de la Collectivité, 97133 Gustavia\nTél. : 05 90 00 07 90 — WhatsApp : +590 690 00 56 78\ncontact@plongeebleucaraibes.example\n\nRéservez en ligne : https://bookings.example/plongee-bleu-caraibes\n\nNous parlons français, anglais et néerlandais.\n\nCe site utilise des cookies pour améliorer votre navigation. © Plongée Bleu Caraïbes"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Centre de plongée PADI à Gustavia, dans la réserve naturelle de Saint-Barthélemy.",
+        "text": "Centre de plongée PADI à Gustavia, dans la réserve naturelle de Saint-Barthélemy.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Baptême de plongée (dès 8 ans) : 95 €",
+        "text": "Baptême de plongée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Baptême de plongée (dès 8 ans) : 95 €",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Baptême de plongée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plongée exploration (équipement inclus) : 80 €",
+        "text": "Plongée exploration",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Plongée exploration (équipement inclus) : 80 €",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Plongée exploration"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Forfait 5 plongées : 360 €",
+        "text": "Forfait 5 plongées",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Forfait 5 plongées : 360 €",
+        "text": null,
+        "price": {
+          "amount": 360,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Forfait 5 plongées"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Formation Open Water (3 à 4 jours) : 520 €",
+        "text": "Formation Open Water",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Formation Open Water (3 à 4 jours) : 520 €",
+        "text": null,
+        "price": {
+          "amount": 520,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Formation Open Water"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plongée de nuit : 110 €",
+        "text": "Plongée de nuit",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Sortie snorkeling (2 h) : 55 € par personne",
+        "text": "Sortie snorkeling",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sortie snorkeling (2 h) : 55 € par personne",
+        "text": null,
+        "price": {
+          "amount": 55,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Sortie snorkeling"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Le centre est ouvert de 8h à 17h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "17:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Nicolas Ferrand, directeur et instructeur PADI",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Nicolas Ferrand",
+          "role": "directeur et instructeur PADI"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Léa Tessier, monitrice BPJEPS",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Léa Tessier",
+          "role": "monitrice BPJEPS"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "vous accompagnent depuis 2010.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2010,
+        "booking": null
+      },
+      {
+        "kind": "award",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Prix « Centre de l’année » de la fédération locale en 2022.",
+        "text": "Prix « Centre de l’année » de la fédération locale en 2022",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "info@plongeebleucaraibes.example",
+        "text": "info@plongeebleucaraibes.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Quai de la Collectivité, 97133 Gustavia",
+        "text": "Quai de la Collectivité, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 07 90",
+        "text": "05 90 00 07 90",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 56 78",
+        "text": "+590 690 00 56 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@plongeebleucaraibes.example",
+        "text": "contact@plongeebleucaraibes.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservez en ligne : https://bookings.example/plongee-bleu-caraibes",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://bookings.example/plongee-bleu-caraibes",
+          "provider": "bookings.example"
+        }
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et néerlandais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et néerlandais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et néerlandais.",
+        "text": "néerlandais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

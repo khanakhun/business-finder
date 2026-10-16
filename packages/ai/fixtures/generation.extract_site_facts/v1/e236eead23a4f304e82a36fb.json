@@ -1,0 +1,399 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Ô Spa Saint-Barth",
+    "businessCategory": "Spa",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://ospa-sbh.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Ô Spa Saint-Barth\n\nSpa et soins à domicile à Saint-Jean / Spa and in-villa treatments in Saint-Jean\n\n## Soins / Treatments\n\n- Massage signature Ô (60 min) / Ô signature massage (60 min) — 140 €\n- Massage aux pierres chaudes (75 min) / Hot stone massage (75 min) — 170 €\n- Soin visage hydratant (50 min) / Hydrating facial (50 min) — 120 €\n- Rituel duo (90 min, 2 pers.) / Couples ritual (90 min, 2 pax) — 380 €\n\nÀ domicile / In-villa : +40 € par praticienne / per therapist.\n\n## Horaires / Hours\n\nTous les jours de 9h à 20h / Every day 9am to 8pm, sur rendez-vous / by appointment.\n\n## Réserver / Book\n\n05 90 00 49 01 · WhatsApp +590 690 00 49 01 · spa@ospa-sbh.example\nEn ligne / Online : https://www.treatwell.example/o-spa-saint-barth\n\nÔ Spa, Les Jardins de Saint-Jean, 97133 Saint-Barthélemy\n\n« Le massage signature est divin, et l’accueil adorable. » — Claire, Lyon\n\"The couples ritual was the best part of our trip.\" — Emily & Dan, Chicago\n\nNous parlons français et anglais / We speak French and English. Parking gratuit / Free parking.\n\n© Ô Spa Saint-Barth — Mentions légales / Legal notice"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Spa et soins à domicile à Saint-Jean / Spa and in-villa treatments in Saint-Jean",
+        "text": "Spa and in-villa treatments in Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Massage signature Ô (60 min) / Ô signature massage (60 min) — 140 €",
+        "text": "Ô signature massage (60 min)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage signature Ô (60 min) / Ô signature massage (60 min) — 140 €",
+        "text": null,
+        "price": {
+          "amount": 140,
+          "currency": "EUR",
+          "unit": "60 min",
+          "item": "Ô signature massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Massage aux pierres chaudes (75 min) / Hot stone massage (75 min) — 170 €",
+        "text": "Hot stone massage (75 min)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage aux pierres chaudes (75 min) / Hot stone massage (75 min) — 170 €",
+        "text": null,
+        "price": {
+          "amount": 170,
+          "currency": "EUR",
+          "unit": "75 min",
+          "item": "Hot stone massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Soin visage hydratant (50 min) / Hydrating facial (50 min) — 120 €",
+        "text": "Hydrating facial (50 min)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Soin visage hydratant (50 min) / Hydrating facial (50 min) — 120 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "50 min",
+          "item": "Hydrating facial"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Rituel duo (90 min, 2 pers.) / Couples ritual (90 min, 2 pax) — 380 €",
+        "text": "Couples ritual (90 min, 2 pax)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hot stone massage (75 min) — 170 €",
+        "text": null,
+        "price": {
+          "amount": 160,
+          "currency": "EUR",
+          "unit": "75 min",
+          "item": "Hot stone massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Rituel duo (90 min, 2 pers.) / Couples ritual (90 min, 2 pax) — 380 €",
+        "text": null,
+        "price": {
+          "amount": 380,
+          "currency": "EUR",
+          "unit": "90 min",
+          "item": "Couples ritual"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "À domicile / In-villa : +40 € par praticienne / per therapist.",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "unit": "per therapist",
+          "item": "In-villa supplement"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tous les jours de 9h à 20h / Every day 9am to 8pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "20:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "05 90 00 49 01 · WhatsApp +590 690 00 49 01",
+        "text": "05 90 00 49 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "05 90 00 49 01 · WhatsApp +590 690 00 49 01",
+        "text": "+590 690 00 49 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "spa@ospa-sbh.example",
+        "text": "spa@ospa-sbh.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+40 € par praticienne / per therapist.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sophie Marchand",
+          "role": "therapist"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "En ligne / Online : https://www.treatwell.example/o-spa-saint-barth",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.treatwell.example/o-spa-saint-barth",
+          "provider": "Treatwell"
+        }
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ô Spa, Les Jardins de Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Les Jardins de Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Le massage signature est divin, et l’accueil adorable. » — Claire, Lyon",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Le massage signature est divin, et l’accueil adorable.",
+          "attribution": "Claire, Lyon"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"The couples ritual was the best part of our trip.\" — Emily & Dan, Chicago",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "The couples ritual was the best part of our trip.",
+          "attribution": "Emily & Dan, Chicago"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / We speak French and English.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / We speak French and English.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Parking gratuit / Free parking.",
+        "text": "Free parking",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

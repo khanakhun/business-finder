@@ -1,0 +1,393 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Boulangerie des Flamands",
+    "businessCategory": "Boulangerie",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://boulangeriedesflamands.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Boulangerie des Flamands\n\nPain au levain, viennoiseries pur beurre et pâtisseries maison, cuits chaque nuit à Flamands.\n\n**Ouvert du mardi au dimanche de 6h à 13h. Fermé le lundi.**\n\n## Nos spécialités\n\n- Baguette tradition — 1,40 €\n- Pain au levain 500 g — 4,20 €\n- Croissant pur beurre — 1,60 €\n- Flan pâtissier (la part) — 3,80 €\n- Gâteaux d’anniversaire sur commande (48 h à l’avance)\n\n## Qui sommes-nous ?\n\nFondée en 1987 par la famille Questel, la boulangerie est aujourd’hui tenue par Julien Questel, artisan boulanger, et son équipe de six personnes.\n\nNous livrons les hôtels et les villas de Flamands, Colombier et Anse des Cayes chaque matin.\n\n## Nous trouver\n\nAnse des Flamands, 97133 Saint-Barthélemy\nTéléphone : 05 90 00 00 78\nPaiement par carte bancaire à partir de 5 €.\n\nCe site utilise des cookies strictement nécessaires à son fonctionnement.\n\n© Boulangerie des Flamands — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pain au levain, viennoiseries pur beurre et pâtisseries maison, cuits chaque nuit à Flamands.",
+        "text": "Pain au levain, viennoiseries pur beurre et pâtisseries maison, cuits chaque nuit à Flamands.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert du mardi au dimanche de 6h à 13h. Fermé le lundi.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "06:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "wed",
+            "opens": "06:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "thu",
+            "opens": "06:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "fri",
+            "opens": "06:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "sat",
+            "opens": "06:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "sun",
+            "opens": "06:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Baguette tradition — 1,40 €",
+        "text": "Baguette tradition",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Baguette tradition — 1,40 €",
+        "text": null,
+        "price": {
+          "amount": 1.4,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Baguette tradition"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pain au levain 500 g — 4,20 €",
+        "text": "Pain au levain 500 g",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Pain au levain 500 g — 4,20 €",
+        "text": null,
+        "price": {
+          "amount": 4.2,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Pain au levain 500 g"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Croissant pur beurre — 1,60 €",
+        "text": "Croissant pur beurre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert du mardi au dimanche de 6h à 13h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "wed",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "thu",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "fri",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "sat",
+            "opens": "06:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "sun",
+            "opens": "06:30",
+            "closes": "14:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Croissant pur beurre — 1,60 €",
+        "text": null,
+        "price": {
+          "amount": 1.6,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Croissant pur beurre"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Flan pâtissier (la part) — 3,80 €",
+        "text": "Flan pâtissier",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Flan pâtissier (la part) — 3,80 €",
+        "text": null,
+        "price": {
+          "amount": 3.8,
+          "currency": "EUR",
+          "unit": "la part",
+          "item": "Flan pâtissier"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gâteaux d’anniversaire sur commande (48 h à l’avance)",
+        "text": "Gâteaux d’anniversaire sur commande",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 1987 par la famille Questel",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1987,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "tenue par Julien Questel, artisan boulanger",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Julien Questel",
+          "role": "artisan boulanger"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous livrons les hôtels et les villas de Flamands, Colombier et Anse des Cayes chaque matin.",
+        "text": "Livraison des hôtels et villas chaque matin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@boulangeriedesflamands.example",
+        "text": "contact@boulangeriedesflamands.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous livrons les hôtels et les villas de Flamands, Colombier et Anse des Cayes chaque matin.",
+        "text": "Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous livrons les hôtels et les villas de Flamands, Colombier et Anse des Cayes chaque matin.",
+        "text": "Colombier",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous livrons les hôtels et les villas de Flamands, Colombier et Anse des Cayes chaque matin.",
+        "text": "Anse des Cayes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Anse des Flamands, 97133 Saint-Barthélemy",
+        "text": "Anse des Flamands, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Téléphone : 05 90 00 00 78",
+        "text": "05 90 00 00 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte bancaire à partir de 5 €.",
+        "text": "carte bancaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

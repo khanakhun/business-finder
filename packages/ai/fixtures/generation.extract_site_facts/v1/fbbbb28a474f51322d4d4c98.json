@@ -1,0 +1,636 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Atelier Coiffure Gustavia",
+    "businessCategory": "Salon de coiffure",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://ateliercoiffuregustavia.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Prestations](/prestations) · [Rendez-vous](/rendez-vous)\n\n# Atelier Coiffure Gustavia\n\nCoiffeur femmes, hommes et enfants au cœur de Gustavia.\n\nDepuis 2012, Camille et son équipe prennent soin de vos cheveux dans une ambiance détendue. Produits professionnels sans sulfates.\n\n## Horaires\n\nDu lundi au samedi, 9h30–12h / 14h–18h30. Sur rendez-vous.\n\n## L’équipe\n\n- Camille Aubert, fondatrice et coloriste\n- Nadia Petit, coiffeuse\n- Tom Lefèvre, barbier\n\nPrise de rendez-vous en ligne sur Planity : https://www.planity.example/atelier-coiffure-gustavia\n\nRue du Roi Oscar II, 97133 Gustavia\nTél. : 05 90 00 00 91 — WhatsApp : +590 690 00 45 67\n\nNous parlons français, anglais et portugais.\n\n© Atelier Coiffure Gustavia — Site réalisé par Example Studio — [Mentions légales](/mentions)"
+      },
+      {
+        "id": "p2",
+        "url": "https://ateliercoiffuregustavia.example/prestations",
+        "kind": "services",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Prestations](/prestations) · [Rendez-vous](/rendez-vous)\n\n# Nos prestations et tarifs\n\nTarifs indicatifs, un devis est établi avant chaque prestation technique.\n\n## Femmes\n\n- Coupe femme (shampoing, coupe, brushing) — 55 €\n- Brushing seul — 30 €\n- Couleur racines — à partir de 65 €\n- Balayage — à partir de 120 €\n- Lissage brésilien — 250 €\n\n## Hommes\n\n- Coupe homme — 32 €\n- Taille de barbe — 18 €\n- Coupe + barbe — 45 €\n\n## Enfants\n\n- Coupe enfant (moins de 12 ans) — 22 €\n\n## Mariages et événements\n\nCoiffure de mariée à domicile ou dans votre villa, essai compris — sur devis.\n\nPaiement par carte, espèces ou Lydia.\n\n© Atelier Coiffure Gustavia"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Coiffeur femmes, hommes et enfants au cœur de Gustavia.",
+        "text": "Coiffeur femmes, hommes et enfants au cœur de Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Depuis 2012, Camille et son équipe prennent soin de vos cheveux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2012,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi, 9h30–12h / 14h–18h30. Sur rendez-vous.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "mon",
+            "opens": "14:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "tue",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "tue",
+            "opens": "14:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "wed",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "wed",
+            "opens": "14:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "thu",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "thu",
+            "opens": "14:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "fri",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "fri",
+            "opens": "14:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "sat",
+            "opens": "09:30",
+            "closes": "12:00"
+          },
+          {
+            "day": "sat",
+            "opens": "14:00",
+            "closes": "18:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Camille Aubert, fondatrice et coloriste",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Camille Aubert",
+          "role": "fondatrice et coloriste"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Nadia Petit, coiffeuse",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Nadia Petit",
+          "role": "coiffeuse"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tom Lefèvre, barbier",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Tom Lefèvre",
+          "role": "barbier"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Prise de rendez-vous en ligne sur Planity : https://www.planity.example/atelier-coiffure-gustavia",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.planity.example/atelier-coiffure-gustavia",
+          "provider": "Planity"
+        }
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Rue du Roi Oscar II, 97133 Gustavia",
+        "text": "Rue du Roi Oscar II, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 00 91",
+        "text": "05 90 00 00 91",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Extensions de cheveux naturels — à partir de 350 €",
+        "text": "Extensions de cheveux naturels",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 45 67",
+        "text": "+590 690 00 45 67",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et portugais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et portugais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et portugais.",
+        "text": "portugais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Coupe femme (shampoing, coupe, brushing) — 55 €",
+        "text": "Coupe femme",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Coupe femme (shampoing, coupe, brushing) — 55 €",
+        "text": null,
+        "price": {
+          "amount": 55,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Coupe femme"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Brushing seul — 30 €",
+        "text": "Brushing seul",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Brushing seul — 30 €",
+        "text": null,
+        "price": {
+          "amount": 30,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Brushing seul"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Camille et son équipe prennent soin de vos cheveux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Léa Martin",
+          "role": "apprentie"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Couleur racines — à partir de 65 €",
+        "text": "Couleur racines",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Couleur racines — à partir de 65 €",
+        "text": null,
+        "price": {
+          "amount": 65,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Couleur racines"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Balayage — à partir de 120 €",
+        "text": "Balayage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Balayage — à partir de 120 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Balayage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Lissage brésilien — 250 €",
+        "text": "Lissage brésilien",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Lissage brésilien — 250 €",
+        "text": null,
+        "price": {
+          "amount": 250,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Lissage brésilien"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Coupe homme — 32 €",
+        "text": "Coupe homme",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Coupe homme — 32 €",
+        "text": null,
+        "price": {
+          "amount": 32,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Coupe homme"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Taille de barbe — 18 €",
+        "text": "Taille de barbe",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Balayage — à partir de 120 €",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Balayage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Taille de barbe — 18 €",
+        "text": null,
+        "price": {
+          "amount": 18,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Taille de barbe"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Coupe + barbe — 45 €",
+        "text": "Coupe + barbe",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Coupe + barbe — 45 €",
+        "text": null,
+        "price": {
+          "amount": 45,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Coupe + barbe"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Coupe enfant (moins de 12 ans) — 22 €",
+        "text": "Coupe enfant (moins de 12 ans)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Coupe enfant (moins de 12 ans) — 22 €",
+        "text": null,
+        "price": {
+          "amount": 22,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Coupe enfant"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Coiffure de mariée à domicile ou dans votre villa, essai compris — sur devis.",
+        "text": "Coiffure de mariée à domicile",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces ou Lydia.",
+        "text": "carte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces ou Lydia.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Le Cabanon de Lorient",
+    "businessCategory": "Restaurant",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://lecabanonlorient.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) [Carte](/carte) [Événements](/evenements) [Contact](/contact)\n\n# Le Cabanon de Lorient\n\n*Un cabanon de plage, une cuisine simple et des couchers de soleil.*\n\nLe Cabanon est un restaurant de plage à Lorient, ouvert à l’année. Grillades, salades et cocktails servis face à la mer.\n\n## Horaires d’ouverture\n\nDu mardi au dimanche, 11h30–22h30. Fermé le lundi.\n\n## À la carte\n\n- Poisson grillé du jour — 32,00 €\n- Salade César au poulet — 19,00 €\n- Brochettes de crevettes — 27,00 €\n- Planche de charcuterie à partager — 24,00 €\n\n## Privatisation\n\nPrivatisez le Cabanon pour vos soirées : à partir de 1 200 € la soirée, jusqu’à 60 personnes.\n\n## Infos pratiques\n\nParking à 50 m, chiens acceptés en terrasse. Chèques vacances acceptés.\n\nLe Cabanon de Lorient — Route de Lorient, 97133 Saint-Barthélemy — 05 90 00 00 56\n\nSuivez-nous sur Instagram et Facebook. © 2024 Le Cabanon de Lorient. Site créé par Example Agency."
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Un cabanon de plage, une cuisine simple et des couchers de soleil.",
+        "text": "Un cabanon de plage, une cuisine simple et des couchers de soleil.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du mardi au dimanche, 11h30–22h30. Fermé le lundi.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "11:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "wed",
+            "opens": "11:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "thu",
+            "opens": "11:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "fri",
+            "opens": "11:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "sat",
+            "opens": "11:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "sun",
+            "opens": "11:30",
+            "closes": "22:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Poisson grillé du jour — 32,00 €",
+        "text": "Poisson grillé du jour",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Poisson grillé du jour — 32,00 €",
+        "text": null,
+        "price": {
+          "amount": 32,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Poisson grillé du jour"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Salade César au poulet — 19,00 €",
+        "text": "Salade César au poulet",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Salade César au poulet — 19,00 €",
+        "text": null,
+        "price": {
+          "amount": 19,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Salade César au poulet"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Brunch le dimanche de 10h à 14h",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "10:00",
+            "closes": "14:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Brochettes de crevettes — 27,00 €",
+        "text": "Brochettes de crevettes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Brochettes de crevettes — 27,00 €",
+        "text": null,
+        "price": {
+          "amount": 27,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Brochettes de crevettes"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Planche de charcuterie à partager — 24,00 €",
+        "text": "Planche de charcuterie à partager",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Planche de charcuterie à partager — 24,00 €",
+        "text": null,
+        "price": {
+          "amount": 24,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Planche de charcuterie"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Privatisez le Cabanon pour vos soirées : à partir de 1 200 € la soirée, jusqu’à 60 personnes.",
+        "text": "Privatisez le Cabanon pour vos soirées",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "à partir de 1 200 € la soirée, jusqu’à 60 personnes.",
+        "text": null,
+        "price": {
+          "amount": 1200,
+          "currency": "EUR",
+          "unit": "la soirée",
+          "item": "Privatisation"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "à partir de 1 500 € la soirée",
+        "text": null,
+        "price": {
+          "amount": 1500,
+          "currency": "EUR",
+          "unit": "la soirée",
+          "item": "Privatisation"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Parking à 50 m, chiens acceptés en terrasse.",
+        "text": "Parking à 50 m",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Parking à 50 m, chiens acceptés en terrasse.",
+        "text": "chiens acceptés en terrasse",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Chèques vacances acceptés.",
+        "text": "Chèques vacances",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Route de Lorient, 97133 Saint-Barthélemy",
+        "text": "Route de Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Route de Lorient, 97133 Saint-Barthélemy — 05 90 00 00 56",
+        "text": "05 90 00 00 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

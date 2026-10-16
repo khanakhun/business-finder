@@ -1,0 +1,407 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Scoot’île",
+    "businessCategory": "Location de scooters",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://scootile.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Scoot’île — Location de scooters et quads\n\nLe moyen le plus simple de se garer à Gustavia.\n\n## Tarifs\n\n| Véhicule | 1 jour | 3 jours | 7 jours |\n|---|---|---|---|\n| Scooter 50 cm³ | 40 € | 105 € | 210 € |\n| Scooter 125 cm³ | 50 € | 135 € | 280 € |\n| Quad 300 cm³ | 90 € | 240 € | 490 € |\n\nCasque, antivol et plein d’essence inclus. Caution de 500 € par carte bancaire. Permis B ou A1 pour les 125 cm³.\n\n## Horaires\n\nTous les jours de 8h à 18h30, de novembre à mai. Hors saison, sur réservation.\n\n## Nous trouver\n\nScoot’île, Rue de la Paix, 97133 Gustavia, face au parking de la gendarmerie.\nTél. : 05 90 00 18 90 — WhatsApp : +590 690 00 18 90 — resa@scootile.example\n\nLivraison gratuite à l’aéroport et au port.\n\n© Scoot’île — Conditions de location"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Le moyen le plus simple de se garer à Gustavia.",
+        "text": "Le moyen le plus simple de se garer à Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Scoot’île — Location de scooters et quads",
+        "text": "Location de scooters et quads",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 50 cm³ | 40 € | 105 € | 210 €",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "unit": "1 jour",
+          "item": "Scooter 50 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 50 cm³ | 40 € | 105 € | 210 €",
+        "text": null,
+        "price": {
+          "amount": 105,
+          "currency": "EUR",
+          "unit": "3 jours",
+          "item": "Scooter 50 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 50 cm³ | 40 € | 105 € | 210 €",
+        "text": null,
+        "price": {
+          "amount": 210,
+          "currency": "EUR",
+          "unit": "7 jours",
+          "item": "Scooter 50 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 125 cm³ | 50 € | 135 € | 280 €",
+        "text": null,
+        "price": {
+          "amount": 50,
+          "currency": "EUR",
+          "unit": "1 jour",
+          "item": "Scooter 125 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 125 cm³ | 50 € | 135 € | 280 €",
+        "text": null,
+        "price": {
+          "amount": 135,
+          "currency": "EUR",
+          "unit": "3 jours",
+          "item": "Scooter 125 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 125 cm³ | 50 € | 135 € | 280 €",
+        "text": null,
+        "price": {
+          "amount": 280,
+          "currency": "EUR",
+          "unit": "7 jours",
+          "item": "Scooter 125 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vélos électriques — 35 € par jour",
+        "text": "Location de vélos électriques",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quad 300 cm³ | 90 € | 240 € | 490 €",
+        "text": null,
+        "price": {
+          "amount": 90,
+          "currency": "EUR",
+          "unit": "1 jour",
+          "item": "Quad 300 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quad 300 cm³ | 90 € | 240 € | 490 €",
+        "text": null,
+        "price": {
+          "amount": 240,
+          "currency": "EUR",
+          "unit": "3 jours",
+          "item": "Quad 300 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quad 300 cm³ | 90 € | 240 € | 490 €",
+        "text": null,
+        "price": {
+          "amount": 490,
+          "currency": "EUR",
+          "unit": "7 jours",
+          "item": "Quad 300 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Scooter 50 cm³ | 40 €",
+        "text": "Scooter 50 cm³",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Scooter 125 cm³ | 50 €",
+        "text": "Scooter 125 cm³",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Quad 300 cm³ | 90 €",
+        "text": "Quad 300 cm³",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Scooter 50 cm³ | 40 € | 105 € | 210 €",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": "2 jours",
+          "item": "Scooter 50 cm³"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Casque, antivol et plein d’essence inclus.",
+        "text": "Casque, antivol et plein d’essence inclus",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tous les jours de 8h à 18h30, de novembre à mai.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "18:30"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "18:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Scoot’île, Rue de la Paix, 97133 Gustavia",
+        "text": "Rue de la Paix, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 18 90",
+        "text": "05 90 00 18 90",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 18 90",
+        "text": "+590 690 00 18 90",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "resa@scootile.example",
+        "text": "resa@scootile.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Livraison gratuite à l’aéroport et au port.",
+        "text": "Livraison gratuite à l’aéroport et au port",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,730 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "La Table de Saint-Jean",
+    "businessCategory": "Restaurant",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://latabledesaintjean.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "Menu · [Accueil](/) · [La carte](/la-carte) · [Réserver](/reserver) · [Contact](/contact)\n\n# La Table de Saint-Jean\n\n**Cuisine créole et poissons du jour, les pieds dans le sable**\n\nDepuis 1998, La Table de Saint-Jean vous accueille sur la baie de Saint-Jean. Le chef Lucas Vernier travaille le poisson de la criée de Gustavia et les légumes des jardins de Grand-Fond.\n\nOuvert tous les jours sauf le lundi, de midi à minuit.\n\n## Nos services\n\n- Déjeuner et dîner en terrasse\n- Privatisation pour mariages et anniversaires\n- Plateaux de fruits de mer à emporter\n- Transats et parasols sur la plage\n\n## L’équipe\n\n- Lucas Vernier, chef de cuisine\n- Inès Morel, directrice de salle\n\n## Avis de nos clients\n\n« Une langouste grillée inoubliable, et un service aux petits soins. » — Thomas et Claire, mariés ici en 2023\n\nNous parlons français et anglais. Parking gratuit devant le restaurant.\n\nRéservations : 05 90 00 00 34 ou [reservation@latabledesaintjean.example](mailto:reservation@latabledesaintjean.example)\n\nPlage de Saint-Jean, 97133 Saint-Barthélemy\n\n© La Table de Saint-Jean · Mentions légales · Politique de confidentialité"
+      },
+      {
+        "id": "p2",
+        "url": "https://latabledesaintjean.example/la-carte",
+        "kind": "menu",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [La carte](/la-carte) · [Réserver](/reserver) · [Contact](/contact)\n\n# La carte\n\nNos plats sont préparés avec des produits frais, la carte change selon les arrivages.\n\n## Entrées\n\n- Accras de morue, sauce chien — 14 €\n- Tartare de thon rouge, mangue et coriandre — 22 €\n- Salade de chèvre chaud — 18 €\n\n## Plats\n\n- Langouste grillée (selon arrivage) — 78 €\n- Dorade coryphène, riz créole — 34 €\n- Colombo de poulet — 29 €\n- Burger de la Table, frites maison — 26 €\n\n## Desserts\n\n- Tarte tatin à l’ananas — 13 €\n- Moelleux au chocolat — 12 €\n\n## Menu du midi\n\nEntrée + plat ou plat + dessert — 38 € par personne, du mardi au vendredi.\n\nPrix nets en euros, taxes et service compris.\n\n© La Table de Saint-Jean"
+      },
+      {
+        "id": "p3",
+        "url": "https://latabledesaintjean.example/reserver",
+        "kind": "booking",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [La carte](/la-carte) · [Réserver](/reserver) · [Contact](/contact)\n\n# Réserver une table\n\nRéservez en ligne en quelques clics sur TheFork : https://www.thefork.example/restaurant/la-table-de-saint-jean\n\nPour les groupes de plus de 10 personnes, contactez-nous par téléphone au 05 90 00 00 34 ou par WhatsApp au +590 690 00 12 34.\n\nNous acceptons les cartes Visa, Mastercard et American Express.\n\nLe restaurant est fermé le lundi.\n\n© La Table de Saint-Jean"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cuisine créole et poissons du jour, les pieds dans le sable",
+        "text": "Cuisine créole et poissons du jour, les pieds dans le sable",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Depuis 1998, La Table de Saint-Jean vous accueille sur la baie de Saint-Jean.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1998,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert tous les jours sauf le lundi, de midi à minuit.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "12:00",
+            "closes": "00:00"
+          },
+          {
+            "day": "wed",
+            "opens": "12:00",
+            "closes": "00:00"
+          },
+          {
+            "day": "thu",
+            "opens": "12:00",
+            "closes": "00:00"
+          },
+          {
+            "day": "fri",
+            "opens": "12:00",
+            "closes": "00:00"
+          },
+          {
+            "day": "sat",
+            "opens": "12:00",
+            "closes": "00:00"
+          },
+          {
+            "day": "sun",
+            "opens": "12:00",
+            "closes": "00:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Déjeuner et dîner en terrasse",
+        "text": "Déjeuner et dîner en terrasse",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Privatisation pour mariages et anniversaires",
+        "text": "Privatisation pour mariages et anniversaires",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plateaux de fruits de mer à emporter",
+        "text": "Plateaux de fruits de mer à emporter",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Transats et parasols sur la plage",
+        "text": "Transats et parasols sur la plage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lucas Vernier, chef de cuisine",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Lucas Vernier",
+          "role": "chef de cuisine"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Inès Morel, directrice de salle",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Inès Morel",
+          "role": "directrice de salle"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Une langouste grillée inoubliable, et un service aux petits soins. » — Thomas et Claire, mariés ici en 2023",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Une langouste grillée inoubliable, et un service aux petits soins.",
+          "attribution": "Thomas et Claire"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservations : 05 90 00 00 34",
+        "text": "05 90 00 00 43",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français et anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Parking gratuit devant le restaurant.",
+        "text": "Parking gratuit",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservations : 05 90 00 00 34",
+        "text": "05 90 00 00 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "reservation@latabledesaintjean.example",
+        "text": "reservation@latabledesaintjean.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plage de Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Plage de Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Entrées",
+        "text": "Entrées",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Accras de morue, sauce chien — 14 €",
+        "text": "Accras de morue, sauce chien",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Accras de morue, sauce chien — 14 €",
+        "text": null,
+        "price": {
+          "amount": 14,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Accras de morue"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Tartare de thon rouge, mangue et coriandre — 22 €",
+        "text": "Tartare de thon rouge, mangue et coriandre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Tartare de thon rouge, mangue et coriandre — 22 €",
+        "text": null,
+        "price": {
+          "amount": 22,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tartare de thon rouge"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Salade de chèvre chaud — 18 €",
+        "text": "Salade de chèvre chaud",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Avis de nos clients",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Service lent et plats tièdes, déçu pour le prix.",
+          "attribution": "Marc B., Google"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Salade de chèvre chaud — 18 €",
+        "text": null,
+        "price": {
+          "amount": 18,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Salade de chèvre chaud"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Plats",
+        "text": "Plats",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Langouste grillée (selon arrivage) — 78 €",
+        "text": "Langouste grillée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Langouste grillée (selon arrivage) — 78 €",
+        "text": null,
+        "price": {
+          "amount": 78,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Langouste grillée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Dorade coryphène, riz créole — 34 €",
+        "text": "Dorade coryphène, riz créole",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Dorade coryphène, riz créole — 34 €",
+        "text": null,
+        "price": {
+          "amount": 34,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Dorade coryphène"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Colombo de poulet — 29 €",
+        "text": "Colombo de poulet",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Colombo de poulet — 29 €",
+        "text": null,
+        "price": {
+          "amount": 29,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Colombo de poulet"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Burger de la Table, frites maison — 26 €",
+        "text": "Burger de la Table, frites maison",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Burger de la Table, frites maison — 26 €",
+        "text": null,
+        "price": {
+          "amount": 26,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Burger de la Table"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Filet de bœuf, sauce au poivre — 42 €",
+        "text": "Filet de bœuf, sauce au poivre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Desserts",
+        "text": "Desserts",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Tarte tatin à l’ananas — 13 €",
+        "text": "Tarte tatin à l’ananas",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Tarte tatin à l’ananas — 13 €",
+        "text": null,
+        "price": {
+          "amount": 13,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tarte tatin à l’ananas"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Moelleux au chocolat — 12 €",
+        "text": "Moelleux au chocolat",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Moelleux au chocolat — 12 €",
+        "text": null,
+        "price": {
+          "amount": 12,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Moelleux au chocolat"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Menu du midi",
+        "text": "Menu du midi",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Entrée + plat ou plat + dessert — 38 € par personne, du mardi au vendredi.",
+        "text": null,
+        "price": {
+          "amount": 38,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Menu du midi"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p3",
+        "locale": null,
+        "evidence": "Réservez en ligne en quelques clics sur TheFork : https://www.thefork.example/restaurant/la-table-de-saint-jean",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.thefork.example/restaurant/la-table-de-saint-jean",
+          "provider": "TheFork"
+        }
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p3",
+        "locale": null,
+        "evidence": "ou par WhatsApp au +590 690 00 12 34.",
+        "text": "+590 690 00 12 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p3",
+        "locale": "fr",
+        "evidence": "Nous acceptons les cartes Visa, Mastercard et American Express.",
+        "text": "Visa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p3",
+        "locale": "fr",
+        "evidence": "Nous acceptons les cartes Visa, Mastercard et American Express.",
+        "text": "Mastercard",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

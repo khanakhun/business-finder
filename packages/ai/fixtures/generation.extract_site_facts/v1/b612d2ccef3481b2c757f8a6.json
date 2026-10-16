@@ -1,0 +1,709 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "The Lorient Grill",
+    "businessCategory": "Restaurant",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://lorientgrill.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Menu](/menu) · [Reservations](/reservations) · [Contact](/contact)\n\n# The Lorient Grill\n\n**Wood-fired steaks and local catch, steps from Lorient beach.**\n\nOpen since 2011, The Lorient Grill is run by chef Daniel Okafor and his wife Priya, who looks after the dining room and the wine list.\n\n## Hours\n\nDinner only, Tuesday to Sunday, 6:30pm–10:30pm. Closed Mondays.\n\n## Private events\n\nWe host rehearsal dinners and birthdays for up to 40 guests. Set menus from €95 per person.\n\n## Reviews from our guests\n\n\"The ribeye was perfect and Priya picked a wonderful wine for us.\" — Mark & Susan, Boston\n\n## Contact\n\nThe Lorient Grill, Route de Lorient, 97133 Saint-Barthélemy\nCall +590 590 00 24 56 or email book@lorientgrill.example\n\nReserve online with Resy: https://resy.example/the-lorient-grill\n\nWe speak English and French. Free parking behind the restaurant.\n\n© The Lorient Grill · Legal notice · Cookie policy"
+      },
+      {
+        "id": "p2",
+        "url": "https://lorientgrill.example/menu",
+        "kind": "menu",
+        "lang": "en",
+        "markdown": "[Home](/) · [Menu](/menu) · [Reservations](/reservations) · [Contact](/contact)\n\n# Dinner menu\n\nPrices in euros, service included.\n\n## Starters\n\n- Burrata, heirloom tomatoes, basil oil — €19\n- Tuna tataki, sesame, ponzu — €24\n- Soup of the day — €14\n\n## From the grill\n\n- Ribeye 350 g — €48\n- Filet mignon 220 g — €46\n- Catch of the day — €36\n- Grilled lobster (market price)\n\n## Sides\n\n- Truffle fries — €9\n- Grilled vegetables — €8\n\n## Desserts\n\n- Chocolate fondant — €13\n- Coconut panna cotta — €12\n\nVegetarian and gluten-free options available on request.\n\n© The Lorient Grill"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Wood-fired steaks and local catch, steps from Lorient beach.",
+        "text": "Wood-fired steaks and local catch, steps from Lorient beach.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open since 2011, The Lorient Grill is run by chef Daniel Okafor",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2011,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "The Lorient Grill is run by chef Daniel Okafor and his wife Priya",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Daniel Okafor",
+          "role": "chef"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Dinner only, Tuesday to Sunday, 6:30pm–10:30pm. Closed Mondays.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "18:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "wed",
+            "opens": "18:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "thu",
+            "opens": "18:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "fri",
+            "opens": "18:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "sat",
+            "opens": "18:30",
+            "closes": "22:30"
+          },
+          {
+            "day": "sun",
+            "opens": "18:30",
+            "closes": "22:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We host rehearsal dinners and birthdays for up to 40 guests.",
+        "text": "Private events: rehearsal dinners and birthdays for up to 40 guests",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Set menus from €95 per person.",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": "per person",
+          "item": "Set menus"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"The ribeye was perfect and Priya picked a wonderful wine for us.\" — Mark & Susan, Boston",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "The ribeye was perfect and Priya picked a wonderful wine for us.",
+          "attribution": "Mark & Susan, Boston"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "The Lorient Grill, Route de Lorient, 97133 Saint-Barthélemy",
+        "text": "Route de Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Call +590 590 00 24 56",
+        "text": "+590 590 00 24 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "or email book@lorientgrill.example",
+        "text": "book@lorientgrill.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Grilled lobster (market price)",
+        "text": null,
+        "price": {
+          "amount": 75,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Grilled lobster"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Reserve online with Resy: https://resy.example/the-lorient-grill",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://resy.example/the-lorient-grill",
+          "provider": "Resy"
+        }
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English and French.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English and French.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Free parking behind the restaurant.",
+        "text": "Free parking",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Starters",
+        "text": "Starters",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Burrata, heirloom tomatoes, basil oil — €19",
+        "text": "Burrata, heirloom tomatoes, basil oil",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Burrata, heirloom tomatoes, basil oil — €19",
+        "text": null,
+        "price": {
+          "amount": 19,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Burrata"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Tuna tataki, sesame, ponzu — €24",
+        "text": "Tuna tataki, sesame, ponzu",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Tuna tataki, sesame, ponzu — €24",
+        "text": null,
+        "price": {
+          "amount": 24,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tuna tataki"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Soup of the day — €14",
+        "text": "Soup of the day",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Dinner only, Tuesday to Sunday",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "12:00",
+            "closes": "14:30"
+          },
+          {
+            "day": "wed",
+            "opens": "12:00",
+            "closes": "14:30"
+          },
+          {
+            "day": "thu",
+            "opens": "12:00",
+            "closes": "14:30"
+          },
+          {
+            "day": "fri",
+            "opens": "12:00",
+            "closes": "14:30"
+          },
+          {
+            "day": "sat",
+            "opens": "12:00",
+            "closes": "14:30"
+          },
+          {
+            "day": "sun",
+            "opens": "12:00",
+            "closes": "14:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Soup of the day — €14",
+        "text": null,
+        "price": {
+          "amount": 14,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Soup of the day"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "From the grill",
+        "text": "From the grill",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Ribeye 350 g — €48",
+        "text": "Ribeye 350 g",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Ribeye 350 g — €48",
+        "text": null,
+        "price": {
+          "amount": 48,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Ribeye 350 g"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Filet mignon 220 g — €46",
+        "text": "Filet mignon 220 g",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Filet mignon 220 g — €46",
+        "text": null,
+        "price": {
+          "amount": 46,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Filet mignon 220 g"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Catch of the day — €36",
+        "text": "Catch of the day",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Catch of the day — €36",
+        "text": null,
+        "price": {
+          "amount": 36,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Catch of the day"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Grilled lobster (market price)",
+        "text": "Grilled lobster",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "and his wife Priya, who looks after the dining room",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Priya Okafor",
+          "role": "sommelier"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Sides",
+        "text": "Sides",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Truffle fries — €9",
+        "text": "Truffle fries",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Truffle fries — €9",
+        "text": null,
+        "price": {
+          "amount": 9,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Truffle fries"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Grilled vegetables — €8",
+        "text": "Grilled vegetables",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Grilled vegetables — €8",
+        "text": null,
+        "price": {
+          "amount": 8,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Grilled vegetables"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Desserts",
+        "text": "Desserts",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Chocolate fondant — €13",
+        "text": "Chocolate fondant",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Chocolate fondant — €13",
+        "text": null,
+        "price": {
+          "amount": 13,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Chocolate fondant"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Coconut panna cotta — €12",
+        "text": "Coconut panna cotta",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Coconut panna cotta — €12",
+        "text": null,
+        "price": {
+          "amount": 12,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Coconut panna cotta"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,435 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "SB Plomberie",
+    "businessCategory": "Plombier",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://sbplomberie.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# SB Plomberie\n\nPlombier-chauffagiste à Saint-Barthélemy — dépannage, installation, chauffe-eau solaire.\n\nIntervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.\n\n## Nos prestations\n\n- Dépannage fuites et débouchage\n- Installation et remplacement de chauffe-eau (solaire et électrique)\n- Rénovation de salles de bains\n- Pompes de piscine et surpresseurs\n- Désalinisateurs et filtration\n\n## Tarifs\n\nDéplacement : 60 €. Main-d’œuvre : 75 € de l’heure. Devis gratuit pour les travaux de rénovation.\n\nMajoration de 50 % le dimanche et les jours fériés.\n\n## Disponibilités\n\nDu lundi au vendredi de 7h à 17h, le samedi de 8h à 12h. Urgences 7j/7 au 06 90 00 09 12.\n\nEntreprise créée en 2008 par Rémi Cointre, artisan plombier.\n\nAssurance décennale et RC pro. Devis et factures par e-mail.\n\nSB Plomberie — Lorient, 97133 Saint-Barthélemy — sbplomberie@example.test\n\nPaiement par virement, chèque ou carte bancaire.\n\n© SB Plomberie — SIRET 000 000 000 00000"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plombier-chauffagiste à Saint-Barthélemy — dépannage, installation, chauffe-eau solaire.",
+        "text": "Plombier-chauffagiste à Saint-Barthélemy — dépannage, installation, chauffe-eau solaire.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "toute l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Lorient",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Grand Cul-de-Sac",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Intervention sur toute l’île : Gustavia, Saint-Jean, Lorient, Flamands, Grand Cul-de-Sac, Toiny.",
+        "text": "Toiny",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Dépannage fuites et débouchage",
+        "text": "Dépannage fuites et débouchage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Majoration de 50 % le dimanche et les jours fériés.",
+        "text": null,
+        "price": {
+          "amount": 112.5,
+          "currency": "EUR",
+          "unit": "de l’heure",
+          "item": "Main-d’œuvre dimanche"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Installation et remplacement de chauffe-eau (solaire et électrique)",
+        "text": "Installation et remplacement de chauffe-eau",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Rénovation de salles de bains",
+        "text": "Rénovation de salles de bains",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pompes de piscine et surpresseurs",
+        "text": "Pompes de piscine et surpresseurs",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Désalinisateurs et filtration",
+        "text": "Désalinisateurs et filtration",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Déplacement : 60 €.",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Déplacement"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Main-d’œuvre : 75 € de l’heure.",
+        "text": null,
+        "price": {
+          "amount": 75,
+          "currency": "EUR",
+          "unit": "de l’heure",
+          "item": "Main-d’œuvre"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Devis gratuit pour les travaux de rénovation.",
+        "text": "Devis gratuit pour les travaux de rénovation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au vendredi de 7h à 17h, le samedi de 8h à 12h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Urgences 7j/7 au 06 90 00 09 12.",
+        "text": "Urgences 7j/7",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Entretien et installation de climatisation",
+        "text": "Installation de climatisation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Urgences 7j/7 au 06 90 00 09 12.",
+        "text": "06 90 00 09 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entreprise créée en 2008 par Rémi Cointre, artisan plombier.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2008,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entreprise créée en 2008 par Rémi Cointre, artisan plombier.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Rémi Cointre",
+          "role": "artisan plombier"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "SB Plomberie — Lorient, 97133 Saint-Barthélemy",
+        "text": "Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "sbplomberie@example.test",
+        "text": "sbplomberie@example.test",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par virement, chèque ou carte bancaire.",
+        "text": "virement",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par virement, chèque ou carte bancaire.",
+        "text": "chèque",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par virement, chèque ou carte bancaire.",
+        "text": "carte bancaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,447 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Studio Ananda Yoga",
+    "businessCategory": "Studio de yoga",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://anandayoga.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Planning](/planning) · [Tarifs](/tarifs) · [Réserver](/reserver)\n\n# Studio Ananda Yoga\n\nYoga, pilates et méditation à Lorient, face à la mer.\n\nFondé en 2018 par Maëlle Garnier, professeure certifiée Yoga Alliance 500 h, le studio accueille débutants comme pratiquants confirmés dans une salle climatisée de 60 m².\n\n## Les cours\n\n- Vinyasa flow (tous niveaux)\n- Yin yoga et relaxation\n- Pilates mat\n- Yoga prénatal\n- Cours privés et à domicile\n\n## Tarifs\n\n- Cours à l’unité : 25 €\n- Carte 10 cours : 220 € (valable 3 mois)\n- Abonnement mensuel illimité : 150 €\n- Cours privé : 90 € de l’heure\n\nTapis et briques fournis. Douches et vestiaires sur place.\n\n## Planning\n\nCours du lundi au samedi, de 7h30 à 19h30. Pas de cours le dimanche. Réservation obligatoire sur https://momoyoga.example/ananda\n\n## L’équipe\n\n- Maëlle Garnier, fondatrice\n- Inès Rocher, professeure de pilates\n- Sam Doucet, professeur de vinyasa\n\nStudio Ananda Yoga, Lorient, 97133 Saint-Barthélemy — 05 90 00 06 89 — namaste@anandayoga.example\n\nLes cours sont donnés en français et en anglais.\n\n© Studio Ananda Yoga — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Yoga, pilates et méditation à Lorient, face à la mer.",
+        "text": "Yoga, pilates et méditation à Lorient, face à la mer.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondé en 2018 par Maëlle Garnier",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2018,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vinyasa flow (tous niveaux)",
+        "text": "Vinyasa flow",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Yin yoga et relaxation",
+        "text": "Yin yoga et relaxation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pilates mat",
+        "text": "Pilates mat",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Yoga prénatal",
+        "text": "Yoga prénatal",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cours privés et à domicile",
+        "text": "Cours privés et à domicile",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Aerial yoga en hamac",
+        "text": "Aerial yoga",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours à l’unité : 25 €",
+        "text": null,
+        "price": {
+          "amount": 25,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cours à l’unité"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Carte 10 cours : 220 € (valable 3 mois)",
+        "text": null,
+        "price": {
+          "amount": 220,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Carte 10 cours"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Abonnement mensuel illimité : 150 €",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": "mensuel",
+          "item": "Abonnement mensuel illimité"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours privé : 90 € de l’heure",
+        "text": null,
+        "price": {
+          "amount": 90,
+          "currency": "EUR",
+          "unit": "de l’heure",
+          "item": "Cours privé"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Tapis et briques fournis.",
+        "text": "Tapis et briques fournis",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Pas de cours le dimanche.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "11:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Douches et vestiaires sur place.",
+        "text": "Douches et vestiaires",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "dans une salle climatisée de 60 m².",
+        "text": "salle climatisée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours du lundi au samedi, de 7h30 à 19h30.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:30",
+            "closes": "19:30"
+          },
+          {
+            "day": "tue",
+            "opens": "07:30",
+            "closes": "19:30"
+          },
+          {
+            "day": "wed",
+            "opens": "07:30",
+            "closes": "19:30"
+          },
+          {
+            "day": "thu",
+            "opens": "07:30",
+            "closes": "19:30"
+          },
+          {
+            "day": "fri",
+            "opens": "07:30",
+            "closes": "19:30"
+          },
+          {
+            "day": "sat",
+            "opens": "07:30",
+            "closes": "19:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservation obligatoire sur https://momoyoga.example/ananda",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://momoyoga.example/ananda",
+          "provider": "Momoyoga"
+        }
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Maëlle Garnier, fondatrice",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Maëlle Garnier",
+          "role": "fondatrice"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Inès Rocher, professeure de pilates",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Inès Rocher",
+          "role": "professeure de pilates"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Abonnement mensuel illimité : 150 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "mensuel",
+          "item": "Abonnement mensuel illimité"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sam Doucet, professeur de vinyasa",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sam Doucet",
+          "role": "professeur de vinyasa"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Studio Ananda Yoga, Lorient, 97133 Saint-Barthélemy",
+        "text": "Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Saint-Barthélemy — 05 90 00 06 89",
+        "text": "05 90 00 06 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "namaste@anandayoga.example",
+        "text": "namaste@anandayoga.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Les cours sont donnés en français et en anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Les cours sont donnés en français et en anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

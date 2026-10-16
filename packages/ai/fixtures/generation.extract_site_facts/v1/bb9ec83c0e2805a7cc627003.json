@@ -1,0 +1,422 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "St Barth Blue Villas",
+    "businessCategory": "Villa rental agency",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://stbarthbluevillas.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Villas](/villas) · [Services](/services) · [About](/about) · [Contact](/contact)\n\n# St Barth Blue Villas\n\n## Hand-picked villas with ocean views, booked directly with the people who know them.\n\nWe are a boutique agency founded in 2009 by Caroline Mercier. Every villa in our portfolio has been visited by our team, and we meet every guest at the airport.\n\n## Featured villas\n\n- Villa Azur, 4 bedrooms, Pointe Milou — from USD 1,800 per night\n- Villa Mango, 2 bedrooms, Saint-Jean — from USD 950 per night\n- Villa Sunset, 6 bedrooms, Gouverneur — from USD 4,500 per night\n\nRates exclude the 5% tourist tax. Minimum stay 5 nights, 7 nights over the holidays.\n\n## Included with every stay\n\n- Airport meet and greet\n- Daily housekeeping (except Sundays)\n- Welcome groceries\n- 24/7 concierge line\n\n## What our guests say\n\n\"Caroline's team handled everything, from the boat day to the babysitter.\" — The Harrisons, London\n\n## Contact\n\nSt Barth Blue Villas, Rue de la Paix, Gustavia 97133\nOffice hours Monday to Friday 9am–5pm, Saturday 9am–1pm.\n+590 590 00 28 90 · stay@stbarthbluevillas.example\n\nWe speak English, French and Portuguese.\n\n© St Barth Blue Villas · Terms · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hand-picked villas with ocean views, booked directly with the people who know them.",
+        "text": "Hand-picked villas with ocean views, booked directly with the people who know them.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "We are a boutique agency founded in 2009 by Caroline Mercier.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2009,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "We are a boutique agency founded in 2009 by Caroline Mercier.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Caroline Mercier",
+          "role": "founder"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Azur, 4 bedrooms, Pointe Milou — from USD 1,800 per night",
+        "text": "Villa Azur, 4 bedrooms, Pointe Milou",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Azur, 4 bedrooms, Pointe Milou — from USD 1,800 per night",
+        "text": null,
+        "price": {
+          "amount": 1800,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Villa Azur"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Mango, 2 bedrooms, Saint-Jean — from USD 950 per night",
+        "text": "Villa Mango, 2 bedrooms, Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Rates exclude the 5% tourist tax.",
+        "text": null,
+        "price": {
+          "amount": 90,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Tourist tax"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Mango, 2 bedrooms, Saint-Jean — from USD 950 per night",
+        "text": null,
+        "price": {
+          "amount": 950,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Villa Mango"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Sunset, 6 bedrooms, Gouverneur — from USD 4,500 per night",
+        "text": "Villa Sunset, 6 bedrooms, Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Sunset, 6 bedrooms, Gouverneur — from USD 4,500 per night",
+        "text": null,
+        "price": {
+          "amount": 4500,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Villa Sunset"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Airport meet and greet",
+        "text": "Airport meet and greet",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Daily housekeeping (except Sundays)",
+        "text": "Daily housekeeping",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Welcome groceries",
+        "text": "Welcome groceries",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Mango, 2 bedrooms, Saint-Jean — from USD 950 per night",
+        "text": null,
+        "price": {
+          "amount": 1050,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Villa Mango"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "24/7 concierge line",
+        "text": "24/7 concierge line",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"Caroline's team handled everything, from the boat day to the babysitter.\" — The Harrisons, London",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Caroline's team handled everything, from the boat day to the babysitter.",
+          "attribution": "The Harrisons, London"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "St Barth Blue Villas, Rue de la Paix, Gustavia 97133",
+        "text": "Rue de la Paix, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Office hours Monday to Friday 9am–5pm, Saturday 9am–1pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 28 90 · stay@stbarthbluevillas.example",
+        "text": "+590 590 00 28 90",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Coral, 3 bedrooms, Flamands — from USD 1,400 per night",
+        "text": "Villa Coral, 3 bedrooms, Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 28 90 · stay@stbarthbluevillas.example",
+        "text": "stay@stbarthbluevillas.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Portuguese.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Portuguese.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Portuguese.",
+        "text": "Portuguese",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Azur, 4 bedrooms, Pointe Milou",
+        "text": "Pointe Milou",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Sunset, 6 bedrooms, Gouverneur",
+        "text": "Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

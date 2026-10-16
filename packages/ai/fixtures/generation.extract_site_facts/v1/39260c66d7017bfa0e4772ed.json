@@ -1,0 +1,427 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Salon de thé Les Alizés",
+    "businessCategory": "Salon de thé",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://lesalizes-salondethe.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Salon de thé Les Alizés\n\nThés d’exception, pâtisseries fines et glaces artisanales, à Gustavia.\n\n## Horaires\n\nDu mardi au samedi de 9h à 18h, le dimanche de 9h à 13h. Fermé le lundi.\n\n## La carte\n\n### Thés et infusions\n- Thé vert sencha — 5 €\n- Earl Grey bergamote — 5 €\n- Infusion hibiscus-gingembre — 5,50 €\n\n### Pâtisseries\n- Tarte au citron meringuée — 7 €\n- Éclair vanille — 6 €\n- Cheesecake passion — 7,50 €\n\n### Glaces artisanales\n- Boule (coco, mangue, vanille, chocolat) — 3,50 €\n\n## Infos\n\nTerrasse ombragée, wifi, chaise haute pour les enfants. Salon climatisé.\n\nLes Alizés, Rue du Général de Gaulle, 97133 Gustavia · 05 90 00 14 56 · salon@lesalizes.example\n\nPaiement par carte bancaire uniquement.\n\nMentions légales — © Salon de thé Les Alizés"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Thés d’exception, pâtisseries fines et glaces artisanales, à Gustavia.",
+        "text": "Thés d’exception, pâtisseries fines et glaces artisanales, à Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du mardi au samedi de 9h à 18h, le dimanche de 9h à 13h. Fermé le lundi.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Thés et infusions",
+        "text": "Thés et infusions",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Thé vert sencha — 5 €",
+        "text": "Thé vert sencha",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Thé vert sencha — 5 €",
+        "text": null,
+        "price": {
+          "amount": 5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Thé vert sencha"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Earl Grey bergamote — 5 €",
+        "text": "Earl Grey bergamote",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Infusion hibiscus-gingembre — 5,50 €",
+        "text": "Infusion hibiscus-gingembre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Infusion hibiscus-gingembre — 5,50 €",
+        "text": null,
+        "price": {
+          "amount": 5.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Infusion hibiscus-gingembre"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pâtisseries",
+        "text": "Pâtisseries",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fermé le lundi.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Tarte au citron meringuée — 7 €",
+        "text": "Tarte au citron meringuée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tarte au citron meringuée — 7 €",
+        "text": null,
+        "price": {
+          "amount": 7,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tarte au citron meringuée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Éclair vanille — 6 €",
+        "text": "Éclair vanille",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Éclair vanille — 6 €",
+        "text": null,
+        "price": {
+          "amount": 6,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Éclair vanille"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cheesecake passion — 7,50 €",
+        "text": "Cheesecake passion",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cheesecake passion — 7,50 €",
+        "text": null,
+        "price": {
+          "amount": 7.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cheesecake passion"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Glaces artisanales",
+        "text": "Glaces artisanales",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Brunch du dimanche à volonté",
+        "text": "Brunch du dimanche",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Boule (coco, mangue, vanille, chocolat) — 3,50 €",
+        "text": null,
+        "price": {
+          "amount": 3.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Boule de glace"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Terrasse ombragée, wifi, chaise haute pour les enfants.",
+        "text": "Terrasse ombragée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Terrasse ombragée, wifi, chaise haute pour les enfants.",
+        "text": "wifi",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Salon climatisé.",
+        "text": "Salon climatisé",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Les Alizés, Rue du Général de Gaulle, 97133 Gustavia",
+        "text": "Rue du Général de Gaulle, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Gustavia · 05 90 00 14 56 · salon@lesalizes.example",
+        "text": "05 90 00 14 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Gustavia · 05 90 00 14 56 · salon@lesalizes.example",
+        "text": "salon@lesalizes.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte bancaire uniquement.",
+        "text": "carte bancaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

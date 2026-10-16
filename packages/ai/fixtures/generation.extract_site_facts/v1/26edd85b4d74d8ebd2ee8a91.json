@@ -1,0 +1,361 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Studio Pilates Gustavia",
+    "businessCategory": "Studio de pilates",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://pilatesgustavia.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Studio Pilates Gustavia\n\nPilates sur machines (reformer, cadillac) et au sol, en petits groupes de quatre personnes maximum.\n\n## Cours\n\n- Reformer débutant et intermédiaire\n- Pilates mat\n- Cours privé ou duo\n- Pilates post-natal\n\n## Tarifs\n\n- Cours collectif reformer : 45 €\n- Carte de 5 cours : 210 €\n- Carte de 10 cours : 400 €\n- Cours privé : 110 €\n- Cours duo : 70 € par personne\n\n## Planning\n\nCours du lundi au vendredi de 7h à 13h et de 16h à 19h, le samedi de 8h à 12h.\n\nRéservation sur l’application Bsport : https://app.bsport.example/pilates-gustavia\n\nLe studio est dirigé par Émilie Sorin, instructrice certifiée Balanced Body.\n\nRue Jeanne d’Arc, 97133 Gustavia · 05 90 00 22 34 · studio@pilatesgustavia.example\n\nVestiaires, douches et parking à proximité.\n\n© Studio Pilates Gustavia"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pilates sur machines (reformer, cadillac) et au sol, en petits groupes de quatre personnes maximum.",
+        "text": "Pilates sur machines (reformer, cadillac) et au sol, en petits groupes de quatre personnes maximum.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Reformer débutant et intermédiaire",
+        "text": "Reformer débutant et intermédiaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pilates mat",
+        "text": "Pilates mat",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cours privé ou duo",
+        "text": "Cours privé ou duo",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pilates post-natal",
+        "text": "Pilates post-natal",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours collectif reformer : 45 €",
+        "text": null,
+        "price": {
+          "amount": 45,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cours collectif reformer"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Le studio est dirigé par Émilie Sorin",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2020,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Carte de 5 cours : 210 €",
+        "text": null,
+        "price": {
+          "amount": 210,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Carte de 5 cours"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Carte de 10 cours : 400 €",
+        "text": null,
+        "price": {
+          "amount": 400,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Carte de 10 cours"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours privé : 110 €",
+        "text": null,
+        "price": {
+          "amount": 110,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cours privé"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours duo : 70 € par personne",
+        "text": null,
+        "price": {
+          "amount": 70,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Cours duo"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cours du lundi au vendredi de 7h à 13h et de 16h à 19h, le samedi de 8h à 12h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "mon",
+            "opens": "16:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "tue",
+            "opens": "16:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "wed",
+            "opens": "16:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "thu",
+            "opens": "16:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "13:00"
+          },
+          {
+            "day": "fri",
+            "opens": "16:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservation sur l’application Bsport : https://app.bsport.example/pilates-gustavia",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://app.bsport.example/pilates-gustavia",
+          "provider": "Bsport"
+        }
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Carte de 10 cours : 400 €",
+        "text": null,
+        "price": {
+          "amount": 380,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Carte de 10 cours"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Le studio est dirigé par Émilie Sorin, instructrice certifiée Balanced Body.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Émilie Sorin",
+          "role": "instructrice certifiée Balanced Body"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Rue Jeanne d’Arc, 97133 Gustavia",
+        "text": "Rue Jeanne d’Arc, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Gustavia · 05 90 00 22 34",
+        "text": "05 90 00 22 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "studio@pilatesgustavia.example",
+        "text": "studio@pilatesgustavia.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vestiaires, douches et parking à proximité.",
+        "text": "Vestiaires, douches",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

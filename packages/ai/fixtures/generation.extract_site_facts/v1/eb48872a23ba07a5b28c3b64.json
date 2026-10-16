@@ -1,0 +1,340 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Toiny Hideaways",
+    "businessCategory": "Villa rental agency",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://toinyhideaways.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Toiny Hideaways\n\nPrivate villa rentals on the wild side of the island: Toiny, Grand Fond and Petit Cul-de-Sac.\n\n## How it works\n\nTell us your dates and the number of guests; we send three villas that fit, with honest notes on each. No booking fee for guests.\n\n## Our villas\n\n- Casa Toiny, 3 bedrooms, infinity pool — from €1,400 per night\n- Grand Fond Cottage, 1 bedroom, sea view — from €550 per night\n- Villa Ti Paradis, 5 bedrooms, private tennis court — from €5,200 per night\n\n## Guest services\n\n- Private chef and in-villa breakfast\n- Car rental delivered to the villa\n- Boat charters and fishing trips\n- Nanny and babysitting service\n\nOwned and run by Marc and Sylvie Petit since 2013.\n\n\"Three villas, three honest emails, one perfect week.\" — Dieter K., Munich\n\nContact: +590 690 00 29 01 (WhatsApp) · bonjour@toinyhideaways.example\n\nWe reply within 24 hours, seven days a week.\n\n© Toiny Hideaways · Terms and conditions · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Private villa rentals on the wild side of the island: Toiny, Grand Fond and Petit Cul-de-Sac.",
+        "text": "Private villa rentals on the wild side of the island: Toiny, Grand Fond and Petit Cul-de-Sac.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Toiny, Grand Fond and Petit Cul-de-Sac.",
+        "text": "Toiny",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Toiny, Grand Fond and Petit Cul-de-Sac.",
+        "text": "Grand Fond",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Toiny, Grand Fond and Petit Cul-de-Sac.",
+        "text": "Petit Cul-de-Sac",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Casa Toiny, 3 bedrooms, infinity pool — from €1,400 per night",
+        "text": "Casa Toiny, 3 bedrooms, infinity pool",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Casa Toiny, 3 bedrooms, infinity pool — from €1,400 per night",
+        "text": null,
+        "price": {
+          "amount": 1400,
+          "currency": "EUR",
+          "unit": "per night",
+          "item": "Casa Toiny"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Grand Fond Cottage, 1 bedroom, sea view — from €550 per night",
+        "text": "Grand Fond Cottage, 1 bedroom, sea view",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "No booking fee for guests.",
+        "text": null,
+        "price": {
+          "amount": 10,
+          "currency": "EUR",
+          "unit": "per cent",
+          "item": "Booking fee"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Grand Fond Cottage, 1 bedroom, sea view — from €550 per night",
+        "text": null,
+        "price": {
+          "amount": 550,
+          "currency": "EUR",
+          "unit": "per night",
+          "item": "Grand Fond Cottage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Ti Paradis, 5 bedrooms, private tennis court — from €5,200 per night",
+        "text": "Villa Ti Paradis, 5 bedrooms, private tennis court",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Ti Paradis, 5 bedrooms, private tennis court — from €5,200 per night",
+        "text": null,
+        "price": {
+          "amount": 5200,
+          "currency": "EUR",
+          "unit": "per night",
+          "item": "Villa Ti Paradis"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Private chef and in-villa breakfast",
+        "text": "Private chef and in-villa breakfast",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Car rental delivered to the villa",
+        "text": "Car rental delivered to the villa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Boat charters and fishing trips",
+        "text": "Boat charters and fishing trips",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nanny and babysitting service",
+        "text": "Nanny and babysitting service",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Dieter K., Munich",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Lovely villa but the wifi kept dropping.",
+          "attribution": "Anna S., Airbnb"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Owned and run by Marc and Sylvie Petit since 2013.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Marc Petit",
+          "role": "owner"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Owned and run by Marc and Sylvie Petit since 2013.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sylvie Petit",
+          "role": "owner"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Owned and run by Marc and Sylvie Petit since 2013.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2013,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"Three villas, three honest emails, one perfect week.\" — Dieter K., Munich",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Three villas, three honest emails, one perfect week.",
+          "attribution": "Dieter K., Munich"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Contact: +590 690 00 29 01 (WhatsApp)",
+        "text": "+590 690 00 29 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "bonjour@toinyhideaways.example",
+        "text": "bonjour@toinyhideaways.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

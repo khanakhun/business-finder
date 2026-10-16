@@ -1,0 +1,488 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Saltwater Hair Studio",
+    "businessCategory": "Hair salon",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://saltwaterhair.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Services](/services) · [Book](/book) · [Contact](/contact)\n\n# Saltwater Hair Studio\n\nColour, cuts and blowouts in Saint-Jean, five minutes from the airport.\n\nFounded in 2017 by Emma Whitfield, a colourist trained in London, Saltwater is a small studio with three chairs and no rush.\n\n## Services\n\n| Service | Price |\n|---|---|\n| Women's cut and blow-dry | €70 |\n| Men's cut | €40 |\n| Blowout | €45 |\n| Full balayage | from €180 |\n| Root touch-up | €85 |\n| Olaplex treatment | €60 |\n| Bridal hair (trial included) | €250 |\n\n## Hours\n\nTuesday–Saturday, 9am–6pm. Closed Sunday and Monday.\n\nBook online: https://www.fresha.example/saltwater-hair-studio\n\n## Team\n\n- Emma Whitfield, owner and colourist\n- Léa Dumont, stylist\n- Jake Morris, barber\n\n\"Emma fixed a colour disaster from another salon and I've never looked back.\" — Hannah P.\n\nSaltwater Hair Studio, Centre Commercial La Savane, Saint-Jean 97133\n+590 590 00 26 78 · bookings@saltwaterhair.example\n\nWe speak English and French. Cards only, no cash.\n\n© Saltwater Hair Studio · Privacy · Cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Colour, cuts and blowouts in Saint-Jean, five minutes from the airport.",
+        "text": "Colour, cuts and blowouts in Saint-Jean, five minutes from the airport.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Founded in 2017 by Emma Whitfield",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2017,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Women's cut and blow-dry | €70",
+        "text": "Women's cut and blow-dry",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Women's cut and blow-dry | €70",
+        "text": null,
+        "price": {
+          "amount": 70,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Women's cut and blow-dry"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Men's cut | €40",
+        "text": "Men's cut",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Men's cut | €40",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Men's cut"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Blowout | €45",
+        "text": "Blowout",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Blowout | €45",
+        "text": null,
+        "price": {
+          "amount": 45,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Blowout"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Full balayage | from €180",
+        "text": "Full balayage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Full balayage | from €180",
+        "text": null,
+        "price": {
+          "amount": 180,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Full balayage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Keratin smoothing treatment | €220",
+        "text": "Keratin smoothing treatment",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Root touch-up | €85",
+        "text": "Root touch-up",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Root touch-up | €85",
+        "text": null,
+        "price": {
+          "amount": 85,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Root touch-up"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Olaplex treatment | €60",
+        "text": "Olaplex treatment",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Olaplex treatment | €60",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Olaplex treatment"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bridal hair (trial included) | €250",
+        "text": "Bridal hair",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Bridal hair (trial included) | €250",
+        "text": null,
+        "price": {
+          "amount": 250,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Bridal hair"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tuesday–Saturday, 9am–6pm. Closed Sunday and Monday.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Book online: https://www.fresha.example/saltwater-hair-studio",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.fresha.example/saltwater-hair-studio",
+          "provider": "Fresha"
+        }
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Emma Whitfield, owner and colourist",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Emma Whitfield",
+          "role": "owner and colourist"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 26 78 · bookings@saltwaterhair.example",
+        "text": "+590 590 00 26 87",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Léa Dumont, stylist",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Léa Dumont",
+          "role": "stylist"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Jake Morris, barber",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Jake Morris",
+          "role": "barber"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"Emma fixed a colour disaster from another salon and I've never looked back.\" — Hannah P.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Emma fixed a colour disaster from another salon and I've never looked back.",
+          "attribution": "Hannah P."
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Saltwater Hair Studio, Centre Commercial La Savane, Saint-Jean 97133",
+        "text": "Centre Commercial La Savane, Saint-Jean 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 26 78 · bookings@saltwaterhair.example",
+        "text": "+590 590 00 26 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 26 78 · bookings@saltwaterhair.example",
+        "text": "bookings@saltwaterhair.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English and French.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English and French.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards only, no cash.",
+        "text": "Cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

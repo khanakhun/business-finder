@@ -64,6 +64,17 @@ export {
 } from './tasks/assets-analyze-image.ts';
 export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
 export {
+  EXTRACTABLE_FACT_KINDS,
+  type ExtractableFactKind,
+  ExtractSiteFactsInput,
+  ExtractSiteFactsOutput,
+  GenerationExtractSiteFacts,
+  SITE_FACT_EVIDENCE_MAX_WORDS,
+  SITE_FACT_PAGE_BUDGET,
+  SITE_FACT_PAGES_PER_CALL,
+  type SiteFactCandidate,
+} from './tasks/generation-extract-site-facts.ts';
+export {
   ExtractPainSignalsInput,
   ExtractPainSignalsOutput,
   REVIEW_TEXT_BUDGET,
@@ -81,6 +92,14 @@ export {
   NO_CATEGORY,
   TaxonomyClassifyBusiness,
 } from './tasks/taxonomy-classify-business.ts';
+export {
+  REJECT_REASONS,
+  type RejectReason,
+  type SiteFactVerification,
+  type SitePageText,
+  type VerifiedSiteFact,
+  verifySiteFactCandidates,
+} from './tasks/verify-site-facts.ts';
 export {
   WebsiteVisionGrade,
   WebsiteVisionGradeInput,

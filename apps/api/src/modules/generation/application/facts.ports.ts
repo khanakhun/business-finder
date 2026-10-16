@@ -1,3 +1,4 @@
+import type { ExtractSiteFactsInput, ExtractSiteFactsOutput, RejectReason, VerifiedSiteFact } from '@bf/ai';
 import type { RegistryFact, RegistryFactKind } from '@bf/contracts';
 import type { Observation } from '../domain/facts/registry.ts';
 
@@ -52,4 +53,71 @@ export interface FactSnapshotStore {
     stats: Record<string, unknown>;
   }): Promise<string>;
   load(organizationId: string, id: string): Promise<RegistryFact[] | undefined>;
+}
+
+// Owner-site extraction (BF-040): the crawl's pages, the model, and the verified facts kept per distinct input.
+
+export const SITE_PAGES_READER = Symbol('SITE_PAGES_READER');
+export const SITE_FACT_EXTRACTOR = Symbol('SITE_FACT_EXTRACTOR');
+export const SITE_FACT_EXTRACTIONS = Symbol('SITE_FACT_EXTRACTIONS');
+export const SITE_FACT_TELEMETRY = Symbol('SITE_FACT_TELEMETRY');
+
+export interface CrawledPage {
+  readonly url: string;
+  readonly kind: string;
+  readonly lang: string | null;
+  /** The page's markdown (untrusted), already read from storage. */
+  readonly markdown: string;
+}
+
+export interface SitePagesReader {
+  /** The latest crawl of the business's own website, with the pages whose markdown was kept. */
+  latest(businessId: string): Promise<
+    | {
+        readonly snapshotId: string;
+        readonly fetchedAt: Date;
+        readonly businessName: string;
+        readonly categoryLabel: string | null;
+        readonly pages: readonly CrawledPage[];
+      }
+    | undefined
+  >;
+}
+
+export interface SiteFactExtractor {
+  extract(
+    organizationId: string,
+    input: ExtractSiteFactsInput,
+  ): Promise<{ readonly output: ExtractSiteFactsOutput; readonly model: string }>;
+}
+
+export interface StoredExtraction {
+  readonly id: string;
+  readonly businessId: string;
+  readonly snapshotId: string | null;
+  readonly inputHash: string;
+  readonly model: string;
+  readonly facts: readonly VerifiedSiteFact[];
+  readonly stats: ExtractionStats;
+  readonly observedAt: Date;
+}
+
+export interface ExtractionStats {
+  readonly pages: number;
+  readonly candidates: number;
+  readonly accepted: number;
+  readonly rejected: Partial<Record<RejectReason, number>>;
+  readonly warnings: number;
+}
+
+export interface SiteFactExtractionStore {
+  find(businessId: string, inputHash: string): Promise<StoredExtraction | undefined>;
+  /** The newest extraction of the business (the registry reads it). */
+  latest(businessId: string): Promise<StoredExtraction | undefined>;
+  /** Keeps the first of concurrent saves of the same input. */
+  save(extraction: Omit<StoredExtraction, 'id'>): Promise<void>;
+}
+
+export interface SiteFactTelemetry {
+  verified(stats: ExtractionStats): void;
 }

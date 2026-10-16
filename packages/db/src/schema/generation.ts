@@ -31,6 +31,7 @@ import {
 import { id, orgId } from '../columns.ts';
 import { organization, user } from './auth.ts';
 import { businesses } from './business-graph.ts';
+import { websiteSnapshots } from './enrichment.ts';
 import { sites, siteVersions } from './sites.ts';
 
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(', '));
@@ -256,5 +257,32 @@ export const factRegistrySnapshots = pgTable(
       table.businessId,
       table.contentHash,
     ),
+  ],
+);
+
+/**
+ * Facts read from a business's own pages (BF-040 `generation.extract_site_facts`), kept only after the deterministic
+ * verification. Global like the crawl it reads (public pages, no workspace data); one row per distinct input.
+ */
+export const siteFactExtractions = pgTable(
+  'site_fact_extractions',
+  {
+    id: id(),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    snapshotId: uuid().references(() => websiteSnapshots.id, { onDelete: 'set null' }),
+    /** Hash of the prompt version and the pages sent: the same pages are never paid for twice. */
+    inputHash: text().notNull(),
+    model: text().notNull(),
+    facts: jsonb().$type<unknown[]>().notNull(),
+    /** Candidates, accepted, rejected per reason, warnings. */
+    stats: jsonb().$type<Record<string, unknown>>().notNull(),
+    observedAt: tz().notNull(),
+    createdAt: tz().notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('uq_site_fact_extractions__business_id_input_hash').on(table.businessId, table.inputHash),
+    index('idx_site_fact_extractions__business_id_created_at').on(table.businessId, table.createdAt.desc()),
   ],
 );

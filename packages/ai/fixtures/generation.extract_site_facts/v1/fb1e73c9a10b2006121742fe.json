@@ -1,0 +1,398 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Ti Kaz Épicerie Fine",
+    "businessCategory": "Épicerie fine",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://tikazepicerie.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Ti Kaz Épicerie Fine\n\nÉpicerie fine, cave et traiteur à Lorient / Fine foods, wine cellar and catering in Lorient\n\n## Nos rayons / Our shelves\n\n- Fromages affinés et charcuteries / Aged cheeses and charcuterie\n- Vins et champagnes, plus de 400 références / Wines and champagnes, over 400 labels\n- Produits locaux : rhums, confitures, piments / Local products: rums, jams, hot sauces\n- Plats traiteur à emporter / Takeaway dishes\n\n## Services\n\n- Livraison dans les villas et sur les bateaux / Delivery to villas and yachts, à partir de / from 100 €\n- Paniers cadeaux / Gift hampers, à partir de / from 60 €\n- Approvisionnement de yachts / Yacht provisioning\n\n## Horaires / Hours\n\nLundi – samedi / Monday – Saturday : 8h – 19h30 / 8am – 7:30pm\nDimanche / Sunday : 8h – 13h / 8am – 1pm\n\nTi Kaz Épicerie Fine, Route de Lorient, 97133 Saint-Barthélemy\n05 90 00 46 78 · commandes@tikazepicerie.example\n\nFondée en 2008 par Nathalie et Franck Gréaux / Founded in 2008 by Nathalie and Franck Gréaux.\n\nCartes acceptées / Cards accepted : Visa, Mastercard, Amex. Parking devant la boutique / Parking in front of the shop.\n\n© Ti Kaz Épicerie Fine"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Épicerie fine, cave et traiteur à Lorient / Fine foods, wine cellar and catering in Lorient",
+        "text": "Épicerie fine, cave et traiteur à Lorient",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Fromages affinés et charcuteries / Aged cheeses and charcuterie",
+        "text": "Aged cheeses and charcuterie",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Vins et champagnes, plus de 400 références / Wines and champagnes, over 400 labels",
+        "text": "Wines and champagnes, over 400 labels",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Produits locaux : rhums, confitures, piments / Local products: rums, jams, hot sauces",
+        "text": "Local products: rums, jams, hot sauces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plats traiteur à emporter / Takeaway dishes",
+        "text": "Plats traiteur à emporter",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Livraison dans les villas et sur les bateaux / Delivery to villas and yachts",
+        "text": "Delivery to villas and yachts",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Delivery to villas and yachts, à partir de / from 100 €",
+        "text": null,
+        "price": {
+          "amount": 100,
+          "currency": "EUR",
+          "unit": "from",
+          "item": "Delivery to villas and yachts"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Paniers cadeaux / Gift hampers, à partir de / from 60 €",
+        "text": "Gift hampers",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Dimanche / Sunday : 8h – 13h / 8am – 1pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "15:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Paniers cadeaux / Gift hampers, à partir de / from 60 €",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": "from",
+          "item": "Gift hampers"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Approvisionnement de yachts / Yacht provisioning",
+        "text": "Yacht provisioning",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lundi – samedi / Monday – Saturday : 8h – 19h30 / 8am – 7:30pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "19:30"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "19:30"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "19:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "19:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "19:30"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "19:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Dimanche / Sunday : 8h – 13h / 8am – 1pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ti Kaz Épicerie Fine, Route de Lorient, 97133 Saint-Barthélemy",
+        "text": "Route de Lorient, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "05 90 00 46 78 · commandes@tikazepicerie.example",
+        "text": "05 90 00 46 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "05 90 00 46 78 · commandes@tikazepicerie.example",
+        "text": "commandes@tikazepicerie.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Paniers cadeaux / Gift hampers, à partir de / from 60 €",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": "from",
+          "item": "Gift hampers"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 2008 par Nathalie et Franck Gréaux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2008,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 2008 par Nathalie et Franck Gréaux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Nathalie Gréaux",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 2008 par Nathalie et Franck Gréaux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Franck Gréaux",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cartes acceptées / Cards accepted : Visa, Mastercard, Amex.",
+        "text": "Visa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cartes acceptées / Cards accepted : Visa, Mastercard, Amex.",
+        "text": "Mastercard",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cartes acceptées / Cards accepted : Visa, Mastercard, Amex.",
+        "text": "Amex",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Parking devant la boutique / Parking in front of the shop.",
+        "text": "Parking in front of the shop",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

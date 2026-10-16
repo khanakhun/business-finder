@@ -1,0 +1,371 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Conciergerie Soleil Levant",
+    "businessCategory": "Conciergerie de villas",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://conciergeriesoleillevant.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Conciergerie Soleil Levant\n\nGestion et conciergerie de villas à Saint-Barthélemy, pour les propriétaires et leurs hôtes.\n\n## Pour les propriétaires\n\n- Gestion locative complète (annonces, check-in, ménage, maintenance)\n- Suivi des travaux et des artisans\n- Reporting mensuel et comptes rendus avec photos\n\nCommission de 20 % sur les revenus locatifs, sans frais fixes.\n\n## Pour les hôtes\n\n- Accueil à l’aéroport de Saint-Jean\n- Courses avant l’arrivée\n- Chef privé, massages, baby-sitting, location de voiture et de bateau\n- Réservations de restaurants et d’activités\n\n## L’équipe\n\nCréée en 2017 par Anaïs Ledoux, la conciergerie compte aujourd’hui huit personnes et gère 45 villas entre Gustavia, Flamands et Toiny.\n\n« Anaïs et son équipe gèrent notre villa comme si c’était la leur. » — M. et Mme Lefort, propriétaires à Toiny\n\nJoignable 7j/7 de 7h à 22h.\n\nTél. : +590 690 00 16 78 · hello@conciergeriesoleillevant.example\n\nNous parlons français, anglais et espagnol.\n\n© Conciergerie Soleil Levant — Mentions légales — Politique de confidentialité — Ce site utilise des cookies."
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gestion et conciergerie de villas à Saint-Barthélemy, pour les propriétaires et leurs hôtes.",
+        "text": "Gestion et conciergerie de villas à Saint-Barthélemy, pour les propriétaires et leurs hôtes.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gestion locative complète (annonces, check-in, ménage, maintenance)",
+        "text": "Gestion locative complète",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Suivi des travaux et des artisans",
+        "text": "Suivi des travaux et des artisans",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Reporting mensuel et comptes rendus avec photos",
+        "text": "Reporting mensuel et comptes rendus avec photos",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Accueil à l’aéroport de Saint-Jean",
+        "text": "Accueil à l’aéroport de Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Courses avant l’arrivée",
+        "text": "Courses avant l’arrivée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Chef privé, massages, baby-sitting, location de voiture et de bateau",
+        "text": "Chef privé",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Chef privé, massages, baby-sitting, location de voiture et de bateau",
+        "text": "baby-sitting",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Commission de 20 % sur les revenus locatifs, sans frais fixes.",
+        "text": null,
+        "price": {
+          "amount": 200,
+          "currency": "EUR",
+          "unit": "par mois",
+          "item": "Gestion locative"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Réservations de restaurants et d’activités",
+        "text": "Réservations de restaurants et d’activités",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Créée en 2017 par Anaïs Ledoux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2017,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Créée en 2017 par Anaïs Ledoux",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Anaïs Ledoux",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "gère 45 villas entre Gustavia, Flamands et Toiny.",
+        "text": "Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "gère 45 villas entre Gustavia, Flamands et Toiny.",
+        "text": "Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "gère 45 villas entre Gustavia, Flamands et Toiny.",
+        "text": "Toiny",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "la conciergerie compte aujourd’hui huit personnes",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Thomas Ledoux",
+          "role": "responsable maintenance"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Anaïs et son équipe gèrent notre villa comme si c’était la leur. » — M. et Mme Lefort, propriétaires à Toiny",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Anaïs et son équipe gèrent notre villa comme si c’était la leur.",
+          "attribution": "M. et Mme Lefort"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Joignable 7j/7 de 7h à 22h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "sat",
+            "opens": "07:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "sun",
+            "opens": "07:00",
+            "closes": "22:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : +590 690 00 16 78",
+        "text": "+590 690 00 16 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "hello@conciergeriesoleillevant.example",
+        "text": "hello@conciergeriesoleillevant.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "espagnol",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

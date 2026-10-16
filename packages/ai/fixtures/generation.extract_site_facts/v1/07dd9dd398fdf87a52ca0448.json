@@ -1,0 +1,309 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Agence Immobilière du Rocher",
+    "businessCategory": "Agence immobilière",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://immodurocher.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Vente](/vente) · [Location annuelle](/location) · [Estimation](/estimation) · [L’agence](/agence)\n\n# Agence Immobilière du Rocher\n\nVente, location à l’année et gestion locative à Saint-Barthélemy depuis 1992.\n\n## Nos métiers\n\n- Vente de villas, appartements et terrains\n- Location à l’année (particuliers et entreprises)\n- Gestion locative et syndic de copropriété\n- Estimation gratuite de votre bien\n\n## L’agence\n\nFondée en 1992 par Jean-Marc Lédée, l’agence est aujourd’hui animée par une équipe de cinq personnes :\n\n- Jean-Marc Lédée, fondateur et directeur\n- Sarah Questel, négociatrice vente\n- Yann Brin, gestionnaire locatif\n\nMembre de la FNAIM. Carte professionnelle délivrée par la CCI de Saint-Martin.\n\n## Horaires\n\nDu lundi au vendredi, 8h30–12h30 et 14h30–17h30. Le samedi matin sur rendez-vous.\n\n## Contact\n\nAgence Immobilière du Rocher, Les Galeries du Commerce, Saint-Jean, 97133 Saint-Barthélemy\nTél. : 05 90 00 08 01\ncontact@immodurocher.example\n\nNous vous accueillons en français et en anglais.\n\n© Agence Immobilière du Rocher — Honoraires — Mentions légales — Ce site utilise des cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vente, location à l’année et gestion locative à Saint-Barthélemy depuis 1992.",
+        "text": "Vente, location à l’année et gestion locative à Saint-Barthélemy depuis 1992.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vente de villas, appartements et terrains",
+        "text": "Vente de villas, appartements et terrains",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location à l’année (particuliers et entreprises)",
+        "text": "Location à l’année",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gestion locative et syndic de copropriété",
+        "text": "Gestion locative et syndic de copropriété",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Estimation gratuite de votre bien",
+        "text": "Estimation gratuite de votre bien",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fondée en 1992 par Jean-Marc Lédée",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1992,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location saisonnière de villas de luxe",
+        "text": "Location saisonnière",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Jean-Marc Lédée, fondateur et directeur",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Jean-Marc Lédée",
+          "role": "fondateur et directeur"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sarah Questel, négociatrice vente",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sarah Questel",
+          "role": "négociatrice vente"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Yann Brin, gestionnaire locatif",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Yann Brin",
+          "role": "gestionnaire locatif"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au vendredi, 8h30–12h30 et 14h30–17h30.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "mon",
+            "opens": "14:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "08:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "tue",
+            "opens": "14:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "08:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "wed",
+            "opens": "14:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "thu",
+            "opens": "14:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "fri",
+            "opens": "14:30",
+            "closes": "17:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Le samedi matin sur rendez-vous.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Les Galeries du Commerce, Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Les Galeries du Commerce, Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 08 01",
+        "text": "05 90 00 08 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@immodurocher.example",
+        "text": "contact@immodurocher.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous vous accueillons en français et en anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous vous accueillons en français et en anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

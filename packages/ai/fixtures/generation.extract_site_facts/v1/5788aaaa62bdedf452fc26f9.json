@@ -1,0 +1,413 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Nautic Saint-Barth",
+    "businessCategory": "Location de bateaux",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://nauticsaintbarth.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Nos bateaux](/bateaux) · [Excursions](/excursions) · [Contact](/contact)\n\n# Nautic Saint-Barth\n\nLocation de bateaux à moteur avec ou sans skipper, au départ du port de Gustavia.\n\nPermis bateau obligatoire pour la location sans skipper. Carburant non inclus.\n\n## Nos bateaux\n\n- Semi-rigide 6 m, 115 cv (6 personnes) — 450 € la journée\n- Semi-rigide 8 m, 2 × 200 cv (10 personnes) — 950 € la journée\n- Vedette 10 m avec skipper (12 personnes) — 1 800 € la journée\n\nDemi-journée (4 h) : 60 % du tarif journée.\n\n## Excursions\n\n- Tour de l’île et baignade à Colombier — 95 € par personne\n- Journée à Tintamarre et Pinel (Saint-Martin) — 160 € par personne\n\n## Infos pratiques\n\nBase nautique ouverte tous les jours de 8h à 18h.\n\nQuai du Port de Plaisance, 97133 Gustavia\nTél. : 05 90 00 02 45 · WhatsApp : +590 690 00 23 45 · contact@nauticsaintbarth.example\n\nPaiement : carte bancaire, espèces, virement. Caution par empreinte bancaire.\n\nNous parlons français, anglais et espagnol.\n\nCe site utilise des cookies. © Nautic Saint-Barth"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de bateaux à moteur avec ou sans skipper, au départ du port de Gustavia.",
+        "text": "Location de bateaux à moteur avec ou sans skipper, au départ du port de Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de bateaux à moteur avec ou sans skipper",
+        "text": "Location de bateaux à moteur avec ou sans skipper",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Semi-rigide 6 m, 115 cv (6 personnes) — 450 € la journée",
+        "text": "Semi-rigide 6 m, 115 cv (6 personnes)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Semi-rigide 6 m, 115 cv (6 personnes) — 450 € la journée",
+        "text": null,
+        "price": {
+          "amount": 450,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "Semi-rigide 6 m"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Semi-rigide 8 m, 2 × 200 cv (10 personnes) — 950 € la journée",
+        "text": "Semi-rigide 8 m, 2 × 200 cv (10 personnes)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Semi-rigide 8 m, 2 × 200 cv (10 personnes) — 950 € la journée",
+        "text": null,
+        "price": {
+          "amount": 950,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "Semi-rigide 8 m"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Vedette 10 m avec skipper (12 personnes) — 1 800 € la journée",
+        "text": "Vedette 10 m avec skipper (12 personnes)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Vedette 10 m avec skipper (12 personnes) — 1 800 € la journée",
+        "text": null,
+        "price": {
+          "amount": 1800,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "Vedette 10 m avec skipper"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Demi-journée (4 h) : 60 % du tarif journée.",
+        "text": null,
+        "price": {
+          "amount": 270,
+          "currency": "EUR",
+          "unit": "la demi-journée",
+          "item": "Semi-rigide 6 m demi-journée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Tour de l’île et baignade à Colombier — 95 € par personne",
+        "text": "Tour de l’île et baignade à Colombier",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tour de l’île et baignade à Colombier — 95 € par personne",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Tour de l’île"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Journée à Tintamarre et Pinel (Saint-Martin) — 160 € par personne",
+        "text": "Journée à Tintamarre et Pinel (Saint-Martin)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Journée à Tintamarre et Pinel (Saint-Martin) — 160 € par personne",
+        "text": null,
+        "price": {
+          "amount": 160,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Journée à Tintamarre et Pinel"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Base nautique ouverte tous les jours de 8h à 18h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Quai du Port de Plaisance, 97133 Gustavia",
+        "text": "Quai du Port de Plaisance, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 02 45",
+        "text": "05 90 00 02 45",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 23 45",
+        "text": "+590 690 00 23 45",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de jet-ski à l’heure",
+        "text": "Location de jet-ski",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@nauticsaintbarth.example",
+        "text": "contact@nauticsaintbarth.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, virement.",
+        "text": "carte bancaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, virement.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, virement.",
+        "text": "virement",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et espagnol.",
+        "text": "espagnol",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

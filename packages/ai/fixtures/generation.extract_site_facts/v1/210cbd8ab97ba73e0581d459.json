@@ -1,0 +1,639 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Harbour Beans",
+    "businessCategory": "Coffee shop",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://harbourbeans.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Menu](/menu) · [Find us](/find-us)\n\nWe use cookies to analyse traffic. [Got it]\n\n# Harbour Beans\n\n**Specialty coffee and fresh bagels on the Gustavia waterfront.**\n\nWe roast small batches every week and bake our bagels at dawn. Dog friendly, laptop friendly, sunrise friendly.\n\n## Opening hours\n\nMon–Sat 7:30am to 2pm. Closed on Sundays.\n\n## What we do\n\n- Pour-over and espresso drinks\n- Bagels, sandwiches and salads\n- Cold brew by the bottle\n- Catering for boats and villas (order 24h ahead)\n\nFree wifi, outdoor seating, oat and almond milk available.\n\n## What people say\n\n\"Best flat white on the island, hands down.\" — Jenna R.\n\n## Find us\n\nHarbour Beans, Rue de la République, Gustavia 97133\nPhone: +590 590 00 23 45 · hello@harbourbeans.example\n\nWe take cards, cash and Apple Pay.\n\n© Harbour Beans 2024 · [Privacy](/privacy)"
+      },
+      {
+        "id": "p2",
+        "url": "https://harbourbeans.example/menu",
+        "kind": "menu",
+        "lang": "en",
+        "markdown": "[Home](/) · [Menu](/menu) · [Find us](/find-us)\n\n# Menu\n\nAll prices in euros, tax included.\n\n## Coffee\n\n- Espresso — €2.80\n- Flat white — €4.50\n- Cold brew (bottle) — €6\n- Iced latte — €5\n\n## Bagels\n\n- Plain with cream cheese — €5.50\n- Smoked salmon and dill — €12\n- Avocado, egg and chili — €11\n\n## Sweet\n\n- Banana bread — €4\n- Cinnamon roll — €4.50\n\nCatering platters from €120 for 10 people.\n\n© Harbour Beans"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Specialty coffee and fresh bagels on the Gustavia waterfront.",
+        "text": "Specialty coffee and fresh bagels on the Gustavia waterfront.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mon–Sat 7:30am to 2pm. Closed on Sundays.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:30",
+            "closes": "14:00"
+          },
+          {
+            "day": "sat",
+            "opens": "07:30",
+            "closes": "14:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Pour-over and espresso drinks",
+        "text": "Pour-over and espresso drinks",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bagels, sandwiches and salads",
+        "text": "Bagels, sandwiches and salads",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cold brew by the bottle",
+        "text": "Cold brew by the bottle",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Catering for boats and villas (order 24h ahead)",
+        "text": "Catering for boats and villas",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Free wifi, outdoor seating, oat and almond milk available.",
+        "text": "Free wifi",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Free wifi, outdoor seating, oat and almond milk available.",
+        "text": "outdoor seating",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Dog friendly, laptop friendly, sunrise friendly.",
+        "text": "Dog friendly",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"Best flat white on the island, hands down.\" — Jenna R.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Best flat white on the island, hands down.",
+          "attribution": "Jenna R."
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Harbour Beans, Rue de la République, Gustavia 97133",
+        "text": "Rue de la République, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Phone: +590 590 00 23 45",
+        "text": "+590 590 00 23 45",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "hello@harbourbeans.example",
+        "text": "hello@harbourbeans.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Closed on Sundays.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We take cards, cash and Apple Pay.",
+        "text": "cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We take cards, cash and Apple Pay.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We take cards, cash and Apple Pay.",
+        "text": "Apple Pay",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Coffee",
+        "text": "Coffee",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Espresso — €2.80",
+        "text": "Espresso",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Espresso — €2.80",
+        "text": null,
+        "price": {
+          "amount": 2.8,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Espresso"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Flat white — €4.50",
+        "text": "Flat white",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Flat white — €4.50",
+        "text": null,
+        "price": {
+          "amount": 4.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Flat white"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Cold brew (bottle) — €6",
+        "text": "Cold brew (bottle)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Cold brew (bottle) — €6",
+        "text": null,
+        "price": {
+          "amount": 6,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cold brew"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Iced latte — €5",
+        "text": "Iced latte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Iced latte — €5",
+        "text": null,
+        "price": {
+          "amount": 5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Iced latte"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Bagels",
+        "text": "Bagels",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "We roast small batches every week",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2015,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Plain with cream cheese — €5.50",
+        "text": "Plain with cream cheese",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Plain with cream cheese — €5.50",
+        "text": null,
+        "price": {
+          "amount": 5.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Plain bagel with cream cheese"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Smoked salmon and dill — €12",
+        "text": "Smoked salmon and dill",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Smoked salmon and dill — €12",
+        "text": null,
+        "price": {
+          "amount": 12,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Smoked salmon and dill"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Avocado, egg and chili — €11",
+        "text": "Avocado, egg and chili",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Avocado, egg and chili — €11",
+        "text": null,
+        "price": {
+          "amount": 11,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Avocado, egg and chili"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Sweet",
+        "text": "Sweet",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Banana bread — €4",
+        "text": "Banana bread",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Banana bread — €4",
+        "text": null,
+        "price": {
+          "amount": 4,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Banana bread"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "en",
+        "evidence": "Cinnamon roll — €4.50",
+        "text": "Cinnamon roll",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Cinnamon roll — €4.50",
+        "text": null,
+        "price": {
+          "amount": 4.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cinnamon roll"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Catering platters from €120 for 10 people.",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "for 10 people",
+          "item": "Catering platters"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

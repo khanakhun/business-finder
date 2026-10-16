@@ -1,0 +1,285 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Maison Coralie",
+    "businessCategory": "Boutique de prêt-à-porter",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://maisoncoralie.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Maison Coralie\n\n**Prêt-à-porter féminin, lin et coton, créé à Saint-Barth.**\n\nRobes, tuniques, chapeaux et sacs en raphia, dessinés par Coralie Lédée et cousus en petites séries. Chaque pièce est unique ou presque.\n\n## La boutique\n\nRue de la France, 97133 Gustavia — à côté de la poste.\n\nOuverte du lundi au samedi de 10h à 19h. Fermée le dimanche hors saison.\n\n## Nos services\n\n- Retouches offertes sur les robes achetées en boutique\n- Commandes sur mesure (comptez trois semaines)\n- Expédition en France métropolitaine et en Europe\n- Cartes cadeaux\n\n## À propos\n\nLa marque est née en 2016 dans un petit atelier de Lorient. Nous travaillons uniquement des matières naturelles : lin européen, coton biologique, raphia de Madagascar.\n\nNous parlons français, anglais et italien.\n\n« Des robes légères et bien coupées, et une vendeuse adorable. » — Anna, Milan\n\nContact : 05 90 00 05 78 · bonjour@maisoncoralie.example · Instagram @maisoncoralie\n\n© Maison Coralie — CGV — Livraison et retours — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Prêt-à-porter féminin, lin et coton, créé à Saint-Barth.",
+        "text": "Prêt-à-porter féminin, lin et coton, créé à Saint-Barth.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "dessinés par Coralie Lédée et cousus en petites séries",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Coralie Lédée",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Rue de la France, 97133 Gustavia — à côté de la poste.",
+        "text": "Rue de la France, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouverte du lundi au samedi de 10h à 19h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "10:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Retouches offertes sur les robes achetées en boutique",
+        "text": "Retouches offertes sur les robes achetées en boutique",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Commandes sur mesure (comptez trois semaines)",
+        "text": "Commandes sur mesure",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Robes, tuniques, chapeaux et sacs en raphia",
+        "text": null,
+        "price": {
+          "amount": 180,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Robe"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Expédition en France métropolitaine et en Europe",
+        "text": "Expédition en France métropolitaine et en Europe",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cartes cadeaux",
+        "text": "Cartes cadeaux",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "La marque est née en 2016 dans un petit atelier de Lorient.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2016,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et italien.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Collection homme en lin",
+        "text": "Collection homme",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et italien.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous parlons français, anglais et italien.",
+        "text": "italien",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Des robes légères et bien coupées, et une vendeuse adorable. » — Anna, Milan",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Des robes légères et bien coupées, et une vendeuse adorable.",
+          "attribution": "Anna, Milan"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Contact : 05 90 00 05 78",
+        "text": "05 90 00 05 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "bonjour@maisoncoralie.example",
+        "text": "bonjour@maisoncoralie.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

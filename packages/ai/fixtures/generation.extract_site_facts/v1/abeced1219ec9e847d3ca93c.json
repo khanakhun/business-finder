@@ -1,0 +1,355 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Île Villas Collection",
+    "businessCategory": "Agence de location de villas",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://ilevillas.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Île Villas Collection\n\nLocation de villas de luxe à Saint-Barthélemy — Luxury villa rentals in Saint-Barthélemy\n\nDepuis 2001, nous sélectionnons les plus belles villas de l’île pour nos clients. Since 2001 we have hand-picked the island’s finest villas for our guests.\n\n## Nos villas / Our villas\n\n- Villa Bleu Lagon, 4 chambres / 4 bedrooms, Grand Cul-de-Sac — à partir de / from 2 500 € par nuit / per night\n- Villa Roche Blanche, 6 chambres / 6 bedrooms, Gouverneur — à partir de / from USD 6,000 par nuit / per night\n\n## Services inclus / Included services\n\n- Accueil à l’aéroport / Airport welcome\n- Conciergerie 24h/24 / 24-hour concierge\n- Ménage quotidien / Daily housekeeping\n\n## L’équipe / The team\n\n- Isabelle Fournier, directrice / managing director\n- Luca Moretti, responsable clientèle / guest relations manager\n\n## Contact\n\nÎle Villas Collection, Rue du Général de Gaulle, 97133 Gustavia\nTél. / Phone : +590 590 00 43 45 · villas@ilevillas.example\n\nBureau ouvert du lundi au vendredi de 9h à 18h / Office open Monday to Friday 9am to 6pm.\n\nNous parlons français, anglais et italien. We speak French, English and Italian.\n\n© Île Villas Collection — Mentions légales / Legal notice"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de villas de luxe à Saint-Barthélemy — Luxury villa rentals in Saint-Barthélemy",
+        "text": "Location de villas de luxe à Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Depuis 2001, nous sélectionnons les plus belles villas de l’île pour nos clients.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2001,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Bleu Lagon, 4 chambres / 4 bedrooms, Grand Cul-de-Sac",
+        "text": "Villa Bleu Lagon, 4 bedrooms, Grand Cul-de-Sac",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Grand Cul-de-Sac — à partir de / from 2 500 € par nuit / per night",
+        "text": null,
+        "price": {
+          "amount": 2500,
+          "currency": "EUR",
+          "unit": "per night",
+          "item": "Villa Bleu Lagon"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Roche Blanche, 6 chambres / 6 bedrooms, Gouverneur",
+        "text": "Villa Roche Blanche, 6 bedrooms, Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Gouverneur — à partir de / from USD 6,000 par nuit / per night",
+        "text": null,
+        "price": {
+          "amount": 6000,
+          "currency": "USD",
+          "unit": "per night",
+          "item": "Villa Roche Blanche"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Accueil à l’aéroport / Airport welcome",
+        "text": "Airport welcome",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Gouverneur — à partir de / from USD 6,000 par nuit / per night",
+        "text": null,
+        "price": {
+          "amount": 5500,
+          "currency": "EUR",
+          "unit": "per night",
+          "item": "Villa Roche Blanche"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Conciergerie 24h/24 / 24-hour concierge",
+        "text": "24-hour concierge",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Ménage quotidien / Daily housekeeping",
+        "text": "Daily housekeeping",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Isabelle Fournier, directrice / managing director",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Isabelle Fournier",
+          "role": "managing director"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Luca Moretti, responsable clientèle / guest relations manager",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Luca Moretti",
+          "role": "guest relations manager"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Île Villas Collection, Rue du Général de Gaulle, 97133 Gustavia",
+        "text": "Rue du Général de Gaulle, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. / Phone : +590 590 00 43 45",
+        "text": "+590 590 00 43 45",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "villas@ilevillas.example",
+        "text": "villas@ilevillas.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa Horizon, 3 chambres / 3 bedrooms, Lurin",
+        "text": "Villa Horizon, 3 bedrooms, Lurin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Bureau ouvert du lundi au vendredi de 9h à 18h / Office open Monday to Friday 9am to 6pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Italian.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Italian.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak French, English and Italian.",
+        "text": "Italian",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Bleu Lagon, 4 chambres / 4 bedrooms, Grand Cul-de-Sac",
+        "text": "Grand Cul-de-Sac",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Roche Blanche, 6 chambres / 6 bedrooms, Gouverneur",
+        "text": "Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

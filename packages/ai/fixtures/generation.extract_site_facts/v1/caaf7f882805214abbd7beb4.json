@@ -1,0 +1,357 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Lucie Vidal Photographe",
+    "businessCategory": "Photographe",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://lucievidalphoto.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Lucie Vidal — Photographe à Saint-Barthélemy\n\nMariages, portraits de famille et photos de villas, en lumière naturelle.\n\nInstallée à Saint-Barth depuis 2014, je photographie les mariages sur les plages de l’île et les séances famille au lever du soleil.\n\n## Prestations\n\n- Séance famille ou couple (1 h, 40 photos retouchées) : 350 €\n- Mariage, formule demi-journée (5 h) : 1 900 €\n- Mariage, formule journée (10 h, 2 photographes) : 3 400 €\n- Reportage villa pour agences (jusqu’à 30 photos HDR) : 600 €\n- Portrait corporate : 180 €\n\nLes photos sont livrées en galerie privée sous 15 jours.\n\n## Témoignages\n\n« Lucie a su capter l’émotion de notre mariage sans jamais être intrusive. » — Camille & Julien\n« Des photos de villa qui ont fait doubler nos demandes de location. » — Agence Example Villas\n\n## Contact\n\nlucie@lucievidalphoto.example · 06 90 00 12 34\nJe me déplace dans toute l’île et à Saint-Martin.\n\nDisponible sur rendez-vous du lundi au samedi.\n\nJe parle français, anglais et espagnol.\n\n© Lucie Vidal — Toutes les photos sont protégées par le droit d’auteur — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Mariages, portraits de famille et photos de villas, en lumière naturelle.",
+        "text": "Mariages, portraits de famille et photos de villas, en lumière naturelle.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Installée à Saint-Barth depuis 2014",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2014,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Séance famille ou couple (1 h, 40 photos retouchées) : 350 €",
+        "text": "Séance famille ou couple",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Séance famille ou couple (1 h, 40 photos retouchées) : 350 €",
+        "text": null,
+        "price": {
+          "amount": 350,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Séance famille ou couple"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Mariage, formule demi-journée (5 h) : 1 900 €",
+        "text": "Mariage, formule demi-journée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mariage, formule demi-journée (5 h) : 1 900 €",
+        "text": null,
+        "price": {
+          "amount": 1900,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Mariage, formule demi-journée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Mariage, formule journée (10 h, 2 photographes) : 3 400 €",
+        "text": "Mariage, formule journée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mariage, formule journée (10 h, 2 photographes) : 3 400 €",
+        "text": null,
+        "price": {
+          "amount": 3400,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Mariage, formule journée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Photos et vidéos par drone",
+        "text": "Photos et vidéos par drone",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Reportage villa pour agences (jusqu’à 30 photos HDR) : 600 €",
+        "text": "Reportage villa pour agences",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Reportage villa pour agences (jusqu’à 30 photos HDR) : 600 €",
+        "text": null,
+        "price": {
+          "amount": 600,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Reportage villa pour agences"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Portrait corporate : 180 €",
+        "text": "Portrait corporate",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Portrait corporate : 180 €",
+        "text": null,
+        "price": {
+          "amount": 180,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Portrait corporate"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Lucie a su capter l’émotion de notre mariage sans jamais être intrusive. » — Camille & Julien",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Lucie a su capter l’émotion de notre mariage sans jamais être intrusive.",
+          "attribution": "Camille & Julien"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Des photos de villa qui ont fait doubler nos demandes de location. » — Agence Example Villas",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Des photos de villa qui ont fait doubler nos demandes de location.",
+          "attribution": "Agence Example Villas"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mariage, formule demi-journée (5 h) : 1 900 €",
+        "text": null,
+        "price": {
+          "amount": 1500,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Mariage, formule demi-journée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "lucie@lucievidalphoto.example · 06 90 00 12 34",
+        "text": "lucie@lucievidalphoto.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "lucie@lucievidalphoto.example · 06 90 00 12 34",
+        "text": "06 90 00 12 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je me déplace dans toute l’île et à Saint-Martin.",
+        "text": "toute l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je me déplace dans toute l’île et à Saint-Martin.",
+        "text": "Saint-Martin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je parle français, anglais et espagnol.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je parle français, anglais et espagnol.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je parle français, anglais et espagnol.",
+        "text": "espagnol",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

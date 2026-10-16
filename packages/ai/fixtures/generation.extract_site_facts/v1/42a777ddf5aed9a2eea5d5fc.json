@@ -1,0 +1,424 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Jet & Sail Rentals",
+    "businessCategory": "Boat rental",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://jetandsail.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Jet & Sail Rentals\n\nBareboat and skippered rentals from Grand Cul-de-Sac lagoon: RIBs, small sailboats and kayaks.\n\n## Rentals\n\n- RIB 5.5 m, 90 hp (6 people), licence required — €380 per day, €240 per half day\n- RIB 7 m, 200 hp (8 people), with skipper — €850 per day\n- Hobie Cat 16 — €60 per hour\n- Double kayak — €25 per hour\n- Stand-up paddle — €20 per hour\n\nFuel is extra on bareboat rentals. Life jackets and a cooler are included.\n\n## Hours\n\nEvery day 8:30am–5:30pm, November to August. Closed in September and October.\n\nBook by WhatsApp: +590 690 00 41 23 or online at https://www.bookingkit.example/jet-and-sail\n\nThe base has been run by Antoine Lecler since 2012.\n\nJet & Sail Rentals, Grand Cul-de-Sac, 97133 Saint-Barthélemy\n\nWe take cards and cash. English and French spoken.\n\n© Jet & Sail Rentals · Terms"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bareboat and skippered rentals from Grand Cul-de-Sac lagoon: RIBs, small sailboats and kayaks.",
+        "text": "Bareboat and skippered rentals from Grand Cul-de-Sac lagoon: RIBs, small sailboats and kayaks.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "RIB 5.5 m, 90 hp (6 people), licence required — €380 per day, €240 per half day",
+        "text": "RIB 5.5 m, 90 hp (6 people)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "RIB 5.5 m, 90 hp (6 people), licence required — €380 per day, €240 per half day",
+        "text": null,
+        "price": {
+          "amount": 380,
+          "currency": "EUR",
+          "unit": "per day",
+          "item": "RIB 5.5 m"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "RIB 5.5 m, 90 hp (6 people), licence required — €380 per day, €240 per half day",
+        "text": null,
+        "price": {
+          "amount": 240,
+          "currency": "EUR",
+          "unit": "per half day",
+          "item": "RIB 5.5 m"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "RIB 7 m, 200 hp (8 people), with skipper — €850 per day",
+        "text": "RIB 7 m, 200 hp (8 people), with skipper",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "RIB 7 m, 200 hp (8 people), with skipper — €850 per day",
+        "text": null,
+        "price": {
+          "amount": 850,
+          "currency": "EUR",
+          "unit": "per day",
+          "item": "RIB 7 m with skipper"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hobie Cat 16 — €60 per hour",
+        "text": "Hobie Cat 16",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hobie Cat 16 — €60 per hour",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Hobie Cat 16"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Jet ski rental — €120 per hour",
+        "text": "Jet ski rental",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Double kayak — €25 per hour",
+        "text": "Double kayak",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Double kayak — €25 per hour",
+        "text": null,
+        "price": {
+          "amount": 25,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Double kayak"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Stand-up paddle — €20 per hour",
+        "text": "Stand-up paddle",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Stand-up paddle — €20 per hour",
+        "text": null,
+        "price": {
+          "amount": 20,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Stand-up paddle"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Life jackets and a cooler are included.",
+        "text": "Life jackets and a cooler are included",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Every day 8:30am–5:30pm, November to August.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "sat",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "sun",
+            "opens": "08:30",
+            "closes": "17:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Book by WhatsApp: +590 690 00 41 23",
+        "text": "+590 690 00 41 23",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "or online at https://www.bookingkit.example/jet-and-sail",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.bookingkit.example/jet-and-sail",
+          "provider": "bookingkit"
+        }
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "RIB 7 m, 200 hp (8 people), with skipper — €850 per day",
+        "text": null,
+        "price": {
+          "amount": 500,
+          "currency": "EUR",
+          "unit": "per half day",
+          "item": "RIB 7 m with skipper"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "The base has been run by Antoine Lecler since 2012.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Antoine Lecler",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "The base has been run by Antoine Lecler since 2012.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2012,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Jet & Sail Rentals, Grand Cul-de-Sac, 97133 Saint-Barthélemy",
+        "text": "Grand Cul-de-Sac, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We take cards and cash.",
+        "text": "cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We take cards and cash.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

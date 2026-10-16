@@ -1,0 +1,398 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Quincaillerie de l’Anse",
+    "businessCategory": "Quincaillerie",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://quincailleriedelanse.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Rayons](/rayons) · [Services](/services) · [Contact](/contact)\n\n# Quincaillerie de l’Anse\n\nOutillage, plomberie, électricité, peinture et jardin : tout pour la maison, à Saint-Jean depuis 1979.\n\n## Nos rayons\n\n- Outillage à main et électroportatif\n- Plomberie et sanitaire\n- Électricité et éclairage\n- Peintures et enduits (mise à la teinte sur place)\n- Jardin et piscine\n- Visserie et fixation\n\n## Nos services\n\n- Reproduction de clés en 10 minutes\n- Découpe de verre et de bois sur mesure\n- Livraison sur toute l’île à partir de 150 € d’achat\n- Location de matériel : ponceuse 25 € la journée, nettoyeur haute pression 45 € la journée\n\n## Horaires\n\nLundi – vendredi : 7h30 – 12h30 et 14h – 17h30\nSamedi : 7h30 – 12h30\nFermé le dimanche et les jours fériés.\n\n## Contact\n\nQuincaillerie de l’Anse, Route de Saint-Jean, 97133 Saint-Barthélemy\nTél. : 05 90 00 04 67\nquincaillerie@delanse.example\n\nComptes professionnels : facturation mensuelle pour les artisans. Paiement par carte, espèces ou chèque.\n\nParking clients devant le magasin.\n\n© Quincaillerie de l’Anse — Mentions légales — Ce site utilise des cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Outillage, plomberie, électricité, peinture et jardin : tout pour la maison, à Saint-Jean depuis 1979.",
+        "text": "Outillage, plomberie, électricité, peinture et jardin : tout pour la maison, à Saint-Jean depuis 1979.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "tout pour la maison, à Saint-Jean depuis 1979.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1979,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Outillage à main et électroportatif",
+        "text": "Outillage à main et électroportatif",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Plomberie et sanitaire",
+        "text": "Plomberie et sanitaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Électricité et éclairage",
+        "text": "Électricité et éclairage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Peintures et enduits (mise à la teinte sur place)",
+        "text": "Peintures et enduits",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Jardin et piscine",
+        "text": "Jardin et piscine",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Reproduction de clés en 10 minutes",
+        "text": "Reproduction de clés en 10 minutes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Samedi : 7h30 – 12h30",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "14:00",
+            "closes": "17:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Découpe de verre et de bois sur mesure",
+        "text": "Découpe de verre et de bois sur mesure",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Livraison sur toute l’île à partir de 150 € d’achat",
+        "text": "Livraison sur toute l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de matériel : ponceuse 25 € la journée, nettoyeur haute pression 45 € la journée",
+        "text": "Location de matériel",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "ponceuse 25 € la journée",
+        "text": null,
+        "price": {
+          "amount": 25,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "ponceuse"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "nettoyeur haute pression 45 € la journée",
+        "text": null,
+        "price": {
+          "amount": 45,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "nettoyeur haute pression"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lundi – vendredi : 7h30 – 12h30 et 14h – 17h30 Samedi : 7h30 – 12h30",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "mon",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "07:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "tue",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "07:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "wed",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "07:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "thu",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "07:30",
+            "closes": "12:30"
+          },
+          {
+            "day": "fri",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "sat",
+            "opens": "07:30",
+            "closes": "12:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "ponceuse 25 € la journée",
+        "text": null,
+        "price": {
+          "amount": 35,
+          "currency": "EUR",
+          "unit": "la journée",
+          "item": "ponceuse"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Quincaillerie de l’Anse, Route de Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Route de Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 04 67",
+        "text": "05 90 00 04 67",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "quincaillerie@delanse.example",
+        "text": "quincaillerie@delanse.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces ou chèque.",
+        "text": "carte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces ou chèque.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement par carte, espèces ou chèque.",
+        "text": "chèque",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Parking clients devant le magasin.",
+        "text": "Parking clients",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

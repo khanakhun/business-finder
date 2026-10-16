@@ -9,7 +9,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { buildBrief } from '../domain/brief/build-brief.ts';
 import type { PagePlanTemplate } from '../domain/brief/page-plan.ts';
-import { BRIEF_SOURCES_READER, type BriefSourcesReader } from './facts.ports.ts';
+import { BRIEF_SOURCES_READER, type BriefSources, type BriefSourcesReader } from './facts.ports.ts';
 import { type FactActor, FactRegistryService } from './facts.service.ts';
 
 // The generation brief of a business for a workspace (BF-040): the registry, the category, the audit, the review
@@ -30,9 +30,16 @@ export class BriefService {
   async build(
     actor: FactActor,
     businessId: string,
-    options: { offer?: GenerationBriefQuery['offer']; overrides?: BriefOverrides } = {},
-  ): Promise<{ brief: GenerationBrief; facts: RegistryFact[] }> {
-    const { facts } = await this.registry.registry(actor, businessId);
+    options: {
+      offer?: GenerationBriefQuery['offer'];
+      overrides?: BriefOverrides;
+      /** A pinned registry (the snapshot a generation reads); else the current one. */
+      facts?: RegistryFact[];
+      /** Image candidates the builder knows better than the crawl (the site's assets). */
+      images?: { count: number; large: number };
+    } = {},
+  ): Promise<{ brief: GenerationBrief; facts: RegistryFact[]; sources: BriefSources }> {
+    const facts = options.facts ?? (await this.registry.registry(actor, businessId)).facts;
     const sources = await this.sources.read(actor.organizationId, businessId);
     if (!sources) throw new NotFoundError('Business', businessId);
     const pagePlanId = options.overrides?.pagePlanId;
@@ -42,11 +49,12 @@ export class BriefService {
       businessId,
       facts,
       ...sources,
+      ...(options.images ? { images: options.images } : {}),
       templates: this.templates,
       ...(options.offer ? { offer: options.offer } : {}),
       ...(options.overrides ? { overrides: options.overrides } : {}),
     });
-    return { brief, facts };
+    return { brief, facts, sources };
   }
 
   async preview(

@@ -332,7 +332,7 @@ export class SitesModule {
             ]
           : []),
       ],
-      exports: [SiteCommands, SiteQueries],
+      exports: [SiteCommands, SiteQueries, SiteAssetCommands],
     };
   }
 }

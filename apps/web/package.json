@@ -20,6 +20,7 @@
     "@bf/contracts": "workspace:*",
     "@bf/ui": "workspace:*",
     "@dnd-kit/core": "catalog:",
+    "@puckeditor/core": "catalog:",
     "@tanstack/react-query": "catalog:",
     "lucide-react": "catalog:",
     "maplibre-gl": "catalog:",

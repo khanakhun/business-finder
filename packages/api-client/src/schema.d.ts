@@ -4244,6 +4244,7 @@ export type components = {
             changeSummary: string | null;
             /** Format: date-time */
             createdAt: string;
+            errors: number;
             /** Format: uuid */
             id: string;
             issues: components["schemas"]["SiteIssue"][];
@@ -4318,6 +4319,7 @@ export type components = {
             changeSummary: string | null;
             /** Format: date-time */
             createdAt: string;
+            errors: number;
             /** Format: uuid */
             id: string;
             parentVersionId: string | null;

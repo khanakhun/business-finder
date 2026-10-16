@@ -35,7 +35,7 @@ export const SiteSpecDocumentSchema = z
   .meta({ id: 'SiteSpecDocument', description: 'A SiteSpec v1 document, validated by @bf/site-schema.' });
 export type SiteSpecDocument = z.infer<typeof SiteSpecDocumentSchema>;
 
-/** A problem the SiteSpec validators found (errors block a version; warnings are stored with it). */
+/** A problem the SiteSpec validators found (stored with the version; errors block publishing). */
 export const SiteIssueSchema = z
   .object({
     path: z.array(z.union([z.string(), z.number()])),
@@ -57,8 +57,10 @@ export const SiteVersionSummarySchema = z
     changeSummary: z.string().nullable(),
     specHash: z.string(),
     schemaVersion: z.number().int().positive(),
-    /** Warnings the validator left (errors never reach a version). */
+    /** Warnings the validator left. */
     warnings: z.number().int().nonnegative(),
+    /** Errors of content still being written (a missing translation, low contrast…): the version cannot be published. */
+    errors: z.number().int().nonnegative(),
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'SiteVersionSummary' });

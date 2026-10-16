@@ -994,6 +994,8 @@ export const ScoringProfileSummarySchema = z
     activeVersion: z.number().int().positive().nullable(),
     /** The workspace's primary profile (its score and tier fill the listing). */
     primary: z.boolean(),
+    /** Archived workspace profiles are kept (their history) but no longer scored. */
+    archived: z.boolean(),
   })
   .meta({ id: 'ScoringProfileSummary' });
 export type ScoringProfileSummary = z.infer<typeof ScoringProfileSummarySchema>;
@@ -1039,6 +1041,90 @@ export const ScoringRecomputeResponseSchema = z
   .meta({ id: 'ScoringRecomputeResponse' });
 export type ScoringRecomputeResponse = z.infer<typeof ScoringRecomputeResponseSchema>;
 
+const ProfileNameSchema = z.string().trim().min(1).max(80);
+
+/** A workspace profile, started from a profile it sees (built-in or its own): its active config becomes v1. */
+export const CreateScoringProfileRequestSchema = z
+  .object({ fromProfileId: z.uuid(), name: ProfileNameSchema })
+  .meta({ id: 'CreateScoringProfileRequest' });
+export type CreateScoringProfileRequest = z.infer<typeof CreateScoringProfileRequestSchema>;
+
+export const UpdateScoringProfileRequestSchema = z
+  .object({ name: ProfileNameSchema, archived: z.boolean() })
+  .partial()
+  .refine((body) => body.name !== undefined || body.archived !== undefined, { message: 'Nothing to change' })
+  .meta({ id: 'UpdateScoringProfileRequest' });
+export type UpdateScoringProfileRequest = z.infer<typeof UpdateScoringProfileRequestSchema>;
+
+/** A new (inactive) version of a workspace profile. */
+export const CreateScoringProfileVersionRequestSchema = z
+  .object({ config: ScoringProfileConfigSchema })
+  .meta({ id: 'CreateScoringProfileVersionRequest' });
+export type CreateScoringProfileVersionRequest = z.infer<typeof CreateScoringProfileVersionRequestSchema>;
+
+export const ActivateScoringProfileVersionRequestSchema = z
+  .object({ version: z.number().int().positive().max(2_147_483_647) })
+  .meta({ id: 'ActivateScoringProfileVersionRequest' });
+export type ActivateScoringProfileVersionRequest = z.infer<typeof ActivateScoringProfileVersionRequestSchema>;
+
+export const ScoringVersionCreatedSchema = z
+  .object({ version: z.number().int().positive() })
+  .meta({ id: 'ScoringVersionCreated' });
+
+export const ScoringProfileVersionListSchema = z
+  .object({
+    items: z.array(
+      z.object({ version: z.number().int().positive(), active: z.boolean(), createdAt: IsoDateTimeSchema }),
+    ),
+  })
+  .meta({ id: 'ScoringProfileVersionList' });
+export type ScoringProfileVersionList = z.infer<typeof ScoringProfileVersionListSchema>;
+
+/** Up to 50 tracked businesses scored with a draft config, nothing stored (the editor's preview, in batches). */
+export const SCORING_EXPLAIN_BATCH_MAX = 50;
+export const ScoringExplainBatchRequestSchema = z
+  .object({
+    config: ScoringProfileConfigSchema,
+    businessIds: z.array(z.uuid()).min(1).max(SCORING_EXPLAIN_BATCH_MAX),
+  })
+  .meta({ id: 'ScoringExplainBatchRequest' });
+export type ScoringExplainBatchRequest = z.infer<typeof ScoringExplainBatchRequestSchema>;
+export const ScoringExplainBatchResponseSchema = z
+  .object({
+    /** Businesses the workspace does not track are left out. */
+    items: z.array(
+      z.object({
+        businessId: z.uuid(),
+        score: z.number().int().min(0).max(100),
+        tier: ScoreTierSchema,
+        gate: z.string().nullable(),
+      }),
+    ),
+  })
+  .meta({ id: 'ScoringExplainBatchResponse' });
+export type ScoringExplainBatchResponse = z.infer<typeof ScoringExplainBatchResponseSchema>;
+
+/** A sample of the workspace's businesses for the preview, stratified by their current tier for a profile. */
+export const SCORING_PREVIEW_SAMPLE_MAX = 200;
+export const ScoringPreviewSampleQuerySchema = z.object({
+  profileId: z.uuid(),
+  size: z.coerce.number().int().min(1).max(SCORING_PREVIEW_SAMPLE_MAX).default(SCORING_PREVIEW_SAMPLE_MAX),
+});
+export type ScoringPreviewSampleQuery = z.infer<typeof ScoringPreviewSampleQuerySchema>;
+export const ScoringPreviewSampleSchema = z
+  .object({
+    items: z.array(
+      z.object({
+        businessId: z.uuid(),
+        displayName: z.string(),
+        score: z.number().int().min(0).max(100).nullable(),
+        tier: ScoreTierSchema.nullable(),
+      }),
+    ),
+  })
+  .meta({ id: 'ScoringPreviewSample' });
+export type ScoringPreviewSample = z.infer<typeof ScoringPreviewSampleSchema>;
+
 export const SetPrimaryScoringProfileRequestSchema = z
   .object({ profileId: z.uuid() })
   .meta({ id: 'SetPrimaryScoringProfileRequest' });
@@ -1062,7 +1148,10 @@ export const ScoreUpdated = defineEvent(
   }),
 );
 
-/** A profile version became active (a new built-in version at boot): every workspace using it recomputes. */
+/**
+ * A profile version became active: a new built-in version at boot (no workspace: every workspace recomputes) or a
+ * workspace's own profile (that workspace recomputes).
+ */
 export const ScoringProfileVersionActivated = defineEvent(
   'scoring.profile_version.activated',
   1,

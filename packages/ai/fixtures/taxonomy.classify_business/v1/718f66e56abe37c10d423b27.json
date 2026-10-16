@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Gestion Locative Soleil",
+    "providerCategories": [],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "accountant",
+        "label": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "villa_caretaking",
+        "label": "Gardiennage de villas",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "condominium_manager",
+        "label": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "villa_rental_agency",
+        "label": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "vacation_rental",
+        "label": "Location saisonnière",
+        "path": "lodging › vacation_rental"
+      },
+      {
+        "id": "real_estate_agency",
+        "label": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "property_management",
+        "label": "Gestion locative",
+        "path": "real_estate › property_management"
+      }
+    ]
+  },
+  "output": {
+    "primary": "accountant",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, name_only)."
+  }
+}

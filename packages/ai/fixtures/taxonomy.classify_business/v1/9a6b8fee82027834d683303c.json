@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Seaside International Academy",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "school"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "daycare",
+        "label": "Daycare",
+        "path": "education › daycare"
+      },
+      {
+        "id": "international_school",
+        "label": "Private & international school",
+        "path": "education › school › international_school"
+      },
+      {
+        "id": "school",
+        "label": "Schools",
+        "path": "education › school"
+      },
+      {
+        "id": "tutoring",
+        "label": "Tutoring",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "primary_school",
+        "label": "Primary school",
+        "path": "education › school › primary_school"
+      },
+      {
+        "id": "language_school",
+        "label": "Language school",
+        "path": "education › language_school"
+      },
+      {
+        "id": "secondary_school",
+        "label": "Secondary school",
+        "path": "education › school › secondary_school"
+      }
+    ]
+  },
+  "output": {
+    "primary": "international_school",
+    "secondary": ["school"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous)."
+  }
+}

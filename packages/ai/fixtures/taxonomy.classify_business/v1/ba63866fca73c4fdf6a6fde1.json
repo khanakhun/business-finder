@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Sparkle Villa Cleaning",
+    "providerCategories": [],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "cleaning_services",
+        "label": "Cleaning services",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "house_cleaning",
+        "label": "House cleaning",
+        "path": "home_services › cleaning_services › house_cleaning"
+      },
+      {
+        "id": "villa_caretaking",
+        "label": "Villa caretaking",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "pest_control",
+        "label": "Pest control",
+        "path": "home_services › repairs_maintenance › pest_control"
+      },
+      {
+        "id": "laundry",
+        "label": "Laundry & dry cleaning",
+        "path": "home_services › personal_services › laundry"
+      },
+      {
+        "id": "concierge",
+        "label": "Concierge service",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "commercial_cleaning",
+        "label": "Commercial cleaning",
+        "path": "home_services › cleaning_services › commercial_cleaning"
+      }
+    ]
+  },
+  "output": {
+    "primary": "house_cleaning",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, name_only)."
+  }
+}

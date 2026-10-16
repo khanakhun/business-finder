@@ -23,6 +23,13 @@ describe('api client', () => {
     expect(apiClient()).toBe(apiClient());
     expect(queryKeys.system.info()).toEqual(['system', 'info']);
     expect(queryKeys.system.all).toEqual(['system']);
+    expect(queryKeys.taxonomy.tree('fr')).toEqual(['taxonomy', 'tree', 'fr']);
+    expect(queryKeys.taxonomy.mappings('needs_review', 'en')).toEqual([
+      'taxonomy',
+      'mappings',
+      'needs_review',
+      'en',
+    ]);
   });
 });
 

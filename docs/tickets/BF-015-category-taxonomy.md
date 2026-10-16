@@ -61,12 +61,12 @@ A curated, bilingual taxonomy (~250–350 categories) relevant to local business
 - Eval: `pnpm eval --task taxonomy.classify_business` ≥ threshold (report attached).
 
 ## Acceptance criteria
-- [ ] Taxonomy seeded with EN/FR labels and synonyms, including the niches listed above.
-- [ ] Provider mapping files for Google Places, Overture, Foursquare and OSM seeded; human mappings never overwritten.
-- [ ] `CategoryClassifier` chain with LLM fallback constrained to candidates; unknown keys stored as `needs_review`.
-- [ ] Category embeddings + candidate search available for BF-021.
-- [ ] APIs, admin review page and `CategoryPicker` component (EN/FR).
-- [ ] Eval meets threshold.
+- [x] Taxonomy seeded with EN/FR labels and synonyms, including the niches listed above.
+- [x] Provider mapping files for Google Places, Overture, Foursquare and OSM seeded; human mappings never overwritten.
+- [x] `CategoryClassifier` chain with LLM fallback constrained to candidates; unknown keys stored as `needs_review`.
+- [x] Category embeddings + candidate search available for BF-021.
+- [x] APIs, admin review page and `CategoryPicker` component (EN/FR).
+- [x] Eval meets threshold.
 
 ## Agent prompt
 ```text
@@ -89,3 +89,52 @@ Verify: pnpm verify && pnpm test:int; pnpm db:seed twice (idempotent); eval repo
 ## References
 - docs/ARCHITECTURE.md §6, §9 · ADR-0013 · docs/conventions/ai-engineering.md
 - Google Places types: https://developers.google.com/maps/documentation/places/web-service/place-types · Overture places taxonomy: https://docs.overturemaps.org/guides/places/ · Foursquare categories: https://docs.foursquare.com/data-products/docs/categories · OSM Map Features: https://wiki.openstreetmap.org/wiki/Map_features
+
+## Implementation notes
+- **Split**: part 1/3 data (contracts, `categories` completion + `category_mappings` + `app_meta` in migration 0007,
+  taxonomy/mapping YAML, loader + seed module); part 2/3 classification (synonym matcher, chain, LLM task + prompt +
+  eval, candidate search, embeddings job, APIs); part 3/3 web (`CategoryPicker`, `/settings/taxonomy`).
+- **Taxonomy v1**: 337 categories in 20 top-level groups (depth ≤ 3), EN/FR labels (French Caribbean usage:
+  quincaillerie, lolo, pressing/laverie…), 2–8 synonyms per language on every leaf, Tabler icons, inherited
+  attributes and offer relevance. Includes every niche the ticket lists plus island ones (hurricane shutters, cistern
+  service, villa caretaking, yacht provisioning, water taxi). Rationale comments above each group.
+- **Mappings** (sources and retrieval date in each file header, lists fetched 2026-10-15): Google Places (New)
+  Table A 375/478 keys, Overture `basic_category` (release 2026-09-23.0) 175/298, Foursquare (24-hex ids,
+  docs' category CSV) 902/1105, OSM Map Features 369/557. Non-business keys (government, worship, transit, natural
+  features, adult/gambling) are skipped, not forced.
+- **Seed**: `pnpm db:seed --only taxonomy` (all environments) upserts by slug / (provider, key); unchanged rows are
+  not touched (verified: second run writes nothing, `updated_at` unchanged); missing slugs are deactivated; `human`
+  mappings are never overwritten; dropped seed mappings are retired. `app_meta.taxonomy_version` records the version.
+  `yaml` 2.9.1 added for parsing.
+- **Search text**: generated column `search_text` (`f_unaccent(lower(labels + synonyms))`) with a trigram GIN index;
+  `path` has a GiST index; slug and depth CHECKs.
+- **Classifier** (`CategoryClassifier`, exported for BF-016): active mapping (human > seed > llm, then confidence) →
+  whole-word label/synonym match on name and provider labels (FR/EN plural folding, accent-insensitive; top-level
+  groups excluded) → LLM (`taxonomy.classify_business`, fast tier) choosing among ≤ 16 candidates (earlier picks +
+  hybrid retrieval). Accept threshold 0.75; LLM confidence capped at 0.85; answers outside the candidates are
+  discarded; never returns an unknown/inactive category. The LLM's pick is stored as an `llm` mapping
+  (`needs_review`) only when exactly one specific, well-formed provider key is unmapped. Model errors (no key,
+  budget) fall back to the best earlier proposal with `needsReview`. Active taxonomy + mappings are cached in
+  memory (60 s / invalidated on review): mapping lookups are map reads (≪ 2 ms). LLM answers are cached by the
+  gateway (global scope, 30 days).
+- **Candidates** (`CategoryCandidateSearch.find(texts, k)`, for BF-021): trigram per short piece fused (RRF) with
+  cosine similarity on category embeddings when any exist for the configured model; degrades to trigram only.
+- **Embeddings**: `taxonomy.embed-categories` job (new `taxonomy` queue) enqueued at worker start; embeds active
+  categories whose text hash or model changed (purpose `category`); skips quietly without a key or budget.
+- **APIs**: `GET /v1/categories` (tree, locale), `GET /v1/categories/search` (typeahead: label/synonym prefix in
+  memory + DB trigram), `GET /v1/categories/mappings` (`settings:manage`; `canReview`; rationale shown to platform
+  operators only), `PATCH /v1/categories/mappings/:id` (approve/reassign/reject → `origin = human`, confidence 1,
+  audited). **Decision**: review requires a platform operator in addition to `settings:manage`, because mappings
+  are shared by every workspace (QUESTIONS.md).
+- **Web**: `CategoryPicker` in `@bf/ui` (tree combobox, single/multi, accent-insensitive search on labels and
+  keywords, keyboard, screen-reader selection state); `/settings/taxonomy` review queue + tree (EN/FR).
+- **Eval**: 77 rows (40 FR / 37 EN; ambiguous, misleading/generic provider, name-only, website, no-fit, injection).
+  Replay report: `primary.accurate` 0.961 (threshold 0.9), `primary.valid_id` 1.0. No provider keys locally, so
+  the fixtures are hand-written (3 deliberate misses); the nightly evals workflow runs real models.
+- **Reviews** (fixed): human decisions get confidence 1, plural folding (`bureaux`, `taxis`), per-piece trigram
+  retrieval, picker ids out of the search haystack + a11y, learned mappings limited to one specific key the model
+  saw, approve of an inactive category refused, rationale hidden from non-operators, `provider_key` length CHECK,
+  richer review audit metadata.
+- **Tests**: API 316 unit / 118 integration (taxonomy 12: tree, typeahead incl. typo, review authz/operator,
+  human mapping survives re-seed, classifier with seeded data, embeddings + hybrid candidates); db loader 7 + seed
+  integration 4; `@bf/ai` replay eval; `@bf/ui` picker 4; web 64.

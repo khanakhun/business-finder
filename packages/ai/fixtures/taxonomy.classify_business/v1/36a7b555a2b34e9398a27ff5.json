@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Palm Tree Animal Hospital",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "veterinary_care"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "pet_store",
+        "label": "Pet store",
+        "path": "pets_animals › pet_store"
+      },
+      {
+        "id": "dog_trainer",
+        "label": "Dog trainer",
+        "path": "pets_animals › dog_trainer"
+      },
+      {
+        "id": "veterinarian",
+        "label": "Veterinarian",
+        "path": "pets_animals › veterinarian"
+      },
+      {
+        "id": "pet_boarding",
+        "label": "Pet boarding",
+        "path": "pets_animals › pet_boarding"
+      },
+      {
+        "id": "pet_grooming",
+        "label": "Pet grooming",
+        "path": "pets_animals › pet_grooming"
+      },
+      {
+        "id": "medical_clinic",
+        "label": "Medical clinic",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "hospital",
+        "label": "Hospital",
+        "path": "health_medical › hospital"
+      }
+    ]
+  },
+  "output": {
+    "primary": "veterinarian",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

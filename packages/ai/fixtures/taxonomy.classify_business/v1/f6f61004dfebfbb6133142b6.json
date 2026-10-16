@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Pressing Blanc Coco",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "laundry"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "personal_services",
+        "label": "Services à la personne",
+        "path": "home_services › personal_services"
+      },
+      {
+        "id": "laundry",
+        "label": "Pressing / Laverie",
+        "path": "home_services › personal_services › laundry"
+      },
+      {
+        "id": "tailor",
+        "label": "Retouches et couture",
+        "path": "home_services › personal_services › tailor"
+      },
+      {
+        "id": "house_cleaning",
+        "label": "Ménage à domicile",
+        "path": "home_services › cleaning_services › house_cleaning"
+      },
+      {
+        "id": "shoe_repair",
+        "label": "Cordonnerie",
+        "path": "home_services › personal_services › shoe_repair"
+      },
+      {
+        "id": "commercial_cleaning",
+        "label": "Nettoyage professionnel",
+        "path": "home_services › cleaning_services › commercial_cleaning"
+      }
+    ]
+  },
+  "output": {
+    "primary": "laundry",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

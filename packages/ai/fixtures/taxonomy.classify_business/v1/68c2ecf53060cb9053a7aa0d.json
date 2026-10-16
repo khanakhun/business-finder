@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "La Cave du Gouverneur",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "liquor_store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "wine_bar",
+        "label": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "cigar_shop",
+        "label": "Cave à cigares",
+        "path": "retail_shopping › leisure_gifts › cigar_shop"
+      },
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "grocery_store",
+        "label": "Épicerie",
+        "path": "retail_shopping › food_retail › grocery_store"
+      },
+      {
+        "id": "wine_spirits_shop",
+        "label": "Cave à vins et spiritueux",
+        "path": "retail_shopping › food_retail › wine_spirits_shop"
+      },
+      {
+        "id": "deli",
+        "label": "Épicerie fine",
+        "path": "retail_shopping › food_retail › deli"
+      },
+      {
+        "id": "duty_free_shop",
+        "label": "Boutique hors taxes",
+        "path": "retail_shopping › duty_free_shop"
+      }
+    ]
+  },
+  "output": {
+    "primary": "wine_spirits_shop",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

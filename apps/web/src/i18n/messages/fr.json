@@ -228,7 +228,8 @@
     "integrations": "Intégrations",
     "features": "Fonctionnalités",
     "audit": "Journal d'audit",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "taxonomy": "Catégories"
   },
   "account": {
     "title": "Compte",
@@ -534,5 +535,31 @@
         "system_test": "Notifications de test"
       }
     }
+  },
+  "taxonomy": {
+    "title": "Catégories",
+    "description": "La taxonomie des catégories utilisée pour la recherche et la classification, et les correspondances fournisseurs à valider.",
+    "reviewTitle": "Correspondances à valider",
+    "reviewDescription": "Catégories fournisseurs que le classifieur IA a rapprochées d'une des nôtres. Validez, réaffectez ou rejetez-les.",
+    "operatorsOnly": "Les correspondances sont partagées par tous les espaces de cette installation : seuls les opérateurs de la plateforme peuvent les valider, les réaffecter ou les rejeter.",
+    "emptyTitle": "Rien à valider",
+    "emptyDescription": "Les nouvelles catégories fournisseurs proposées par le classifieur apparaîtront ici.",
+    "provider": "Catégorie fournisseur",
+    "proposed": "Catégorie proposée",
+    "actions": "Actions",
+    "approve": "Valider",
+    "reject": "Rejeter",
+    "reassign": "Réaffecter",
+    "reassignPlaceholder": "Autre catégorie…",
+    "search": "Rechercher une catégorie",
+    "noCategory": "Aucune catégorie trouvée.",
+    "remove": "Retirer {label}",
+    "more": "+{count} de plus",
+    "confidence": "Confiance {value} %",
+    "reviewed": "Correspondance mise à jour.",
+    "loadMore": "Afficher plus",
+    "treeTitle": "Arborescence des catégories",
+    "treeDescription": "Toutes les catégories actives, dans la langue actuelle.",
+    "selected": "sélectionnée"
   }
 }

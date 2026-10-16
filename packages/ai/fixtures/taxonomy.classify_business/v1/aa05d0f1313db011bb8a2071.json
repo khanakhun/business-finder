@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Villas Caraïbes Prestige",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "real_estate_agency"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Location de villas de luxe avec piscine pour vos vacances. Conciergerie privée incluse : chef à domicile, location de bateau, réservations de restaurants.",
+    "candidates": [
+      {
+        "id": "villa_rental_agency",
+        "label": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "villa_caretaking",
+        "label": "Gardiennage de villas",
+        "path": "home_services › villa_caretaking"
+      },
+      {
+        "id": "real_estate_agency",
+        "label": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "vacation_rental",
+        "label": "Location saisonnière",
+        "path": "lodging › vacation_rental"
+      },
+      {
+        "id": "property_management",
+        "label": "Gestion locative",
+        "path": "real_estate › property_management"
+      },
+      {
+        "id": "travel_agency",
+        "label": "Agence de voyages",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "concierge",
+        "label": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      }
+    ]
+  },
+  "output": {
+    "primary": "villa_caretaking",
+    "secondary": ["villa_rental_agency", "concierge"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous, website, misleading_provider)."
+  }
+}

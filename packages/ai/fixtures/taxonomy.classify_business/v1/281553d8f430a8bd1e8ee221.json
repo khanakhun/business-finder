@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Maillots Lagon",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "swimwear_store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "sporting_goods_store",
+        "label": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "lingerie_store",
+        "label": "Boutique de lingerie",
+        "path": "retail_shopping › fashion › lingerie_store"
+      },
+      {
+        "id": "shoe_store",
+        "label": "Magasin de chaussures",
+        "path": "retail_shopping › fashion › shoe_store"
+      },
+      {
+        "id": "surf_shop",
+        "label": "Surf shop",
+        "path": "retail_shopping › fashion › surf_shop"
+      },
+      {
+        "id": "fashion_boutique",
+        "label": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "swimwear_store",
+        "label": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      }
+    ]
+  },
+  "output": {
+    "primary": "swimwear_store",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

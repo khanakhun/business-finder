@@ -28,6 +28,8 @@ export const QUEUES = {
     },
     concurrency: 10,
   },
+  /** Taxonomy maintenance (BF-015): category embeddings. One at a time: runs are idempotent and rare. */
+  taxonomy: { name: 'taxonomy', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

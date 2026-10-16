@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Centre de Plongée Grand Bleu",
+    "providerCategories": [
+      {
+        "provider": "osm",
+        "key": "shop=scuba_diving"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Baptêmes, formations PADI et plongées d'exploration sur les épaves et la réserve marine.",
+    "candidates": [
+      {
+        "id": "boat_excursion",
+        "label": "Excursions en mer",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "water_sports",
+        "label": "Sports nautiques",
+        "path": "marine_nautical › water_sports"
+      },
+      {
+        "id": "scuba_diving",
+        "label": "Plongée sous-marine",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "chandlery",
+        "label": "Accastillage",
+        "path": "marine_nautical › boating_services › chandlery"
+      },
+      {
+        "id": "surf_school",
+        "label": "École de surf",
+        "path": "marine_nautical › water_sports › surf_school"
+      },
+      {
+        "id": "sporting_goods_store",
+        "label": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "sailing_school",
+        "label": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      }
+    ]
+  },
+  "output": {
+    "primary": "scuba_diving",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, website)."
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Northpoint Optical",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "store"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Prescription glasses, designer sunglasses and contact lenses fitted in store. Frames repaired while you wait.",
+    "candidates": [
+      {
+        "id": "pharmacy",
+        "label": "Pharmacy",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "jewelry_store",
+        "label": "Jewelry store",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "fashion_boutique",
+        "label": "Fashion boutique",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "electronics_store",
+        "label": "Electronics store",
+        "path": "retail_shopping › electronics › electronics_store"
+      },
+      {
+        "id": "medical_clinic",
+        "label": "Medical clinic",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "hearing_aid_center",
+        "label": "Hearing aid center",
+        "path": "health_medical › hearing_aid_center"
+      },
+      {
+        "id": "ophthalmologist",
+        "label": "Ophthalmologist",
+        "path": "health_medical › medical_specialists › ophthalmologist"
+      }
+    ]
+  },
+  "output": {
+    "primary": "none",
+    "secondary": [],
+    "confidence": 0.3,
+    "rationale": "None of the candidates describes this business."
+  }
+}

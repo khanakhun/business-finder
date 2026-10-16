@@ -1,0 +1,62 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Café de la Marina",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "cafe"
+      },
+      {
+        "provider": "foursquare",
+        "key": "6e17e9c6d1b4fe0d59c328e4",
+        "label": "Dining and Drinking > Café, Coffee, and Tea House > Café"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "snack_bar",
+        "label": "Snack",
+        "path": "food_drink › quick_service › snack_bar"
+      },
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "ice_cream_shop",
+        "label": "Glacier",
+        "path": "food_drink › ice_cream_shop"
+      },
+      {
+        "id": "juice_bar",
+        "label": "Bar à jus",
+        "path": "food_drink › juice_bar"
+      },
+      {
+        "id": "bakery",
+        "label": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "cafe",
+        "label": "Café",
+        "path": "food_drink › cafe"
+      }
+    ]
+  },
+  "output": {
+    "primary": "cafe",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

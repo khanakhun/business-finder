@@ -1,0 +1,181 @@
+# Overture Maps basic_category values (release 2026-09-23.0) → Business Finder categories (BF-015).
+# Source: https://docs.overturemaps.org/taxonomy/2026-09-23.0/basic_categories.csv (via https://docs.overturemaps.org/guides/places/taxonomy-explorer/), retrieved 2026-10-15.
+# Skipped: geographic entities, government/civic/public facilities & utilities, worship & heritage sites, transit/parking infrastructure, housing, ATMs and ambiguous catch-alls (rental/technical/design service).
+provider: overture
+version: 1
+mappings:
+  - { key: arts_and_entertainment, category: attractions_entertainment, confidence: 0.7 }
+  - { key: amusement_attraction, category: attractions_entertainment, confidence: 0.7 }
+  - { key: amusement_park, category: amusement_park, confidence: 0.95 }
+  - { key: animal_attraction, label: Animal Attraction, category: nature_park, confidence: 0.7 }
+  - { key: aquarium, category: nature_park, confidence: 0.7 }
+  - { key: zoo, category: nature_park, confidence: 0.85 }
+  - { key: arts_and_crafts_space, label: Arts and Crafts Space, category: arts_crafts, confidence: 0.7 }
+  - { key: art_gallery, category: art_gallery, confidence: 0.95 }
+  - { key: event_venue, category: event_venue, confidence: 0.95 }
+  - { key: festival_venue, category: event_venue, confidence: 0.85 }
+  - { key: fairgrounds, category: event_venue, confidence: 0.7 }
+  - { key: gaming_venue, label: Gaming Venue, category: attractions_entertainment, confidence: 0.7 }
+  - { key: arcade, category: escape_game, confidence: 0.7 }
+  - { key: casino, category: casino, confidence: 0.95 }
+  - { key: movie_theater, category: cinema, confidence: 0.95 }
+  - { key: museum, category: museum, confidence: 0.95 }
+  - { key: nightlife_venue, category: bars_nightlife, confidence: 0.85 }
+  - { key: dance_club, category: nightclub, confidence: 0.95 }
+  - { key: performing_arts_venue, category: theater, confidence: 0.85 }
+  - { key: comedy_club, category: attractions_entertainment, confidence: 0.7 }
+  - { key: music_venue, category: live_music_venue, confidence: 0.95 }
+  - { key: theatre_venue, category: theater, confidence: 0.95 }
+  - { key: rural_attraction, label: Rural Attraction, category: attractions_entertainment, confidence: 0.7 }
+  - { key: science_attraction, label: Science Attraction, category: museum, confidence: 0.7 }
+  - { key: planetarium, category: museum, confidence: 0.7 }
+  - { key: social_club, label: Social Club, category: nonprofit_association, confidence: 0.7 }
+  - { key: country_club, category: sports_club, confidence: 0.85 }
+  - { key: civic_organization, label: Civic Organization, category: nonprofit_association, confidence: 0.85 }
+  - { key: social_or_community_service, label: Social or Community Service, category: nonprofit_association, confidence: 0.7 }
+  - { key: community_center, category: community_center, confidence: 0.95 }
+  - { key: food_bank, category: nonprofit_association, confidence: 0.85 }
+  - { key: youth_organization, category: nonprofit_association, confidence: 0.85 }
+  - { key: cultural_center, category: community_center, confidence: 0.7 }
+  - { key: education, category: education, confidence: 0.7 }
+  - { key: educational_facility, category: education, confidence: 0.7 }
+  - { key: educational_service, label: Educational Service, category: education, confidence: 0.7 }
+  - { key: tutoring_service, category: tutoring, confidence: 0.95 }
+  - { key: place_of_learning, label: Place of Learning, category: education, confidence: 0.7 }
+  - { key: academy, category: education, confidence: 0.7 }
+  - { key: class_venue, label: Class Venue, category: education, confidence: 0.7 }
+  - { key: college_university, category: education, confidence: 0.7 }
+  - { key: elementary_school, category: primary_school, confidence: 0.95 }
+  - { key: high_school, category: secondary_school, confidence: 0.95 }
+  - { key: kindergarten, category: preschool, confidence: 0.95 }
+  - { key: middle_school, category: secondary_school, confidence: 0.85 }
+  - { key: preschool, category: preschool, confidence: 0.95 }
+  - { key: specialty_school, label: Specialty School, category: education, confidence: 0.7 }
+  - { key: food_and_drink, category: food_drink, confidence: 0.7 }
+  - { key: alcoholic_beverage_venue, label: Alcoholic Beverage Venue, category: bars_nightlife, confidence: 0.85 }
+  - { key: bar, category: bar, confidence: 0.95 }
+  - { key: brewery, category: food_producer, confidence: 0.85 }
+  - { key: distillery, category: food_producer, confidence: 0.85 }
+  - { key: lounge, category: bar, confidence: 0.85 }
+  - { key: winery, category: food_producer, confidence: 0.85 }
+  - { key: casual_eatery, label: Casual Eatery, category: quick_service, confidence: 0.7 }
+  - { key: cafe, category: cafe, confidence: 0.95 }
+  - { key: fast_food_restaurant, category: fast_food, confidence: 0.95 }
+  - { key: food_court, category: quick_service, confidence: 0.7 }
+  - { key: food_truck_stand, category: food_truck, confidence: 0.95 }
+  - { key: non_alcoholic_beverage_venue, label: Non-Alcoholic Beverage Venue, category: cafe, confidence: 0.7 }
+  - { key: coffee_shop, category: cafe, confidence: 0.95 }
+  - { key: smoothie_juice_bar, category: juice_bar, confidence: 0.95 }
+  - { key: restaurant, category: restaurant, confidence: 0.95 }
+  - { key: marina, category: marina, confidence: 0.95 }
+  - { key: health_care, category: health_medical, confidence: 0.7 }
+  - { key: emergency_or_urgent_care_facility, category: medical_clinic, confidence: 0.7 }
+  - { key: emergency_department, category: hospital, confidence: 0.85 }
+  - { key: urgent_care_clinic, category: medical_clinic, confidence: 0.85 }
+  - { key: walk_in_clinic, category: medical_clinic, confidence: 0.85 }
+  - { key: hospital, category: hospital, confidence: 0.95 }
+  - { key: general_hospital, category: hospital, confidence: 0.95 }
+  - { key: specialty_hospital, category: hospital, confidence: 0.85 }
+  - { key: medical_service, category: health_medical, confidence: 0.7 }
+  - { key: outpatient_care_facility, category: medical_clinic, confidence: 0.85 }
+  - { key: behavioral_or_mental_health_clinic, category: psychologist, confidence: 0.7 }
+  - { key: complementary_and_alternative_medicine, category: paramedical, confidence: 0.7 }
+  - { key: dental_clinic, category: dentist, confidence: 0.95 }
+  - { key: diagnostics_imaging_or_lab_service, category: medical_laboratory, confidence: 0.7 }
+  - { key: pediatric_clinic, category: pediatrician, confidence: 0.85 }
+  - { key: physical_medicine_and_rehabilitation, category: physiotherapist, confidence: 0.85 }
+  - { key: primary_care_or_general_clinic, category: general_practitioner, confidence: 0.85 }
+  - { key: reproductive_perinatal_and_womens_care, category: gynecologist, confidence: 0.85 }
+  - { key: specialized_health_care, category: medical_specialists, confidence: 0.7 }
+  - { key: vision_or_eye_care_clinic, category: ophthalmologist, confidence: 0.85 }
+  - { key: specialized_medical_facility, category: medical_specialists, confidence: 0.7 }
+  - { key: surgery, label: Surgery, category: medical_specialists, confidence: 0.7 }
+  - { key: animal_or_pet_service, category: pets_animals, confidence: 0.85 }
+  - { key: food_service, label: Food Service, category: catering, confidence: 0.7 }
+  - { key: personal_or_beauty_service, category: beauty_wellness, confidence: 0.85 }
+  - { key: wellness_service, category: wellness, confidence: 0.85 }
+  - { key: lodging, category: lodging, confidence: 0.7 }
+  - { key: bed_and_breakfast, category: guest_house, confidence: 0.85 }
+  - { key: campground, category: campground, confidence: 0.95 }
+  - { key: hotel, category: hotel, confidence: 0.95 }
+  - { key: inn, category: hotel, confidence: 0.85 }
+  - { key: private_lodging, label: Private Lodging, category: vacation_rental, confidence: 0.85 }
+  - { key: resort, category: resort, confidence: 0.95 }
+  - { key: rv_park, category: campground, confidence: 0.85 }
+  - { key: agricultural_service, category: farm, confidence: 0.7 }
+  - { key: farm, category: farm, confidence: 0.95 }
+  - { key: b2b_service, label: B2B Service, category: business_services, confidence: 0.7 }
+  - { key: b2b_industrial_and_machine_service, label: B2B Industrial and Machine Service, category: industry_trade, confidence: 0.7 }
+  - { key: b2b_office_and_professional_service, label: B2B Office and Professional Service, category: business_services, confidence: 0.85 }
+  - { key: b2b_science_and_technology_service, label: B2B Science and Technology Service, category: technology_media, confidence: 0.7 }
+  - { key: b2b_transportation_and_storage_service, label: B2B Transportation and Storage Service, category: logistics, confidence: 0.85 }
+  - { key: manufacturer, category: manufacturer, confidence: 0.95 }
+  - { key: supplier_or_distributor, category: wholesaler, confidence: 0.85 }
+  - { key: wholesaler, category: wholesaler, confidence: 0.95 }
+  - { key: building_or_construction_service, category: home_construction, confidence: 0.85 }
+  - { key: event_or_party_service, category: events, confidence: 0.85 }
+  - { key: family_service, label: Family Service, category: personal_services, confidence: 0.7 }
+  - { key: financial_service, category: finance_insurance, confidence: 0.85 }
+  - { key: bank_or_credit_union, category: bank, confidence: 0.95 }
+  - { key: home_service, category: home_services, confidence: 0.85 }
+  - { key: housing_or_property_service, label: Housing or Property Service, category: real_estate, confidence: 0.7 }
+  - { key: industrial_facility_or_service, category: industry_trade, confidence: 0.7 }
+  - { key: laundry_service, category: laundry, confidence: 0.95 }
+  - { key: legal_service, category: legal_services, confidence: 0.95 }
+  - { key: attorney_or_law_firm, category: lawyer, confidence: 0.95 }
+  - { key: media_service, category: media_outlet, confidence: 0.7 }
+  - { key: radio_station, category: media_outlet, confidence: 0.85 }
+  - { key: television_station, category: media_outlet, confidence: 0.85 }
+  - { key: printing_service, category: printing, confidence: 0.95 }
+  - { key: professional_service, category: professional_services, confidence: 0.7 }
+  - { key: real_estate_service, category: real_estate, confidence: 0.85 }
+  - { key: security_service, category: security_services, confidence: 0.95 }
+  - { key: shipping_or_delivery_service, category: courier, confidence: 0.85 }
+  - { key: storage_facility, category: moving_storage, confidence: 0.85 }
+  - { key: telecommunications_service, category: telecom_provider, confidence: 0.95 }
+  - { key: shopping, category: retail_shopping, confidence: 0.7 }
+  - { key: convenience_store, category: grocery_store, confidence: 0.85 }
+  - { key: department_store, category: department_store, confidence: 0.95 }
+  - { key: discount_store, category: retail_shopping, confidence: 0.7 }
+  - { key: fashion_and_apparel_store, category: fashion, confidence: 0.85 }
+  - { key: food_and_beverage_store, category: food_retail, confidence: 0.85 }
+  - { key: market, category: food_retail, confidence: 0.7 }
+  - { key: farmers_market, category: farmers_market, confidence: 0.95 }
+  - { key: second_hand_store, category: second_hand_store, confidence: 0.95 }
+  - { key: specialty_store, category: retail_shopping, confidence: 0.7 }
+  - { key: animal_and_pet_store, category: pet_store, confidence: 0.95 }
+  - { key: arts_crafts_and_hobby_store, category: leisure_gifts, confidence: 0.7 }
+  - { key: books_music_and_video_store, category: bookstore, confidence: 0.85 }
+  - { key: electronics_store, category: electronics_store, confidence: 0.95 }
+  - { key: flowers_and_gifts_store, category: leisure_gifts, confidence: 0.85 }
+  - { key: hardware_home_and_garden_store, category: hardware_store, confidence: 0.7 }
+  - { key: musical_instrument_and_pro_audio_store, category: leisure_gifts, confidence: 0.7 }
+  - { key: office_supply_store, category: retail_shopping, confidence: 0.7 }
+  - { key: personal_care_and_beauty_store, category: perfume_cosmetics_store, confidence: 0.85 }
+  - { key: pharmacy_and_drug_store, category: pharmacy, confidence: 0.95 }
+  - { key: sporting_goods_store, category: sporting_goods_store, confidence: 0.95 }
+  - { key: toys_and_games_store, category: toy_store, confidence: 0.95 }
+  - { key: vehicle_parts_store, category: auto_parts, confidence: 0.95 }
+  - { key: superstore, label: Superstore, category: supermarket, confidence: 0.7 }
+  - { key: vehicle_dealer, category: car_dealer, confidence: 0.85 }
+  - { key: auto_dealer, category: car_dealer, confidence: 0.95 }
+  - { key: warehouse_club_store, category: supermarket, confidence: 0.7 }
+  - { key: sports_and_recreation, category: sports_fitness, confidence: 0.7 }
+  - { key: sport_league, category: sports_club, confidence: 0.7 }
+  - { key: sport_or_fitness_facility, category: sports_fitness, confidence: 0.85 }
+  - { key: fitness_studio, category: fitness_studio, confidence: 0.95 }
+  - { key: golf_course, category: golf_course, confidence: 0.95 }
+  - { key: gym, category: gym, confidence: 0.95 }
+  - { key: skating_rink, category: sports_fitness, confidence: 0.7 }
+  - { key: sports_complex, category: sports_fitness, confidence: 0.7 }
+  - { key: swimming_pool, category: swimming_pool, confidence: 0.95 }
+  - { key: sport_or_recreation_club, category: sports_club, confidence: 0.85 }
+  - { key: sport_team, category: sports_club, confidence: 0.85 }
+  - { key: fueling_station, category: gas_station, confidence: 0.85 }
+  - { key: gas_station, category: gas_station, confidence: 0.95 }
+  - { key: taxi_or_ride_share_service, category: taxi, confidence: 0.95 }
+  - { key: travel_service, category: travel_services, confidence: 0.85 }
+  - { key: vehicle_service, category: automotive_services, confidence: 0.85 }
+  - { key: automotive_service, category: automotive_services, confidence: 0.85 }
+  - { key: ferry_service, category: ferry, confidence: 0.95 }
+  - { key: water_taxi_service, category: water_taxi, confidence: 0.95 }

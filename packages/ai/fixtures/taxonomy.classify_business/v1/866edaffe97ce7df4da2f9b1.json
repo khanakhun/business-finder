@@ -1,0 +1,47 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Math Masters Tutoring",
+    "providerCategories": [],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "music_school",
+        "label": "Music school",
+        "path": "education › music_school"
+      },
+      {
+        "id": "language_school",
+        "label": "Language school",
+        "path": "education › language_school"
+      },
+      {
+        "id": "vocational_training",
+        "label": "Vocational training",
+        "path": "education › vocational_training"
+      },
+      {
+        "id": "tutoring",
+        "label": "Tutoring",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "primary_school",
+        "label": "Primary school",
+        "path": "education › school › primary_school"
+      },
+      {
+        "id": "daycare",
+        "label": "Daycare",
+        "path": "education › daycare"
+      }
+    ]
+  },
+  "output": {
+    "primary": "tutoring",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, name_only)."
+  }
+}

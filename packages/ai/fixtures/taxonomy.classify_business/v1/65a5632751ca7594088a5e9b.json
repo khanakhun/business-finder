@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Cabinet Dentaire du Lagon",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "dentist"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "orthodontist",
+        "label": "Orthodontiste",
+        "path": "health_medical › dental › orthodontist"
+      },
+      {
+        "id": "general_practitioner",
+        "label": "Médecin généraliste",
+        "path": "health_medical › general_practitioner"
+      },
+      {
+        "id": "dermatologist",
+        "label": "Dermatologue",
+        "path": "health_medical › medical_specialists › dermatologist"
+      },
+      {
+        "id": "aesthetic_medicine",
+        "label": "Médecine esthétique",
+        "path": "health_medical › medical_specialists › aesthetic_medicine"
+      },
+      {
+        "id": "dental",
+        "label": "Soins dentaires",
+        "path": "health_medical › dental"
+      },
+      {
+        "id": "dentist",
+        "label": "Chirurgien-dentiste",
+        "path": "health_medical › dental › dentist"
+      },
+      {
+        "id": "medical_clinic",
+        "label": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      }
+    ]
+  },
+  "output": {
+    "primary": "dentist",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

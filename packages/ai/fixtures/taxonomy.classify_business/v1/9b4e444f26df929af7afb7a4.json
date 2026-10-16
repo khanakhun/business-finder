@@ -1,0 +1,47 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Expertise Comptable Antilles Conseil",
+    "providerCategories": [],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "lawyer",
+        "label": "Avocat",
+        "path": "professional_services › legal_services › lawyer"
+      },
+      {
+        "id": "accountant",
+        "label": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "business_consultant",
+        "label": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "insurance_broker",
+        "label": "Courtier en assurances",
+        "path": "finance_insurance › insurance_broker"
+      },
+      {
+        "id": "credit_broker",
+        "label": "Courtier en crédit",
+        "path": "finance_insurance › credit_broker"
+      },
+      {
+        "id": "wealth_management",
+        "label": "Gestion de patrimoine",
+        "path": "finance_insurance › wealth_management"
+      }
+    ]
+  },
+  "output": {
+    "primary": "accountant",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, name_only)."
+  }
+}

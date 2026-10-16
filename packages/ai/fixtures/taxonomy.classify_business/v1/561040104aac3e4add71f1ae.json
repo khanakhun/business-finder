@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Le Barbier de l'Anse",
+    "providerCategories": [
+      {
+        "provider": "osm",
+        "key": "shop=hairdresser"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "barber",
+        "label": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "beauty_salon",
+        "label": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "hair_salon",
+        "label": "Salon de coiffure",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "hair_services",
+        "label": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "label": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      },
+      {
+        "id": "tattoo_studio",
+        "label": "Salon de tatouage",
+        "path": "beauty_wellness › tattoo_studio"
+      }
+    ]
+  },
+  "output": {
+    "primary": "barber",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

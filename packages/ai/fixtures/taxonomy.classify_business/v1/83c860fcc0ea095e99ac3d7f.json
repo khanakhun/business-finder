@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Reef & Wreck Dive Shop",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "sporting_goods_store"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "water_sports",
+        "label": "Water sports",
+        "path": "marine_nautical › water_sports"
+      },
+      {
+        "id": "scuba_diving",
+        "label": "Scuba diving",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "sporting_goods_store",
+        "label": "Sporting goods store",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "boat_excursion",
+        "label": "Boat trips & excursions",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "surf_shop",
+        "label": "Surf shop",
+        "path": "retail_shopping › fashion › surf_shop"
+      },
+      {
+        "id": "chandlery",
+        "label": "Ship chandler",
+        "path": "marine_nautical › boating_services › chandlery"
+      }
+    ]
+  },
+  "output": {
+    "primary": "scuba_diving",
+    "secondary": ["sporting_goods_store"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous)."
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Plage Rouge Beach Club",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "restaurant"
+      }
+    ],
+    "locale": "fr",
+    "websiteSnippet": "Transats et parasols, cocktails et déjeuner les pieds dans le sable. DJ le dimanche après-midi.",
+    "candidates": [
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "resort",
+        "label": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "bars_nightlife",
+        "label": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "nightclub",
+        "label": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "seafood_restaurant",
+        "label": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "beach_club",
+        "label": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      }
+    ]
+  },
+  "output": {
+    "primary": "beach_club",
+    "secondary": ["restaurant"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous, website)."
+  }
+}

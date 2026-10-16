@@ -1,0 +1,61 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "The Rusty Anchor Pub",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "bar"
+      },
+      {
+        "provider": "osm",
+        "key": "amenity=pub"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "bars_nightlife",
+        "label": "Bars & nightlife",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "live_music_venue",
+        "label": "Concert venue",
+        "path": "tourism_leisure › attractions_entertainment › live_music_venue"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "nightclub",
+        "label": "Nightclub",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "beach_club",
+        "label": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "wine_bar",
+        "label": "Wine bar",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      }
+    ]
+  },
+  "output": {
+    "primary": "bar",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

@@ -24,6 +24,10 @@ export const queryKeys = {
     list: (filter: 'all' | 'unread') => ['notifications', 'list', filter] as const,
     preferences: () => ['notifications', 'preferences'] as const,
   }),
+  taxonomy: defineQueryKeys('taxonomy', {
+    tree: (locale: string) => ['taxonomy', 'tree', locale] as const,
+    mappings: (status: string, locale: string) => ['taxonomy', 'mappings', status, locale] as const,
+  }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,
     logo: () => ['workspace', 'logo'] as const,

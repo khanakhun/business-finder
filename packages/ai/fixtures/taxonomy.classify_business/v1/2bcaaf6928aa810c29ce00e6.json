@@ -1,0 +1,62 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Serenity Spa & Nails",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "nail_salon"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "beauty_services",
+        "label": "Beauty care",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "lash_brow_bar",
+        "label": "Lash & brow bar",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "waxing_salon",
+        "label": "Hair removal",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "nail_salon",
+        "label": "Nail salon",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      },
+      {
+        "id": "massage",
+        "label": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "beauty_salon",
+        "label": "Beauty salon",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "spa",
+        "label": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "wellness_center",
+        "label": "Wellness center",
+        "path": "beauty_wellness › wellness › wellness_center"
+      }
+    ]
+  },
+  "output": {
+    "primary": "nail_salon",
+    "secondary": ["spa", "beauty_salon"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (en, ambiguous)."
+  }
+}

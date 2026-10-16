@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Slice of Paradise",
+    "providerCategories": [],
+    "locale": "en",
+    "websiteSnippet": "Wood-fired pizzas, calzones and takeaway every evening from 6pm. Order at the counter.",
+    "candidates": [
+      {
+        "id": "italian_restaurant",
+        "label": "Italian restaurant",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "food_truck",
+        "label": "Food truck",
+        "path": "food_drink › quick_service › food_truck"
+      },
+      {
+        "id": "pizzeria",
+        "label": "Pizzeria",
+        "path": "food_drink › restaurant › pizzeria"
+      },
+      {
+        "id": "fast_food",
+        "label": "Fast food",
+        "path": "food_drink › quick_service › fast_food"
+      },
+      {
+        "id": "snack_bar",
+        "label": "Snack bar",
+        "path": "food_drink › quick_service › snack_bar"
+      },
+      {
+        "id": "bakery",
+        "label": "Bakery",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      }
+    ]
+  },
+  "output": {
+    "primary": "pizzeria",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, website)."
+  }
+}

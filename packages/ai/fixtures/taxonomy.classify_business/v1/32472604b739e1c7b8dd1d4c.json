@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Pompes Funèbres de l'Espérance",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "funeral_home"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "water_tank_service",
+        "label": "Citernes et traitement de l'eau",
+        "path": "home_services › repairs_maintenance › water_tank_service"
+      },
+      {
+        "id": "septic_service",
+        "label": "Assainissement",
+        "path": "home_services › repairs_maintenance › septic_service"
+      },
+      {
+        "id": "pool_maintenance",
+        "label": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "plumber",
+        "label": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "gas_station",
+        "label": "Station-service",
+        "path": "automotive_transport › automotive_services › gas_station"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "label": "Fournitures électriques et sanitaires",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      }
+    ]
+  },
+  "output": {
+    "primary": "none",
+    "secondary": [],
+    "confidence": 0.3,
+    "rationale": "None of the candidates describes this business."
+  }
+}

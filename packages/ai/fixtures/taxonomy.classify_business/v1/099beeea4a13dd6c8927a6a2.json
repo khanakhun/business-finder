@@ -1,0 +1,58 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "ByteFix IT Solutions",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "point_of_interest"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Managed IT, network setup, backups and on-site support for small businesses and villas.",
+    "candidates": [
+      {
+        "id": "it_services",
+        "label": "IT services",
+        "path": "technology_media › it_services"
+      },
+      {
+        "id": "electronics_store",
+        "label": "Electronics store",
+        "path": "retail_shopping › electronics › electronics_store"
+      },
+      {
+        "id": "software_company",
+        "label": "Software company",
+        "path": "technology_media › software_company"
+      },
+      {
+        "id": "computer_repair",
+        "label": "Computer & phone repair",
+        "path": "technology_media › computer_repair"
+      },
+      {
+        "id": "telecom_provider",
+        "label": "Telecom & internet provider",
+        "path": "technology_media › telecom_provider"
+      },
+      {
+        "id": "security_services",
+        "label": "Security & alarm systems",
+        "path": "home_services › security_services"
+      },
+      {
+        "id": "web_agency",
+        "label": "Web agency",
+        "path": "technology_media › web_agency"
+      }
+    ]
+  },
+  "output": {
+    "primary": "it_services",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, generic_provider, website)."
+  }
+}

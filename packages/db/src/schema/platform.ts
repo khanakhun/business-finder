@@ -72,3 +72,10 @@ export const llmCalls = pgTable(
     check('llm_calls_status_check', sql`${table.status} IN ('ok', 'cached', 'error')`),
   ],
 );
+
+/** Deployment-wide key/value state (e.g. `taxonomy_version`, set by the taxonomy seed). */
+export const appMeta = pgTable('app_meta', {
+  key: text().primaryKey(),
+  value: jsonb().$type<unknown>().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});

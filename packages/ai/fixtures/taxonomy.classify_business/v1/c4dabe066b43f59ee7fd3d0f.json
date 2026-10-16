@@ -1,0 +1,57 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Reliable Rooter Plumbing",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "plumber"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "water_tank_service",
+        "label": "Cistern & water treatment",
+        "path": "home_services › repairs_maintenance › water_tank_service"
+      },
+      {
+        "id": "hvac",
+        "label": "Air conditioning & HVAC",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "handyman",
+        "label": "Handyman",
+        "path": "home_services › repairs_maintenance › handyman"
+      },
+      {
+        "id": "septic_service",
+        "label": "Septic & drainage service",
+        "path": "home_services › repairs_maintenance › septic_service"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "label": "Electrical & plumbing supplies",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      },
+      {
+        "id": "plumber",
+        "label": "Plumber",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "pool_maintenance",
+        "label": "Pool maintenance",
+        "path": "home_services › pool_services › pool_maintenance"
+      }
+    ]
+  },
+  "output": {
+    "primary": "plumber",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

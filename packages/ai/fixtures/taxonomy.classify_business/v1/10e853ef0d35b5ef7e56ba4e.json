@@ -1,0 +1,59 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Brightside Marketing Co.",
+    "providerCategories": [
+      {
+        "provider": "foursquare",
+        "key": "5a9953ee76e2794ced58c636",
+        "label": "Business and Professional Services > Advertising Agency"
+      }
+    ],
+    "locale": "en",
+    "websiteSnippet": "Brand strategy, social media campaigns and advertising for hospitality brands.",
+    "candidates": [
+      {
+        "id": "printing",
+        "label": "Printing",
+        "path": "professional_services › business_services › printing"
+      },
+      {
+        "id": "graphic_designer",
+        "label": "Graphic designer",
+        "path": "technology_media › graphic_designer"
+      },
+      {
+        "id": "marketing_agency",
+        "label": "Marketing agency",
+        "path": "technology_media › marketing_agency"
+      },
+      {
+        "id": "business_consultant",
+        "label": "Business consultant",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "sign_maker",
+        "label": "Signs & signage",
+        "path": "professional_services › business_services › sign_maker"
+      },
+      {
+        "id": "web_agency",
+        "label": "Web agency",
+        "path": "technology_media › web_agency"
+      },
+      {
+        "id": "media_outlet",
+        "label": "Media outlet",
+        "path": "technology_media › media_outlet"
+      }
+    ]
+  },
+  "output": {
+    "primary": "marketing_agency",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear, website)."
+  }
+}

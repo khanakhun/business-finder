@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Wave Sushi Bar",
+    "providerCategories": [
+      {
+        "provider": "overture",
+        "key": "sushi_restaurant"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "asian_restaurant",
+        "label": "Asian restaurant",
+        "path": "food_drink › restaurant › asian_restaurant"
+      },
+      {
+        "id": "japanese_restaurant",
+        "label": "Japanese restaurant",
+        "path": "food_drink › restaurant › japanese_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "seafood_restaurant",
+        "label": "Seafood restaurant",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "fast_food",
+        "label": "Fast food",
+        "path": "food_drink › quick_service › fast_food"
+      },
+      {
+        "id": "bar",
+        "label": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      }
+    ]
+  },
+  "output": {
+    "primary": "japanese_restaurant",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

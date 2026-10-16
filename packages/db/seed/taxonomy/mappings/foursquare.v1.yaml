@@ -1,0 +1,912 @@
+# Foursquare Places categories → Business Finder categories (BF-015).
+# Source: https://docs.foursquare.com/data-products/docs/categories (Places Open Source & Pro
+# category list, fsq-places-os-categories.csv via https://observablehq.com/d/da51c7e6d46cd01e),
+# retrieved 2026-10-15.
+# Skipped: non-business categories (government, landmarks, outdoor features, stadiums, fields,
+# transit and airport infrastructure, events, office buildings, malls, ATMs), adult, cannabis,
+# gambling and weapons venues, and categories with no fitting trade in the taxonomy.
+provider: foursquare
+version: 1
+mappings:
+  - { key: 4d4b7104d754a06370d81259, label: "Arts and Entertainment", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d182941735, label: "Arts and Entertainment > Amusement Park", category: amusement_park, confidence: 0.95 }
+  - { key: 5109983191d435c0d71c2bb1, label: "Arts and Entertainment > Amusement Park > Attraction", category: amusement_park, confidence: 0.85 }
+  - { key: 4fceea171983d5d06c3e9823, label: "Arts and Entertainment > Aquarium", category: nature_park, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1e1931735, label: "Arts and Entertainment > Arcade", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1e2931735, label: "Arts and Entertainment > Art Gallery", category: art_gallery, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e4931735, label: "Arts and Entertainment > Bowling Alley", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d17c941735, label: "Arts and Entertainment > Casino", category: casino, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d18e941735, label: "Arts and Entertainment > Comedy Club", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b22, label: "Arts and Entertainment > Country Club", category: sports_club, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79ef, label: "Arts and Entertainment > Country Dance Club", category: nightclub, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b23, label: "Arts and Entertainment > Dance Hall", category: nightclub, confidence: 0.7 }
+  - { key: 5f2c2834b6d05514c704451e, label: "Arts and Entertainment > Escape Room", category: escape_game, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d18d941735, label: "Arts and Entertainment > Gaming Cafe", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1f1931735, label: "Arts and Entertainment > General Entertainment", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79ea, label: "Arts and Entertainment > Go Kart Track", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 5744ccdfe4b0c0459246b4bb, label: "Arts and Entertainment > Karaoke Box", category: bars_nightlife, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79e6, label: "Arts and Entertainment > Laser Tag Center", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79eb, label: "Arts and Entertainment > Mini Golf Course", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d17f941735, label: "Arts and Entertainment > Movie Theater", category: cinema, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d5734de, label: "Arts and Entertainment > Movie Theater > Drive-in Theater", category: cinema, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d17e941735, label: "Arts and Entertainment > Movie Theater > Indie Movie Theater", category: cinema, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d180941735, label: "Arts and Entertainment > Movie Theater > Multiplex", category: cinema, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d181941735, label: "Arts and Entertainment > Museum", category: museum, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d18f941735, label: "Arts and Entertainment > Museum > Art Museum", category: museum, confidence: 0.95 }
+  - { key: 559acbe0498e472f1a53fa23, label: "Arts and Entertainment > Museum > Erotic Museum", category: museum, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d190941735, label: "Arts and Entertainment > Museum > History Museum", category: museum, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d191941735, label: "Arts and Entertainment > Museum > Science Museum", category: museum, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d11f941735, label: "Arts and Entertainment > Night Club", category: nightclub, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b24, label: "Arts and Entertainment > Party Center", category: event_venue, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1f2931735, label: "Arts and Entertainment > Performing Arts Venue", category: theater, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734db, label: "Arts and Entertainment > Performing Arts Venue > Amphitheater", category: theater, confidence: 0.7 }
+  - { key: 5032792091d4c4b30a586d5c, label: "Arts and Entertainment > Performing Arts Venue > Concert Hall", category: live_music_venue, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d135941735, label: "Arts and Entertainment > Performing Arts Venue > Indie Theater", category: theater, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e5931735, label: "Arts and Entertainment > Performing Arts Venue > Music Venue", category: live_music_venue, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e7931735, label: "Arts and Entertainment > Performing Arts Venue > Music Venue > Jazz and Blues Venue", category: live_music_venue, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e9931735, label: "Arts and Entertainment > Performing Arts Venue > Music Venue > Rock Club", category: live_music_venue, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d136941735, label: "Arts and Entertainment > Performing Arts Venue > Opera House", category: theater, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d137941735, label: "Arts and Entertainment > Performing Arts Venue > Theater", category: theater, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d192941735, label: "Arts and Entertainment > Planetarium", category: museum, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1e3931735, label: "Arts and Entertainment > Pool Hall", category: bars_nightlife, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79e9, label: "Arts and Entertainment > Roller Rink", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b79ec, label: "Arts and Entertainment > Salsa Club", category: nightclub, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734f9, label: "Arts and Entertainment > Samba School", category: dance_school, confidence: 0.85 }
+  - { key: 5f2c14a5b6d05514c7042eb7, label: "Arts and Entertainment > VR Cafe", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d193941735, label: "Arts and Entertainment > Water Park", category: amusement_park, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d17b941735, label: "Arts and Entertainment > Zoo", category: nature_park, confidence: 0.85 }
+  - { key: 4d4b7105d754a06375d81259, label: "Business and Professional Services", category: professional_services, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a3d, label: "Business and Professional Services > Advertising Agency", category: marketing_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b26, label: "Business and Professional Services > Agriculture and Forestry Service", category: industry_trade, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b27, label: "Business and Professional Services > Appraiser", category: real_estate_appraiser, confidence: 0.7 }
+  - { key: 5fac002599ce226e27fe72e5, label: "Business and Professional Services > Architecture Firm", category: architect, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b28, label: "Business and Professional Services > Art Restoration Service", category: arts_crafts, confidence: 0.7 }
+  - { key: 58daa1558bbb0b01f18ec1d6, label: "Business and Professional Services > Art Studio", category: artist_studio, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b29, label: "Business and Professional Services > Audiovisual Service", category: sound_lighting, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b2b, label: "Business and Professional Services > Automotive Service", category: automotive_services, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b44, label: "Business and Professional Services > Automotive Service > Automotive Repair Shop", category: auto_repair, confidence: 0.95 }
+  - { key: 4f04ae1f2fb6e1c99f3db0ba, label: "Business and Professional Services > Automotive Service > Car Wash and Detail", category: car_wash, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b2c, label: "Business and Professional Services > Automotive Service > Motorcycle Repair Shop", category: motorcycle_shop, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b2d, label: "Business and Professional Services > Automotive Service > Oil Change Service", category: auto_repair, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b2e, label: "Business and Professional Services > Automotive Service > Smog Check Shop", category: auto_repair, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b2f, label: "Business and Professional Services > Automotive Service > Tire Repair Shop", category: tire_shop, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b30, label: "Business and Professional Services > Automotive Service > Towing Service", category: auto_repair, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b31, label: "Business and Professional Services > Automotive Service > Transmissions Shop", category: auto_repair, confidence: 0.85 }
+  - { key: 5f2c1e0db6d05514c70436d4, label: "Business and Professional Services > Automotive Service > Vehicle Inspection Station", category: automotive_services, confidence: 0.7 }
+  - { key: 56aa371be4b08b9a8d5734cf, label: "Business and Professional Services > Ballroom", category: event_venue, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573517, label: "Business and Professional Services > Business Center", category: coworking_space, confidence: 0.7 }
+  - { key: 5453de49498eade8af355881, label: "Business and Professional Services > Business Service", category: business_services, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b33, label: "Business and Professional Services > Career Counselor", category: recruitment_agency, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b34, label: "Business and Professional Services > Chemicals and Gasses Manufacturer", category: manufacturer, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4c7, label: "Business and Professional Services > Child Care Service", category: daycare, confidence: 0.85 }
+  - { key: 4f4532974b9074f6e4fb0104, label: "Business and Professional Services > Child Care Service > Daycare", category: daycare, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b35, label: "Business and Professional Services > Computer Repair Service", category: computer_repair, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b36, label: "Business and Professional Services > Construction", category: general_contractor, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ff931735, label: "Business and Professional Services > Convention Center", category: event_venue, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d100941735, label: "Business and Professional Services > Convention Center > Conference Room", category: event_venue, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b37, label: "Business and Professional Services > Creative Service", category: events_creative, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1f4941735, label: "Business and Professional Services > Design Studio", category: graphic_designer, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b38, label: "Business and Professional Services > Direct Mail and Email Marketing Service", category: marketing_agency, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a37, label: "Business and Professional Services > Distribution Center", category: logistics, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b39, label: "Business and Professional Services > Electrical Equipment Supplier", category: electrical_plumbing_supply, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b57, label: "Business and Professional Services > Employment Agency", category: recruitment_agency, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b3a, label: "Business and Professional Services > Engineer", category: engineering_firm, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b3b, label: "Business and Professional Services > Entertainment Agency", category: events, confidence: 0.7 }
+  - { key: 56aa371be4b08b9a8d573554, label: "Business and Professional Services > Entertainment Service", category: events, confidence: 0.7 }
+  - { key: 5454152e498ef71e2b9132c6, label: "Business and Professional Services > Event Service", category: event_planner, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d171941735, label: "Business and Professional Services > Event Space", category: event_venue, confidence: 0.95 }
+  - { key: 4eb1bea83b7b6f98df247e06, label: "Business and Professional Services > Factory", category: manufacturer, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d573523, label: "Business and Professional Services > Film Studio", category: videographer, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b3d, label: "Business and Professional Services > Financial Service", category: finance_insurance, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b3e, label: "Business and Professional Services > Financial Service > Accounting and Bookkeeping Service", category: accountant, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b3f, label: "Business and Professional Services > Financial Service > Banking and Finance", category: bank, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10a951735, label: "Business and Professional Services > Financial Service > Banking and Finance > Bank", category: bank, confidence: 0.95 }
+  - { key: 5032850891d4c4b30a586d62, label: "Business and Professional Services > Financial Service > Banking and Finance > Credit Union", category: bank, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b40, label: "Business and Professional Services > Financial Service > Business Broker", category: business_consultant, confidence: 0.7 }
+  - { key: 5744ccdfe4b0c0459246b4be, label: "Business and Professional Services > Financial Service > Currency Exchange", category: currency_exchange, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b43, label: "Business and Professional Services > Financial Service > Financial Planner", category: wealth_management, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b44, label: "Business and Professional Services > Financial Service > Loans Agency", category: credit_broker, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b45, label: "Business and Professional Services > Financial Service > Stock Broker", category: wealth_management, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573550, label: "Business and Professional Services > Food and Beverage Service", category: food_drink, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b46, label: "Business and Professional Services > Food and Beverage Service > Caterer", category: catering, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b47, label: "Business and Professional Services > Food and Beverage Service > Food Distribution Center", category: wholesaler, confidence: 0.7 }
+  - { key: 4f4534884b9074f6e4fb0174, label: "Business and Professional Services > Funeral Home", category: funeral_home, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b48, label: "Business and Professional Services > Geological Service", category: engineering_firm, confidence: 0.7 }
+  - { key: 54541900498ea6ccd0202697, label: "Business and Professional Services > Health and Beauty Service", category: beauty_wellness, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b49, label: "Business and Professional Services > Health and Beauty Service > Barbershop", category: barber, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a27, label: "Business and Professional Services > Health and Beauty Service > Bath House", category: spa, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b20, label: "Business and Professional Services > Health and Beauty Service > Body Piercing Shop", category: tattoo_studio, confidence: 0.85 }
+  - { key: 698b7b3e05512d4553149a5d, label: "Business and Professional Services > Health and Beauty Service > Brow Bar", category: lash_brow_bar, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b1d, label: "Business and Professional Services > Health and Beauty Service > Dry Cleaner", category: laundry, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b4a, label: "Business and Professional Services > Health and Beauty Service > Hair Removal Service", category: waxing_salon, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d110951735, label: "Business and Professional Services > Health and Beauty Service > Hair Salon", category: hair_salon, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b3c, label: "Business and Professional Services > Health and Beauty Service > Massage Clinic", category: massage, confidence: 0.95 }
+  - { key: 4f04aa0c2fb6e1c99f3db0b8, label: "Business and Professional Services > Health and Beauty Service > Nail Salon", category: nail_salon, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b4b, label: "Business and Professional Services > Health and Beauty Service > Skin Care Clinic", category: beauty_salon, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ed941735, label: "Business and Professional Services > Health and Beauty Service > Spa", category: spa, confidence: 0.95 }
+  - { key: 4d1cf8421a97d635ce361c31, label: "Business and Professional Services > Health and Beauty Service > Tanning Salon", category: tanning_salon, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1de931735, label: "Business and Professional Services > Health and Beauty Service > Tattoo Parlor", category: tattoo_studio, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b58, label: "Business and Professional Services > Home Improvement Service", category: home_construction, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b4c, label: "Business and Professional Services > Home Improvement Service > Bathroom Contractor", category: finishing_trades, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b4d, label: "Business and Professional Services > Home Improvement Service > Carpenter", category: carpentry, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b4e, label: "Business and Professional Services > Home Improvement Service > Carpet and Flooring Contractor", category: finishing_trades, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b4f, label: "Business and Professional Services > Home Improvement Service > Chimney Sweep", category: repairs_maintenance, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b50, label: "Business and Professional Services > Home Improvement Service > Deck and Patio Contractor", category: carpentry, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b51, label: "Business and Professional Services > Home Improvement Service > Doors and Windows Contractor", category: glazing, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b52, label: "Business and Professional Services > Home Improvement Service > Electrician", category: electrician, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b53, label: "Business and Professional Services > Home Improvement Service > Fence Contractor", category: structural_work, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b54, label: "Business and Professional Services > Home Improvement Service > Garage Door Supplier", category: hurricane_shutters, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b55, label: "Business and Professional Services > Home Improvement Service > General Contractor", category: general_contractor, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b56, label: "Business and Professional Services > Home Improvement Service > Heating, Ventilating and Air Conditioning Contractor", category: hvac, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b57, label: "Business and Professional Services > Home Improvement Service > Home Inspection", category: design_engineering, confidence: 0.7 }
+  - { key: 545419b1498ea6ccd0202f58, label: "Business and Professional Services > Home Improvement Service > Home Service", category: home_services, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b59, label: "Business and Professional Services > Home Improvement Service > Interior Designer", category: interior_designer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b5a, label: "Business and Professional Services > Home Improvement Service > Kitchen Remodeler", category: finishing_trades, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b5b, label: "Business and Professional Services > Home Improvement Service > Landscaper and Gardener", category: landscaping, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b5c, label: "Business and Professional Services > Home Improvement Service > Mover", category: moving_storage, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b5d, label: "Business and Professional Services > Home Improvement Service > Painter", category: painter, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b5e, label: "Business and Professional Services > Home Improvement Service > Pest Control Service", category: pest_control, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b5f, label: "Business and Professional Services > Home Improvement Service > Plumber", category: plumber, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b60, label: "Business and Professional Services > Home Improvement Service > Professional Cleaning Service", category: cleaning_services, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b61, label: "Business and Professional Services > Home Improvement Service > Roofer", category: roofing, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b62, label: "Business and Professional Services > Home Improvement Service > Sewer Contractor", category: septic_service, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b63, label: "Business and Professional Services > Home Improvement Service > Swimming Pool Maintenance and Service", category: pool_maintenance, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b64, label: "Business and Professional Services > Home Improvement Service > Tree Service", category: tree_care, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b65, label: "Business and Professional Services > Home Improvement Service > Upholstery Service", category: craft_artisan, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b66, label: "Business and Professional Services > Human Resources Agency", category: recruitment_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b67, label: "Business and Professional Services > Import and Export Service", category: import_export, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b68, label: "Business and Professional Services > Industrial Equipment Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 58daa1558bbb0b01f18ec1f1, label: "Business and Professional Services > Insurance Agency", category: insurance_agency, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b33, label: "Business and Professional Services > Laundromat", category: laundry, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1fc941735, label: "Business and Professional Services > Laundry Service", category: laundry, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b6a, label: "Business and Professional Services > Leather Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b6b, label: "Business and Professional Services > Legal Service", category: legal_services, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b6c, label: "Business and Professional Services > Legal Service > Immigration Attorney", category: lawyer, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b3f, label: "Business and Professional Services > Legal Service > Law Office", category: lawyer, confidence: 0.95 }
+  - { key: 5ae95d208a6f17002ce792b2, label: "Business and Professional Services > Legal Service > Notary", category: notary, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b1e, label: "Business and Professional Services > Locksmith", category: locksmith, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b38, label: "Business and Professional Services > Lottery Retailer", category: tobacco_newsstand, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b6e, label: "Business and Professional Services > Machine Shop", category: metalwork, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b6f, label: "Business and Professional Services > Management Consultant", category: business_consultant, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b70, label: "Business and Professional Services > Manufacturer", category: manufacturer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b71, label: "Business and Professional Services > Market Research and Consulting Service", category: business_consultant, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b72, label: "Business and Professional Services > Media Agency", category: marketing_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b73, label: "Business and Professional Services > Metals Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b74, label: "Business and Professional Services > Mobile Company", category: telecom_provider, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b32, label: "Business and Professional Services > Office > Business and Strategy Consulting Office", category: business_consultant, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b75, label: "Business and Professional Services > Office > Corporate Housing Agency", category: aparthotel, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d174941735, label: "Business and Professional Services > Office > Coworking Space", category: coworking_space, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d127941735, label: "Business and Professional Services > Office > Meeting Room", category: event_venue, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d125941735, label: "Business and Professional Services > Office > Tech Startup", category: software_company, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b77, label: "Business and Professional Services > Online Advertising Service", category: marketing_agency, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d57356a, label: "Business and Professional Services > Outdoor Event Space", category: event_venue, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b78, label: "Business and Professional Services > Paper Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 5032897c91d4c4b30a586d69, label: "Business and Professional Services > Pet Service", category: pets_animals, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b79, label: "Business and Professional Services > Pet Service > Pet Grooming Service", category: pet_grooming, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b7a, label: "Business and Professional Services > Pet Service > Pet Sitting and Boarding Service", category: pet_boarding, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b7d, label: "Business and Professional Services > Photography Service", category: photo_video, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b7c, label: "Business and Professional Services > Photography Service > Photographer", category: photographer, confidence: 0.95 }
+  - { key: 4eb1bdde3b7b55596b4a7490, label: "Business and Professional Services > Photography Service > Photography Lab", category: photographer, confidence: 0.7 }
+  - { key: 554a5e17498efabeda6cc559, label: "Business and Professional Services > Photography Service > Photography Studio", category: photographer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b7e, label: "Business and Professional Services > Plastics Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b7f, label: "Business and Professional Services > Print, TV, Radio and Outdoor Advertising Service", category: marketing_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b80, label: "Business and Professional Services > Promotional Item Service", category: printing, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b81, label: "Business and Professional Services > Public Relations Firm", category: marketing_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b82, label: "Business and Professional Services > Publisher", category: media_outlet, confidence: 0.85 }
+  - { key: 5032856091d4c4b30a586d63, label: "Business and Professional Services > Radio Station", category: media_outlet, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b83, label: "Business and Professional Services > Real Estate Service", category: real_estate, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b84, label: "Business and Professional Services > Real Estate Service > Building and Land Surveyor", category: land_surveyor, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b85, label: "Business and Professional Services > Real Estate Service > Commercial Real Estate Developer", category: property_developer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b86, label: "Business and Professional Services > Real Estate Service > Property Management Office", category: property_management, confidence: 0.95 }
+  - { key: 5032885091d4c4b30a586d66, label: "Business and Professional Services > Real Estate Service > Real Estate Agency", category: real_estate_agency, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b87, label: "Business and Professional Services > Real Estate Service > Real Estate Appraiser", category: real_estate_appraiser, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b88, label: "Business and Professional Services > Real Estate Service > Real Estate Development and Title Company", category: property_developer, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b37, label: "Business and Professional Services > Recording Studio", category: events_creative, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b8a, label: "Business and Professional Services > Renewable Energy Service", category: solar_installer, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b2f, label: "Business and Professional Services > Repair Service", category: repairs_maintenance, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b8b, label: "Business and Professional Services > Rubber Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b8c, label: "Business and Professional Services > Salvage Yard", category: auto_parts, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b8d, label: "Business and Professional Services > Scientific Equipment Supplier", category: wholesaler, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9b8e, label: "Business and Professional Services > Search Engine Marketing and Optimization Service", category: marketing_agency, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b8f, label: "Business and Professional Services > Security and Safety", category: security_services, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b1f, label: "Business and Professional Services > Shipping, Freight, and Material Transportation Service", category: freight_forwarder, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b39, label: "Business and Professional Services > Shoe Repair Service", category: shoe_repair, confidence: 0.95 }
+  - { key: 4f04b1572fb6e1c99f3db0bf, label: "Business and Professional Services > Storage Facility", category: moving_storage, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a31, label: "Business and Professional Services > TV Station", category: media_outlet, confidence: 0.95 }
+  - { key: 5032781d91d4c4b30a586d5b, label: "Business and Professional Services > Tailor", category: tailor, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b90, label: "Business and Professional Services > Technology Business", category: technology_media, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b36, label: "Business and Professional Services > Technology Business > IT Service", category: it_services, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b91, label: "Business and Professional Services > Technology Business > Software Company", category: software_company, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b92, label: "Business and Professional Services > Technology Business > Website Designer", category: web_agency, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b93, label: "Business and Professional Services > Telecommunication Service", category: telecom_provider, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b94, label: "Business and Professional Services > Translation Service", category: translation_service, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b95, label: "Business and Professional Services > Tutoring Service", category: tutoring, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b96, label: "Business and Professional Services > Water Treatment Service", category: water_tank_service, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734c5, label: "Business and Professional Services > Wedding Hall", category: event_venue, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b97, label: "Business and Professional Services > Welding Service", category: metalwork, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b98, label: "Business and Professional Services > Wholesaler", category: wholesaler, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9b99, label: "Business and Professional Services > Writing, Copywriting and Technical Writing Service", category: marketing_agency, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a34, label: "Community and Government > Community Center", category: community_center, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a32, label: "Community and Government > Cultural Center", category: community_center, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b9c, label: "Community and Government > Disabled Persons Service", category: home_care, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d13b941735, label: "Community and Government > Education", category: education, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573570, label: "Community and Government > Education > Adult Education", category: vocational_training, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9b9f, label: "Community and Government > Education > Art School", category: art_school, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a43, label: "Community and Government > Education > Circus School", category: art_school, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9ba0, label: "Community and Government > Education > Computer Training School", category: vocational_training, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec200, label: "Community and Government > Education > Culinary School", category: cooking_school, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a42, label: "Community and Government > Education > Driving School", category: driving_school, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a49, label: "Community and Government > Education > Flight School", category: vocational_training, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a48, label: "Community and Government > Education > Language School", category: language_school, confidence: 0.95 }
+  - { key: 4f04b10d2fb6e1c99f3db0be, label: "Community and Government > Education > Music School", category: music_school, confidence: 0.95 }
+  - { key: 4f4533814b9074f6e4fb0107, label: "Community and Government > Education > Nursery School", category: preschool, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a45, label: "Community and Government > Education > Preschool", category: preschool, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9ba1, label: "Community and Government > Education > Primary and Secondary School", category: school, confidence: 0.85 }
+  - { key: 4f4533804b9074f6e4fb0105, label: "Community and Government > Education > Primary and Secondary School > Elementary School", category: primary_school, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d13d941735, label: "Community and Government > Education > Primary and Secondary School > High School", category: secondary_school, confidence: 0.95 }
+  - { key: 4f4533814b9074f6e4fb0106, label: "Community and Government > Education > Primary and Secondary School > Middle School", category: secondary_school, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a46, label: "Community and Government > Education > Private School", category: school, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a47, label: "Community and Government > Education > Religious School", category: school, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ad941735, label: "Community and Government > Education > Trade School", category: vocational_training, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9baa, label: "Community and Government > Organization", category: nonprofit_association, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bab, label: "Community and Government > Organization > Charity", category: nonprofit_association, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bac, label: "Community and Government > Organization > Environmental Organization", category: nonprofit_association, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bae, label: "Community and Government > Organization > LGBTQ Organization", category: nonprofit_association, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bad, label: "Community and Government > Organization > Labor Union", category: nonprofit_association, confidence: 0.7 }
+  - { key: 50328a8e91d4c4b30a586d6c, label: "Community and Government > Organization > Non-Profit Organization", category: nonprofit_association, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9baf, label: "Community and Government > Organization > Social Services Organization", category: nonprofit_association, confidence: 0.85 }
+  - { key: 5f2c5de85b4c177b9a6de29c, label: "Community and Government > Organization > Veterans' Organization", category: nonprofit_association, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bb0, label: "Community and Government > Organization > Youth Organization", category: nonprofit_association, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bb3, label: "Community and Government > Senior Citizen Service", category: home_care, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a33, label: "Community and Government > Social Club", category: nonprofit_association, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a10, label: "Community and Government > Summer Camp", category: kids_activities, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bb5, label: "Dining and Drinking", category: food_drink, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d179941735, label: "Dining and Drinking > Bagel Shop", category: bakery, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16a941735, label: "Dining and Drinking > Bakery", category: bakery, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d116941735, label: "Dining and Drinking > Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1ea941735, label: "Dining and Drinking > Bar > Apres Ski Bar", category: bar, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a0d, label: "Dining and Drinking > Bar > Beach Bar", category: beach_club, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d57356c, label: "Dining and Drinking > Bar > Beer Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d117941735, label: "Dining and Drinking > Bar > Beer Garden", category: bar, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a0e, label: "Dining and Drinking > Bar > Champagne Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d11e941735, label: "Dining and Drinking > Bar > Cocktail Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d118941735, label: "Dining and Drinking > Bar > Dive Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1d8941735, label: "Dining and Drinking > Bar > Gay Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d119941735, label: "Dining and Drinking > Bar > Hookah Bar", category: bar, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1d5941735, label: "Dining and Drinking > Bar > Hotel Bar", category: bar, confidence: 0.95 }
+  - { key: 5f2c40f15b4c177b9a6dc684, label: "Dining and Drinking > Bar > Ice Bar", category: bar, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a06, label: "Dining and Drinking > Bar > Irish Pub", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d120941735, label: "Dining and Drinking > Bar > Karaoke Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d121941735, label: "Dining and Drinking > Bar > Lounge", category: bar, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1e8931735, label: "Dining and Drinking > Bar > Piano Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d11b941735, label: "Dining and Drinking > Bar > Pub", category: bar, confidence: 0.95 }
+  - { key: 5f2c224bb6d05514c70440a3, label: "Dining and Drinking > Bar > Rooftop Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d11c941735, label: "Dining and Drinking > Bar > Sake Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1d4941735, label: "Dining and Drinking > Bar > Speakeasy", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d11d941735, label: "Dining and Drinking > Bar > Sports Bar", category: bar, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d57354d, label: "Dining and Drinking > Bar > Tiki Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d122941735, label: "Dining and Drinking > Bar > Whisky Bar", category: bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d123941735, label: "Dining and Drinking > Bar > Wine Bar", category: wine_bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d143941735, label: "Dining and Drinking > Breakfast Spot", category: restaurant, confidence: 0.85 }
+  - { key: 50327c8591d4c4b30a586d5d, label: "Dining and Drinking > Brewery", category: food_producer, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bb6, label: "Dining and Drinking > Cafe, Coffee, and Tea House", category: cafe, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a0c, label: "Dining and Drinking > Cafe, Coffee, and Tea House > Bubble Tea Shop", category: cafe, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16d941735, label: "Dining and Drinking > Cafe, Coffee, and Tea House > Café", category: cafe, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e0931735, label: "Dining and Drinking > Cafe, Coffee, and Tea House > Coffee Shop", category: cafe, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d573508, label: "Dining and Drinking > Cafe, Coffee, and Tea House > Pet Café", category: cafe, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1dc931735, label: "Dining and Drinking > Cafe, Coffee, and Tea House > Tea Room", category: cafe, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d128941735, label: "Dining and Drinking > Cafeteria", category: restaurant, confidence: 0.7 }
+  - { key: 5e189fd6eee47d000759bbfd, label: "Dining and Drinking > Cidery", category: food_producer, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f2, label: "Dining and Drinking > Creperie", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1d0941735, label: "Dining and Drinking > Dessert Shop", category: pastry_shop, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1bc941735, label: "Dining and Drinking > Dessert Shop > Cupcake Shop", category: pastry_shop, confidence: 0.85 }
+  - { key: 512e7cae91d4cbb4e5efe0af, label: "Dining and Drinking > Dessert Shop > Frozen Yogurt Shop", category: ice_cream_shop, confidence: 0.85 }
+  - { key: 5f2c407c5b4c177b9a6dc536, label: "Dining and Drinking > Dessert Shop > Gelato Shop", category: ice_cream_shop, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1c9941735, label: "Dining and Drinking > Dessert Shop > Ice Cream Parlor", category: ice_cream_shop, confidence: 0.95 }
+  - { key: 5744ccdfe4b0c0459246b4e2, label: "Dining and Drinking > Dessert Shop > Pastry Shop", category: pastry_shop, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a0a, label: "Dining and Drinking > Dessert Shop > Pie Shop", category: pastry_shop, confidence: 0.85 }
+  - { key: 62d5af45da6648532de303ee, label: "Dining and Drinking > Dessert Shop > Waffle Shop", category: snack_bar, confidence: 0.7 }
+  - { key: 4e0e22f5a56208c4ea9a85a0, label: "Dining and Drinking > Distillery", category: food_producer, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d148941735, label: "Dining and Drinking > Donut Shop", category: bakery, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d57350b, label: "Dining and Drinking > Food Stand", category: snack_bar, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1cb941735, label: "Dining and Drinking > Food Truck", category: food_truck, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d112941735, label: "Dining and Drinking > Juice Bar", category: juice_bar, confidence: 0.95 }
+  - { key: 5e189d71eee47d000759b7e2, label: "Dining and Drinking > Meadery", category: food_producer, confidence: 0.85 }
+  - { key: 4d4b7105d754a06374d81259, label: "Dining and Drinking > Restaurant", category: restaurant, confidence: 0.95 }
+  - { key: 503288ae91d4c4b30a586d67, label: "Dining and Drinking > Restaurant > Afghan Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c8941735, label: "Dining and Drinking > Restaurant > African Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10a941735, label: "Dining and Drinking > Restaurant > African Restaurant > Ethiopian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5f2c344a5b4c177b9a6dc011, label: "Dining and Drinking > Restaurant > African Restaurant > Mauritian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d14e941735, label: "Dining and Drinking > Restaurant > American Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d157941735, label: "Dining and Drinking > Restaurant > American Restaurant > New American Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5f2c2b7db6d05514c7044837, label: "Dining and Drinking > Restaurant > Armenian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d142941735, label: "Dining and Drinking > Restaurant > Asian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d573568, label: "Dining and Drinking > Restaurant > Asian Restaurant > Burmese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a03, label: "Dining and Drinking > Restaurant > Asian Restaurant > Cambodian Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d145941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a5e3cf9994f4e043bea, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Anhui Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a723cf9994f4e043bec, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Beijing Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a7c3cf9994f4e043bed, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Cantonese Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 58daa1558bbb0b01f18ec1d3, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Cha Chaan Teng", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a673cf9994f4e043beb, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Chinese Aristocrat Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a903cf9994f4e043bee, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Chinese Breakfast Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f5931735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Dim Sum Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3a9f3cf9994f4e043bef, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Dongbei Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3aaa3cf9994f4e043bf0, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Fujian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3ab53cf9994f4e043bf1, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Guizhou Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3abe3cf9994f4e043bf2, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Hainan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3ac83cf9994f4e043bf3, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Hakka Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3ad23cf9994f4e043bf4, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Henan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3add3cf9994f4e043bf5, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Hong Kong Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3af23cf9994f4e043bf7, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Huaiyang Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3ae63cf9994f4e043bf6, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Hubei Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3afc3cf9994f4e043bf8, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Hunan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b053cf9994f4e043bf9, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Imperial Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b213cf9994f4e043bfa, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Jiangsu Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b293cf9994f4e043bfb, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Jiangxi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b343cf9994f4e043bfc, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Macanese Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b3b3cf9994f4e043bfd, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Manchu Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b463cf9994f4e043bfe, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Peking Duck Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b633cf9994f4e043c01, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Shaanxi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b513cf9994f4e043bff, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Shandong Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b593cf9994f4e043c00, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Shanghai Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b6e3cf9994f4e043c02, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Shanxi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b773cf9994f4e043c03, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Szechuan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b813cf9994f4e043c04, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Taiwanese Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b893cf9994f4e043c05, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Tianjin Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b913cf9994f4e043c06, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Xinjiang Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3b9a3cf9994f4e043c07, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Yunnan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af3ba23cf9994f4e043c08, label: "Dining and Drinking > Restaurant > Asian Restaurant > Chinese Restaurant > Zhejiang Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 4eb1bd1c3b7b55596b4a748f, label: "Dining and Drinking > Restaurant > Asian Restaurant > Filipino Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79fb, label: "Dining and Drinking > Restaurant > Asian Restaurant > Himalayan Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52af0bd33cf9994f4e043bdd, label: "Dining and Drinking > Restaurant > Asian Restaurant > Hotpot Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4deefc054765f83613cdba6f, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043ac9, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Acehnese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043acb, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Balinese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043aca, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Betawinese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043acc, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Indonesian Meatball Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043ac7, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Javanese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043ac8, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Manadonese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043ac5, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Padangnese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52960eda3cf9994f4e043ac6, label: "Dining and Drinking > Restaurant > Asian Restaurant > Indonesian Restaurant > Sundanese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d111941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb0c, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Donburi Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb30, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Japanese Curry Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 5f2c2436b6d05514c704433e, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Japanese Family Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb21, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Kaiseki Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb06, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Kushikatsu Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb1b, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Monjayaki Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb1e, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Nabe Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb18, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Okonomiyaki Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb24, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Ramen Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb15, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Shabu-Shabu Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb27, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Soba Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb12, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Sukiyaki Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1d2941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Sushi Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb2d, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Takoyaki Place", category: japanese_restaurant, confidence: 0.85 }
+  - { key: 5f2c239eb6d05514c70441ee, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Teishoku Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59a31e4b013909087cb00, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Tempura Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59af1e4b013909087cb03, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Tonkatsu Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb2a, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Udon Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb0f, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Unagi Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb33, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Wagashi Place", category: pastry_shop, confidence: 0.7 }
+  - { key: 55a59bace4b013909087cb09, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Yakitori Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 55a59bace4b013909087cb36, label: "Dining and Drinking > Restaurant > Asian Restaurant > Japanese Restaurant > Yoshoku Restaurant", category: japanese_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d113941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734e4, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Bossam/Jokbal Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734f0, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Bunsik Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734e7, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Gukbap Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734ed, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Janguh Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 5f2c3f6b5b4c177b9a6dc388, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Korean BBQ Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734ea, label: "Dining and Drinking > Restaurant > Asian Restaurant > Korean Restaurant > Samgyetang Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d156941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Malay Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 5ae9595eb77c77002c2f9f26, label: "Dining and Drinking > Restaurant > Asian Restaurant > Malay Restaurant > Mamak Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4eb1d5724b900d56c88a45fe, label: "Dining and Drinking > Restaurant > Asian Restaurant > Mongolian Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1d1941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Noodle Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d57350e, label: "Dining and Drinking > Restaurant > Asian Restaurant > Satay Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 5f2c430e5b4c177b9a6dcabd, label: "Dining and Drinking > Restaurant > Asian Restaurant > Singaporean Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d149941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Thai Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d573502, label: "Dining and Drinking > Restaurant > Asian Restaurant > Thai Restaurant > Som Tum Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 52af39fb3cf9994f4e043be9, label: "Dining and Drinking > Restaurant > Asian Restaurant > Tibetan Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d14a941735, label: "Dining and Drinking > Restaurant > Asian Restaurant > Vietnamese Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d169941735, label: "Dining and Drinking > Restaurant > Australian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a01, label: "Dining and Drinking > Restaurant > Austrian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1df931735, label: "Dining and Drinking > Restaurant > BBQ Joint", category: restaurant, confidence: 0.85 }
+  - { key: 5e179ee74ae8e90006e9a746, label: "Dining and Drinking > Restaurant > Bangladeshi Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a02, label: "Dining and Drinking > Restaurant > Belgian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f1, label: "Dining and Drinking > Restaurant > Bistro", category: restaurant, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b79f4, label: "Dining and Drinking > Restaurant > Buffet", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16c941735, label: "Dining and Drinking > Restaurant > Burger Joint", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d17a941735, label: "Dining and Drinking > Restaurant > Cajun and Creole Restaurant", category: creole_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d144941735, label: "Dining and Drinking > Restaurant > Caribbean Restaurant", category: creole_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d154941735, label: "Dining and Drinking > Restaurant > Caribbean Restaurant > Cuban Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5f2c2abab6d05514c70446e4, label: "Dining and Drinking > Restaurant > Caribbean Restaurant > Puerto Rican Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5293a7d53cf9994f4e043a45, label: "Dining and Drinking > Restaurant > Caucasian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a00, label: "Dining and Drinking > Restaurant > Comfort Food Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52f2ae52bcbc57f1066b8b81, label: "Dining and Drinking > Restaurant > Czech Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d146941735, label: "Dining and Drinking > Restaurant > Deli", category: snack_bar, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d147941735, label: "Dining and Drinking > Restaurant > Diner", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d108941735, label: "Dining and Drinking > Restaurant > Dumpling Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4d0, label: "Dining and Drinking > Restaurant > Dutch Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d109941735, label: "Dining and Drinking > Restaurant > Eastern European Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e97, label: "Dining and Drinking > Restaurant > Eastern European Restaurant > Belarusian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1ee, label: "Dining and Drinking > Restaurant > Eastern European Restaurant > Bosnian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734f3, label: "Dining and Drinking > Restaurant > Eastern European Restaurant > Bulgarian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52960bac3cf9994f4e043ac4, label: "Dining and Drinking > Restaurant > Eastern European Restaurant > Romanian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e98, label: "Dining and Drinking > Restaurant > Eastern European Restaurant > Tatar Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a05, label: "Dining and Drinking > Restaurant > English Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10b941735, label: "Dining and Drinking > Restaurant > Falafel Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16e941735, label: "Dining and Drinking > Restaurant > Fast Food Restaurant", category: fast_food, confidence: 0.95 }
+  - { key: 4edd64a0c7ddd24ca188df1a, label: "Dining and Drinking > Restaurant > Fish and Chips Shop", category: fast_food, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a09, label: "Dining and Drinking > Restaurant > Fondue Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10c941735, label: "Dining and Drinking > Restaurant > French Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306b6, label: "Dining and Drinking > Restaurant > French Restaurant > Alsatian Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306b8, label: "Dining and Drinking > Restaurant > French Restaurant > Auvergne Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306bc, label: "Dining and Drinking > Restaurant > French Restaurant > Basque Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306b0, label: "Dining and Drinking > Restaurant > French Restaurant > Brasserie", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306c5, label: "Dining and Drinking > Restaurant > French Restaurant > Breton Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306c0, label: "Dining and Drinking > Restaurant > French Restaurant > Burgundian Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306cb, label: "Dining and Drinking > Restaurant > French Restaurant > Catalan Restaurant", category: french_restaurant, confidence: 0.85 }
+  - { key: 57558b36e4b065ecebd306ce, label: "Dining and Drinking > Restaurant > French Restaurant > Ch'ti Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306d1, label: "Dining and Drinking > Restaurant > French Restaurant > Corsican Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306b4, label: "Dining and Drinking > Restaurant > French Restaurant > Estaminet", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306b2, label: "Dining and Drinking > Restaurant > French Restaurant > Labour Canteen", category: french_restaurant, confidence: 0.85 }
+  - { key: 57558b35e4b065ecebd306ad, label: "Dining and Drinking > Restaurant > French Restaurant > Lyonese Bouchon", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306d4, label: "Dining and Drinking > Restaurant > French Restaurant > Norman Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306d7, label: "Dining and Drinking > Restaurant > French Restaurant > Provençal Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306da, label: "Dining and Drinking > Restaurant > French Restaurant > Savoyard Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306ba, label: "Dining and Drinking > Restaurant > French Restaurant > Southwestern French Restaurant", category: french_restaurant, confidence: 0.95 }
+  - { key: 4d4ae6fc7a7b7dea34424761, label: "Dining and Drinking > Restaurant > Fried Chicken Joint", category: fast_food, confidence: 0.85 }
+  - { key: 55d25775498e9f6a0816a37a, label: "Dining and Drinking > Restaurant > Friterie", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d155941735, label: "Dining and Drinking > Restaurant > Gastropub", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10d941735, label: "Dining and Drinking > Restaurant > German Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573583, label: "Dining and Drinking > Restaurant > German Restaurant > Apple Wine Pub", category: bar, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573572, label: "Dining and Drinking > Restaurant > German Restaurant > Bavarian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d57358e, label: "Dining and Drinking > Restaurant > German Restaurant > Bratwurst Joint", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d57358b, label: "Dining and Drinking > Restaurant > German Restaurant > Currywurst Joint", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573574, label: "Dining and Drinking > Restaurant > German Restaurant > Franconian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573592, label: "Dining and Drinking > Restaurant > German Restaurant > German Pop-Up Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573578, label: "Dining and Drinking > Restaurant > German Restaurant > Palatine Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d57357b, label: "Dining and Drinking > Restaurant > German Restaurant > Rhenisch Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573587, label: "Dining and Drinking > Restaurant > German Restaurant > Schnitzel Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d57357f, label: "Dining and Drinking > Restaurant > German Restaurant > Silesian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371ce4b08b9a8d573576, label: "Dining and Drinking > Restaurant > German Restaurant > Swabian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4c2cd86ed066bed06c3c5209, label: "Dining and Drinking > Restaurant > Gluten-Free Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10e941735, label: "Dining and Drinking > Restaurant > Greek Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83e8, label: "Dining and Drinking > Restaurant > Greek Restaurant > Bougatsa Shop", category: pastry_shop, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83e2, label: "Dining and Drinking > Restaurant > Greek Restaurant > Cretan Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83d8, label: "Dining and Drinking > Restaurant > Greek Restaurant > Fish Taverna", category: seafood_restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83d6, label: "Dining and Drinking > Restaurant > Greek Restaurant > Grilled Meat Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83e6, label: "Dining and Drinking > Restaurant > Greek Restaurant > Kafenio", category: cafe, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83e4, label: "Dining and Drinking > Restaurant > Greek Restaurant > Magirio", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83da, label: "Dining and Drinking > Restaurant > Greek Restaurant > Meze Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83d4, label: "Dining and Drinking > Restaurant > Greek Restaurant > Modern Greek Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83dc, label: "Dining and Drinking > Restaurant > Greek Restaurant > Ouzeri", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83e0, label: "Dining and Drinking > Restaurant > Greek Restaurant > Patsa Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f3, label: "Dining and Drinking > Restaurant > Greek Restaurant > Souvlaki Shop", category: fast_food, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83d2, label: "Dining and Drinking > Restaurant > Greek Restaurant > Taverna", category: restaurant, confidence: 0.85 }
+  - { key: 53d6c1b0e4b02351e88a83de, label: "Dining and Drinking > Restaurant > Greek Restaurant > Tsipouro Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79ff, label: "Dining and Drinking > Restaurant > Halal Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79fe, label: "Dining and Drinking > Restaurant > Hawaiian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89d4, label: "Dining and Drinking > Restaurant > Hawaiian Restaurant > Poke Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16f941735, label: "Dining and Drinking > Restaurant > Hot Dog Joint", category: fast_food, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79fa, label: "Dining and Drinking > Restaurant > Hungarian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 54135bf5e4b08f3d2429dfdf, label: "Dining and Drinking > Restaurant > Indian Chinese Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10f941735, label: "Dining and Drinking > Restaurant > Indian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe5, label: "Dining and Drinking > Restaurant > Indian Restaurant > Andhra Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff3, label: "Dining and Drinking > Restaurant > Indian Restaurant > Awadhi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff5, label: "Dining and Drinking > Restaurant > Indian Restaurant > Bengali Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe2, label: "Dining and Drinking > Restaurant > Indian Restaurant > Chaat Place", category: snack_bar, confidence: 0.85 }
+  - { key: 54135bf5e4b08f3d2429dff2, label: "Dining and Drinking > Restaurant > Indian Restaurant > Chettinad Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe1, label: "Dining and Drinking > Restaurant > Indian Restaurant > Dhaba", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe3, label: "Dining and Drinking > Restaurant > Indian Restaurant > Dosa Place", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe8, label: "Dining and Drinking > Restaurant > Indian Restaurant > Goan Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe9, label: "Dining and Drinking > Restaurant > Indian Restaurant > Gujarati Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe6, label: "Dining and Drinking > Restaurant > Indian Restaurant > Hyderabadi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe4, label: "Dining and Drinking > Restaurant > Indian Restaurant > Indian Sweet Shop", category: pastry_shop, confidence: 0.7 }
+  - { key: 54135bf5e4b08f3d2429dfe7, label: "Dining and Drinking > Restaurant > Indian Restaurant > Irani Cafe", category: cafe, confidence: 0.85 }
+  - { key: 54135bf5e4b08f3d2429dfea, label: "Dining and Drinking > Restaurant > Indian Restaurant > Jain Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfeb, label: "Dining and Drinking > Restaurant > Indian Restaurant > Karnataka Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfed, label: "Dining and Drinking > Restaurant > Indian Restaurant > Kerala Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfee, label: "Dining and Drinking > Restaurant > Indian Restaurant > Maharashtrian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff4, label: "Dining and Drinking > Restaurant > Indian Restaurant > Mughlai Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfe0, label: "Dining and Drinking > Restaurant > Indian Restaurant > Multicuisine Indian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfdd, label: "Dining and Drinking > Restaurant > Indian Restaurant > North Indian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff6, label: "Dining and Drinking > Restaurant > Indian Restaurant > Northeast Indian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfef, label: "Dining and Drinking > Restaurant > Indian Restaurant > Parsi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff0, label: "Dining and Drinking > Restaurant > Indian Restaurant > Punjabi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dff1, label: "Dining and Drinking > Restaurant > Indian Restaurant > Rajasthani Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfde, label: "Dining and Drinking > Restaurant > Indian Restaurant > South Indian Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 54135bf5e4b08f3d2429dfec, label: "Dining and Drinking > Restaurant > Indian Restaurant > Udupi Restaurant", category: asian_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d110941735, label: "Dining and Drinking > Restaurant > Italian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbb6, label: "Dining and Drinking > Restaurant > Italian Restaurant > Abruzzo Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb7c, label: "Dining and Drinking > Restaurant > Italian Restaurant > Agriturismo", category: italian_restaurant, confidence: 0.7 }
+  - { key: 55a5a1ebe4b013909087cba7, label: "Dining and Drinking > Restaurant > Italian Restaurant > Aosta Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cba1, label: "Dining and Drinking > Restaurant > Italian Restaurant > Basilicata Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cba4, label: "Dining and Drinking > Restaurant > Italian Restaurant > Calabria Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb95, label: "Dining and Drinking > Restaurant > Italian Restaurant > Campanian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb89, label: "Dining and Drinking > Restaurant > Italian Restaurant > Emilia Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb9b, label: "Dining and Drinking > Restaurant > Italian Restaurant > Friuli Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb98, label: "Dining and Drinking > Restaurant > Italian Restaurant > Ligurian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbbf, label: "Dining and Drinking > Restaurant > Italian Restaurant > Lombard Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb79, label: "Dining and Drinking > Restaurant > Italian Restaurant > Malga", category: italian_restaurant, confidence: 0.7 }
+  - { key: 55a5a1ebe4b013909087cbb0, label: "Dining and Drinking > Restaurant > Italian Restaurant > Marche Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbb3, label: "Dining and Drinking > Restaurant > Italian Restaurant > Molise Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb74, label: "Dining and Drinking > Restaurant > Italian Restaurant > Piadineria", category: italian_restaurant, confidence: 0.85 }
+  - { key: 55a5a1ebe4b013909087cbaa, label: "Dining and Drinking > Restaurant > Italian Restaurant > Piedmontese Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb83, label: "Dining and Drinking > Restaurant > Italian Restaurant > Puglia Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb8c, label: "Dining and Drinking > Restaurant > Italian Restaurant > Romagna Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb92, label: "Dining and Drinking > Restaurant > Italian Restaurant > Roman Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb8f, label: "Dining and Drinking > Restaurant > Italian Restaurant > Sardinian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb86, label: "Dining and Drinking > Restaurant > Italian Restaurant > Sicilian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbb9, label: "Dining and Drinking > Restaurant > Italian Restaurant > South Tyrolean Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb7f, label: "Dining and Drinking > Restaurant > Italian Restaurant > Trattoria", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbbc, label: "Dining and Drinking > Restaurant > Italian Restaurant > Trentino Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cb9e, label: "Dining and Drinking > Restaurant > Italian Restaurant > Tuscan Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbc2, label: "Dining and Drinking > Restaurant > Italian Restaurant > Umbrian Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 55a5a1ebe4b013909087cbad, label: "Dining and Drinking > Restaurant > Italian Restaurant > Veneto Restaurant", category: italian_restaurant, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b79fd, label: "Dining and Drinking > Restaurant > Jewish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79fc, label: "Dining and Drinking > Restaurant > Jewish Restaurant > Kosher Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d7, label: "Dining and Drinking > Restaurant > Kebab Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1be941735, label: "Dining and Drinking > Restaurant > Latin American Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d152941735, label: "Dining and Drinking > Restaurant > Latin American Restaurant > Arepa Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939a8c3cf9994f4e043a35, label: "Dining and Drinking > Restaurant > Latin American Restaurant > Empanada Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5f2c32587ff30c0d7ac09638, label: "Dining and Drinking > Restaurant > Latin American Restaurant > Honduran Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5745c7ac498e5d0483112fdb, label: "Dining and Drinking > Restaurant > Latin American Restaurant > Salvadoran Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1cd941735, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d107941735, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Argentinian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d16b941735, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5294c7523cf9994f4e043a62, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Acai House", category: juice_bar, confidence: 0.7 }
+  - { key: 52939ae13cf9994f4e043a3b, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Baiano Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939a9e3cf9994f4e043a36, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Central Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939a643cf9994f4e043a33, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Churrascaria", category: steakhouse, confidence: 0.85 }
+  - { key: 5294c55c3cf9994f4e043a61, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Empada House", category: snack_bar, confidence: 0.85 }
+  - { key: 52939af83cf9994f4e043a3d, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Goiano Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939aed3cf9994f4e043a3c, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Mineiro Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939aae3cf9994f4e043a37, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Northeastern Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939ab93cf9994f4e043a38, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Northern Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5294cbda3cf9994f4e043a63, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Pastelaria", category: snack_bar, confidence: 0.85 }
+  - { key: 52939ac53cf9994f4e043a39, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Southeastern Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939ad03cf9994f4e043a3a, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Southern Brazilian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52939a7d3cf9994f4e043a34, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Brazilian Restaurant > Tapiocaria", category: snack_bar, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1f4, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Colombian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4eb1bfa43b7b52c0e1adc2e8, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Peruvian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5f2c1c31b6d05514c704334c, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Peruvian Restaurant > Peruvian Roast Chicken Joint", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573558, label: "Dining and Drinking > Restaurant > Latin American Restaurant > South American Restaurant > Venezuelan Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1bf941735, label: "Dining and Drinking > Restaurant > Mac and Cheese Joint", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c0941735, label: "Dining and Drinking > Restaurant > Mediterranean Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c1941735, label: "Dining and Drinking > Restaurant > Mexican Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1d9, label: "Dining and Drinking > Restaurant > Mexican Restaurant > Botanero", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d153941735, label: "Dining and Drinking > Restaurant > Mexican Restaurant > Burrito Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d151941735, label: "Dining and Drinking > Restaurant > Mexican Restaurant > Taco Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371ae4b08b9a8d5734ba, label: "Dining and Drinking > Restaurant > Mexican Restaurant > Tex-Mex Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4d3, label: "Dining and Drinking > Restaurant > Mexican Restaurant > Yucatecan Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d115941735, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89e1, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Egyptian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89e7, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Iraqi Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573529, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Israeli Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4ca, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Kurdish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1cd, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Lebanese Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f7, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1bc, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Ash and Haleem Place", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1c0, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Dizi Place", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1c4, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Gilaki Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1c7, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Jegaraki", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4a6, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Kale Pache Place", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdfe4b0c0459246b4a8, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Persian Restaurant > Tabbakhi", category: restaurant, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89e4, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Shawarma Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89da, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Syrian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89ea, label: "Dining and Drinking > Restaurant > Middle Eastern Restaurant > Yemeni Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f9, label: "Dining and Drinking > Restaurant > Modern European Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c2941735, label: "Dining and Drinking > Restaurant > Molecular Gastronomy Restaurant", category: fine_dining, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c3941735, label: "Dining and Drinking > Restaurant > Moroccan Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b79f8, label: "Dining and Drinking > Restaurant > Pakistani Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ca941735, label: "Dining and Drinking > Restaurant > Pizzeria", category: pizzeria, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a04, label: "Dining and Drinking > Restaurant > Polish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4def73e84765ae376e57713a, label: "Dining and Drinking > Restaurant > Portuguese Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734c7, label: "Dining and Drinking > Restaurant > Poutine Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c4941735, label: "Dining and Drinking > Restaurant > Restaurant", category: restaurant, confidence: 0.95 }
+  - { key: 5293a7563cf9994f4e043a44, label: "Dining and Drinking > Restaurant > Russian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e9d, label: "Dining and Drinking > Restaurant > Russian Restaurant > Blini House", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e9c, label: "Dining and Drinking > Restaurant > Russian Restaurant > Pelmeni House", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1bd941735, label: "Dining and Drinking > Restaurant > Salad Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1c5941735, label: "Dining and Drinking > Restaurant > Sandwich Spot", category: snack_bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1c6941735, label: "Dining and Drinking > Restaurant > Scandinavian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5744ccdde4b0c0459246b4a3, label: "Dining and Drinking > Restaurant > Scottish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ce941735, label: "Dining and Drinking > Restaurant > Seafood Restaurant", category: seafood_restaurant, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d57355a, label: "Dining and Drinking > Restaurant > Slovak Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1dd931735, label: "Dining and Drinking > Restaurant > Soup Spot", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d14f941735, label: "Dining and Drinking > Restaurant > Southern Food Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d150941735, label: "Dining and Drinking > Restaurant > Spanish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d14d941735, label: "Dining and Drinking > Restaurant > Spanish Restaurant > Paella Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1db931735, label: "Dining and Drinking > Restaurant > Spanish Restaurant > Tapas Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 5413605de4b0ae91d18581a9, label: "Dining and Drinking > Restaurant > Sri Lankan Restaurant", category: asian_restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1cc941735, label: "Dining and Drinking > Restaurant > Steakhouse", category: steakhouse, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d158941735, label: "Dining and Drinking > Restaurant > Swiss Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573538, label: "Dining and Drinking > Restaurant > Theme Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4f04af1f2fb6e1c99f3db0bb, label: "Dining and Drinking > Restaurant > Turkish Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 530faca9bcbc57f1066bc2f3, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Borek Place", category: restaurant, confidence: 0.85 }
+  - { key: 530faca9bcbc57f1066bc2f4, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Cigkofte Place", category: fast_food, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d8, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Doner Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d9, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Gozleme Place", category: restaurant, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88db, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Kofte Place", category: restaurant, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d6, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Kokoreç Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573535, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Kumpir Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734bd, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Kumru Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d5, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Manti Place", category: restaurant, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88da, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Meyhane", category: restaurant, confidence: 0.85 }
+  - { key: 530faca9bcbc57f1066bc2f2, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Pide Place", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1df, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Pilavcı", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1dc, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Söğüş Place", category: restaurant, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734bf, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Tantuni Restaurant", category: fast_food, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d5734c1, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Turkish Coffeehouse", category: cafe, confidence: 0.85 }
+  - { key: 5283c7b4e4b094cb91ec88d4, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Turkish Home Cooking Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1e2, label: "Dining and Drinking > Restaurant > Turkish Restaurant > Çöp Şiş Place", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e96, label: "Dining and Drinking > Restaurant > Ukrainian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e9a, label: "Dining and Drinking > Restaurant > Ukrainian Restaurant > Varenyky Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 52e928d0bcbc57f1066b7e9b, label: "Dining and Drinking > Restaurant > Ukrainian Restaurant > West-Ukrainian Restaurant", category: restaurant, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1d3941735, label: "Dining and Drinking > Restaurant > Vegan and Vegetarian Restaurant", category: vegetarian_restaurant, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d14c941735, label: "Dining and Drinking > Restaurant > Wings Joint", category: fast_food, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b41, label: "Dining and Drinking > Smoothie Shop", category: juice_bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1c7941735, label: "Dining and Drinking > Snack Place", category: snack_bar, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1de941735, label: "Dining and Drinking > Vineyard", category: food_producer, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d14b941735, label: "Dining and Drinking > Winery", category: food_producer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bb9, label: "Health and Medicine", category: health_medical, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a3b, label: "Health and Medicine > Acupuncture Clinic", category: paramedical, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a3c, label: "Health and Medicine > Alternative Medicine Clinic", category: wellness_center, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bbb, label: "Health and Medicine > Assisted Living Service", category: home_care, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a3a, label: "Health and Medicine > Chiropractor", category: paramedical, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d178941735, label: "Health and Medicine > Dentist", category: dentist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bbd, label: "Health and Medicine > Emergency Service > Ambulance Service", category: ambulance_service, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d194941735, label: "Health and Medicine > Emergency Service > Emergency Room", category: hospital, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bbe, label: "Health and Medicine > Healthcare Clinic", category: medical_clinic, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bbf, label: "Health and Medicine > Home Health Care Service", category: home_care, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d196941735, label: "Health and Medicine > Hospital", category: hospital, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bc0, label: "Health and Medicine > Hospital > Children's Hospital", category: hospital, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d5734ff, label: "Health and Medicine > Maternity Clinic", category: medical_clinic, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d104941735, label: "Health and Medicine > Medical Center", category: medical_clinic, confidence: 0.95 }
+  - { key: 4f4531b14b9074f6e4fb0103, label: "Health and Medicine > Medical Lab", category: medical_laboratory, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bc1, label: "Health and Medicine > Mental Health Service", category: psychologist, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a39, label: "Health and Medicine > Mental Health Service > Mental Health Clinic", category: medical_clinic, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bc2, label: "Health and Medicine > Mental Health Service > Psychologist", category: psychologist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bc3, label: "Health and Medicine > Nurse", category: nurse, confidence: 0.95 }
+  - { key: 58daa1558bbb0b01f18ec1d0, label: "Health and Medicine > Nutritionist", category: dietitian, confidence: 0.95 }
+  - { key: 522e32fae4b09b556e370f19, label: "Health and Medicine > Optometrist", category: optician, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bc5, label: "Health and Medicine > Other Healthcare Professional", category: paramedical, confidence: 0.7 }
+  - { key: 5744ccdfe4b0c0459246b4af, label: "Health and Medicine > Physical Therapy Clinic", category: physiotherapist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bc6, label: "Health and Medicine > Physician", category: general_practitioner, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bc8, label: "Health and Medicine > Physician > Cardiologist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bc9, label: "Health and Medicine > Physician > Dermatologist", category: dermatologist, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d177941735, label: "Health and Medicine > Physician > Doctor's Office", category: general_practitioner, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bca, label: "Health and Medicine > Physician > Ear, Nose and Throat Doctor", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bcb, label: "Health and Medicine > Physician > Family Medicine Doctor", category: general_practitioner, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bcc, label: "Health and Medicine > Physician > Gastroenterologist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bcd, label: "Health and Medicine > Physician > General Surgeon", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bce, label: "Health and Medicine > Physician > Geriatric Doctor", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bcf, label: "Health and Medicine > Physician > Internal Medicine Doctor", category: general_practitioner, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd0, label: "Health and Medicine > Physician > Neurologist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd1, label: "Health and Medicine > Physician > Obstetrician Gynecologist (Ob-gyn)", category: gynecologist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bd2, label: "Health and Medicine > Physician > Oncologist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd3, label: "Health and Medicine > Physician > Ophthalmologist", category: ophthalmologist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bd4, label: "Health and Medicine > Physician > Oral Surgeon", category: dental, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd5, label: "Health and Medicine > Physician > Orthopedic Surgeon", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd7, label: "Health and Medicine > Physician > Pediatrician", category: pediatrician, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bd8, label: "Health and Medicine > Physician > Plastic Surgeon", category: aesthetic_medicine, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bd9, label: "Health and Medicine > Physician > Psychiatrist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bda, label: "Health and Medicine > Physician > Radiologist", category: radiology_center, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bdb, label: "Health and Medicine > Physician > Respiratory Doctor", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bdc, label: "Health and Medicine > Physician > Urologist", category: medical_specialists, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bdd, label: "Health and Medicine > Podiatrist", category: podiatrist, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bde, label: "Health and Medicine > Sports Medicine Clinic", category: medical_clinic, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573526, label: "Health and Medicine > Urgent Care Center", category: medical_clinic, confidence: 0.85 }
+  - { key: 4d954af4a243a5684765b473, label: "Health and Medicine > Veterinarian", category: veterinarian, confidence: 0.95 }
+  - { key: 590a0744340a5803fd8508c3, label: "Health and Medicine > Weight Loss Center", category: wellness_center, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bdf, label: "Health and Medicine > Women's Health Clinic", category: gynecologist, confidence: 0.85 }
+  - { key: 52e81612bcbc57f1066b7a22, label: "Landmarks and Outdoors > Botanical Garden", category: nature_park, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1e4941735, label: "Landmarks and Outdoors > Campground", category: campground, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d15b941735, label: "Landmarks and Outdoors > Farm", category: farm, confidence: 0.95 }
+  - { key: 69d41dd556ec6a4ded8e8267, label: "Landmarks and Outdoors > Farm > Urban Farm", category: farm, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1e0941735, label: "Landmarks and Outdoors > Harbor or Marina", category: marina, confidence: 0.85 }
+  - { key: 69d41dd556ec6a4ded8e826f, label: "Landmarks and Outdoors > Orchard", category: farm, confidence: 0.85 }
+  - { key: 4eb1baf03b7b2c5b1d4306ca, label: "Landmarks and Outdoors > Stable", category: equestrian_center, confidence: 0.85 }
+  - { key: 4d4b7105d754a06376d81259, label: "Nightlife Spot", category: bars_nightlife, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d11a941735, label: "Nightlife Spot > Other Nightlife", category: bars_nightlife, confidence: 0.7 }
+  - { key: 4d4b7105d754a06378d81259, label: "Retail", category: retail_shopping, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d116951735, label: "Retail > Antique Store", category: second_hand_store, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d127951735, label: "Retail > Arts and Crafts Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 56aa371be4b08b9a8d5734d3, label: "Retail > Auto Workshop", category: auto_repair, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be3, label: "Retail > Automotive Retail", category: automotive_services, confidence: 0.7 }
+  - { key: 6a19b7309538a31d55066ec3, label: "Retail > Automotive Retail > Boat Dealership", category: yacht_broker, confidence: 0.7 }
+  - { key: 4eb1c1623b7b52c0e1adc2ec, label: "Retail > Automotive Retail > Car Dealership", category: car_dealer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be4, label: "Retail > Automotive Retail > Car Dealership > Classic and Antique Car Dealership", category: car_dealer, confidence: 0.95 }
+  - { key: 5e8f50bd03c7a9000c1e2fbc, label: "Retail > Automotive Retail > Car Dealership > New Car Dealership", category: car_dealer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be5, label: "Retail > Automotive Retail > Car Dealership > RV and Motorhome Dealership", category: car_dealer, confidence: 0.85 }
+  - { key: 5e8f501a03c7a9000c1e2e88, label: "Retail > Automotive Retail > Car Dealership > Used Car Dealership", category: car_dealer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be6, label: "Retail > Automotive Retail > Car Parts and Accessories", category: auto_parts, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be7, label: "Retail > Automotive Retail > Moped Dealership", category: motorcycle_shop, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9be8, label: "Retail > Automotive Retail > Motor Scooter Dealership", category: motorcycle_shop, confidence: 0.95 }
+  - { key: 5032833091d4c4b30a586d60, label: "Retail > Automotive Retail > Motorcycle Dealership", category: motorcycle_shop, confidence: 0.95 }
+  - { key: 59d79d6b2e268052fa2a3332, label: "Retail > Automotive Retail > Motorsports Store", category: motorcycle_shop, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d124951735, label: "Retail > Automotive Shop", category: automotive_services, confidence: 0.7 }
+  - { key: 52f2ab2ebcbc57f1066b8b42, label: "Retail > Big Box Store", category: department_store, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1f1941735, label: "Retail > Board Store", category: surf_shop, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d114951735, label: "Retail > Bookstore", category: bookstore, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b30, label: "Retail > Bookstore > Used Bookstore", category: bookstore, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d104951735, label: "Retail > Boutique", category: fashion_boutique, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b18, label: "Retail > Comic Book Store", category: bookstore, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bea, label: "Retail > Computers and Electronics Retail", category: electronics, confidence: 0.95 }
+  - { key: 4eb1bdf03b7b55596b4a7491, label: "Retail > Computers and Electronics Retail > Camera Store", category: electronics_store, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d122951735, label: "Retail > Computers and Electronics Retail > Electronics Store", category: electronics_store, confidence: 0.95 }
+  - { key: 4f04afc02fb6e1c99f3db0bc, label: "Retail > Computers and Electronics Retail > Mobile Phone Store", category: mobile_phone_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d10b951735, label: "Retail > Computers and Electronics Retail > Video Games Store", category: electronics_store, confidence: 0.7 }
+  - { key: 5454144b498ec1f095bff2f2, label: "Retail > Construction Supplies Store", category: building_supplies, confidence: 0.95 }
+  - { key: 4d954b0ea243a5684a65b473, label: "Retail > Convenience Store", category: grocery_store, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10c951735, label: "Retail > Cosmetics Store", category: perfume_cosmetics_store, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b17, label: "Retail > Costume Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1f6941735, label: "Retail > Department Store", category: department_store, confidence: 0.95 }
+  - { key: 52dea92d3cf9994f4e043dbb, label: "Retail > Discount Store", category: department_store, confidence: 0.7 }
+  - { key: 5745c2e4498e11e7bccabdbd, label: "Retail > Drugstore", category: pharmacy, confidence: 0.85 }
+  - { key: 589ddde98ae3635c072819ee, label: "Retail > Duty-free Store", category: duty_free_shop, confidence: 0.95 }
+  - { key: 4d954afda243a5684865b473, label: "Retail > Eyecare Store", category: optician, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bec, label: "Retail > Fashion Retail", category: fashion, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d5734cb, label: "Retail > Fashion Retail > Batik Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d11a951735, label: "Retail > Fashion Retail > Bridal Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d105951735, label: "Retail > Fashion Retail > Children's Clothing Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d103951735, label: "Retail > Fashion Retail > Clothing Store", category: fashion_boutique, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d102951735, label: "Retail > Fashion Retail > Fashion Accessories Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d111951735, label: "Retail > Fashion Retail > Jewelry Store", category: jewelry_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d109951735, label: "Retail > Fashion Retail > Lingerie Store", category: lingerie_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d106951735, label: "Retail > Fashion Retail > Men's Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d107951735, label: "Retail > Fashion Retail > Shoe Store", category: shoe_store, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bed, label: "Retail > Fashion Retail > Sunglasses Store", category: fashion_boutique, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bee, label: "Retail > Fashion Retail > Swimwear Store", category: swimwear_store, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b2e, label: "Retail > Fashion Retail > Watch Store", category: jewelry_store, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d108951735, label: "Retail > Fashion Retail > Women's Store", category: fashion_boutique, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1f7941735, label: "Retail > Flea Market", category: second_hand_store, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d11b951735, label: "Retail > Flower Store", category: florist, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f9941735, label: "Retail > Food and Beverage Retail", category: food_retail, confidence: 0.95 }
+  - { key: 5370f356bcbc57f1066c94c2, label: "Retail > Food and Beverage Retail > Beer Store", category: wine_spirits_shop, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d11d951735, label: "Retail > Food and Beverage Retail > Butcher", category: butcher, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d117951735, label: "Retail > Food and Beverage Retail > Candy Store", category: food_retail, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d11e951735, label: "Retail > Food and Beverage Retail > Cheese Store", category: deli, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b31, label: "Retail > Food and Beverage Retail > Chocolate Store", category: pastry_shop, confidence: 0.7 }
+  - { key: 5e18993feee47d000759b256, label: "Retail > Food and Beverage Retail > Coffee Roaster", category: cafe, confidence: 0.7 }
+  - { key: 58daa1558bbb0b01f18ec1ca, label: "Retail > Food and Beverage Retail > Dairy Store", category: food_retail, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1fa941735, label: "Retail > Food and Beverage Retail > Farmers Market", category: farmers_market, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d10e951735, label: "Retail > Food and Beverage Retail > Fish Market", category: fishmonger, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b1c, label: "Retail > Food and Beverage Retail > Fruit and Vegetable Store", category: greengrocer, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f5941735, label: "Retail > Food and Beverage Retail > Gourmet Store", category: deli, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d118951735, label: "Retail > Food and Beverage Retail > Grocery Store", category: grocery_store, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b45, label: "Retail > Food and Beverage Retail > Grocery Store > Organic Grocery", category: organic_store, confidence: 0.95 }
+  - { key: 50aa9e744b90af0d42d5de0e, label: "Retail > Food and Beverage Retail > Health Food Store", category: organic_store, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b2c, label: "Retail > Food and Beverage Retail > Herbs and Spices Store", category: deli, confidence: 0.7 }
+  - { key: 5f2c41945b4c177b9a6dc7d6, label: "Retail > Food and Beverage Retail > Imported Food Store", category: grocery_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bef, label: "Retail > Food and Beverage Retail > Kosher Store", category: grocery_store, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1e8, label: "Retail > Food and Beverage Retail > Kuruyemişçi Shop", category: food_retail, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d186941735, label: "Retail > Food and Beverage Retail > Liquor Store", category: wine_spirits_shop, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bf0, label: "Retail > Food and Beverage Retail > Meat and Seafood Store", category: butcher, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573564, label: "Retail > Food and Beverage Retail > Sausage Store", category: butcher, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b46, label: "Retail > Food and Beverage Retail > Supermarket", category: supermarket, confidence: 0.95 }
+  - { key: 58daa1558bbb0b01f18ec1e5, label: "Retail > Food and Beverage Retail > Turşucu Shop", category: food_retail, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d119951735, label: "Retail > Food and Beverage Retail > Wine Store", category: wine_spirits_shop, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b24, label: "Retail > Framing Store", category: picture_framing, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f8941735, label: "Retail > Furniture and Home Store", category: home_retail, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b2a, label: "Retail > Furniture and Home Store > Carpet Store", category: home_decor_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf1, label: "Retail > Furniture and Home Store > Home Appliance Store", category: appliance_store, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bf2, label: "Retail > Furniture and Home Store > Housewares Store", category: home_decor_store, confidence: 0.85 }
+  - { key: 58daa1558bbb0b01f18ec1b4, label: "Retail > Furniture and Home Store > Kitchen Supply Store", category: home_decor_store, confidence: 0.85 }
+  - { key: 55888a5a498e782e3303b43a, label: "Retail > Furniture and Home Store > Lighting Store", category: home_decor_store, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b27, label: "Retail > Furniture and Home Store > Mattress Store", category: furniture_store, confidence: 0.85 }
+  - { key: 4eb1c0253b7b52c0e1adc2e9, label: "Retail > Garden Center", category: garden_center, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d128951735, label: "Retail > Gift Store", category: gift_shop, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d112951735, label: "Retail > Hardware Store", category: hardware_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1fb941735, label: "Retail > Hobby Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 52f2ab2ebcbc57f1066b8b25, label: "Retail > Knitting Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 52f2ab2ebcbc57f1066b8b2b, label: "Retail > Leather Goods Store", category: leather_goods_store, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b29, label: "Retail > Luggage Store", category: leather_goods_store, confidence: 0.85 }
+  - { key: 50be8ee891d4fa8dcc7199a7, label: "Retail > Market", category: food_retail, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d1fe941735, label: "Retail > Music Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 5f2c5a295b4c177b9a6ddd0e, label: "Retail > Newsagent", category: tobacco_newsstand, confidence: 0.95 }
+  - { key: 4f04ad622fb6e1c99f3db0b9, label: "Retail > Newsstand", category: tobacco_newsstand, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b22, label: "Retail > Outdoor Supply Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf4, label: "Retail > Party Supply Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 52f2ab2ebcbc57f1066b8b34, label: "Retail > Pawn Shop", category: second_hand_store, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b23, label: "Retail > Perfume Store", category: perfume_cosmetics_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d100951735, label: "Retail > Pet Supplies Store", category: pet_store, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d10f951735, label: "Retail > Pharmacy", category: pharmacy, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b28, label: "Retail > Print Store", category: printing, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d10d951735, label: "Retail > Record Store", category: leisure_gifts, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d123951735, label: "Retail > Smoke Shop", category: tobacco_newsstand, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b1b, label: "Retail > Souvenir Store", category: gift_shop, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f2941735, label: "Retail > Sporting Goods Retail", category: sporting_goods_store, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bf5, label: "Retail > Sporting Goods Retail > Baseball Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d115951735, label: "Retail > Sporting Goods Retail > Bicycle Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b1a, label: "Retail > Sporting Goods Retail > Dive Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b16, label: "Retail > Sporting Goods Retail > Fishing Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf6, label: "Retail > Sporting Goods Retail > Golf Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf7, label: "Retail > Sporting Goods Retail > Running Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 5bae9231bedf3950379f89d2, label: "Retail > Sporting Goods Retail > Skate Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573566, label: "Retail > Sporting Goods Retail > Ski Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf8, label: "Retail > Sporting Goods Retail > Soccer Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9bf9, label: "Retail > Sporting Goods Retail > Surf Store", category: surf_shop, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9bfa, label: "Retail > Sporting Goods Retail > Tennis Store", category: sporting_goods_store, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b21, label: "Retail > Stationery Store", category: bookstore, confidence: 0.7 }
+  - { key: 5744ccdfe4b0c0459246b4cd, label: "Retail > Supplement Store", category: organic_store, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bfb, label: "Retail > Swimming Pool Supply Store", category: pool_services, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bfc, label: "Retail > Tobacco Store", category: tobacco_newsstand, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f3941735, label: "Retail > Toy Store", category: toy_store, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d57355c, label: "Retail > Vape Store", category: tobacco_newsstand, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d101951735, label: "Retail > Vintage and Thrift Store", category: second_hand_store, confidence: 0.95 }
+  - { key: 52e816a6bcbc57f1066b7a54, label: "Retail > Warehouse or Wholesale Store", category: wholesaler, confidence: 0.85 }
+  - { key: 4f4528bc4b90abdf24c9de85, label: "Sports and Recreation", category: sports_fitness, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9bff, label: "Sports and Recreation > Baseball > Baseball Club", category: sports_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c02, label: "Sports and Recreation > Basketball > Basketball Club", category: sports_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c04, label: "Sports and Recreation > Equestrian Facility", category: equestrian_center, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c06, label: "Sports and Recreation > Football > Football Club", category: sports_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c08, label: "Sports and Recreation > Golf", category: golf_course, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c09, label: "Sports and Recreation > Golf > Golf Club", category: golf_course, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1e6941735, label: "Sports and Recreation > Golf > Golf Course", category: golf_course, confidence: 0.95 }
+  - { key: 58daa1558bbb0b01f18ec1b0, label: "Sports and Recreation > Golf > Golf Driving Range", category: golf_course, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d175941735, label: "Sports and Recreation > Gym and Studio", category: gym, confidence: 0.85 }
+  - { key: 52f2ab2ebcbc57f1066b8b47, label: "Sports and Recreation > Gym and Studio > Boxing Gym", category: martial_arts, confidence: 0.85 }
+  - { key: 503289d391d4c4b30a586d6a, label: "Sports and Recreation > Gym and Studio > Climbing Gym", category: fitness_studio, confidence: 0.7 }
+  - { key: 52f2ab2ebcbc57f1066b8b49, label: "Sports and Recreation > Gym and Studio > Cycle Studio", category: fitness_studio, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d134941735, label: "Sports and Recreation > Gym and Studio > Dance Studio", category: dance_school, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d176941735, label: "Sports and Recreation > Gym and Studio > Gym", category: gym, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d105941735, label: "Sports and Recreation > Gym and Studio > Gym Pool", category: swimming_pool, confidence: 0.7 }
+  - { key: 5744ccdfe4b0c0459246b4b2, label: "Sports and Recreation > Gym and Studio > Pilates Studio", category: pilates_studio, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d102941735, label: "Sports and Recreation > Gym and Studio > Yoga Studio", category: yoga_studio, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b48, label: "Sports and Recreation > Gymnastics > Gymnastics Center", category: sports_club, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c0c, label: "Sports and Recreation > Hockey > Hockey Club", category: sports_club, confidence: 0.95 }
+  - { key: 5744ccdfe4b0c0459246b4b5, label: "Sports and Recreation > Indoor Play Area", category: kids_activities, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d101941735, label: "Sports and Recreation > Martial Arts Dojo", category: martial_arts, confidence: 0.95 }
+  - { key: 5032829591d4c4b30a586d5e, label: "Sports and Recreation > Paintball Field", category: attractions_entertainment, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9c0e, label: "Sports and Recreation > Personal Trainer", category: personal_trainer, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c0f, label: "Sports and Recreation > Racquet Sports", category: racket_club, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c10, label: "Sports and Recreation > Racquet Sports > Racquet Sport Club", category: racket_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c11, label: "Sports and Recreation > Racquet Sports > Racquetball Club", category: racket_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c12, label: "Sports and Recreation > Racquet Sports > Tennis", category: racket_club, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c13, label: "Sports and Recreation > Racquet Sports > Tennis > Tennis Club", category: racket_club, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a26, label: "Sports and Recreation > Recreation Center", category: sports_fitness, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9c16, label: "Sports and Recreation > Running and Track > Running Club", category: sports_club, confidence: 0.95 }
+  - { key: 58daa1558bbb0b01f18ec1ae, label: "Sports and Recreation > Sauna", category: spa, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c1b, label: "Sports and Recreation > Soccer > Soccer Club", category: sports_club, confidence: 0.95 }
+  - { key: 52e81612bcbc57f1066b7a2e, label: "Sports and Recreation > Sports Club", category: sports_club, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c1c, label: "Sports and Recreation > Water Sports", category: water_sports, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c1d, label: "Sports and Recreation > Water Sports > Canoe and Kayak Rental", category: paddle_kayak_rental, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c1e, label: "Sports and Recreation > Water Sports > Rafting Outfitter", category: water_sports, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c1f, label: "Sports and Recreation > Water Sports > Sailing Club", category: sailing_school, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c20, label: "Sports and Recreation > Water Sports > Scuba Diving Instructor", category: scuba_diving, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c21, label: "Sports and Recreation > Water Sports > Surfing", category: surf_school, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c22, label: "Sports and Recreation > Water Sports > Swimming", category: swimming_pool, confidence: 0.7 }
+  - { key: 52e81612bcbc57f1066b7a44, label: "Sports and Recreation > Water Sports > Swimming > Swim School", category: swimming_pool, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c23, label: "Sports and Recreation > Water Sports > Swimming > Swimming Club", category: sports_club, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d15e941735, label: "Sports and Recreation > Water Sports > Swimming > Swimming Pool", category: swimming_pool, confidence: 0.95 }
+  - { key: 4e4c9077bd41f78e849722f9, label: "Travel and Transportation > Bike Rental", category: bike_rental, confidence: 0.95 }
+  - { key: 5744ccdfe4b0c0459246b4c1, label: "Travel and Transportation > Boat Rental", category: boat_charter, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d12d951735, label: "Travel and Transportation > Boat or Ferry", category: ferry, confidence: 0.85 }
+  - { key: 55077a22498e5e9248869ba2, label: "Travel and Transportation > Cruise", category: boat_excursion, confidence: 0.7 }
+  - { key: 4bf58dd8d48988d113951735, label: "Travel and Transportation > Fuel Station", category: gas_station, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f6931735, label: "Travel and Transportation > General Travel", category: travel_services, confidence: 0.7 }
+  - { key: 63be6904847c3692a84b9c24, label: "Travel and Transportation > Hot Air Balloon Tour Agency", category: tour_operator, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c25, label: "Travel and Transportation > Lodging", category: lodging, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1f8931735, label: "Travel and Transportation > Lodging > Bed and Breakfast", category: guest_house, confidence: 0.95 }
+  - { key: 4f4530a74b9074f6e4fb0100, label: "Travel and Transportation > Lodging > Boarding House", category: guest_house, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c26, label: "Travel and Transportation > Lodging > Cabin", category: vacation_rental, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1ee931735, label: "Travel and Transportation > Lodging > Hostel", category: hostel, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1fa931735, label: "Travel and Transportation > Lodging > Hotel", category: hotel, confidence: 0.95 }
+  - { key: 5bae9231bedf3950379f89cb, label: "Travel and Transportation > Lodging > Inn", category: guest_house, confidence: 0.95 }
+  - { key: 63be6904847c3692a84b9c27, label: "Travel and Transportation > Lodging > Lodge", category: hotel, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d1fb931735, label: "Travel and Transportation > Lodging > Motel", category: hotel, confidence: 0.85 }
+  - { key: 4bf58dd8d48988d12f951735, label: "Travel and Transportation > Lodging > Resort", category: resort, confidence: 0.95 }
+  - { key: 56aa371be4b08b9a8d5734e1, label: "Travel and Transportation > Lodging > Vacation Rental", category: vacation_rental, confidence: 0.95 }
+  - { key: 52f2ab2ebcbc57f1066b8b53, label: "Travel and Transportation > RV Park", category: campground, confidence: 0.95 }
+  - { key: 4f4530164b9074f6e4fb00ff, label: "Travel and Transportation > Tourist Information and Service", category: tourist_office, confidence: 0.85 }
+  - { key: 56aa371be4b08b9a8d573520, label: "Travel and Transportation > Tourist Information and Service > Tour Provider", category: tour_operator, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d1ef941735, label: "Travel and Transportation > Transport Hub > Rental Car Location", category: car_rental, confidence: 0.95 }
+  - { key: 54541b70498ea6ccd0204bff, label: "Travel and Transportation > Transportation Service", category: passenger_transport, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c2b, label: "Travel and Transportation > Transportation Service > Charter Bus", category: passenger_transport, confidence: 0.85 }
+  - { key: 63be6904847c3692a84b9c2c, label: "Travel and Transportation > Transportation Service > Limo Service", category: chauffeur_service, confidence: 0.95 }
+  - { key: 4bf58dd8d48988d130951735, label: "Travel and Transportation > Transportation Service > Taxi", category: taxi, confidence: 0.95 }
+  - { key: 4f04b08c2fb6e1c99f3db0bd, label: "Travel and Transportation > Travel Agency", category: travel_agency, confidence: 0.95 }
+  - { key: 57558b36e4b065ecebd306dd, label: "Travel and Transportation > Truck Stop", category: gas_station, confidence: 0.7 }

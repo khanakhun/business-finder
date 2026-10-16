@@ -1,0 +1,62 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Quincaillerie du Port",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "hardware_store"
+      }
+    ],
+    "locale": "fr",
+    "candidates": [
+      {
+        "id": "hardware_store",
+        "label": "Quincaillerie",
+        "path": "home_construction › construction_supplies › hardware_store"
+      },
+      {
+        "id": "building_supplies",
+        "label": "Négoce de matériaux",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "appliance_store",
+        "label": "Magasin d'électroménager",
+        "path": "retail_shopping › home_retail › appliance_store"
+      },
+      {
+        "id": "electrical_plumbing_supply",
+        "label": "Fournitures électriques et sanitaires",
+        "path": "home_construction › construction_supplies › electrical_plumbing_supply"
+      },
+      {
+        "id": "construction_supplies",
+        "label": "Matériaux et quincaillerie",
+        "path": "home_construction › construction_supplies"
+      },
+      {
+        "id": "garden_center",
+        "label": "Jardinerie",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "home_decor_store",
+        "label": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      },
+      {
+        "id": "locksmith",
+        "label": "Serrurier",
+        "path": "home_services › repairs_maintenance › locksmith"
+      }
+    ]
+  },
+  "output": {
+    "primary": "hardware_store",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear)."
+  }
+}

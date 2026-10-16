@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Oui Mariage Caraïbes",
+    "providerCategories": [],
+    "locale": "fr",
+    "websiteSnippet": "Organisation de mariages sur la plage : décoration, traiteur, photographe et coordination complète le jour J.",
+    "candidates": [
+      {
+        "id": "event_planner",
+        "label": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      },
+      {
+        "id": "florist",
+        "label": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "photographer",
+        "label": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "catering",
+        "label": "Traiteur",
+        "path": "food_drink › catering"
+      },
+      {
+        "id": "wedding_planner",
+        "label": "Wedding planner",
+        "path": "events_creative › events › wedding_planner"
+      },
+      {
+        "id": "party_rental",
+        "label": "Location de matériel événementiel",
+        "path": "events_creative › events › party_rental"
+      },
+      {
+        "id": "event_venue",
+        "label": "Salle de réception",
+        "path": "events_creative › events › event_venue"
+      }
+    ]
+  },
+  "output": {
+    "primary": "wedding_planner",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, website)."
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Sharp Lines Barbershop",
+    "providerCategories": [
+      {
+        "provider": "google_places",
+        "key": "barber_shop"
+      }
+    ],
+    "locale": "en",
+    "candidates": [
+      {
+        "id": "hair_services",
+        "label": "Hair",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "hair_salon",
+        "label": "Hair salon",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "beauty_salon",
+        "label": "Beauty salon",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "tattoo_studio",
+        "label": "Tattoo & piercing studio",
+        "path": "beauty_wellness › tattoo_studio"
+      },
+      {
+        "id": "barber",
+        "label": "Barber",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "braiding_salon",
+        "label": "Braiding & natural hair salon",
+        "path": "beauty_wellness › hair_services › braiding_salon"
+      }
+    ]
+  },
+  "output": {
+    "primary": "barber",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (en, clear)."
+  }
+}

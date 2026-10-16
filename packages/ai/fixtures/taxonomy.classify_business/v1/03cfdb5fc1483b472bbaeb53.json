@@ -1,0 +1,48 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Table de l'Anse Claire",
+    "providerCategories": [],
+    "locale": "fr",
+    "websiteSnippet": "Menu dégustation en sept temps, accords mets et vins, cuisine française contemporaine à base de produits des îles. Dîner uniquement, du mardi au samedi.",
+    "candidates": [
+      {
+        "id": "wine_bar",
+        "label": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "private_chef",
+        "label": "Chef à domicile",
+        "path": "food_drink › private_chef"
+      },
+      {
+        "id": "fine_dining",
+        "label": "Restaurant gastronomique",
+        "path": "food_drink › restaurant › fine_dining"
+      },
+      {
+        "id": "restaurant",
+        "label": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "french_restaurant",
+        "label": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "catering",
+        "label": "Traiteur",
+        "path": "food_drink › catering"
+      }
+    ]
+  },
+  "output": {
+    "primary": "fine_dining",
+    "secondary": ["french_restaurant"],
+    "confidence": 0.65,
+    "rationale": "Best match for the name and provider categories (fr, ambiguous, website)."
+  }
+}

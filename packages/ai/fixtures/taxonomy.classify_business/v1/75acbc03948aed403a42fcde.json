@@ -1,0 +1,53 @@
+{
+  "task": "taxonomy.classify_business",
+  "promptVersion": 1,
+  "input": {
+    "name": "Cours Plus Réussite",
+    "providerCategories": [],
+    "locale": "fr",
+    "websiteSnippet": "Soutien scolaire du CP à la terminale : cours particuliers à domicile et stages intensifs de révision du bac.",
+    "candidates": [
+      {
+        "id": "secondary_school",
+        "label": "Collège et lycée",
+        "path": "education › school › secondary_school"
+      },
+      {
+        "id": "school",
+        "label": "Établissements scolaires",
+        "path": "education › school"
+      },
+      {
+        "id": "primary_school",
+        "label": "École primaire",
+        "path": "education › school › primary_school"
+      },
+      {
+        "id": "language_school",
+        "label": "École de langues",
+        "path": "education › language_school"
+      },
+      {
+        "id": "vocational_training",
+        "label": "Organisme de formation",
+        "path": "education › vocational_training"
+      },
+      {
+        "id": "international_school",
+        "label": "École privée et internationale",
+        "path": "education › school › international_school"
+      },
+      {
+        "id": "tutoring",
+        "label": "Soutien scolaire",
+        "path": "education › tutoring"
+      }
+    ]
+  },
+  "output": {
+    "primary": "tutoring",
+    "secondary": [],
+    "confidence": 0.9,
+    "rationale": "Best match for the name and provider categories (fr, clear, website)."
+  }
+}

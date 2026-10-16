@@ -228,7 +228,8 @@
     "integrations": "Integrations",
     "features": "Features",
     "audit": "Audit log",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "taxonomy": "Categories"
   },
   "account": {
     "title": "Account",
@@ -534,5 +535,31 @@
         "system_test": "Test notifications"
       }
     }
+  },
+  "taxonomy": {
+    "title": "Categories",
+    "description": "The category taxonomy used for search and classification, and provider mappings awaiting review.",
+    "reviewTitle": "Mappings to review",
+    "reviewDescription": "Provider categories the AI classifier matched to one of ours. Approve, reassign or reject them.",
+    "operatorsOnly": "Mappings are shared by every workspace on this deployment: only platform operators can approve, reassign or reject them.",
+    "emptyTitle": "Nothing to review",
+    "emptyDescription": "New provider categories proposed by the classifier will appear here.",
+    "provider": "Provider category",
+    "proposed": "Proposed category",
+    "actions": "Actions",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reassign": "Reassign",
+    "reassignPlaceholder": "Another category…",
+    "search": "Search categories",
+    "noCategory": "No category found.",
+    "remove": "Remove {label}",
+    "more": "+{count} more",
+    "confidence": "Confidence {value}%",
+    "reviewed": "Mapping updated.",
+    "loadMore": "Load more",
+    "treeTitle": "Category tree",
+    "treeDescription": "All active categories, in the current language.",
+    "selected": "selected"
   }
 }

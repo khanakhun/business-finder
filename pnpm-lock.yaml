@@ -318,6 +318,9 @@ catalogs:
     vitest:
       specifier: 5.0.4
       version: 5.0.4
+    yaml:
+      specifier: 2.9.1
+      version: 2.9.1
     zod:
       specifier: 4.6.7
       version: 4.6.7
@@ -837,6 +840,9 @@ importers:
       postgres:
         specifier: 'catalog:'
         version: 3.4.9
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.1
       zod:
         specifier: 'catalog:'
         version: 4.6.7

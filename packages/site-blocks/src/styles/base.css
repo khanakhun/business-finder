@@ -243,13 +243,6 @@
     margin-inline: 0;
   }
 
-  /* A disabled form looks disabled. */
-  fieldset:disabled .bf-input,
-  fieldset:disabled .bf-btn {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-
   /* Buttons (44 px targets) */
   .bf-actions {
     display: flex;
@@ -698,6 +691,13 @@
 
   .bf-input[aria-invalid="true"] {
     border-color: #b42318;
+  }
+
+  /* A disabled form looks disabled. */
+  fieldset:disabled .bf-input,
+  fieldset:disabled .bf-btn {
+    cursor: not-allowed;
+    opacity: 0.55;
   }
 
   .bf-error {

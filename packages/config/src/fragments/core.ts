@@ -16,6 +16,16 @@ export const coreEnv = z.object({
     .min(1)
     .default('sites.localhost')
     .describe('Previews are served at https://<slug>.<SITES_BASE_DOMAIN> (no scheme, no port).'),
+  APP_VERSION: z
+    .string()
+    .min(1)
+    .default('0.0.0-dev')
+    .describe('Release version, set by the build/deploy pipeline.'),
+  GIT_COMMIT: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Git commit SHA of the running build, set by the build/deploy pipeline.'),
   OTEL_EXPORTER_OTLP_ENDPOINT: z
     .url()
     .optional()

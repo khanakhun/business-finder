@@ -11,7 +11,17 @@
     // Markdown, YAML, Python, … are not Biome's job; don't report them as errors.
     "ignoreUnknown": true,
     // Lockfiles and generated artifacts are owned by their tools.
-    "includes": ["**", "!pnpm-lock.yaml", "!**/coverage", "!**/dist", "!**/.next", "!**/.turbo"]
+    "includes": [
+      "**",
+      "!pnpm-lock.yaml",
+      "!**/coverage",
+      "!**/dist",
+      "!**/.next",
+      "!**/.turbo",
+      // Generated and checked by their own tests (`api:openapi`, `contracts:jsonschema`).
+      "!packages/api-client/openapi.json",
+      "!packages/contracts/generated"
+    ]
   },
   "formatter": {
     "indentStyle": "space",
@@ -20,6 +30,10 @@
     "lineWidth": 110
   },
   "javascript": {
+    "parser": {
+      // NestJS constructor-parameter decorators (`@Inject(TOKEN) private readonly x`) are legacy TS syntax.
+      "unsafeParameterDecoratorsEnabled": true
+    },
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "all"
@@ -58,6 +72,16 @@
     }
   },
   "overrides": [
+    {
+      // NestJS DI reads constructor parameter types at runtime (emitDecoratorMetadata): an injected class used only
+      // as a type must stay a value import. TypeScript's verbatimModuleSyntax still forces `import type` for
+      // real types (interfaces, aliases), so nothing is lost.
+      // Nest dynamic modules (`static forRoot()` on a decorated class) are static-only classes by design.
+      "includes": ["apps/api/**"],
+      "linter": {
+        "rules": { "style": { "useImportType": "off" }, "complexity": { "noStaticOnlyClass": "off" } }
+      }
+    },
     {
       // AGENTS.md §3: @bf/contracts is the dependency leaf and must run in browsers/edge (BF-004).
       "includes": ["packages/contracts/src/**", "!packages/contracts/src/cli/**", "!**/*.test.ts"],

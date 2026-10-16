@@ -30,6 +30,7 @@ export const GENERATED_BY_INFRA: ReadonlySet<string> = new Set([
   'SITES_PORT',
   'API_PORT',
   'INTEL_PORT',
+  'WORKER_METRICS_PORT',
 ]);
 
 const GROUPS: ReadonlyArray<readonly [string, EnvSchema]> = [

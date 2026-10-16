@@ -32,12 +32,18 @@
           },
           "path": {
             "items": {
-              "type": ["string", "number"]
+              "type": [
+                "string",
+                "number"
+              ]
             },
             "type": "array"
           }
         },
-        "required": ["path", "message"],
+        "required": [
+          "path",
+          "message"
+        ],
         "type": "object"
       },
       "type": "array"
@@ -61,7 +67,12 @@
       "type": "string"
     }
   },
-  "required": ["type", "title", "status", "code"],
+  "required": [
+    "type",
+    "title",
+    "status",
+    "code"
+  ],
   "title": "ProblemDetails",
   "type": "object"
 }

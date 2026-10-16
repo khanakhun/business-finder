@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/turbo/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      // A test asserts the committed OpenAPI document matches the code, so editing it must bust the cache.
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/packages/api-client/openapi.json"]
+    }
+  }
+}

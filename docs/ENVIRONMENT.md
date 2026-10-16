@@ -69,6 +69,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `APP_URL` | Core | api, worker, web, sites | no | `http://localhost:3000` |  | Public URL of the dashboard (apps/web). |
 | `API_URL` | Core | api, worker, web, sites | no | `http://localhost:4000` |  | Public URL of the API (apps/api). |
 | `SITES_BASE_DOMAIN` | Core | api, worker, sites | no | `sites.localhost` |  | Previews are served at https://<slug>.<SITES_BASE_DOMAIN> (no scheme, no port). |
+| `APP_VERSION` | Core | api, worker, sites | no | `0.0.0-dev` |  | Release version, set by the build/deploy pipeline. |
+| `GIT_COMMIT` | Core | api, worker, sites | no |  |  | Git commit SHA of the running build, set by the build/deploy pipeline. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Core | api, worker, sites, intel | no |  |  | OTLP/HTTP endpoint for traces/metrics/logs (BF-005). Unset disables export. |
 | `DATABASE_URL` | Database | api, worker | yes (infra:up) |  | yes | Read-write connection string (owner role; migrations and apps/api). Written by infra:up. |
 | `DB_POOL_MAX` | Database | api, worker | no | `10` |  | Max connections per process. |
@@ -95,7 +97,10 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
+| `BULL_BOARD_USER` | App-specific | api | no |  |  | Basic-auth user for the queue dashboard (/admin/queues). Unset = dashboard off. |
+| `BULL_BOARD_PASSWORD` | App-specific | api | no |  | yes | Basic-auth password for the queue dashboard, ≥ 12 chars. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
+| `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |
 | `WEB_PORT` | App-specific | web | no | `3000` |  | HTTP port of apps/web. Set by infra:up from BF_PORT_OFFSET. |
 | `NEXT_PUBLIC_API_URL` | App-specific | web | no | `http://localhost:4000` |  | API base URL used by the browser. |
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |

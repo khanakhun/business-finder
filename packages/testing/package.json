@@ -9,7 +9,9 @@
     "./vitest-config": "./src/vitest-config.ts",
     "./setup": "./src/setup.ts",
     "./db": "./src/db/index.ts",
-    "./db/global-setup": "./src/db/global-setup.ts"
+    "./db/global-setup": "./src/db/global-setup.ts",
+    "./valkey": "./src/valkey/index.ts",
+    "./valkey/global-setup": "./src/valkey/global-setup.ts"
   },
   "scripts": {
     "lint": "biome check .",

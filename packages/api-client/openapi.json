@@ -1,0 +1,255 @@
+{
+  "components": {
+    "schemas": {
+      "PingJobsAccepted": {
+        "additionalProperties": false,
+        "description": "Ids of the enqueued jobs.",
+        "properties": {
+          "jobIds": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "jobIds"
+        ],
+        "type": "object"
+      },
+      "PingJobsRequest": {
+        "additionalProperties": false,
+        "description": "Enqueue system.ping jobs (smoke test for the queue pipeline).",
+        "properties": {
+          "count": {
+            "default": 1,
+            "description": "How many ping jobs to enqueue.",
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotencyKey": {
+            "description": "Re-sending the same key enqueues nothing new.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "count"
+        ],
+        "type": "object"
+      },
+      "ProblemDetails": {
+        "additionalProperties": false,
+        "description": "RFC 9457 problem details (application/problem+json).",
+        "properties": {
+          "code": {
+            "enum": [
+              "VALIDATION_FAILED",
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "CONFLICT",
+              "IDEMPOTENCY_KEY_REUSED",
+              "INVALID_STATE_TRANSITION",
+              "RATE_LIMITED",
+              "BUDGET_EXCEEDED",
+              "EXTERNAL_SERVICE_FAILED",
+              "INTERNAL"
+            ],
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "path": {
+                  "items": {
+                    "type": [
+                      "string",
+                      "number"
+                    ]
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "path",
+                "message"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "status": {
+            "maximum": 599,
+            "minimum": 400,
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string"
+          },
+          "type": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "type": "object"
+      },
+      "SystemInfo": {
+        "additionalProperties": false,
+        "description": "Build and runtime information about the API process.",
+        "properties": {
+          "commit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "env": {
+            "enum": [
+              "development",
+              "test",
+              "production"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "time": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "commit",
+          "env",
+          "time"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "contact": {},
+    "description": "REST API (/v1). Errors are RFC 9457 problem+json; see docs/conventions/api.md.",
+    "title": "Business Finder API",
+    "version": "0.0.0-dev"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/system/info": {
+      "get": {
+        "operationId": "getSystemInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemInfo"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Build and runtime information",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/system/ping-jobs": {
+      "post": {
+        "operationId": "enqueuePingJobs",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PingJobsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingJobsAccepted"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Enqueue system.ping jobs (queue smoke test)",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  },
+  "servers": [],
+  "tags": []
+}

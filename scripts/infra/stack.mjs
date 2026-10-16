@@ -18,6 +18,7 @@ export const BASE_PORTS = Object.freeze({
   SITES_PORT: 3100,
   API_PORT: 4000,
   INTEL_PORT: 8000,
+  WORKER_METRICS_PORT: 9464,
 });
 
 /** Compose services that publish each infra port; app ports have no service. */

@@ -8,6 +8,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import {
   BatchSpanProcessor,
   ConsoleSpanExporter,
+  NoopSpanProcessor,
   ParentBasedSampler,
   type SpanProcessor,
   TraceIdRatioBasedSampler,
@@ -59,6 +60,9 @@ export function initTelemetry(options: InitTelemetryOptions): Telemetry {
   } else if (options.exporter === 'console') {
     processors.push(new BatchSpanProcessor(new ConsoleSpanExporter()));
   }
+  // NodeSDK registers a tracer provider only when it has a processor. Without one, spans are no-ops with all-zero
+  // ids and logs lose correlation, so `none` still registers (with a processor that exports nothing).
+  if (processors.length === 0) processors.push(new NoopSpanProcessor());
 
   const sdk = new NodeSDK({
     resource: defaultResource().merge(

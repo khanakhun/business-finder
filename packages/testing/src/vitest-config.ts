@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type ViteUserConfig } from 'vitest/config';
 
+type PluginOption = NonNullable<ViteUserConfig['plugins']>[number];
+
 export type VitestConfigType = 'unit' | 'int';
 
 export interface VitestConfigOptions {
@@ -13,6 +15,13 @@ export interface VitestConfigOptions {
    * package's integration tests (DB clients, CLIs). Not a way to skip testing.
    */
   readonly coverageExclude?: readonly string[];
+  /**
+   * Globs measured by unit coverage (default `src/**`). Apps narrow it to their logic layers; framework wiring
+   * is covered by integration tests.
+   */
+  readonly coverageInclude?: readonly string[];
+  /** Vite plugins, e.g. `unplugin-swc` for NestJS decorator metadata. */
+  readonly plugins?: readonly PluginOption[];
   /** Vitest global setup files, e.g. `PG_GLOBAL_SETUP` for integration tests that need Postgres. */
   readonly globalSetup?: readonly string[];
   /** Adds machine-readable reports for CI. Defaults to the `CI` environment variable. */
@@ -32,6 +41,9 @@ export const SETUP_FILE = fileURLToPath(new URL('./setup.ts', import.meta.url));
 /** Global setup that starts the test Postgres and migrates the template database (`@bf/testing/db`). */
 export const PG_GLOBAL_SETUP = fileURLToPath(new URL('./db/global-setup.ts', import.meta.url));
 
+/** Global setup that starts a Valkey container (`@bf/testing/valkey`). */
+export const VALKEY_GLOBAL_SETUP = fileURLToPath(new URL('./valkey/global-setup.ts', import.meta.url));
+
 const UNIT_TESTS = 'src/**/*.test.{ts,tsx}';
 const INT_TESTS = 'src/**/*.int.test.{ts,tsx}';
 const INT_TESTS_ANYWHERE = '**/*.int.test.{ts,tsx}';
@@ -49,11 +61,14 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
     setupFiles = [],
     globalSetup = [],
     coverageExclude = [],
+    coverageInclude = ['src/**/*.{ts,tsx}'],
+    plugins = [],
     ci = process.env.CI === 'true',
   } = options;
   const isUnit = type === 'unit';
 
   return defineConfig({
+    ...(plugins.length > 0 ? { plugins: [...plugins] } : {}),
     test: {
       include: [isUnit ? UNIT_TESTS : INT_TESTS],
       exclude: ['**/node_modules/**', '**/dist/**', ...(isUnit ? [INT_TESTS_ANYWHERE] : [])],
@@ -71,7 +86,7 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
         enabled: false,
         provider: 'v8',
         // Listing sources makes untested files count as 0% instead of being silently skipped.
-        include: ['src/**/*.{ts,tsx}'],
+        include: [...coverageInclude],
         exclude: ['**/*.test.{ts,tsx}', '**/__fixtures__/**', '**/*.d.ts', ...coverageExclude],
         reporter: ['text-summary', 'json-summary', 'lcov'],
         ...(isUnit ? { thresholds: UNIT_COVERAGE_THRESHOLDS } : {}),

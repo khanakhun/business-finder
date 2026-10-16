@@ -86,13 +86,13 @@ tools/generators/module/           # templates for pnpm gen:module
 - Contract: generated OpenAPI snapshot includes `system` routes and `ProblemDetails` component.
 
 ## Acceptance criteria
-- [ ] `pnpm --filter @bf/api dev` runs HTTP (4000) and worker processes; `/health/ready` is 200 with infra up.
-- [ ] Problem+json returned for validation, domain and unknown errors (tests).
-- [ ] `system.ping` job demonstrates typed producer/processor, idempotency, trace propagation and metrics (tests).
-- [ ] `pnpm api:openapi` writes `packages/api-client/openapi.json` without infra running.
-- [ ] Bull Board available at `/admin/queues` behind basic auth.
-- [ ] `pnpm gen:module example` scaffolds a compiling module with tests (generated test module removed before merge).
-- [ ] Graceful shutdown verified by an integration test or documented manual test.
+- [x] `pnpm --filter @bf/api dev` runs HTTP (4000) and worker processes; `/health/ready` is 200 with infra up.
+- [x] Problem+json returned for validation, domain and unknown errors (tests).
+- [x] `system.ping` job demonstrates typed producer/processor, idempotency, trace propagation and metrics (tests).
+- [x] `pnpm api:openapi` writes `packages/api-client/openapi.json` without infra running.
+- [x] Bull Board available at `/admin/queues` behind basic auth.
+- [x] `pnpm gen:module example` scaffolds a compiling module with tests (generated test module removed before merge).
+- [x] Graceful shutdown verified by an integration test or documented manual test.
 
 ## Agent prompt
 ```text
@@ -120,3 +120,41 @@ POST /v1/system/ping-jobs, view the trace in Jaeger (observability profile). Pas
 ## References
 - docs/ARCHITECTURE.md §5, §7 · ADR-0005 · ADR-0006 · docs/conventions/api.md · docs/conventions/testing.md
 - NestJS: https://docs.nestjs.com/ · @nestjs/bullmq: https://docs.nestjs.com/techniques/queues · cockatiel: https://github.com/connor4312/cockatiel · Bull Board: https://github.com/felixmosh/bull-board
+
+## Implementation notes
+Delivered as three stacked commits (platform + system + OpenAPI · queue + worker + Bull Board · generator + docs).
+
+- **Versions**: NestJS 12.1.3 (ESM-only; ADR says ≥ 11), @nestjs/swagger 12.0.2, terminus 12.1.0, throttler 6.7.1,
+  @nestjs/bullmq 12.0.0, bullmq 6.3.15, ioredis 6.0.0, cockatiel 4.0.0, helmet 8.3.0, express 5.3.0, Bull Board 9.10.4,
+  @swc-node/register 1.12.1, unplugin-swc 2.0.0.
+- **Runtime: SWC loader**. Node type stripping and esbuild cannot emit decorator metadata (Nest DI by type), so dev
+  and tests compile with SWC. Production bundling is BF-025. Cold start under the dev loader: 3.4 s (it compiles every
+  file); `GET /v1/system/info` p95 1.5 ms, `/health/live` p95 1.2 ms locally.
+- **OpenAPI without nestjs-zod** (it only supports Nest ≤ 11): `zodDto(schema)` classes + a global `ZodValidationPipe`
+  for validation; `@ApiRoute({ body, query, response, errors })` emits @nestjs/swagger metadata with `$ref`s to Zod
+  JSON Schema components; the document is OpenAPI **3.1** (JSON Schema 2020-12). Generation runs offline (2 s).
+- **Throttler storage written in-house** (`@nest-lab/throttler-storage-redis` only supports Nest ≤ 11): atomic Lua
+  on Valkey. DECISION: **fails open** when Valkey is down (requests allowed, warning logged, readiness reports it).
+- **Valkey roles**: the shared connection fails fast (`maxRetriesPerRequest: 1`) so HTTP never hangs; BullMQ gets
+  connection *options* (it owns and closes its connections) — blocking for workers, fail-fast for HTTP producers.
+- **@bf/queue is framework-free**: `TypedProducer` (validation, trace context, job id from idempotency key) and
+  `createJobRunner` (Template Method: validate → SET NX idempotency → consumer span → log context → handler →
+  metrics). `TypedProcessor` in apps/api adapts it to `@nestjs/bullmq`'s `WorkerHost`. Cancellation: cross-process
+  cancel key polled into an `AbortSignal`, combined with BullMQ 6's own worker signal; cancelled jobs never retry.
+- **Bull Board** at `/admin/queues` (excluded from the `/v1` prefix) with basic auth, mounted only when
+  `BULL_BOARD_USER`/`BULL_BOARD_PASSWORD` are set. TODO(BF-010): RBAC.
+- **Coverage for apps**: unit gates measure `domain/`, `application/` and pure platform helpers (100 % lines); Nest
+  wiring is proven by integration tests (25). New `@bf/testing` options: `plugins`, `coverageInclude`, `globalSetup`,
+  and a Valkey Testcontainer (`@bf/testing/valkey`).
+- **Lint**: Biome `useImportType` is off for apps/api — it would turn constructor-injected classes into type-only
+  imports and break Nest DI at runtime (TypeScript's `verbatimModuleSyntax` still enforces real type imports);
+  `noStaticOnlyClass` off for Nest dynamic modules; parameter decorators enabled in the parser.
+- **Generator**: `pnpm gen:module <context>` (dependency-free templates in `tools/generators/module`);
+  `pnpm gen:module:check` generates a module into the real app, typechecks, lints and runs its tests, then restores
+  the tree (CI step in BF-009; not part of `verify` because it edits the working tree).
+- Also in this ticket: `@bf/observability` → `@prometheus-io/client` (prom-client's new name) and a registered tracer
+  provider even with `exporter: 'none'` (real trace ids in logs); `WORKER_METRICS_PORT` follows `BF_PORT_OFFSET`;
+  generated OpenAPI/JSON Schema files excluded from Biome.
+- Real run (offset 10, observability profile): `POST /v1/system/ping-jobs` → one Jaeger trace spanning `bf-api`
+  (HTTP POST, Valkey eval/evalsha) and `bf-worker` (`job.process system`, idempotency `set`); both processes exit 0 on
+  SIGTERM after logging graceful shutdown.

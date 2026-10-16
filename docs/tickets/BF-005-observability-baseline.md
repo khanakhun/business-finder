@@ -27,7 +27,7 @@ Work flows across HTTP, queues, a Python service, sandboxes and LLM providers. W
   - `initTelemetry({ serviceName, serviceVersion, exporter: 'otlp' | 'console' | 'none', samplingRatio })` using the OpenTelemetry Node SDK with auto-instrumentations for http, undici/fetch, pg/postgres.js (verify which instrumentation supports postgres.js), ioredis/valkey; graceful shutdown hook.
   - Context propagation for jobs: `injectTraceContext(): { traceparent, tracestate? }` and `runWithExtractedContext(carrier, name, fn)` creating a consumer span linked to the producer.
   - `startSpan(name, attrs, fn)` convenience with error recording.
-  - Metrics: `metrics.counter/histogram/gauge` wrappers over prom-client with a shared registry, default process metrics, standard latency buckets; `metricsHandler()` returning Prometheus text.
+  - Metrics: `metrics.counter/histogram/gauge` wrappers over @prometheus-io/client with a shared registry, default process metrics, standard latency buckets; `metricsHandler()` returning Prometheus text.
   - Health contracts: `HealthIndicator` type and `aggregateHealth()` (used by Nest terminus adapter in BF-006 and by Next apps).
 - `infra/compose/otel-collector.yaml` (used by the `observability` compose profile from BF-002): OTLP receiver → Jaeger exporter + debug logging.
 - Docs: `docs/OBSERVABILITY.md` — how to see traces locally, log field glossary, naming conventions for spans (`<module>.<operation>`) and metrics (`bf_<area>_<name>_<unit>`).
@@ -49,7 +49,7 @@ packages/observability/src/
 ├── log-context.ts   # AsyncLocalStorage helpers
 ├── telemetry.ts     # initTelemetry, startSpan
 ├── propagation.ts   # injectTraceContext, runWithExtractedContext
-├── metrics.ts       # prom-client wrappers, registry, handler
+├── metrics.ts       # @prometheus-io/client wrappers, registry, handler
 ├── health.ts        # HealthIndicator, aggregateHealth
 └── index.ts
 ```
@@ -93,10 +93,10 @@ screenshot or the Jaeger trace JSON to the PR.
 
 ## References
 - ADR-0015 · docs/ARCHITECTURE.md §14 · docs/conventions/security.md §7
-- OpenTelemetry JS: https://opentelemetry.io/docs/languages/js/ · pino redaction: https://getpino.io/#/docs/redaction · prom-client: https://github.com/siimon/prom-client
+- OpenTelemetry JS: https://opentelemetry.io/docs/languages/js/ · pino redaction: https://getpino.io/#/docs/redaction · @prometheus-io/client: https://github.com/siimon/@prometheus-io/client
 
 ## Implementation notes
-- **Versions**: pino 10.4.0, prom-client 15.1.3, @opentelemetry/api 1.9.1, sdk-node / exporter-trace-otlp-http /
+- **Versions**: pino 10.4.0, @prometheus-io/client 0.16.1 (@prometheus-io/client's new name), @opentelemetry/api 1.9.1, sdk-node / exporter-trace-otlp-http /
   instrumentation-http 0.223.0, sdk-trace-base / resources / core 2.12.0, instrumentation-undici 0.33.0,
   instrumentation-ioredis 0.71.0, semantic-conventions 1.43.0.
 - **postgres.js has no OpenTelemetry instrumentation** (`instrumentation-pg` is for `pg`); DB spans are manual.

@@ -371,6 +371,20 @@ describe('views', () => {
     });
   });
 
+  it('reads the renderer’s text/plain beacon (a simple cross-origin request, no preflight)', async () => {
+    const site = await newSite('Plain Beacon');
+    const token = await signSiteViewToken(site.id, VIEW_SECRET);
+    await request(t.app.getHttpServer())
+      .post('/v1/public/sites/views')
+      .set('Content-Type', 'text/plain;charset=UTF-8')
+      .set('X-Forwarded-For', '203.0.113.90')
+      .send(JSON.stringify({ token, pageId: 'home', locale: 'fr' }))
+      .expect(204);
+    await worker.get(SiteViewsFlusher).flush();
+    const [day] = await db.select().from(siteViewDaily).where(eq(siteViewDaily.siteId, site.id));
+    expect(day?.pageViews).toBe(1);
+  });
+
   it('counts at most 30 views a day per visitor, and at most 50 campaigns (the rest as ~other)', async () => {
     const site = await newSite('Capped Views');
     const token = await signSiteViewToken(site.id, VIEW_SECRET);

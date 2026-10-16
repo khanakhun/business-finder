@@ -1,6 +1,6 @@
 // Service-to-service authentication for services/intel (ADR-0002, BF-008). The Python verifier lives in
 // services/intel/app/security/internal_auth.py; both sides are pinned to fixtures/internal-auth-vectors.json.
-import { hmacSha256, toBase64Url } from './encoding.ts';
+import { constantTimeEqual, hmacSha256, toBase64Url } from './encoding.ts';
 
 /** Accepted distance between the signer's and the verifier's clocks, in seconds. */
 export const INTERNAL_AUTH_MAX_SKEW_SECONDS = 60;
@@ -54,6 +54,36 @@ export async function canonicalString(
       : new Uint8Array(request.body ?? []);
   const bodyHash = toHex(new Uint8Array(await crypto.subtle.digest('SHA-256', body)));
   return [String(timestamp), nonce, request.method.toUpperCase(), request.path, bodyHash].join('|');
+}
+
+export type InternalAuthResult =
+  | { readonly ok: true; readonly timestamp: number; readonly nonce: string }
+  | { readonly ok: false; readonly reason: 'missing' | 'malformed' | 'expired' | 'bad_signature' };
+
+const AUTHORIZATION = /^Bearer (\d{1,12})\.([A-Za-z0-9_-]{16,64})\.([0-9a-f]{64})$/;
+
+/**
+ * Verifies an `Authorization` header made by `signInternalRequest` (the TypeScript side of the Python verifier):
+ * the signature over the request, in constant time, and a timestamp within `INTERNAL_AUTH_MAX_SKEW_SECONDS` of
+ * `now`. Replays inside that window are the caller's to refuse (by remembering the nonce until it expires).
+ */
+export async function verifyInternalRequest(
+  authorization: string | null | undefined,
+  request: InternalRequest,
+  options: { readonly secret: string; readonly now?: number },
+): Promise<InternalAuthResult> {
+  if (!authorization) return { ok: false, reason: 'missing' };
+  const match = AUTHORIZATION.exec(authorization);
+  if (!match) return { ok: false, reason: 'malformed' };
+  const [, ts = '', nonce = '', hex = ''] = match;
+  const timestamp = Number(ts);
+  const now = options.now ?? Math.floor(Date.now() / 1000);
+  if (Math.abs(now - timestamp) > INTERNAL_AUTH_MAX_SKEW_SECONDS) return { ok: false, reason: 'expired' };
+  const expected = await hmacSha256(options.secret, await canonicalString(request, timestamp, nonce));
+  const given = Uint8Array.from(hex.match(/../g) ?? [], (byte) => Number.parseInt(byte, 16));
+  return constantTimeEqual(given, expected)
+    ? { ok: true, timestamp, nonce }
+    : { ok: false, reason: 'bad_signature' };
 }
 
 function toHex(bytes: Uint8Array): string {

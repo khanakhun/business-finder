@@ -150,7 +150,7 @@ export class SitesController {
   @Get(':id/versions/:versionId')
   @RequirePermission('sites:read')
   @ApiRoute({
-    summary: 'A version with its spec and warnings',
+    summary: 'A version with its spec and issues (errors a draft keeps block publishing)',
     operationId: 'getSiteVersion',
     response: { status: 200, schema: SiteVersionSchema },
     errors: [401, 403, 404],

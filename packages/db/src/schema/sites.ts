@@ -100,7 +100,7 @@ export const siteVersions = pgTable(
     authorId: text(),
     parentVersionId: uuid(),
     changeSummary: text(),
-    /** The validators' warnings (errors never reach a version). */
+    /** The validators' issues: warnings, and the errors a draft may keep (BF-037; publishing refuses them). */
     validation: jsonb().$type<{ issues: SiteIssue[] }>().notNull(),
     /** The quality gates' report (BF-045): set once. */
     quality: jsonb().$type<Record<string, unknown>>(),

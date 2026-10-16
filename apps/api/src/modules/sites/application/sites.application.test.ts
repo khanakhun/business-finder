@@ -65,9 +65,26 @@ async function siteWithVersion() {
 
 describe('checkSpec', () => {
   it('returns the parsed spec and its warnings', () => {
-    const { spec, warnings } = checkSpec(salon(), hosting);
+    const { spec, issues } = checkSpec(salon(), hosting);
     expect(spec.schemaVersion).toBe(1);
-    expect(warnings.every((issue) => issue.severity === 'warning')).toBe(true);
+    expect(issues.every((issue) => issue.severity === 'warning')).toBe(true);
+  });
+
+  it('lets a draft keep errors of content being written, never those of shape, hosts or markup', () => {
+    const untranslated = salon();
+    const hero = (untranslated.pages as { blocks: { props: { title: Record<string, string> } }[] }[])[0]
+      ?.blocks[0];
+    if (hero) delete hero.props.title.en;
+    const { issues } = checkSpec(untranslated, hosting, 'draft');
+    expect(issues).toContainEqual(expect.objectContaining({ code: 'locale_missing', severity: 'error' }));
+    // Publishing refuses the same spec.
+    expect(() => checkSpec(untranslated, hosting, 'publish')).toThrow(SiteSpecInvalidError);
+    const bad = salon();
+    (bad.seo as { title: Record<string, string> }).title.en = 'www.evil.example';
+    expect(() => checkSpec(bad, hosting, 'draft')).toThrow(SiteSpecInvalidError);
+    expect(() => checkSpec(salon(), { ...hosting, assetHosts: ['other.cdn'] }, 'draft')).toThrow(
+      SiteSpecInvalidError,
+    );
   });
 
   it('refuses errors with their codes, an unknown version and a non-spec', () => {
@@ -199,6 +216,24 @@ describe('SiteCommands', () => {
     await expect(
       commands.applyOperations(actor, siteId, { baseVersionId: v2.id, operations: [{ op: 'unknown' }] }),
     ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('saves an edit that leaves a translation missing, with its error, and refuses to publish it', async () => {
+    const { siteId, v1 } = await siteWithVersion();
+    const draft = await commands.applyOperations(actor, siteId, {
+      baseVersionId: v1,
+      operations: [{ op: 'updateText', path: ['seo', 'title'], locale: 'en', value: null }],
+    });
+    expect(draft.issues).toContainEqual(
+      expect.objectContaining({ code: 'locale_missing', severity: 'error' }),
+    );
+    await expect(
+      commands.publishPreview(actor, siteId, { versionId: draft.id, expiresInDays: 1 }),
+    ).rejects.toBeInstanceOf(SiteSpecInvalidError);
+    // The version before it still publishes.
+    await expect(
+      commands.publishPreview(actor, siteId, { versionId: v1, expiresInDays: 1 }),
+    ).resolves.toMatchObject({ status: 'active' });
   });
 
   it('publishes, extends, replaces, unpublishes and asks the renderer to refresh after each', async () => {

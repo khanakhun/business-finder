@@ -8,18 +8,22 @@ export interface PublicEnv {
   readonly apiUrl: string;
   readonly appUrl: string;
   readonly mapStyleUrl: string;
+  /** Where published sites' images are (the site editor's canvas shows them, BF-037). */
+  readonly sitesAssetsUrl: string;
 }
 
 const DEFAULTS: PublicEnv = {
   apiUrl: 'http://localhost:4000',
   appUrl: 'http://localhost:3000',
   mapStyleUrl: 'https://tiles.openfreemap.org/styles/liberty',
+  sitesAssetsUrl: 'https://assets.sites.localhost',
 };
 
 const KEYS: Record<keyof PublicEnv, string> = {
   apiUrl: 'NEXT_PUBLIC_API_URL',
   appUrl: 'NEXT_PUBLIC_APP_URL',
   mapStyleUrl: 'NEXT_PUBLIC_MAP_STYLE_URL',
+  sitesAssetsUrl: 'NEXT_PUBLIC_SITES_ASSETS_BASE_URL',
 };
 
 /** The server's view (container environment at run time). */
@@ -39,7 +43,12 @@ export function serverPublicEnv(
     }
     return value;
   };
-  return { apiUrl: read('apiUrl'), appUrl: read('appUrl'), mapStyleUrl: read('mapStyleUrl') };
+  return {
+    apiUrl: read('apiUrl'),
+    appUrl: read('appUrl'),
+    mapStyleUrl: read('mapStyleUrl'),
+    sitesAssetsUrl: read('sitesAssetsUrl'),
+  };
 }
 
 let browserEnv: PublicEnv | undefined;
@@ -49,7 +58,7 @@ export function setPublicEnv(env: PublicEnv): void {
   browserEnv = env;
 }
 
-/** Where the API, app and map style live, on the server and in the browser. */
+/** Where the API, app, map style and site images live, on the server and in the browser. */
 export function publicEnv(): PublicEnv {
   if (typeof window === 'undefined') return serverPublicEnv();
   return browserEnv ?? DEFAULTS;

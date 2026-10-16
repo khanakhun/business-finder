@@ -39,6 +39,8 @@ export default defineConfig({
         FAKE_EMAIL_VERIFIER: 'true',
         FAKE_REVIEWS: 'true',
         FAKE_WEBSITE_AUDIT: 'true',
+        // The site fixtures' image host (the site editor e2e creates sites from them, BF-037).
+        SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
       },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
@@ -58,6 +60,12 @@ export default defineConfig({
       reuseExistingServer: !ci,
       timeout: 60_000,
     },
-    { command: 'pnpm build && pnpm start', url: webUrl, reuseExistingServer: !ci, timeout: 240_000 },
+    {
+      command: 'pnpm build && pnpm start',
+      env: { NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test' },
+      url: webUrl,
+      reuseExistingServer: !ci,
+      timeout: 240_000,
+    },
   ],
 });

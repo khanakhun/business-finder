@@ -49,6 +49,7 @@ export const toVersionSummary = (version: StoredVersionSummary): SiteVersionSumm
   specHash: version.specHash,
   schemaVersion: version.schemaVersion,
   warnings: version.issues.filter((issue) => issue.severity === 'warning').length,
+  errors: version.issues.filter((issue) => issue.severity === 'error').length,
   createdAt: version.createdAt.toISOString(),
 });
 

@@ -18,8 +18,11 @@
     "@bf/auth": "workspace:*",
     "@bf/config": "workspace:*",
     "@bf/contracts": "workspace:*",
+    "@bf/site-blocks": "workspace:*",
+    "@bf/site-schema": "workspace:*",
     "@bf/ui": "workspace:*",
     "@dnd-kit/core": "catalog:",
+    "@puckeditor/core": "catalog:",
     "@tanstack/react-query": "catalog:",
     "lucide-react": "catalog:",
     "maplibre-gl": "catalog:",
@@ -33,7 +36,8 @@
     "react-markdown": "catalog:",
     "recharts": "catalog:",
     "server-only": "catalog:",
-    "uqr": "catalog:"
+    "uqr": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
@@ -51,6 +55,7 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "fast-check": "catalog:",
     "happy-dom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",

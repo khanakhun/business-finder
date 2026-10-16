@@ -78,6 +78,7 @@ services:
       API_INTERNAL_URL: http://api:4000
       NEXT_PUBLIC_APP_URL: https://app.${BASE_DOMAIN:?}
       NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN:?}
+      NEXT_PUBLIC_SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
     networks:
       edge: { ipv4_address: 172.30.0.11 }
     deploy:

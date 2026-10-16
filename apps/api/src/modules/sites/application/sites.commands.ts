@@ -96,7 +96,7 @@ export class SiteCommands {
     const business = await this.repository.trackedBusiness(actor.organizationId, input.businessId);
     if (!business) throw new NotFoundError('Business', input.businessId);
     // Checked before anything is written: an invalid first version creates no site.
-    const first = input.spec ? checkSpec(input.spec, this.hosting) : undefined;
+    const first = input.spec ? checkSpec(input.spec, this.hosting, 'draft') : undefined;
     await this.repository.lockBusiness(actor.organizationId, business.id);
     const sites = await this.repository.sitesOfBusiness(actor.organizationId, business.id);
     if (!input.forceNew && sites[0]) {
@@ -156,7 +156,7 @@ export class SiteCommands {
     author?: VersionAuthor,
   ): Promise<StoredVersion> {
     const site = await this.editable(actor, siteId, input.baseVersionId);
-    const checked = checkSpec(input.spec, this.hosting);
+    const checked = checkSpec(input.spec, this.hosting, 'draft');
     const current = site.currentVersionId
       ? await this.repository.version(site.id, site.currentVersionId)
       : undefined;
@@ -202,7 +202,7 @@ export class SiteCommands {
         { details: { reason: 'SITE_OPERATION_REFUSED' } },
       );
     }
-    const checked = checkSpec(after, this.hosting);
+    const checked = checkSpec(after, this.hosting, 'draft');
     const summary = input.changeSummary ?? diffSpecs(before, checked.spec).summary;
     return this.saveVersion(actor, site, checked, author ?? { type: 'user', id: actor.userId }, summary);
   }
@@ -213,7 +213,7 @@ export class SiteCommands {
     const site = await this.editable(actor, siteId, input.baseVersionId);
     const target = await this.repository.version(site.id, input.versionId);
     if (!target) throw new NotFoundError('SiteVersion', input.versionId);
-    const checked = checkSpec(target.spec, this.hosting);
+    const checked = checkSpec(target.spec, this.hosting, 'draft');
     return this.saveVersion(
       actor,
       site,
@@ -399,7 +399,7 @@ export class SiteCommands {
   private async saveVersion(
     actor: SiteActor,
     site: StoredSite,
-    checked: { spec: SiteSpec; warnings: SiteIssue[] },
+    checked: { spec: SiteSpec; issues: SiteIssue[] },
     author: VersionAuthor,
     changeSummary: string,
   ): Promise<StoredVersion> {
@@ -416,7 +416,7 @@ export class SiteCommands {
       authorId: author.id,
       parentVersionId: site.currentVersionId,
       changeSummary,
-      issues: checked.warnings,
+      issues: checked.issues,
     });
     // The database moves the current version only from the one this edit started from (compare-and-set).
     const moved = await this.repository.setCurrentVersion(

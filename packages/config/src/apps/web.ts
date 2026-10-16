@@ -16,6 +16,10 @@ export const webPublicEnv = z.object({
     .url()
     .default('https://tiles.openfreemap.org/styles/liberty')
     .describe('MapLibre style for the search map (OpenFreeMap by default: free, no key, OSM attribution).'),
+  NEXT_PUBLIC_SITES_ASSETS_BASE_URL: z
+    .url()
+    .default('https://assets.sites.localhost')
+    .describe("Public base URL of site images (SITES_ASSETS_BASE_URL): the site editor's canvas shows them."),
 });
 
 export const webEnv = z.object({

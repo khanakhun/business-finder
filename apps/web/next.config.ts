@@ -22,7 +22,8 @@ const nextConfig: NextConfig = {
     ? { output: 'standalone', outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)) }
     : {}),
   // Workspace packages are consumed as TypeScript source (packages/README.md).
-  transpilePackages: ['@bf/ui', '@bf/api-client'],
+  // The site editor (BF-037) renders with the block library and edits with the SiteSpec schema (TypeScript sources).
+  transpilePackages: ['@bf/ui', '@bf/api-client', '@bf/site-blocks', '@bf/site-schema'],
   poweredByHeader: false,
   reactStrictMode: true,
   async headers() {

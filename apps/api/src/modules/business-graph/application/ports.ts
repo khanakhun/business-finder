@@ -1,11 +1,4 @@
-import type {
-  AddedVia,
-  BusinessDetail,
-  BusinessSummary,
-  ContactType,
-  PipelineStatus,
-  SourceProvider,
-} from '@bf/contracts';
+import type { AddedVia, BusinessDetail, ContactType, PipelineStatus, SourceProvider } from '@bf/contracts';
 import type { Business } from '../domain/business.entity.ts';
 import type { BusinessContactProps } from '../domain/business-contact.ts';
 
@@ -95,20 +88,9 @@ export interface OrgBusinessRepository {
 }
 export const ORG_BUSINESS_REPOSITORY = Symbol('OrgBusinessRepository');
 
-export interface TrackedPosition {
-  /** `org_businesses.created_at` as ISO-8601 UTC with microseconds (`2026-10-15T06:50:01.123456Z`). */
-  readonly trackedAt: string;
-  readonly businessId: string;
-}
-
 /** Read side (CQRS-lite): joins global facts with the workspace's state. */
 export interface BusinessReadModel {
   /** Undefined unless the workspace tracks the business. */
   detail(organizationId: string, businessId: string): Promise<BusinessDetail | undefined>;
-  /** Most recently tracked first; keyset paging after `after`. */
-  listTracked(
-    organizationId: string,
-    page: { readonly limit: number; readonly after?: TrackedPosition },
-  ): Promise<Array<{ readonly summary: BusinessSummary; readonly position: TrackedPosition }>>;
 }
 export const BUSINESS_READ_MODEL = Symbol('BusinessReadModel');

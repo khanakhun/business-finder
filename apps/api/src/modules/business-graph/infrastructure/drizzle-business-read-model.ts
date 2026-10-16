@@ -2,10 +2,10 @@ import type { BusinessDetail, BusinessSummary } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { businessCategories, businesses, businessHours, businessMedia, orgBusinesses } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, sql } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import { toContact, toOrgBusinessState } from '../application/mappers.ts';
-import type { BusinessReadModel, TrackedPosition } from '../application/ports.ts';
+import type { BusinessReadModel } from '../application/ports.ts';
 import { DrizzleContactRepository } from './drizzle-contact.repository.ts';
 
 type BusinessRow = typeof businesses.$inferSelect;
@@ -25,9 +25,6 @@ const toSummary = (b: BusinessRow, ob: OrgBusinessRow): BusinessSummary => ({
   ratingCount: b.ratingCount,
   pipelineStatus: ob.pipelineStatus,
 });
-
-/** `created_at` as ISO-8601 UTC with microseconds: cursors keep full precision (a millisecond cursor would skip older rows tracked in the same millisecond). */
-const trackedAtText = sql<string>`to_char(${orgBusinesses.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 
 /** `HH:MM:SS` → `HH:MM`. */
 const hhmm = (time: string) => time.slice(0, 5);
@@ -98,29 +95,5 @@ export class DrizzleBusinessReadModel implements BusinessReadModel {
       lastSeenAt: b.lastSeenAt.toISOString(),
       version: b.version,
     };
-  }
-
-  async listTracked(
-    organizationId: string,
-    page: { readonly limit: number; readonly after?: TrackedPosition },
-  ): Promise<Array<{ readonly summary: BusinessSummary; readonly position: TrackedPosition }>> {
-    const rows = await getExecutor(this.db)
-      .select({ business: businesses, org: orgBusinesses, trackedAt: trackedAtText })
-      .from(orgBusinesses)
-      .innerJoin(businesses, eq(businesses.id, orgBusinesses.businessId))
-      .where(
-        and(
-          eq(orgBusinesses.organizationId, organizationId),
-          page.after
-            ? sql`(${orgBusinesses.createdAt}, ${orgBusinesses.businessId}) < (${page.after.trackedAt}::timestamptz, ${page.after.businessId}::uuid)`
-            : undefined,
-        ),
-      )
-      .orderBy(desc(orgBusinesses.createdAt), desc(orgBusinesses.businessId))
-      .limit(page.limit);
-    return rows.map((row) => ({
-      summary: toSummary(row.business, row.org),
-      position: { trackedAt: row.trackedAt, businessId: row.org.businessId },
-    }));
   }
 }

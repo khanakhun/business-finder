@@ -85,6 +85,41 @@
       "when": 1792073730113,
       "tag": "0011_discovery_runs",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792078400083,
+      "tag": "0012_search_listing",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792078418782,
+      "tag": "0013_idx_businesses_search_tsv",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792078419623,
+      "tag": "0014_idx_businesses_embedding",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792078420444,
+      "tag": "0015_idx_org_businesses_score",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792078421237,
+      "tag": "0016_idx_org_businesses_tags",
+      "breakpoints": true
     }
   ]
 }

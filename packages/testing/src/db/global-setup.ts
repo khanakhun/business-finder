@@ -3,12 +3,11 @@
 // to workers via provide/inject. Tests then clone the template per file with createIsolatedDatabase().
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainers';
 import type { TestProject } from 'vitest/node';
 import { databaseUrl, PROVIDE_KEY, type TestPostgres } from './connection.ts';
+import { applyMigrations } from './migrations.ts';
 
 const IMAGE_TAG = 'bf-postgres-test:local';
 const TEMPLATE = 'bf_template';
@@ -66,7 +65,7 @@ async function createTemplate(pg: TestPostgres, migrationsFolder: string): Promi
   }
   const client = postgres(databaseUrl(pg, TEMPLATE), { max: 1, onnotice: () => undefined });
   try {
-    await migrate(drizzle(client), { migrationsFolder });
+    await applyMigrations(client, migrationsFolder);
   } finally {
     // CREATE DATABASE … TEMPLATE requires that nobody is connected to the template.
     await client.end();

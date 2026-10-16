@@ -250,12 +250,13 @@ erDiagram
 - Money and costs: `numeric(12,6)` in USD for provider/LLM costs; currency-aware fields store ISO-4217 code alongside.
 - Geography: `geography(Point, 4326)` for locations; `geography(MultiPolygon, 4326)` for areas; GiST indexes.
 - Area geometry in TypeScript (BF-017): tiling and clipping for discovery are pure functions on Turf.js (`geo/domain/tiling.ts`), so they run in unit tests without a database; PostGIS does storage-side work (containment, distance, area, trigram name lookup). GeoJSON positions are `[lng, lat]`; APIs speak `{ lat, lng }`, converted only in `geo/domain/geometry.ts`.
-- Text search: generated `tsvector` columns using `unaccent` and a language-aware config (`simple` + `french` + `english` combined weights); `pg_trgm` GIN on names.
+- Text search: generated `tsvector` columns using `unaccent` and a language-aware config (`simple` + `french` + `english` combined weights); `pg_trgm` GIN on names. `businesses.search_tsv` (BF-022) weighs name A, category labels B (`category_text`, kept by triggers: ancestors' labels and synonyms, so "restaurant" finds pizzerias), locality/address C, short description D.
+- Listing search (BF-022, `search` module): a Specification of filters → parameterized SQL; free text ranked by three rankers (full text, name trigram, embeddings — ≤ 200 candidates each) fused with RRF (k = 60); other sorts use keyset cursors with nulls last; facets drop their own dimension's filter and, with text, count the ranked results.
 - Vectors: `vector(<dims>)` with HNSW index (`vector_cosine_ops`); the embedding model and dimension are recorded per row (`embedding_model`), re-embedding is a background job.
 - Hierarchies: `ltree` path on `categories` for "category and all descendants" filters.
 - Provenance: per-field provenance in `attributes jsonb` on golden records: `{ "<field>": { "value": …, "source": "google_places", "sourceId": "…", "confidence": 0.92, "observedAt": "…" } }`.
 - Retention: `business_sources.expires_at` enforced by `system.retention`; provider-specific TTLs (e.g. Google Places content) in config ([ADR-0013](adr/0013-discovery-providers-and-data-licensing.md)).
-- Migrations: Drizzle Kit generated SQL, reviewed, forward-only; destructive changes follow expand → migrate → contract across separate PRs ([ADR-0004](adr/0004-drizzle-orm-and-migration-ownership.md)).
+- Migrations: Drizzle Kit generated SQL, reviewed, forward-only; destructive changes follow expand → migrate → contract across separate PRs ([ADR-0004](adr/0004-drizzle-orm-and-migration-ownership.md)). `runMigrations` (`@bf/db`) keeps Drizzle's journal but runs each migration in its own transaction, and none for a migration starting with `-- bf:no-transaction` (one `CREATE INDEX CONCURRENTLY` per such migration; `packages/db/README.md`).
 
 ## 7. Asynchronous processing
 

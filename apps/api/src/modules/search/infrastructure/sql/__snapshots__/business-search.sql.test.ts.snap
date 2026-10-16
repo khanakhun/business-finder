@@ -1,0 +1,305 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`filterSql > adds recency and keyword conditions from the resolved spec 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "2026-10-01T00:00:00.000Z",
+    "vegan",
+    "vegan",
+    "vegan",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."created_at" >= $2::timestamptz AND "businesses"."search_tsv" @@ (websearch_to_tsquery('simple', f_unaccent($3)) || websearch_to_tsquery('french', f_unaccent($4)) || websearch_to_tsquery('english', f_unaccent($5)))",
+  "typings": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > area 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "0192a1b2-0000-7000-8000-000000000001",
+    "0192a1b2-0000-7000-8000-0000000000aa",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND EXISTS (SELECT 1 FROM "geo_areas" ga WHERE ga.id = $2
+          AND (ga.organization_id IS NULL OR ga.organization_id = $3)
+          AND ST_Intersects("businesses"."location", ga.geom))",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > category 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "0192a1b2-0000-7000-8000-000000000001",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND EXISTS (SELECT 1 FROM "business_categories" bcat JOIN "categories" c ON c.id = bcat.category_id
+      WHERE bcat.business_id = "businesses"."id"
+        AND c.path <@ ARRAY(SELECT sel.path FROM "categories" sel WHERE sel.id = ANY(ARRAY[$2]::uuid[])))",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > country 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "BL",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."country_code" = $2",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > email 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "email",
+    "email",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND EXISTS (SELECT 1 FROM "business_contacts" bc WHERE bc.business_id = "businesses"."id" AND bc.type = $2) AND NOT EXISTS (SELECT 1 FROM "business_contacts" bc WHERE bc.business_id = "businesses"."id" AND bc.type = $3 AND bc.verification_status = 'valid')",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > near 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    -62.85,
+    17.9,
+    2000,
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND ST_DWithin("businesses"."location", ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, $4)",
+  "typings": [
+    "none",
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > no email 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "email",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND NOT EXISTS (SELECT 1 FROM "business_contacts" bc WHERE bc.business_id = "businesses"."id" AND bc.type = $2)",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > owner 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "0192a1b2-0000-7000-8000-000000000001",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."owner_user_id" = $2",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > phone 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "phone",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND NOT ("businesses"."primary_phone_e164" IS NOT NULL OR EXISTS (SELECT 1 FROM "business_contacts" bc WHERE bc.business_id = "businesses"."id" AND bc.type = $2))",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > price 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    1,
+    2,
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."price_level" = ANY(ARRAY[$2, $3]::smallint[])",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > ratings 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    3.5,
+    4.5,
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."rating_avg" >= $2 AND "businesses"."rating_avg" <= $3",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > reviews 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    10,
+    50,
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."rating_count" >= $2 AND "businesses"."rating_count" <= $3",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > scopes to the workspace, live records and open businesses by default 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently'",
+  "typings": [
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > scores 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    60,
+    90,
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."score" >= $2 AND "org_businesses"."score" <= $3",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > status 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "qualified",
+    "won",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."pipeline_status" = ANY(ARRAY[$2, $3]::text[])",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > tag 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "vip",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."tags" && ARRAY[$2]::text[]",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > tier 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+    "A",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "org_businesses"."tier" = ANY(ARRAY[$2]::text[])",
+  "typings": [
+    "none",
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > website none 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."website_url" IS NULL",
+  "typings": [
+    "none",
+  ],
+}
+`;
+
+exports[`filterSql > website weak 1`] = `
+{
+  "params": [
+    "0192a1b2-0000-7000-8000-0000000000aa",
+  ],
+  "sql": ""org_businesses"."organization_id" = $1 AND "businesses"."merged_into_id" IS NULL AND "businesses"."operating_status" <> 'closed_permanently' AND "businesses"."website_url" IS NOT NULL",
+  "typings": [
+    "none",
+  ],
+}
+`;
+
+exports[`sort and keyset > orders nulls last with an id tie-breaker in the same direction 1`] = `
+{
+  "params": [
+    40,
+    40,
+    "0192a1b2-0000-7000-8000-000000000001",
+  ],
+  "sql": "("org_businesses"."score" < $1::float8 OR ("org_businesses"."score" = $2::float8 AND "businesses"."id" < $3::uuid) OR "org_businesses"."score" IS NULL)",
+  "typings": [
+    "none",
+    "none",
+    "none",
+  ],
+}
+`;

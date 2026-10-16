@@ -42,10 +42,12 @@ export class AppModule {
         RealtimeModule.forRoot(mode),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
+        // Before BusinessGraphModule: Express matches routes in registration order, and the listing's
+        // `GET /businesses/facets` (search) must win over `GET /businesses/:id` (business graph).
+        SearchModule.forRoot(mode),
         BusinessGraphModule.forRoot(mode),
         GeoModule.forRoot(mode),
         DiscoveryModule.forRoot(mode),
-        SearchModule.forRoot(mode),
       ],
     };
   }

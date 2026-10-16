@@ -44,7 +44,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { id, timestamps } from '../columns.ts';
 import { geographyPoint } from '../types/geography.ts';
-import { citext, ltree } from '../types/text.ts';
+import { citext, ltree, tsvector } from '../types/text.ts';
 import { vector } from '../types/vector.ts';
 import { organization, user } from './auth.ts';
 
@@ -165,6 +165,21 @@ export const businesses = pgTable(
     ratingCount: integer(),
     attributes: jsonb().$type<Record<string, Provenance>>().notNull().default({}),
     dataQuality: smallint(),
+    /** Labels (EN + FR) of the business's categories, kept by trigger (BF-022): weight B of `search_tsv`. */
+    categoryText: text().notNull().default(''),
+    /** Short description of the business (site intel, BF-026): weight D of `search_tsv`. */
+    shortDescription: text(),
+    /**
+     * Full-text document (BF-022): name A, categories B, locality and address C, description D; English, French and
+     * unstemmed (`simple`) passes, accent-insensitive (`bf_tsvector`).
+     */
+    searchTsv: tsvector().generatedAlwaysAs(
+      sql`setweight(bf_tsvector(display_name, display_name, display_name), 'A') || setweight(bf_tsvector(category_text, category_text, category_text), 'B') || setweight(to_tsvector('simple'::regconfig, f_unaccent(coalesce(locality, '') || ' ' || coalesce(formatted_address, ''))), 'C') || setweight(bf_tsvector(short_description, short_description, short_description), 'D')`,
+    ),
+    /** Semantic search vector (BF-022) of the text `EmbeddingTextComposer` builds; re-embedded when it changes. */
+    embedding: vector(1536),
+    embeddingModel: text(),
+    embeddingTextHash: text(),
     mergedIntoId: uuid().references((): AnyPgColumn => businesses.id, { onDelete: 'restrict' }),
     version: integer().notNull().default(0),
     firstSeenAt: tz().notNull().defaultNow(),
@@ -181,6 +196,12 @@ export const businesses = pgTable(
     index('idx_businesses__country_code').on(table.countryCode),
     index('idx_businesses__locality').on(table.locality),
     index('idx_businesses__primary_category_id').on(table.primaryCategoryId),
+    // Created CONCURRENTLY in standalone migrations (BF-022).
+    index('idx_businesses__search_tsv').using('gin', table.searchTsv),
+    index('idx_businesses__embedding')
+      .using('hnsw', table.embedding.op('vector_cosine_ops'))
+      .with({ m: 16, ef_construction: 64 })
+      .where(sql`${table.embedding} IS NOT NULL`),
     index('idx_businesses__merged_into_id')
       .on(table.mergedIntoId)
       .where(sql`${table.mergedIntoId} IS NOT NULL`),

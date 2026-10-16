@@ -2,19 +2,16 @@ import {
   AddContactRequestSchema,
   type BusinessDetail,
   BusinessDetailSchema,
-  type BusinessPage,
-  BusinessPageSchema,
   type Contact,
   type ContactList,
   ContactListSchema,
   ContactSchema,
   CreateManualBusinessRequestSchema,
-  CursorPageRequestSchema,
   type OrgBusinessState,
   OrgBusinessStateSchema,
   TrackBusinessRequestSchema,
 } from '@bf/contracts';
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { Ctx, RequirePermission } from '../../platform/security/auth.decorators.ts';
@@ -26,44 +23,28 @@ import {
   CreateManualBusinessCommand,
   TrackBusinessCommand,
 } from '../application/business.commands.ts';
-import {
-  GetBusinessDetailQuery,
-  ListContactsQuery,
-  ListTrackedBusinessesQuery,
-} from '../application/business.queries.ts';
+import { GetBusinessDetailQuery, ListContactsQuery } from '../application/business.queries.ts';
 
-class PageQueryDto extends zodDto(CursorPageRequestSchema) {}
 class CreateManualBusinessBody extends zodDto(CreateManualBusinessRequestSchema) {}
 class TrackBusinessBody extends zodDto(TrackBusinessRequestSchema) {}
 class AddContactBody extends zodDto(AddContactRequestSchema) {}
 
 const businessId = () => new ParseUUIDPipe({ version: '7' });
 
-/** Businesses the workspace tracks: global facts (ADR-0008) plus the workspace's state. */
+/**
+ * Businesses the workspace tracks: global facts (ADR-0008) plus the workspace's state. The listing itself
+ * (`GET /businesses`, facets) lives in the search module (BF-022).
+ */
 @ApiTags('businesses')
 @Controller('businesses')
 export class BusinessesController {
   constructor(
     private readonly detailQuery: GetBusinessDetailQuery,
-    private readonly listQuery: ListTrackedBusinessesQuery,
     private readonly contactsQuery: ListContactsQuery,
     private readonly createManual: CreateManualBusinessCommand,
     private readonly trackCommand: TrackBusinessCommand,
     private readonly addContactCommand: AddContactCommand,
   ) {}
-
-  @Get()
-  @RequirePermission('business:read')
-  @ApiRoute({
-    summary: 'Businesses the workspace tracks, most recently added first',
-    operationId: 'listBusinesses',
-    query: PageQueryDto,
-    response: { status: 200, schema: BusinessPageSchema },
-    errors: [401, 403],
-  })
-  index(@Ctx() auth: AuthContext, @Query() query: PageQueryDto): Promise<BusinessPage> {
-    return this.listQuery.execute(auth, query);
-  }
 
   @Post()
   @RequirePermission('business:write')

@@ -26,7 +26,7 @@ export function NumericInput({
   readonly value: number;
   readonly onCommit: (value: number) => void;
   readonly integer?: boolean;
-  /** Bounds: a typed value outside them is committed clamped (and shown so on leaving the field). */
+  /** Bounds: a typed value outside them is committed clamped (the field shows the clamped value). */
   readonly min?: number;
   readonly max?: number;
 }) {
@@ -53,9 +53,10 @@ export function NumericInput({
           );
         }
       }}
-      // Leaving the field shows what the draft holds (a clamped or unfinished value).
+      // Leaving the field shows what the draft holds when the text says otherwise (a value already at its bound, an
+      // unfinished or refused one); a typed "0,5" stays as typed.
       onBlur={(event) => {
-        setText(String(value));
+        setText((current) => (parseNumber(current) === value ? current : String(value)));
         props.onBlur?.(event);
       }}
     />

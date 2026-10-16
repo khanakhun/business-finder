@@ -244,6 +244,10 @@ describe('profile problems', () => {
     expect(unknownPlaceholders('{value} and {value} again')).toEqual([]);
     expect(unknownPlaceholders('{valeur} avis, {value}, {valeur}')).toEqual(['{valeur}']);
     expect(unknownPlaceholders('no placeholder {} here')).toEqual(['{}']);
+    // Reported as typed.
+    expect(unknownPlaceholders('Rated {va{value}lue}')).toEqual(['{va{value}lue}']);
+    expect(unknownPlaceholders('Rated {{value}}')).toEqual(['{{value}}']);
+    expect(unknownPlaceholders('Rated {value')).toEqual(['{value']);
     // Typos the engine would show as typed.
     for (const typo of [
       '{value',

@@ -207,12 +207,10 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
     const payload = event.payload as ScoringRecomputeProgress | null;
     if (payload?.profileId !== profileId) return;
     // While an activation is under way, events of another version (a late one) are ignored.
-    if (
-      progressRef.current &&
-      !progressRef.current.finished &&
-      progressRef.current.version !== payload.version
-    )
-      return;
+    const current = progressRef.current;
+    if (current && !current.finished && current.version !== payload.version) return;
+    // A repeated event (the same run, the same numbers) changes nothing and toasts once.
+    if (current && JSON.stringify(current) === JSON.stringify(payload)) return;
     setProgress(payload);
     if (payload.finished)
       void getToast().then((toast) => toast.success(t('recomputed', { count: payload.done })));

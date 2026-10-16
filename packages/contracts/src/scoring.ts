@@ -1042,11 +1042,12 @@ export const REASON_PLACEHOLDERS = ['{value}'] as const;
  */
 export function unknownPlaceholders(template: string): string[] {
   let rest = template;
-  // Blanked first (a space, so the text around never joins into a new placeholder): what is left of `{{value}}`
-  // (`{ }`) or a lone brace is flagged.
-  for (const placeholder of REASON_PLACEHOLDERS) rest = rest.replaceAll(placeholder, ' ');
+  // Marked first (a character nobody types, so the text around never joins into a new placeholder): what is left of
+  // `{{value}}` or a lone brace is flagged, reported as typed.
+  const MARK = '\u0000';
+  for (const placeholder of REASON_PLACEHOLDERS) rest = rest.replaceAll(placeholder, MARK);
   const found = rest.match(/\{[^{}]*\}?|\}/g) ?? [];
-  return [...new Set(found)];
+  return [...new Set(found.map((token) => token.replaceAll(MARK, '{value}')))];
 }
 
 /** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path, its code in params). */

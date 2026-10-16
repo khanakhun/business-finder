@@ -1,0 +1,86 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Hair salon",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "My 2pm appointment started at 3:30. Great time to catch up on magazines from 2019.",
+        "rating": 2
+      },
+      {
+        "id": "r2",
+        "text": "Asked for a trim, got a bob. Stylist nodded at everything I said.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "Fab!! [person] is a genius with curls, never going anywhere else 💕",
+        "rating": 5
+      },
+      {
+        "id": "r4",
+        "text": "No prices online, and I got quoted differently on the phone and at the salon.",
+        "rating": 2
+      },
+      {
+        "id": "r5",
+        "text": "Fine"
+      },
+      {
+        "id": "r6",
+        "text": "Only takes bookings by phone and they never pick up between 12 and 3.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Appointment began ninety minutes late."
+      },
+      {
+        "id": "r2",
+        "tags": ["poor_communication"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Requested cut was misunderstood despite apparent agreement."
+      },
+      {
+        "id": "r3",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Stylist excels with curly hair; client is now loyal."
+      },
+      {
+        "id": "r4",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Rates are not posted on the web and quotes varied between calls and visits."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["booking_friction", "unreachable_by_phone"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Reservations require calling, and the line goes unanswered midday."
+      }
+    ],
+    "warnings": []
+  }
+}

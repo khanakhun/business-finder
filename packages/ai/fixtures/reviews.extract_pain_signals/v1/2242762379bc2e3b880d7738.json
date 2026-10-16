@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Plumber",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Travail propre et efficace, fuite réparée en une heure. Mais il a fallu 6 appels pour le joindre.",
+        "rating": 4
+      },
+      {
+        "id": "r2",
+        "text": "Devis promis par mail sous 48h, j'attends toujours depuis 3 semaines.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "Pas de site, pas de tarifs, rien. On ne sait pas à quoi s'attendre avant qu'il arrive.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Plombier sérieux.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Il devait venir mardi, il est venu jeudi sans prévenir. Résultat impeccable par contre.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Facture bien plus élevée que ce qui avait été dit à l'oral, et il a laissé de la boue partout.",
+        "rating": 1
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["unreachable_by_phone"],
+        "sentiment": 0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Réparation rapide et soignée, artisan toutefois très difficile à contacter par téléphone."
+      },
+      {
+        "id": "r2",
+        "tags": ["slow_or_no_reply"],
+        "sentiment": -0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Estimation écrite jamais envoyée malgré la promesse, trois semaines plus tard."
+      },
+      {
+        "id": "r3",
+        "tags": ["website_broken_or_outdated", "no_online_menu_or_prices"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Aucune présence web ni grille tarifaire, impossible d'anticiper le coût."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["poor_communication", "long_wait_times"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Intervention décalée de deux jours sans avertissement, travail final irréprochable."
+      },
+      {
+        "id": "r6",
+        "tags": ["other", "poor_communication"],
+        "sentiment": -0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Montant final supérieur à l'annonce verbale et chantier laissé sale."
+      }
+    ],
+    "warnings": []
+  }
+}

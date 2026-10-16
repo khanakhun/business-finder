@@ -11,6 +11,8 @@ import {
   exactMatch,
   jsonPathMatch,
   llmJudge,
+  macroF1,
+  meanAbsoluteError,
   numericTolerance,
   setF1,
 } from './scorers.ts';
@@ -125,6 +127,48 @@ describe('eval runner', () => {
     const empty = await runEval(judged, [], { gateway, model: 'm', mode: 'test' });
     expect(empty.means['odd.precision']).toBe(0); // no rows never passes a threshold
     expect(empty.failures).toEqual(['odd.precision: 0.000 < 0.5']);
+  });
+
+  it('computes dataset-level metrics and checks lower-is-better maxima', async () => {
+    const error = meanAbsoluteError(
+      'n.mae',
+      ({ row, output }) => [
+        { expected: (row.expected as { n: number }).n, predicted: (output as { n: number } | undefined)?.n },
+      ],
+      10,
+    );
+    const withMax = defineEval({
+      task: Task,
+      scorers: [],
+      aggregates: [error],
+      thresholds: {},
+      maxThresholds: { 'n.mae': 30 },
+    });
+    // Errors: 0, |99 - 2|, 0 and the failed row's 10 → 107 / 4.
+    const report = await runEval(withMax, rows, { gateway, model: 'm', mode: 'test' });
+    expect(report.means['n.mae']).toBeCloseTo(26.75);
+    expect(report.passed).toBe(true);
+    expect(reportMarkdown(report)).toContain('| n.mae | 26.750 | ≤ 30 |');
+    const strict = await runEval(defineEval({ ...withMax, maxThresholds: { 'n.mae': 1 } }), rows, {
+      gateway,
+      model: 'm',
+      mode: 'test',
+    });
+    expect(strict.failures).toEqual(['n.mae: 26.750 > 1']);
+    expect(() => defineEval({ ...withMax, maxThresholds: { 'nope.mae': 1 } })).toThrow(/unknown scorer/);
+  });
+
+  it('macro-averages F1 over labels that occur', () => {
+    const scorer = macroF1('tags.macro_f1', ({ output }) => output as never, ['a', 'b', 'c', 'unused']);
+    const items = [
+      { expected: ['a'], predicted: ['a'] },
+      { expected: ['b'], predicted: ['a'] },
+      { expected: [], predicted: ['c'] },
+    ];
+    // a: tp 1, fp 1 → 2/3; b: fn 1 → 0; c: fp 1 → 0; unused is left out.
+    expect(scorer.score([{ row: row({}), output: items }])).toBeCloseTo(2 / 9);
+    expect(scorer.score([{ row: row({}), output: [] }])).toBe(1);
+    expect(meanAbsoluteError('x', () => [], 1).score([])).toBe(0);
   });
 
   it('rejects thresholds for unknown scorers', () => {

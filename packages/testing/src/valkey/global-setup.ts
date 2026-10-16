@@ -3,6 +3,8 @@ import { GenericContainer, type StartedTestContainer, Wait } from 'testcontainer
 import type { TestProject } from 'vitest/node';
 
 export const VALKEY_IMAGE = 'valkey/valkey:8.1.10-alpine';
+/** Databases in the test container (`valkeyDb` 0–63). */
+export const TEST_VALKEY_DATABASES = 64;
 
 declare module 'vitest' {
   export interface ProvidedContext {
@@ -14,6 +16,8 @@ let container: StartedTestContainer | undefined;
 
 export async function setup(project: TestProject): Promise<void> {
   container = await new GenericContainer(VALKEY_IMAGE)
+    // Each suite with a worker needs its own database (BullMQ queues): more than the default 16.
+    .withCommand(['valkey-server', '--databases', String(TEST_VALKEY_DATABASES)])
     .withExposedPorts(6379)
     .withWaitStrategy(Wait.forLogMessage(/Ready to accept connections/))
     .start();

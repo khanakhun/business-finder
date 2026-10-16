@@ -57,7 +57,7 @@ import {
   type WebsiteSnapshotRepository,
 } from './application/ports.ts';
 import { EnrichmentOrchestrator } from './application/run-orchestrator.ts';
-import { StepRegistry } from './application/step-registry.ts';
+import { NightlyMaintenance, StepRegistry } from './application/step-registry.ts';
 import { VerifyContactCommand } from './application/verify-contact.command.ts';
 import { BullmqEnrichmentQueue } from './infrastructure/bullmq-enrichment-queue.ts';
 import {
@@ -170,7 +170,19 @@ export class EnrichmentModule implements OnModuleInit {
     @Inject(PERSONAL_ADDRESS_POLICY) private readonly personalAddresses: PersonalAddressPolicy,
   ) {}
 
+  private static readonly byMode = new Map<AppMode, DynamicModule>();
+
+  /** One definition per mode: modules importing this one (reviews, BF-029) share the app module's instance. */
   static forRoot(mode: AppMode): DynamicModule {
+    let definition = EnrichmentModule.byMode.get(mode);
+    if (!definition) {
+      definition = EnrichmentModule.build(mode);
+      EnrichmentModule.byMode.set(mode, definition);
+    }
+    return definition;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: EnrichmentModule,
       imports: [BusinessGraphModule.forRoot(mode), RealtimeModule.forRoot(mode)],
@@ -229,6 +241,7 @@ export class EnrichmentModule implements OnModuleInit {
         { provide: MAINTENANCE_AUTOSTART, useValue: mode === 'worker' },
         IntelClient,
         StepRegistry,
+        NightlyMaintenance,
         EnrichmentOrchestrator,
         EnrichmentPlanning,
         StartEnrichmentCommand,
@@ -243,7 +256,13 @@ export class EnrichmentModule implements OnModuleInit {
           ? [EnrichmentRunProcessor, EnrichmentStepProcessor, EnrichmentRefreshProcessor]
           : []),
       ],
-      exports: [StepRegistry, EnrichmentReconciler, EnrichmentScheduler],
+      exports: [
+        StepRegistry,
+        NightlyMaintenance,
+        EnrichmentPlanning,
+        EnrichmentReconciler,
+        EnrichmentScheduler,
+      ],
     };
   }
 

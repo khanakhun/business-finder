@@ -25,6 +25,7 @@ import { ConfirmDialog } from './confirm-dialog.tsx';
 import { DiscoverySources } from './discovery-sources.tsx';
 import { EmailVerificationSettings } from './email-verification-settings.tsx';
 import { Forbidden } from './forbidden.tsx';
+import { ReviewSourcesSettings } from './review-sources.tsx';
 import { SettingsSection } from './section.tsx';
 
 const PROVIDERS = [
@@ -66,6 +67,7 @@ export function IntegrationsSettings() {
     <div className="grid gap-6">
       <DiscoverySources />
       <EmailVerificationSettings />
+      <ReviewSourcesSettings />
       {groups.map((group) => (
         <SettingsSection
           key={group.provider}

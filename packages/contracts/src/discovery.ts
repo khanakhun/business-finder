@@ -3,6 +3,7 @@ import { SourceRecordSchema } from './business-graph/source-record.ts';
 import { DISCOVERY_PROVIDER_IDS, FieldTierSchema, ProviderIdSchema } from './discovery-settings.ts';
 import { BBoxSchema } from './geo.ts';
 import { CircleGeometrySchema } from './geo-areas.ts';
+import { ReviewsUsageSchema } from './reviews.ts';
 
 export {
   DEFAULT_DISCOVERY_SETTINGS,
@@ -57,6 +58,9 @@ export const ProviderLicensingSchema = z
     attributionRequired: z.boolean(),
     attributionText: z.string().nullable(),
     commercialUseAllowed: z.boolean(),
+    reviewsUsage: ReviewsUsageSchema.describe(
+      'The most review text from this provider may be used for (BF-029); workspaces opt in below it.',
+    ),
     notes: z.string(),
   })
   .meta({ id: 'ProviderLicensing' });

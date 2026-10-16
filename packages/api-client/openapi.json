@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "AcknowledgeGoogleReviewsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "termsVersion": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "termsVersion"
+        ],
+        "type": "object"
+      },
       "Activity": {
         "additionalProperties": false,
         "properties": {
@@ -340,6 +354,39 @@
           "byModel",
           "byDay",
           "budget"
+        ],
+        "type": "object"
+      },
+      "AnalyzePastedReviewsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reviews": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "rating": {
+                  "maximum": 5,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "text": {
+                  "maxLength": 2000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text"
+              ],
+              "type": "object"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "reviews"
         ],
         "type": "object"
       },
@@ -1799,6 +1846,33 @@
         "required": [
           "items",
           "nextCursor"
+        ],
+        "type": "object"
+      },
+      "BusinessReviewInsights": {
+        "additionalProperties": false,
+        "properties": {
+          "insights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewInsights"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sources": {
+            "description": "What this workspace may analyse now.",
+            "items": {
+              "$ref": "#/components/schemas/ReviewSourceGate"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "insights",
+          "sources"
         ],
         "type": "object"
       },
@@ -4081,7 +4155,8 @@
                   "dependency_skipped",
                   "budget",
                   "cancelled",
-                  "not_registered"
+                  "not_registered",
+                  "licensing_disabled"
                 ],
                 "type": "string"
               },
@@ -4257,6 +4332,48 @@
           "intent",
           "area",
           "options"
+        ],
+        "type": "object"
+      },
+      "EvidenceSnippet": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "maxLength": 10,
+            "type": "string"
+          },
+          "sourceRef": {
+            "enum": [
+              "google_places",
+              "gmaps_scraper",
+              "manual"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "description": "A paraphrase of at most 20 words, not a quote.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "language",
+          "sourceRef",
+          "expiresAt"
         ],
         "type": "object"
       },
@@ -6356,6 +6473,15 @@
             ],
             "description": "How long fetched content may be kept; null when there is no limit."
           },
+          "reviewsUsage": {
+            "description": "The most review text from this provider may be used for (BF-029); workspaces opt in below it.",
+            "enum": [
+              "none",
+              "transient_insights",
+              "store_text"
+            ],
+            "type": "string"
+          },
           "storableFields": {
             "description": "Fields that may be kept indefinitely even when content expires (e.g. the place id).",
             "items": {
@@ -6370,6 +6496,7 @@
           "attributionRequired",
           "attributionText",
           "commercialUseAllowed",
+          "reviewsUsage",
           "notes"
         ],
         "type": "object"
@@ -6635,6 +6762,395 @@
         },
         "required": [
           "action"
+        ],
+        "type": "object"
+      },
+      "ReviewInsights": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/EvidenceSnippet"
+              },
+              "maxItems": 3,
+              "type": "array"
+            },
+            "propertyNames": {
+              "enum": [
+                "booking_friction",
+                "unreachable_by_phone",
+                "slow_or_no_reply",
+                "website_broken_or_outdated",
+                "no_online_menu_or_prices",
+                "hard_to_find_info",
+                "language_barrier",
+                "payment_friction",
+                "long_wait_times",
+                "inconsistent_hours",
+                "poor_communication",
+                "positive_strong_reputation",
+                "other"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the insights from licensed sources expire."
+          },
+          "model": {
+            "type": "string"
+          },
+          "ownerResponseRate": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Share of reviews with an owner reply (null when no source tells)."
+          },
+          "painCounts": {
+            "additionalProperties": {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "description": "Reviews evidencing each tag.",
+            "propertyNames": {
+              "enum": [
+                "booking_friction",
+                "unreachable_by_phone",
+                "slow_or_no_reply",
+                "website_broken_or_outdated",
+                "no_online_menu_or_prices",
+                "hard_to_find_info",
+                "language_barrier",
+                "payment_friction",
+                "long_wait_times",
+                "inconsistent_hours",
+                "poor_communication",
+                "positive_strong_reputation",
+                "other"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "painShare": {
+            "additionalProperties": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "description": "Share of analysed reviews evidencing each tag.",
+            "propertyNames": {
+              "enum": [
+                "booking_friction",
+                "unreachable_by_phone",
+                "slow_or_no_reply",
+                "website_broken_or_outdated",
+                "no_online_menu_or_prices",
+                "hard_to_find_info",
+                "language_barrier",
+                "payment_friction",
+                "long_wait_times",
+                "inconsistent_hours",
+                "poor_communication",
+                "positive_strong_reputation",
+                "other"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "promptVersion": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "ratingSnapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "avg": {
+                    "maximum": 5,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "count": {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "observedAt": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "avg",
+                  "count",
+                  "observedAt"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ratingTrend": {
+            "enum": [
+              "up",
+              "flat",
+              "down",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "sampleSize": {
+            "description": "Reviews analysed (across sources still within retention).",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sentimentAvg": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": -1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sources": {
+            "items": {
+              "enum": [
+                "google_places",
+                "gmaps_scraper",
+                "manual"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "businessId",
+          "computedAt",
+          "sources",
+          "sampleSize",
+          "painCounts",
+          "painShare",
+          "sentimentAvg",
+          "ownerResponseRate",
+          "ratingSnapshot",
+          "ratingTrend",
+          "evidence",
+          "model",
+          "promptVersion",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
+      "ReviewSourceGate": {
+        "additionalProperties": false,
+        "properties": {
+          "blockedBy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "not_enabled",
+                  "acknowledgement",
+                  "not_configured",
+                  "scraper_gates"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effective": {
+            "description": "What applies now: `none` while a gate blocks the source.",
+            "enum": [
+              "none",
+              "transient_insights",
+              "store_text"
+            ],
+            "type": "string"
+          },
+          "maxUsage": {
+            "description": "The most the source’s terms allow.",
+            "enum": [
+              "none",
+              "transient_insights",
+              "store_text"
+            ],
+            "type": "string"
+          },
+          "retentionDays": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "enum": [
+              "google_places",
+              "gmaps_scraper",
+              "manual"
+            ],
+            "type": "string"
+          },
+          "usage": {
+            "description": "What the workspace chose (never above `maxUsage`).",
+            "enum": [
+              "none",
+              "transient_insights",
+              "store_text"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "maxUsage",
+          "usage",
+          "effective",
+          "blockedBy",
+          "retentionDays"
+        ],
+        "type": "object"
+      },
+      "ReviewSourcesStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "googleAcknowledgement": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "acknowledgedAt": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "termsVersion": {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  "userId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "userId",
+                  "acknowledgedAt",
+                  "termsVersion"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The owner acknowledgement of the current Google terms warning, if any."
+          },
+          "googleTerms": {
+            "additionalProperties": false,
+            "properties": {
+              "lastModified": {
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "version": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "warning": {
+                "additionalProperties": false,
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "en",
+                  "fr"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "version",
+              "url",
+              "lastModified",
+              "warning"
+            ],
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewSourceGate"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sources",
+          "googleTerms",
+          "googleAcknowledgement"
         ],
         "type": "object"
       },
@@ -8212,6 +8728,23 @@
             ]
           }
         },
+        "type": "object"
+      },
+      "UpdateReviewSourcesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "gmapsScraper": {
+            "description": "Derive insights from scraped reviews.",
+            "enum": [
+              "none",
+              "transient_insights"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "gmapsScraper"
+        ],
         "type": "object"
       },
       "UpdateSavedSearchRequest": {
@@ -12769,6 +13302,208 @@
         "summary": "Assign (or clear) the workspace member who owns a business",
         "tags": [
           "crm"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/review-insights": {
+      "get": {
+        "operationId": "getBusinessReviewInsights",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewInsights"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace's aggregated review insights for the business, and the review sources it may use",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/reviews/analyze": {
+      "post": {
+        "operationId": "analyzePastedReviews",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzePastedReviewsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessReviewInsights"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "402": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Analyse pasted reviews (anonymized, classified, then discarded: only aggregated insights are kept)",
+        "tags": [
+          "reviews"
         ]
       }
     },
@@ -18085,6 +18820,270 @@
         "summary": "Server-sent events of the active workspace (Last-Event-ID replays up to 1000 missed events)",
         "tags": [
           "realtime"
+        ]
+      }
+    },
+    "/v1/reviews/sources": {
+      "get": {
+        "operationId": "getReviewSources",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSourcesStatus"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Review sources: what each licence allows, what the workspace chose, what applies now",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "put": {
+        "operationId": "updateReviewSources",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewSourcesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSourcesStatus"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Choose whether scraped reviews feed insights (turning it off forgets what was derived from them)",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/v1/reviews/sources/google/acknowledgement": {
+      "delete": {
+        "operationId": "revokeGoogleReviewsTerms",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSourcesStatus"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Stop using Google reviews and forget the insights derived from them",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "post": {
+        "operationId": "acknowledgeGoogleReviewsTerms",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcknowledgeGoogleReviewsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSourcesStatus"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Acknowledge the Google terms warning and derive insights from Google reviews (workspace owner only; audited)",
+        "tags": [
+          "reviews"
         ]
       }
     },

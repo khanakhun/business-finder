@@ -38,6 +38,7 @@ export const OSM_LICENSING = {
   attributionRequired: true,
   attributionText: '© OpenStreetMap contributors',
   commercialUseAllowed: true,
+  reviewsUsage: 'none' as const,
   notes:
     'ODbL 1.0: attribute "© OpenStreetMap contributors" linking to openstreetmap.org/copyright; derived ' +
     'databases that are published stay under the ODbL.',

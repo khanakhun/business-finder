@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Hair salon",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Super coupe, [person] est une artiste !!! Je recommande les yeux fermés",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Rdv à 14h, prise en charge à 15h10. Personne ne s'excuse.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Bien.",
+        "rating": 4
+      },
+      {
+        "id": "r4",
+        "text": "Pas de prise de rdv en ligne en 2026, faut passer au salon ou envoyer un message sur [handle] et attendre.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Résultat ok mais trop cher pour un simple brushing.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Fermé un mardi à 11h alors que Google indique ouvert. Deuxième fois.",
+        "rating": 1
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Coiffeuse très douée, recommandation sans réserve."
+      },
+      {
+        "id": "r2",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Plus d'une heure de retard sur le rendez-vous, sans excuses."
+      },
+      {
+        "id": "r3",
+        "tags": [],
+        "sentiment": 0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r4",
+        "tags": ["booking_friction", "poor_communication"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Aucune réservation sur internet ; il faut se déplacer ou écrire et patienter."
+      },
+      {
+        "id": "r5",
+        "tags": ["other"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Prestation correcte, tarif jugé excessif pour un coiffage basique."
+      },
+      {
+        "id": "r6",
+        "tags": ["inconsistent_hours"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Salon trouvé clos en pleine journée malgré les horaires affichés, à répétition."
+      }
+    ],
+    "warnings": []
+  }
+}

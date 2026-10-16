@@ -1,4 +1,4 @@
-import { type Clock, ExternalServiceError, type ProviderQuery } from '@bf/contracts';
+import { type Clock, ExternalServiceError, type ProviderQuery, REVIEW_SOURCE_LICENSING } from '@bf/contracts';
 import { z } from 'zod';
 import type {
   BuildQueriesInput,
@@ -23,7 +23,7 @@ const MAX_ROWS = 1_000;
 const MAX_CSV_BYTES = 20_000_000;
 
 /** The body as text, refusing more than `max` bytes (never buffers an unbounded download). */
-async function readCapped(response: Response, max: number): Promise<string> {
+export async function readCapped(response: Response, max: number): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) return '';
   const chunks: Uint8Array[] = [];
@@ -49,6 +49,7 @@ export const SCRAPER_LICENSING = {
   attributionRequired: false,
   attributionText: null,
   commercialUseAllowed: false,
+  reviewsUsage: REVIEW_SOURCE_LICENSING.gmaps_scraper.maxUsage,
   notes:
     'No licence: scraping Google Maps is likely to breach Google’s Terms of Service. Off by default; needs the ' +
     'deployment flag, the workspace flag and an owner acknowledgement. Reviews are never stored; records ' +

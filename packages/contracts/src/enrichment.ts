@@ -54,6 +54,8 @@ export const ENRICHMENT_SKIP_REASONS = [
   'cancelled',
   /** Not available in this deployment yet (its ticket is not shipped, or it is disabled). */
   'not_registered',
+  /** No review source is allowed for the workspace (licensing gates off, BF-029). */
+  'licensing_disabled',
 ] as const;
 export const EnrichmentSkipReasonSchema = z.enum(ENRICHMENT_SKIP_REASONS);
 export type EnrichmentSkipReason = z.infer<typeof EnrichmentSkipReasonSchema>;

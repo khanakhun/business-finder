@@ -24,6 +24,12 @@ export interface Scorer {
   score(output: unknown, row: EvalRow, context: ScoreContext): Promise<number | null> | number | null;
 }
 
+/** A dataset-level metric: sees every row and its output at once (`output` is undefined for a failed row). */
+export interface AggregateScorer {
+  readonly name: string;
+  score(results: ReadonlyArray<{ readonly row: EvalRow; readonly output: unknown }>): number;
+}
+
 /** Value at a dotted path (`a.b.0.c`); undefined when absent. */
 export function atPath(value: unknown, path: string): unknown {
   if (path === '') return value;
@@ -104,5 +110,59 @@ export const llmJudge = (name: string, rubric: string): Scorer => ({
       { orgId: context.orgId },
     );
     return JudgeVerdict.parse(verdict.output).score;
+  },
+});
+
+type AggregateResult = Parameters<AggregateScorer['score']>[0][number];
+
+/**
+ * Macro-F1 over `labels`: F1 of each label across every item of every row, averaged. A label nobody expected or
+ * predicted is left out (no evidence either way); none left scores 1.
+ */
+export const macroF1 = (
+  name: string,
+  items: (result: AggregateResult) => ReadonlyArray<{
+    readonly expected: readonly string[];
+    readonly predicted: readonly string[];
+  }>,
+  labels: readonly string[],
+): AggregateScorer => ({
+  name,
+  score(results) {
+    const counts = new Map(labels.map((label) => [label, { tp: 0, fp: 0, fn: 0 }]));
+    for (const item of results.flatMap(items)) {
+      const expected = new Set(item.expected);
+      const predicted = new Set(item.predicted);
+      for (const [label, count] of counts) {
+        if (expected.has(label) && predicted.has(label)) count.tp++;
+        else if (predicted.has(label)) count.fp++;
+        else if (expected.has(label)) count.fn++;
+      }
+    }
+    const f1s = [...counts.values()]
+      .filter((c) => c.tp + c.fp + c.fn > 0)
+      .map((c) => (2 * c.tp) / (2 * c.tp + c.fp + c.fn));
+    return f1s.length === 0 ? 1 : f1s.reduce((sum, f1) => sum + f1, 0) / f1s.length;
+  },
+});
+
+/** Mean absolute error between paired numbers; a missing prediction counts as `missingError`. */
+export const meanAbsoluteError = (
+  name: string,
+  pairs: (
+    result: AggregateResult,
+  ) => ReadonlyArray<{ readonly expected: number; readonly predicted: number | undefined }>,
+  missingError: number,
+): AggregateScorer => ({
+  name,
+  score(results) {
+    const errors = results
+      .flatMap(pairs)
+      .map(({ expected, predicted }) =>
+        predicted === undefined || !Number.isFinite(predicted)
+          ? missingError
+          : Math.abs(predicted - expected),
+      );
+    return errors.length === 0 ? 0 : errors.reduce((sum, e) => sum + e, 0) / errors.length;
   },
 });

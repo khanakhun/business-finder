@@ -23,3 +23,24 @@ export class StepRegistry {
     return this.steps;
   }
 }
+
+/** A retention task run with the nightly refresh (e.g. purging expired review insights, BF-029). */
+export type NightlyMaintenanceTask = (now: Date) => Promise<number>;
+
+/**
+ * Retention hooks of other modules, run once per night before the refresh (Registry, like the steps). A failing hook
+ * is logged and does not stop the others or the refresh.
+ */
+@Injectable()
+export class NightlyMaintenance {
+  private readonly tasks = new Map<string, NightlyMaintenanceTask>();
+
+  register(name: string, task: NightlyMaintenanceTask): void {
+    if (this.tasks.has(name)) throw new Error(`Nightly maintenance task ${name} is already registered`);
+    this.tasks.set(name, task);
+  }
+
+  all(): ReadonlyMap<string, NightlyMaintenanceTask> {
+    return this.tasks;
+  }
+}

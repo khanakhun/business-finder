@@ -18,6 +18,9 @@ export const featureFlagsEnv = z.object({
   FAKE_EMAIL_VERIFIER: booleanFlag(false).describe(
     'E-mail verification answers from a built-in fake (no SMTP or DNS; tests and E2E only; refused in production).',
   ),
+  FAKE_REVIEWS: booleanFlag(false).describe(
+    'Review sources and the review classifier answer from built-in fakes (no Google, scraper or LLM call; tests and E2E only; refused in production).',
+  ),
   FAKE_CONNECTION_TESTS: booleanFlag(false).describe(
     'Development/E2E only: provider connection tests succeed without calling providers. Refused in production.',
   ),

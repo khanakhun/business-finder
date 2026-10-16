@@ -1,0 +1,88 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Restaurant",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Le food était amazing mais le service so slow, on a attendu genre 1h pour les plats.",
+        "rating": 3
+      },
+      {
+        "id": "r2",
+        "text": "Best ti-punch ever, l'ambiance de folie, on reviendra c'est sûr !!",
+        "rating": 5
+      },
+      {
+        "id": "r3",
+        "text": "Réservé via leur site, mais they never got it. Table donnée à quelqu'un d'autre.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Owner replied à mon avis, super gentil, il nous a offert le dessert la fois d’après.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Pas de menu online, no prices, rien. Annoying.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "Cool spot.",
+        "rating": 4,
+        "language": "en"
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["long_wait_times"],
+        "sentiment": 0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Cuisine excellente mais une heure d'attente pour être servis."
+      },
+      {
+        "id": "r2",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Cocktail et atmosphère adorés, clients décidés à revenir."
+      },
+      {
+        "id": "r3",
+        "tags": ["booking_friction"],
+        "sentiment": -0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "La réservation en ligne n'a pas été reçue, table attribuée à d'autres."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Ni carte ni tarifs disponibles sur internet."
+      },
+      {
+        "id": "r6",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

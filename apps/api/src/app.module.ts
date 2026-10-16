@@ -11,6 +11,7 @@ import { EventsModule } from './modules/platform/events/events.module.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
 import { QueueModule } from './modules/platform/queue/queue.module.ts';
 import { RealtimeModule } from './modules/realtime/realtime.module.ts';
+import { ReviewsModule } from './modules/reviews/index.ts';
 import { SearchModule } from './modules/search/index.ts';
 import { SystemModule } from './modules/system/system.module.ts';
 import { WorkspaceModule } from './modules/workspace/workspace.module.ts';
@@ -53,6 +54,7 @@ export class AppModule {
         GeoModule.forRoot(mode),
         DiscoveryModule.forRoot(mode),
         EnrichmentModule.forRoot(mode),
+        ReviewsModule.forRoot(mode),
       ],
     };
   }

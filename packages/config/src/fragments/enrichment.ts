@@ -17,6 +17,20 @@ export const enrichmentEnv = z.object({
     .max(1)
     .default(0)
     .describe('Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0).'),
+  ENRICHMENT_REVIEWS_LLM_COST_USD: z.coerce
+    .number()
+    .min(0)
+    .max(1)
+    .default(0.002)
+    .describe('Estimated LLM cost of classifying one business’s reviews (fast tier), for budgets.'),
+  ENRICHMENT_REVIEWS_GOOGLE_COST_USD: z.coerce
+    .number()
+    .min(0)
+    .max(1)
+    .default(0.025)
+    .describe(
+      'Cost of one Google Place Details call with reviews (Enterprise + Atmosphere SKU), for budgets.',
+    ),
   REACHER_URL: z
     .url()
     .optional()

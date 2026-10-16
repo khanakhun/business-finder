@@ -1,0 +1,99 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Car rental",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Cash only?? In St Barth? Had to run to an ATM with luggage.",
+        "rating": 2
+      },
+      {
+        "id": "r2",
+        "text": "meh"
+      },
+      {
+        "id": "r3",
+        "text": "Car was clean and cheap, but their office was closed when our flight landed even though the site says open till 6.",
+        "rating": 3
+      },
+      {
+        "id": "r4",
+        "text": "Nobody at the desk spoke English and the contract was French only. We signed without really knowing the insurance terms.",
+        "rating": 2,
+        "language": "en"
+      },
+      {
+        "id": "r5",
+        "text": "Super easy, will rent again.",
+        "rating": 5
+      },
+      {
+        "id": "r6",
+        "text": "Their Google pin points to a field near the airport. The actual office is behind the gas station. Add that to your website please.",
+        "rating": 3
+      },
+      {
+        "id": "r7",
+        "text": "We booked a Jeep online, got a tiny hatchback. 'That's what we have.'",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["payment_friction"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Only accepted cash, forcing a trip to a cash machine."
+      },
+      {
+        "id": "r2",
+        "tags": [],
+        "sentiment": 0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r3",
+        "tags": ["inconsistent_hours"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Rental desk shut at arrival despite advertised evening opening."
+      },
+      {
+        "id": "r4",
+        "tags": ["language_barrier", "poor_communication"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Staff and paperwork in a single language left the insurance conditions unclear."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["hard_to_find_info"],
+        "sentiment": 0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Map location is wrong; real office sits elsewhere near the fuel station."
+      },
+      {
+        "id": "r7",
+        "tags": ["booking_friction"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Reserved vehicle was swapped for a smaller model without notice."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,4 +1,5 @@
 import type { ProviderCostModel, ProviderLicensing } from '@bf/contracts';
+import { REVIEW_SOURCE_LICENSING } from '@bf/contracts';
 
 // Google Places licensing and prices as verified on 2026-10-15 (README). Re-check before changing.
 
@@ -11,6 +12,7 @@ export const GOOGLE_PLACES_LICENSING: ProviderLicensing = {
   attributionRequired: true,
   attributionText: 'Google Maps',
   commercialUseAllowed: true,
+  reviewsUsage: REVIEW_SOURCE_LICENSING.google_places.maxUsage,
   notes:
     'Place IDs may be stored indefinitely (refresh after 12 months). Latitude/longitude may be cached for up to ' +
     '30 days; other Places content may not be cached beyond that, so records expire after 30 days and are only ' +

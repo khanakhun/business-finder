@@ -148,6 +148,20 @@
       "when": 1792106783788,
       "tag": "0020_email_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792110920540,
+      "tag": "0021_review_mining",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792115685135,
+      "tag": "0022_rating_observations_per_workspace",
+      "breakpoints": true
     }
   ]
 }

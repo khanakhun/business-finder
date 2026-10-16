@@ -59,6 +59,13 @@ export {
 } from './routing.ts';
 export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
 export {
+  ExtractPainSignalsInput,
+  ExtractPainSignalsOutput,
+  REVIEW_TEXT_BUDGET,
+  REVIEWS_PER_CALL,
+  ReviewsExtractPainSignals,
+} from './tasks/reviews-extract-pain-signals.ts';
+export {
   ParseSearchIntentInput,
   ParseSearchIntentOutput,
   SearchParseIntent,

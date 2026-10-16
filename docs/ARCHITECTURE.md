@@ -131,7 +131,8 @@ Dependency rules are listed in [AGENTS.md §3](../AGENTS.md#3-repository-map--de
 | `discovery` | Providers, discovery runs and tasks | `discovery_runs`, `discovery_tasks`, `provider_usage` | BF-018…BF-020 |
 | `search` | Intent parsing, hybrid search, saved searches, lists | `saved_searches`, `lists`, `list_items` | BF-021…BF-023 |
 | `crm` | Org-scoped business state: pipeline, owner, tags, notes, tasks, activity, user-asserted facts | `org_businesses`, `notes`, `tasks`, `activities`, `org_business_facts` | BF-024, BF-040 (facts overlay) |
-| `enrichment` | Enrichment runs, site intel, PSI, email verification, reviews mining, audits | `enrichment_*`, `website_snapshots`, `website_audits`, `review_insights` | BF-026…BF-030 |
+| `enrichment` | Enrichment runs (step registry, DAG planner, nightly refresh and maintenance hooks), site intel, PSI, email verification, audits | `enrichment_*`, `website_snapshots`, `website_audits` | BF-026…BF-028, BF-030 |
+| `reviews` | Review licensing gates per workspace and source, review mining (`reviews` enrichment step, pasted reviews), insights, rating observations | `review_insights`, `review_source_settings`, `business_rating_observations` | BF-029 |
 | `scoring` | Feature registry, scoring profiles, scores, outcome models (training datasets, shadow scores) | `scoring_profiles`, `business_scores`, `business_score_history`, `scoring_models`, `label_definitions` | BF-031, BF-032, BF-059 |
 | `sites` | Sites, versions, publications, assets and sourcing, leads, views, chat editing, custom domains, live sites | `sites`, `site_*` | BF-035, BF-036 (renderer read model), BF-037, BF-038, BF-047, BF-048, BF-062 |
 | `generation` | Batches, jobs, engines, sandbox orchestration, brief builder and fact registry snapshots, quality gates | `generation_*`, `fact_registry_snapshots` | BF-039…BF-046 |
@@ -365,6 +366,24 @@ downgrading a conclusive one. A step stopped after paying (cancel, deferral) boo
 (`StepInterruptedError`). `POST
 /v1/contacts/:id/verify` starts an `email_verify` run; `POST /v1/workspace/diagnostics/smtp-port` tells whether port
 25 is open. Request URLs in traces are redacted (keys and addresses in query strings).
+
+**Review mining (BF-029).** The `reviews` module registers the `reviews` step with the enrichment registry. Review
+text is licensed content, so every source sits behind a per-workspace **licensing gate** (Policy): Google Places
+reviews (Place Details `reviews,rating,userRatingCount`, at most 5, Enterprise + Atmosphere SKU) only after a
+workspace owner acknowledged the versioned terms warning (audit log: who, when, terms URL and date) and with a Places
+key; scraped reviews only where the workspace opted in *and* the scraper's own gates pass (an on-demand single-place
+job; the step defers while it runs, asynchronous sources first so a deferral never repeats a paid call); pasted
+reviews always (`POST /v1/businesses/:id/reviews/analyze`). With no fetching source allowed the step skips with
+`licensing_disabled` and the nightly refresh leaves it out (`EnrichmentStep.refreshableFor`). Each review is
+anonymized in memory (author names the source gave, names after a title or a thank-you, e-mails, phones, handles,
+links → placeholders), classified in batches of 20 by `reviews.extract_pain_signals` (fast tier; a per-review
+verdict cache per workspace keyed by a hash of the anonymized text), and discarded: under `transient_insights` (the
+most any source allows today) no review text is ever stored. What is kept is each source's *contribution* (counts,
+sentiment sum, owner replies, ≤ 3 checked paraphrases per tag — ≤ 20 words, never a 5-word quote, re-anonymized) in
+`review_insights` per workspace and business; the insights are rebuilt from the live contributions under an advisory lock,
+so a source can be refreshed, turned off (its part is forgotten) or expire (30 days for Google and the scraper) on its
+own; a merge re-checks its source's gate under that source's lock, so a source turned off mid-run stores nothing. Ratings seen over time (`business_rating_observations`, within retention) give the trend. A nightly maintenance
+hook purges what expired. Outreach may only use aggregated themes, never quotes (BF-051).
 
 ### F4 — Batch site generation
 

@@ -1,0 +1,98 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Taxi",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Chofè-la té ka rivé a lè, bon moun. Mwen ka rekomandé'y 100% !!",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Mwen kriyé'y 5 fwa, pa ni pon répons.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "Pa ka pran kat bankè, lajan kach sèlman.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Bon."
+      },
+      {
+        "id": "r5",
+        "text": "Nou atann taksi-la 50 minit nan ayéropò-a.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "Mèt-la réponn avi-a, i di mèsi épi i ké fè pi byen.",
+        "rating": 4
+      },
+      {
+        "id": "r7",
+        "text": "Sé pa té menm pri-a ki té di nou o téléfòn.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Chauffeur ponctuel et agréable, recommandé sans réserve."
+      },
+      {
+        "id": "r2",
+        "tags": ["unreachable_by_phone"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Plusieurs appels au chauffeur restés sans réponse."
+      },
+      {
+        "id": "r3",
+        "tags": ["payment_friction"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Seules les espèces sont acceptées pour la course."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Attente de près d'une heure à l'aéroport avant la prise en charge."
+      },
+      {
+        "id": "r6",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r7",
+        "tags": ["poor_communication"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Tarif réclamé différent de celui annoncé par téléphone."
+      }
+    ],
+    "warnings": []
+  }
+}

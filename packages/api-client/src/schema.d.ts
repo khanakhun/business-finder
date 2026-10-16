@@ -243,6 +243,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses/{id}/review-insights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace's aggregated review insights for the business, and the review sources it may use */
+        get: operations["getBusinessReviewInsights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/reviews/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Analyse pasted reviews (anonymized, classified, then discarded: only aggregated insights are kept) */
+        post: operations["analyzePastedReviews"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/split": {
         parameters: {
             query?: never;
@@ -1222,6 +1256,42 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/reviews/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review sources: what each licence allows, what the workspace chose, what applies now */
+        get: operations["getReviewSources"];
+        /** Choose whether scraped reviews feed insights (turning it off forgets what was derived from them) */
+        put: operations["updateReviewSources"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/reviews/sources/google/acknowledgement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge the Google terms warning and derive insights from Google reviews (workspace owner only; audited) */
+        post: operations["acknowledgeGoogleReviewsTerms"];
+        /** Stop using Google reviews and forget the insights derived from them */
+        delete: operations["revokeGoogleReviewsTerms"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/saved-searches": {
         parameters: {
             query?: never;
@@ -1488,6 +1558,9 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        AcknowledgeGoogleReviewsRequest: {
+            termsVersion: number;
+        };
         Activity: {
             actor: {
                 id: string | null;
@@ -1567,6 +1640,12 @@ export type components = {
                 inputTokens: number;
                 outputTokens: number;
             };
+        };
+        AnalyzePastedReviewsRequest: {
+            reviews: {
+                rating?: number;
+                text: string;
+            }[];
         };
         ApiKeyList: {
             items: components["schemas"]["ApiKeySummary"][];
@@ -1843,6 +1922,11 @@ export type components = {
             items: components["schemas"]["BusinessList"][];
             nextCursor: string | null;
             totalEstimate?: number;
+        };
+        BusinessReviewInsights: {
+            insights: components["schemas"]["ReviewInsights"] | null;
+            /** @description What this workspace may analyse now. */
+            sources: components["schemas"]["ReviewSourceGate"][];
         };
         BusinessSearchPage: {
             items: components["schemas"]["BusinessListItem"][];
@@ -2302,7 +2386,7 @@ export type components = {
             finishedAt: string | null;
             /** Format: uuid */
             id: string;
-            skipReason: ("fresh" | "no_website" | "not_applicable" | "dependency_failed" | "dependency_skipped" | "budget" | "cancelled" | "not_registered") | null;
+            skipReason: ("fresh" | "no_website" | "not_applicable" | "dependency_failed" | "dependency_skipped" | "budget" | "cancelled" | "not_registered" | "licensing_disabled") | null;
             startedAt: string | null;
             /** @enum {string} */
             status: "queued" | "running" | "done" | "skipped" | "failed";
@@ -2337,6 +2421,14 @@ export type components = {
             options: components["schemas"]["DiscoveryRunOptions"];
             /** @description Default: the workspace selection. */
             providers?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+        };
+        EvidenceSnippet: {
+            expiresAt: string | null;
+            language: string;
+            /** @enum {string} */
+            sourceRef: "google_places" | "gmaps_scraper" | "manual";
+            /** @description A paraphrase of at most 20 words, not a quote. */
+            text: string;
         };
         FeatureFlags: {
             [key: string]: boolean;
@@ -2791,6 +2883,11 @@ export type components = {
             notes: string;
             /** @description How long fetched content may be kept; null when there is no limit. */
             retentionDays: number | null;
+            /**
+             * @description The most review text from this provider may be used for (BF-029); workspaces opt in below it.
+             * @enum {string}
+             */
+            reviewsUsage: "none" | "transient_insights" | "store_text";
             /** @description Fields that may be kept indefinitely even when content expires (e.g. the place id). */
             storableFields: string[];
         };
@@ -2859,6 +2956,82 @@ export type components = {
              * @description The new category (`reassign` only).
              */
             categoryId?: string;
+        };
+        ReviewInsights: {
+            /** Format: uuid */
+            businessId: string;
+            /** Format: date-time */
+            computedAt: string;
+            evidence: {
+                [key: string]: components["schemas"]["EvidenceSnippet"][];
+            };
+            /** @description When the insights from licensed sources expire. */
+            expiresAt: string | null;
+            model: string;
+            /** @description Share of reviews with an owner reply (null when no source tells). */
+            ownerResponseRate: number | null;
+            /** @description Reviews evidencing each tag. */
+            painCounts: {
+                [key: string]: number;
+            };
+            /** @description Share of analysed reviews evidencing each tag. */
+            painShare: {
+                [key: string]: number;
+            };
+            promptVersion: number;
+            ratingSnapshot: {
+                avg: number;
+                count: number;
+                /** Format: date-time */
+                observedAt: string;
+            } | null;
+            /** @enum {string} */
+            ratingTrend: "up" | "flat" | "down" | "unknown";
+            /** @description Reviews analysed (across sources still within retention). */
+            sampleSize: number;
+            sentimentAvg: number | null;
+            sources: ("google_places" | "gmaps_scraper" | "manual")[];
+        };
+        ReviewSourceGate: {
+            blockedBy: ("not_enabled" | "acknowledgement" | "not_configured" | "scraper_gates") | null;
+            /**
+             * @description What applies now: `none` while a gate blocks the source.
+             * @enum {string}
+             */
+            effective: "none" | "transient_insights" | "store_text";
+            /**
+             * @description The most the source’s terms allow.
+             * @enum {string}
+             */
+            maxUsage: "none" | "transient_insights" | "store_text";
+            retentionDays: number | null;
+            /** @enum {string} */
+            source: "google_places" | "gmaps_scraper" | "manual";
+            /**
+             * @description What the workspace chose (never above `maxUsage`).
+             * @enum {string}
+             */
+            usage: "none" | "transient_insights" | "store_text";
+        };
+        ReviewSourcesStatus: {
+            /** @description The owner acknowledgement of the current Google terms warning, if any. */
+            googleAcknowledgement: {
+                /** Format: date-time */
+                acknowledgedAt: string;
+                termsVersion: number;
+                userId: string | null;
+            } | null;
+            googleTerms: {
+                /** Format: date */
+                lastModified: string;
+                url: string;
+                version: number;
+                warning: {
+                    en: string;
+                    fr: string;
+                };
+            };
+            sources: components["schemas"]["ReviewSourceGate"][];
         };
         RunBusiness: {
             /** Format: uuid */
@@ -3182,6 +3355,13 @@ export type components = {
             /** @description IANA time zone, e.g. America/St_Barthelemy. */
             timezone?: string;
             websiteUrl?: string | null;
+        };
+        UpdateReviewSourcesRequest: {
+            /**
+             * @description Derive insights from scraped reviews.
+             * @enum {string}
+             */
+            gmapsScraper: "none" | "transient_insights";
         };
         UpdateSavedSearchRequest: {
             filters?: {
@@ -4633,6 +4813,171 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessReviewInsights: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessReviewInsights"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    analyzePastedReviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyzePastedReviewsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessReviewInsights"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9216,6 +9561,238 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getReviewSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSourcesStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateReviewSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateReviewSourcesRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSourcesStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    acknowledgeGoogleReviewsTerms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcknowledgeGoogleReviewsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSourcesStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    revokeGoogleReviewsTerms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewSourcesStatus"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -90,6 +90,37 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /**
+   * Google Place Details for reviews (BF-029): one paid call per business. Not retried (a call that timed out here
+   * may have been billed); the step re-checks a failed source within the hour.
+   */
+  'google-places-reviews': {
+    timeoutMs: 15_000,
+    maxRetries: 0,
+    initialDelayMs: 500,
+    maxDelayMs: 3_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
+  /** The self-hosted scraper's job API (BF-029 review jobs), per request; job creation is never retried. */
+  'maps-scraper': {
+    // Just above the adapter's own 60 s per request (a result download of up to 5 MB included).
+    timeoutMs: 65_000,
+    maxRetries: 1,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
+  /** Scraper job creation (BF-029): never retried (a POST that timed out may have created a job), but breaker-guarded. */
+  'maps-scraper-create': {
+    timeoutMs: 65_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,
@@ -106,8 +137,31 @@ export type ResiliencePolicyName = keyof typeof RESILIENCE_POLICIES;
 export const isTransient = (error: unknown): boolean =>
   !(error instanceof DomainError) || (error.httpStatus >= 500 && error.details?.retryable !== false);
 
+/**
+ * Runs `fn` under `policy`, giving it the attempt's signal combined with the caller's. A caller's cancellation then
+ * rejects inside the call with its own reason (left out of retries and breakers) instead of reaching cockatiel's
+ * timeout. Backoff waits between attempts are not interrupted (bounded by the policy's `maxDelayMs`); the next
+ * attempt starts already aborted and stops at once.
+ */
+export function executeWithSignal<T>(
+  policy: IPolicy,
+  signal: AbortSignal | undefined,
+  fn: (signal: AbortSignal) => Promise<T>,
+): Promise<T> {
+  return policy.execute(({ signal: attempt }) => fn(signal ? AbortSignal.any([signal, attempt]) : attempt));
+}
+
+/** Errors a cancelled caller sees (not failures of the dependency). */
+export const isCancellation = (error: unknown): boolean =>
+  error instanceof Error && CANCELLATIONS.has(error.name);
+const CANCELLATIONS = new Set(['AbortError', 'JobCancelledError']);
+
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
-  const transient = handleWhen(isTransient);
+  // A cancellation (the caller's signal: fetch's AbortError, or the reason it was aborted with, e.g. a cancelled
+  // job) is not an outage: never retried, never counted by the breaker. Callers go through `executeWithSignal` so
+  // their signal stays inside the call (passed to `execute`, cockatiel's timeout would turn the abort into a
+  // TaskCancelledError, which counts).
+  const transient = handleWhen((error) => isTransient(error) && !isCancellation(error));
   return wrap(
     retry(transient, {
       maxAttempts: config.maxRetries,

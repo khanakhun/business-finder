@@ -29,6 +29,7 @@ Business data comes from sources with very different terms: official paid APIs w
 - Positive: data we keep long-term is data we are allowed to keep; costs are visible and bounded.
 - Negative: golden records can lose fields after TTL if no other source confirms them — the enrichment pipeline re-confirms facts from the business's website, which we can store.
 - Action: the exact Google Maps Platform terms must be re-read at implementation time (BF-018) and encoded in the provider's licensing profile.
+- Reviews (BF-029): licensing profiles declare `reviewsUsage` (the most a provider's review text may be used for). Google Maps Platform Terms §3.2.3 (last modified 2026-08-26) forbid saving user reviews and creating content from Google Maps content, so Google review insights are off by default, need an owner's acknowledgement of a versioned warning, never store text and expire after 30 days; scraped reviews stay unstored (BF-019's promise) and are read on demand. Google content is never used to train or test models: the review eval set is synthetic.
 
 ## References
 

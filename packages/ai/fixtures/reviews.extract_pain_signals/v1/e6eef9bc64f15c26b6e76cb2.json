@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Taxi",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Chauffeur ponctuel et sympa, voiture nickel.",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Bravo pour la réactivité : réservé par SMS au [phone] lundi, réponse reçue... jeudi. Mon vol était mercredi.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "Pas de terminal de paiement, 60€ la course en espèces uniquement.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Le gérant a répondu à mon avis négatif, explications honnêtes, je redonnerai une chance.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Numéro sur la page Facebook n'est plus attribué.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "Super taxi, [person] toujours là pour nous à l'aéroport, je recommande à 200% !!",
+        "rating": 5
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": [],
+        "sentiment": 0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r2",
+        "tags": ["poor_communication"],
+        "sentiment": -0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Message de réservation traité trois jours plus tard, après le départ du client."
+      },
+      {
+        "id": "r3",
+        "tags": ["payment_friction"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Course payable seulement en liquide, carte refusée faute d’appareil."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.1,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["unreachable_by_phone", "hard_to_find_info"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Le contact téléphonique affiché en ligne ne fonctionne plus."
+      },
+      {
+        "id": "r6",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Service fiable aux arrivées, recommandation enthousiaste."
+      }
+    ],
+    "warnings": []
+  }
+}

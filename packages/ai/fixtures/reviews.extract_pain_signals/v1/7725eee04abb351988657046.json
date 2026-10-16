@@ -1,0 +1,88 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Bakery",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Pen-la té bon toubonnman, mé pa ni pon moun ka réponn téléfòn-la pou kòmandé.",
+        "rating": 4
+      },
+      {
+        "id": "r2",
+        "text": "Meilleures baguettes de l'île, sa té bèl !! Mèsi.",
+        "rating": 5
+      },
+      {
+        "id": "r3",
+        "text": "Sé ouvè 6h asi Google, nou rivé 6h15, sé té fèmé. Lapòt té ka ouvè 7h.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Bon.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Kès-la pa ka pran kat, sé lajan sèlman.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Croissants corrects, queue interminable le dimanche matin, 30 min debout.",
+        "rating": 3,
+        "language": "fr"
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["unreachable_by_phone"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Pain apprécié, mais personne ne décroche pour passer commande."
+      },
+      {
+        "id": "r2",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Baguettes jugées les meilleures du coin, client ravi."
+      },
+      {
+        "id": "r3",
+        "tags": ["inconsistent_hours"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Horaires en ligne faux : ouverture réelle une heure plus tard qu'annoncé."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["payment_friction"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Pas de paiement par carte, uniquement en espèces."
+      },
+      {
+        "id": "r6",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Viennoiseries correctes mais attente d'une demi-heure le week-end."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -21,6 +21,7 @@ export interface EvalReport {
   /** Mean per scorer over the rows it applies to (a failed row scores 0; no applicable row → 1, no rows → 0). */
   readonly means: Record<string, number>;
   readonly thresholds: Readonly<Record<string, number>>;
+  readonly maxThresholds: Readonly<Record<string, number>>;
   readonly failures: readonly string[];
   readonly passed: boolean;
   readonly totalCostUsd: number;
@@ -92,9 +93,21 @@ export async function runEval(
       ),
     ]),
   );
-  const failures = Object.entries(config.thresholds)
-    .filter(([name, min]) => (means[name] ?? 0) < min)
-    .map(([name, min]) => `${name}: ${(means[name] ?? 0).toFixed(3)} < ${min}`);
+  for (const aggregate of config.aggregates ?? []) {
+    means[aggregate.name] =
+      results.length === 0
+        ? 0
+        : aggregate.score(rows.map((row, index) => ({ row, output: results[index]?.output })));
+  }
+  const maxThresholds = config.maxThresholds ?? {};
+  const failures = [
+    ...Object.entries(config.thresholds)
+      .filter(([name, min]) => (means[name] ?? 0) < min)
+      .map(([name, min]) => `${name}: ${(means[name] ?? 0).toFixed(3)} < ${min}`),
+    ...Object.entries(maxThresholds)
+      .filter(([name, max]) => !((means[name] ?? Number.POSITIVE_INFINITY) <= max))
+      .map(([name, max]) => `${name}: ${(means[name] ?? Number.NaN).toFixed(3)} > ${max}`),
+  ];
   return {
     task: config.task.name,
     model: options.model,
@@ -103,6 +116,7 @@ export async function runEval(
     rows: results,
     means,
     thresholds: config.thresholds,
+    maxThresholds,
     failures,
     passed: failures.length === 0 && results.length > 0,
     totalCostUsd: results.reduce((sum, r) => sum + (r.costUsd ?? 0), 0),
@@ -120,7 +134,14 @@ export function reportMarkdown(report: EvalReport): string {
     '| Scorer | Mean | Threshold |',
     '|---|---|---|',
     ...Object.entries(report.means).map(
-      ([name, mean]) => `| ${name} | ${mean.toFixed(3)} | ${report.thresholds[name]?.toString() ?? '—'} |`,
+      ([name, mean]) =>
+        `| ${name} | ${mean.toFixed(3)} | ${
+          report.thresholds[name] !== undefined
+            ? `≥ ${report.thresholds[name]}`
+            : report.maxThresholds[name] !== undefined
+              ? `≤ ${report.maxThresholds[name]}`
+              : '—'
+        } |`,
     ),
   ];
   const weak = report.rows.filter((r) => r.error || Object.values(r.scores).some((s) => s < 1));

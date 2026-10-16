@@ -487,6 +487,41 @@
         "other": "connection failed"
       },
       "reacherMissing": "No Reacher service is configured on this deployment: Reacher is skipped."
+    },
+    "reviews": {
+      "title": "Review sources",
+      "description": "Which reviews may feed review insights. Review text is licensed content: it is analysed on the fly and never kept.",
+      "active": "Active",
+      "blockedBy": {
+        "not_enabled": "Off",
+        "acknowledgement": "Needs an owner’s acknowledgement",
+        "not_configured": "Needs a Google Places key",
+        "scraper_gates": "Scraper not allowed"
+      },
+      "saved": "Review sources saved.",
+      "cancel": "Cancel",
+      "google": {
+        "title": "Google reviews",
+        "summary": "Up to 5 reviews per business through the Place Details API (billed to your Google key). Insights are kept 30 days.",
+        "acknowledged": "Acknowledged on {date}.",
+        "notAcknowledged": "Off: an owner must read and acknowledge Google’s terms first.",
+        "revoke": "Stop using Google reviews",
+        "enable": "Derive insights from Google reviews…",
+        "ownerOnly": "Only a workspace owner can enable this.",
+        "dialogTitle": "Derive insights from Google reviews",
+        "termsLink": "Google Maps Platform Terms (last modified {date})",
+        "accept": "I have read the warning and Google’s terms, and accept responsibility for this use.",
+        "confirm": "Enable"
+      },
+      "scraper": {
+        "title": "Scraped reviews",
+        "summary": "Reviews read on demand by the Google Maps scraper, only where the scraper itself is allowed. Insights are kept 30 days. Turning it off deletes them."
+      },
+      "manual": {
+        "title": "Pasted reviews",
+        "summary": "Members can paste reviews on a business page. The text is anonymized, analysed and discarded."
+      },
+      "loadFailed": "The review sources could not be loaded."
     }
   },
   "features": {
@@ -981,7 +1016,8 @@
       "overview": "Overview",
       "contacts": "Contacts",
       "activity": "Activity",
-      "website": "Website"
+      "website": "Website",
+      "reviews": "Reviews"
     },
     "actions": {
       "label": "Quick actions",
@@ -1334,7 +1370,8 @@
       "dependency_skipped": "a step it needs did not run",
       "budget": "monthly budget reached",
       "cancelled": "stopped",
-      "not_registered": "not available yet"
+      "not_registered": "not available yet",
+      "licensing_disabled": "no review source enabled"
     },
     "noSolicitation": {
       "title": "This business asks not to be solicited",
@@ -1419,5 +1456,64 @@
       "partial": "Partly enriched",
       "failed": "Enrichment failed"
     }
+  },
+  "reviews": {
+    "title": "Review insights",
+    "subtitle": "Aggregated and anonymous: problems customers mention, never their words or names.",
+    "analyse": "Analyse reviews",
+    "pasteButton": "Paste reviews",
+    "analysisStarted": "Review analysis started.",
+    "analysisFailed": "The review analysis could not start.",
+    "sampleSize": "Reviews analysed",
+    "reviewCount": "{count, plural, one {# review} other {# reviews}}",
+    "sourcesLabel": "Sources",
+    "sources": {
+      "google_places": "Google reviews",
+      "gmaps_scraper": "Scraped reviews",
+      "manual": "Pasted reviews"
+    },
+    "sentiment": "Sentiment",
+    "sentiments": {
+      "negative": "Negative ({value})",
+      "mixed": "Mixed ({value})",
+      "positive": "Positive ({value})"
+    },
+    "ownerResponseRate": "Owner replies (at least)",
+    "rating": "Rating",
+    "ratingValue": "{avg} ★ ({count, plural, one {# rating} other {# ratings}})",
+    "ratingTrend": "Rating trend",
+    "trends": {
+      "up": "Rising",
+      "flat": "Stable",
+      "down": "Falling",
+      "unknown": "Not enough history"
+    },
+    "computedAt": "Analysed",
+    "expiresAt": "Kept until",
+    "unknown": "Not known",
+    "signalsTitle": "Pain signals",
+    "signalValue": "{count, plural, one {# review} other {# reviews}} · {share}",
+    "noSignals": "No pain signal in the analysed reviews.",
+    "evidenceTitle": "Evidence",
+    "evidenceHint": "Short paraphrases written by the model — not quotes. They are deleted when their source’s licence says so.",
+    "noEvidence": "No evidence kept.",
+    "keptUntil": "Kept until {date}",
+    "googleAttribution": "Includes insights derived from Google Maps reviews.",
+    "usagePolicy": "Outreach mentions these themes in general terms only and never quotes a review or names a reviewer.",
+    "emptyTitle": "No review insights yet",
+    "emptyFetch": "Analyse the reviews your enabled sources provide, or paste reviews to analyse them.",
+    "emptyNoSources": "Google and scraped reviews are off for this workspace. Paste reviews to analyse them, or ask an owner to enable a source.",
+    "settingsLink": "Review sources",
+    "paste": {
+      "title": "Paste reviews",
+      "description": "One review per paragraph (leave a blank line between reviews), up to {max}. Names, e-mails, phone numbers and links are removed before analysis, and the text is not kept. A new paste replaces the previous one.",
+      "label": "Reviews",
+      "count": "{count, plural, =0 {No review yet} one {# review to analyse} other {# reviews to analyse}}",
+      "cancel": "Cancel",
+      "analyse": "Analyse",
+      "analysing": "Analysing…",
+      "done": "Reviews analysed."
+    },
+    "loadFailed": "The review insights could not be loaded."
   }
 }

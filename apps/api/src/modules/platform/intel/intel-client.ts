@@ -3,7 +3,7 @@ import { ExternalServiceError, signInternalRequest } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type { z } from 'zod';
 import { APP_ENV, type AppEnv } from '../config/app-env.ts';
-import { policyFor, type ResiliencePolicyName } from '../resilience/resilience.ts';
+import { executeWithSignal, policyFor, type ResiliencePolicyName } from '../resilience/resilience.ts';
 
 /**
  * Signed calls to services/intel (ADR-0002, BF-008 auth): `Authorization` HMAC over method, path and body
@@ -20,7 +20,9 @@ export class IntelClient {
     options: { readonly policy?: ResiliencePolicyName; readonly signal?: AbortSignal } = {},
   ): Promise<z.output<S>> {
     const policy = policyFor(options.policy ?? 'intel');
-    return policy.execute(({ signal }) => this.send(path, body, responseSchema, signal), options.signal);
+    return executeWithSignal(policy, options.signal, (signal) =>
+      this.send(path, body, responseSchema, signal),
+    );
   }
 
   private async send<S extends z.ZodType>(

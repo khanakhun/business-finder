@@ -196,6 +196,9 @@ describe('resilience rules', () => {
   it('retries 429, 5xx and network errors only', () => {
     expect(isRetryable(new RateLimitedError('x'))).toBe(true);
     expect(isRetryable(new ExternalServiceError('s', 'x'))).toBe(true);
+    // A cancelled caller is not a provider failure (BF-029).
+    expect(isRetryable(Object.assign(new Error('cancelled'), { name: 'JobCancelledError' }))).toBe(false);
+    expect(isRetryable(Object.assign(new Error('aborted'), { name: 'AbortError' }))).toBe(false);
     expect(isRetryable(new ExternalServiceError('s', 'x', { details: { retryable: false } }))).toBe(false);
     expect(isRetryable(new TypeError('fetch failed'))).toBe(true);
     expect(isRetryable(new ProviderNotConfiguredError('Google', 'google_places'))).toBe(false);

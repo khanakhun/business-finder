@@ -137,6 +137,20 @@ export type ResiliencePolicyName = keyof typeof RESILIENCE_POLICIES;
 export const isTransient = (error: unknown): boolean =>
   !(error instanceof DomainError) || (error.httpStatus >= 500 && error.details?.retryable !== false);
 
+/**
+ * Runs `fn` under `policy`, giving it the attempt's signal combined with the caller's. A caller's cancellation then
+ * rejects inside the call with its own reason (left out of retries and breakers) instead of reaching cockatiel's
+ * timeout. Backoff waits between attempts are not interrupted (bounded by the policy's `maxDelayMs`); the next
+ * attempt starts already aborted and stops at once.
+ */
+export function executeWithSignal<T>(
+  policy: IPolicy,
+  signal: AbortSignal | undefined,
+  fn: (signal: AbortSignal) => Promise<T>,
+): Promise<T> {
+  return policy.execute(({ signal: attempt }) => fn(signal ? AbortSignal.any([signal, attempt]) : attempt));
+}
+
 /** Errors a cancelled caller sees (not failures of the dependency). */
 export const isCancellation = (error: unknown): boolean =>
   error instanceof Error && CANCELLATIONS.has(error.name);
@@ -144,10 +158,9 @@ const CANCELLATIONS = new Set(['AbortError', 'JobCancelledError']);
 
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
   // A cancellation (the caller's signal: fetch's AbortError, or the reason it was aborted with, e.g. a cancelled
-  // job) is not an outage: never retried, never counted by the breaker. This only works when callers keep their
-  // signal in the call itself rather than passing it to `execute` (cockatiel's timeout turns that abort into a
-  // TaskCancelledError, which counts). TODO(BF-029 follow-up): intel-client, email verifiers and guarded-provider
-  // still pass it to `execute`.
+  // job) is not an outage: never retried, never counted by the breaker. Callers go through `executeWithSignal` so
+  // their signal stays inside the call (passed to `execute`, cockatiel's timeout would turn the abort into a
+  // TaskCancelledError, which counts).
   const transient = handleWhen((error) => isTransient(error) && !isCancellation(error));
   return wrap(
     retry(transient, {

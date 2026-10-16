@@ -2,7 +2,11 @@ import { Resolver } from 'node:dns/promises';
 import { ExternalServiceError } from '@bf/contracts';
 import { BrokenCircuitError, TaskCancelledError } from 'cockatiel';
 import type { RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
-import { policyFor, type ResiliencePolicyName } from '../../platform/resilience/resilience.ts';
+import {
+  executeWithSignal,
+  policyFor,
+  type ResiliencePolicyName,
+} from '../../platform/resilience/resilience.ts';
 import { isPublicAddress } from '../../platform/security/ip-policy.ts';
 import type { ResolvedSecret } from '../../workspace/index.ts';
 import type { EmailVerifier } from '../application/ports.ts';
@@ -26,7 +30,7 @@ async function resilient<T>(
   call: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> {
   try {
-    return await policyFor(policy).execute(({ signal: attempt }) => call(attempt), signal);
+    return await executeWithSignal(policyFor(policy), signal, call);
   } catch (error) {
     if (error instanceof BrokenCircuitError) {
       throw new ExternalServiceError(service, 'unavailable', {

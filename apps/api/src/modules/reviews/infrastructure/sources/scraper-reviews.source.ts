@@ -2,7 +2,7 @@ import { type Clock, ExternalServiceError } from '@bf/contracts';
 import type { Redis } from 'ioredis';
 import { z } from 'zod';
 import { csvObjects, readCapped } from '../../../discovery/index.ts';
-import { isTransient, policyFor } from '../../../platform/resilience/resilience.ts';
+import { executeWithSignal, isTransient, policyFor } from '../../../platform/resilience/resilience.ts';
 import type { ReviewFetch, ReviewFetchContext, ReviewSourceAdapter } from '../../application/ports.ts';
 import type { SourceReview } from '../../domain/review.ts';
 
@@ -259,12 +259,13 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     read: (response: Response) => Promise<T>,
     retry = true,
   ): Promise<T> {
-    const exchange = async (attempt?: AbortSignal): Promise<T> => {
+    // `attempt` already combines the caller's signal with the policy attempt's.
+    const exchange = async (attempt: AbortSignal): Promise<T> => {
       const response = await fetch(new URL(path, this.options.baseUrl), {
         ...init,
         headers: { 'Content-Type': 'application/json' },
         redirect: 'error',
-        signal: AbortSignal.any([signal, ...(attempt ? [attempt] : []), AbortSignal.timeout(60_000)]),
+        signal: AbortSignal.any([attempt, AbortSignal.timeout(60_000)]),
       });
       if (!response.ok) {
         throw new ExternalServiceError('maps-scraper', `answered ${response.status}`, {
@@ -273,9 +274,7 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
       }
       return read(response);
     };
-    // The caller's signal stays in the request only (see `buildPolicy`): a cancellation never counts as an outage.
-    return policyFor(retry ? 'maps-scraper' : 'maps-scraper-create').execute(({ signal: attempt }) =>
-      exchange(attempt),
-    );
+    // The caller's signal stays inside the request: a cancellation never counts as an outage.
+    return executeWithSignal(policyFor(retry ? 'maps-scraper' : 'maps-scraper-create'), signal, exchange);
   }
 }

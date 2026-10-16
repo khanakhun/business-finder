@@ -8,6 +8,7 @@ import {
 } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import type { IPolicy } from 'cockatiel';
+import { executeWithSignal } from '../../platform/resilience/resilience.ts';
 import type { SecretResolver } from '../../workspace/index.ts';
 import { billingScopeOf, type ProviderUsageMeter, type RateLimiter } from '../application/ports.ts';
 import { skuOf } from '../domain/cost.ts';
@@ -102,10 +103,10 @@ export class GuardedProvider implements DiscoveryProvider {
     const scope = billingScopeOf(context.organizationId, credential?.source ?? null);
     await this.assertWithinBudget(context.organizationId);
     // Every attempt (retries included) takes tokens, so a failure burst cannot exceed the per-key rate.
-    const result = await this.policyFor(scope).execute(async ({ signal }) => {
+    const result = await executeWithSignal(this.policyFor(scope), context.signal, async (signal) => {
       await this.takeTokens(context.organizationId, scope, signal);
       return this.inner.fetchPage(query, { ...context, credential, signal });
-    }, context.signal);
+    });
     const callCostUsd = await this.meter(context.organizationId, scope, result);
     return { ...result, callCostUsd };
   }

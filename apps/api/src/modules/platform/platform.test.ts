@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { loadAppEnv } from './config/app-env.ts';
 import { resolveRequestId } from './context/request-context.ts';
 import { toProblem } from './errors/problem-details.filter.ts';
-import { buildPolicy, isTransient, WithResilience } from './resilience/resilience.ts';
+import { buildPolicy, executeWithSignal, isTransient, WithResilience } from './resilience/resilience.ts';
 import { zodDto } from './validation/zod-dto.ts';
 import { ZodValidationPipe } from './validation/zod-validation.pipe.ts';
 
@@ -117,25 +117,33 @@ describe('resilience', () => {
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
-  it('neither retries nor counts a cancellation (aborted fetch, cancelled job)', async () => {
+  it('neither retries nor counts a caller cancellation (executeWithSignal)', async () => {
     const policy = buildPolicy({ ...fast, breakerThreshold: 2 });
     for (const name of ['AbortError', 'JobCancelledError', 'AbortError']) {
-      // The caller's signal aborts the request itself (as adapters do), with this reason.
-      const controller = new AbortController();
-      const cancelled = Object.assign(new Error('cancelled'), { name });
+      // The caller cancels while the request runs (a cancelled run, a shutdown).
+      const caller = new AbortController();
+      const reason = Object.assign(new Error('cancelled'), { name });
       const fn = vi.fn(
-        ({ signal }: { signal: AbortSignal }) =>
+        (signal: AbortSignal) =>
           new Promise((_, reject) => {
-            const both = AbortSignal.any([signal, controller.signal]);
-            both.addEventListener('abort', () => reject(cancelled), { once: true });
-            controller.abort(cancelled);
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            setTimeout(() => caller.abort(reason), 5);
           }),
       );
-      await expect(policy.execute(fn)).rejects.toBe(cancelled);
+      await expect(executeWithSignal(policy, caller.signal, fn)).rejects.toBe(reason);
       expect(fn).toHaveBeenCalledTimes(1);
     }
     // Three cancellations, threshold two: the breaker is still closed.
-    expect(await policy.execute(async () => 'ok')).toBe('ok');
+    expect(await executeWithSignal(policy, undefined, async () => 'ok')).toBe('ok');
+    // Real failures still count.
+    for (let i = 0; i < 2; i++) {
+      await expect(
+        executeWithSignal(policy, undefined, async () => {
+          throw new Error('down');
+        }),
+      ).rejects.toThrow();
+    }
+    await expect(executeWithSignal(policy, undefined, async () => 'ok')).rejects.toThrow(/circuit/i);
   });
 
   it('does not retry client-side domain errors', async () => {

@@ -59,10 +59,51 @@ A licensing-gated review mining step that turns available review text into aggre
 - Eval report attached.
 
 ## Acceptance criteria
-- [ ] Licensing gates per source with owner acknowledgement for Google reviews (default off).
-- [ ] Reviews step produces aggregated insights with paraphrased evidence; raw text not persisted unless allowed.
-- [ ] Reviews tab, settings and manual paste work (EN/FR).
-- [ ] Eval thresholds met.
+- [x] Licensing gates per source with owner acknowledgement for Google reviews (default off).
+- [x] Reviews step produces aggregated insights with paraphrased evidence; raw text not persisted unless allowed.
+- [x] Reviews tab, settings and manual paste work (EN/FR).
+- [ ] Eval thresholds met. *(Met on simulated replay answers only — no model key was available; a recorded run is pending, see notes.)*
+
+## Implementation notes
+
+- **Module**: `apps/api/src/modules/reviews` (new bounded context; registers the `reviews` step with the BF-027
+  registry and a nightly maintenance task). Domain is pure: personal-details stripping, language, aggregator
+  (per-source *contributions* → insights), rating trend, licensing gate policy.
+- **Licensing gates** (`REVIEW_SOURCE_LICENSING`, `ProviderLicensing.reviewsUsage`): Google — off by default; enabled
+  only by a workspace owner's acknowledgement of a versioned warning (audit log `reviews.google_terms_acknowledged`
+  with terms URL and last-modified date) plus a Places key; capped at `transient_insights`, 30-day expiry. Scraper —
+  workspace opt-in (`review_source_settings`) *and* BF-019's three gates; reviews are read on demand by a single-place
+  scraper job (the step defers while it runs); the job is deleted from the scraper once read. Pasted reviews — always
+  `transient_insights`. Turning a source off forgets its insights and cached verdicts. No source allows `store_text`,
+  so `business_reviews` is never written.
+- **Google terms** (re-read 2026-10-16): GMP Terms §3.2.3 (last modified 2026-08-26) — "(a)(iii) copy and save …
+  user reviews" and "(c) No Creating Content From Google Maps Content" — hence default-off, owner acknowledgement,
+  no stored text, 30-day expiry, and no Google content in evals (§3.2.3(c)(vii)). Place Details `reviews` is the
+  Enterprise + Atmosphere SKU: $25 per 1,000 (first tier), 1,000 free per month, at most 5 reviews (relevance order).
+- **Privacy**: reviews are anonymized in memory (source-given author names, names after a title or thank-you,
+  e-mails, phones ≥ 8 digits, handles, links → placeholders) before the model; paraphrases are re-anonymized and
+  refused when longer than 20 words or quoting ≥ 5 consecutive words (or a short review whole). Stored: counts,
+  sentiment sums, owner replies, ≤ 3 paraphrases per tag, each expiring with its source.
+- **Classifier**: `reviews.extract_pain_signals` (fast tier, 20 reviews per call, untrusted-data wrapping, injection
+  warnings). No gateway response cache (it would keep raw answers); validated per-review verdicts are cached in
+  Valkey per workspace and source (30 days).
+- **Eval**: 29 batches / 184 synthetic EN/FR/Creole reviews (sarcasm, mixed, short, owner replies, 3 injection
+  attempts). Thresholds: tags macro-F1 ≥ 0.80, sentiment MAE ≤ 0.25 (new dataset-level `aggregates` and
+  `maxThresholds` in the eval harness). Replay answers are **simulated** (macro-F1 0.922, MAE 0.104): a real run
+  (`pnpm eval --task reviews.extract_pain_signals --record`) is needed before trusting the thresholds.
+- **Engine additions**: `EnrichmentStep.refreshableFor(org)` (the nightly refresh leaves out steps that could only
+  skip — reviews with no fetching source); `NightlyMaintenance` retention hooks; `EnrichmentModule`/`DiscoveryModule`
+  memoize their definitions per mode (imported by `reviews`).
+- **Concurrency**: merges lock `(workspace, business)` (advisory, transaction-scoped) and hold the source's lock
+  shared while re-checking the gate; forgetting a source holds it exclusively.
+- **Rating trend**: `business_rating_observations` (global, with expiry): a source's own rating summary and the golden
+  record's (30 days, as its provenance is usually Google); trend from one source's series spanning ≥ 14 days,
+  ±0.1★; only sources the workspace currently uses count.
+- **Decisions**: insights per `(organization_id, business_id)` (the ticket lists `business_id` only: gates and pasted
+  reviews are per workspace); a new paste replaces the previous one; `estimateCost` is an upper bound including the
+  paid Google call; owner reply rate is "at least" (source flag, else the review mentions a reply).
+- **Tests**: test Valkey container now has 64 databases (each worker suite needs its own); the reviews int suite uses
+  DB 16 and one clock shared by app and worker.
 
 ## Agent prompt
 ```text

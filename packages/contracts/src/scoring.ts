@@ -50,6 +50,8 @@ interface Text {
 export type ReasonTexts = Readonly<Partial<Record<string, Text>>>;
 
 export interface FeatureDefinition {
+  /** A short name (charts, tables, the editor). */
+  readonly label: Text;
   readonly group: FeatureGroup;
   readonly type: 'number' | 'boolean' | 'enum';
   /** The values of an enum feature. */
@@ -97,10 +99,26 @@ const PAIN_LABELS: Record<(typeof SCORED_PAIN_TAGS)[number], Text> = {
   positive_strong_reputation: { en: 'a strong reputation', fr: 'une solide réputation' },
 };
 
+const PAIN_SHORT: Record<(typeof SCORED_PAIN_TAGS)[number], Text> = {
+  booking_friction: { en: 'booking', fr: 'réservation' },
+  unreachable_by_phone: { en: 'unreachable', fr: 'injoignable' },
+  slow_or_no_reply: { en: 'slow replies', fr: 'réponses lentes' },
+  website_broken_or_outdated: { en: 'website', fr: 'site' },
+  no_online_menu_or_prices: { en: 'no menu or prices', fr: 'pas de carte ni de prix' },
+  hard_to_find_info: { en: 'hard to find', fr: 'difficile à trouver' },
+  language_barrier: { en: 'language', fr: 'langue' },
+  payment_friction: { en: 'payment', fr: 'paiement' },
+  long_wait_times: { en: 'waiting', fr: 'attente' },
+  inconsistent_hours: { en: 'opening hours', fr: 'horaires' },
+  poor_communication: { en: 'communication', fr: 'communication' },
+  positive_strong_reputation: { en: 'praise', fr: 'éloges' },
+};
+
 const painFeatures = Object.fromEntries(
   SCORED_PAIN_TAGS.map((tag) => [
     `pain_share.${tag}`,
     {
+      label: { en: `Reviews: ${PAIN_SHORT[tag].en}`, fr: `Avis : ${PAIN_SHORT[tag].fr}` },
       group: 'pain',
       type: 'number',
       unit: 'share',
@@ -125,6 +143,7 @@ const yesNo = (yes: Text, no: Text): ReasonTexts => ({ true: yes, false: no });
 const DEFINITIONS = {
   // Presence (website)
   has_website: {
+    label: { en: 'Website', fr: 'Site web' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -139,6 +158,7 @@ const DEFINITIONS = {
     ),
   },
   website_status: {
+    label: { en: 'Website status', fr: 'Statut du site' },
     group: 'presence',
     type: 'enum',
     values: WEBSITE_STATUSES,
@@ -162,6 +182,7 @@ const DEFINITIONS = {
     },
   },
   website_quality_score: {
+    label: { en: 'Website quality', fr: 'Qualité du site' },
     group: 'presence',
     type: 'number',
     unit: 'score100',
@@ -173,6 +194,7 @@ const DEFINITIONS = {
     },
   },
   psi_mobile_performance: {
+    label: { en: 'Mobile speed', fr: 'Vitesse mobile' },
     group: 'presence',
     type: 'number',
     unit: 'score100',
@@ -185,6 +207,7 @@ const DEFINITIONS = {
     reasons: { value: { en: 'Mobile speed score {value}.', fr: 'Score de vitesse mobile : {value}.' } },
   },
   lcp_mobile_seconds: {
+    label: { en: 'Mobile load time', fr: 'Temps de chargement mobile' },
     group: 'presence',
     type: 'number',
     unit: 'seconds',
@@ -202,6 +225,7 @@ const DEFINITIONS = {
     },
   },
   vision_overall: {
+    label: { en: 'Design grade', fr: 'Note de design' },
     group: 'presence',
     type: 'number',
     unit: 'score10',
@@ -211,6 +235,7 @@ const DEFINITIONS = {
     reasons: { value: { en: 'The design is graded {value}.', fr: 'Le design est noté {value}.' } },
   },
   has_https: {
+    label: { en: 'HTTPS', fr: 'HTTPS' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -222,6 +247,7 @@ const DEFINITIONS = {
     ),
   },
   site_freshness_years: {
+    label: { en: 'Site age', fr: 'Ancienneté du site' },
     group: 'presence',
     type: 'number',
     unit: 'years',
@@ -236,6 +262,7 @@ const DEFINITIONS = {
     },
   },
   has_booking_tool: {
+    label: { en: 'Online booking', fr: 'Réservation en ligne' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -250,6 +277,7 @@ const DEFINITIONS = {
     },
   },
   has_online_menu: {
+    label: { en: 'Menu or prices online', fr: 'Carte ou tarifs en ligne' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -264,6 +292,7 @@ const DEFINITIONS = {
     ),
   },
   has_contact_form: {
+    label: { en: 'Contact form', fr: 'Formulaire de contact' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -275,6 +304,7 @@ const DEFINITIONS = {
     ),
   },
   has_language_gap_for_market: {
+    label: { en: 'Missing language', fr: 'Langue manquante' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -292,6 +322,7 @@ const DEFINITIONS = {
     ),
   },
   no_solicitation_notice: {
+    label: { en: 'No-solicitation notice', fr: 'Refus du démarchage' },
     group: 'presence',
     type: 'boolean',
     unit: 'none',
@@ -308,6 +339,7 @@ const DEFINITIONS = {
   },
   // Business
   category_offer_relevance: {
+    label: { en: 'Offer fit', fr: 'Pertinence de l’offre' },
     group: 'business',
     type: 'number',
     unit: 'share',
@@ -331,6 +363,7 @@ const DEFINITIONS = {
     },
   },
   appointment_based: {
+    label: { en: 'By appointment', fr: 'Sur rendez-vous' },
     group: 'business',
     type: 'boolean',
     unit: 'none',
@@ -343,6 +376,7 @@ const DEFINITIONS = {
     ),
   },
   tourism_facing: {
+    label: { en: 'Tourism', fr: 'Tourisme' },
     group: 'business',
     type: 'boolean',
     unit: 'none',
@@ -355,6 +389,7 @@ const DEFINITIONS = {
     ),
   },
   price_level: {
+    label: { en: 'Price level', fr: 'Niveau de prix' },
     group: 'business',
     type: 'number',
     unit: 'count',
@@ -364,6 +399,7 @@ const DEFINITIONS = {
     reasons: { value: { en: 'Price level {value} of 4.', fr: 'Niveau de prix {value} sur 4.' } },
   },
   rating_avg: {
+    label: { en: 'Rating', fr: 'Note' },
     group: 'business',
     type: 'number',
     unit: 'rating',
@@ -373,6 +409,7 @@ const DEFINITIONS = {
     reasons: { value: { en: 'Rated {value}.', fr: 'Noté {value}.' } },
   },
   review_count_log: {
+    label: { en: 'Reviews', fr: 'Avis' },
     group: 'business',
     type: 'number',
     unit: 'log_count',
@@ -385,6 +422,7 @@ const DEFINITIONS = {
     reasons: { value: { en: 'Reviews: {value}.', fr: 'Avis : {value}.' } },
   },
   owner_response_rate: {
+    label: { en: 'Owner replies', fr: 'Réponses du propriétaire' },
     group: 'business',
     type: 'number',
     unit: 'share',
@@ -402,6 +440,7 @@ const DEFINITIONS = {
     },
   },
   multi_location: {
+    label: { en: 'Several locations', fr: 'Plusieurs établissements' },
     group: 'business',
     type: 'boolean',
     unit: 'none',
@@ -417,6 +456,7 @@ const DEFINITIONS = {
     ),
   },
   ad_pixels_present: {
+    label: { en: 'Online ads', fr: 'Publicité en ligne' },
     group: 'business',
     type: 'boolean',
     unit: 'none',
@@ -431,6 +471,7 @@ const DEFINITIONS = {
     ),
   },
   operating_status: {
+    label: { en: 'Open status', fr: 'Statut d’ouverture' },
     group: 'business',
     type: 'enum',
     values: OPERATING_STATUSES,
@@ -447,6 +488,7 @@ const DEFINITIONS = {
   // Pain (reviews)
   ...painFeatures,
   sentiment_avg: {
+    label: { en: 'Review sentiment', fr: 'Sentiment des avis' },
     group: 'pain',
     type: 'number',
     unit: 'none',
@@ -461,6 +503,7 @@ const DEFINITIONS = {
   },
   // Reachability
   has_verified_email: {
+    label: { en: 'Verified e-mail', fr: 'E-mail vérifié' },
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
@@ -473,6 +516,7 @@ const DEFINITIONS = {
     ),
   },
   has_usable_email: {
+    label: { en: 'Usable e-mail', fr: 'E-mail utilisable' },
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
@@ -488,6 +532,7 @@ const DEFINITIONS = {
     ),
   },
   has_generic_email_only: {
+    label: { en: 'Generic e-mail only', fr: 'E-mail générique seulement' },
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
@@ -502,6 +547,7 @@ const DEFINITIONS = {
     ),
   },
   has_phone: {
+    label: { en: 'Phone', fr: 'Téléphone' },
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
@@ -514,6 +560,7 @@ const DEFINITIONS = {
     ),
   },
   has_whatsapp: {
+    label: { en: 'WhatsApp', fr: 'WhatsApp' },
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
@@ -527,6 +574,7 @@ const DEFINITIONS = {
   },
   // Workspace
   do_not_contact: {
+    label: { en: 'Do not contact', fr: 'Ne pas contacter' },
     group: 'workspace',
     type: 'boolean',
     unit: 'none',
@@ -542,6 +590,7 @@ const DEFINITIONS = {
     ),
   },
   pipeline_status: {
+    label: { en: 'Pipeline stage', fr: 'Étape du pipeline' },
     group: 'workspace',
     type: 'enum',
     values: PIPELINE_STATUSES,
@@ -558,6 +607,7 @@ const DEFINITIONS = {
     },
   },
   days_since_last_contact: {
+    label: { en: 'Last contact', fr: 'Dernier contact' },
     group: 'workspace',
     type: 'number',
     unit: 'days',

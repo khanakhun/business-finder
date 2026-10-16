@@ -91,12 +91,13 @@ describe('scoring contracts', () => {
     }
   });
 
-  it('defines one pain feature per scored pain tag, and EN/FR texts for every feature', () => {
+  it('defines one pain feature per scored pain tag, and EN/FR labels and texts for every feature', () => {
     expect(SCORED_PAIN_TAGS).toEqual(PAIN_SIGNAL_TAGS.filter((tag) => tag !== 'other'));
     for (const tag of SCORED_PAIN_TAGS) expect(FEATURE_KEYS).toContain(`pain_share.${tag}`);
     for (const key of FEATURE_KEYS) {
-      const { description, reasons, type, values } = FEATURE_DEFINITIONS[key];
+      const { description, label, reasons, type, values } = FEATURE_DEFINITIONS[key];
       expect(description.en && description.fr, key).toBeTruthy();
+      expect(label.en && label.fr, key).toBeTruthy();
       for (const [value, text] of Object.entries(reasons)) {
         expect(text?.en && text.fr, `${key}.${value}`).toBeTruthy();
         const allowed = [

@@ -45,6 +45,7 @@ export const OVERTURE_LICENSING: ProviderLicensing = {
   attributionRequired: true,
   attributionText: 'Overture Maps Foundation (overturemaps.org)',
   commercialUseAllowed: true,
+  reviewsUsage: 'none' as const,
   notes:
     'Licensed per source (record attributes.sources): Meta, Microsoft and others CDLA-Permissive-2.0 ("Data from ' +
     '[Name]. Available under CDLA Permissive 2.0."), Foursquare Apache-2.0, AllThePlaces CC0-1.0.',
@@ -56,6 +57,7 @@ export const FOURSQUARE_LICENSING: ProviderLicensing = {
   attributionRequired: true,
   attributionText: 'Foursquare OS Places — Copyright 2024 Foursquare Labs, Inc. (Apache-2.0)',
   commercialUseAllowed: true,
+  reviewsUsage: 'none' as const,
   notes:
     'Apache-2.0: keep the licence and NOTICE with redistributed data. Gated on Hugging Face (token needed).',
 };

@@ -18,7 +18,7 @@ import {
   ENRICHMENT_REPOSITORY,
   type EnrichmentRepository,
 } from './ports.ts';
-import { StepRegistry } from './step-registry.ts';
+import { NightlyMaintenance, StepRegistry } from './step-registry.ts';
 
 const DAY_MS = 24 * 3_600_000;
 /** Candidates looked at per run the cap allows (some have nothing to do: a step that does not apply). */
@@ -94,6 +94,7 @@ export class NightlyRefresh {
     private readonly defaults: WorkspaceDefaults,
     private readonly registry: StepRegistry,
     @Inject(EMAIL_VERDICT_CACHE) private readonly verdicts: EmailVerdictCache,
+    private readonly maintenance: NightlyMaintenance,
   ) {}
 
   async run(day: string): Promise<{ readonly started: number }> {
@@ -103,14 +104,25 @@ export class NightlyRefresh {
     const verdictTtlDays = this.registry.get('email_verify')?.ttlDays ?? 60;
     const purged = await this.verdicts.purgeExpired(new Date(now - verdictTtlDays * DAY_MS));
     if (purged > 0) this.logger.info({ purged }, 'expired e-mail verdicts purged');
+    for (const [name, task] of this.maintenance.all()) {
+      try {
+        const count = await task(new Date(now));
+        if (count > 0) this.logger.info({ task: name, count }, 'nightly maintenance');
+      } catch (error) {
+        this.logger.error({ err: error, task: name }, 'nightly maintenance task failed');
+      }
+    }
     // Every registered step, with its own freshness: later steps are refreshed without changing this code.
-    const steps = [...this.registry.all().values()].map((step) => ({
-      step: step.id,
-      staleBefore: new Date(now - step.ttlDays * DAY_MS),
-    }));
-    if (steps.length === 0) return { started: 0 };
+    const registered = [...this.registry.all().values()];
+    if (registered.length === 0) return { started: 0 };
     let started = 0;
     for (const organizationId of await this.runs.trackingOrganizations()) {
+      const steps = [];
+      for (const step of registered) {
+        if (step.refreshableFor && !(await step.refreshableFor(organizationId))) continue;
+        steps.push({ step: step.id, staleBefore: new Date(now - step.ttlDays * DAY_MS) });
+      }
+      if (steps.length === 0) continue;
       const { nightlyRefreshLimit } = await this.defaults.enrichmentSettings(organizationId);
       // A retried job (same day) counts what it already started.
       const already = await this.runs.countRunsSince(

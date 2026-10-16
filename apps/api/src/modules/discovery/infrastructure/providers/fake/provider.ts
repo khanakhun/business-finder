@@ -55,6 +55,7 @@ export class FakeDiscoveryProvider implements DiscoveryProvider {
     attributionRequired: false,
     attributionText: null,
     commercialUseAllowed: true,
+    reviewsUsage: 'none' as const,
     notes: 'Fictional fixture data for tests and E2E.',
   };
   readonly costModel;

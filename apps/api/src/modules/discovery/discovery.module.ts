@@ -175,7 +175,19 @@ export class DiscoveryModule implements OnModuleInit {
     @Inject(ConnectionTesterRegistry) private readonly testers: ConnectionTesterRegistry,
   ) {}
 
+  private static readonly byMode = new Map<AppMode, DynamicModule>();
+
+  /** One definition per mode: modules importing this one (reviews, BF-029) share the app module's instance. */
   static forRoot(mode: AppMode): DynamicModule {
+    let definition = DiscoveryModule.byMode.get(mode);
+    if (!definition) {
+      definition = DiscoveryModule.build(mode);
+      DiscoveryModule.byMode.set(mode, definition);
+    }
+    return definition;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: DiscoveryModule,
       // Ingestion and tracking, areas and realtime come from their modules' public surfaces.
@@ -213,6 +225,7 @@ export class DiscoveryModule implements OnModuleInit {
         DiscoveryQueries,
       ],
       exports: [
+        ScraperAcknowledgement,
         ProviderRegistry,
         ProviderQueryBuilder,
         ProviderCostEstimator,

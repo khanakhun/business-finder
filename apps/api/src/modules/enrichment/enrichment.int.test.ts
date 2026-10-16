@@ -114,9 +114,8 @@ function testStep(
     execute: async ({ subject, signal }) => {
       executed.push({ step: id, businessId: subject.businessId });
       const mode = behaviour.get(subject.businessId);
-      if (mode === 'fail' && id === 'reviews')
-        throw new ValidationError('The reviews provider refused the place.');
-      if (mode === 'block' && id === 'reviews') {
+      if (mode === 'fail' && id === 'psi') throw new ValidationError('The psi provider refused the place.');
+      if (mode === 'block' && id === 'psi') {
         await new Promise((_, reject) =>
           signal.addEventListener('abort', () => reject(signal.reason), { once: true }),
         );
@@ -126,10 +125,11 @@ function testStep(
   };
 }
 
+// Placeholders under step ids no ticket has shipped yet (`reviews` is real since BF-029; move these on when
+// BF-030 ships `psi` and `vision_audit`).
 const TEST_STEPS = () => [
-  testStep('reviews', { cost: 0.05 }),
-  testStep('psi', { dependsOn: ['site_intel'] }),
-  testStep('vision_audit', { dependsOn: ['site_intel', 'reviews'] }),
+  testStep('psi', { cost: 0.05 }),
+  testStep('vision_audit', { dependsOn: ['site_intel', 'psi'] }),
 ];
 
 async function track(overrides: Parameters<typeof aBusiness>[0] = {}, organizationId = org): Promise<string> {
@@ -188,13 +188,14 @@ describe('manual enrichment', () => {
     expect(stepsOf(run)).toEqual({
       site_intel: ['done', null],
       email_verify: ['done', null],
-      reviews: ['done', null],
+      // The real step (BF-029): no review source is enabled for the workspace.
+      reviews: ['skipped', 'licensing_disabled'],
       psi: ['done', null],
       vision_audit: ['done', null],
     });
     // Dependencies ran first.
     const order = executed.filter((e) => e.businessId === id).map((e) => e.step);
-    expect(order.indexOf('vision_audit')).toBeGreaterThan(order.indexOf('reviews'));
+    expect(order.indexOf('vision_audit')).toBeGreaterThan(order.indexOf('psi'));
 
     const website = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body;
     expect(website.reachability).toBe('ok');
@@ -257,25 +258,23 @@ describe('manual enrichment', () => {
     expect(run.status).toBe('partially_completed');
     expect(stepsOf(run)).toMatchObject({
       site_intel: ['done', null],
-      reviews: ['failed', null],
-      psi: ['done', null],
+      psi: ['failed', null],
       vision_audit: ['skipped', 'dependency_failed'],
     });
-    expect(run.steps.find((s) => s.step === 'reviews')?.error).toBe(
-      'The reviews provider refused the place.',
-    );
+    expect(run.steps.find((s) => s.step === 'psi')?.error).toBe('The psi provider refused the place.');
   });
 
   it('skips website steps for a business without a website', async () => {
     const id = await track({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
     await owner
       .post(`/v1/businesses/${id}/enrich`)
-      .send({ steps: ['psi'] })
+      .send({ steps: ['vision_audit'] })
       .expect(201);
     const run = await settled(owner, id);
     expect(stepsOf(run)).toEqual({
       site_intel: ['skipped', 'no_website'],
-      psi: ['skipped', 'dependency_skipped'],
+      psi: ['done', null],
+      vision_audit: ['skipped', 'dependency_skipped'],
     });
     await owner.get(`/v1/businesses/${id}/website`).expect(404);
   });
@@ -285,7 +284,7 @@ describe('manual enrichment', () => {
     behaviour.set(id, 'block');
     const { body } = await owner
       .post(`/v1/businesses/${id}/enrich`)
-      .send({ steps: ['reviews'] })
+      .send({ steps: ['psi'] })
       .expect(201);
     await expect
       .poll(
@@ -298,7 +297,7 @@ describe('manual enrichment', () => {
       .toBe('running');
     const cancelled = (await owner.post(`/v1/enrichment/runs/${body.id}/cancel`).expect(200)).body;
     expect(cancelled.status).toBe('cancelled');
-    expect(stepsOf(cancelled)).toEqual({ reviews: ['skipped', 'cancelled'] });
+    expect(stepsOf(cancelled)).toEqual({ psi: ['skipped', 'cancelled'] });
   });
 
   it('enforces roles and workspaces', async () => {
@@ -316,7 +315,7 @@ describe('manual enrichment', () => {
     await outsider.get(`/v1/businesses/${id}/website/screenshots/desktop`).expect(404);
     const { body } = await owner
       .post(`/v1/businesses/${id}/enrich`)
-      .send({ steps: ['reviews'] })
+      .send({ steps: ['psi'] })
       .expect(201);
     await outsider.get(`/v1/enrichment/runs/${body.id}`).expect(404);
     await outsider.post(`/v1/enrichment/runs/${body.id}/cancel`).expect(404);
@@ -402,12 +401,12 @@ describe('bulk, budget and triggers', () => {
     const estimate = (
       await budgetOwner
         .post('/v1/enrichment/estimate')
-        .send({ businessIds: [a, b], steps: ['reviews'] })
+        .send({ businessIds: [a, b], steps: ['psi'] })
         .expect(200)
     ).body;
     expect(estimate).toMatchObject({
       businesses: 2,
-      steps: [{ step: 'reviews', willRun: 2, skipped: 0, costUsd: 0.1 }],
+      steps: [{ step: 'psi', willRun: 2, skipped: 0, costUsd: 0.1 }],
       totalCostUsd: 0.1,
       budget: { monthlyBudgetUsd: 0.06, spentUsd: 0, remainingUsd: 0.06 },
       withinBudget: false,
@@ -415,7 +414,7 @@ describe('bulk, budget and triggers', () => {
     const bulk = (
       await budgetOwner
         .post('/v1/enrichment/bulk')
-        .send({ businessIds: [a, b], steps: ['reviews'] })
+        .send({ businessIds: [a, b], steps: ['psi'] })
         .expect(202)
     ).body;
     // $0.05 fits in $0.06; the second $0.05 does not.
@@ -485,7 +484,7 @@ describe('recovery', () => {
   it('never runs a step before its dependency, even when the reconciler re-enqueues it', async () => {
     const id = await track({ websiteUrl: 'https://www.slow-dependency-enrich.com/' });
     behaviour.set(id, 'block');
-    // vision_audit needs reviews; reviews (blocked here) is still running.
+    // vision_audit needs psi; psi (blocked here) is still running.
     const { body } = await owner
       .post(`/v1/businesses/${id}/enrich`)
       .send({ steps: ['vision_audit'] })
@@ -495,7 +494,7 @@ describe('recovery', () => {
         (s: { step: string }) => s.step === name,
       );
     await expect
-      .poll(async () => (await step('reviews'))?.status, { timeout: 20_000, interval: 100 })
+      .poll(async () => (await step('psi'))?.status, { timeout: 20_000, interval: 100 })
       .toBe('running');
     // Make the waiting step look like its job was lost long ago.
     await db
@@ -514,7 +513,7 @@ describe('recovery', () => {
     const id = await track({ websiteUrl: 'https://www.lost-worker-enrich.com/' });
     const { body } = await owner
       .post(`/v1/businesses/${id}/enrich`)
-      .send({ steps: ['reviews'] })
+      .send({ steps: ['psi'] })
       .expect(201);
     await settled(owner, id);
     // Simulate a crash mid-step: back to running with an old heartbeat, run reopened.

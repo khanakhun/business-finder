@@ -77,6 +77,11 @@ export interface EnrichmentStep {
   estimateCost(subject: EnrichmentSubject): number;
   /** Overrides the TTL rule when a step knows better (e.g. an output older than its source). */
   isStale?(last: StepOutput, now: Date): boolean;
+  /**
+   * Whether the nightly refresh should consider this step for the workspace at all (default: yes). A step that can
+   * only skip there (e.g. reviews with every licensing gate off) would otherwise look stale forever (BF-029).
+   */
+  refreshableFor?(organizationId: string): Promise<boolean>;
   execute(execution: StepExecution): Promise<StepResult>;
 }
 

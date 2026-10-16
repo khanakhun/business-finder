@@ -16,9 +16,15 @@
         "RATE_LIMITED",
         "BUDGET_EXCEEDED",
         "DISCOVERY_PROVIDER_NOT_CONFIGURED",
+        "SITE_VERSION_CONFLICT",
         "EXTERNAL_SERVICE_FAILED",
         "INTERNAL"
       ],
+      "type": "string"
+    },
+    "currentVersionId": {
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
       "type": "string"
     },
     "detail": {
@@ -28,6 +34,9 @@
       "items": {
         "additionalProperties": false,
         "properties": {
+          "code": {
+            "type": "string"
+          },
           "message": {
             "type": "string"
           },

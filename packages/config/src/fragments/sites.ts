@@ -1,0 +1,25 @@
+import { z } from 'zod';
+import { secret } from '../schema.ts';
+
+/** The API's side of the site platform (BF-035): the renderer it refreshes and the asset host sites may use. */
+export const sitesApiEnv = z.object({
+  SITES_INTERNAL_URL: z
+    .url()
+    .default('http://127.0.0.1:3100')
+    .describe('Internal URL of apps/sites; the API asks it to refresh a site after a publication changes.'),
+  SITES_REVALIDATE_SECRET: secret(
+    z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        'Shared secret signing revalidation calls to apps/sites, ≥ 32 chars. Unset: no revalidation (refused in production).',
+      ),
+  ),
+  SITES_ASSETS_BASE_URL: z
+    .url()
+    .default('https://assets.sites.localhost')
+    .describe(
+      'Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host.',
+    ),
+});

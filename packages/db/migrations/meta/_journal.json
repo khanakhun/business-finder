@@ -183,6 +183,13 @@
       "when": 1792128523838,
       "tag": "0025_scoring_profile_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792153000259,
+      "tag": "0026_sites",
+      "breakpoints": true
     }
   ]
 }

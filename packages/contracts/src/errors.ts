@@ -15,6 +15,7 @@ export const ERROR_CODES = {
   RATE_LIMITED: { status: 429, title: 'Too many requests' },
   BUDGET_EXCEEDED: { status: 402, title: 'Budget exceeded' },
   DISCOVERY_PROVIDER_NOT_CONFIGURED: { status: 409, title: 'Discovery provider not configured' },
+  SITE_VERSION_CONFLICT: { status: 409, title: 'The site changed since this edit started' },
   EXTERNAL_SERVICE_FAILED: { status: 502, title: 'External service failed' },
   INTERNAL: { status: 500, title: 'Internal error' },
 } as const satisfies Record<string, { status: number; title: string }>;
@@ -27,6 +28,8 @@ export const ERROR_TYPE_BASE = 'https://errors.business-finder.dev/';
 export const ProblemFieldErrorSchema = z.object({
   path: z.array(z.union([z.string(), z.number()])),
   message: z.string(),
+  /** A machine-readable cause for this field (e.g. a SiteSpec issue code such as `external_url`). */
+  code: z.string().optional(),
 });
 export type ProblemFieldError = z.infer<typeof ProblemFieldErrorSchema>;
 
@@ -46,6 +49,8 @@ export const ProblemDetailsSchema = z
       .optional(),
     traceId: z.string().optional(),
     errors: z.array(ProblemFieldErrorSchema).optional(),
+    /** `SITE_VERSION_CONFLICT`: the site's current version, to reload before editing again. */
+    currentVersionId: z.uuid().optional(),
   })
   .meta({ id: 'ProblemDetails', description: 'RFC 9457 problem details (application/problem+json).' });
 export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;

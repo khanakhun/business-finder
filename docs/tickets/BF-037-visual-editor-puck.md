@@ -194,8 +194,20 @@ visual parity report in the PR.
     save (load the latest; rebase comes in part 2), a read-only canvas without `sites:generate`.
   - API (BF-035 change, required by this ticket): a version may keep the errors of content still being written; its
     summary counts them; publishing still refuses every error.
-- **Planned**: part 2 — site settings (theme, contact, navigation, header/footer, locales, SEO, with the missing
-  BF-033 operations), pages, the validation worker and issues panel, local drafts, undo/redo and rebase, and the
-  fields' help texts (the schema's descriptions, English only today: translated first). Part 3 —
-  versions drawer (diff, restore), publish popover, image library and upload, facts, JSON mode, visual parity, a11y
-  and performance checks.
+- **Part 2 (stacked PR 2/3)**:
+  - `setLocales` in BF-033 (`@bf/site-schema`): the site's languages and default; a removed language takes its texts
+    (restored by the inverse); a text left in no language is refused. Site and page search texts use `updateText`.
+  - Site-level changes (`state/site-changes.ts`): applied to the working site as operations, undone by inverses and
+    redone; rebase replays local operations on a newer version, setting aside those that no longer apply.
+  - Panels (Puck plugins beside Sections and Outline): Site (theme: style, palette with contrast checks and the
+    validator's suggested fixes, fonts, corners, spacing, photos; menu: reorder, labels per language, at most 7;
+    header and footer; languages; search texts; settings with the preview locks; contact details read-only, from the
+    facts), Pages (templates About/Services/Menu/Contact/Gallery/FAQ filled for the site; reorder; delete with a
+    confirmation, the home page stays) and Issues.
+  - Validation in a Web Worker (`validateSite`, as publishing checks) on the site as the canvas shows it; issues
+    grouped by page and section, a click selects the section and focuses its field; an error count in the header.
+  - Local drafts in IndexedDB per site, offered back after a reload (replayed on the version open now); a conflict
+    can now re-apply the local changes on the latest version, listing those that no longer apply.
+  - Field help per field (EN/FR); new blocks start in the first layout the site can show as is.
+- **Planned**: part 3 — versions drawer (diff, restore), publish popover, image library and upload, facts, JSON mode,
+  visual parity, a11y and performance checks.

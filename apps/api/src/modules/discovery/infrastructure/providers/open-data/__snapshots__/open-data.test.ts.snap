@@ -1,0 +1,98 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`open-data records > maps places to storable records with per-source licences 1`] = `
+{
+  "address": {
+    "city": "Gustavia",
+    "countryCode": "BL",
+    "line1": "12 Rue de l’Exemple",
+    "postalCode": "97133",
+  },
+  "attributes": {
+    "confidence": 0.92,
+    "otherWebsites": [
+      "https://autre.example",
+    ],
+    "release": "2026-09-23.1",
+    "sources": [
+      {
+        "dataset": "meta",
+        "license": "CDLA-Permissive-2.0",
+        "recordId": "123",
+      },
+    ],
+  },
+  "emails": [],
+  "fetchedAt": "2026-10-15T12:00:00.000Z",
+  "location": {
+    "lat": 17.8963,
+    "lng": -62.8499,
+  },
+  "name": "Café Fictif",
+  "operatingStatus": "closed_temporarily",
+  "phones": [
+    "+590 590 00 00 01",
+  ],
+  "provider": "overture",
+  "providerCategories": [
+    {
+      "key": "cafe",
+    },
+    {
+      "key": "coffee_shop",
+    },
+  ],
+  "providerRef": "08f-001",
+  "raw": {
+    "address": {
+      "city": "Gustavia",
+      "countryCode": "BL",
+      "line1": "12 Rue de l’Exemple",
+      "postalCode": "97133",
+      "region": null,
+    },
+    "brand": null,
+    "categories": [
+      {
+        "key": "cafe",
+        "label": null,
+      },
+      {
+        "key": "coffee_shop",
+        "label": null,
+      },
+    ],
+    "confidence": 0.92,
+    "emails": [],
+    "id": "08f-001",
+    "location": {
+      "lat": 17.8963,
+      "lng": -62.8499,
+    },
+    "name": "Café Fictif",
+    "operatingStatus": "temporarily_closed",
+    "phones": [
+      "+590 590 00 00 01",
+    ],
+    "socials": [
+      "https://www.instagram.com/cafe_fictif",
+    ],
+    "sources": [
+      {
+        "dataset": "meta",
+        "license": "CDLA-Permissive-2.0",
+        "recordId": "123",
+      },
+    ],
+    "websites": [
+      "https://cafe-fictif.example",
+      "javascript:alert(1)",
+      "https://autre.example",
+    ],
+  },
+  "socials": [
+    "https://www.instagram.com/cafe_fictif",
+  ],
+  "website": "https://cafe-fictif.example",
+}
+`;

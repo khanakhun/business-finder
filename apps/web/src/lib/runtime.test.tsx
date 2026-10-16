@@ -24,6 +24,8 @@ describe('api client', () => {
     expect(queryKeys.system.info()).toEqual(['system', 'info']);
     expect(queryKeys.system.all).toEqual(['system']);
     expect(queryKeys.taxonomy.tree('fr')).toEqual(['taxonomy', 'tree', 'fr']);
+    expect(queryKeys.discovery.providers()).toEqual(['discovery', 'providers']);
+    expect(queryKeys.discovery.scraper()).toEqual(['discovery', 'scraper']);
     expect(queryKeys.taxonomy.mappings('needs_review', 'en')).toEqual([
       'taxonomy',
       'mappings',

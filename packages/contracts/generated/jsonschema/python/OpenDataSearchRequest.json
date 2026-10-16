@@ -1,0 +1,188 @@
+{
+  "$id": "https://schemas.business-finder.dev/OpenDataSearchRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/open-data/places/search request on services/intel.",
+  "properties": {
+    "categories": {
+      "description": "Dataset-native category keys (Overture basic_category, Foursquare category ids); empty = all.",
+      "items": {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array"
+    },
+    "cursor": {
+      "maxLength": 500,
+      "type": "string"
+    },
+    "dataset": {
+      "enum": [
+        "overture",
+        "foursquare"
+      ],
+      "type": "string"
+    },
+    "geometry": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "bbox": {
+              "additionalProperties": false,
+              "properties": {
+                "east": {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "type": "number"
+                },
+                "north": {
+                  "maximum": 90,
+                  "minimum": -90,
+                  "type": "number"
+                },
+                "south": {
+                  "maximum": 90,
+                  "minimum": -90,
+                  "type": "number"
+                },
+                "west": {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "west",
+                "south",
+                "east",
+                "north"
+              ],
+              "type": "object"
+            },
+            "type": {
+              "const": "BBox",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "bbox"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": false,
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "maximum": 180,
+                      "minimum": -180,
+                      "type": "number"
+                    },
+                    {
+                      "maximum": 90,
+                      "minimum": -90,
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "minItems": 4,
+                "type": "array"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "type": {
+              "const": "Polygon",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coordinates": {
+              "items": {
+                "items": {
+                  "items": {
+                    "items": false,
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "maximum": 180,
+                        "minimum": -180,
+                        "type": "number"
+                      },
+                      {
+                        "maximum": 90,
+                        "minimum": -90,
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  "minItems": 4,
+                  "type": "array"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "type": {
+              "const": "MultiPolygon",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "hfToken": {
+      "description": "Hugging Face token for gated datasets (Foursquare); never logged or cached.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+    },
+    "limit": {
+      "default": 200,
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "release": {
+      "description": "Pinned release; the latest known one when omitted.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}(\\.\\d{1,3})?$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dataset",
+    "geometry",
+    "categories",
+    "limit"
+  ],
+  "title": "OpenDataSearchRequest",
+  "type": "object"
+}

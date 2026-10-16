@@ -1,0 +1,40 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API (fixture)",
+  "osm3s": {
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 1000000001,
+      "lat": 17.8965,
+      "lon": -62.8501,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Café Fictif OSM",
+        "opening_hours": "Mo-Fr 07:00-18:30; Sa 08:00-14:00; Su off",
+        "phone": "+590 590 00 00 10;+590 690 00 00 10",
+        "website": "https://cafe-osm.example",
+        "addr:housenumber": "5",
+        "addr:street": "Rue Imaginaire",
+        "addr:city": "Gustavia",
+        "addr:postcode": "97133",
+        "contact:instagram": "https://www.instagram.com/cafe_osm_fictif",
+        "email": "contact@cafe-osm.example"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2000000002,
+      "center": { "lat": 17.9041, "lon": -62.8182 },
+      "tags": {
+        "shop": "bakery",
+        "name": "Boulangerie OSM Démo",
+        "opening_hours": "sunrise-sunset",
+        "website": "www.boulangerie-demo.example"
+      }
+    },
+    { "type": "node", "id": 1000000003, "lat": 17.9, "lon": -62.84, "tags": { "amenity": "cafe" } }
+  ]
+}

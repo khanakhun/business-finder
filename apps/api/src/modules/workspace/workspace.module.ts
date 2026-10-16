@@ -5,6 +5,7 @@ import { InMemoryObjectStorage, OBJECT_STORAGE } from '../platform/storage/objec
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { AuditLogger } from './application/audit-logger.ts';
 import { ListAuditLogsQuery } from './application/audit-logs.query.ts';
+import { AuditTrail } from './application/audit-trail.ts';
 import { ConnectionTesterRegistry } from './application/connection-testers.ts';
 import { FeatureFlagService } from './application/feature-flags.service.ts';
 import { IdentityAuditSubscriber } from './application/identity-audit.subscriber.ts';
@@ -40,6 +41,7 @@ import { WorkspaceSettingsController } from './interface/http/workspace-settings
 /** Services other modules use (see index.ts): audit, secrets, feature flags, readiness. */
 const PUBLIC = [
   AuditLogger,
+  AuditTrail,
   SecretsVault,
   SecretResolver,
   ConnectionTesterRegistry,

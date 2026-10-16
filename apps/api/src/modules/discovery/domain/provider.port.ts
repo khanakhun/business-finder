@@ -50,6 +50,8 @@ export interface ProviderFetchResult {
   readonly sku: string;
   /** Set by the metering decorator: the call's cost after free monthly allowances. */
   readonly callCostUsd?: number;
+  /** Asynchronous sources (scraper jobs): ask again with `nextPageToken` after this delay. */
+  readonly pollAfterMs?: number;
 }
 
 export interface ConnectionCheck {
@@ -79,6 +81,11 @@ export interface DiscoveryProvider {
    * provider's last possible page.
    */
   fetchPage(query: ProviderQuery, context: ProviderCallContext): Promise<ProviderFetchResult>;
+  /**
+   * Extra per-workspace gate beyond the feature flag (the scraper's recorded owner acknowledgement). Providers
+   * without one are allowed whenever their flag is.
+   */
+  isAllowed?(organizationId: string): Promise<boolean>;
   /** A cheap call proving the credential works (Settings → Integrations). */
   testConnection(credential: ProviderCredential, signal: AbortSignal): Promise<ConnectionCheck>;
 }

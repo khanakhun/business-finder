@@ -53,3 +53,6 @@ tmp/
 # Eval reports (attach them to PRs; not versioned)
 packages/ai/evals/reports/*
 !packages/ai/evals/reports/.gitkeep
+
+# Open-data extracts cached by services/intel (BF-019)
+services/intel/.cache/

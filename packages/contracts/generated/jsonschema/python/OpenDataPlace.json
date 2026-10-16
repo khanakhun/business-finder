@@ -1,0 +1,247 @@
+{
+  "$id": "https://schemas.business-finder.dev/OpenDataPlace.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A place from an open dataset, as services/intel normalizes it.",
+  "properties": {
+    "address": {
+      "additionalProperties": false,
+      "properties": {
+        "city": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "countryCode": {
+          "anyOf": [
+            {
+              "maxLength": 2,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line1": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "postalCode": {
+          "anyOf": [
+            {
+              "maxLength": 20,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "region": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "line1",
+        "city",
+        "postalCode",
+        "region",
+        "countryCode"
+      ],
+      "type": "object"
+    },
+    "brand": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "categories": {
+      "description": "Primary first.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "type": "object"
+      },
+      "maxItems": 30,
+      "type": "array"
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "emails": {
+      "items": {
+        "maxLength": 254,
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "id": {
+      "description": "Dataset id (Overture GERS id, Foursquare fsq_place_id).",
+      "maxLength": 200,
+      "type": "string"
+    },
+    "location": {
+      "$ref": "https://schemas.business-finder.dev/LatLng.json"
+    },
+    "name": {
+      "maxLength": 300,
+      "type": "string"
+    },
+    "operatingStatus": {
+      "anyOf": [
+        {
+          "enum": [
+            "open",
+            "temporarily_closed",
+            "permanently_closed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "phones": {
+      "items": {
+        "maxLength": 40,
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "socials": {
+      "items": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    },
+    "sources": {
+      "description": "Upstream contributors and their licences (Overture `sources`).",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset": {
+            "maxLength": 120,
+            "type": "string"
+          },
+          "license": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "dataset",
+          "recordId",
+          "license"
+        ],
+        "type": "object"
+      },
+      "maxItems": 20,
+      "type": "array"
+    },
+    "websites": {
+      "items": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "maxItems": 10,
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "categories",
+    "location",
+    "address",
+    "phones",
+    "websites",
+    "emails",
+    "socials",
+    "operatingStatus",
+    "confidence",
+    "brand",
+    "sources"
+  ],
+  "title": "OpenDataPlace",
+  "type": "object"
+}

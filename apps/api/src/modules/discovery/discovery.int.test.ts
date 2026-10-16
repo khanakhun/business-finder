@@ -215,6 +215,53 @@ describe('providers', () => {
   });
 });
 
+describe('open-data, OSM and scraper providers', () => {
+  it('lists Overture, Foursquare and OSM with their licences, and no scraper unless deployed', async () => {
+    const listed = await member.get('/v1/discovery/providers').expect(200);
+    const byId = Object.fromEntries(listed.body.items.map((p: { id: string }) => [p.id, p]));
+    expect(byId.overture).toMatchObject({
+      status: 'ready',
+      licensing: { retentionDays: null, attributionRequired: true },
+    });
+    expect(byId.foursquare).toMatchObject({ status: 'not_configured', secretName: 'huggingface' });
+    expect(byId.osm).toMatchObject({
+      status: 'ready',
+      licensing: { attributionText: '© OpenStreetMap contributors' },
+    });
+    expect(byId.gmaps_scraper).toBeUndefined();
+    // Default preference order: open data first.
+    expect(listed.body.items.map((p: { id: string }) => p.id).slice(0, 3)).toEqual([
+      'overture',
+      'foursquare',
+      'osm',
+    ]);
+  });
+
+  it('pins an Overture release in the workspace settings', async () => {
+    const saved = await owner
+      .patch('/v1/workspace/settings', { discovery: { overtureRelease: '2026-09-23.1' } })
+      .expect(200);
+    expect(saved.body.discovery.overtureRelease).toBe('2026-09-23.1');
+    await owner.patch('/v1/workspace/settings', { discovery: { overtureRelease: 'latest' } }).expect(422);
+  });
+
+  it('refuses a scraper acknowledgement while the scraper is not deployed', async () => {
+    const before = await owner.get('/v1/discovery/scraper').expect(200);
+    expect(before.body).toMatchObject({
+      deployed: false,
+      flagEnabled: false,
+      acknowledgement: null,
+      allowed: false,
+    });
+    expect(before.body.warning.fr).toContain('conditions d’utilisation');
+    await member.post('/v1/discovery/scraper/acknowledgement', { warningVersion: 1 }).expect(403);
+    const refused = await owner
+      .post('/v1/discovery/scraper/acknowledgement', { warningVersion: 1 })
+      .expect(409);
+    expect(refused.body.reason).toBe('SCRAPER_NOT_DEPLOYED');
+  });
+});
+
 describe('Google key connection test', () => {
   const GOOGLE_KEY = `AIza${'x'.repeat(35)}`;
 

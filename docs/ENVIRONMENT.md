@@ -133,6 +133,11 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NOMINATIM_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address sent to Nominatim (User-Agent and `email` parameter), required by its policy. |
 | `DISCOVERY_APPLY_FREE_TIER` | App-specific | api, worker | no | `true` |  | Count providers' free monthly allowances (per billing account) before estimating cost. |
 | `GOOGLE_PLACES_REQUESTS_PER_SECOND` | App-specific | api, worker | no | `5` |  | Client-side cap on Google Places calls per second, per API key (Google allows ~100/s). |
+| `OVERPASS_URL` | App-specific | api, worker | no | `https://overpass-api.de/api/interpreter` |  | Overpass API endpoint. The public one is for light use: self-host or use a paid instance in production. |
+| `OVERPASS_REQUESTS_PER_SECOND` | App-specific | api, worker | no | `0.1` |  | Overpass calls per second (no parallel queries on public instances; raise for a self-hosted one). |
+| `OVERPASS_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address in the Overpass User-Agent (usage policy: identify the application). |
+| `MAPS_SCRAPER_URL` | App-specific | api, worker | no |  |  | Self-hosted gosom/google-maps-scraper web API (only used with FEATURE_MAPS_SCRAPER). |
+| `MAPS_SCRAPER_MAX_TIME_SECONDS` | App-specific | api, worker | no | `300` |  | Time budget of one scraper job (the scraper needs at least 3 minutes). |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |
@@ -147,5 +152,16 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `INTEL_MAX_REQUEST_BYTES` | App-specific | intel | no | `1048576` |  | Largest request body accepted on /v1, checked before authentication (bytes). |
 | `INTEL_FETCH_TIMEOUT_SECONDS` | App-specific | intel | no | `20` |  | Total time budget of one safe_fetch call, redirects included. |
 | `INTEL_FETCH_MAX_BYTES` | App-specific | intel | no | `10485760` |  | Largest response body safe_fetch accepts after decompression (bytes). |
+| `OPEN_DATA_CACHE_DIR` | App-specific | intel | no | `.cache/open-data` |  | Local directory for regional open-data extracts (BF-019), relative to services/intel. |
+| `OPEN_DATA_OBJECT_CACHE` | App-specific | intel | no | `false` |  | Also keep regional extracts in the artifacts bucket (open-data/…), shared by intel replicas. |
+| `OPEN_DATA_EXTENSION_DIR` | App-specific | intel | no |  |  | DuckDB extension directory (the image pre-installs httpfs there); DuckDB default when unset. |
+| `OPEN_DATA_CACHE_MAX_MB` | App-specific | intel | no | `5120` |  | Size cap of the local extract cache (least recently used extracts are evicted). |
+| `OPEN_DATA_QUERY_TIMEOUT_SECONDS` | App-specific | intel | no | `120` |  | Time budget of one open-data query (a first extract downloads from the dataset bucket). |
+| `OPEN_DATA_MEMORY_LIMIT` | App-specific | intel | no | `1GB` |  | DuckDB memory limit per open-data query. |
+| `OVERTURE_RELEASE` | App-specific | intel | no |  |  | Pinned Overture release (e.g. 2026-09-23.1); the latest from the STAC catalog when unset. |
+| `OVERTURE_STAC_URL` | App-specific | intel | no | `https://stac.overturemaps.org/catalog.json` |  | Overture STAC root (its `latest` key names the current release). |
+| `OVERTURE_SOURCE_URL` | App-specific | intel | no | `s3://overturemaps-us-west-2/release/{release}/theme=places/type=place/*.parquet` |  | Overture places parquet glob ({release} is substituted). Anonymous S3, us-west-2. |
+| `FOURSQUARE_RELEASE` | App-specific | intel | no | `2026-09-15` |  | Foursquare OS Places release directory (dt=…) on Hugging Face. |
+| `FOURSQUARE_SOURCE_URL` | App-specific | intel | no | `hf://datasets/foursquare/fsq-os-places/release/dt={release}/places/parquet/*.parquet` |  | Foursquare OS Places parquet glob ({release} substituted); gated, needs a Hugging Face token. |
 
 <!-- env:end -->

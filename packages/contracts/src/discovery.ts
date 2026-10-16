@@ -186,3 +186,41 @@ export const ProviderUsageReportSchema = z
   })
   .meta({ id: 'ProviderUsageReport' });
 export type ProviderUsageReport = z.infer<typeof ProviderUsageReportSchema>;
+
+/**
+ * The warning a workspace owner must acknowledge before the Google Maps scraper can run (BF-019, ADR-0013).
+ * Changing the text means bumping the version: earlier acknowledgements then no longer count.
+ */
+export const SCRAPER_WARNING_VERSION = 1;
+export const SCRAPER_WARNING = {
+  en:
+    'The Google Maps scraper collects data from Google Maps pages. Scraping is likely to breach Google’s Terms ' +
+    'of Service and may be unlawful in some jurisdictions. Results carry no licence, are kept for 30 days only ' +
+    'and reviews are never stored. You enable it at your own risk, and you are responsible for complying with ' +
+    'applicable terms and laws.',
+  fr:
+    'Le scraper Google Maps collecte des données depuis les pages Google Maps. Le scraping enfreint ' +
+    'probablement les conditions d’utilisation de Google et peut être illégal dans certains pays. Les ' +
+    'résultats ne sont couverts par aucune licence, sont conservés 30 jours seulement et les avis ne sont ' +
+    'jamais enregistrés. Vous l’activez à vos risques, et vous êtes responsable du respect des conditions et ' +
+    'lois applicables.',
+} as const;
+
+export const ScraperStatusSchema = z
+  .object({
+    deployed: z.boolean().describe('FEATURE_MAPS_SCRAPER is on and a scraper URL is configured.'),
+    flagEnabled: z.boolean().describe('The workspace feature flag `mapsScraper` is on.'),
+    acknowledgement: z
+      .object({
+        userId: z.string().nullable(),
+        acknowledgedAt: z.iso.datetime(),
+        warningVersion: z.number().int(),
+      })
+      .nullable()
+      .describe('The owner acknowledgement in force (current warning version), if any.'),
+    allowed: z.boolean().describe('All three gates pass: the scraper may run for this workspace.'),
+    warningVersion: z.number().int(),
+    warning: z.object({ en: z.string(), fr: z.string() }),
+  })
+  .meta({ id: 'ScraperStatus' });
+export type ScraperStatus = z.infer<typeof ScraperStatusSchema>;

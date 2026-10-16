@@ -1,5 +1,6 @@
 // Public surface of the workspace module (ARCHITECTURE.md §5.1): other modules import from here only.
 export { type AuditActor, type AuditEntryInput, AuditLogger } from './application/audit-logger.ts';
+export { AuditTrail } from './application/audit-trail.ts';
 export {
   type ConnectionTester,
   ConnectionTesterRegistry,

@@ -28,6 +28,10 @@ export const queryKeys = {
     tree: (locale: string) => ['taxonomy', 'tree', locale] as const,
     mappings: (status: string, locale: string) => ['taxonomy', 'mappings', status, locale] as const,
   }),
+  discovery: defineQueryKeys('discovery', {
+    providers: () => ['discovery', 'providers'] as const,
+    scraper: () => ['discovery', 'scraper'] as const,
+  }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,
     logo: () => ['workspace', 'logo'] as const,

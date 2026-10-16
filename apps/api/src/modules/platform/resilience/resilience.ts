@@ -45,6 +45,17 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /** Open-data queries in intel (BF-019): a first extract for an area downloads from the dataset's bucket. */
+  'intel-open-data': {
+    // Longer than intel's own budget (OPEN_DATA_QUERY_TIMEOUT_SECONDS, 120 s) so intel answers first, and no
+    // retry: a timed-out extract retried would build twice.
+    timeoutMs: 135_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,
@@ -59,7 +70,7 @@ export type ResiliencePolicyName = keyof typeof RESILIENCE_POLICIES;
 
 /** Only transient failures are retried / counted by the breaker: not our own 4xx-class domain errors. */
 export const isTransient = (error: unknown): boolean =>
-  !(error instanceof DomainError) || error.httpStatus >= 500;
+  !(error instanceof DomainError) || (error.httpStatus >= 500 && error.details?.retryable !== false);
 
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
   const transient = handleWhen(isTransient);

@@ -1,6 +1,7 @@
 import {
   BudgetExceededError,
   type Clock,
+  ForbiddenError,
   ProviderNotConfiguredError,
   type ProviderQuery,
   RateLimitedError,
@@ -86,7 +87,17 @@ export class GuardedProvider implements DiscoveryProvider {
     return this.inner.testConnection(credential, signal);
   }
 
+  async isAllowed(organizationId: string): Promise<boolean> {
+    return this.inner.isAllowed ? this.inner.isAllowed(organizationId) : true;
+  }
+
   async fetchPage(query: ProviderQuery, context: ProviderCallContext): Promise<ProviderFetchResult> {
+    // Gated providers (the scraper) are refused here too, not only by selection.
+    if (this.inner.isAllowed && !(await this.inner.isAllowed(context.organizationId))) {
+      throw new ForbiddenError(`${this.label} is not enabled for this workspace.`, {
+        details: { reason: 'PROVIDER_NOT_ALLOWED' },
+      });
+    }
     const credential = await this.credentialFor(context.organizationId);
     const scope = billingScopeOf(context.organizationId, credential?.source ?? null);
     await this.assertWithinBudget(context.organizationId);

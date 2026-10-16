@@ -114,9 +114,9 @@ export class ProviderSelectionService {
       this.registry.all().map(async (provider) => ({
         id: provider.id,
         capabilities: provider.capabilities,
-        available: provider.featureFlag
-          ? await this.flags.isEnabled(organizationId, provider.featureFlag)
-          : true,
+        available:
+          (provider.featureFlag ? await this.flags.isEnabled(organizationId, provider.featureFlag) : true) &&
+          (provider.isAllowed ? await provider.isAllowed(organizationId) : true),
         enabled: !settings.disabledProviders.includes(provider.id),
         configured:
           !provider.secretName ||

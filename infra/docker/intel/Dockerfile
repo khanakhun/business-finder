@@ -39,6 +39,11 @@ COPY --from=build /opt/venv /opt/venv
 RUN if [ "$INSTALL_BROWSERS" = "true" ]; then \
       playwright install --with-deps --only-shell chromium && rm -rf /var/lib/apt/lists/*; \
     fi
+# DuckDB httpfs bundled at build time (no extension download at runtime) and a writable extract cache.
+ENV OPEN_DATA_EXTENSION_DIR=/opt/duckdb-extensions \
+    OPEN_DATA_CACHE_DIR=/var/cache/bf-intel/open-data
+RUN python -c "import duckdb; duckdb.connect(config={'extension_directory': '/opt/duckdb-extensions'}).execute('INSTALL httpfs')" \
+    && mkdir -p /var/cache/bf-intel && chown 10001:10001 /var/cache/bf-intel
 WORKDIR /app
 COPY --from=build /src/app ./app
 USER 10001:10001

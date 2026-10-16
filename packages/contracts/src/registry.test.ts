@@ -10,6 +10,9 @@ describe('JSON Schema export', () => {
       'jsonschema/python/EchoRequest.json',
       'jsonschema/python/EchoResponse.json',
       'jsonschema/python/LatLng.json',
+      'jsonschema/python/OpenDataPlace.json',
+      'jsonschema/python/OpenDataSearchRequest.json',
+      'jsonschema/python/OpenDataSearchResponse.json',
       'jsonschema/python/ProblemDetails.json',
       'error-codes.json',
     ]);

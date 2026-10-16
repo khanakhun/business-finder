@@ -1,0 +1,106 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`scraper CSV > maps rows to short-lived records without reviews 1`] = `
+[
+  {
+    "address": {
+      "city": "Gustavia",
+      "countryCode": "BL",
+      "formatted": "1 Rue Exemple, Gustavia 97133",
+      "line1": "1 Rue Exemple",
+      "postalCode": "97133",
+    },
+    "attributes": {
+      "link": "https://www.google.com/maps/place/fixture1",
+    },
+    "emails": [
+      "contact@la-vague.example",
+    ],
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "location": {
+      "lat": 17.8971,
+      "lng": -62.8497,
+    },
+    "name": "Restaurant Fictif "La Vague"",
+    "operatingStatus": "unknown",
+    "phones": [
+      "+590 590 00 00 20",
+    ],
+    "provider": "gmaps_scraper",
+    "providerCategories": [
+      {
+        "key": "Restaurant",
+      },
+    ],
+    "providerRef": "ChIJScraperFixture00001",
+    "rating": 4.5,
+    "raw": {
+      "cid": "1000000000000000020",
+      "place_id": "ChIJScraperFixture00001",
+    },
+    "reviewCount": 42,
+    "website": "https://la-vague.example",
+  },
+  {
+    "address": {
+      "formatted": "Lorient 97133",
+    },
+    "attributes": {
+      "link": "https://www.google.com/maps/place/fixture2",
+    },
+    "emails": [],
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "location": {
+      "lat": 17.9031,
+      "lng": -62.819,
+    },
+    "name": "Bar Fermé (fictif)",
+    "operatingStatus": "closed_permanently",
+    "phones": [],
+    "provider": "gmaps_scraper",
+    "providerCategories": [
+      {
+        "key": "Bar",
+      },
+    ],
+    "providerRef": "ChIJScraperFixture00002",
+    "rating": 3.9,
+    "raw": {
+      "cid": "1000000000000000021",
+      "place_id": "ChIJScraperFixture00002",
+    },
+    "reviewCount": 3,
+  },
+  {
+    "address": {
+      "formatted": "Ailleurs",
+    },
+    "attributes": {
+      "link": "https://www.google.com/maps/place/fixture3",
+    },
+    "emails": [],
+    "expiresAt": "2026-11-14T12:00:00.000Z",
+    "fetchedAt": "2026-10-15T12:00:00.000Z",
+    "location": {
+      "lat": 18.2,
+      "lng": -63.1,
+    },
+    "name": "Hors zone (fictif)",
+    "operatingStatus": "unknown",
+    "phones": [],
+    "provider": "gmaps_scraper",
+    "providerCategories": [
+      {
+        "key": "Bar",
+      },
+    ],
+    "providerRef": "ChIJScraperFixture00003",
+    "raw": {
+      "cid": "1000000000000000022",
+      "place_id": "ChIJScraperFixture00003",
+    },
+  },
+]
+`;

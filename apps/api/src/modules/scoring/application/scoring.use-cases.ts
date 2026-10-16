@@ -2,6 +2,7 @@ import {
   type BusinessScore,
   type BusinessScoreList,
   type Clock,
+  ConflictError,
   FEATURE_SET_VERSION,
   NotFoundError,
   type ScoringExplainRequest,
@@ -54,7 +55,10 @@ export class ScoringQueries {
 
   async businessScores(organizationId: string, businessId: string): Promise<BusinessScoreList> {
     await this.assertTracked(organizationId, businessId);
-    const offers = new Map((await this.repository.profiles(organizationId)).map((p) => [p.id, p.offer]));
+    // Archived profiles are no longer scored: their last scores are not shown.
+    const offers = new Map(
+      (await this.repository.profiles(organizationId)).filter((p) => !p.archived).map((p) => [p.id, p.offer]),
+    );
     const scores = await this.repository.businessScores(organizationId, businessId);
     return {
       items: scores.flatMap((score) => {
@@ -74,6 +78,7 @@ export class ScoringQueries {
         builtin: profile.builtin,
         activeVersion: profile.activeVersion,
         primary: profile.id === primary,
+        archived: profile.archived,
       })),
     };
   }
@@ -99,9 +104,24 @@ export class ScoringQueries {
     return { ...scoreBusiness(request.config, facts), featureSetVersion: FEATURE_SET_VERSION };
   }
 
-  private async assertTracked(organizationId: string, businessId: string): Promise<void> {
+  async assertTracked(organizationId: string, businessId: string): Promise<void> {
     if (!(await this.repository.tracks(organizationId, businessId)))
       throw new NotFoundError('Business', businessId);
+  }
+}
+
+/** Recomputes one business now, every active profile (the Scores tab's button), then returns its scores. */
+@Injectable()
+export class RecomputeBusinessCommand {
+  constructor(
+    private readonly queries: ScoringQueries,
+    private readonly scoring: ScoringService,
+  ) {}
+
+  async execute(organizationId: string, businessId: string): Promise<BusinessScoreList> {
+    await this.queries.assertTracked(organizationId, businessId);
+    await this.scoring.compute(organizationId, [businessId], { force: true });
+    return this.queries.businessScores(organizationId, businessId);
   }
 }
 
@@ -121,6 +141,7 @@ export class RecomputeProfileCommand {
   ): Promise<ScoringRecomputeResponse> {
     const profile = await this.repository.profile(organizationId, profileId);
     if (!profile?.activeVersion) throw new NotFoundError('ScoringProfile', profileId);
+    if (profile.archived) throw new ConflictError('An archived profile is not scored: unarchive it first.');
     const total = await this.repository.trackedCount(organizationId);
     await this.queue.recompute({
       organizationId,
@@ -199,8 +220,12 @@ export class SetPrimaryProfileCommand {
 
   @Transactional()
   private async switch(organizationId: string, profileId: string, userId: string | null): Promise<void> {
-    const profile = await this.repository.profile(organizationId, profileId);
+    // Share lock: archiving the profile (an update lock) waits for this switch, and this one for an archive.
+    const profile = await this.repository.lockProfile(organizationId, profileId, 'share');
     if (!profile?.activeVersion) throw new NotFoundError('ScoringProfile', profileId);
+    if (profile.archived) {
+      throw new ConflictError('An archived profile cannot be the primary profile: unarchive it first.');
+    }
     await this.repository.setPrimaryProfile(organizationId, profileId, userId);
     // The scores already there fill the listing now; the recompute fills in the rest.
     await this.repository.denormalizePrimary(organizationId, profileId);

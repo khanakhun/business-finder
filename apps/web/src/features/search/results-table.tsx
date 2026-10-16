@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
+import { usePrimaryProfile } from '@/features/scoring/api.ts';
+import { ScoreBadge } from '@/features/scoring/score-badge.tsx';
 import { useCategories } from './hooks.tsx';
 import { safeWebUrl } from './safe-url.ts';
 import type { STATUSES } from './url-state.ts';
@@ -53,7 +55,8 @@ export function ResultsTable(props: ResultsTableProps) {
   const enrichment = useTranslations('enrichment.listing');
   const format = useFormatter();
   const { labels } = useCategories();
-  const [visibility, setVisibility] = React.useState<VisibilityState>({ score: false, lastActivity: false });
+  const primary = usePrimaryProfile();
+  const [visibility, setVisibility] = React.useState<VisibilityState>({ lastActivity: false });
 
   const columns = React.useMemo<ColumnDef<BusinessListItem, unknown>[]>(
     () => [
@@ -173,8 +176,9 @@ export function ResultsTable(props: ResultsTableProps) {
       {
         id: 'score',
         header: t('score'),
-        cell: ({ row }) =>
-          row.original.score === null ? '' : `${row.original.score} ${row.original.tier ?? ''}`,
+        cell: ({ row }) => (
+          <ScoreBadge score={row.original.score} tier={row.original.tier} offer={primary?.offer} />
+        ),
       },
       {
         id: 'lastActivity',
@@ -184,7 +188,7 @@ export function ResultsTable(props: ResultsTableProps) {
       },
       { id: 'addedVia', header: t('addedVia'), cell: ({ row }) => via(row.original.addedVia) },
     ],
-    [t, status, via, enrichment, format, labels],
+    [t, status, via, enrichment, format, labels, primary?.offer],
   );
 
   return (

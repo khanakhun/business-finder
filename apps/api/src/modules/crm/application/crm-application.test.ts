@@ -165,7 +165,7 @@ class FakeRepository implements CrmRepository {
           primaryCategoryId: null,
           locality: 'Gustavia',
           score: 70,
-          tier: 'A',
+          tier: 'A' as const,
         },
       ],
     },

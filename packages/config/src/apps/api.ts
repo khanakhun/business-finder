@@ -12,6 +12,7 @@ import { mailEnv } from '../fragments/mail.ts';
 import { providersEnv } from '../fragments/providers.ts';
 import { resolutionEnv } from '../fragments/resolution.ts';
 import { s3Env } from '../fragments/s3.ts';
+import { scoringEnv } from '../fragments/scoring.ts';
 import { searchEnv } from '../fragments/search.ts';
 import { valkeyEnv } from '../fragments/valkey.ts';
 import { port, secret } from '../schema.ts';
@@ -24,6 +25,7 @@ const backendShape = {
   ...aiEnv.shape,
   ...providersEnv.shape,
   ...resolutionEnv.shape,
+  ...scoringEnv.shape,
   ...geoEnv.shape,
   ...searchEnv.shape,
   ...discoveryEnv.shape,

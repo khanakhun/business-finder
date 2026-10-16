@@ -1,7 +1,6 @@
 'use client';
 
 import type { PipelineBoard, PipelineStatus } from '@bf/contracts';
-import { Badge } from '@bf/ui/components/badge';
 import { CategoryPicker } from '@bf/ui/components/category-picker';
 import { ErrorState } from '@bf/ui/components/error-state';
 import { Input } from '@bf/ui/components/input';
@@ -34,6 +33,7 @@ import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { useCrmErrorMessage, useTeammates } from '@/features/business/api.ts';
 import { TeammateAvatar } from '@/features/business/crm/owner-select.tsx';
 import { ReasonDialog, StatusDot, StatusMenu } from '@/features/business/crm/status-menu.tsx';
+import { ScoreBadge } from '@/features/scoring/score-badge.tsx';
 import { useCategories } from '@/features/search/hooks.tsx';
 import { apiClient, queryKeys } from '@/lib/api.ts';
 import { usePermission } from '@/lib/session.tsx';
@@ -71,7 +71,6 @@ function useBoard(filters: Readonly<Record<string, string>>) {
 }
 
 function CardBody({ card, dragging = false }: { readonly card: Card; readonly dragging?: boolean }) {
-  const t = useTranslations('pipeline');
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { labels } = useCategories();
@@ -94,16 +93,7 @@ function CardBody({ card, dragging = false }: { readonly card: Card; readonly dr
         >
           {card.displayName}
         </Link>
-        {card.tier ? (
-          <Badge
-            variant="outline"
-            className="shrink-0 tabular-nums"
-            title={t('score', { score: card.score ?? 0 })}
-          >
-            {card.tier}
-            {card.score !== null ? ` ${card.score}` : ''}
-          </Badge>
-        ) : null}
+        <ScoreBadge score={card.score} tier={card.tier} className="shrink-0" />
       </div>
       {category || card.locality ? (
         <p className="text-xs text-muted-foreground">

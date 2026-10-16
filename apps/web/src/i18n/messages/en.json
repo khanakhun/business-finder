@@ -1017,7 +1017,8 @@
       "contacts": "Contacts",
       "activity": "Activity",
       "website": "Website",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "scores": "Scores"
     },
     "actions": {
       "label": "Quick actions",
@@ -1291,7 +1292,6 @@
     "anyCategory": "Any category",
     "tag": "Tag",
     "error": "The pipeline could not be loaded",
-    "score": "Score {score}",
     "count": "{count, plural, one {# business} other {# businesses}}",
     "more": "{count, plural, one {# more in search} other {# more in search}}",
     "emptyColumn": "No business here",
@@ -1594,5 +1594,52 @@
       "done": "Reviews analysed."
     },
     "loadFailed": "The review insights could not be loaded."
+  },
+  "scoring": {
+    "badge": {
+      "label": "Tier {tier}, score {score}",
+      "labelOffer": "Tier {tier}, score {score} for {offer}"
+    },
+    "offers": {
+      "new_website": "New website",
+      "website_redesign": "Website redesign",
+      "ai_receptionist": "AI receptionist",
+      "booking_system": "Booking system",
+      "local_seo": "Local SEO"
+    },
+    "tab": {
+      "primary": "Primary",
+      "meta": "Profile version {version} · computed {when}",
+      "total": "Score",
+      "points": "points",
+      "gateExcluded": "Excluded: {reason}",
+      "gateCapped": "Capped: {reason}",
+      "gateNote": "Note: {reason}",
+      "for": "Why it scores",
+      "against": "What holds it back",
+      "nothingAgainst": "Nothing holds it back.",
+      "details": "All contributions",
+      "tableCaption": "Each feature, its value, weight and contribution in score points",
+      "feature": "Feature",
+      "value": "Value",
+      "weight": "Weight",
+      "contribution": "Points",
+      "yes": "Yes",
+      "no": "No",
+      "missing": "Unknown",
+      "imputed": {
+        "default": "default",
+        "profile": "filled in by the profile"
+      },
+      "recompute": "Recompute",
+      "recomputed": "Scores recomputed.",
+      "recomputeFailed": "The scores could not be recomputed: {reason}",
+      "loadFailed": "The scores could not be loaded.",
+      "emptyTitle": "Not scored yet",
+      "emptyDescription": "Scores appear once the business is tracked and enriched. Recompute to score it now.",
+      "adjustBounds": "Limited to 0–100",
+      "adjustCapped": "Capped by a rule",
+      "adjustExcluded": "Excluded by a rule"
+    }
   }
 }

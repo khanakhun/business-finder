@@ -10,6 +10,7 @@ export interface ProfileRecord {
   readonly name: string;
   readonly builtin: boolean;
   readonly activeVersion: number | null;
+  readonly archived: boolean;
 }
 
 export interface ProfileVersionRecord {
@@ -55,6 +56,19 @@ export interface ScoringRepository {
   profiles(organizationId: string): Promise<ProfileRecord[]>;
   /** A profile the workspace may see (built-in or its own). */
   profile(organizationId: string, profileId: string): Promise<ProfileRecord | undefined>;
+  /**
+   * A profile read under a row lock until the transaction ends: `update` for changes to one of the workspace's own
+   * (archive, versions), `share` to rely on a profile it may see staying as read (making it the primary profile).
+   */
+  lockProfile(
+    organizationId: string,
+    profileId: string,
+    mode: 'update' | 'share',
+  ): Promise<ProfileRecord | undefined>;
+  /** Profiles the workspace created that are not archived (the ones scored). */
+  countActiveOwnProfiles(organizationId: string): Promise<number>;
+  /** Serializes creating and unarchiving profiles in the workspace until the transaction ends (exact cap). */
+  lockProfileCap(organizationId: string): Promise<void>;
   version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined>;
   /** Creates the built-in profiles and versions that do not exist yet (idempotent); returns the ones it activated. */
   ensureBuiltins(
@@ -68,6 +82,43 @@ export interface ScoringRepository {
   ): Promise<{ readonly profileId: string; readonly version: number }[]>;
   /** Workspaces tracking at least one business (a new built-in version recomputes them). */
   workspacesWithBusinesses(): Promise<string[]>;
+  /** A workspace profile at version 1 (active). */
+  createProfile(input: {
+    readonly organizationId: string;
+    readonly offer: Offer;
+    readonly name: string;
+    readonly config: ScoringProfileConfig;
+    readonly createdBy: string | null;
+  }): Promise<ProfileRecord>;
+  /** Changes a profile of the workspace (never a built-in). */
+  updateProfile(
+    organizationId: string,
+    profileId: string,
+    change: { readonly name?: string; readonly archivedAt?: Date | null },
+  ): Promise<void>;
+  /** The versions of a profile the workspace may see, newest first. */
+  versions(
+    organizationId: string,
+    profileId: string,
+  ): Promise<{ readonly version: number; readonly createdAt: Date }[]>;
+  /**
+   * The next version of a profile of the workspace (inactive), numbered under a lock on the profile (the caller
+   * holds it from `lockProfile`).
+   */
+  addVersion(
+    organizationId: string,
+    profileId: string,
+    config: ScoringProfileConfig,
+    createdBy: string | null,
+  ): Promise<number>;
+  /** Activates a version of a profile of the workspace. */
+  activate(organizationId: string, profileId: string, version: number): Promise<void>;
+  /** Tracked businesses with their current score for a profile, stratified by tier (preview). */
+  previewSample(
+    organizationId: string,
+    profileId: string,
+    size: number,
+  ): Promise<{ businessId: string; displayName: string; score: number | null; tier: ScoreTier | null }[]>;
   /** The workspace's primary profile id (null: the default built-in). */
   primaryProfileId(organizationId: string): Promise<string | null>;
   setPrimaryProfile(organizationId: string, profileId: string, userId: string | null): Promise<void>;

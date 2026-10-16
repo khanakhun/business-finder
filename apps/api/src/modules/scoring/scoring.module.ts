@@ -7,9 +7,11 @@ import {
   SCORING_QUEUE,
   SCORING_REPOSITORY,
 } from './application/ports.ts';
+import { ScoringEditorQueries, ScoringProfileCommands } from './application/profile-management.use-cases.ts';
 import { ScoringService } from './application/scoring.service.ts';
 import { ScoringSubscribers } from './application/scoring.subscribers.ts';
 import {
+  RecomputeBusinessCommand,
   RecomputeProfileCommand,
   RecomputeRunner,
   ScoringQueries,
@@ -19,7 +21,11 @@ import { BullmqScoringQueue, OPENAPI_SCORING_QUEUE } from './infrastructure/bull
 import { DrizzleScoringRepository } from './infrastructure/drizzle-scoring.repository.ts';
 import { SqlFactsAssembler } from './infrastructure/facts-assembler.sql.ts';
 import { RealtimeRecomputeProgress } from './infrastructure/realtime-recompute-progress.ts';
-import { BusinessScoresController, ScoringController } from './interface/http/scoring.controller.ts';
+import {
+  BusinessScoresController,
+  ScoringController,
+  ScoringProfilesController,
+} from './interface/http/scoring.controller.ts';
 import {
   ScoringComputeProcessor,
   ScoringRecomputeProcessor,
@@ -45,7 +51,8 @@ export class ScoringModule {
   private static build(mode: AppMode): DynamicModule {
     return {
       module: ScoringModule,
-      controllers: mode === 'worker' ? [] : [BusinessScoresController, ScoringController],
+      controllers:
+        mode === 'worker' ? [] : [BusinessScoresController, ScoringController, ScoringProfilesController],
       providers: [
         { provide: SCORING_REPOSITORY, useClass: DrizzleScoringRepository },
         { provide: FACTS_ASSEMBLER, useClass: SqlFactsAssembler },
@@ -55,9 +62,12 @@ export class ScoringModule {
         { provide: RECOMPUTE_PROGRESS, useClass: RealtimeRecomputeProgress },
         ScoringService,
         ScoringQueries,
+        RecomputeBusinessCommand,
         RecomputeProfileCommand,
         RecomputeRunner,
         SetPrimaryProfileCommand,
+        ScoringProfileCommands,
+        ScoringEditorQueries,
         ScoringSubscribers,
         // OpenAPI generation has no database.
         ...(mode === 'openapi' ? [] : [BuiltinProfilesSeeder]),

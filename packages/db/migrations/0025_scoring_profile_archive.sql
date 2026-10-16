@@ -1,0 +1,1 @@
+ALTER TABLE "scoring_profiles" ADD COLUMN "archived_at" timestamp with time zone;

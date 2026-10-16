@@ -39,6 +39,14 @@ export function registerDefaultTabs(): void {
     }),
   });
   businessTabs.register({
+    id: 'scores',
+    labelKey: 'business.tabs.scores',
+    order: 28,
+    component: dynamic(() => import('@/features/scoring/scores-tab.tsx').then((m) => m.ScoresTab), {
+      loading: TabSkeleton,
+    }),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

@@ -3,6 +3,7 @@ import { AddedViaSchema, PipelineStatusSchema } from './business.ts';
 import { ActorSchema, defineEvent } from './events.ts';
 import { BusinessId } from './ids.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
+import { ScoreTierSchema } from './search-intent.ts';
 import { IsoDateTimeSchema } from './time.ts';
 
 // CRM basics (BF-024): the workspace's pipeline state machine, owner, tags, do-not-contact, notes, tasks and the
@@ -231,7 +232,7 @@ export const PipelineCardSchema = z.object({
   primaryCategoryId: z.uuid().nullable(),
   locality: z.string().nullable(),
   score: z.number().int().nullable(),
-  tier: z.string().nullable(),
+  tier: ScoreTierSchema.nullable(),
   ownerUserId: z.uuid().nullable(),
   nextTaskDueAt: IsoDateTimeSchema.nullable(),
   statusChangedAt: IsoDateTimeSchema.nullable(),

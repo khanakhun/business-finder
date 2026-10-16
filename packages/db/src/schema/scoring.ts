@@ -47,6 +47,8 @@ export const scoringProfiles = pgTable(
     builtin: boolean().notNull().default(false),
     /** The version scores are computed with (null until one is activated). */
     activeVersion: integer(),
+    /** An archived workspace profile is no longer scored (its scores and history stay). BF-032. */
+    archivedAt: timestamp({ withTimezone: true }),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
     ...timestamps(),
   },

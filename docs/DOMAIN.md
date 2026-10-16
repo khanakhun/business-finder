@@ -50,7 +50,7 @@
 | **Generation batch / job** | A user request to generate sites for N businesses (batch) and one job per business, with priority, engine and status. |
 | **Engine** | A strategy that produces a SiteSpec: `blocks`, `claude-agent-sdk`, `claude-code`, `codex`. |
 | **Brief** | Generation input: facts, brand, reviews highlights, audit findings, offer, locales, page plan, constraints. |
-| **Fact registry** | The set of verified facts a generator may use (name, address, phones, emails, hours, services, prices if published). Anything else is not a fact. |
+| **Fact registry** | The set of verified facts a generator may use (name, address, phones, emails, hours, services, prices if published). Anything else is not a fact. Each fact carries its provenance and a usage: `display` only when one provenance is licensed for display (the business's own site or JSON-LD, open data, a workspace member); facts known only from restricted providers stay `internal`. A workspace's own statements (the overlay) win over global facts of single-valued kinds; generations read a deduplicated snapshot. |
 | **Quality gate** | A check in the chain run on generated versions (schema, facts, copy, a11y, Lighthouse, visual critic). |
 | **Sandbox / Runner** | Isolated container in which coding-agent engines run. |
 | **Mailbox** | A connected sending account (Gmail/Workspace, Microsoft 365, SMTP/IMAP) with caps, ramp-up schedule and sending window. |

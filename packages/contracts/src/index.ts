@@ -287,6 +287,7 @@ export {
   type SmtpPortDiagnostic,
   SmtpPortDiagnosticSchema,
 } from './email-verification.ts';
+export { sha256Hex, stableJson } from './encoding.ts';
 export {
   type BulkEnrichRequest,
   BulkEnrichRequestSchema,
@@ -368,6 +369,31 @@ export {
   getEventDefinition,
   registeredEvents,
 } from './events.ts';
+export {
+  type BusinessFacts,
+  BusinessFactsSchema,
+  type CreateOrgBusinessFactRequest,
+  CreateOrgBusinessFactRequestSchema,
+  FACT_SOURCES,
+  FACT_USAGES,
+  type FactSource,
+  FactSourceSchema,
+  type FactUsage,
+  FactUsageSchema,
+  FactValueSchemas,
+  factValueSchema,
+  type OrgBusinessFact,
+  OrgBusinessFactSchema,
+  REGISTRY_FACT_KINDS,
+  type RegistryFact,
+  type RegistryFactKind,
+  RegistryFactKindSchema,
+  RegistryFactSchema,
+  registryFactId,
+  toSiteFactKind,
+  type UpdateOrgBusinessFactRequest,
+  UpdateOrgBusinessFactRequestSchema,
+} from './facts.ts';
 export {
   type CreateGenerationBatchRequest,
   CreateGenerationBatchRequestSchema,

@@ -130,12 +130,12 @@ Dependency rules are listed in [AGENTS.md §3](../AGENTS.md#3-repository-map--de
 | `geo` | Location resolution, geocoding, areas, tiling | `geo_areas`, `geocode_cache` | BF-017 |
 | `discovery` | Providers, discovery runs and tasks | `discovery_runs`, `discovery_tasks`, `provider_usage` | BF-018…BF-020 |
 | `search` | Intent parsing, hybrid search, saved searches, lists | `saved_searches`, `lists`, `list_items` | BF-021…BF-023 |
-| `crm` | Org-scoped business state: pipeline, owner, tags, notes, tasks, activity, user-asserted facts | `org_businesses`, `notes`, `tasks`, `activities`, `org_business_facts` | BF-024, BF-040 (facts overlay) |
+| `crm` | Org-scoped business state: pipeline, owner, tags, notes, tasks, activity | `org_businesses`, `notes`, `tasks`, `activities` | BF-024 |
 | `enrichment` | Enrichment runs (step registry, DAG planner, nightly refresh and maintenance hooks), site intel, PSI, email verification, audits | `enrichment_*`, `website_snapshots`, `website_audits` | BF-026…BF-028, BF-030 |
 | `reviews` | Review licensing gates per workspace and source, review mining (`reviews` enrichment step, pasted reviews), insights, rating observations | `review_insights`, `review_source_settings`, `business_rating_observations` | BF-029 |
 | `scoring` | Feature registry, scoring profiles, scores, outcome models (training datasets, shadow scores) | `scoring_profiles`, `business_scores`, `business_score_history`, `scoring_models`, `label_definitions` | BF-031, BF-032, BF-059 |
 | `sites` | Sites, versions, publications, assets and sourcing, leads, views, chat editing, custom domains, live sites | `sites`, `site_*` | BF-035, BF-036 (renderer read model), BF-037, BF-038, BF-047, BF-048, BF-062 |
-| `generation` | Batches, jobs, engines, sandbox orchestration, brief builder and fact registry snapshots, quality gates | `generation_*`, `fact_registry_snapshots` | BF-039…BF-046 |
+| `generation` | Batches, jobs, engines, sandbox orchestration, brief builder, the fact registry (with the workspace's user-asserted facts) and its snapshots, quality gates | `generation_*`, `org_business_facts`, `fact_registry_snapshots` | BF-039…BF-046 |
 | `compliance` | Jurisdiction policies, decisions, suppression, lawful basis, unsubscribe tokens, data-subject requests, retention | `compliance_*`, `suppression_*`, `lawful_basis_records`, `offer_relevance`, `unsubscribe_tokens`, `dsr_requests`, `retention_runs` | BF-049, BF-055 |
 | `outreach` | Mailboxes, templates, drafts, messages, threads, sequences, replies, deliverability, call/WhatsApp assist | `mailbox*`, `email_*`, `outbound_*`, `inbound_messages`, `sequence_*`, `manual_contact_logs` | BF-050…BF-054, BF-056, BF-057 |
 | `analytics` | Fact table fed by domain events, semantic metrics layer, rollups, metrics endpoints | `analytics_*` | BF-058 |

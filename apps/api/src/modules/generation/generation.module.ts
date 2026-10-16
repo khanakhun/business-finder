@@ -9,6 +9,8 @@ import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
 import { SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
+import { FACT_OVERLAY_REPOSITORY, FACT_SNAPSHOTS, FACT_SOURCES_READER } from './application/facts.ports.ts';
+import { FactRegistryService } from './application/facts.service.ts';
 import { GenerationCommands } from './application/generation.commands.ts';
 import { GenerationNotifications } from './application/generation.notifications.ts';
 import { GenerationQuality } from './application/generation.quality.ts';
@@ -48,6 +50,11 @@ import {
   StaticEngineRegistry,
 } from './infrastructure/defaults/defaults.ts';
 import { FakeEngine } from './infrastructure/defaults/fake.engine.ts';
+import {
+  DrizzleFactOverlay,
+  DrizzleFactSnapshots,
+  DrizzleFactSources,
+} from './infrastructure/drizzle-facts.repository.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
@@ -58,6 +65,7 @@ import {
   ValkeyEventStream,
   ValkeyLeaseSemaphore,
 } from './infrastructure/valkey-adapters.ts';
+import { FactsController } from './interface/http/facts.controller.ts';
 import { GenerationController } from './interface/http/generation.controller.ts';
 import {
   GenerationBlocksProcessor,
@@ -88,9 +96,13 @@ export class GenerationModule {
     return {
       module: GenerationModule,
       imports: [SitesModule.forRoot(mode), RealtimeModule.forRoot(mode)],
-      controllers: mode === 'worker' ? [] : [GenerationController],
+      controllers: mode === 'worker' ? [] : [GenerationController, FactsController],
       providers: [
         { provide: GENERATION_REPOSITORY, useClass: DrizzleGenerationRepository },
+        { provide: FACT_SOURCES_READER, useClass: DrizzleFactSources },
+        { provide: FACT_OVERLAY_REPOSITORY, useClass: DrizzleFactOverlay },
+        { provide: FACT_SNAPSHOTS, useClass: DrizzleFactSnapshots },
+        FactRegistryService,
         {
           provide: ENGINE_REGISTRY,
           inject: [APP_ENV],
@@ -207,7 +219,7 @@ export class GenerationModule {
             ]
           : []),
       ],
-      exports: [GenerationCommands, GenerationQueries],
+      exports: [GenerationCommands, GenerationQueries, FactRegistryService],
     };
   }
 }

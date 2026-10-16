@@ -39,9 +39,12 @@ export IMAGE_REGISTRY="${IMAGE_REGISTRY:-$(env_value IMAGE_REGISTRY)}"
 # would let anyone forge view tokens or read the database. Names only, never values.
 # Assignments only (`.env.example`, where env files start from, names them in comments).
 local_only='^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=.*local_only'
+# Bytes, not characters (LC_ALL=C): an invalid UTF-8 byte must neither hide a line nor stop `.*` mid-value.
 for file in .env app.env caddy.env backup.env intel.env reacher.env; do
-  if [ -f "$file" ] && grep -Eq "$local_only" "$file"; then
-    names="$(sed -En "s/${local_only}.*/\\2/p" "$file" | tr '\n' ' ')"
+  [ -e "$file" ] || continue
+  [ -r "$file" ] || { echo "refusing to deploy: cannot read $file" >&2; exit 1; }
+  if LC_ALL=C grep -Eq "$local_only" "$file"; then
+    names="$(LC_ALL=C sed -En "s/${local_only}.*/\\2/p" "$file" | tr '\n' ' ')"
     echo "refusing to deploy: $file holds local-only defaults: ${names}" >&2
     exit 1
   fi

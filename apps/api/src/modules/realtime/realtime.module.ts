@@ -30,7 +30,22 @@ import { RealtimeController } from './interface/realtime.controller.ts';
 @Global()
 @Module({})
 export class RealtimeModule {
+  private static readonly byMode = new Map<AppMode, DynamicModule>();
+
+  /**
+   * One definition per mode: modules importing this one (for its public services) share the instance the app
+   * module creates instead of building a second one.
+   */
   static forRoot(mode: AppMode): DynamicModule {
+    let definition = RealtimeModule.byMode.get(mode);
+    if (!definition) {
+      definition = RealtimeModule.build(mode);
+      RealtimeModule.byMode.set(mode, definition);
+    }
+    return definition;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     const http = mode !== 'worker';
     return {
       module: RealtimeModule,

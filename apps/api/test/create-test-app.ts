@@ -103,19 +103,26 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
 /** A worker process (processors only) on the same database/Valkey as a test app. Close it before the app. */
 export async function createTestWorker(
   app: TestApp,
-  options: { readonly mailer?: SystemMailer } = {},
+  options: {
+    readonly mailer?: SystemMailer;
+    readonly env?: Partial<Record<string, string>>;
+    /** Worker clock (default: the system clock). */
+    readonly clock?: Clock;
+  } = {},
 ): Promise<INestApplicationContext> {
   const env = loadAppEnv('worker', {
     ...TEST_ENV,
+    ...options.env,
     DATABASE_URL: app.env.DATABASE_URL,
     VALKEY_URL: app.env.VALKEY_URL,
   });
   const { AppModule: Module_ } = await import('../src/app.module.ts');
   // System mail never leaves the test (notification emails are sent by the worker).
-  const moduleRef = await Test.createTestingModule({ imports: [Module_.forWorker(env)] })
+  let builder = Test.createTestingModule({ imports: [Module_.forWorker(env)] })
     .overrideProvider(SYSTEM_MAILER)
-    .useValue(options.mailer ?? new FakeMailer())
-    .compile();
+    .useValue(options.mailer ?? new FakeMailer());
+  if (options.clock) builder = builder.overrideProvider(CLOCK).useValue(options.clock);
+  const moduleRef = await builder.compile();
   await moduleRef.init();
   return moduleRef;
 }

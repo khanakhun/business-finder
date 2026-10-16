@@ -57,6 +57,23 @@ export class ProviderQueryBuilder {
     return provider.buildQueries({ intent, tile, keysByCategory, fieldTier: tier });
   }
 
+  /** Queries for many tiles of one provider, resolving category keys once. */
+  async buildForTiles(
+    organizationId: string,
+    providerId: ProviderId,
+    intent: DiscoveryIntent,
+    tiles: readonly DiscoveryTile[],
+    fieldTier?: FieldTier,
+  ): Promise<ProviderQuery[]> {
+    const provider = this.provider(providerId);
+    const keysByCategory =
+      provider.taxonomy && intent.categoryIds.length > 0
+        ? await this.keys.keysFor(intent.categoryIds, provider.taxonomy)
+        : new Map();
+    const tier = fieldTier ?? (await this.defaults.discoverySettings(organizationId)).googleFieldTier;
+    return tiles.flatMap((tile) => provider.buildQueries({ intent, tile, keysByCategory, fieldTier: tier }));
+  }
+
   private provider(id: ProviderId): DiscoveryProvider {
     const provider = this.registry.get(id);
     if (!provider) throw new NotFoundError('DiscoveryProvider', id);
@@ -74,6 +91,25 @@ export class ProviderCostEstimator {
     @Inject(APP_ENV) private readonly env: AppEnv,
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
+
+  /** Cost of planned calls per SKU for one provider (free allowances of its billing account first). */
+  async estimateCalls(
+    organizationId: string,
+    providerId: ProviderId,
+    planned: ReadonlyArray<{ readonly sku: string; readonly calls: number }>,
+  ): Promise<CostEstimate> {
+    const provider = this.registry.get(providerId);
+    if (!provider) throw new NotFoundError('DiscoveryProvider', providerId);
+    const secret = provider.secretName
+      ? await this.secrets.resolve(organizationId, provider.secretName)
+      : undefined;
+    const used = await this.meter.monthCalls(
+      billingScopeOf(organizationId, secret?.source ?? null),
+      providerId,
+      this.clock.now(),
+    );
+    return estimateCost(provider.costModel, planned, used, this.env.DISCOVERY_APPLY_FREE_TIER);
+  }
 
   async estimate(
     organizationId: string,

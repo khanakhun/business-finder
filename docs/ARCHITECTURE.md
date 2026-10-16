@@ -263,9 +263,9 @@ erDiagram
 
 | Queue | Producer | Default concurrency | Retry policy | Idempotency key |
 |---|---|---|---|---|
-| `discovery.plan` | `StartDiscoveryRun` | 2 | 3× exp | `runId` |
-| `discovery.fetch` | plan step (flow child) | 4, provider limiter | 5× exp + jitter | `runId:taskId:page` |
-| `discovery.ingest` | fetch step | 4 | 3× | `provider:providerRef:contentHash` |
+| `discovery.plan` | `StartDiscoveryRun`, reconciler | 2 | 3× exp | `runId:attemptKey` |
+| `discovery.fetch` | plan step, fetch step (splits, next pages), reconciler | 4, provider limiter | 5× exp + jitter | `taskId:attempt[:window]` |
+| `discovery.ingest` | fetch step, reconciler | 4 | 3× | `taskId:attemptKey` (records wait on the task row) |
 | `enrichment.run` | `BusinessCreated` / user | 4 | 3× | `businessId:pipelineVersion:yyyymmdd` |
 | `enrichment.step` | `enrichment.run` (flow children) | 8 | per step | `businessId:step:inputHash` |
 | `scoring.compute` | `BusinessEnriched`, profile change | 8 | 3× | `orgId:businessId:profileVersion:featureHash` |
@@ -288,7 +288,7 @@ Concurrency values are configuration (`QUEUE_CONCURRENCY__GENERATION_CODEX=2`, �
 
 ### 7.2 Patterns
 
-- **Flows** (BullMQ parent/child) for fan-out/fan-in: a discovery run fans out to tile × category fetches, then ingests; enrichment fans out to steps, then triggers scoring.
+- **Flows** (BullMQ parent/child) for fan-out/fan-in where the tree is known up front: enrichment fans out to steps, then triggers scoring. Discovery runs grow their tree while running (quadtree splits, next pages), so they fan out through task rows instead: each step enqueues its follow-ups and a locked `finalize` detects fan-in (BF-020, ADR-0006).
 - **DB-backed scheduler** for anything with business-time semantics (sequence steps, preview expiry): rows carry `next_run_at`; a one-minute tick claims due rows with `SELECT … FOR UPDATE SKIP LOCKED` and enqueues work. Survives Valkey loss; easy to reason about.
 - **Transactional outbox**: domain events are written to `outbox_events` inside the business transaction; the relay (worker) publishes them and marks them dispatched. Consumers are idempotent.
 - **Realtime**: workers publish `RealtimeEvent`s to Valkey channel `rt:org:<orgId>`; the API's `/v1/realtime` SSE endpoint fans them out to that org's connected clients; the web app maps events to TanStack Query invalidations. Job-scoped streams (`/v1/generation-jobs/:id/events`) replay the persisted event log first, then tail live events.
@@ -328,12 +328,13 @@ sequenceDiagram
   participant P as providers
   participant BG as business-graph
   A->>Q: discovery.plan(runId)
-  Q->>Q: tile area × categories → N fetch tasks (flow)
-  loop each task
-    Q->>P: provider.search(task)
-    P-->>Q: SourceRecord[]
-    Q->>BG: ingest(record) — normalize → block → match → merge
+  Q->>Q: tile area × categories → N task rows + fetch jobs
+  loop each task (reserve budget → call → complete + follow-ups in one transaction)
+    Q->>P: provider.fetchPage(task)
+    P-->>Q: SourceRecord[] (saturated → 4 child tiles; next page → continuation)
+    Q->>BG: ingest(page) — normalize → block → match → merge, then track for the workspace
   end
+  Q->>Q: finalize when no open task and no pending ingest (also by the reconciler)
   BG-->>Q: BusinessCreated / BusinessUpdated (outbox)
   Q->>Q: enrichment.run per new business (budget permitting)
   Q-->>A: run completed (counts, cost) → realtime

@@ -59,7 +59,22 @@ import { TaxonomyEmbedProcessor } from './interface/taxonomy/taxonomy-embed.proc
  */
 @Module({})
 export class BusinessGraphModule {
+  private static readonly byMode = new Map<AppMode, DynamicModule>();
+
+  /**
+   * One definition per mode: modules importing this one (for its public services) share the instance the app
+   * module creates instead of building a second one.
+   */
   static forRoot(mode: AppMode): DynamicModule {
+    let definition = BusinessGraphModule.byMode.get(mode);
+    if (!definition) {
+      definition = BusinessGraphModule.build(mode);
+      BusinessGraphModule.byMode.set(mode, definition);
+    }
+    return definition;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: BusinessGraphModule,
       // ResolutionController first: its static paths (`possible-duplicates`, `merge`) must win over `:id`.

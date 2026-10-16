@@ -69,6 +69,12 @@ def test_ipv6_forms_embedding_a_blocked_ipv4_are_blocked(inner: IPv4Address | IP
         assert reason.split()[0] in ("IPv4-mapped", "NAT64", "6to4")
 
 
+@pytest.mark.parametrize("address", ["192.0.0.9", "192.0.0.10", "::ffff:192.0.0.9"])
+def test_ietf_protocol_anycast_addresses_are_blocked(address: str) -> None:
+    # Global per Python 3.13's IANA table, but refused with the rest of 192.0.0.0/24.
+    assert blocked_reason(ip_address(address)) is not None
+
+
 @given(any_of(PUBLIC_V4))
 def test_ipv6_forms_embedding_a_public_ipv4_are_allowed(inner: IPv4Address | IPv6Address) -> None:
     assert blocked_reason(IPv6Address((0xFFFF << 32) | int(inner))) is None

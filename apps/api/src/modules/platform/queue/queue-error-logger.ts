@@ -1,4 +1,4 @@
-import { QUEUE_NAMES } from '@bf/queue';
+import { QUEUE_NAMES, QUEUES } from '@bf/queue';
 import { getQueueToken } from '@nestjs/bullmq';
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -14,7 +14,8 @@ export class QueueErrorLogger implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    for (const name of QUEUE_NAMES) {
+    for (const key of QUEUE_NAMES) {
+      const name = QUEUES[key].name;
       const queue = this.moduleRef.get<Queue>(getQueueToken(name), { strict: false });
       let last = '';
       queue.on('error', (error: Error) => {

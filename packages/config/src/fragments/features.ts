@@ -9,6 +9,9 @@ export const featureFlagsEnv = z.object({
   FAKE_DISCOVERY_PROVIDER: booleanFlag(false).describe(
     'Register the fixture discovery provider (tests and E2E only; refused in production).',
   ),
+  FAKE_DISCOVERY_SYNTHETIC: booleanFlag(false).describe(
+    'The fixture discovery provider generates grid records instead of fixtures (benchmarks, tiling tests).',
+  ),
   FAKE_CONNECTION_TESTS: booleanFlag(false).describe(
     'Development/E2E only: provider connection tests succeed without calling providers. Refused in production.',
   ),

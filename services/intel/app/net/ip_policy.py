@@ -5,13 +5,16 @@ NAT64, 6to4) are judged by the embedded address, so `::ffff:127.0.0.1` is loopba
 Playwright request interception in BF-026.
 """
 
-from ipaddress import IPv4Address, IPv6Address, IPv6Network, ip_address
+from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_address
 
 type IPAddress = IPv4Address | IPv6Address
 
 _NAT64 = IPv6Network("64:ff9b::/96")  # RFC 6052 well-known prefix: last 32 bits are an IPv4 address
 _SIX_TO_FOUR = IPv6Network("2002::/16")  # RFC 3056: bits 16-48 are an IPv4 address
 _TEREDO = IPv6Network("2001::/32")  # RFC 4380 tunnels: the client address is obfuscated, refuse outright
+# RFC 6890 IETF protocol assignments. Python 3.13 marks 192.0.0.9/.10 (PCP/TURN anycast) global; no website
+# lives there, so the whole block stays refused.
+_IETF_PROTOCOL = IPv4Network("192.0.0.0/24")
 
 # Named for clearer errors; every one of these is also caught by the generic checks below.
 _CLOUD_METADATA = frozenset(
@@ -45,6 +48,8 @@ def blocked_reason(ip: IPAddress) -> str | None:
             return "Teredo tunnel address"
     if ip in _CLOUD_METADATA:
         return "cloud metadata address"
+    if isinstance(ip, IPv4Address) and ip in _IETF_PROTOCOL:
+        return "IETF protocol assignment"
     for flag, reason in _CATEGORIES:
         if getattr(ip, flag):
             return reason

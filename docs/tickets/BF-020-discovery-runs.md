@@ -77,11 +77,43 @@ modules/discovery/
 - E2E (in BF-023).
 
 ## Acceptance criteria
-- [ ] Estimate endpoint returns tiles, calls and cost ranges per provider.
-- [ ] Runs execute with adaptive tiling, ingestion and tracking; counts and costs accurate.
-- [ ] Budget caps enforced; cancellation and crash recovery work (tests).
-- [ ] Realtime progress + completion notification.
-- [ ] Benchmark meets throughput target.
+- [x] Estimate endpoint returns tiles, calls and cost ranges per provider.
+- [x] Runs execute with adaptive tiling, ingestion and tracking; counts and costs accurate.
+- [x] Budget caps enforced; cancellation and crash recovery work (tests).
+- [x] Realtime progress + completion notification.
+- [x] Benchmark meets throughput target.
+
+## Implementation notes (BF-020)
+- **Database-driven orchestration (ADR-0006)** instead of BullMQ flows: three queues (`discovery-plan`,
+  `discovery-fetch`, `discovery-ingest`) execute steps whose state lives in `discovery_runs`/`discovery_tasks`.
+  Fan-in is a locked `finalize` (no open task, no pending ingest, run planned) attempted after every step and by
+  the reconciler. Counters are integer columns with atomic increments (not a `counts` jsonb); the page token
+  lives in the task's `query` jsonb; fetched records wait on the task (`pending_records`) for the ingest job.
+- **Idempotency**: tasks are unique per (run, dedupe key = provider, category, keys, mode, keywords, tile,
+  page); a task's completion and its follow-ups (quadtree children, next page) commit in one transaction;
+  ingestion runs once per task (`ingested_at`); job ids are `taskId:attempt` (+ a reconcile-window suffix for
+  reconciler re-enqueues, so a job that failed for good does not block its retry).
+- **Budget**: a call starts only after reserving its estimated cost on the run *and* the task
+  (`cost + reserved + estimate <= budget`); every task exit (done, failed, requeued, skipped) gives the
+  reservation back, so a crashed worker cannot leak budget. The run's `cost_usd` is the actual cost reported
+  by the provider (the same cost model as the estimate). Budget stop → queued tasks skipped, in-flight calls
+  finish, run ends `partially_completed` with `reason=budget` (or `monthly_budget` from the BF-018 guard).
+- **Cancellation**: queued tasks skipped in the cancel transaction; in-flight jobs get a cooperative abort; a
+  call that still completes is recorded as skipped with its cost, and its records are dropped.
+- **Crash recovery**: running tasks heartbeat every 30 s; the reconciler (worker, every 30 s) requeues tasks
+  silent for 2 min (failed after 3 attempts), re-enqueues queued tasks whose job was lost, re-runs pending
+  ingests, re-plans runs whose planning never committed, and finalizes finished runs.
+- **Limits**: area ≤ 25,000 km²; ≤ 20,000 tasks per run (checked from the tiling before queries are built;
+  past it during a run, saturated tiles stay unsplit); ≤ 3 queued/running runs per workspace (advisory lock);
+  an `Idempotency-Key` reused with a different request → 409 `IDEMPOTENCY_KEY_REUSED`.
+- **Planner**: capped providers (Google, scraper) get 1.5 km circles splitting up to depth 3 (4 circles of
+  0.75 r per split, children outside the area dropped); exhaustive providers (open data) get 10 km boxes.
+- **Benchmark** (`pnpm --filter @bf/api bench:discovery`, synthetic fake provider, one worker, local infra):
+  **2,147 businesses, 482 tasks, 7,200 records in 22.4 s → ≈ 344,000 businesses/hour** (target 1,000).
+- **Follow-ups**: per-route rate limiting for estimate/start (no throttler exists yet); `maxResults` is a soft
+  cap (may overshoot by in-flight fetches); a crash between ingestion and its counter update re-ingests as
+  `unchanged`, so `created` can under-count; jobs re-enqueued by the reconciler are not reached by cooperative
+  cancel (their results are still discarded); progress events show run cost to every workspace member.
 
 ## Agent prompt
 ```text

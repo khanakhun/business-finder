@@ -36,6 +36,11 @@ export const DiscoverySettingsSchema = z
       .regex(/^\d{4}-\d{2}-\d{2}\.\d{1,3}$/)
       .nullable()
       .describe('Pinned Overture release (e.g. 2026-09-23.1); null follows the latest release.'),
+    runBudgetUsd: z
+      .number()
+      .min(0)
+      .max(10_000)
+      .describe('Default budget of one discovery run (a run never spends more).'),
     monthlyBudgetUsd: z
       .number()
       .min(0)
@@ -51,6 +56,7 @@ export const DEFAULT_DISCOVERY_SETTINGS: DiscoverySettings = {
   disabledProviders: [],
   googleFieldTier: 'pro',
   overtureRelease: null,
+  runBudgetUsd: 5,
   monthlyBudgetUsd: null,
 };
 

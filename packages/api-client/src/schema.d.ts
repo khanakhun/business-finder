@@ -276,6 +276,109 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/discovery-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Discovery runs of the workspace, newest first */
+        get: operations["listDiscoveryRuns"];
+        put?: never;
+        /** Start a discovery run (`Idempotency-Key` header: the same key returns the same run) */
+        post: operations["startDiscoveryRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery-runs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A discovery run with its counts and cost */
+        get: operations["getDiscoveryRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery-runs/{id}/businesses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Businesses this run added to the workspace */
+        get: operations["listDiscoveryRunBusinesses"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery-runs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a run: no new provider calls; in-flight calls stop at their next checkpoint */
+        post: operations["cancelDiscoveryRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery-runs/{id}/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider tasks of a run (debugging) */
+        get: operations["listDiscoveryRunTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/discovery-runs/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tiles, tasks, calls and cost ranges per provider for a discovery run (no side effects) */
+        post: operations["estimateDiscoveryRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/discovery/providers": {
         parameters: {
             query?: never;
@@ -1149,6 +1252,13 @@ export type components = {
             postalCode?: string;
             websiteUrl?: string;
         };
+        DiscoveryIntent: {
+            /** @default [] */
+            categoryIds: string[];
+            keywords?: string;
+            languageCode: string;
+            regionCode?: string;
+        };
         DiscoveryProviderList: {
             items: components["schemas"]["DiscoveryProviderSummary"][];
         };
@@ -1169,6 +1279,97 @@ export type components = {
              */
             status: "ready" | "not_configured" | "disabled" | "unavailable";
         };
+        DiscoveryRun: {
+            areaId: string | null;
+            budgetUsd: number;
+            costUsd: number;
+            counts: components["schemas"]["RunCounts"];
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            intent: components["schemas"]["DiscoveryIntent"];
+            options: components["schemas"]["DiscoveryRunOptions"];
+            providers: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+            reason: ("budget" | "monthly_budget" | "tasks_failed" | "cancelled" | "no_providers" | "error") | null;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "running" | "completed" | "partially_completed" | "failed" | "cancelled";
+        };
+        DiscoveryRunEstimate: {
+            budgetUsd: number;
+            excluded: {
+                /** @enum {string} */
+                provider: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake";
+                reason: string;
+            }[];
+            providers: {
+                calls: {
+                    expected: number;
+                    max: number;
+                    min: number;
+                };
+                costUsd: {
+                    expected: number;
+                    max: number;
+                    min: number;
+                };
+                /** @enum {string} */
+                provider: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake";
+                results: {
+                    max: number;
+                    min: number;
+                };
+                tasks: number;
+                tiles: number;
+            }[];
+            totals: {
+                calls: {
+                    expected: number;
+                    max: number;
+                    min: number;
+                };
+                costUsd: {
+                    expected: number;
+                    max: number;
+                    min: number;
+                };
+                tasks: number;
+            };
+            warnings: {
+                code: string;
+                message: string;
+            }[];
+        };
+        DiscoveryRunOptions: {
+            /**
+             * @description Emit `discovery.business_found` for enrichment (BF-027).
+             * @default false
+             */
+            autoEnrich: boolean;
+            /**
+             * @description Google field tier for this run (workspace setting by default).
+             * @enum {string}
+             */
+            fieldTier?: "essentials" | "pro" | "enterprise";
+            /**
+             * @description Stop fetching beyond this many records.
+             * @default 2000
+             */
+            maxResults: number;
+            /**
+             * @default auto
+             * @enum {string}
+             */
+            tileStrategy: "auto" | "circles" | "bboxes";
+        };
+        DiscoveryRunPage: {
+            items: components["schemas"]["DiscoveryRun"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
         DiscoverySettings: {
             disabledProviders: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
             /**
@@ -1182,6 +1383,71 @@ export type components = {
             overtureRelease: string | null;
             /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
             providerOrder: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+            /** @description Default budget of one discovery run (a run never spends more). */
+            runBudgetUsd: number;
+        };
+        DiscoveryTask: {
+            attempt: number;
+            categoryId: string | null;
+            costUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            depth: number;
+            error: string | null;
+            /** Format: uuid */
+            id: string;
+            pageNumber: number;
+            /** @enum {string} */
+            provider: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake";
+            records: number;
+            saturated: boolean;
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "failed" | "skipped";
+            tile: components["schemas"]["DiscoveryTile"];
+        };
+        DiscoveryTaskPage: {
+            items: components["schemas"]["DiscoveryTask"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
+        DiscoveryTile: components["schemas"]["CircleGeometry"] | {
+            bbox: {
+                east: number;
+                north: number;
+                south: number;
+                west: number;
+            };
+            /** @constant */
+            type: "BBox";
+        };
+        EstimateDiscoveryRunRequest: {
+            /** @description A stored area (BF-017) or a drawn geometry. */
+            area: {
+                /** Format: uuid */
+                areaId: string;
+            } | {
+                geometry: {
+                    coordinates: [
+                        number,
+                        number
+                    ][][][];
+                    /** @constant */
+                    type: "MultiPolygon";
+                } | components["schemas"]["CircleGeometry"];
+            };
+            /** @description Default: the workspace run budget. */
+            budgetUsd?: number;
+            intent: components["schemas"]["DiscoveryIntent"];
+            /**
+             * @default {
+             *       "autoEnrich": false,
+             *       "maxResults": 2000,
+             *       "tileStrategy": "auto"
+             *     }
+             */
+            options: components["schemas"]["DiscoveryRunOptions"];
+            /** @description Default: the workspace selection. */
+            providers?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
         };
         FeatureFlags: {
             [key: string]: boolean;
@@ -1627,6 +1893,32 @@ export type components = {
              */
             categoryId?: string;
         };
+        RunBusiness: {
+            /** Format: uuid */
+            businessId: string;
+            locality: string | null;
+            name: string;
+            primaryCategoryId: string | null;
+            /** Format: date-time */
+            trackedAt: string;
+        };
+        RunBusinessPage: {
+            items: components["schemas"]["RunBusiness"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
+        RunCounts: {
+            created: number;
+            failedRecords: number;
+            merged: number;
+            possibleDuplicates: number;
+            recordsFetched: number;
+            tasksDone: number;
+            tasksFailed: number;
+            tasksSkipped: number;
+            tasksTotal: number;
+            unchanged: number;
+        };
         ScraperStatus: {
             /** @description The owner acknowledgement in force (current warning version), if any. */
             acknowledgement: {
@@ -1694,6 +1986,7 @@ export type components = {
             newBusinessId: string;
             sourcesMoved: number;
         };
+        StartDiscoveryRunRequest: components["schemas"]["EstimateDiscoveryRunRequest"];
         /** @description Build and runtime information about the API process. */
         SystemInfo: {
             commit: string | null;
@@ -1743,6 +2036,8 @@ export type components = {
                 overtureRelease?: string | null;
                 /** @description Preferred providers first (ADR-0013: open data, then official APIs, then opt-in scrapers). */
                 providerOrder?: ("google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "fake")[];
+                /** @description Default budget of one discovery run (a run never spends more). */
+                runBudgetUsd?: number;
             };
             features?: components["schemas"]["FeatureFlags"];
             legalName?: string | null;
@@ -3049,6 +3344,514 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listDiscoveryRuns: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+                status?: "queued" | "running" | "completed" | "partially_completed" | "failed" | "cancelled";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRunPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    startDiscoveryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartDiscoveryRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getDiscoveryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listDiscoveryRunBusinesses: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunBusinessPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    cancelDiscoveryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listDiscoveryRunTasks: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryTaskPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    estimateDiscoveryRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EstimateDiscoveryRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoveryRunEstimate"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -24,7 +24,22 @@ const geocoderProvider: Provider = {
 /** Geo (BF-017): areas, location resolution, geocoding with caching, tiling for discovery. */
 @Module({})
 export class GeoModule {
+  private static readonly byMode = new Map<AppMode, DynamicModule>();
+
+  /**
+   * One definition per mode: modules importing this one (for its public services) share the instance the app
+   * module creates instead of building a second one.
+   */
   static forRoot(mode: AppMode): DynamicModule {
+    let definition = GeoModule.byMode.get(mode);
+    if (!definition) {
+      definition = GeoModule.build(mode);
+      GeoModule.byMode.set(mode, definition);
+    }
+    return definition;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: GeoModule,
       controllers: mode === 'worker' ? [] : [GeoController],

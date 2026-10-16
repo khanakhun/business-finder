@@ -26,8 +26,12 @@ export class QueueModule {
           connection: { url: appEnv.VALKEY_URL, maxRetriesPerRequest: mode === 'worker' ? null : 1 },
         }),
       }),
-      ...QUEUE_NAMES.map((name) =>
-        BullModule.registerQueue({ name, defaultJobOptions: QUEUES[name].defaultJobOptions }),
+      // Registered under the queue's name (registry keys are identifiers, names may contain dashes).
+      ...QUEUE_NAMES.map((key) =>
+        BullModule.registerQueue({
+          name: QUEUES[key].name,
+          defaultJobOptions: QUEUES[key].defaultJobOptions,
+        }),
       ),
     ];
     if (mode === 'http') {
@@ -38,7 +42,9 @@ export class QueueModule {
           // Platform operators only: Bull Board spans every workspace (credentials resolved in http.ts).
           middleware: requireOperator(),
         }),
-        ...QUEUE_NAMES.map((name) => BullBoardModule.forFeature({ name, adapter: BullMQAdapter })),
+        ...QUEUE_NAMES.map((key) =>
+          BullBoardModule.forFeature({ name: QUEUES[key].name, adapter: BullMQAdapter }),
+        ),
       );
     }
     return {

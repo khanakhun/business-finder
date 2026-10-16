@@ -30,6 +30,18 @@ export const QUEUES = {
   },
   /** Taxonomy maintenance (BF-015): category embeddings. One at a time: runs are idempotent and rare. */
   taxonomy: { name: 'taxonomy', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  /** Discovery runs (BF-020): planning, provider fetches (rate-limited per provider key), ingestion. */
+  discoveryPlan: { name: 'discovery-plan', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  discoveryFetch: {
+    name: 'discovery-fetch',
+    defaultJobOptions: {
+      ...DEFAULT_JOB_OPTIONS,
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 2_000 },
+    },
+    concurrency: 4,
+  },
+  discoveryIngest: { name: 'discovery-ingest', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

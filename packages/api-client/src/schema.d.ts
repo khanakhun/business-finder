@@ -3549,7 +3549,7 @@ export type components = {
             primary: boolean;
         };
         ScoringProfileVersion: {
-            config: components["schemas"]["ScoringProfileConfig"];
+            config: components["schemas"]["StoredScoringProfileConfig"];
             /** Format: date-time */
             createdAt: string;
             /** Format: uuid */
@@ -3774,6 +3774,46 @@ export type components = {
             sourcesMoved: number;
         };
         StartDiscoveryRunRequest: components["schemas"]["EstimateDiscoveryRunRequest"];
+        StoredScoringProfileConfig: {
+            /** @default [] */
+            gates: components["schemas"]["ScoringGate"][];
+            /**
+             * @default rules
+             * @constant
+             */
+            kind: "rules";
+            /** @default {} */
+            missing: {
+                [key: string]: number;
+            };
+            /**
+             * @default weighted_sum
+             * @constant
+             */
+            normalization: "weighted_sum";
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** @default {} */
+            reasonTemplates: {
+                [key: string]: {
+                    [key: string]: {
+                        en: string;
+                        fr: string;
+                    };
+                };
+            };
+            tiers: {
+                A: number;
+                B: number;
+            };
+            /** @default {} */
+            transforms: {
+                [key: string]: components["schemas"]["ScoringTransform"];
+            };
+            weights: {
+                [key: string]: number;
+            };
+        };
         /** @description Build and runtime information about the API process. */
         SystemInfo: {
             commit: string | null;

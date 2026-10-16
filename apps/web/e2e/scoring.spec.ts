@@ -4,7 +4,9 @@ import { apiUrl, webUrl } from './env.ts';
 import { expect, test } from './fixtures.ts';
 
 // Scores (BF-032): a tracked business is scored for every built-in offer; the Scores tab explains each score and
-// recomputes on demand; the pipeline card shows the primary profile's tier; the tab reads in French.
+// recomputes on demand; the pipeline card shows the primary profile's tier; the tab reads in French. The primary
+// profile is the built-in new-website one, but another spec may switch it for a moment: the tests check that the
+// primary card comes first, whichever it is.
 test.describe.configure({ mode: 'serial' });
 
 const run = `${Date.now().toString(36)}`;
@@ -37,14 +39,10 @@ test('explains the scores of a business, recomputes them, and badges the pipelin
   await page.getByRole('button', { name: 'Recompute' }).first().click();
   await expect(page.getByText('Scores recomputed.')).toBeVisible();
 
-  const primary = page.getByTestId('score-card-new_website');
+  const primary = page.locator('[data-testid^="score-card-"]').first();
   await expect(primary.getByText('Primary')).toBeVisible();
-  await expect(page.locator('[data-testid^="score-card-"]').first()).toHaveAttribute(
-    'data-testid',
-    'score-card-new_website',
-  );
-  for (const offer of ['website_redesign', 'ai_receptionist', 'booking_system', 'local_seo'])
-    await expect(page.getByTestId(`score-card-${offer}`)).toBeVisible();
+  for (const offer of ['new_website', 'website_redesign', 'ai_receptionist', 'booking_system', 'local_seo'])
+    await expect(page.getByTestId(`score-card-${offer}`).first()).toBeVisible();
   // Once scored, the recompute button sits above the cards only.
   await expect(page.getByRole('button', { name: 'Recompute' })).toHaveCount(1);
   await primary.getByText('All contributions').click();
@@ -78,7 +76,7 @@ test.describe('in French', () => {
     await expect(page.getByRole('tab', { name: 'Scores', selected: true })).toBeVisible();
     await page.getByRole('button', { name: 'Recalculer' }).first().click();
     await expect(page.getByText('Scores recalculés.')).toBeVisible();
-    const primary = page.getByTestId('score-card-new_website');
+    const primary = page.locator('[data-testid^="score-card-"]').first();
     await expect(primary.getByText('Principal')).toBeVisible();
     await expect(primary.getByText(/^Version \d+ du profil/)).toBeVisible();
     await primary.getByText('Toutes les contributions').click();

@@ -28,6 +28,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
+import { PrimaryProfileSelect } from '@/features/scoring/primary-profile-select.tsx';
 import { apiClient, queryKeys } from '@/lib/api.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
@@ -266,6 +267,7 @@ export function SearchToolbar({
           ))}
         </SelectContent>
       </Select>
+      <PrimaryProfileSelect />
       <Segmented
         name="search-view"
         legend={t('view')}

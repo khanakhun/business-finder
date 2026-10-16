@@ -21,6 +21,7 @@ import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useBusinessScores, useRecomputeBusinessScores, useScoringProfiles } from './api.ts';
 import { OFFER_ICON, ScoreBadge } from './score-badge.tsx';
+import { useValueLabel } from './value-labels.ts';
 import { Waterfall, waterfallSteps } from './waterfall.tsx';
 
 // The business's Scores tab (BF-032): one card per profile of the workspace, primary first — score, tier, why
@@ -31,25 +32,16 @@ type Locale = 'en' | 'fr';
 const label = (feature: ScoreContribution['feature'], locale: Locale) =>
   FEATURE_DEFINITIONS[feature].label[locale];
 
-/** Where the dashboard already names an enum feature's values. */
-const ENUM_MESSAGES: Partial<Record<ScoreContribution['feature'], string>> = {
-  website_status: 'enrichment.audit.statuses',
-  operating_status: 'business.operating',
-  pipeline_status: 'search.status',
-};
-
 /** A feature's raw value, readable: yes/no, a localized number, an enum value's label. */
 function useValueText() {
   const t = useTranslations('scoring.tab');
-  const all = useTranslations();
   const format = useFormatter();
+  const valueLabel = useValueLabel();
   return (feature: ScoreContribution['feature'], raw: ScoreContribution['rawValue']): string => {
     if (raw === null) return t('missing');
     if (typeof raw === 'boolean') return t(raw ? 'yes' : 'no');
     if (typeof raw === 'number') return format.number(raw, { maximumFractionDigits: 2 });
-    // Keys built at runtime: checked with `has` (an unknown value reads as is).
-    const key = `${ENUM_MESSAGES[feature]}.${raw}` as Parameters<typeof all>[0];
-    return ENUM_MESSAGES[feature] && all.has(key) ? all(key) : raw;
+    return valueLabel(feature, raw);
   };
 }
 

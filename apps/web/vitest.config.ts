@@ -24,6 +24,12 @@ export default mergeConfig(
       'src/features/business/tags.ts',
       'src/features/business/markdown.tsx',
       'src/features/pipeline/move-card.ts',
+      // The scoring editor's logic (BF-032); its components are covered by Playwright.
+      'src/features/scoring/waterfall.tsx',
+      'src/features/scoring/editor/draft.ts',
+      'src/features/scoring/editor/gates.ts',
+      'src/features/scoring/editor/preview-stats.ts',
+      'src/features/scoring/editor/transform-curve.ts',
     ],
   }),
   {

@@ -56,6 +56,9 @@ const child = spawn(process.execPath, [nextBin, ...args], {
     NEXT_PUBLIC_APP_URL: env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_MAP_STYLE_URL: env.NEXT_PUBLIC_MAP_STYLE_URL,
     NEXT_PUBLIC_SITES_ASSETS_BASE_URL: env.NEXT_PUBLIC_SITES_ASSETS_BASE_URL,
+    ...(env.NEXT_PUBLIC_SITES_UPLOADS_URL
+      ? { NEXT_PUBLIC_SITES_UPLOADS_URL: env.NEXT_PUBLIC_SITES_UPLOADS_URL }
+      : {}),
     // Server-side calls (session check in the dashboard layout) may use an internal API address.
     API_URL: env.API_URL,
   },

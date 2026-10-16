@@ -1,7 +1,17 @@
 'use client';
 
 import { ApiError } from '@bf/api-client';
-import type { SiteVersion } from '@bf/contracts';
+import type {
+  CreateSiteAssetUploadRequest,
+  SiteAsset,
+  SiteAssetList,
+  SiteAssetUpload,
+  SiteDetail,
+  SitePublication,
+  SiteVersion,
+  SiteVersionDiff,
+  SiteVersionPage,
+} from '@bf/contracts';
 import { type BaseOperation, MAX_BATCH, type SiteSpec } from '@bf/site-schema';
 import { apiClient } from '@/lib/api.ts';
 
@@ -60,4 +70,141 @@ export async function fetchVersion(siteId: string, versionId: string): Promise<S
     params: { path: { id: siteId, versionId } },
   });
   return data as SiteVersion;
+}
+
+/** Saves a whole spec as one version (the admins' JSON mode). Throws `VersionConflict` on a concurrent save. */
+export async function saveSpec(input: {
+  readonly siteId: string;
+  readonly baseVersionId: string;
+  readonly spec: unknown;
+  readonly changeSummary?: string;
+}): Promise<SiteVersion> {
+  try {
+    const { data } = await apiClient().POST('/v1/sites/{id}/versions', {
+      params: { path: { id: input.siteId } },
+      body: {
+        spec: input.spec as Record<string, unknown>,
+        baseVersionId: input.baseVersionId,
+        ...(input.changeSummary ? { changeSummary: input.changeSummary } : {}),
+      },
+    });
+    return data as SiteVersion;
+  } catch (error) {
+    throw conflictOf(error) ?? error;
+  }
+}
+
+/** The site: its publications and views (the publish button's state). */
+export async function fetchSite(siteId: string): Promise<SiteDetail> {
+  const { data } = await apiClient().GET('/v1/sites/{id}', { params: { path: { id: siteId } } });
+  return data as SiteDetail;
+}
+
+/** A page of the site's versions, newest first. */
+export async function fetchVersions(siteId: string, cursor?: string): Promise<SiteVersionPage> {
+  const { data } = await apiClient().GET('/v1/sites/{id}/versions', {
+    params: { path: { id: siteId }, query: { limit: 50, ...(cursor ? { cursor } : {}) } },
+  });
+  return data as SiteVersionPage;
+}
+
+/** What changed from one version to another. */
+export async function fetchDiff(siteId: string, from: string, to: string): Promise<SiteVersionDiff> {
+  const { data } = await apiClient().GET('/v1/sites/{id}/diff', {
+    params: { path: { id: siteId }, query: { from, to } },
+  });
+  return data as SiteVersionDiff;
+}
+
+/** Makes an earlier version's content current again, as a new version. */
+export async function restoreVersion(input: {
+  readonly siteId: string;
+  readonly versionId: string;
+  readonly baseVersionId: string;
+}): Promise<SiteVersion> {
+  try {
+    const { data } = await apiClient().POST('/v1/sites/{id}/rollback', {
+      params: { path: { id: input.siteId } },
+      body: { versionId: input.versionId, baseVersionId: input.baseVersionId },
+    });
+    return data as SiteVersion;
+  } catch (error) {
+    throw conflictOf(error) ?? error;
+  }
+}
+
+export async function publishPreview(
+  siteId: string,
+  versionId: string,
+  expiresInDays: number,
+): Promise<SitePublication> {
+  const { data } = await apiClient().POST('/v1/sites/{id}/preview', {
+    params: { path: { id: siteId } },
+    body: { versionId, expiresInDays },
+  });
+  return data as SitePublication;
+}
+
+export async function extendPreview(siteId: string, days: number): Promise<SitePublication> {
+  const { data } = await apiClient().POST('/v1/sites/{id}/preview/extend', {
+    params: { path: { id: siteId } },
+    body: { days },
+  });
+  return data as SitePublication;
+}
+
+export async function unpublishPreview(siteId: string): Promise<void> {
+  await apiClient().POST('/v1/sites/{id}/unpublish', {
+    params: { path: { id: siteId } },
+    body: { environment: 'preview' },
+  });
+}
+
+/** The site's uploaded and collected images, newest first. */
+export async function fetchAssets(siteId: string): Promise<readonly SiteAsset[]> {
+  const { data } = await apiClient().GET('/v1/sites/{id}/assets', { params: { path: { id: siteId } } });
+  return (data as SiteAssetList).items;
+}
+
+/**
+ * Uploads an image: a pending asset and a presigned URL from the API, the bytes PUT there, then finalized (the API
+ * checks the bytes and queues the variants). Returns the asset as finalized (usually still `processing`).
+ */
+export async function uploadAsset(
+  siteId: string,
+  file: Blob,
+  request: {
+    readonly license: CreateSiteAssetUploadRequest['license'];
+    readonly alt?: Record<string, string>;
+    readonly licenseDetails?: {
+      author?: string;
+      sourceUrl?: string;
+      attributionText?: string;
+      provider?: string;
+    };
+  },
+  signal?: AbortSignal,
+): Promise<SiteAsset> {
+  const { data } = await apiClient().POST('/v1/sites/{id}/assets', {
+    params: { path: { id: siteId } },
+    body: {
+      license: request.license,
+      ...(request.alt ? { alt: request.alt } : {}),
+      ...(request.licenseDetails ? { licenseDetails: request.licenseDetails } : {}),
+      mime: file.type as CreateSiteAssetUploadRequest['mime'],
+      bytes: file.size,
+    },
+  });
+  const upload = data as SiteAssetUpload;
+  const put = await fetch(upload.uploadUrl, {
+    method: upload.method,
+    headers: upload.headers,
+    body: file,
+    ...(signal ? { signal } : {}),
+  });
+  if (!put.ok) throw new Error(`Upload refused (${put.status})`);
+  const finalized = await apiClient().POST('/v1/sites/{id}/assets/{assetId}/finalize', {
+    params: { path: { id: siteId, assetId: upload.asset.id } },
+  });
+  return finalized.data as SiteAsset;
 }

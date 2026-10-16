@@ -62,7 +62,11 @@ export default defineConfig({
     },
     {
       command: 'pnpm build && pnpm start',
-      env: { NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test' },
+      // The site editor's image host and upload origin (its e2e answers both, BF-037).
+      env: {
+        NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
+        NEXT_PUBLIC_SITES_UPLOADS_URL: 'https://uploads.bf-sites.test',
+      },
       url: webUrl,
       reuseExistingServer: !ci,
       timeout: 240_000,

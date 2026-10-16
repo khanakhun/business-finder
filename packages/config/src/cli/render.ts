@@ -28,6 +28,7 @@ export const GENERATED_BY_INFRA: ReadonlySet<string> = new Set([
   'INTEL_URL',
   'NEXT_PUBLIC_API_URL',
   'NEXT_PUBLIC_APP_URL',
+  'NEXT_PUBLIC_SITES_UPLOADS_URL',
   'WEB_PORT',
   'SITES_PORT',
   'SITES_INTERNAL_URL',

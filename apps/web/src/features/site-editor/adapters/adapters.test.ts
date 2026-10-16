@@ -282,6 +282,7 @@ function play(data: EditorData, steps: Session['steps'], spec: SiteSpec): Editor
 }
 
 describe('editor sessions (property)', () => {
+  // A property test over every fixture: seconds of CPU, more when `pnpm verify` runs every package at once.
   it('give operations that reproduce the canvas exactly, and none once saved', () => {
     fc.assert(
       fc.property(edit, ({ fixture: [name, pageId], steps }) => {
@@ -296,5 +297,5 @@ describe('editor sessions (property)', () => {
       }),
       { numRuns: 300 },
     );
-  });
+  }, 30_000);
 });

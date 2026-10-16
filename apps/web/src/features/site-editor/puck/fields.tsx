@@ -17,6 +17,7 @@ import { FieldLabel } from '@puckeditor/core';
 import { ArrowDownIcon, ArrowUpIcon, LockIcon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
+import { AssetPicker } from '../assets/asset-picker.tsx';
 import { useSiteEditor } from '../context.tsx';
 import type { FieldSpec } from './field-registry.ts';
 
@@ -237,7 +238,7 @@ export function PlainTextField({
   );
 }
 
-/** One of the site's images (none, if the prop is optional). */
+/** One of the site's images (none, if the prop is optional), chosen in the image picker. */
 export function AssetField({
   label,
   id,
@@ -249,8 +250,11 @@ export function AssetField({
 }: CustomFieldProps<string | undefined> & { readonly optional: boolean }) {
   const t = useTranslations('siteEditor.fields');
   const { spec, locale } = useSiteEditor();
-  const images = spec.assets.filter((asset) => asset.kind !== 'icon');
-  const selected = images.find((asset) => asset.id === value);
+  const [picking, setPicking] = React.useState(false);
+  const selected = spec.assets.find((asset) => asset.id === value);
+  const name = selected
+    ? (selected.alt[locale] ?? selected.alt[spec.defaultLocale] ?? selected.id)
+    : undefined;
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
       {help ? <FieldHelp text={help} /> : null}
@@ -263,23 +267,31 @@ export function AssetField({
             height={selected.height}
             className="h-24 w-full rounded object-cover"
           />
-        ) : null}
-        <select
-          id={id}
-          aria-label={label}
-          className="border-input h-9 rounded-md border bg-transparent px-2 text-sm"
-          value={value ?? ''}
-          disabled={readOnly}
-          onChange={(event) => onChange(event.target.value || undefined)}
-        >
-          {optional || !value ? <option value="">{t('noImage')}</option> : null}
-          {images.map((asset) => (
-            <option key={asset.id} value={asset.id}>
-              {asset.alt[locale] ?? asset.alt[spec.defaultLocale] ?? asset.id}
-            </option>
-          ))}
-        </select>
+        ) : (
+          <span className="text-muted-foreground text-xs">{t('noImage')}</span>
+        )}
+        {name ? <span className="truncate text-xs">{name}</span> : null}
+        {readOnly ? null : (
+          <div className="flex gap-1">
+            <Button id={id} type="button" size="sm" variant="outline" onClick={() => setPicking(true)}>
+              {selected ? t('changeImage', { name: label }) : t('chooseImage', { name: label })}
+            </Button>
+            {optional && selected ? (
+              <Button type="button" size="sm" variant="ghost" onClick={() => onChange(undefined)}>
+                {t('removeImage')}
+              </Button>
+            ) : null}
+          </div>
+        )}
       </div>
+      {picking ? (
+        <AssetPicker
+          open
+          onOpenChange={setPicking}
+          kinds={['image', 'logo']}
+          onPick={(assetId) => onChange(assetId)}
+        />
+      ) : null}
     </FieldLabel>
   );
 }
@@ -300,9 +312,9 @@ export function AssetListField({
 }) {
   const t = useTranslations('siteEditor.fields');
   const { spec, locale } = useSiteEditor();
+  const [picking, setPicking] = React.useState(false);
   const ids = value ?? [];
   const byId = new Map(spec.assets.map((asset) => [asset.id, asset]));
-  const available = spec.assets.filter((asset) => asset.kind === 'image' && !ids.includes(asset.id));
   const move = (from: number, to: number) => {
     const next = [...ids];
     const [moved] = next.splice(from, 1);
@@ -315,12 +327,16 @@ export function AssetListField({
       <div className="flex flex-col gap-2">
         <ol className="flex flex-col gap-1">
           {ids.map((assetId, index) => {
-            const name = byId.get(assetId)?.alt[locale] ?? assetId;
+            const asset = byId.get(assetId);
+            const name = asset?.alt[locale] ?? assetId;
             // An image may be listed twice (stored data): its key counts earlier copies, so it stays stable when a
             // row moves (focus follows the moved image) and unique when an id repeats.
             const copy = ids.slice(0, index).filter((other) => other === assetId).length;
             return (
               <li key={`${assetId}#${copy}`} className="flex items-center gap-1 text-sm">
+                {asset ? (
+                  <img src={asset.url} alt="" className="size-8 shrink-0 rounded object-cover" />
+                ) : null}
                 <span className="flex-1 truncate">{name}</span>
                 {readOnly ? null : (
                   <>
@@ -361,24 +377,21 @@ export function AssetListField({
           })}
         </ol>
         {readOnly || ids.length >= (max ?? Number.POSITIVE_INFINITY) ? null : (
-          <select
-            id={id}
-            aria-label={t('addImage')}
-            className="border-input h-9 rounded-md border bg-transparent px-2 text-sm"
-            value=""
-            onChange={(event) => {
-              if (event.target.value) onChange([...ids, event.target.value]);
-            }}
-          >
-            <option value="">{t('addImage')}</option>
-            {available.map((asset) => (
-              <option key={asset.id} value={asset.id}>
-                {asset.alt[locale] ?? asset.id}
-              </option>
-            ))}
-          </select>
+          <Button id={id} type="button" size="sm" variant="outline" onClick={() => setPicking(true)}>
+            {t('addImage')}
+          </Button>
         )}
       </div>
+      {picking ? (
+        <AssetPicker
+          open
+          onOpenChange={setPicking}
+          kinds={['image']}
+          onPick={(assetId) => {
+            if (!ids.includes(assetId)) onChange([...ids, assetId]);
+          }}
+        />
+      ) : null}
     </FieldLabel>
   );
 }

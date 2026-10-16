@@ -12,7 +12,12 @@ describe('public env', () => {
       appUrl: 'http://localhost:3000',
       mapStyleUrl: 'https://tiles.openfreemap.org/styles/liberty',
       sitesAssetsUrl: 'https://assets.sites.localhost',
+      sitesUploadsUrl: null,
     });
+    // The site editor's uploads, when the browser may reach object storage.
+    expect(serverPublicEnv({ NEXT_PUBLIC_SITES_UPLOADS_URL: 'http://127.0.0.1:9010' }).sitesUploadsUrl).toBe(
+      'http://127.0.0.1:9010',
+    );
   });
 
   it('requires the deployment URLs in production', () => {
@@ -38,6 +43,9 @@ describe('public env', () => {
     expect(() => serverPublicEnv({ NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'data:x' })).toThrow(
       /NEXT_PUBLIC_SITES_ASSETS_BASE_URL/,
     );
+    expect(() => serverPublicEnv({ NEXT_PUBLIC_SITES_UPLOADS_URL: 'ftp://x' })).toThrow(
+      /NEXT_PUBLIC_SITES_UPLOADS_URL/,
+    );
   });
 
   it('uses the values the server handed over in the browser, defaults before that', () => {
@@ -47,12 +55,14 @@ describe('public env', () => {
       appUrl: 'https://app.example',
       mapStyleUrl: 'https://tiles.example/style.json',
       sitesAssetsUrl: 'https://assets.example',
+      sitesUploadsUrl: null,
     });
     expect(publicEnv()).toEqual({
       apiUrl: 'https://api.example',
       appUrl: 'https://app.example',
       mapStyleUrl: 'https://tiles.example/style.json',
       sitesAssetsUrl: 'https://assets.example',
+      sitesUploadsUrl: null,
     });
   });
 });

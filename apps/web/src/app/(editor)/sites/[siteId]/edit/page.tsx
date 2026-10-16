@@ -28,5 +28,5 @@ export default async function Page({ params }: Props) {
   if (!current) return <EmptyState title={t('noVersion')} />;
   const version = await serverGet<SiteVersion>(`/v1/sites/${siteId}/versions/${current.id}`);
   if (!version.ok) return <EmptyState title={t('notFound')} />;
-  return <LazySiteEditor siteId={siteId} initialVersion={version.data} />;
+  return <LazySiteEditor siteId={siteId} initialSite={site.data} initialVersion={version.data} />;
 }

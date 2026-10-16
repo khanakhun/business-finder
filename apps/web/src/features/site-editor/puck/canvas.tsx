@@ -2,6 +2,7 @@
 
 import {
   BlockRenderer,
+  blockTones,
   createRenderContext,
   Footer,
   Header,
@@ -11,7 +12,7 @@ import {
   themeDataAttributes,
   themeToCssVars,
 } from '@bf/site-blocks';
-import { BLOCK_SCHEMAS, type BlockType } from '@bf/site-schema';
+import { BLOCK_SCHEMAS, type Block, type BlockType } from '@bf/site-schema';
 import { createUsePuck } from '@puckeditor/core';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -40,12 +41,13 @@ function CanvasLink({ href, children, ...rest }: SiteLinkProps) {
   );
 }
 
-const OPTIONS: RenderOptions = { preview: true, mode: 'production', linkComponent: CanvasLink };
+/** How the canvas renders (the renderer's options for a preview, links inert): the parity test uses them too. */
+export const CANVAS_OPTIONS: RenderOptions = { preview: true, mode: 'production', linkComponent: CanvasLink };
 
 function useRenderContext() {
   const { spec, pageId, locale } = useSiteEditor();
   return React.useMemo(
-    () => createRenderContext(spec, findPage(spec, pageId), locale, OPTIONS),
+    () => createRenderContext(spec, findPage(spec, pageId), locale, CANVAS_OPTIONS),
     [spec, pageId, locale],
   );
 }
@@ -76,12 +78,10 @@ export function CanvasBlock({ type, props }: { readonly type: BlockType; readonl
   const ctx = useRenderContext();
   const content = usePuck((state) => state.appState.data.content);
   const index = content.findIndex((item) => item.props.id === props.id);
-  // Tones alternate by position among the non-hero blocks (blockTones in the library).
-  let tone: 'base' | 'alt' | undefined;
-  if (type !== 'hero') {
-    const before = content.slice(0, Math.max(index, 0) + 1).filter((item) => item.type !== 'hero').length;
-    tone = before % 2 === 1 ? 'alt' : 'base';
-  }
+  // Tones alternate by position among the non-hero blocks: the library's own rule (it reads the types only).
+  const tone = blockTones(content as unknown as readonly Pick<Block, 'type'>[] as readonly Block[])[
+    Math.max(index, 0)
+  ];
   // Puck adds its own render props (`puck`, `editMode`): the block gets its schema's keys only.
   const own = Object.keys(BLOCK_SCHEMAS[type].shape.props.shape);
   const block = itemToBlock({

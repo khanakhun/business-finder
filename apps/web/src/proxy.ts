@@ -17,6 +17,8 @@ export function buildCsp(
     https: boolean;
     mapOrigin?: string;
     sitesAssetsOrigin?: string;
+    /** Object storage, for the site editor's presigned image uploads (BF-037). */
+    uploadsOrigin?: string;
   },
 ): string {
   return [
@@ -29,7 +31,7 @@ export function buildCsp(
     `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.sitesAssetsOrigin ? ` ${options.sitesAssetsOrigin}` : ''}`,
     "worker-src 'self' blob:",
     "font-src 'self'",
-    `connect-src 'self' ${options.apiOrigin}${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.dev ? ' ws:' : ''}`,
+    `connect-src 'self' ${options.apiOrigin}${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.uploadsOrigin ? ` ${options.uploadsOrigin}` : ''}${options.dev ? ' ws:' : ''}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -48,6 +50,7 @@ export function proxy(request: NextRequest): NextResponse {
     https: env.appUrl.startsWith('https://'),
     mapOrigin: new URL(env.mapStyleUrl).origin,
     sitesAssetsOrigin: new URL(env.sitesAssetsUrl).origin,
+    ...(env.sitesUploadsUrl ? { uploadsOrigin: new URL(env.sitesUploadsUrl).origin } : {}),
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);

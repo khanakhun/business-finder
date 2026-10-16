@@ -1,6 +1,6 @@
 'use client';
 
-import type { Issue, Operation, SiteLocale, SiteSpec } from '@bf/site-schema';
+import type { Asset, Issue, Operation, SiteLocale, SiteSpec } from '@bf/site-schema';
 import * as React from 'react';
 
 /**
@@ -9,6 +9,7 @@ import * as React from 'react';
  * config stays the same while these change; its renders and fields read them here.
  */
 export interface SiteEditorState {
+  readonly siteId: string;
   readonly spec: SiteSpec;
   readonly pageId: string;
   readonly locale: SiteLocale;
@@ -40,6 +41,12 @@ export interface SiteEditorActions {
    * reported, nothing changes then.
    */
   readonly change: (op: Operation, options?: { readonly open?: string }) => void;
+  /**
+   * Adds an image to the site (picked from its library) without touching the canvas: a field then points at it. Not
+   * an undo step (undoing it would leave the field pointing at nothing); an unused image is dropped at the next save
+   * by the validator's warning, or stays harmlessly.
+   */
+  readonly addAsset: (asset: Asset) => void;
   readonly undo: () => void;
   readonly redo: () => void;
   readonly canUndo: boolean;

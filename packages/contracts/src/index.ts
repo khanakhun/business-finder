@@ -16,6 +16,7 @@ export {
   type ProblemFieldError,
   ProblemFieldErrorSchema,
   RateLimitedError,
+  UnauthenticatedError,
   ValidationError,
 } from './errors.ts';
 export {
@@ -49,6 +50,34 @@ export {
   LocalizedTextSchema,
   pickLocale,
 } from './i18n.ts';
+export {
+  type ApiKeyList,
+  ApiKeyListSchema,
+  type ApiKeySummary,
+  ApiKeySummarySchema,
+  type ChangeMemberRoleRequest,
+  ChangeMemberRoleRequestSchema,
+  type CreateApiKeyRequest,
+  CreateApiKeyRequestSchema,
+  type CreatedApiKey,
+  CreatedApiKeySchema,
+  type IdentityConfig,
+  IdentityConfigSchema,
+  type Invitation,
+  InvitationSchema,
+  type InviteMemberRequest,
+  InviteMemberRequestSchema,
+  type Me,
+  type Member,
+  MemberSchema,
+  type MembersOverview,
+  MembersOverviewSchema,
+  MeSchema,
+  type OrganizationSummary,
+  OrganizationSummarySchema,
+  type TransferOwnershipRequest,
+  TransferOwnershipRequestSchema,
+} from './identity.ts';
 export { BusinessId, EventId, type Id, idSchema, isUuidV7, newId, OrgId, SiteId, UserId } from './ids.ts';
 export { type EchoRequest, EchoRequestSchema, type EchoResponse, EchoResponseSchema } from './intel.ts';
 export {

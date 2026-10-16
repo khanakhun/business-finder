@@ -1,16 +1,6 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { parseEnv } from 'node:util';
 import { defineConfig, devices } from '@playwright/test';
+import { apiUrl, webUrl } from './e2e/env.ts';
 
-// Same ports as `pnpm infra:up` / `pnpm dev`: .env and .env.generated at the repo root, real env wins.
-const fileEnv: Record<string, string | undefined> = {};
-for (const file of ['../../.env', '../../.env.generated']) {
-  const url = new URL(file, import.meta.url);
-  if (existsSync(url)) Object.assign(fileEnv, parseEnv(readFileSync(url, 'utf8')));
-}
-const env = { ...fileEnv, ...process.env };
-const webUrl = `http://localhost:${env.WEB_PORT ?? '3000'}`;
-const apiUrl = `http://localhost:${env.API_PORT ?? '4000'}`;
 const ci = Boolean(process.env.CI);
 
 export default defineConfig({
@@ -20,11 +10,22 @@ export default defineConfig({
   retries: ci ? 1 : 0,
   reporter: ci ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: { baseURL: webUrl, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  // Production build of the dashboard + the real API (it needs no database for these pages).
+  projects: [
+    // Signs up a workspace owner once (needs Mailpit: `pnpm infra:up`) and stores the session.
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/owner.json' },
+      dependencies: ['setup'],
+    },
+  ],
+  // Production build of the dashboard + the real API (database migrated, Mailpit running: pnpm infra:up).
   webServer: [
     {
       command: 'pnpm --filter @bf/api start',
+      // Browsers and the test runner reach the API from loopback: treat it as the reverse proxy so the per-test
+      // X-Forwarded-For (e2e/users.ts nextClientIp) separates rate-limit buckets. Never set this in production.
+      env: { AUTH_TRUSTED_PROXIES: '127.0.0.1,::1' },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
       timeout: 60_000,

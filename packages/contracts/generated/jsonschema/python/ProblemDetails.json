@@ -51,6 +51,10 @@
     "instance": {
       "type": "string"
     },
+    "reason": {
+      "pattern": "^[A-Z][A-Z0-9_]*$",
+      "type": "string"
+    },
     "status": {
       "maximum": 599,
       "minimum": 400,

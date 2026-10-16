@@ -4,9 +4,11 @@ import { Redis } from 'ioredis';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { createTestApp, type TestApp } from '../test/create-test-app.ts';
+import { AllowAnonymous } from './modules/platform/security/auth.decorators.ts';
 import { ApiRoute } from './modules/platform/validation/api-route.decorator.ts';
 
 @Controller('test-platform')
+@AllowAnonymous()
 class PlatformProbeController {
   @Get('domain-error')
   domainError(): never {

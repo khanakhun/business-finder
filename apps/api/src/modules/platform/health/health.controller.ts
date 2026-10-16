@@ -16,6 +16,7 @@ import { sql } from 'drizzle-orm';
 import type { Response } from 'express';
 import type { Redis } from 'ioredis';
 import { DB_CLIENT } from '../db/db.module.ts';
+import { AllowAnonymous } from '../security/auth.decorators.ts';
 import { VALKEY } from '../valkey/valkey.module.ts';
 
 const CHECK_TIMEOUT_MS = 2_000;
@@ -31,6 +32,7 @@ class HealthReportFilter implements ExceptionFilter {
 /** `/health/live`: the process runs. `/health/ready`: dependencies answer (503 otherwise). ADR-0015. */
 @ApiExcludeController()
 @SkipThrottle()
+@AllowAnonymous()
 @UseFilters(HealthReportFilter)
 @Controller('health')
 export class HealthController {

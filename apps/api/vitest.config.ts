@@ -13,5 +13,5 @@ export default defineVitestConfig({
     'src/modules/platform/{config,context,errors,resilience,validation}/**',
   ],
   // Pure DI declarations; their wiring is what the integration suite boots.
-  coverageExclude: ['**/*.module.ts'],
+  coverageExclude: ['**/*.module.ts', 'src/modules/*/application/testing.ts'],
 });

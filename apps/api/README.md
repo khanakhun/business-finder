@@ -19,7 +19,7 @@ pnpm gen:module <context>             # scaffold a new module (see below)
 
 Code runs through the SWC loader (`@swc-node/register`): NestJS needs decorator metadata, which Node's type
 stripping and esbuild do not emit. `src/instrumentation.ts` is preloaded so OpenTelemetry patches modules before
-they load. Until BF-010 adds authentication, the app **refuses to start with `NODE_ENV=production`**.
+they load.
 
 ## Layout
 
@@ -56,8 +56,36 @@ worker, and no queue connections in OpenAPI mode.
 | Resilience | `resilience/` | `@WithResilience('policy')`: timeout, retry with jitter, circuit breaker (cockatiel) |
 | Security | `security/` | helmet, CORS (APP_URL), throttling 300/min/user · 60/min/IP on Valkey (fails open) |
 | Health/metrics | `health/`, `metrics/` | `/health/live`, `/health/ready` (DB + Valkey), Prometheus `/metrics` |
-| Queues | `queue/` | BullMQ registration, `TypedProcessor`, Bull Board (basic auth until BF-010) |
+| Queues | `queue/` | BullMQ registration, `TypedProcessor`, Bull Board (signed-in, `settings:manage`) |
+| Security | `security/` | `AuthContext`, `@AllowAnonymous`/`@RequirePermission`/`@NoOrgRequired`/`@Ctx`, `AuthorizationGuard`, throttling |
 | OpenAPI | `openapi/` | OpenAPI 3.1 from Nest routes + Zod schemas (`.meta({ id })` → components) |
+
+## Authentication and authorization (BF-010)
+
+- **Better Auth** (`@bf/auth`) is mounted at `/api/auth/*` by `http.ts`, before Nest's body parsers. Only the
+  endpoints in `identity/infrastructure/better-auth-http.ts` are reachable; membership changes and API keys go
+  through `/v1` so the domain rules (last owner, who may grant which role, no permission escalation) hold.
+- Every request's credentials are resolved once (`BetterAuthResolver`, an Express middleware in `http.ts`): the
+  session cookie, or `Authorization: Bearer bf_…` (an organization API key). Org context comes only from the
+  session's active workspace or the key's workspace.
+- Every route declares exactly one policy — `@RequirePermission(...)` (the default choice), `@NoOrgRequired()`
+  (caller acting on themselves) or `@AllowAnonymous()`. A route without one is refused, and `src/routes.test.ts`
+  fails. 401 = no/invalid credentials; 403 = no workspace, missing permission, or a cross-origin session write;
+  resources of another workspace are 404.
+- First owner: `pnpm admin:bootstrap --email … --name … --workspace …` (prints a one-time set-password link).
+- Sign-up policy: `SIGNUP_MODE` (`invite_only` by default in production, `open` otherwise).
+
+### Anonymous routes
+
+Reviewed list (kept in sync with `src/routes.test.ts`):
+
+| Route | Why |
+|---|---|
+| `GET /health/live`, `GET /health/ready` | Probes |
+| `GET /metrics` | Prometheus scrape (internal network) |
+| `GET /v1/system/info` | Version and environment for the dashboard's connection card and deploy checks |
+| `GET /v1/identity/config` | Which sign-in/sign-up options the auth pages may show (sign-up mode, Google) |
+| `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
 ## Adding things
 

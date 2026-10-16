@@ -9,8 +9,10 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.ts';
 import { configureHttp } from '../src/http.ts';
+import { SYSTEM_MAILER, type SystemMailer } from '../src/modules/identity/application/ports.ts';
 import { CLOCK } from '../src/modules/platform/clock/clock.module.ts';
 import { type AppEnv, loadAppEnv } from '../src/modules/platform/config/app-env.ts';
+import { FakeMailer } from './fake-mailer.ts';
 
 /** A complete local environment for tests; secrets are throwaway constants. */
 export const TEST_ENV = {
@@ -23,6 +25,8 @@ export const TEST_ENV = {
   SECRETS_MASTER_KEY: Buffer.alloc(32, 7).toString('base64'),
   SMTP_URL: 'smtp://127.0.0.1:9',
   INTEL_SHARED_SECRET: 'test-intel-secret-test-intel-secret-00',
+  // Supertest connects from loopback: treat it as the reverse proxy so tests can set per-user client IPs.
+  AUTH_TRUSTED_PROXIES: '127.0.0.1,::1',
 } as const;
 
 export interface TestAppOptions {
@@ -33,6 +37,8 @@ export interface TestAppOptions {
   /** Valkey database index (0–15); give each test file its own so rate limits do not interfere. */
   readonly valkeyDb?: number;
   readonly env?: Partial<Record<string, string>>;
+  /** System mailer (verification, invitations…); defaults to a capturing fake, never real SMTP. */
+  readonly mailer?: SystemMailer;
 }
 
 export interface TestApp {
@@ -60,6 +66,8 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   })
     .overrideProvider(CLOCK)
     .useValue(options.clock ?? fixedClock('2026-10-14T12:00:00.000Z'))
+    .overrideProvider(SYSTEM_MAILER)
+    .useValue(options.mailer ?? new FakeMailer())
     .compile();
   const app = moduleRef.createNestApplication({ logger: false });
   configureHttp(app, env);

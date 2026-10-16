@@ -38,6 +38,11 @@ export const ProblemDetailsSchema = z
     detail: z.string().optional(),
     instance: z.string().optional(),
     code: ErrorCodeSchema,
+    /** Finer machine-readable cause within `code` (e.g. `LAST_OWNER`), for clients to show a localized message. */
+    reason: z
+      .string()
+      .regex(/^[A-Z][A-Z0-9_]*$/)
+      .optional(),
     traceId: z.string().optional(),
     errors: z.array(ProblemFieldErrorSchema).optional(),
   })
@@ -64,15 +69,20 @@ export abstract class DomainError extends Error {
     return ERROR_CODES[this.code].status;
   }
 
-  /** `detail` is the error message; 5xx messages are replaced so internals never leak (api.md §4). */
+  /**
+   * `detail` is the error message; 5xx messages are replaced so internals never leak (api.md §4). A
+   * `details.reason` in UPPER_SNAKE_CASE becomes `reason`; other details stay server-side.
+   */
   toProblem(instance?: string, traceId?: string): ProblemDetails {
     const { status, title } = ERROR_CODES[this.code];
+    const reason = this.details?.reason;
     return {
       type: `${ERROR_TYPE_BASE}${this.code}`,
       title,
       status,
       detail: status >= 500 ? title : this.message,
       code: this.code,
+      ...(status < 500 && typeof reason === 'string' && /^[A-Z][A-Z0-9_]*$/.test(reason) ? { reason } : {}),
       ...(instance === undefined ? {} : { instance }),
       ...(traceId === undefined ? {} : { traceId }),
     };
@@ -113,6 +123,14 @@ export class ValidationError extends DomainError {
 
 export class ConflictError extends DomainError {
   readonly code = 'CONFLICT';
+}
+
+/** No valid session or API key (401). */
+export class UnauthenticatedError extends DomainError {
+  readonly code = 'UNAUTHENTICATED';
+  constructor(message = 'Authentication required.', options?: DomainErrorOptions) {
+    super(message, options);
+  }
 }
 
 export class ForbiddenError extends DomainError {

@@ -41,6 +41,7 @@ class ProblemDetails(BaseModel):
     detail: str | None = None
     errors: list[Error] | None = None
     instance: str | None = None
+    reason: Annotated[str | None, Field(pattern="^[A-Z][A-Z0-9_]*$")] = None
     status: Annotated[int, Field(ge=400, le=599)]
     title: str
     traceId: str | None = None

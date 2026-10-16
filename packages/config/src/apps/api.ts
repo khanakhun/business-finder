@@ -25,15 +25,6 @@ const backendShape = {
 export const apiEnv = z.object({
   ...backendShape,
   API_PORT: port(4000).describe('HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET.'),
-  // TODO(BF-010): replace basic auth on /admin/queues with RBAC, then remove these.
-  BULL_BOARD_USER: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Basic-auth user for the queue dashboard (/admin/queues). Unset = dashboard off.'),
-  BULL_BOARD_PASSWORD: secret(
-    z.string().min(12).optional().describe('Basic-auth password for the queue dashboard, ≥ 12 chars.'),
-  ),
 });
 export type ApiEnv = z.output<typeof apiEnv>;
 

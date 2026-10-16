@@ -74,6 +74,20 @@ describe('toProblem', () => {
     });
   });
 
+  it('exposes an UPPER_SNAKE_CASE details.reason, and no other details', () => {
+    const problem = new ConflictError('Keep an owner.', {
+      details: { reason: 'LAST_OWNER', memberId: 'm1' },
+    });
+    expect(ProblemDetailsSchema.parse(problem.toProblem())).toMatchObject({
+      code: 'CONFLICT',
+      reason: 'LAST_OWNER',
+    });
+    expect(problem.toProblem()).not.toHaveProperty('memberId');
+    expect(new ConflictError('x', { details: { reason: 'free text' } }).toProblem()).not.toHaveProperty(
+      'reason',
+    );
+  });
+
   it('never leaks internal messages for 5xx', () => {
     const problem = new ExternalServiceError('db', 'password authentication failed for user x').toProblem();
     expect(problem.detail).toBe('External service failed');

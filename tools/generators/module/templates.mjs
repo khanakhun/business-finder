@@ -176,6 +176,7 @@ export class Drizzle${n.pascal}Repository implements ${n.pascal}Repository {
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
+import { RequirePermission } from '../../platform/security/auth.decorators.ts';
 import { ApiRoute } from '../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../platform/validation/zod-dto.ts';
 import { Create${n.pascal}Command } from '../application/create-${n.kebab}.command.ts';
@@ -184,7 +185,8 @@ import { Get${n.pascal}Query } from '../application/get-${n.kebab}.query.ts';
 class Create${n.pascal}Body extends zodDto(Create${n.pascal}RequestSchema) {}
 class ${n.pascal}Params extends zodDto(z.object({ id: ${n.pascal}Id })) {}
 
-// TODO(BF-010): add @RequirePermission(...) to every route.
+// Every route declares its permission (routes without one are refused); pick the ones this context needs from
+// PERMISSIONS in @bf/contracts. Org-scoped use cases take the caller's orgId via @Ctx() (see identity module).
 @ApiTags('${n.kebab}')
 @Controller('${n.route}')
 export class ${n.pascal}Controller {
@@ -194,12 +196,14 @@ export class ${n.pascal}Controller {
   ) {}
 
   @Post()
+  @RequirePermission('business:write')
   @ApiRoute({ summary: 'Create a ${n.kebab}', body: Create${n.pascal}Body, response: { status: 201, schema: ${n.pascal}Schema } })
   create(@Body() body: Create${n.pascal}Body): Promise<${n.pascal}> {
     return this.create${n.pascal}.execute(body);
   }
 
   @Get(':id')
+  @RequirePermission('business:read')
   @ApiRoute({ summary: 'Get a ${n.kebab}', response: { status: 200, schema: ${n.pascal}Schema }, errors: [404] })
   get(@Param() params: ${n.pascal}Params): Promise<${n.pascal}> {
     return this.get${n.pascal}.execute(params.id);

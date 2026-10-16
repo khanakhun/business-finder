@@ -86,13 +86,13 @@ apps/web/src/app/(dashboard)/settings/{account,members,api-keys}/page.tsx
 - E2E: sign-in flow, workspace switch, invite member (Mailpit link), 2FA setup page renders QR.
 
 ## Acceptance criteria
-- [ ] Email/password with verification, Google OAuth (when configured) and TOTP 2FA work end-to-end.
-- [ ] Workspaces with roles and invitations; last-owner protection; ownership transfer.
-- [ ] Every `/v1` route enforces auth + permission; anonymous routes explicit; tests cover 401/403/404 cases.
-- [ ] API keys (create once, hashed, revocable, scoped to org) authenticate API calls.
-- [ ] Dashboard protected; permission-aware UI; settings pages for account, members, API keys (EN/FR).
-- [ ] `pnpm admin:bootstrap` creates the first owner; sign-up mode enforced by config.
-- [ ] BF-006 production guard removed; Bull Board requires `settings:manage`.
+- [x] Email/password with verification, Google OAuth (when configured) and TOTP 2FA work end-to-end.
+- [x] Workspaces with roles and invitations; last-owner protection; ownership transfer.
+- [x] Every `/v1` route enforces auth + permission; anonymous routes explicit; tests cover 401/403/404 cases.
+- [x] API keys (create once, hashed, revocable, scoped to org) authenticate API calls.
+- [x] Dashboard protected; permission-aware UI; settings pages for account, members, API keys (EN/FR).
+- [x] `pnpm admin:bootstrap` creates the first owner; sign-up mode enforced by config.
+- [x] BF-006 production guard removed; Bull Board requires `settings:manage`.
 
 ## Agent prompt
 ```text
@@ -119,3 +119,47 @@ invite → accept; viewer blocked from a write route; API key request succeeds.
 ## References
 - ADR-0007 · docs/DOMAIN.md §5 · docs/conventions/security.md · docs/conventions/api.md §2
 - Better Auth docs: https://www.better-auth.com/docs · NestJS integration: https://better-auth.com/docs/1.6/integrations/nestjs · React Email: https://react.email/
+
+## Implementation notes
+- **Versions** (checked against the installed type definitions): better-auth 1.7.8, @better-auth/api-key 1.7.8,
+  Better Auth CLI 1.7.8 (schema generation), nodemailer 10.1.1, @react-email/components 1.0.12 /
+  @react-email/render 2.1.0, otplib 13.5.0 (tests), uqr 0.1.3 (QR code as SVG, no canvas), server-only 0.0.1.
+- **Split**: part 1/3 `@bf/auth` + schema + migration + sign-up policy; part 2/3 identity module (guard,
+  `/v1/me`, members, invitations, API keys, mailer, bootstrap CLI); security-review fixes; part 3/3 web pages,
+  protected layout, switcher, settings, E2E.
+- **Better Auth in Nest**: a thin Express middleware (`identity/infrastructure/better-auth-http.ts`) mounted before
+  the body parsers, not `@thallesp/nestjs-better-auth`: only an allowlist of Better Auth endpoints is exposed (the
+  members/API-key endpoints go through our use cases so the permission matrix and domain rules apply).
+- **Guard**: one middleware resolves session cookie or `Bearer bf_…` key into an `AuthContext`; a global
+  `AuthorizationGuard` enforces `@AllowAnonymous()` / `@RequirePermission()` / `@NoOrgRequired()` /
+  `@OperatorOnly()`; a route without a policy is refused. `routes.test.ts` pins the anonymous, operator and
+  org-less route lists. Defense in depth lives in the use cases (`memberActor()` + `membership-policy.ts`) rather
+  than a separate `PolicyService`.
+- **Sessions**: 7-day sliding (refreshed at most daily), cookie cache **off** so revocation is immediate;
+  `bf.`-prefixed HttpOnly SameSite=Lax cookies, Secure in production; a new session starts in the user's first
+  workspace (`session-defaults.ts`). Origin check on unsafe `/v1` requests made with a session.
+- **Rate limits**: Better Auth's limiter with database storage (shared across instances): 100/min/IP default,
+  sign-in 10, sign-up 5, password reset 5, 2FA 10; plus a per-account sign-in throttle in Valkey. The client IP is
+  the first untrusted hop walking back from the socket peer through `AUTH_TRUSTED_PROXIES` (client-prepended
+  X-Forwarded-For entries are ignored; header-less requests get their own bucket). The E2E API trusts loopback and
+  each test sends its own client IP.
+- **API keys**: Better Auth's API key plugin, organization-owned (`references: organization`), prefix `bf_`,
+  permissions a subset of the creator's; keys survive their creator leaving (they belong to the workspace).
+  The plugin hashes with SHA-256 without a pepper (the ticket allowed the plugin) — high-entropy keys make a pepper
+  of little value; noted in QUESTIONS.md.
+- **Bull Board / ping job**: operator-only (`PLATFORM_OPERATOR_EMAILS`, verified session) instead of
+  `settings:manage`: both span every workspace, and a workspace owner must not see other workspaces' jobs.
+- **Sign-up policy**: `SIGNUP_MODE` (default `invite_only` in production, `open` otherwise), allowlist by email
+  domain, enforced for every method (email and Google) and for workspace creation; invitations always allowed.
+  Refused sign-ups get the same response as accepted ones (no account enumeration).
+- **Web**: auth pages in `(auth)`, protected `(dashboard)` layout (server-side `GET /v1/me`, `?next=` validated by
+  `safe-next.ts`: parsed as a URL, same origin only, control characters rejected), workspace switcher + account menu in the top bar, `/settings/{account,members,api-keys}`,
+  `usePermission()`; the web app imports only `@bf/auth/client` (boundary rule).
+- **Problem `reason`**: `ProblemDetails` gained an optional UPPER_SNAKE_CASE `reason` (from a domain error's
+  `details.reason`, 4xx only) so the dashboard can localize domain refusals such as `LAST_OWNER`.
+- **OpenAPI**: shared `$defs` from `@bf/contracts` are promoted to components (fix in the schema registry); anonymous
+  routes still list the global security requirement (Swagger drops an empty override) — cosmetic.
+- **Tests**: API 115 unit / 57 integration, `@bf/auth` 10 integration, web 54 unit, E2E 27 (sign-in redirect, wrong
+  password, axe on auth pages, workspace switch, invite via Mailpit link, 2FA QR, members axe), green three
+  consecutive runs.
+

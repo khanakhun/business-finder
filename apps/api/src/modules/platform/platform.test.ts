@@ -9,7 +9,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 import { BrokenCircuitError } from 'cockatiel';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { loadAppEnv, ProductionWithoutAuthError } from './config/app-env.ts';
+import { loadAppEnv } from './config/app-env.ts';
 import { resolveRequestId } from './context/request-context.ts';
 import { toProblem } from './errors/problem-details.filter.ts';
 import { buildPolicy, isTransient, WithResilience } from './resilience/resilience.ts';
@@ -169,8 +169,8 @@ describe('loadAppEnv', () => {
     expect(loadAppEnv('http', env).API_PORT).toBe(4000);
   });
 
-  it('refuses production until auth exists (BF-010)', () => {
-    expect(() => loadAppEnv('http', { ...env, NODE_ENV: 'production' })).toThrow(ProductionWithoutAuthError);
+  it('boots in production now that authentication exists (BF-010 removed the guard)', () => {
+    expect(loadAppEnv('http', { ...env, NODE_ENV: 'production' }).NODE_ENV).toBe('production');
   });
 
   it('needs no environment in openapi mode', () => {

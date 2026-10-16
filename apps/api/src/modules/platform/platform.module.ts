@@ -13,6 +13,7 @@ import { HealthController } from './health/health.controller.ts';
 import { HttpLoggingMiddleware, LOGGER, type Logger } from './logging/logger.ts';
 import { LoggingModule } from './logging/logging.module.ts';
 import { MetricsController } from './metrics/metrics.controller.ts';
+import { AuthorizationGuard } from './security/authorization.guard.ts';
 import { AppThrottlerGuard, RATE_LIMITS } from './security/throttler.guard.ts';
 import { ValkeyThrottlerStorage } from './security/valkey-throttler.storage.ts';
 import { ResponseValidationInterceptor } from './validation/response-validation.interceptor.ts';
@@ -40,8 +41,7 @@ export class PlatformModule implements NestModule {
               {
                 name: 'default',
                 ttl: RATE_LIMITS.windowMs,
-                limit: () =>
-                  getRequestContext()?.userId ? RATE_LIMITS.authenticated : RATE_LIMITS.anonymous,
+                limit: () => (getRequestContext()?.auth ? RATE_LIMITS.authenticated : RATE_LIMITS.anonymous),
               },
             ],
             storage: new ValkeyThrottlerStorage(valkey, logger),
@@ -54,6 +54,7 @@ export class PlatformModule implements NestModule {
         { provide: APP_FILTER, useClass: ProblemDetailsFilter },
         { provide: APP_INTERCEPTOR, useClass: ResponseValidationInterceptor },
         { provide: APP_GUARD, useClass: AppThrottlerGuard },
+        { provide: APP_GUARD, useClass: AuthorizationGuard },
       ],
     };
   }

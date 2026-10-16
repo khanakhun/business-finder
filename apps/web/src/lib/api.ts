@@ -13,4 +13,9 @@ export function apiClient(): ApiClient {
 /** Every query key in the dashboard, in one place (coding-standards §3). */
 export const queryKeys = {
   system: defineQueryKeys('system', { info: () => ['system', 'info'] as const }),
+  identity: defineQueryKeys('identity', {
+    members: () => ['identity', 'members'] as const,
+    apiKeys: () => ['identity', 'api-keys'] as const,
+    sessions: () => ['identity', 'sessions'] as const,
+  }),
 };

@@ -21,6 +21,8 @@ reports/
 .hypothesis/
 *.tsbuildinfo
 playwright-report/
+# Playwright sessions created by e2e setup (contain session cookies).
+**/e2e/.auth/
 test-results/
 blob-report/
 .lighthouseci/

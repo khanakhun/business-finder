@@ -1,4 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { IdentityModule } from './modules/identity/identity.module.ts';
 import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
 import { QueueModule } from './modules/platform/queue/queue.module.ts';
@@ -26,7 +27,8 @@ export class AppModule {
       imports: [
         PlatformModule.forRoot(env, mode),
         // Creating queues connects to Valkey, which OpenAPI generation must never do.
-        ...(mode === 'openapi' ? [] : [QueueModule.forRoot(env, mode)]),
+        ...(mode === 'openapi' ? [] : [QueueModule.forRoot(mode)]),
+        IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
       ],
     };

@@ -15,6 +15,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { activeNavItem } from '@/lib/navigation.ts';
+import { useSession } from '@/lib/session.tsx';
 import { LazyMenu } from './lazy-menu.tsx';
 
 const menus = () => import('./topbar-menus.tsx');
@@ -30,6 +31,7 @@ export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: To
   const t = useTranslations();
   const locale = useLocale();
   const current = activeNavItem(usePathname());
+  const workspaceName = useSession().activeOrganization?.name ?? t('workspace.none');
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur sm:px-5">
@@ -43,7 +45,6 @@ export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: To
         <MenuIcon aria-hidden />
       </Button>
 
-      {/* Workspace switcher: real workspaces arrive with BF-010. */}
       <LazyMenu
         load={() => menus().then((m) => m.WorkspaceMenu)}
         trigger={{
@@ -53,7 +54,7 @@ export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: To
           'aria-label': t('topbar.switchWorkspace'),
         }}
       >
-        {t('topbar.workspace')}
+        {workspaceName}
         <ChevronsUpDownIcon aria-hidden className="text-muted-foreground" />
       </LazyMenu>
 

@@ -1,4 +1,6 @@
 {
   "extends": "@bf/tsconfig/nestjs.json",
+  // System email templates are React Email components (identity/infrastructure/emails/*.tsx).
+  "compilerOptions": { "jsx": "react-jsx" },
   "include": ["src", "test", "*.config.ts"]
 }

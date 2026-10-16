@@ -146,6 +146,30 @@ describe('resilience', () => {
     await expect(executeWithSignal(policy, undefined, async () => 'ok')).rejects.toThrow(/circuit/i);
   });
 
+  it('never starts a call for an already-cancelled caller (the half-open trial stays for a real caller)', async () => {
+    const policy = buildPolicy({ ...fast, maxRetries: 0, breakerThreshold: 1, halfOpenAfterMs: 20 });
+    await expect(
+      executeWithSignal(policy, undefined, async () => {
+        throw new Error('down');
+      }),
+    ).rejects.toThrow('down');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    // Half-open: a cancelled job must not take the trial (cockatiel would close the breaker on its cancellation).
+    const caller = new AbortController();
+    const reason = Object.assign(new Error('cancelled'), { name: 'JobCancelledError' });
+    caller.abort(reason);
+    const fn = vi.fn(async () => 'never');
+    await expect(executeWithSignal(policy, caller.signal, fn)).rejects.toBe(reason);
+    expect(fn).not.toHaveBeenCalled();
+    // The next real call is the trial: it fails and the breaker opens again.
+    await expect(
+      executeWithSignal(policy, undefined, async () => {
+        throw new Error('still down');
+      }),
+    ).rejects.toThrow('still down');
+    await expect(executeWithSignal(policy, undefined, async () => 'ok')).rejects.toThrow(/circuit/i);
+  });
+
   it('does not retry client-side domain errors', async () => {
     const fn = vi.fn().mockRejectedValue(new ValidationError('bad'));
     await expect(buildPolicy(fast).execute(fn)).rejects.toThrow(ValidationError);

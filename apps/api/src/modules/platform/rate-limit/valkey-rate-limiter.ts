@@ -6,8 +6,14 @@ import { VALKEY } from '../valkey/valkey.module.ts';
 
 /** Token bucket per key (a provider and its key, a mailbox…), shared by every process. */
 export interface RateLimiter {
-  /** One attempt: 0 when a token was taken, else the milliseconds until one is available. */
-  tryTake(key: string, limit: { readonly capacity: number; readonly perSecond: number }): Promise<number>;
+  /**
+   * One attempt: 0 when `cost` tokens (default 1) were taken, all or none, else the milliseconds until they are
+   * available.
+   */
+  tryTake(
+    key: string,
+    limit: { readonly capacity: number; readonly perSecond: number; readonly cost?: number },
+  ): Promise<number>;
   /** Takes one token, waiting for it up to `maxWaitMs`; false when none came in time. */
   acquire(
     key: string,
@@ -20,13 +26,14 @@ export const RATE_LIMITER = Symbol('RateLimiter');
 
 /**
  * Token bucket in one Lua call (atomic across processes): refills `perSecond` tokens per second up to `capacity`;
- * returns 0 when a token was taken, else the milliseconds until one is available. Time is the Valkey server's
- * (one clock for every process), unless a test drives its own clock.
+ * returns 0 when `cost` tokens were taken (all or none), else the milliseconds until they are available. Time is the
+ * Valkey server's (one clock for every process), unless a test drives its own clock.
  */
 const TOKEN_BUCKET = `
 local capacity = tonumber(ARGV[1])
 local rate = tonumber(ARGV[2])
 local now = tonumber(ARGV[3])
+local cost = tonumber(ARGV[4]) or 1
 if not now then
   local t = redis.call('TIME')
   now = tonumber(t[1]) * 1000 + math.floor(tonumber(t[2]) / 1000)
@@ -36,10 +43,10 @@ local tokens = tonumber(state[1]) or capacity
 local ts = tonumber(state[2]) or now
 tokens = math.min(capacity, tokens + math.max(0, now - ts) * rate / 1000)
 local wait = 0
-if tokens >= 1 then
-  tokens = tokens - 1
+if tokens >= cost then
+  tokens = tokens - cost
 else
-  wait = math.ceil((1 - tokens) * 1000 / rate)
+  wait = math.ceil((cost - tokens) * 1000 / rate)
 end
 redis.call('HSET', KEYS[1], 'tokens', tostring(tokens), 'ts', tostring(now))
 redis.call('PEXPIRE', KEYS[1], math.ceil(capacity / rate * 1000) + 1000)
@@ -68,8 +75,8 @@ export class ValkeyRateLimiter implements RateLimiter {
     @Optional() private readonly useClientTime: boolean = false,
   ) {}
 
-  /** One attempt: 0 when a token was taken, else the wait in ms. */
-  async tryTake(key: string, limit: { capacity: number; perSecond: number }): Promise<number> {
+  /** One attempt: 0 when the tokens were taken, else the wait in ms. */
+  async tryTake(key: string, limit: { capacity: number; perSecond: number; cost?: number }): Promise<number> {
     const wait = await this.valkey.eval(
       TOKEN_BUCKET,
       1,
@@ -77,6 +84,7 @@ export class ValkeyRateLimiter implements RateLimiter {
       limit.capacity,
       limit.perSecond,
       this.useClientTime ? this.clock.now().getTime() : '',
+      limit.cost ?? 1,
     );
     return Number(wait);
   }

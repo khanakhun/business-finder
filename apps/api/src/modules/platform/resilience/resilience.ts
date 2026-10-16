@@ -160,6 +160,9 @@ export function executeWithSignal<T>(
   signal: AbortSignal | undefined,
   fn: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> {
+  // An already-cancelled caller never starts a call: in the breaker's half-open state, cockatiel would count the
+  // trial's unhandled cancellation as a success and close it. (A cancellation during the trial still can.)
+  if (signal?.aborted) return Promise.reject(signal.reason);
   return policy.execute(({ signal: attempt }) => fn(signal ? AbortSignal.any([signal, attempt]) : attempt));
 }
 

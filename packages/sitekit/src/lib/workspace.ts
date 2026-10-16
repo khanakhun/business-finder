@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, open, realpath, stat, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 
 // The workspace sitekit works in (BF-042): every path is resolved against its root, and a path that leaves it —
@@ -69,13 +69,21 @@ export class Workspace {
 
   async readText(path: string, maxBytes = MAX_READ_BYTES): Promise<string> {
     const absolute = await this.resolve(path);
-    const info = await stat(absolute).catch(() => {
-      throw new WorkspaceError('not_found', `${path} does not exist in the workspace.`);
+    // One handle for the checks and the read: the file cannot be swapped in between.
+    const handle = await open(absolute, 'r').catch((error: NodeJS.ErrnoException) => {
+      throw error.code === 'EISDIR'
+        ? new WorkspaceError('not_a_file', `${path} is not a file.`)
+        : new WorkspaceError('not_found', `${path} does not exist in the workspace.`);
     });
-    if (!info.isFile()) throw new WorkspaceError('not_a_file', `${path} is not a file.`);
-    if (info.size > maxBytes)
-      throw new WorkspaceError('too_large', `${path} is ${info.size} bytes; the limit is ${maxBytes}.`);
-    return readFile(absolute, 'utf8');
+    try {
+      const info = await handle.stat();
+      if (!info.isFile()) throw new WorkspaceError('not_a_file', `${path} is not a file.`);
+      if (info.size > maxBytes)
+        throw new WorkspaceError('too_large', `${path} is ${info.size} bytes; the limit is ${maxBytes}.`);
+      return await handle.readFile('utf8');
+    } finally {
+      await handle.close();
+    }
   }
 
   async readJson(path: string, maxBytes = MAX_READ_BYTES): Promise<unknown> {

@@ -11,6 +11,7 @@ import { buildSiteCsp } from './csp.ts';
 import { siteHostname, underSitesDomain } from './host.ts';
 import { pageAlternates, resolveRoute } from './locale-routing.ts';
 import { NonceCache } from './nonce-cache.ts';
+import { previewActionLinks } from './preview-actions.ts';
 import { REVALIDATE_PATH, revalidate, revalidateNonces } from './revalidate.ts';
 import { PREVIEW_BOT, robotsTxt, sitemapXml, siteOrigin, siteScheme } from './seo.ts';
 import { statusPage } from './status-page.ts';
@@ -354,5 +355,25 @@ describe('cacheUntil', () => {
     expect(cacheUntil({ status: 'expired', expiresAt: '2026-10-15T12:00:00.000Z' }, now)).toBe(
       now + TENANT_TTL_MS,
     );
+  });
+});
+
+describe('previewActionLinks', () => {
+  const spec = { defaultLocale: 'fr' } as SiteSpec;
+
+  it('links the renderer’s claim and opt-out pages, passing an e-mail’s signed reference on', () => {
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: 'v1.abcdefgh.sig_-' })).toEqual({
+      claim: '/claim',
+      optOut: '/opt-out?r=v1.abcdefgh.sig_-',
+    });
+  });
+
+  it('keeps the page’s language, and drops a reference that is not one', () => {
+    expect(previewActionLinks({ spec, locale: 'en', outreachRef: undefined })).toEqual({
+      claim: '/en/claim',
+      optOut: '/en/opt-out',
+    });
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: '"><script>' }).optOut).toBe('/opt-out');
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: 'short' }).optOut).toBe('/opt-out');
   });
 });

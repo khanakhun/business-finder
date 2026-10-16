@@ -11,7 +11,8 @@
 #   caddy.env   the DNS provider token          backup.env  object storage key and backup passphrase
 #   intel.env   services/intel: object storage settings (its own, narrowly scoped key) and open-data tuning
 #
-# Only Caddy publishes ports. Postgres and Valkey sit on an internal network with no route out.
+# Only Caddy publishes ports. Postgres and Valkey sit on an internal network with no route out. The site renderer has
+# internal networks of its own: one to Postgres (nothing else of the data network), one per caller (Caddy, the API).
 
 name: bf
 
@@ -31,7 +32,8 @@ x-hardened: &hardened
 x-app: &app
   <<: *hardened
   env_file: app.env
-  networks: [edge, data]
+  # sites-api: the renderer's revalidation endpoint (http://sites:3000).
+  networks: [edge, data, sites-api]
 
 services:
   caddy:
@@ -59,8 +61,10 @@ services:
     depends_on:
       web: { condition: service_healthy }
       api: { condition: service_healthy }
+      sites: { condition: service_healthy }
     networks:
       edge: { ipv4_address: 172.30.0.10 }
+      sites-edge: {}
     deploy:
       resources:
         limits: { cpus: '0.5', memory: 256M }
@@ -80,6 +84,35 @@ services:
       resources:
         limits: { cpus: '1', memory: 512M }
 
+  # The site renderer (BF-036): published sites on *.SITES_BASE_DOMAIN. It reads the database as the read-only role
+  # and holds only the two secrets it shares with the API: no object storage, no API or provider keys.
+  sites:
+    <<: *hardened
+    image: ${IMAGE_REGISTRY:?}/bf-sites:${IMAGE_TAG:?}
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      APP_VERSION: ${IMAGE_TAG:?}
+      API_URL: https://api.${BASE_DOMAIN:?}
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
+      SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
+      SITES_DATABASE_URL: postgres://bf_sites_ro:${BF_SITES_RO_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+      SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
+      SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
+      SITES_PREVIEW_ACTIONS: ${SITES_PREVIEW_ACTIONS:-false}
+    depends_on:
+      postgres: { condition: service_healthy }
+    # The most exposed container (every site hostname, server rendering): no internet, no Valkey, no API or intel.
+    networks: [sites-edge, sites-api, sites-db]
+    # Read-only root filesystem: Next's cache and /tmp are scratch space.
+    read_only: true
+    tmpfs:
+      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700,size=128m
+      - /tmp:size=32m
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 512M, pids: 256 }
+
   api:
     <<: *app
     image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
@@ -90,6 +123,12 @@ services:
       APP_URL: https://app.${BASE_DOMAIN:?}
       API_URL: https://api.${BASE_DOMAIN:?}
       INTEL_URL: http://intel:8000
+      # The site renderer, its asset host and the secrets the API and it share (revalidation, view tokens).
+      SITES_INTERNAL_URL: http://sites:3000
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
+      SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
+      SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
+      SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
       # Caddy and the web server (which forwards the visitor's address on its server-side calls), by their fixed
       # addresses on the edge network: the API rate-limits and audits per real client IP.
       AUTH_TRUSTED_PROXIES: 172.30.0.10,172.30.0.11
@@ -184,7 +223,7 @@ services:
     shm_size: 1g
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks: [data]
+    networks: [data, sites-db]
     deploy:
       resources:
         limits: { cpus: '2', memory: 2560M }
@@ -266,6 +305,14 @@ networks:
           ip_range: 172.30.0.128/25
   # Databases: no route outside the host.
   data:
+    internal: true
+  # The site renderer's: Postgres only (as the read-only role), and each of its callers apart, so Caddy and the API
+  # still meet only on edge (the API trusts Caddy's fixed address there).
+  sites-db:
+    internal: true
+  sites-edge:
+    internal: true
+  sites-api:
     internal: true
 
 volumes:

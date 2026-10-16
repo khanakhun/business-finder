@@ -50,7 +50,8 @@
     "gen:module": "node tools/generators/module/cli.mjs",
     "gen:module:check": "node tools/generators/module/check.mjs",
     "geo:import": "pnpm --filter @bf/api geo:import",
-    "email:disposable-update": "node scripts/update-disposable-domains.mjs"
+    "email:disposable-update": "node scripts/update-disposable-domains.mjs",
+    "sites:seed": "pnpm --filter @bf/sites seed:fixtures"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

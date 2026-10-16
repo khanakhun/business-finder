@@ -26,6 +26,8 @@ export default defineConfig({
       API_URL,
       // The fixtures' image host: their images are on our CDN as far as the policy is concerned.
       SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
+      // The preview's claim and opt-out links (their pages come with BF-048).
+      SITES_PREVIEW_ACTIONS: 'true',
     },
   },
 });

@@ -87,6 +87,11 @@ export interface RenderOptions {
    * `noindex` whatever the spec says, and the contact form disabled (no visitor data before the business agrees).
    */
   readonly preview?: boolean;
+  /**
+   * What the business can do with its preview (apps/sites: "this is my business", "not interested"), shown in the
+   * preview banner after its text: right after the skip link, in the page's flow.
+   */
+  readonly previewActions?: ReactNode;
   /** Where the contact form posts (BF-048); without it (or on a preview) the form is shown disabled. */
   readonly contactFormAction?: string;
   /** A static map image of the location on our storage (BF-036); without one a link to the map is shown. */

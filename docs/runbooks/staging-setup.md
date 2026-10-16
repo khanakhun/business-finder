@@ -101,12 +101,15 @@ would break the URL) and `openssl rand -base64 32` for the others.
 |---|---|
 | `IMAGE_REGISTRY` | `ghcr.io/<github-owner>` (lowercase) |
 | `POSTGRES_IMAGE_TAG`, `CADDY_IMAGE_TAG`, `BACKUP_IMAGE_TAG` | the sha of a `main` build whose images to use; bump on purpose (a new Postgres tag restarts the database) |
-| `BASE_DOMAIN`, `SITES_BASE_DOMAIN` | the domains of §2 |
+| `BASE_DOMAIN`, `SITES_BASE_DOMAIN` | the domains of §2 — `SITES_BASE_DOMAIN` must be a separate registrable domain (e.g. `example-sites.com`), never under the dashboard's cookie domain: the API refuses to start otherwise |
 | `ACME_EMAIL` | an address that receives certificate warnings |
 | `ACME_DNS_PROVIDER` | `cloudflare` (default) or the module you built |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | e.g. `bf`, `openssl rand -hex 32`, `bf` |
 | `BF_SITES_RO_PASSWORD` | `openssl rand -hex 32` (read-only role of apps/sites) |
 | `INTEL_SHARED_SECRET` | generated (also in `app.env`, same value) |
+| `SITES_REVALIDATE_SECRET`, `SITES_VIEW_TOKEN_SECRET` | `openssl rand -hex 32` each: shared by the API, the worker and the site renderer (compose passes them; not in `app.env`) |
+| `SITES_ASSETS_BASE_URL` | the public URL of site images (the CDN or public bucket in front of `S3_BUCKET_SITES`) |
+| `SITES_PREVIEW_ACTIONS` | optional, `true` once BF-048's claim and opt-out pages exist (previews then link to them) |
 | `PG_SHARED_BUFFERS`, `PG_EFFECTIVE_CACHE_SIZE`, `PG_WORK_MEM`, … | optional tuning (defaults fit 8 GB) |
 
 **`app.env`** — the api and worker. Start from the repository's `.env.example` (every variable, described in
@@ -125,7 +128,7 @@ would break the URL) and `openssl rand -base64 32` for the others.
 | `SMTP_URL`, `MAIL_FROM` | system mail (invitations, password resets) |
 | AI and provider keys | as needed (`ANTHROPIC_API_KEY`, `GOOGLE_PLACES_API_KEY`, …) |
 
-The compose file sets the URLs between services (`APP_URL`, `API_URL`, `INTEL_URL`, `API_INTERNAL_URL`,
+The compose file sets the URLs between services (`APP_URL`, `API_URL`, `INTEL_URL`, `API_INTERNAL_URL`, `SITES_INTERNAL_URL`,
 `NEXT_PUBLIC_*`, `AUTH_TRUSTED_PROXIES`) from `BASE_DOMAIN`; do not set them in `app.env`.
 
 **`caddy.env`** — `ACME_DNS_API_TOKEN` (the zone-scoped token of §2), nothing else.
@@ -213,6 +216,9 @@ alias dc='docker compose -p bf --project-directory /opt/bf --env-file /opt/bf/.e
 | Optional services | `dc --profile scraper up -d gmaps-scraper` · `dc --profile verify up -d reacher` (needs outbound port 25; put a generated `RCH__HEADER_SECRET` in `reacher.env`, and `REACHER_URL=http://reacher:8080` plus the same secret as `REACHER_HEADER_SECRET` in `app.env`; then Settings → Integrations → "Check port 25") |
 
 Rollbacks never undo migrations: they are forward-only and keep the previous release working (expand/contract).
+The health gate checks that an unknown client-site hostname gets the site renderer's 404, so a rollback to a release
+from before the renderer (BF-036) reports `ROLLBACK FAILED` although the dashboard and API are up: a one-time case.
+`deploy.sh` refuses to run while an env file holds one of the repository's local-only defaults (`…local_only…`).
 
 ## 7. Backups and restore
 

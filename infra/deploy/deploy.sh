@@ -29,10 +29,26 @@ trap '' HUP
 # The few settings this script needs, read as data (a Docker env file is not shell syntax: never source it).
 env_value() { sed -n "s/^$1=//p" .env | tail -n 1 | sed -e 's/^["'\'']//' -e 's/["'\'']$//'; }
 BASE_DOMAIN="${BASE_DOMAIN:-$(env_value BASE_DOMAIN)}"
+SITES_BASE_DOMAIN="${SITES_BASE_DOMAIN:-$(env_value SITES_BASE_DOMAIN)}"
 CADDY_TLS="${CADDY_TLS:-$(env_value CADDY_TLS)}"
 HTTPS_PORT="${HTTPS_PORT:-$(env_value HTTPS_PORT)}"
 export IMAGE_REGISTRY="${IMAGE_REGISTRY:-$(env_value IMAGE_REGISTRY)}"
 : "${BASE_DOMAIN:?BASE_DOMAIN must be set in .env}"
+: "${SITES_BASE_DOMAIN:?SITES_BASE_DOMAIN must be set in .env}"
+# The repository's local-only defaults (`bf_local_only…`, public in git) never reach a server: a copied local file
+# would let anyone forge view tokens or read the database. Names only, never values.
+# Assignments only (`.env.example`, where env files start from, names them in comments).
+local_only='^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=.*local_only'
+# Bytes, not characters (LC_ALL=C): an invalid UTF-8 byte must neither hide a line nor stop `.*` mid-value.
+for file in .env app.env caddy.env backup.env intel.env reacher.env; do
+  [ -e "$file" ] || continue
+  [ -r "$file" ] || { echo "refusing to deploy: cannot read $file" >&2; exit 1; }
+  if LC_ALL=C grep -Eq "$local_only" "$file"; then
+    names="$(LC_ALL=C sed -En "s/${local_only}.*/\\2/p" "$file" | tr '\n' ' ')"
+    echo "refusing to deploy: $file holds local-only defaults: ${names}" >&2
+    exit 1
+  fi
+done
 : "${IMAGE_REGISTRY:?IMAGE_REGISTRY must be set in .env}"
 
 current_tag="$(cat IMAGE_TAG 2>/dev/null || true)"
@@ -52,6 +68,14 @@ compose() {
     --project-directory "$deploy_dir" --env-file "$deploy_dir/.env" --file "$file" "${@:2}"
 }
 
+# The site renderer answers through Caddy: a hostname with no publication is its own 404 (a 502 or 503 is not).
+# Arguments: extra curl options.
+sites_routed() {
+  local probe="bf-deploy-probe.${SITES_BASE_DOMAIN}"
+  [ "$(curl -sS "$@" --max-time 5 --resolve "${probe}:${HTTPS_PORT:-443}:127.0.0.1" \
+        -o /dev/null -w '%{http_code}' "https://${probe}:${HTTPS_PORT:-443}/" 2>/dev/null)" = 404 ]
+}
+
 # Through Caddy, as a visitor would arrive (TLS and routing included), but resolved locally.
 healthy() {
   local deadline=$((SECONDS + health_timeout))
@@ -61,7 +85,8 @@ healthy() {
     if curl -fsS "${insecure[@]}" --max-time 5 --resolve "api.${BASE_DOMAIN}:${HTTPS_PORT:-443}:127.0.0.1" \
          "https://api.${BASE_DOMAIN}:${HTTPS_PORT:-443}/health/ready" >/dev/null 2>&1 &&
        curl -fsS "${insecure[@]}" --max-time 5 --resolve "app.${BASE_DOMAIN}:${HTTPS_PORT:-443}:127.0.0.1" \
-         "https://app.${BASE_DOMAIN}:${HTTPS_PORT:-443}/health/ready" >/dev/null 2>&1; then
+         "https://app.${BASE_DOMAIN}:${HTTPS_PORT:-443}/health/ready" >/dev/null 2>&1 &&
+       sites_routed "${insecure[@]}"; then
       return 0
     fi
     sleep 3

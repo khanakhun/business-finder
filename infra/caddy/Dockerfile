@@ -15,7 +15,6 @@ RUN xcaddy build --with "${DNS_MODULE}"
 FROM ${CADDY_IMAGE}
 COPY --from=build /usr/bin/caddy /usr/bin/caddy
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY sites-unavailable.html /srv/sites-unavailable.html
 # The official image runs as root to bind 80/443; capabilities instead, so Caddy itself never runs as root.
 RUN setcap cap_net_bind_service=+ep /usr/bin/caddy \
     && addgroup -S -g 10002 caddy && adduser -S -D -H -u 10002 -G caddy caddy \

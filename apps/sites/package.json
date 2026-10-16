@@ -11,7 +11,10 @@
     "lint": "biome check .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --coverage",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "seed:fixtures": "node scripts/seed-fixtures.ts",
+    "lighthouse": "node scripts/perf.mjs lighthouse",
+    "load": "node scripts/perf.mjs load"
   },
   "dependencies": {
     "@bf/config": "workspace:*",

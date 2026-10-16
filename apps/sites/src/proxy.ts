@@ -90,8 +90,9 @@ function safeDecode(segment: string): string {
 }
 
 export const config = {
-  // Every path but Next's built files: the proxy itself lets the exact internal routes through on the internal address
-  // only, so a look-alike path (`/api/revalidatex`, `/-/x`) is a site path like any other.
-  // (`_next/static/` with its slash: `/_next/staticx` is a site path; the renderer uses no `next/image`.)
-  matcher: [{ source: '/((?!_next/static/).*)' }],
+  // Every path but Next's built files (`_next/static/` with its slash: `/_next/staticx` is a site path; the renderer
+  // uses no `next/image`) and the block library's stylesheet and fonts (public/_bf): the proxy itself lets the exact
+  // internal routes through on the internal address only, so a look-alike path (`/api/revalidatex`, `/-/x`) is a site
+  // path like any other.
+  matcher: [{ source: '/((?!_next/static/|_bf/).*)' }],
 };

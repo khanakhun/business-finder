@@ -68,12 +68,23 @@ export async function dropWorkspace(client: SeedClient, slug: string): Promise<v
 
 const uuid = () => crypto.randomUUID();
 
-async function publish(
+/** Publishes a fixture site as a preview (straight to the database, like the API's publish). */
+export async function publish(
   client: SeedClient,
   orgId: string,
-  input: { slug: string; fixtureName: string; expiresAt: Date; status?: 'active' | 'unpublished' },
+  input: {
+    slug: string;
+    fixtureName: string;
+    expiresAt: Date;
+    status?: 'active' | 'unpublished';
+    /** The business name's prefix. */
+    label?: string;
+  },
 ): Promise<{ siteId: string; versionId: string; publicationId: string }> {
-  const business = aBusiness({ displayName: `E2E ${input.fixtureName}`, locality: 'Gustavia' });
+  const business = aBusiness({
+    displayName: `${input.label ?? 'E2E'} ${input.fixtureName}`,
+    locality: 'Gustavia',
+  });
   await client.insert(businesses).values(business);
   const businessId = business.id;
   const siteId = uuid();
@@ -83,7 +94,7 @@ async function publish(
     organizationId: orgId,
     businessId,
     slug: input.slug,
-    name: `E2E ${input.fixtureName}`,
+    name: `${input.label ?? 'E2E'} ${input.fixtureName}`,
     status: 'preview',
     defaultLocale: String(spec.defaultLocale ?? 'fr'),
   });

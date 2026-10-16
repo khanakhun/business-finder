@@ -72,6 +72,7 @@ describe('servicesFor / portsFor', () => {
 
   it('adds profile services', () => {
     assert.deepEqual(servicesFor(['apps']).slice(-1), ['intel']);
+    assert.deepEqual(servicesFor(['sites']).slice(-1), ['sites']);
     const services = servicesFor(['scraper', 'observability']);
     assert.ok(services.includes('gmaps-scraper'));
     assert.ok(services.includes('jaeger'));
@@ -99,6 +100,7 @@ describe('derivedEnv', () => {
     assert.equal(env.S3_ENDPOINT, 'http://127.0.0.1:9020');
     assert.equal(env.SMTP_URL, 'smtp://127.0.0.1:1045');
     assert.equal(env.API_URL, 'http://localhost:4020');
+    assert.equal(env.SITES_INTERNAL_URL, 'http://127.0.0.1:3120');
   });
 
   it('exports app ports and the project identity', () => {

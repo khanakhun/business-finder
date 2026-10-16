@@ -20,6 +20,8 @@ export const RESERVED_SITE_SLUGS: ReadonlySet<string> = new Set([
   'cdn',
   'assets',
   'preview',
+  // The deploy's health probe asks for this host and expects the renderer's 404 (infra/deploy/deploy.sh).
+  'bf-deploy-probe',
 ]);
 
 /** Stems a slug never shows, even inside a word (`fuckin`): long and unambiguous, EN and FR. */

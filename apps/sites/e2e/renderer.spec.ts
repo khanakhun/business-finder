@@ -206,3 +206,44 @@ test('ignores a visitor’s own proxy headers and look-alike internal paths', as
   });
   expect(big.status).toBe(413);
 });
+
+test('serves the block library’s stylesheet and preloaded fonts, and nothing else under /_bf', async ({
+  page,
+  request,
+}) => {
+  await page.goto(siteUrl(SLUGS.active));
+  const files = await page
+    .locator('link[rel="preload"][as="font"], link[rel="stylesheet"]')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
+  expect(files.length).toBeGreaterThanOrEqual(3);
+  for (const file of files) {
+    const response = await request.get(siteUrl(SLUGS.active, file));
+    expect(response.status(), file).toBe(200);
+    expect(response.headers()['cache-control']).toContain('public');
+  }
+  for (const path of ['/_bf/nothing-here', '/_bf/fonts/missing.woff2']) {
+    const missing = await request.get(siteUrl(SLUGS.active, path));
+    expect(missing.status(), path).toBe(404);
+    expect(missing.headers()['cache-control'] ?? '', path).not.toContain('public');
+    expect(await missing.text()).not.toContain('Salon');
+  }
+});
+
+test('offers a preview’s claim and opt-out in its banner, passing the e-mail’s signed reference on', async ({
+  page,
+}) => {
+  await page.goto(siteUrl(SLUGS.active, '/?r=v1.e2e-reference.signature'));
+  const banner = page.locator('.bf-preview-banner');
+  await expect(banner.getByRole('link', { name: /C’est mon entreprise/ })).toHaveAttribute('href', '/claim');
+  await expect(banner.getByRole('link', { name: /Pas intéressé/ })).toHaveAttribute(
+    'href',
+    '/opt-out?r=v1.e2e-reference.signature',
+  );
+  // Keyboard order: the skip link first, then the banner's actions.
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.bf-skip')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(banner.getByRole('link', { name: /C’est mon entreprise/ })).toBeFocused();
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  expect(axe.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+});

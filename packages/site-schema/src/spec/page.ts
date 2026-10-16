@@ -3,7 +3,7 @@ import { BlockSchema } from './blocks/index.ts';
 import { LIMITS } from './limits.ts';
 import { ElementIdSchema, localized, PageIdSchema, SITE_LOCALES } from './localized.ts';
 
-/** Slugs the renderer's routes use (a locale prefix, our paths). */
+/** Slugs the renderer's routes use (a locale prefix, our paths, a preview's claim, opt-out and privacy pages). */
 export const RESERVED_SLUGS: readonly string[] = [
   ...SITE_LOCALES,
   'api',
@@ -12,6 +12,10 @@ export const RESERVED_SLUGS: readonly string[] = [
   '_next',
   'admin',
   'preview',
+  'health',
+  'claim',
+  'opt-out',
+  'privacy',
 ];
 
 export const PageSchema = z

@@ -102,6 +102,17 @@ describe('SitePage', () => {
     for (const form of container.querySelectorAll('form')) expect(form).not.toHaveAttribute('action');
   });
 
+  it('shows the renderer’s preview actions in the banner, right after the skip link', () => {
+    const { container } = render(
+      <SitePage spec={salon} page="home" locale="fr" preview previewActions={<a href="/claim">Claim</a>} />,
+    );
+    const links = [...container.querySelectorAll('a')].slice(0, 2).map((link) => link.getAttribute('href'));
+    expect(links).toEqual(['#main', '/claim']);
+    expect(screen.getByRole('complementary', { name: 'Aperçu' })).toContainElement(
+      screen.getByRole('link', { name: 'Claim' }),
+    );
+  });
+
   it('prefixes the DOM ids taken from block ids (a block id never shadows a global or a layout id)', () => {
     const spec = structuredClone(salon);
     const hero = spec.pages[0]?.blocks[0];

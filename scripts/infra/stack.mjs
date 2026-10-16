@@ -36,6 +36,8 @@ export const PORT_SERVICES = Object.freeze({
   BF_OTLP_HTTP_PORT: 'otel-collector',
   // Profile `apps` runs services/intel in a container; without it, `pnpm --filter @bf/intel dev` uses the port.
   INTEL_PORT: 'intel',
+  // Profile `sites` runs apps/sites' image; without it, `pnpm --filter @bf/sites dev` uses the port.
+  SITES_PORT: 'sites',
 });
 
 export const DEFAULT_SERVICES = Object.freeze(['postgres', 'valkey', 's3', 's3-init', 'mailpit']);
@@ -45,6 +47,7 @@ export const PROFILE_SERVICES = Object.freeze({
   verify: ['reacher'],
   observability: ['otel-collector', 'jaeger'],
   apps: ['intel'],
+  sites: ['sites'],
 });
 
 export const MAX_OFFSET = 70;
@@ -123,6 +126,8 @@ export function derivedEnv({ ports, env, projectName, offset, profiles = [] }) {
     APP_URL: `http://localhost:${ports.WEB_PORT}`,
     API_URL: `http://localhost:${ports.API_PORT}`,
     INTEL_URL: `http://127.0.0.1:${ports.INTEL_PORT}`,
+    // The site renderer (BF-036), which the API asks to refresh after publication changes.
+    SITES_INTERNAL_URL: `http://127.0.0.1:${ports.SITES_PORT}`,
     NEXT_PUBLIC_APP_URL: `http://localhost:${ports.WEB_PORT}`,
     NEXT_PUBLIC_API_URL: `http://localhost:${ports.API_PORT}`,
   };

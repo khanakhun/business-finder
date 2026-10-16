@@ -1,7 +1,15 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+// The block library's fonts in public/_bf (scripts/next.mjs copies them before `next build`): only these are cached,
+// so a font a page names but this release lacks is a 404 that no cache keeps.
+const fontsDir = fileURLToPath(new URL('./public/_bf/fonts', import.meta.url));
+const fonts = existsSync(fontsDir)
+  ? readdirSync(fontsDir).filter((file) => /^[a-z0-9.-]+\.woff2$/.test(file))
+  : [];
 
 // Headers that do not depend on the request; the per-request CSP (with its nonce) and X-Robots-Tag are set in
 // src/proxy.ts.
@@ -33,7 +41,25 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    // The block library's stylesheet (its URL carries the release) and fonts (fixed per font): cached, in production.
+    const cached = [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      ...(isProduction
+        ? [
+            { source: '/_bf/site-blocks.css', headers: cached },
+            ...fonts.map((file) => ({ source: `/_bf/fonts/${file}`, headers: cached })),
+          ]
+        : []),
+    ];
+  },
+  async rewrites() {
+    // public/_bf skips the proxy (src/proxy.ts): a path there that is no file is a plain 404, never a site page.
+    return {
+      beforeFiles: [],
+      afterFiles: [{ source: '/_bf/:path*', destination: '/-/unknown' }],
+      fallback: [],
+    };
   },
 };
 

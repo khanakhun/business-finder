@@ -1,6 +1,6 @@
 # Edge proxy for staging/production (BF-025, ADR-0014). Values come from the environment (compose passes them):
 #   BASE_DOMAIN        app.{BASE_DOMAIN} → web, api.{BASE_DOMAIN} → api
-#   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (a 503 page until apps/sites ships, BF-036)
+#   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (apps/sites, BF-036)
 #   ACME_EMAIL         account e-mail for Let's Encrypt
 #   ACME_DNS_PROVIDER  DNS module for the wildcard (cloudflare by default; the image must include it)
 #   ACME_DNS_API_TOKEN token of that provider (DNS edit on the zone only)
@@ -9,9 +9,20 @@
 	email {$ACME_EMAIL}
 	# Admin API on loopback only (the healthcheck reads it).
 	admin 127.0.0.1:2019
+	# Error logs carry the request too: the same redaction as the access logs.
 	log default {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace r REDACTED
+				}
+				# A same-origin Referer is the full address of the page, `?r=` included, as is a redirect's Location.
+				request>headers>Referer delete
+				resp_headers>Location delete
+			}
+		}
 	}
 	servers {
 		timeouts {
@@ -50,10 +61,22 @@
 	}
 }
 
+# An e-mail's signed outreach reference (`?r=`, on preview links) names the prospect it was sent to, so it is never
+# logged, not even in a Referer or a redirect's Location (docs/conventions/security.md §7).
 (access_log) {
 	log {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace r REDACTED
+				}
+				# A same-origin Referer is the full address of the page, `?r=` included, as is a redirect's Location.
+				request>headers>Referer delete
+				resp_headers>Location delete
+			}
+		}
 	}
 }
 
@@ -91,12 +114,14 @@ api.{$BASE_DOMAIN} {
 	import wildcard_tls_{$CADDY_TLS:acme}
 	import security_headers
 	import access_log
-	# apps/sites arrives in M3 (BF-036): replace this block with `reverse_proxy sites:3000`.
-	header Cache-Control "no-store"
-	header Retry-After "3600"
-	rewrite * /sites-unavailable.html
-	file_server {
-		root /srv
-		status 503
+	encode zstd gzip
+	# Published sites receive no uploads (their contact form posts to the API).
+	request_body {
+		max_size 64KB
 	}
+	# The renderer's internal routes are for the API (revalidation) and the container (health), never the public.
+	@internal path /api/revalidate /health/*
+	respond @internal 404
+	# apps/sites (BF-036): every hostname of the sites domain; it answers 404 for one with no publication.
+	reverse_proxy sites:3000
 }

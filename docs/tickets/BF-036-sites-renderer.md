@@ -74,11 +74,11 @@ apps/sites/src/
 - Lighthouse CI and autocannon reports attached.
 
 ## Acceptance criteria
-- [ ] Hostname → active publication → rendered site with locale routing and correct SEO rules.
-- [ ] Previews: banner, noindex everywhere, claim/opt-out entry points, cookieless beacon.
-- [ ] Tag revalidation on publish/unpublish/expire within 5 s.
-- [ ] Friendly 404/410 pages; strict CSP and headers.
-- [ ] Performance, a11y and load targets met (reports attached).
+- [x] Hostname → active publication → rendered site with locale routing and correct SEO rules.
+- [x] Previews: banner, noindex everywhere, claim/opt-out entry points, cookieless beacon.
+- [x] Tag revalidation on publish/unpublish/expire within 5 s.
+- [x] Friendly 404/410 pages; strict CSP and headers.
+- [ ] Performance, a11y and load targets met (reports attached). — Lighthouse and accessibility met; the load target only up to ~4 concurrent connections (see notes).
 
 ## Agent prompt
 ```text
@@ -112,4 +112,64 @@ Verify: pnpm verify && pnpm e2e (sites suite); Lighthouse CI + load test reports
   with the hourly job: cap a page's cache lifetime at `expires_at`.
 - Pass `preview: true` to the site-blocks renderer for preview publications (banner, `noindex`, contact form off) and
   send `X-Robots-Tag: noindex`. Let services/intel's user agent read previews (published-site pictures, BF-035 part 2).
+
+## Implementation notes
+
+- **Part 1 (PR #103)**: `apps/sites` on Next.js 16.4.1. The file convention is `proxy.ts` (formerly middleware), running
+  on Node. The proxy resolves the Host (one label under `SITES_BASE_DOMAIN`) through `renderer_published_sites` with
+  the read-only role and answers:
+  - 404 for an unknown host;
+  - 410 for an ended publication (business and agency named);
+  - 404 in the path's language for a path that is no page;
+  - 308 for the default language's prefix;
+  - 503 when the database is down.
+
+  Active pages render per request with a nonce CSP and `X-Robots-Tag` on previews.
+- **Caching**: one process-wide tagged store (`host:`, `site:`), capped at the preview's expiry. Unknown hosts are
+  kept apart, lookups in flight are shared, and the last known site is served during an outage (with a 5 s "down"
+  window). The API's signed, replay-protected `POST /api/revalidate` clears it; a revalidation wins over lookups in
+  flight. This replaces `'use cache'`/ISR, which a per-request nonce rules out. Run one renderer replica until
+  revalidation fans out.
+- **Previews**: the block library's banner (forced by the `preview` render option), `noindex` three ways (header,
+  meta, robots.txt closed to all but our screenshot bot), and the claim/opt-out links inside the banner (right after
+  the skip link). They point at the renderer's own `/claim` and `/opt-out` pages in the page's language, passing an
+  e-mail's signed `?r=` on; they show once `SITES_PREVIEW_ACTIONS=true`, when BF-048 adds the pages (and lets those
+  paths through the proxy). `claim`, `opt-out`, `privacy` and `health` are reserved page slugs. The opt-out
+  page must not suppress on a GET (link scanners): BF-048/BF-055 verify `r` and ask to confirm.
+- **View beacon**: a credential-less `text/plain` fetch, not sent under DNT/GPC; the API counts it only from a site
+  origin.
+- **Part 2 (PR #104)**:
+  - Docker image (`infra/docker/sites`) and a production compose `sites` service: the read-only role and the two
+    shared secrets only, a read-only root filesystem, and internal networks of its own (Postgres; Caddy; the API):
+    no internet, no Valkey. The local `sites` profile runs the same image.
+  - Caddy proxies `*.SITES_BASE_DOMAIN` (internal routes refused, 64 KB bodies; the renderer itself answers them only
+    on its internal address, never under the sites domain). Logs never carry `?r=` (query redacted, Referer and
+    redirect Location dropped; the renderer logs paths without query). The deploy gate checks that an unknown site
+    hostname gets the renderer's 404, and refuses env files holding the repository's local-only defaults.
+  - `infra:up` derives `SITES_INTERNAL_URL`; `pnpm sites:seed` publishes the four fixtures locally (local databases
+    only, its own workspace only); `apps/sites/README.md` covers local wildcard hosts.
+  - The block library's stylesheet (versioned by release) and fonts are served at stable paths so each site preloads
+    its fonts (CLS 0); only those files are cached, anything else under `/_bf` is a plain 404.
+- **Measured**:
+  - Lighthouse (mobile, four fixture previews, images and preview actions included): performance 0.98–0.99,
+    accessibility 1, best practices 1, CLS 0, LCP ≈ 2.0 s. SEO is 0.66–0.69 by design (previews are `noindex`).
+  - `pnpm --filter @bf/sites load` fails when a response is not 2xx or p97.5 (autocannon's bound above p95) passes
+    50 ms.
+  - autocannon on a cached page at 200 req/s, no errors:
+    - 4 connections: median 7 ms, p97.5 21 ms;
+    - 10 connections: median 16–21 ms, p90 42 ms, p97.5 51–70 ms (across runs);
+    - 20 connections: median 42 ms, p97.5 134 ms.
+
+    The ticket's p95 < 50 ms at 200 req/s holds only up to about 4 concurrent connections on this machine. The
+    service time is about 4 ms of CPU per page (a full server render, per request, for the nonce), so 200 req/s keeps
+    one process 80 % busy and concurrent renders interleave. Meeting it at higher concurrency needs several processes
+    (cluster or replicas) with revalidation fanned out to each: follow-up, open.
+- **Deviations**:
+  - The design's `middleware.ts` is `proxy.ts` in Next 16.
+  - `revalidateTag`/`'use cache'` are replaced by the process store.
+  - `next/image` is not used: images are processed variants on our CDN, rendered as plain `<img>` with `srcset`.
+  - The dev-only `/__blocks` gallery stays the block library's static gallery (`pnpm --filter @bf/site-blocks
+    gallery`), not a renderer route.
+  - The preview banner is not dismissible: it is the "not the official site" disclosure, so it stays (the
+    conservative choice; it is one line in the page's flow).
 

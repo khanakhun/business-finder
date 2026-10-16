@@ -53,6 +53,7 @@ describe('site slugs', () => {
 
   it('never gives one of our hostnames', () => {
     expect(isValidSlug('www')).toBe(false);
+    expect(isValidSlug('bf-deploy-probe')).toBe(false);
     expect(isValidSlug(previewSlug(baseSlug('API', null), 'abc234'))).toBe(true);
   });
 });

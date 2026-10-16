@@ -162,6 +162,36 @@ services:
     security_opt: [no-new-privileges:true]
     # Healthcheck (GET /health/ready) is defined in the image.
 
+  # apps/sites (BF-036), optional: `pnpm infra:up --profile sites` runs its production image, reading Postgres as the
+  # read-only role. Its own profile: it takes SITES_PORT, which `pnpm --filter @bf/sites dev` and the e2e suite use.
+  sites:
+    profiles: [sites]
+    build:
+      context: ../..
+      dockerfile: infra/docker/sites/Dockerfile
+    image: bf-sites:dev
+    environment:
+      SITES_DATABASE_URL: postgres://bf_sites_ro:${BF_SITES_RO_PASSWORD:-bf_sites_ro_local_only}@postgres:5432/${POSTGRES_DB:-bf}
+      # The browser's view beacon goes to the API on the host.
+      API_URL: http://127.0.0.1:${API_PORT:-4000}
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:-sites.localhost}
+      SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:-https://assets.sites.localhost}
+      SITES_PREVIEW_ACTIONS: ${SITES_PREVIEW_ACTIONS:-false}
+      # Local-only defaults (a production build requires both). Set the same values in .env for the API to refresh
+      # this renderer and count its views; without them a change shows within a minute.
+      SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:-bf_local_only_sites_revalidate_secret_0123}
+      SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:-bf_local_only_sites_view_token_secret_0123}
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports:
+      - 127.0.0.1:${SITES_PORT:-3100}:3000
+    read_only: true
+    tmpfs:
+      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700,size=128m
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
 volumes:
   postgres-data:
   valkey-data:

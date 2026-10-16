@@ -31,7 +31,10 @@ export interface Feature {
   readonly compute: FeatureCompute;
 }
 
-/** All features in registry order; fails fast (at import) when a definition has no compute function. */
+/**
+ * All features in registry order; fails fast (at import) when a definition has no compute function (a programming
+ * error, hence a plain Error).
+ */
 export const FEATURES: readonly Feature[] = FEATURE_KEYS.map((key) => {
   const compute = COMPUTES[key];
   if (!compute) throw new Error(`Scoring feature ${key} has no compute function`);
@@ -51,15 +54,31 @@ const valid = (definition: FeatureDefinition, value: FeatureValue): boolean => {
 };
 
 /**
- * The business's feature vector for a profile's offer. A value the facts do not give is the definition's
- * `missingDefault`, else null; a value of the wrong type is a bug and throws.
+ * The business's feature vector for a profile's offer, as stored with its score: a value the facts do not give is
+ * `null` (missingness is information for BF-059; `withDefaults` applies the registry's defaults when scoring). A
+ * value of the wrong type is a programming error, never a silent score: it throws.
  */
 export function computeFeatures(facts: BusinessFacts, context: FeatureContext): FeatureVector {
   const vector: FeatureVector = {};
   for (const { key, definition, compute } of FEATURES) {
     const raw = compute(facts, context);
     if (!valid(definition, raw)) throw new TypeError(`Scoring feature ${key} computed an invalid value`);
-    vector[key] = raw ?? definition.missingDefault ?? null;
+    vector[key] = raw;
   }
   return vector;
+}
+
+/**
+ * The vector scoring reads: a non-finite number (from a replayed or hand-written vector) counts as missing, and each
+ * missing value is replaced by its feature's `missingDefault` when it has one.
+ */
+export function withDefaults(vector: FeatureVector): FeatureVector {
+  const effective: FeatureVector = {};
+  for (const { key, definition } of FEATURES) {
+    const value = vector[key] ?? null;
+    const known = typeof value === 'number' && !Number.isFinite(value) ? null : value;
+    if (known !== null) effective[key] = known;
+    else if (definition.missingDefault !== undefined) effective[key] = definition.missingDefault;
+  }
+  return effective;
 }

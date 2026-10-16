@@ -1,25 +1,35 @@
 # Built-in scoring profiles (BF-031)
 
 Scores answer "who should I contact next, for which offer, and why?". Each **offer** has a built-in profile
-(`apps/api/src/modules/scoring/domain/builtin-profiles.ts`, version 1). They are read-only: a workspace duplicates
-one to customize it (BF-032). Change a weight here and in code together, bump `BUILTIN_PROFILE_VERSION`, and update
-the golden table (`golden.test.ts`, below).
+(`apps/api/src/modules/scoring/domain/builtin-profiles.ts`, each at version 1). They are read-only: a workspace
+duplicates one to customize it (BF-032). Change a weight here and in code together, bump that profile's version in
+`BUILTIN_PROFILE_VERSIONS` (a test pins each version to a hash of its config), and update the golden table
+(`golden.test.ts`, below).
 
 ## How a score is computed
 
 1. **Features** (`FEATURE_DEFINITIONS` in `@bf/contracts`, computed in `scoring/domain/features`): typed values
    from the business record, the latest website audit and crawl, the workspace's review insights, contacts and CRM
-   row. A value the facts do not give is *missing* (or the feature's documented default, e.g. `has_phone` → false).
-2. **Transforms** map each value to 0–1: `linear`/`inverse` over a range, `piecewise`, `log`, `boolean`,
-   `enumMap`. Booleans default to 1/0; shares (0–1) need no transform.
+   row. A value the facts do not give is *missing*; stored snapshots keep it missing, and scoring uses the
+   feature's documented default when it has one (e.g. `has_phone` → false). Feature keys are append-only and
+   `FEATURE_SET_VERSION` names the features' semantics.
+2. **Transforms** map each value to 0–1: `linear`/`inverse` over a range, `piecewise` (non-decreasing points),
+   `log` (`log(1 + x) ÷ log(1 + max)`), `boolean`, `enumMap`. Booleans default to 1/0; shares (0–1) need no
+   transform. Numeric transforms are monotone; for "less is better" use `inverse` or a negative weight.
 3. **Weighted sum**: `score = clamp(100 × Σ weight × transformed ÷ Σ positive weights, 0, 100)`. A missing feature
-   contributes nothing, but its weight still counts: **missing data never raises a score**. Negative weights lower
-   it.
-4. **Gates** (conditions on the features): an *exclusion* gives tier **X** and score 0; a *cap* limits the score
-   (the lowest cap wins; an exclusion wins over caps). Do-not-contact always excludes, whatever the profile says.
+   takes the profile's `missing` value if it sets one, else contributes nothing while its weight still counts: for
+   a positive weight, missing data never raises a score. Negative weights lower it.
+4. **Gates** (conditions on the features, defaults applied; a comparison with a missing value is false, so
+   `not: { eq }` matches a missing value while `neq` does not): an *exclusion* gives tier **X**, score 0 and no
+   reasons but its own; a *cap* limits the score (the lowest cap wins; an exclusion wins over caps; a cap that does
+   not lower the score is not reported). Do-not-contact always excludes, whatever the profile says.
 5. **Tiers**: A from the profile's `A` threshold, B from `B`, else C.
-6. **Reasons**: the three strongest contributions each way, in EN/FR, from the registry's texts or the profile's
-   `reasonTemplates`.
+6. **Reasons**: the three strongest contributions each way, in EN/FR: the profile's `reasonTemplates` first, then
+   the registry's texts — by value (`true`, `false`, an enum value), by side of the feature's pivot (`below`,
+   `above`), else `value`.
+
+`category_offer_relevance` is one key whose value is the relevance of the profile's own offer (stored per score):
+one key per offer would add five mostly irrelevant features to every snapshot.
 
 The engine is pure and deterministic (property-tested: same input, same output; raising a positively weighted
 feature never lowers the score).
@@ -29,11 +39,12 @@ feature never lowers the score).
 | Gate | Condition | Effect | Why |
 |---|---|---|---|
 | `closed_permanently` | operating status is closed permanently | exclude | Nobody to sell to. |
-| `already_customer_or_disqualified` | pipeline status is won or disqualified | exclude | A customer is served by the account, not prospected; a disqualified business was judged by a person. |
+| `disqualified` | pipeline status is disqualified | exclude | A person judged it. |
+| `already_customer` | pipeline status is won | cap 40 | A customer stays visible for cross-selling, below cold prospects. |
 | `no_solicitation` | the website asks not to be solicited | exclude | Respect the owner's wish (the compliance gate also blocks outreach). |
 | `closed_temporarily` | operating status is closed temporarily | cap 40 | Worth a look later, not now. |
 | `offer_rarely_fits` | category relevance of the offer < 0.25 | cap 30 | A missing booking tool does not make a gift shop a booking prospect. |
-| `unreachable` | no verified e-mail, no phone, no WhatsApp | cap 30 | A great prospect we cannot reach is not "act now" yet; enrichment may find a way in. |
+| `unreachable` | no usable e-mail, no phone, no WhatsApp | cap 30 | A great prospect we cannot reach is not "act now" yet; enrichment may find a way in. |
 
 ## `new_website` — businesses without a real website (tiers A ≥ 70, B ≥ 50)
 
@@ -76,8 +87,10 @@ Extra gate: `has_working_website` (status ok/strong) caps at 30 — that busines
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 | `multi_location` | −6 | yes/no | Chains have central sites. |
 
-Extra gate: `no_website_to_redesign` (status none/parked/social only) caps at 20 — that business belongs to the new
-website offer. A broken site scores both offers (it may need a rebuild).
+Missing values: quality, design, PageSpeed and load time count as 0.9 when missing — a site that cannot be audited
+(broken, unreadable) is a poor one. Extra gates: `no_website_to_redesign` (status none/parked/social only) caps at
+20 — that business belongs to the new website offer; `not_audited_yet` (a website, no audit) caps at 40 until the
+audit runs. A broken site scores both offers (it may need a rebuild).
 
 ## `ai_receptionist` — businesses that miss calls and messages (tiers A ≥ 65, B ≥ 45)
 
@@ -114,6 +127,7 @@ Extra gate: `no_phone_line` (no phone) caps at 40.
 | `has_website` | 3 | yes/no | A widget fits an existing site (without one, the new website offer leads). |
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 
+Missing value: `has_booking_tool` counts as "no tool" when unknown (no readable site, e.g. only a social page).
 Extra gate: `already_books_online` caps at 35.
 
 ## `local_seo` — businesses customers struggle to find (tiers A ≥ 65, B ≥ 45)
@@ -141,8 +155,8 @@ Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their 
 
 | Business | new website | redesign | AI receptionist | booking | local SEO |
 |---|:-:|:-:|:-:|:-:|:-:|
-| Beach bistro, no website, busy | A | C | C | C | B |
-| Salon, Facebook page only, phone pains | A | C | A | B | C |
+| Beach bistro, no website, busy | A | C | C | B | B |
+| Salon, Facebook page only, phone pains | A | C | A | A | C |
 | Villa rental, dated slow site | B | A | B | A | A |
 | Hotel, strong site, books online | C | C | B | C | B |
 | Dentist, ok site, no booking | C | C | B | A | C |
@@ -150,6 +164,6 @@ Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their 
 | Permanently closed café | X | X | X | X | X |
 | Do-not-contact bakery | X | X | X | X | X |
 | Garage, unreachable | C | C | C | C | C |
-| Spa, broken site, many complaints | B | C | A | B | C |
+| Spa, broken site, many complaints | B | A | A | A | C |
 | Chain boutique, shared website | C | C | C | C | C |
-| Won customer, no website | X | X | X | X | X |
+| Won customer, no website | C | C | C | C | C |

@@ -15,45 +15,73 @@ export const REASONS_PER_DIRECTION = 3;
 
 type Locale = 'en' | 'fr';
 
-const number = (value: number, locale: Locale, digits = 1) =>
-  new Intl.NumberFormat(locale === 'fr' ? 'fr-FR' : 'en-GB', { maximumFractionDigits: digits }).format(value);
+const LOCALE_TAG: Record<Locale, string> = { en: 'en-GB', fr: 'fr-FR' };
+const FORMATS = new Map<string, Intl.NumberFormat>();
+const PLURALS = { en: new Intl.PluralRules('en-GB'), fr: new Intl.PluralRules('fr-FR') };
 
-const plural = (value: number, one: string, many: string) => (Math.abs(value) < 2 ? one : many);
+const format = (value: number, locale: Locale, digits: number) => {
+  const key = `${locale}:${digits}`;
+  let formatter = FORMATS.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(LOCALE_TAG[locale], { maximumFractionDigits: digits });
+    FORMATS.set(key, formatter);
+  }
+  return formatter.format(value);
+};
+
+/** `3,5 ans`, `1 year`, `0 years`: the plural rule of the locale, applied to the number as displayed. */
+const counted = (value: number, locale: Locale, digits: number, one: string, many: string) => {
+  const shown = Number(value.toFixed(digits));
+  return `${format(value, locale, digits)} ${PLURALS[locale].select(shown) === 'one' ? one : many}`;
+};
 
 /** A value in its unit, as a sentence reads it (`42/100`, `3,5 s`, `35 %`, `2 years`…). */
 export function formatValue(unit: FeatureUnit, value: FeatureValue, locale: Locale): string {
   if (typeof value !== 'number') return String(value);
   switch (unit) {
     case 'score100':
-      return `${number(value, locale, 0)}/100`;
+      return `${format(value, locale, 0)}/100`;
     case 'score10':
-      return `${number(value, locale)}/10`;
+      return `${format(value, locale, 1)}/10`;
     case 'rating':
-      return `${number(value, locale)}/5`;
+      return `${format(value, locale, 1)}/5`;
     case 'seconds':
-      return `${number(value, locale)} s`;
+      return `${format(value, locale, 1)} s`;
     case 'share':
       // French puts a (narrow) space before the percent sign.
-      return locale === 'fr' ? `${number(value * 100, locale, 0)} %` : `${number(value * 100, locale, 0)}%`;
+      return locale === 'fr'
+        ? `${format(value * 100, locale, 0)}\u202f%`
+        : `${format(value * 100, locale, 0)}%`;
     case 'years':
       return locale === 'fr'
-        ? `${number(value, locale)} ${plural(value, 'an', 'ans')}`
-        : `${number(value, locale)} ${plural(value, 'year', 'years')}`;
+        ? counted(value, locale, 1, 'an', 'ans')
+        : counted(value, locale, 1, 'year', 'years');
     case 'days':
       return locale === 'fr'
-        ? `${number(value, locale, 0)} ${plural(value, 'jour', 'jours')}`
-        : `${number(value, locale, 0)} ${plural(value, 'day', 'days')}`;
+        ? counted(value, locale, 0, 'jour', 'jours')
+        : counted(value, locale, 0, 'day', 'days');
+    case 'log_count':
+      return format(Math.round(10 ** value - 1), locale, 0);
     default:
-      return number(value, locale);
+      return format(value, locale, 1);
   }
+}
+
+/** The text key a value reads: its boolean or enum value, `below`/`above` its feature's pivot, else `value`. */
+function keysOf(raw: FeatureValue, pivot: number | undefined): string[] {
+  if (typeof raw === 'boolean' || typeof raw === 'string') return [String(raw), 'value'];
+  if (typeof raw === 'number' && pivot !== undefined) return [raw < pivot ? 'below' : 'above', 'value'];
+  return ['value'];
 }
 
 function text(config: ScoringProfileConfig, contribution: ScoreContribution) {
   const definition = FEATURE_DEFINITIONS[contribution.feature];
-  const texts: ReasonTexts = { ...definition.reasons, ...config.reasonTemplates[contribution.feature] };
   const raw = contribution.rawValue;
-  const template =
-    (typeof raw === 'boolean' || typeof raw === 'string' ? texts[String(raw)] : undefined) ?? texts.value;
+  // The profile's texts win over the registry's; within each, the most specific key.
+  const keys = keysOf(raw, definition.pivot);
+  const pick = (texts: ReasonTexts | undefined) =>
+    keys.map((key) => texts?.[key]).find((template) => template !== undefined);
+  const template = pick(config.reasonTemplates[contribution.feature]) ?? pick(definition.reasons);
   if (!template) return null;
   const fill = (locale: Locale) =>
     template[locale].replaceAll('{value}', formatValue(definition.unit, raw, locale));

@@ -18,10 +18,23 @@ describe('transforms', () => {
       ],
     };
     expect([-1, 1, 2, 3, 9].map((x) => applyTransform(piecewise, x))).toEqual([0, 0.4, 0.8, 0.9, 1]);
-    const log: Transform = { kind: 'log', base: 10, max: 999 };
+    const log: Transform = { kind: 'log', max: 999 };
     expect(applyTransform(log, 0)).toBe(0);
     expect(applyTransform(log, 999)).toBe(1);
     expect(applyTransform(log, 99)).toBeCloseTo(2 / 3, 6);
+    // Interpolation is exact between points.
+    expect(
+      applyTransform(
+        {
+          kind: 'piecewise',
+          points: [
+            [10, 0.2],
+            [20, 0.6],
+          ],
+        },
+        12.5,
+      ),
+    ).toBeCloseTo(0.3, 10);
     expect(applyTransform({ kind: 'boolean', true: 0.2, false: 0.9 }, true)).toBe(0.2);
     expect(applyTransform({ kind: 'boolean', true: 0.2, false: 0.9 }, false)).toBe(0.9);
     const map: Transform = { kind: 'enumMap', map: { none: 1, weak: 0.5 }, default: 0.1 };
@@ -56,7 +69,7 @@ describe('transforms', () => {
           [20, 1],
         ],
       },
-      { kind: 'log', base: 2, max: 500 },
+      { kind: 'log', max: 500 },
     ];
     fc.assert(
       fc.property(pair, ([x, delta]) => {
@@ -68,6 +81,7 @@ describe('transforms', () => {
         const inverse: Transform = { kind: 'inverse', min: -50, max: 300 };
         expect(applyTransform(inverse, x + delta)).toBeLessThanOrEqual(applyTransform(inverse, x) ?? 1);
       }),
+      { seed: Number(process.env.FC_SEED ?? 20_261_016) },
     );
   });
 });

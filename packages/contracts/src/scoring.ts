@@ -27,6 +27,8 @@ export const FEATURE_UNITS = [
   'share',
   'rating',
   'count',
+  /** A log10(1 + n) value shown as the count n. */
+  'log_count',
   'none',
 ] as const;
 export type FeatureUnit = (typeof FEATURE_UNITS)[number];
@@ -37,8 +39,9 @@ interface Text {
 }
 
 /**
- * Reason texts of a feature: by boolean or enum value (`true`, `false`, `closed_permanently`…) or for any value
- * (`value`, with `{value}`). A contribution reads the most specific one there is.
+ * Reason texts of a feature: by boolean or enum value (`true`, `false`, `closed_permanently`…), below or above the
+ * feature's `pivot` (`below`, `above`), or for any value (`value`, with `{value}`). A contribution reads the most
+ * specific one there is, the profile's before the registry's.
  */
 export type ReasonTexts = Readonly<Partial<Record<string, Text>>>;
 
@@ -51,10 +54,24 @@ export interface FeatureDefinition {
   readonly description: Text;
   /** Where the value comes from (shown in the editor). */
   readonly source: string;
-  /** A value that stands in when the facts do not tell (else the feature is missing: no contribution). */
+  /** The usual range of a number (the editor suggests transform bounds from it). */
+  readonly range?: readonly [number, number];
+  /** A number's reasons read `below` / `above` this value (e.g. sentiment around 0). */
+  readonly pivot?: number;
+  /**
+   * The value scoring uses when the facts do not tell (else the feature is missing: no contribution). Stored
+   * feature snapshots keep the missing value itself (`null`): missingness is information (BF-059).
+   */
   readonly missingDefault?: number | boolean | string;
   readonly reasons: ReasonTexts;
 }
+
+/**
+ * Version of the features' semantics: bump it when a compute function changes meaning (stored snapshots say which
+ * version produced them, and a recompute is not skipped as "unchanged"). Feature keys are append-only: deprecate a
+ * key, never remove or rename it (snapshots and profile versions refer to it forever).
+ */
+export const FEATURE_SET_VERSION = 1;
 
 /** Pain tags that become `pain_share.<tag>` features (`other` says nothing an offer can address). */
 export const SCORED_PAIN_TAGS = PAIN_SIGNAL_TAGS.filter(
@@ -83,6 +100,7 @@ const painFeatures = Object.fromEntries(
       group: 'pain',
       type: 'number',
       unit: 'share',
+      range: [0, 1],
       description: {
         en: `Share of analysed reviews mentioning ${PAIN_LABELS[tag].en} (0–1).`,
         fr: `Part des avis analysés qui évoquent ${PAIN_LABELS[tag].fr} (0–1).`,
@@ -143,6 +161,7 @@ const DEFINITIONS = {
     group: 'presence',
     type: 'number',
     unit: 'score100',
+    range: [0, 100],
     description: { en: 'Website quality score (0–100).', fr: 'Score de qualité du site (0–100).' },
     source: 'website audit (BF-030)',
     reasons: { value: { en: 'Website quality score {value}.', fr: 'Score de qualité du site : {value}.' } },
@@ -151,6 +170,7 @@ const DEFINITIONS = {
     group: 'presence',
     type: 'number',
     unit: 'score100',
+    range: [0, 100],
     description: {
       en: 'Google PageSpeed performance score on mobile (0–100).',
       fr: 'Score de performance PageSpeed de Google sur mobile (0–100).',
@@ -162,6 +182,7 @@ const DEFINITIONS = {
     group: 'presence',
     type: 'number',
     unit: 'seconds',
+    range: [0, 30],
     description: {
       en: 'Time until the main content shows on mobile (largest contentful paint, seconds).',
       fr: 'Temps d’affichage du contenu principal sur mobile (largest contentful paint, secondes).',
@@ -178,6 +199,7 @@ const DEFINITIONS = {
     group: 'presence',
     type: 'number',
     unit: 'score10',
+    range: [0, 10],
     description: { en: 'Visual design grade (0–10).', fr: 'Note de design visuel (0–10).' },
     source: 'website audit (BF-030)',
     reasons: { value: { en: 'The design is graded {value}.', fr: 'Le design est noté {value}.' } },
@@ -197,6 +219,7 @@ const DEFINITIONS = {
     group: 'presence',
     type: 'number',
     unit: 'years',
+    range: [0, 20],
     description: {
       en: 'Years since the site was last updated (copyright year, dated content, sitemap).',
       fr: 'Années depuis la dernière mise à jour du site (année du copyright, contenu daté, sitemap).',
@@ -279,6 +302,7 @@ const DEFINITIONS = {
     group: 'business',
     type: 'number',
     unit: 'share',
+    range: [0, 1],
     description: {
       en: 'How relevant the profile’s offer is to the business category (0–1).',
       fr: 'Pertinence de l’offre du profil pour la catégorie de l’entreprise (0–1).',
@@ -319,6 +343,7 @@ const DEFINITIONS = {
     group: 'business',
     type: 'number',
     unit: 'count',
+    range: [1, 4],
     description: { en: 'Price level (1–4).', fr: 'Niveau de prix (1–4).' },
     source: 'business record',
     reasons: { value: { en: 'Price level {value} of 4.', fr: 'Niveau de prix {value} sur 4.' } },
@@ -327,6 +352,7 @@ const DEFINITIONS = {
     group: 'business',
     type: 'number',
     unit: 'rating',
+    range: [1, 5],
     description: { en: 'Average customer rating (1–5).', fr: 'Note moyenne des clients (1–5).' },
     source: 'business record',
     reasons: { value: { en: 'Rated {value}.', fr: 'Noté {value}.' } },
@@ -334,23 +360,20 @@ const DEFINITIONS = {
   review_count_log: {
     group: 'business',
     type: 'number',
-    unit: 'none',
+    unit: 'log_count',
+    range: [0, 4],
     description: {
       en: 'Number of reviews, on a log scale (log10 of 1 + count).',
       fr: 'Nombre d’avis, en échelle logarithmique (log10 de 1 + nombre).',
     },
     source: 'business record',
-    reasons: {
-      value: {
-        en: 'An active business with many reviews.',
-        fr: 'Une entreprise active, avec beaucoup d’avis.',
-      },
-    },
+    reasons: { value: { en: '{value} reviews.', fr: '{value} avis.' } },
   },
   owner_response_rate: {
     group: 'business',
     type: 'number',
     unit: 'share',
+    range: [0, 1],
     description: {
       en: 'Share of reviews the owner replied to (at least, 0–1).',
       fr: 'Part des avis auxquels le propriétaire a répondu (au moins, 0–1).',
@@ -412,10 +435,13 @@ const DEFINITIONS = {
     group: 'pain',
     type: 'number',
     unit: 'none',
+    range: [-1, 1],
     description: { en: 'Average review sentiment (−1 to 1).', fr: 'Sentiment moyen des avis (−1 à 1).' },
     source: 'review insights (BF-029)',
+    pivot: 0,
     reasons: {
-      value: { en: 'Customers are unhappy in reviews.', fr: 'Les clients se plaignent dans les avis.' },
+      below: { en: 'Customers are unhappy in reviews.', fr: 'Les clients se plaignent dans les avis.' },
+      above: { en: 'Customers are happy in reviews.', fr: 'Les clients sont satisfaits dans les avis.' },
     },
   },
   // Reachability
@@ -431,16 +457,30 @@ const DEFINITIONS = {
       { en: 'No verified e-mail address.', fr: 'Aucune adresse e-mail vérifiée.' },
     ),
   },
+  has_usable_email: {
+    group: 'reachability',
+    type: 'boolean',
+    unit: 'none',
+    description: {
+      en: 'An e-mail address worth writing to is known (valid, accept-all or not yet verified).',
+      fr: 'Une adresse e-mail utilisable est connue (valide, acceptant tout ou pas encore vérifiée).',
+    },
+    source: 'contacts (BF-028)',
+    missingDefault: false,
+    reasons: yesNo(
+      { en: 'Reachable by e-mail.', fr: 'Joignable par e-mail.' },
+      { en: 'No usable e-mail address.', fr: 'Aucune adresse e-mail utilisable.' },
+    ),
+  },
   has_generic_email_only: {
     group: 'reachability',
     type: 'boolean',
     unit: 'none',
     description: {
-      en: 'The only usable e-mails are generic ones (info@, contact@).',
-      fr: 'Les seuls e-mails utilisables sont génériques (info@, contact@).',
+      en: 'The only usable e-mails are generic ones (info@, contact@); unknown without a usable e-mail.',
+      fr: 'Les seuls e-mails utilisables sont génériques (info@, contact@) ; inconnu sans e-mail utilisable.',
     },
     source: 'contacts (BF-028)',
-    missingDefault: false,
     reasons: yesNo(
       { en: 'Only a generic e-mail address.', fr: 'Seulement une adresse e-mail générique.' },
       { en: 'A personal e-mail address is known.', fr: 'Une adresse e-mail personnelle est connue.' },
@@ -506,6 +546,7 @@ const DEFINITIONS = {
     group: 'workspace',
     type: 'number',
     unit: 'days',
+    range: [0, 3650],
     description: {
       en: 'Days since the workspace last contacted the business (none if never).',
       fr: 'Jours depuis le dernier contact de l’espace de travail (aucun si jamais).',
@@ -541,14 +582,17 @@ export const TransformSchema = z
     z.object({ kind: z.literal('inverse'), min: finite, max: finite }),
     z.object({
       kind: z.literal('piecewise'),
-      /** `[x, y]` points, x strictly increasing; linear in between, flat outside. */
+      /**
+       * `[x, y]` points, x strictly increasing and y never decreasing (every transform is monotone; for "less is
+       * better", give the feature a negative weight); linear in between, flat outside.
+       */
       points: z
         .array(z.tuple([finite, unit]))
         .min(2)
         .max(20),
     }),
-    /** log_base(1 + x) / log_base(1 + max). */
-    z.object({ kind: z.literal('log'), base: z.number().gt(1), max: z.number().positive() }),
+    /** log(1 + x) / log(1 + max), clamped (DECISION: no `base` — the ratio is the same in every base). */
+    z.object({ kind: z.literal('log'), max: z.number().positive() }),
     z.object({ kind: z.literal('boolean'), true: unit, false: unit }),
     z.object({ kind: z.literal('enumMap'), map: z.record(z.string(), unit), default: unit.default(0) }),
   ])
@@ -561,6 +605,12 @@ export const TransformSchema = z
       transform.points.some((point, i) => i > 0 && point[0] <= (transform.points[i - 1]?.[0] ?? -Infinity))
     ) {
       ctx.addIssue({ code: 'custom', message: 'piecewise points must have strictly increasing x' });
+    }
+    if (
+      transform.kind === 'piecewise' &&
+      transform.points.some((point, i) => i > 0 && point[1] < (transform.points[i - 1]?.[1] ?? -Infinity))
+    ) {
+      ctx.addIssue({ code: 'custom', message: 'piecewise points must not decrease' });
     }
   })
   .meta({ id: 'ScoringTransform' });
@@ -585,29 +635,31 @@ export type GateCondition =
 
 const LEAF_OPERATORS = ['eq', 'neq', 'in', 'gt', 'gte', 'lt', 'lte', 'isNull'] as const;
 const scalar = z.union([z.number(), z.boolean(), z.string().max(100)]);
-export const GateConditionSchema: z.ZodType<GateCondition> = z.lazy(() =>
-  z.union([
-    z
-      .object({
-        feature: FeatureKeySchema,
-        eq: scalar.optional(),
-        neq: scalar.optional(),
-        in: z.array(scalar).min(1).max(50).optional(),
-        gt: finite.optional(),
-        gte: finite.optional(),
-        lt: finite.optional(),
-        lte: finite.optional(),
-        isNull: z.boolean().optional(),
-      })
-      .strict()
-      .refine((leaf) => LEAF_OPERATORS.filter((op) => leaf[op] !== undefined).length === 1, {
-        message: 'A condition needs exactly one operator',
-      }),
-    z.object({ all: z.array(GateConditionSchema).min(1).max(20) }).strict(),
-    z.object({ any: z.array(GateConditionSchema).min(1).max(20) }).strict(),
-    z.object({ not: GateConditionSchema }).strict(),
-  ]),
-);
+export const GateConditionSchema: z.ZodType<GateCondition> = z
+  .lazy(() =>
+    z.union([
+      z
+        .object({
+          feature: FeatureKeySchema,
+          eq: scalar.optional(),
+          neq: scalar.optional(),
+          in: z.array(scalar).min(1).max(50).optional(),
+          gt: finite.optional(),
+          gte: finite.optional(),
+          lt: finite.optional(),
+          lte: finite.optional(),
+          isNull: z.boolean().optional(),
+        })
+        .strict()
+        .refine((leaf) => LEAF_OPERATORS.filter((op) => leaf[op] !== undefined).length === 1, {
+          message: 'A condition needs exactly one operator',
+        }),
+      z.object({ all: z.array(GateConditionSchema).min(1).max(20) }).strict(),
+      z.object({ any: z.array(GateConditionSchema).min(1).max(20) }).strict(),
+      z.object({ not: GateConditionSchema }).strict(),
+    ]),
+  )
+  .meta({ id: 'ScoringGateCondition' });
 
 const TextSchema = z.object({ en: z.string().min(1).max(300), fr: z.string().min(1).max(300) });
 
@@ -627,29 +679,176 @@ export type Gate = z.infer<typeof GateSchema>;
 
 export const ReasonTextsSchema = z.partialRecord(z.string().max(40), TextSchema);
 
-export const ScoringProfileConfigSchema = z
-  .object({
-    offer: OfferSchema,
-    /** Feature → weight (negative weights lower the score). */
-    weights: z.partialRecord(FeatureKeySchema, z.number().min(-100).max(100)),
-    transforms: z.partialRecord(FeatureKeySchema, TransformSchema).default({}),
-    gates: z.array(GateSchema).max(30).default([]),
-    /** Tier A from `A`, B from `B`, else C (gated out: X). */
-    tiers: z
-      .object({ A: z.number().int().min(1).max(100), B: z.number().int().min(0).max(99) })
-      .refine((tiers) => tiers.A > tiers.B, { message: 'Tier A must start above tier B' }),
-    /**
-     * `weighted_sum`: 100 × Σ weight × transformed ÷ Σ positive weights, clamped to 0–100. A missing feature
-     * contributes nothing (missing data never raises a score).
-     */
-    normalization: z.literal('weighted_sum').default('weighted_sum'),
-    /** Overrides of the registry's reason texts, per feature. */
-    reasonTemplates: z.partialRecord(FeatureKeySchema, ReasonTextsSchema).default({}),
-  })
-  .refine((config) => Object.values(config.weights).some((weight) => (weight ?? 0) > 0), {
-    message: 'At least one feature needs a positive weight',
-  })
-  .meta({ id: 'ScoringProfileConfig' });
+/** The engine's own gate id (do-not-contact always excludes): a profile cannot reuse it. */
+export const DO_NOT_CONTACT_GATE_ID = 'do_not_contact';
+
+const ProfileConfigObjectSchema = z.object({
+  /** Rule-based (this config); model-based profiles (BF-059) will be another kind. */
+  kind: z.literal('rules').default('rules'),
+  offer: OfferSchema,
+  /** Feature → weight (negative weights lower the score). */
+  weights: z.partialRecord(FeatureKeySchema, z.number().min(-100).max(100)),
+  transforms: z.partialRecord(FeatureKeySchema, TransformSchema).default({}),
+  /**
+   * The transformed value (0–1) of a feature when it is missing, for this profile (e.g. an unauditable site counts
+   * as a poor one for a redesign). Without it, a missing feature contributes nothing.
+   */
+  missing: z.partialRecord(FeatureKeySchema, unit).default({}),
+  gates: z.array(GateSchema).max(30).default([]),
+  /** Tier A from `A`, B from `B`, else C (gated out: X). */
+  tiers: z
+    .object({ A: z.number().int().min(1).max(100), B: z.number().int().min(0).max(99) })
+    .refine((tiers) => tiers.A > tiers.B, { message: 'Tier A must start above tier B' }),
+  /**
+   * `weighted_sum`: 100 × Σ weight × transformed ÷ Σ positive weights, clamped to 0–100. A missing feature
+   * contributes nothing (or its `missing` value), but its weight still counts.
+   */
+  normalization: z.literal('weighted_sum').default('weighted_sum'),
+  /** Overrides of the registry's reason texts, per feature. */
+  reasonTemplates: z.partialRecord(FeatureKeySchema, ReasonTextsSchema).default({}),
+});
+
+export interface ProfileProblem {
+  /** Dotted path in the config (`transforms.rating_avg`, `gates[0].when.any[1]`). */
+  readonly path: string;
+  readonly message: string;
+}
+export const ProfileProblemSchema = z
+  .object({ path: z.string(), message: z.string() })
+  .meta({ id: 'ScoringProfileProblem' });
+
+const FITS: Record<FeatureDefinition['type'], readonly Transform['kind'][]> = {
+  number: ['linear', 'inverse', 'piecewise', 'log'],
+  boolean: ['boolean'],
+  enum: ['enumMap'],
+};
+
+function conditionProblems(condition: GateCondition, path: string, problems: ProfileProblem[]): void {
+  if ('all' in condition) {
+    for (const [i, part] of condition.all.entries()) conditionProblems(part, `${path}.all[${i}]`, problems);
+    return;
+  }
+  if ('any' in condition) {
+    for (const [i, part] of condition.any.entries()) conditionProblems(part, `${path}.any[${i}]`, problems);
+    return;
+  }
+  if ('not' in condition) {
+    conditionProblems(condition.not, `${path}.not`, problems);
+    return;
+  }
+  const definition = FEATURE_DEFINITIONS[condition.feature];
+  const values = [condition.eq, condition.neq, ...(condition.in ?? [])].filter(
+    (value) => value !== undefined,
+  );
+  for (const value of values) {
+    const fits =
+      definition.type === 'enum'
+        ? typeof value === 'string' && (definition.values ?? []).includes(value)
+        : typeof value === (definition.type === 'number' ? 'number' : 'boolean');
+    if (!fits) problems.push({ path, message: `${String(value)} is not a value of ${condition.feature}` });
+  }
+  const ordered = [condition.gt, condition.gte, condition.lt, condition.lte].some(
+    (value) => value !== undefined,
+  );
+  if (ordered && definition.type !== 'number') {
+    problems.push({ path, message: `${condition.feature} is not a number: it cannot be compared` });
+  }
+  if (condition.isNull !== undefined && definition.missingDefault !== undefined) {
+    problems.push({ path, message: `${condition.feature} is never missing (it has a default)` });
+  }
+}
+
+/**
+ * What the schema's shapes cannot say (BF-031), shared by the API and the profile editor (BF-032): a transform must
+ * fit its feature's type, an enum needs an `enumMap`, a number off the 0–1 scale needs a transform, gate values and
+ * reason keys must exist, gate ids must be unique (and not the engine's own). Empty when the profile is usable.
+ */
+export function profileProblems(config: z.output<typeof ProfileConfigObjectSchema>): ProfileProblem[] {
+  const problems: ProfileProblem[] = [];
+  if (!Object.values(config.weights).some((weight) => (weight ?? 0) > 0)) {
+    problems.push({ path: 'weights', message: 'At least one feature needs a positive weight' });
+  }
+  for (const [key, weight] of Object.entries(config.weights) as [FeatureKey, number][]) {
+    if (weight === 0) continue;
+    const definition = FEATURE_DEFINITIONS[key];
+    const transform = config.transforms[key];
+    if (transform && !FITS[definition.type].includes(transform.kind)) {
+      problems.push({
+        path: `transforms.${key}`,
+        message: `A ${definition.type} feature cannot use ${transform.kind}`,
+      });
+    }
+    if (!transform && definition.type === 'enum') {
+      problems.push({ path: `transforms.${key}`, message: 'An enum feature needs an enumMap transform' });
+    }
+    if (!transform && definition.type === 'number' && definition.unit !== 'share') {
+      problems.push({
+        path: `transforms.${key}`,
+        message: 'This number is not on 0–1: it needs a transform',
+      });
+    }
+    if (transform?.kind === 'enumMap') {
+      for (const value of Object.keys(transform.map)) {
+        if (!(definition.values ?? []).includes(value)) {
+          problems.push({
+            path: `transforms.${key}.map.${value}`,
+            message: `${value} is not a value of ${key}`,
+          });
+        }
+      }
+    }
+  }
+  for (const section of ['transforms', 'missing'] as const) {
+    for (const key of Object.keys(config[section]) as FeatureKey[]) {
+      if (config.weights[key] === undefined) {
+        problems.push({ path: `${section}.${key}`, message: 'Set for a feature without a weight' });
+      }
+    }
+  }
+  for (const [key, texts] of Object.entries(config.reasonTemplates) as [
+    FeatureKey,
+    Record<string, unknown>,
+  ][]) {
+    const definition = FEATURE_DEFINITIONS[key];
+    const allowed = new Set([
+      'value',
+      ...(definition.type === 'boolean' ? ['true', 'false'] : []),
+      ...(definition.type === 'enum' ? (definition.values ?? []) : []),
+      ...(definition.pivot !== undefined ? ['below', 'above'] : []),
+    ]);
+    for (const value of Object.keys(texts)) {
+      if (!allowed.has(value)) {
+        problems.push({
+          path: `reasonTemplates.${key}.${value}`,
+          message: `${value} is not a value of ${key}`,
+        });
+      }
+    }
+  }
+  const ids = new Set<string>([DO_NOT_CONTACT_GATE_ID]);
+  for (const [i, gate] of config.gates.entries()) {
+    if (ids.has(gate.id)) {
+      problems.push({ path: `gates[${i}].id`, message: `Gate id ${gate.id} is reserved or used twice` });
+    }
+    ids.add(gate.id);
+    conditionProblems(gate.when, `gates[${i}].when`, problems);
+  }
+  return problems;
+}
+
+/** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path). */
+export const ScoringProfileConfigSchema = ProfileConfigObjectSchema.superRefine((config, ctx) => {
+  for (const problem of profileProblems(config)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: problem.path
+        .split(/[.[\]]+/)
+        .filter(Boolean)
+        .map((part) => (/^\d+$/.test(part) ? Number(part) : part)),
+      message: problem.message,
+    });
+  }
+}).meta({ id: 'ScoringProfileConfig' });
 export type ScoringProfileConfig = z.infer<typeof ScoringProfileConfigSchema>;
 export type ScoringProfileConfigInput = z.input<typeof ScoringProfileConfigSchema>;
 
@@ -696,6 +895,7 @@ export const BusinessScoreSchema = ScoreResultSchema.extend({
   businessId: z.uuid(),
   profileId: z.uuid(),
   profileVersion: z.number().int().positive(),
+  featureSetVersion: z.number().int().positive(),
   offer: OfferSchema,
   features: FeatureVectorSchema,
   computedAt: IsoDateTimeSchema,

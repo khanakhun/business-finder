@@ -7,10 +7,17 @@ import {
 } from '@bf/contracts';
 
 // Built-in offer profiles (BF-031): versioned and read-only; a workspace duplicates one to customize it. Every
-// weight's rationale is in docs/scoring/profiles.md — change both together, and bump `BUILTIN_PROFILE_VERSION` (a
-// new version is seeded; scores computed with the old one stay as they were).
+// weight's rationale is in docs/scoring/profiles.md — change both together and bump that profile's version in
+// `BUILTIN_PROFILE_VERSIONS` (a new version is seeded; scores computed with the old one stay as they were). A test
+// pins each version to a hash of its config, so an edit without a bump fails.
 
-export const BUILTIN_PROFILE_VERSION = 1;
+export const BUILTIN_PROFILE_VERSIONS: Readonly<Record<Offer, number>> = {
+  new_website: 1,
+  website_redesign: 1,
+  ai_receptionist: 1,
+  booking_system: 1,
+  local_seo: 1,
+};
 
 /** Gates every built-in profile shares (do-not-contact is the engine's own). */
 const COMMON_GATES: Gate[] = [
@@ -21,12 +28,19 @@ const COMMON_GATES: Gate[] = [
     reason: { en: 'Permanently closed.', fr: 'Fermée définitivement.' },
   },
   {
-    id: 'already_customer_or_disqualified',
-    when: { feature: 'pipeline_status', in: ['won', 'disqualified'] },
+    id: 'disqualified',
+    when: { feature: 'pipeline_status', eq: 'disqualified' },
     effect: { type: 'exclude' },
+    reason: { en: 'Disqualified in the pipeline.', fr: 'Disqualifiée dans le pipeline.' },
+  },
+  {
+    // DECISION(BF-031): a customer stays visible for cross-selling, below cold prospects.
+    id: 'already_customer',
+    when: { feature: 'pipeline_status', eq: 'won' },
+    effect: { type: 'cap', max: 40 },
     reason: {
-      en: 'Already a customer or disqualified in the pipeline.',
-      fr: 'Déjà cliente ou disqualifiée dans le pipeline.',
+      en: 'Already a customer: an upsell through the account, not a cold prospect.',
+      fr: 'Déjà cliente : une vente additionnelle via le compte, pas une prospection.',
     },
   },
   {
@@ -57,7 +71,7 @@ const COMMON_GATES: Gate[] = [
     id: 'unreachable',
     when: {
       all: [
-        { feature: 'has_verified_email', eq: false },
+        { feature: 'has_usable_email', eq: false },
         { feature: 'has_phone', eq: false },
         { feature: 'has_whatsapp', eq: false },
       ],
@@ -150,8 +164,26 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
       has_https: notHaving,
       has_contact_form: notHaving,
     },
+    // A site that cannot be audited (broken, unreadable) counts as a poor one.
+    missing: {
+      website_quality_score: 0.9,
+      vision_overall: 0.9,
+      psi_mobile_performance: 0.9,
+      lcp_mobile_seconds: 0.9,
+    },
     gates: [
       ...COMMON_GATES,
+      {
+        id: 'not_audited_yet',
+        when: {
+          all: [
+            { feature: 'has_website', eq: true },
+            { feature: 'website_status', isNull: true },
+          ],
+        },
+        effect: { type: 'cap', max: 40 },
+        reason: { en: 'The website is not audited yet.', fr: 'Le site n’est pas encore audité.' },
+      },
       {
         id: 'no_website_to_redesign',
         when: { feature: 'website_status', in: ['none', 'parked', 'social_only'] },
@@ -215,6 +247,8 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
       has_website: 3,
       has_phone: 3,
     },
+    // Unknown (no readable site, e.g. only a social page): no booking tool seen.
+    missing: { has_booking_tool: 1 },
     transforms: {
       has_booking_tool: notHaving,
       'pain_share.booking_friction': painUpTo(0.25),
@@ -267,7 +301,7 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
   },
 };
 
-/** The built-in profiles, parsed (defaults applied) and frozen. */
+/** The built-in profiles, parsed (defaults applied, problems refused) and frozen. */
 export const BUILTIN_PROFILES: Readonly<Record<Offer, ScoringProfileConfig>> = Object.freeze(
   Object.fromEntries(
     Object.entries(PROFILES).map(([offer, input]) => [offer, ScoringProfileConfigSchema.parse(input)]),

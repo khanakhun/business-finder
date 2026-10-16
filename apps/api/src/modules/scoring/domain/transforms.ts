@@ -7,7 +7,8 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
 /** The transformed value, or null when the value is missing or of a kind the transform cannot read. */
 export function applyTransform(transform: Transform | undefined, value: FeatureValue): number | null {
-  if (value === null) return null;
+  // A non-finite number (a replayed or hand-written vector) is no measurement.
+  if (value === null || (typeof value === 'number' && !Number.isFinite(value))) return null;
   if (!transform) {
     // Defaults: a boolean is 1/0, a number already on 0–1 is itself; anything else needs a transform.
     if (typeof value === 'boolean') return value ? 1 : 0;

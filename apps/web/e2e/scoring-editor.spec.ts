@@ -62,6 +62,7 @@ test('tunes a profile with a live preview, saves, activates and reorders the lis
   // With the built-in profile, the phone counts for the business.
   await expect.poll(() => order(page), { timeout: 30_000 }).toEqual(['phone', 'quiet']);
 
+  let profileId: string | null = null;
   try {
     await page.goto('/settings/scoring');
     await expect(page.getByRole('heading', { level: 1, name: 'Scoring' })).toBeVisible();
@@ -71,13 +72,17 @@ test('tunes a profile with a live preview, saves, activates and reorders the lis
     await dialog.getByLabel('Name').fill(`Phone-averse ${run}`);
     await dialog.getByRole('button', { name: 'Duplicate' }).click();
     await expect(page).toHaveURL(/\/settings\/scoring\/[0-9a-f-]{36}$/);
+    profileId = page.url().split('/').at(-1) ?? null;
     await expect(page.getByRole('heading', { level: 2, name: `Phone-averse ${run}` })).toBeVisible();
 
     // The draft: a phone now counts against.
     await expect(page.getByTestId('preview-status')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('spinbutton', { name: 'Phone', exact: true }).fill('-100');
+    await page.getByRole('textbox', { name: 'Phone', exact: true }).fill('-100');
     await expect(page.getByText(/Unsaved changes, started from version 1/)).toBeVisible();
-    await expect(page.getByTestId('top-movers')).toContainText(`Appel ${run}`, { timeout: 30_000 });
+    // Every business with a phone moves down: the list shows them (which ones depends on the shared sample).
+    await expect(page.getByTestId('top-movers').getByRole('listitem').first()).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.getByTestId('preview-correlation')).toBeVisible();
 
     const results = await new AxeBuilder({ page })
@@ -90,13 +95,33 @@ test('tunes a profile with a live preview, saves, activates and reorders the lis
     await expect(page.getByText('Version 2 saved.', { exact: false })).toBeVisible();
     await page.getByRole('button', { name: 'Activate version 2' }).click();
     await expect(page.getByText(/Version 2 activated/)).toBeVisible();
-    await expect(page.getByText(/Recompute finished/)).toBeVisible({ timeout: 60_000 });
+    // Durable state, not the toast: the banner goes away and version 2 is active.
+    await expect(page.getByTestId('recompute-progress')).toBeHidden({ timeout: 60_000 });
     await expect(page.getByRole('button', { name: 'Active version' })).toBeDisabled();
+    await expect
+      .poll(async () => {
+        const profiles = await page.request.get(`${apiUrl}/v1/scoring/profiles`, {
+          headers: { Origin: webUrl },
+        });
+        const items = ((await profiles.json()) as { items: { id: string; activeVersion: number }[] }).items;
+        return items.find((profile) => profile.id === profileId)?.activeVersion;
+      })
+      .toBe(2);
+
+    // Compare the two versions over the sample.
+    const compare = page.getByRole('region', { name: 'Compare versions' });
+    await compare.getByRole('button', { name: 'Compare' }).click();
+    await expect(compare.getByTestId('tier-matrix')).toBeVisible({ timeout: 30_000 });
+    await expect(compare.getByText(/^Rank correlation: /)).toBeVisible();
 
     // The listing follows the profile once it is primary.
     await page.goto(`/search?tag=${label}&sort=-score&mode=listings`);
     await page.getByRole('combobox', { name: 'Profile behind the score column' }).click();
     await page.getByRole('option', { name: `Phone-averse ${run}` }).click();
+    await page
+      .getByRole('dialog', { name: `Make Phone-averse ${run} the primary profile?` })
+      .getByRole('button', { name: 'Make primary' })
+      .click();
     await expect(
       page.getByText(`The listing now follows Phone-averse ${run}`, { exact: false }),
     ).toBeVisible();
@@ -108,6 +133,14 @@ test('tunes a profile with a live preview, saves, activates and reorders the lis
       headers: { Origin: webUrl },
     });
     expect(reset.ok(), await reset.text()).toBe(true);
+    // Not left to be scored on every later run.
+    if (profileId) {
+      const archived = await page.request.patch(`${apiUrl}/v1/scoring/profiles/${profileId}`, {
+        data: { archived: true },
+        headers: { Origin: webUrl },
+      });
+      expect(archived.ok(), await archived.text()).toBe(true);
+    }
   }
 });
 
@@ -120,6 +153,6 @@ test.describe('in French', () => {
     await page.goto(`/settings/scoring/${await builtinPrimary(page)}`);
     await expect(page.getByText(/Les profils intégrés sont en lecture seule/)).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Poids' })).toBeVisible();
-    await expect(page.getByRole('spinbutton', { name: 'Téléphone', exact: true })).toBeDisabled();
+    await expect(page.getByRole('textbox', { name: 'Téléphone', exact: true })).toBeDisabled();
   });
 });

@@ -165,7 +165,7 @@ recomputes the workspace (progress in realtime). Two versions can be compared ov
 matrix and rank correlation). The primary profile (the listing's score, tier, facet and sort) is switched from the
 listing's toolbar or the profiles list; an archived profile is not scored and cannot be primary.
 
-
+## Golden table
 
 Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their tier per profile, pinned by
 `golden.test.ts`:

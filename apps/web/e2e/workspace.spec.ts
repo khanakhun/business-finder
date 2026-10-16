@@ -14,7 +14,7 @@ test('stores a provider key: status, last four characters and a connection test'
     await page
       .getByRole('button', { name: /^(?!Test|Delete).* — Google Places API key$/ })
       .first()
-      .click();
+      .click({ timeout: 2_000 });
     await expect(dialog).toBeVisible({ timeout: 2_000 });
   }).toPass({ timeout: 15_000 });
   await dialog.getByLabel('Key', { exact: true }).fill(GOOGLE_KEY);

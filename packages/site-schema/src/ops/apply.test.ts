@@ -147,6 +147,9 @@ describe('operations', () => {
       salon,
       { op: 'setSettings', settings: { ...salon.settings, contactForm: { enabled: false } } },
     ],
+    ['setLocales (adds)', salon, { op: 'setLocales', locales: ['fr', 'en', 'de'], defaultLocale: 'fr' }],
+    ['setLocales (removes, texts too)', salon, { op: 'setLocales', locales: ['fr'], defaultLocale: 'fr' }],
+    ['setLocales (default)', salon, { op: 'setLocales', locales: ['fr', 'en'], defaultLocale: 'en' }],
     [
       'updateText',
       salon,
@@ -201,6 +204,28 @@ describe('operations', () => {
   ])('%s applies and its inverse restores the site exactly', (_name, spec, operation) => {
     expect(OperationSchema.safeParse(operation).success).toBe(true);
     roundTrip(spec, operation);
+  });
+
+  it('removes a language with its texts, and refuses what would leave a text in no language', () => {
+    const salon = load('salon-gustavia');
+    const french = apply(salon, { op: 'setLocales', locales: ['fr'], defaultLocale: 'fr' }).spec;
+    expect(french.locales).toEqual(['fr']);
+    expect(JSON.stringify(french)).not.toMatch(/"en":/);
+    expect(() => apply(salon, { op: 'setLocales', locales: ['en', 'en'], defaultLocale: 'en' })).toThrow(
+      expect.objectContaining({ code: 'invalid_order' }),
+    );
+    expect(() => apply(salon, { op: 'setLocales', locales: ['fr'], defaultLocale: 'en' })).toThrow(
+      expect.objectContaining({ code: 'invalid_order' }),
+    );
+    const onlyEnglish = apply(salon, {
+      op: 'updateText',
+      path: ['seo', 'title'],
+      locale: 'fr',
+      value: null,
+    }).spec;
+    expect(() => apply(onlyEnglish, { op: 'setLocales', locales: ['fr'], defaultLocale: 'fr' })).toThrow(
+      expect.objectContaining({ code: 'invalid_result' }),
+    );
   });
 
   it('merges props deeply, replaces arrays and removes a prop given null', () => {

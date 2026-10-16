@@ -272,6 +272,33 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
       next.settings = copy(operation.settings);
       return [{ op: 'setSettings', settings: before }];
     }
+    case 'setLocales': {
+      const locales = [...new Set(operation.locales)];
+      if (locales.length !== operation.locales.length || !locales.includes(operation.defaultLocale))
+        throw new OperationError(
+          'invalid_order',
+          'The languages must be distinct and include the default one.',
+        );
+      const inverse: BaseOperation[] = [
+        { op: 'setLocales', locales: [...next.locales], defaultLocale: next.defaultLocale },
+      ];
+      // The texts of a removed language go with it (restored by the inverse, after the languages).
+      const removed = next.locales.filter((locale) => !locales.includes(locale));
+      if (removed.length > 0) {
+        for (const { value, path } of walk(next)) {
+          if (!isLocalized(value)) continue;
+          for (const locale of removed) {
+            const text = value[locale];
+            if (text === undefined) continue;
+            inverse.push({ op: 'updateText', path: [...path], locale, value: text });
+            delete value[locale];
+          }
+        }
+      }
+      next.locales = locales;
+      next.defaultLocale = operation.defaultLocale;
+      return inverse;
+    }
     case 'updateText': {
       const { parent, key } = locate(next, operation.path);
       const text = step(parent, key, operation.path);

@@ -646,6 +646,7 @@ export {
   FeatureValueSchema,
   type FeatureVector,
   FeatureVectorSchema,
+  GATE_CONDITION_LIMITS,
   type Gate,
   type GateCondition,
   GateConditionSchema,
@@ -654,6 +655,7 @@ export {
   type ProfileProblem,
   ProfileProblemSchema,
   profileProblems,
+  REASON_PLACEHOLDERS,
   type ReasonTexts,
   ReasonTextsSchema,
   SCORED_PAIN_TAGS,
@@ -706,6 +708,7 @@ export {
   TransformSchema,
   type UpdateScoringProfileRequest,
   UpdateScoringProfileRequestSchema,
+  unknownPlaceholders,
 } from './scoring.ts';
 export {
   PAIN_SIGNALS,

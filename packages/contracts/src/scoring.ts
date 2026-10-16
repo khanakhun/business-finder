@@ -922,7 +922,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
   }
   for (const [key, texts] of Object.entries(config.reasonTemplates) as [
     FeatureKey,
-    Record<string, unknown>,
+    Readonly<Partial<Record<string, Text>>>,
   ][]) {
     const definition = FEATURE_DEFINITIONS[key];
     const allowed = new Set([

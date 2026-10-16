@@ -479,6 +479,9 @@ importers:
       '@bf/queue':
         specifier: workspace:*
         version: link:../../packages/queue
+      '@bf/site-schema':
+        specifier: workspace:*
+        version: link:../../packages/site-schema
       '@bf/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig

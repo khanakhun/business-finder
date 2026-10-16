@@ -64,6 +64,20 @@ export const QUEUES = {
   scoring: { name: 'scoring', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   /** Bulk recomputes of a profile version for a workspace (long: one or two at a time). */
   scoringRecompute: { name: 'scoring-recompute', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /**
+   * Sites (BF-035): renderer revalidation after a publication changed (more attempts: the renderer may be
+   * restarting), and the hourly preview expiry (one job per hour).
+   */
+  sitesRevalidate: {
+    name: 'sites-revalidate',
+    defaultJobOptions: {
+      ...DEFAULT_JOB_OPTIONS,
+      attempts: 6,
+      backoff: { type: 'exponential', delay: 2_000 },
+    },
+    concurrency: 4,
+  },
+  sitesExpire: { name: 'sites-expire', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

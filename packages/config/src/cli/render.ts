@@ -8,6 +8,7 @@ import { intelEnv } from '../fragments/intel.ts';
 import { mailEnv } from '../fragments/mail.ts';
 import { providersEnv } from '../fragments/providers.ts';
 import { s3Env } from '../fragments/s3.ts';
+import { sitesApiEnv } from '../fragments/sites.ts';
 import { valkeyEnv } from '../fragments/valkey.ts';
 import { APP_SCHEMAS, type AppName } from '../registry.ts';
 import { describeVariables, type EnvSchema, type VariableInfo } from '../schema.ts';
@@ -44,6 +45,7 @@ const GROUPS: ReadonlyArray<readonly [string, EnvSchema]> = [
   ['Auth & secrets', authEnv],
   ['System mail', mailEnv],
   ['Intel service', intelEnv],
+  ['Sites', sitesApiEnv],
   ['Feature flags', featureFlagsEnv],
 ];
 

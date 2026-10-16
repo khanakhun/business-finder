@@ -40,6 +40,10 @@
       "status": 429,
       "title": "Too many requests"
     },
+    "SITE_VERSION_CONFLICT": {
+      "status": 409,
+      "title": "The site changed since this edit started"
+    },
     "UNAUTHENTICATED": {
       "status": 401,
       "title": "Authentication required"

@@ -24,6 +24,7 @@ ERROR_CODES: Final[dict[Code, ErrorCodeInfo]] = {
     Code.INVALID_STATE_TRANSITION: ErrorCodeInfo(409, "Invalid state transition"),
     Code.NOT_FOUND: ErrorCodeInfo(404, "Not found"),
     Code.RATE_LIMITED: ErrorCodeInfo(429, "Too many requests"),
+    Code.SITE_VERSION_CONFLICT: ErrorCodeInfo(409, "The site changed since this edit started"),
     Code.UNAUTHENTICATED: ErrorCodeInfo(401, "Authentication required"),
     Code.VALIDATION_FAILED: ErrorCodeInfo(422, "Validation failed"),
 }

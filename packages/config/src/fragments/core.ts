@@ -13,7 +13,10 @@ export const coreEnv = z.object({
   API_URL: z.url().default('http://localhost:4000').describe('Public URL of the API (apps/api).'),
   SITES_BASE_DOMAIN: z
     .string()
-    .min(1)
+    .regex(
+      /^(?=.{1,200}$)[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/,
+      'A lowercase hostname, e.g. sites.example.com',
+    )
     .default('sites.localhost')
     .describe('Previews are served at https://<slug>.<SITES_BASE_DOMAIN> (no scheme, no port).'),
   APP_VERSION: z

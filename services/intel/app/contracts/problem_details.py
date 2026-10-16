@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field
+from uuid import UUID
 from typing import Annotated
 
 
@@ -18,6 +19,7 @@ class Code(StrEnum):
     RATE_LIMITED = "RATE_LIMITED"
     BUDGET_EXCEEDED = "BUDGET_EXCEEDED"
     DISCOVERY_PROVIDER_NOT_CONFIGURED = "DISCOVERY_PROVIDER_NOT_CONFIGURED"
+    SITE_VERSION_CONFLICT = "SITE_VERSION_CONFLICT"
     EXTERNAL_SERVICE_FAILED = "EXTERNAL_SERVICE_FAILED"
     INTERNAL = "INTERNAL"
 
@@ -26,6 +28,7 @@ class Error(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    code: str | None = None
     message: str
     path: list[str | float]
 
@@ -39,6 +42,7 @@ class ProblemDetails(BaseModel):
         extra="forbid",
     )
     code: Code
+    currentVersionId: UUID | None = None
     detail: str | None = None
     errors: list[Error] | None = None
     instance: str | None = None

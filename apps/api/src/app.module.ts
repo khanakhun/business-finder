@@ -14,6 +14,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module.ts';
 import { ReviewsModule } from './modules/reviews/index.ts';
 import { ScoringModule } from './modules/scoring/index.ts';
 import { SearchModule } from './modules/search/index.ts';
+import { SitesModule } from './modules/sites/index.ts';
 import { SystemModule } from './modules/system/system.module.ts';
 import { WorkspaceModule } from './modules/workspace/workspace.module.ts';
 
@@ -46,6 +47,7 @@ export class AppModule {
         RealtimeModule.forRoot(mode),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
+        SitesModule.forRoot(mode),
         // Before BusinessGraphModule: Express matches routes in registration order, and the listing's
         // `GET /businesses/facets` (search) must win over `GET /businesses/:id` (business graph).
         SearchModule.forRoot(mode),

@@ -131,3 +131,14 @@ describe('renderStaticSite', () => {
     if (home) expect(staticPath(salon, home, 'en')).toBe('en/index.html');
   });
 });
+
+describe('staticPath', () => {
+  it('refuses a page path that could leave the export folder', () => {
+    const page = salon.pages[1] ?? salon.pages[0];
+    if (!page) throw new Error('no page');
+    expect(staticPath(salon, page, salon.defaultLocale)).toBe(`${page.slug}/index.html`);
+    expect(() => staticPath(salon, { ...page, slug: '../../../../tmp/pwn' }, salon.defaultLocale)).toThrow(
+      /Not a page path/,
+    );
+  });
+});

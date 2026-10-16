@@ -193,6 +193,9 @@ export function renderStaticPage(
 /** The file path of a page in a static export (`index.html`, `en/carte/index.html`). */
 export function staticPath(spec: SiteSpec, page: Page, locale: SiteLocale): string {
   const href = (defaultPageHref(page, locale, spec).replace(/^\//, '') || '').replace(/\/$/, '');
+  // Only kebab-case segments (a locale, a slug): a path from an unvalidated spec never leaves the export folder.
+  if (href && !href.split('/').every((segment) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(segment)))
+    throw new Error(`Not a page path: ${JSON.stringify(href)}`);
   return href ? `${href}/index.html` : 'index.html';
 }
 

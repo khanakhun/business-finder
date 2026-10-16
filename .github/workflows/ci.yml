@@ -273,6 +273,9 @@ jobs:
     if: needs.changes.outputs.sites == 'true'
     # Pinned: pixel baselines depend on the OS's text rendering (ubuntu-latest moves to a new release).
     runs-on: ubuntu-24.04
+    # It runs no turbo task, but third-party browsers and tools: the cache token stays out of its environment.
+    env:
+      TURBO_TOKEN: ''
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

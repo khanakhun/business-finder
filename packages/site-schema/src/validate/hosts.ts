@@ -1,3 +1,5 @@
+import { parse } from 'tldts';
+
 // Hosts a site may link to (BF-033): its own assets on our storage, the business's own domain, known booking
 // providers and the social networks' own hosts. Everything else is an external URL and refused.
 
@@ -126,16 +128,62 @@ const GENERIC_TLDS =
 const SHORT_NAME_TLDS =
   'cc|gg|am|to|tv|ai|ws|fm|la|sh|gd|nu|mp|ly|me|io|co|de|fr|uk|us|eu|so|im|is|it|be|nl|es';
 
+const GENERIC = new Set(GENERIC_TLDS.split('|'));
+const SHORT_NAMES = new Set(SHORT_NAME_TLDS.split('|'));
+const known = new Map<string, boolean>();
+/** A real top-level domain (the public suffix list, ICANN section), cached. */
+function isTld(label: string): boolean {
+  let answer = known.get(label);
+  if (answer === undefined) {
+    const parsed = parse(`x.${label}`, { allowPrivateDomains: false });
+    answer = parsed.isIcann === true && parsed.publicSuffix === label;
+    if (known.size < 10_000) known.set(label, answer);
+  }
+  return answer;
+}
+
+/** An ending a web address is recognised by: any two letters, a listed ending, punycode, or a real TLD. */
+const isEnding = (label: string) =>
+  /^[a-z]{2}$/.test(label) ||
+  GENERIC.has(label) ||
+  /^xn--[a-z0-9-]{1,59}$/.test(label) ||
+  (/\p{L}{2}/u.test(label) && isTld(label));
+
 /**
- * A domain: labels of two or more characters before any ending (a label after `.`, `_` or `*` too: `m.evil.com`,
- * `x_evil.com`, `*.evil.com`); a one-character name before a generic or short-name ending (`x.com`, `t.me`, `x.cc`),
- * or before any ending when a path follows (`j.mp/promo`). Abbreviations (`p.ex.`) stay text. Every repetition is
- * bounded (labels of 63, ten dots): a match may start at any label, so an unbounded chain would be quadratic.
+ * A domain in a token of letters, digits, dots and dashes: a name of two or more characters (or any label after
+ * another, `m.evil.com`) before an ending (`evil.com`, `evil.ovh`, `Gustavia.Le`); a one-character name before a
+ * generic or short-name ending (`x.com`, `t.me`, `x.cc`), or before any letters when a path follows (`j.mp/promo`).
+ * Abbreviations (`p.ex.`, `S.A.R.L.`, `M.Dupont`) stay text. Tokens are cut on everything else (`x_evil.com`,
+ * `*.evil.com`), one pass over the text: linear.
  */
-const DOMAIN = new RegExp(
-  `(?<![\\p{L}\\p{N}@-])(?:[\\p{L}\\p{N}-]{2,63}(?:\\.[\\p{L}\\p{N}-]{1,63}){0,10}\\.(?:[a-z]{2}|${GENERIC_TLDS}|xn--[a-z0-9-]{1,59}|[\\p{Script=Cyrillic}\\p{Script=Greek}\\p{Script=Arabic}\\p{Script=Han}\\p{Script=Hangul}]{2,63})|[\\p{L}\\p{N}]\\.(?:${GENERIC_TLDS}|${SHORT_NAME_TLDS})|[\\p{L}\\p{N}]\\.[a-z]{2,63}(?=/))(?![\\p{L}\\p{N}-])`,
-  'iu',
-);
+function hasDomain(text: string): boolean {
+  for (const match of text.matchAll(/[\p{L}\p{N}.-]+/gu)) {
+    const token = match[0].toLowerCase();
+    const at = match.index ?? 0;
+    // An e-mail's domain is the facts validator's (its `@` is just before).
+    if (text[at - 1] === '@') continue;
+    const labels = token.split('.');
+    if (labels.length < 2) continue;
+    let named = false;
+    for (const [i, label] of labels.entries()) {
+      if (label === '') {
+        named = false;
+        continue;
+      }
+      if (i > 0 && labels[i - 1] !== '') {
+        const previous = labels[i - 1] as string;
+        if ((named || previous.length >= 2) && isEnding(label)) return true;
+        if (previous.length === 1 && !named) {
+          if (GENERIC.has(label) || SHORT_NAMES.has(label)) return true;
+          const after = text[at + token.length];
+          if (after === '/' && i === labels.length - 1 && /^[a-z]{2,63}$/.test(label)) return true;
+        }
+      }
+      if (label.length >= 2) named = true;
+    }
+  }
+  return false;
+}
 
 const MIDDLE_DOT_DOMAIN = new RegExp(
   `(?<![\\p{L}\\p{N}-])[\\p{L}\\p{N}-]{2,63}·(?:${GENERIC_TLDS})(?![\\p{L}\\p{N}-])`,
@@ -154,7 +202,7 @@ export function hasWebAddress(text: string): boolean {
     .replace(/[‧∙⋅•・⸱]/g, '·');
   return (
     /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) ||
-    DOMAIN.test(folded) ||
+    hasDomain(folded) ||
     // A middle dot as the dot only before a generic ending: French inclusive writing (ami·es) is not an address.
     // DECISION(BF-033): `evil·fr` (a two-letter ending) passes: those endings are inclusive writing too (·es, ·te).
     (folded.includes('·') && MIDDLE_DOT_DOMAIN.test(folded))

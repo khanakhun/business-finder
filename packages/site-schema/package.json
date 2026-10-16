@@ -14,6 +14,7 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
+    "tldts": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -6,12 +6,12 @@ export const SiteLocaleSchema = z.enum(SITE_LOCALES).describe('A site language (
 export type SiteLocale = z.infer<typeof SiteLocaleSchema>;
 
 /**
- * No control, invisible formatting or ignorable characters (direction overrides, zero-width spaces, variation
- * selectors, the combining grapheme joiner) and only ASCII digits (the site languages write no other: look-alike
+ * No control, invisible formatting, ignorable, private-use or unassigned characters (direction overrides, zero-width
+ * spaces, variation selectors, the combining grapheme joiner) and only ASCII digits (the site languages write no other: look-alike
  * digits would hide a number from the facts check); line breaks allowed.
  */
-const SAFE_TEXT = /^(?:[^\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9]|\n)*$/u;
-const SAFE_LINE = /^(?:[^\p{Cc}\p{Cf}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9])*$/u;
+const SAFE_TEXT = /^(?:[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9]|\n)*$/u;
+const SAFE_LINE = /^(?:[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9])*$/u;
 
 /** Text shown on the site (one language): trimmed, bounded, no hidden characters. */
 export const safeText = (max: number) =>

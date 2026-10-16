@@ -217,6 +217,8 @@ describe('validateSite', () => {
     'evil.\u{E0100}com',
     'Appelez le \u0660\u0666\u0669\u0660 12 34 56',
     'Depuis \u0967\u096F\u096F\u096E',
+    'Visitez evil\uE000.com',
+    'Visitez evil\u0378.com',
   ])('refuses hidden marks and look-alike digits in text: %j', (title) => {
     expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).toBeNull();
   });
@@ -467,6 +469,10 @@ describe('validateSite', () => {
     'Mél:anne.ng@gmail.com',
     'Résa:contact.sb@orange.fr',
     'p.ex. une coupe et un brushing',
+    'Salon St.Barth',
+    'Chez M.Dupont',
+    'S.A.R.L. au capital de 10 000 €',
+    'Version 1.2.3, note 4.8/5',
     'Nos client·es sont ravi·es',
     'Nos client•es et ami‧es',
     'x </ y',
@@ -490,6 +496,10 @@ describe('validateSite', () => {
     'see x_evil.com',
     'see ..evil.com',
     'Voir j.mp/promo',
+    'Visitez evil.ovh',
+    'Visitez evil.icu',
+    'Visitez evil.ไทย',
+    'Visitez evil.みんな',
     'Voir w.wiki/promo',
     'Voir x.cc',
     'Le Z.Bar',

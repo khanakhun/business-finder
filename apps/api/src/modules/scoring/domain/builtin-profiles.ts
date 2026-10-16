@@ -121,8 +121,8 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
         when: { feature: 'website_status', in: ['ok', 'strong'] },
         effect: { type: 'cap', max: 30 },
         reason: {
-          en: 'Already has a website that is neither weak nor broken: see the redesign offer.',
-          fr: 'A déjà un site ni faible ni cassé : voir l’offre de refonte.',
+          en: 'The audit flagged no major problem with its website: see the redesign offer.',
+          fr: 'L’audit n’a relevé aucun problème majeur sur son site : voir l’offre de refonte.',
         },
       },
     ],

@@ -9,8 +9,8 @@ import { scoreBusiness } from './engine.ts';
 // order (new_website, website_redesign, ai_receptionist, booking_system, local_seo). A weight change that moves a
 // tier must update this table, the PR's golden table and docs/scoring/profiles.md together.
 const EXPECTED: [string, string, (string | null)[]][] = [
-  ['Beach bistro, no website, busy', 'ACCBB', [null, 'no_website_to_redesign', null, null, null]],
-  ['Salon, Facebook page only, phone pains', 'ACAAC', [null, 'no_website_to_redesign', null, null, null]],
+  ['Beach bistro, no website, busy', 'ACCBB', [null, 'no_website_to_redesign~', null, null, null]],
+  ['Salon, Facebook page only, phone pains', 'ACAAC', [null, 'no_website_to_redesign~', null, null, null]],
   ['Villa rental, dated slow site', 'BABAA', [null, null, null, null, null]],
   [
     'Hotel, strong site, books online',
@@ -18,7 +18,7 @@ const EXPECTED: [string, string, (string | null)[]][] = [
     ['has_working_website', null, null, 'already_books_online', null],
   ],
   ['Dentist, ok site, no booking', 'CCBAC', ['has_working_website', null, null, null, null]],
-  ['Gift shop, parked domain', 'BCCCC', [null, 'no_website_to_redesign', null, 'offer_rarely_fits', null]],
+  ['Gift shop, parked domain', 'BCCCC', [null, 'no_website_to_redesign~', null, 'offer_rarely_fits', null]],
   [
     'Permanently closed café',
     'XXXXX',
@@ -38,17 +38,21 @@ const EXPECTED: [string, string, (string | null)[]][] = [
   [
     'Garage, unreachable',
     'CCCCC',
-    ['unreachable', 'no_website_to_redesign', 'unreachable', 'offer_rarely_fits', 'unreachable'],
+    ['unreachable', 'no_website_to_redesign~', 'unreachable~', 'offer_rarely_fits~', 'unreachable~'],
   ],
   ['Spa, broken site, many complaints', 'BCACC', [null, null, null, 'booking_not_checked', null]],
-  ['Chain boutique, shared website', 'CCCCC', ['has_working_website', null, null, 'offer_rarely_fits', null]],
+  [
+    'Chain boutique, shared website',
+    'CCCCC',
+    ['has_working_website~', null, null, 'offer_rarely_fits', null],
+  ],
   [
     'Won customer, no website',
     'CCCCC',
     [
       'already_customer',
-      'no_website_to_redesign',
-      'already_customer',
+      'no_website_to_redesign~',
+      'already_customer~',
       'already_customer',
       'already_customer',
     ],
@@ -65,7 +69,12 @@ describe('built-in profiles (golden)', () => {
   it.each(EXPECTED)('%s → %s', (name, tiers, gates) => {
     const scored = results(name);
     expect(scored.map((result) => result.tier).join('')).toBe(tiers);
-    expect(scored.map((result) => result.gated?.gate ?? null)).toEqual(gates);
+    // A cap that matched without lowering the score is marked `~` (not applied).
+    expect(
+      scored.map((result) =>
+        result.gated ? `${result.gated.gate}${result.gated.applied ? '' : '~'}` : null,
+      ),
+    ).toEqual(gates);
   });
 
   it('covers every golden business', () => {
@@ -86,6 +95,13 @@ describe('built-in profiles (golden)', () => {
   it('explains every other score with filled reasons in both languages', () => {
     const scored = all.filter((result) => result.tier !== 'X');
     for (const result of scored) expect(result.reasons.length).toBeGreaterThan(0);
+    // A low category relevance never reads as "often needs this offer".
+    const relevance = scored.flatMap((result) =>
+      result.reasons
+        .filter((reason) => reason.feature === 'category_offer_relevance')
+        .map((reason) => ({ value: result.features.category_offer_relevance, text: reason.text.en })),
+    );
+    expect(relevance.filter(({ value, text }) => Number(value) < 0.5 && text.includes('often'))).toEqual([]);
     for (const reason of scored.flatMap((result) => result.reasons)) {
       expect(reason.text.en).not.toMatch(/\{value\}|null|undefined|NaN/);
       expect(reason.text.fr).not.toMatch(/\{value\}|null|undefined|NaN/);

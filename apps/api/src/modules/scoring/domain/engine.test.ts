@@ -225,14 +225,19 @@ describe('scoring engine', () => {
       expect(scoreVector(config, { has_phone: true })).toMatchObject({
         score: 30,
         tier: 'C',
-        gated: { gate: 'capped', effect: 'cap' },
+        gated: { gate: 'capped', effect: 'cap', applied: true },
       });
       const excluding = profile({
         weights: { has_phone: 100 },
         gates: [gate('closed', { type: 'exclude' })],
       });
       const excluded = scoreVector(excluding, { has_phone: true });
-      expect(excluded).toMatchObject({ score: 0, tier: 'X', reasons: [], gated: { gate: 'closed' } });
+      expect(excluded).toMatchObject({
+        score: 0,
+        tier: 'X',
+        reasons: [],
+        gated: { gate: 'closed', applied: true },
+      });
       // The contributions are kept for the snapshot.
       expect(excluded.contributions[0]?.contribution).toBe(100);
       expect(scoreVector(excluding, { has_phone: true, do_not_contact: true }).gated?.gate).toBe(

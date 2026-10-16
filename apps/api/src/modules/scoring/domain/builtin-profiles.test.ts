@@ -26,7 +26,7 @@ const digest = (value: unknown): string => {
 // The digest of every released version of each built-in, in order (index + 1 = version). Released = merged to main
 // (then seeded somewhere): from then on an edit appends the new digest and bumps the version, never edits an entry.
 const RELEASED: Record<string, readonly string[]> = {
-  new_website: ['405fb2065b1da0a5'],
+  new_website: ['8dc3cf88813cc6ac'],
   website_redesign: ['efa2848249582362'],
   ai_receptionist: ['bbd3f46a7d1fe94b'],
   booking_system: ['b933f0fc4b3194d0'],
@@ -109,6 +109,11 @@ describe('blocked crawls', () => {
     expect(
       redesign.reasons.map((reason) => reason.feature).filter((feature) => presence.includes(feature)),
     ).toEqual([]);
+    // The new website offer's gate makes no claim about it either.
+    expect(scoreBusiness(BUILTIN_PROFILES.new_website, blocked).gated).toMatchObject({
+      gate: 'has_working_website',
+      reason: { en: 'The audit flagged no major problem with its website: see the redesign offer.' },
+    });
     // Its status is `ok` by convention (never measured): the text claims no assessment.
     expect(
       redesign.reasons

@@ -18,9 +18,9 @@ import { applyTransform } from './transforms.ts';
 //
 // score = clamp(Σ contribution, 0, 100), contribution = 100 × weight × transformed ÷ Σ positive weights. A missing
 // feature takes its registry default, else the profile's `missing` value (which can raise a score: the built-ins use
-// it for booking only, capped while a crawl could still tell), else contributes nothing while its weight still counts. Then gates: an exclusion
-// gives tier X and 0, a cap lowers the score; `do_not_contact` always excludes, whatever the profile says. Tiers: A
-// from `tiers.A`, B from `tiers.B`, else C.
+// it for booking only, capped while a crawl could still tell), else contributes nothing while its weight still
+// counts. Then gates: an exclusion gives tier X and 0, a cap lowers the score; `do_not_contact` always excludes,
+// whatever the profile says. Tiers: A from `tiers.A`, B from `tiers.B`, else C.
 
 /** The engine's own gate: a business the workspace must not contact is never a prospect. */
 export const DO_NOT_CONTACT_GATE: Gate = {

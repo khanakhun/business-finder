@@ -156,6 +156,9 @@ catalog:
   '@ai-sdk/anthropic': 4.0.78
   '@ai-sdk/openai': 4.0.91
   sharp: 0.35.5
+  # BF-038: the wordmark's text outlined to SVG paths (reads the block library's static WOFF fonts).
+  opentype.js: 1.3.5
+  '@types/opentype.js': 1.3.10
   msw: 3.0.2
   '@aws-sdk/client-s3': 3.1148.0
   # Presigned uploads of site images (BF-035); 3.1145.0 is the newest release at least two weeks old.

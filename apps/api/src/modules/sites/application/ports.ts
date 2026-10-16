@@ -228,10 +228,22 @@ export interface StoredAsset {
   readonly bytes: number | null;
   readonly publicUrl: string | null;
   readonly variants: { width: number; format: string; key: string; url: string; bytes: number }[] | null;
-  readonly license: 'owner_site' | 'stock' | 'ai_generated' | 'uploaded';
+  readonly license: 'owner_site' | 'stock' | 'ai_generated' | 'uploaded' | 'system_generated';
   readonly licenseDetails: Record<string, string> | null;
   readonly alt: Record<string, string> | null;
   readonly dominantColors: string[] | null;
+  /** A photo or the business's logo (BF-038). */
+  readonly kind: 'image' | 'logo';
+  /** How it reached the library (BF-038). */
+  readonly source: 'upload' | 'owner_site' | 'stock' | 'ai' | 'wordmark';
+  /** Where it was found (owner-site and stock images). */
+  readonly sourceUrl: string | null;
+  /** 64-bit difference hash (hex), for near-duplicates. */
+  readonly dhash: string | null;
+  readonly restrictions: 'preview_only'[];
+  readonly ownership: { confirmedAt: string; confirmedBy: string | null; method: string } | null;
+  readonly analysis: Record<string, unknown> | null;
+  readonly focalPoint: { x: number; y: number } | null;
   /** The SHA-256 of the original as checked at finalize (the job processes those bytes only). */
   readonly sha256: string | null;
   /** When processing started (null outside `processing`). */
@@ -254,9 +266,23 @@ export interface SiteAssetsRepository {
       | 'sha256'
       | 'processingStartedAt'
       | 'createdAt'
-    > & {
-      createdBy: string | null;
-    },
+      | 'kind'
+      | 'source'
+      | 'sourceUrl'
+      | 'dhash'
+      | 'restrictions'
+      | 'ownership'
+      | 'analysis'
+      | 'focalPoint'
+    > &
+      Partial<
+        Pick<
+          StoredAsset,
+          'kind' | 'source' | 'sourceUrl' | 'dhash' | 'restrictions' | 'sha256' | 'focalPoint'
+        >
+      > & {
+        createdBy: string | null;
+      },
   ): Promise<StoredAsset>;
   get(organizationId: string, siteId: string, assetId: string): Promise<StoredAsset | undefined>;
   /** By id only (the processing job). */
@@ -323,8 +349,22 @@ export interface ImageProcessor {
     widths: readonly number[],
   ): Promise<{ width: number; format: 'webp' | 'avif'; body: Buffer }[]>;
   dominantColors(image: Buffer, count: number): Promise<string[]>;
+  /**
+   * What sourcing needs to judge an image (BF-038): its difference hash (near-duplicates), its sharpness (variance
+   * of the Laplacian on a 512 px grey copy) and the point a saliency crop keeps (0–1 from the top left).
+   */
+  measure(image: Buffer): Promise<{ dhash: string; sharpness: number; focalPoint: { x: number; y: number } }>;
+  /** A PNG of an SVG we generated (the wordmark), `width` pixels wide. */
+  rasterizeSvg(svg: string, width: number): Promise<Buffer>;
 }
 export const IMAGE_PROCESSOR = Symbol('ImageProcessor');
+
+/** The sourcing jobs (BF-038): collect a site's images, analyse one image. */
+export interface AssetSourcingQueue {
+  collect(organizationId: string, siteId: string): Promise<void>;
+  analyze(assetId: string, organizationId: string): Promise<void>;
+}
+export const ASSET_SOURCING_QUEUE = Symbol('AssetSourcingQueue');
 
 /** Queues the processing of a finalized asset. */
 export interface AssetProcessingQueue {

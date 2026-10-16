@@ -7,7 +7,7 @@ import {
   OpenDataSearchRequestSchema,
   OpenDataSearchResponseSchema,
 } from './open-data.ts';
-import { SiteIntelRequestSchema, SiteIntelSchema } from './site-intel.ts';
+import { ImageFetchRequestSchema, SiteIntelRequestSchema, SiteIntelSchema } from './site-intel.ts';
 
 /** Languages schemas can be exported to. `python` → services/intel Pydantic models (BF-008). */
 export const EXPORT_TARGETS = ['python'] as const;
@@ -69,6 +69,11 @@ exportSchema(OpenDataSearchResponseSchema, {
   description: 'POST /v1/open-data/places/search response on services/intel.',
 });
 
+exportSchema(ImageFetchRequestSchema, {
+  id: 'ImageFetchRequest',
+  exportTo: ['python'],
+  description: 'POST /v1/image-fetch request on services/intel (one image through the SSRF guard).',
+});
 exportSchema(SiteIntelRequestSchema, {
   id: 'SiteIntelRequest',
   exportTo: ['python'],

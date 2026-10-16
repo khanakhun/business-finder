@@ -78,6 +78,22 @@ export const SiteIntelRequestSchema = z
   .meta({ id: 'SiteIntelRequest' });
 export type SiteIntelRequest = z.input<typeof SiteIntelRequestSchema>;
 
+/** The largest image services/intel downloads for the API (BF-038 owner-site images). */
+export const IMAGE_FETCH_MAX_BYTES = 15 * 1024 * 1024;
+
+/**
+ * `POST /v1/image-fetch` on services/intel: downloads one image of a crawled site through the SSRF guard and returns
+ * its bytes (`application/octet-stream`); the API sniffs, checks and stores them. Errors are problem+json.
+ */
+export const ImageFetchRequestSchema = z
+  .object({
+    url: url.describe('The image URL (http or https), as found on the business website.'),
+    maxBytes: z.number().int().min(1).max(IMAGE_FETCH_MAX_BYTES).default(IMAGE_FETCH_MAX_BYTES),
+    timeoutSeconds: z.number().int().min(5).max(60).default(20),
+  })
+  .meta({ id: 'ImageFetchRequest' });
+export type ImageFetchRequest = z.input<typeof ImageFetchRequestSchema>;
+
 const SitePageSchema = z.object({
   url,
   kind: SitePageKindSchema,

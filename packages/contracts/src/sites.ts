@@ -319,8 +319,55 @@ export const SitesExpireJob = defineJob('sites-expire', 'expire', {});
 
 // ── Part 2: assets, screenshots, views ────────────────────────────────────────────────────────────────────────
 
-export const SITE_ASSET_LICENSES = ['owner_site', 'stock', 'ai_generated', 'uploaded'] as const;
+/** Where an image comes from (licence); `system_generated` is ours (the wordmark, BF-038). */
+export const SITE_ASSET_LICENSES = [
+  'owner_site',
+  'stock',
+  'ai_generated',
+  'uploaded',
+  'system_generated',
+] as const;
 export const SiteAssetLicenseSchema = z.enum(SITE_ASSET_LICENSES);
+/** The licences a person may declare for an upload (`system_generated` is never uploaded). */
+export const SITE_UPLOAD_LICENSES = ['owner_site', 'stock', 'ai_generated', 'uploaded'] as const;
+/** How an image reached the library. */
+export const SITE_ASSET_SOURCES = ['upload', 'owner_site', 'stock', 'ai', 'wordmark'] as const;
+export const SiteAssetSourceSchema = z.enum(SITE_ASSET_SOURCES);
+export type SiteAssetSource = z.infer<typeof SiteAssetSourceSchema>;
+/** `preview_only`: an owner-site image whose ownership nobody confirmed yet (never on a live site). */
+export const SITE_ASSET_RESTRICTIONS = ['preview_only'] as const;
+/** What an image is used for on a site (ranking roles). */
+export const SITE_ASSET_ROLES = ['hero', 'gallery', 'about', 'og', 'logo', 'favicon'] as const;
+export const SiteAssetRoleSchema = z.enum(SITE_ASSET_ROLES);
+export type SiteAssetRole = z.infer<typeof SiteAssetRoleSchema>;
+export const OWNERSHIP_CONFIRMATION_METHODS = ['claim_form', 'email', 'call', 'other'] as const;
+
+/** What a vision model saw in an image (BF-038 analysis): ranks it and decides where it may go. */
+export const SiteAssetAnalysisSchema = z
+  .object({
+    depicts: z.enum([
+      'interior',
+      'exterior',
+      'product',
+      'food',
+      'people',
+      'team',
+      'logo',
+      'landscape',
+      'texture',
+      'other',
+    ]),
+    containsText: z.boolean(),
+    containsPeople: z.boolean(),
+    identifiablePeople: z.boolean(),
+    quality: z.number().int().min(1).max(5),
+    heroSuitability: z.number().int().min(1).max(5),
+    mood: z.array(z.string().max(30)).max(5),
+    /** Sharpness (variance of the Laplacian on a 512 px grey copy): low means blurry. */
+    sharpness: z.number().nonnegative().nullable(),
+  })
+  .meta({ id: 'SiteAssetAnalysis' });
+export type SiteAssetAnalysis = z.infer<typeof SiteAssetAnalysisSchema>;
 export const SITE_ASSET_STATUSES = ['pending', 'processing', 'ready', 'failed'] as const;
 /** Image types a site accepts (sniffed from the bytes at finalize, not trusted from the request). */
 export const SITE_ASSET_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const;
@@ -346,6 +393,23 @@ export const SiteAssetSchema = z
     licenseDetails: z.record(z.string(), z.string()).nullable(),
     alt: localizedAlt.nullable(),
     dominantColors: z.array(z.string().regex(/^#[0-9a-f]{6}$/)).nullable(),
+    /** A photo, or the business's logo (found on its site, or our wordmark). */
+    kind: z.enum(['image', 'logo']),
+    /** How it reached the library (BF-038). */
+    source: SiteAssetSourceSchema,
+    restrictions: z.array(z.enum(SITE_ASSET_RESTRICTIONS)),
+    /** The point to keep in view when cropping (0–1 from the top left), once known. */
+    focalPoint: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }).nullable(),
+    /** What the vision model saw, once analysed. */
+    analysis: SiteAssetAnalysisSchema.nullable(),
+    /** Who confirmed the business owns an owner-site image, how and when (lifts `preview_only`). */
+    ownership: z
+      .object({
+        confirmedAt: z.iso.datetime(),
+        confirmedBy: z.string().nullable(),
+        method: z.enum(OWNERSHIP_CONFIRMATION_METHODS),
+      })
+      .nullable(),
     createdAt: z.iso.datetime(),
   })
   .meta({ id: 'SiteAsset' });
@@ -361,7 +425,7 @@ export const CreateSiteAssetUploadRequestSchema = z
     mime: z.enum(SITE_ASSET_MIME_TYPES),
     bytes: z.number().int().min(1).max(SITE_ASSET_MAX_BYTES),
     /** Where the image comes from: required (BF-038 licensing). */
-    license: SiteAssetLicenseSchema,
+    license: z.enum(SITE_UPLOAD_LICENSES),
     licenseDetails: z
       .object({
         author: z.string().trim().max(120).optional(),
@@ -448,3 +512,77 @@ export const SitesScreenshotJob = defineJob('sites-screenshot', 'capture', {
 
 /** Writes the views counted in Valkey to the database, and the hourly `site.viewed` events (every 5 minutes). */
 export const SitesViewsFlushJob = defineJob('sites-views', 'flush', {});
+
+// ── BF-038: sourcing (owner-site images, wordmark; stock and AI images in part 2) ──────────────────────────────
+
+/** An image a site could use, ranked for a role, before or after it is in the library. */
+export const SiteAssetCandidateSchema = z
+  .object({
+    /** `asset:<uuid>` once in the library; `<source>:<key>` otherwise (import it to use it). */
+    id: z.string().max(300),
+    source: SiteAssetSourceSchema,
+    assetId: z.uuid().nullable(),
+    previewUrl: z.url().nullable(),
+    width: z.number().int().positive().nullable(),
+    height: z.number().int().positive().nullable(),
+    license: SiteAssetLicenseSchema,
+    attribution: z.string().max(200).nullable(),
+    restrictions: z.array(z.enum(SITE_ASSET_RESTRICTIONS)),
+    alt: localizedAlt.nullable(),
+    /** 0–100 for the role asked, with the reasons (explainable ranking). */
+    score: z.number().min(0).max(100),
+    reasons: z.array(z.string().max(120)).max(10),
+  })
+  .meta({ id: 'SiteAssetCandidate' });
+export type SiteAssetCandidate = z.infer<typeof SiteAssetCandidateSchema>;
+
+export const SiteAssetSuggestionsQuerySchema = z
+  .object({
+    role: SiteAssetRoleSchema.default('gallery'),
+    source: SiteAssetSourceSchema.optional(),
+    q: z.string().trim().max(100).optional(),
+  })
+  .meta({ id: 'SiteAssetSuggestionsQuery' });
+export type SiteAssetSuggestionsQuery = z.infer<typeof SiteAssetSuggestionsQuerySchema>;
+
+export const SiteAssetSuggestionsSchema = z
+  .object({ role: SiteAssetRoleSchema, items: z.array(SiteAssetCandidateSchema) })
+  .meta({ id: 'SiteAssetSuggestions' });
+export type SiteAssetSuggestions = z.infer<typeof SiteAssetSuggestionsSchema>;
+
+export const ConfirmAssetOwnershipRequestSchema = z
+  .object({ method: z.enum(OWNERSHIP_CONFIRMATION_METHODS) })
+  .meta({ id: 'ConfirmAssetOwnershipRequest' });
+export type ConfirmAssetOwnershipRequest = z.infer<typeof ConfirmAssetOwnershipRequestSchema>;
+
+/** Collected: how many images each source added (re-collecting adds only new ones). */
+export const SiteAssetCollectResultSchema = z
+  .object({
+    added: z.record(SiteAssetSourceSchema, z.number().int().nonnegative()),
+    rejected: z.number().int().nonnegative(),
+  })
+  .meta({ id: 'SiteAssetCollectResult' });
+export type SiteAssetCollectResult = z.infer<typeof SiteAssetCollectResultSchema>;
+
+/** Collects a business's images into its site's library (owner site, wordmark): enqueued by refresh and generation. */
+export const SitesAssetCollectJob = defineJob('sites-asset-collect', 'collect', {
+  organizationId: z.string(),
+  siteId: SiteId,
+});
+
+/** Tags an image, writes its alt texts and finds its focal point (after processing). */
+export const SitesAssetAnalyzeJob = defineJob('sites-asset-analyze', 'analyze', { assetId: z.uuid() });
+
+/** An image's ownership was confirmed (its `preview_only` restriction is lifted). */
+export const SiteAssetOwnershipConfirmed = defineEvent(
+  'site.asset.ownership_confirmed',
+  1,
+  z.object({ ...sitePayload, assetId: z.uuid(), method: z.enum(OWNERSHIP_CONFIRMATION_METHODS) }),
+);
+
+/** An image was analysed (tags, alt texts, focal point). */
+export const SiteAssetAnalyzed = defineEvent(
+  'site.asset.analyzed',
+  1,
+  z.object({ siteId: SiteId, assetId: z.uuid() }),
+);

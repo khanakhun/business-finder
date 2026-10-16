@@ -227,6 +227,10 @@
               ],
               "additionalProperties": false,
               "description": "The contact form."
+            },
+            "labelAiImages": {
+              "description": "Label AI-generated images \"Illustration\" (default true).",
+              "type": "boolean"
             }
           },
           "required": [
@@ -3208,9 +3212,29 @@
             "owner_site",
             "stock",
             "ai_generated",
-            "uploaded"
+            "uploaded",
+            "system_generated"
           ],
-          "description": "owner_site: from the business's own website; stock: a licensed library; ai_generated; uploaded by the agency or the business."
+          "description": "owner_site: from the business's own website; stock: a licensed library; ai_generated; uploaded by the agency or the business; system_generated: made by us (e.g. a wordmark)."
+        },
+        "hosting": {
+          "description": "self (default): our storage; hotlink: the stock provider’s CDN, when its terms require it.",
+          "type": "string",
+          "enum": [
+            "self",
+            "hotlink"
+          ]
+        },
+        "restrictions": {
+          "description": "preview_only: usable in a preview, not on a live site (ownership not confirmed yet).",
+          "maxItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "preview_only"
+            ]
+          }
         },
         "attribution": {
           "type": "string",

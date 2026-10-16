@@ -28,6 +28,12 @@ const library = (overrides: Partial<SiteAsset>): SiteAsset => ({
   licenseDetails: null,
   alt: { fr: 'La terrasse', en: 'The terrace' },
   dominantColors: null,
+  kind: 'image',
+  source: 'upload',
+  restrictions: [],
+  focalPoint: null,
+  analysis: null,
+  ownership: null,
   createdAt: '2026-10-01T10:00:00.000Z',
   ...overrides,
 });

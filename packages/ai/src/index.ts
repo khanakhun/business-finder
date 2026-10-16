@@ -57,6 +57,11 @@ export {
   type RoutingConfig,
   routeFor,
 } from './routing.ts';
+export {
+  AssetsAnalyzeImage,
+  AssetsAnalyzeImageInput,
+  AssetsAnalyzeImageOutput,
+} from './tasks/assets-analyze-image.ts';
 export { DemoExtractBusinessFacts } from './tasks/demo-extract-business-facts.ts';
 export {
   ExtractPainSignalsInput,

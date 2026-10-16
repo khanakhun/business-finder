@@ -81,6 +81,15 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /** One image downloaded by intel through its SSRF guard (BF-038): intel's deadline is 20 s; one retry. */
+  'intel-image': {
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    initialDelayMs: 500,
+    maxDelayMs: 2_000,
+    breakerThreshold: 10,
+    halfOpenAfterMs: 30_000,
+  },
   /**
    * Self-hosted Reacher (BF-028): an SMTP conversation can take a while (greylisting, slow servers). No retry here:
    * the verifier chain moves on to the next verifier, and the enrichment engine retries the step.

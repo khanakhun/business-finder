@@ -2453,7 +2453,8 @@
         "owner_site": "From the business’s website",
         "stock": "Stock (licensed)",
         "ai_generated": "AI-generated",
-        "uploaded": "Uploaded"
+        "uploaded": "Uploaded",
+        "system_generated": "Made by us (wordmark)"
       },
       "alt": "Alt text",
       "altHelp": "Describe what the image shows, for people using screen readers.",
@@ -2477,7 +2478,9 @@
       "attribution": "Credit line",
       "uploading": "Uploading…",
       "processing": "Processing the image…",
-      "upload": "Upload and use"
+      "upload": "Upload and use",
+      "previewOnly": "Preview only",
+      "previewOnlyHelp": "From the business’s website: usable in a preview, not on a live site until the business confirms it owns it."
     },
     "versions": {
       "button": "Versions",

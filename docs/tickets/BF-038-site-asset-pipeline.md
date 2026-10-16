@@ -170,3 +170,31 @@ Verify: pnpm verify && pnpm test:int; run the alt-text/tagging evals (pnpm eval 
 ## References
 - ADR-0009 · ADR-0013 · BF-026 (image candidates) · BF-035 (assets)
 - Unsplash API guidelines: https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines · Unsplash API documentation: https://unsplash.com/documentation · Pexels API documentation and guidelines: https://www.pexels.com/api/documentation/ · sharp: https://sharp.pixelplumbing.com/ · opentype.js: https://opentype.js.org/
+
+## Implementation notes
+
+- **Part 1 (PR 1/2)**:
+  - Schema (`@bf/site-schema`, backward compatible): `assets[].hosting` (`self` default, `hotlink`), `restrictions`
+    (`preview_only`), licence `system_generated`, `settings.labelAiImages`. Validator: hotlinking only for stock
+    images from `hotlinkHosts` (none by default); `preview_only` images are refused with `environment: 'live'`.
+  - Library (`site_assets`): `kind` (image/logo), `source` (upload/owner_site/stock/ai/wordmark), `source_url`
+    (unique per site: collecting is idempotent), `dhash`, `restrictions`, `ownership`, `analysis`.
+  - Owner-site images: the latest website snapshot's image and logo candidates (BF-026), downloaded by
+    services/intel (`POST /v1/image-fetch`, its SSRF guard, `image/*` only, ≤ 15 MB), sniffed and decoded within
+    limits, judged (provider photo hosts, tracking pixels, sprites, icons, short side < 600 px, blur by variance of the
+    Laplacian), deduplicated (sha256 and 64-bit dHash, Hamming ≤ 6), stored privately and processed like uploads
+    (BF-035 variants), `preview_only` until ownership is confirmed.
+  - Wordmark: the name outlined to SVG paths with opentype.js (DM Serif Display or Lato Bold WOFF), rasterized to a
+    1200 px PNG, plus a monogram favicon; deterministic; only when the site has no logo.
+  - Analysis job after processing: `assets.analyze_image` (vision, fast tier, prompt v1, synthetic eval set) for tags,
+    quality, hero suitability and native alt texts (kept where a person wrote one); sharpness and the saliency focal
+    point from sharp.
+  - Ranking per role (hero, gallery, about, og, logo, favicon), explainable (every point has a reason), with palette
+    fit (CIE76 ΔE); AI images showing people are never offered.
+  - API: `GET /v1/sites/:id/asset-suggestions`, `POST /v1/sites/:id/assets/refresh` (a job per site and hour),
+    `POST /v1/sites/:id/assets/:assetId/confirm-ownership` (`sites:publish`).
+  - Editor: library images keep their kind, restrictions and focal point in the spec; a "Preview only" badge.
+- **Planned (part 2)**: stock providers (Unsplash, Pexels) with licensing profiles verified against their current
+  terms, search cache, limiter and download tracking; AI image generation with policy check, moderation and budget;
+  renderer hotlink CSP, attribution and the AI label; `collectCandidates`/`writeToWorkspace` for BF-040; the editor's
+  "Find more images" tab.

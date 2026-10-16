@@ -1655,6 +1655,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/asset-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The site’s images ranked for a role (hero, gallery…), with the reasons */
+        get: operations["suggestSiteAssets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/assets": {
         parameters: {
             query?: never;
@@ -1690,6 +1707,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/assets/{assetId}/confirm-ownership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record that the business owns an image from its website (lifts preview_only) */
+        post: operations["confirmSiteAssetOwnership"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/assets/{assetId}/finalize": {
         parameters: {
             query?: never;
@@ -1701,6 +1735,23 @@ export type paths = {
         put?: never;
         /** Check an uploaded image (type, size, dimensions) and queue its processing */
         post: operations["finalizeSiteAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/assets/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Collect the business’s images again (its website, a wordmark when it has no logo) */
+        post: operations["refreshSiteAssets"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2554,6 +2605,10 @@ export type components = {
             radiusM: number;
             /** @constant */
             type: "Circle";
+        };
+        ConfirmAssetOwnershipRequest: {
+            /** @enum {string} */
+            method: "claim_form" | "email" | "call" | "other";
         };
         Contact: {
             confidence: number;
@@ -4084,21 +4139,38 @@ export type components = {
             alt: {
                 [key: string]: string;
             } | null;
+            analysis: components["schemas"]["SiteAssetAnalysis"] | null;
             bytes: number | null;
             /** Format: date-time */
             createdAt: string;
             dominantColors: string[] | null;
+            focalPoint: {
+                x: number;
+                y: number;
+            } | null;
             height: number | null;
             /** Format: uuid */
             id: string;
             /** @enum {string} */
-            license: "owner_site" | "stock" | "ai_generated" | "uploaded";
+            kind: "image" | "logo";
+            /** @enum {string} */
+            license: "owner_site" | "stock" | "ai_generated" | "uploaded" | "system_generated";
             licenseDetails: {
                 [key: string]: string;
             } | null;
             mime: string;
+            ownership: {
+                /** Format: date-time */
+                confirmedAt: string;
+                confirmedBy: string | null;
+                /** @enum {string} */
+                method: "claim_form" | "email" | "call" | "other";
+            } | null;
             publicUrl: string | null;
+            restrictions: "preview_only"[];
             siteId: string | null;
+            /** @enum {string} */
+            source: "upload" | "owner_site" | "stock" | "ai" | "wordmark";
             /** @enum {string} */
             status: "pending" | "processing" | "ready" | "failed";
             variants: {
@@ -4110,8 +4182,42 @@ export type components = {
             }[];
             width: number | null;
         };
+        SiteAssetAnalysis: {
+            containsPeople: boolean;
+            containsText: boolean;
+            /** @enum {string} */
+            depicts: "interior" | "exterior" | "product" | "food" | "people" | "team" | "logo" | "landscape" | "texture" | "other";
+            heroSuitability: number;
+            identifiablePeople: boolean;
+            mood: string[];
+            quality: number;
+            sharpness: number | null;
+        };
+        SiteAssetCandidate: {
+            alt: {
+                [key: string]: string;
+            } | null;
+            assetId: string | null;
+            attribution: string | null;
+            height: number | null;
+            id: string;
+            /** @enum {string} */
+            license: "owner_site" | "stock" | "ai_generated" | "uploaded" | "system_generated";
+            previewUrl: string | null;
+            reasons: string[];
+            restrictions: "preview_only"[];
+            score: number;
+            /** @enum {string} */
+            source: "upload" | "owner_site" | "stock" | "ai" | "wordmark";
+            width: number | null;
+        };
         SiteAssetList: {
             items: components["schemas"]["SiteAsset"][];
+        };
+        SiteAssetSuggestions: {
+            items: components["schemas"]["SiteAssetCandidate"][];
+            /** @enum {string} */
+            role: "hero" | "gallery" | "about" | "og" | "logo" | "favicon";
         };
         SiteAssetUpload: {
             asset: components["schemas"]["SiteAsset"];
@@ -12964,6 +13070,86 @@ export interface operations {
             };
         };
     };
+    suggestSiteAssets: {
+        parameters: {
+            query?: {
+                q?: string;
+                role?: "hero" | "gallery" | "about" | "og" | "logo" | "favicon";
+                source?: "upload" | "owner_site" | "stock" | "ai" | "wordmark";
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteAssetSuggestions"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     listSiteAssets: {
         parameters: {
             query?: never;
@@ -13168,6 +13354,96 @@ export interface operations {
             };
         };
     };
+    confirmSiteAssetOwnership: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assetId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmAssetOwnershipRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteAsset"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     finalizeSiteAsset: {
         parameters: {
             query?: never;
@@ -13227,6 +13503,62 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    refreshSiteAssets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

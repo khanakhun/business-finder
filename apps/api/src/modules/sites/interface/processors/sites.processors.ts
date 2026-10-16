@@ -1,4 +1,6 @@
 import {
+  SitesAssetAnalyzeJob,
+  SitesAssetCollectJob,
   SitesAssetProcessJob,
   SitesExpireJob,
   SitesRevalidateJob,
@@ -9,6 +11,7 @@ import { type JobContext, QUEUES } from '@bf/queue';
 import { Processor } from '@nestjs/bullmq';
 import type { z } from 'zod';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
+import { AssetSourcing } from '../../application/asset-sourcing.ts';
 import { SiteAssetCommands } from '../../application/site-assets.ts';
 import { SiteThumbnailCommands } from '../../application/site-thumbnails.ts';
 import { SiteViewsFlusher } from '../../application/site-views.ts';
@@ -93,6 +96,42 @@ export class SitesAssetProcessProcessor extends TypedProcessor<
       }
       throw error;
     }
+  }
+}
+
+@Processor(QUEUES.sitesAssetCollect.name, { concurrency: QUEUES.sitesAssetCollect.concurrency })
+export class SitesAssetCollectProcessor extends TypedProcessor<
+  typeof SitesAssetCollectJob,
+  { readonly added: Record<string, number>; readonly rejected: number }
+> {
+  protected readonly definition = SitesAssetCollectJob;
+
+  constructor(private readonly sourcing: AssetSourcing) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof SitesAssetCollectJob.schema>, context: JobContext) {
+    const result = await this.sourcing.collect(payload.organizationId, payload.siteId, context.signal);
+    context.logger.info({ siteId: payload.siteId, ...result }, 'site images collected');
+    return result;
+  }
+}
+
+@Processor(QUEUES.sitesAssetAnalyze.name, { concurrency: QUEUES.sitesAssetAnalyze.concurrency })
+export class SitesAssetAnalyzeProcessor extends TypedProcessor<
+  typeof SitesAssetAnalyzeJob,
+  { readonly outcome: string }
+> {
+  protected readonly definition = SitesAssetAnalyzeJob;
+
+  constructor(private readonly sourcing: AssetSourcing) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof SitesAssetAnalyzeJob.schema>, context: JobContext) {
+    const outcome = await this.sourcing.analyze(payload.assetId);
+    context.logger.info({ assetId: payload.assetId, outcome }, 'site image analysed');
+    return { outcome };
   }
 }
 

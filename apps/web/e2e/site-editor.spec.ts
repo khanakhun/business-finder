@@ -439,6 +439,12 @@ test('swaps the hero image for another of the site’s, and uploads one with its
     licenseDetails: { author: 'Studio Test' },
     alt: { fr: 'La nouvelle terrasse' },
     dominantColors: null,
+    kind: 'image',
+    source: 'upload',
+    restrictions: [],
+    focalPoint: null,
+    analysis: null,
+    ownership: null,
     createdAt: new Date().toISOString(),
   };
   const ready = {

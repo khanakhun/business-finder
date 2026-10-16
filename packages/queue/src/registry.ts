@@ -80,6 +80,10 @@ export const QUEUES = {
   sitesExpire: { name: 'sites-expire', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   /** Image processing of uploaded site assets (sharp: CPU-bound, a few at a time). */
   sitesAssetProcess: { name: 'sites-asset-process', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** A site's images collected from the business's website and the wordmark (BF-038; downloads through intel). */
+  sitesAssetCollect: { name: 'sites-asset-collect', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** Vision analysis of a processed image (tags, alt texts; one model call each). */
+  sitesAssetAnalyze: { name: 'sites-asset-analyze', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   /** Thumbnails of published sites (services/intel takes the pictures). */
   sitesScreenshot: { name: 'sites-screenshot', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** Views flush (Valkey → site_view_daily) and the hourly `site.viewed` events, every 5 minutes. */

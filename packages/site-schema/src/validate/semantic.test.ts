@@ -423,6 +423,46 @@ describe('validateSite', () => {
     expect(found(creds)).toContain('external_url@contact.bookingUrl.value');
   });
 
+  it('hotlinks only stock images from an allowed provider CDN (BF-038)', () => {
+    const hotlinked = with_((s) =>
+      Object.assign(s.assets[1] ?? {}, {
+        url: 'https://images.unsplash.com/photo-1?w=1200',
+        hosting: 'hotlink',
+        license: 'stock',
+        attribution: 'Photo by A. Person on Unsplash',
+      }),
+    );
+    expect(found(hotlinked, { ...OPTIONS, hotlinkHosts: ['images.unsplash.com'] })).toEqual([]);
+    // Not allowed by default, never for another licence, never from another host.
+    expect(found(hotlinked)).toContain('asset_hotlink@assets.1.hosting');
+    const owner = with_((s) =>
+      Object.assign(s.assets[1] ?? {}, { url: 'https://images.unsplash.com/x', hosting: 'hotlink' }),
+    );
+    expect(found(owner, { ...OPTIONS, hotlinkHosts: ['images.unsplash.com'] })).toContain(
+      'asset_hotlink@assets.1.hosting',
+    );
+    const elsewhere = with_((s) =>
+      Object.assign(s.assets[1] ?? {}, {
+        url: 'https://evil.example/x.jpg',
+        hosting: 'hotlink',
+        license: 'stock',
+      }),
+    );
+    expect(found(elsewhere, { ...OPTIONS, hotlinkHosts: ['images.unsplash.com'] })).toContain(
+      'asset_hotlink@assets.1.hosting',
+    );
+  });
+
+  it('allows preview-only images in previews, not on a live site (BF-038)', () => {
+    const unconfirmed = with_((s) =>
+      Object.assign(s.assets[1] ?? {}, { license: 'owner_site', restrictions: ['preview_only'] }),
+    );
+    expect(found(unconfirmed)).toEqual([]);
+    expect(found(unconfirmed, { ...OPTIONS, mode: 'published', environment: 'live' })).toContain(
+      'asset_preview_only@assets.1.restrictions',
+    );
+  });
+
   it('refuses reserved slugs and hidden characters', () => {
     for (const slug of ['en', 'claim', 'opt-out', 'privacy', 'health'])
       expect(found(with_((s) => Object.assign(s.pages[1] ?? {}, { slug })))).toEqual(['schema@pages.1.slug']);

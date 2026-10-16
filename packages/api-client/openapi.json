@@ -2521,6 +2521,24 @@
         ],
         "type": "object"
       },
+      "ConfirmAssetOwnershipRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "method": {
+            "enum": [
+              "claim_form",
+              "email",
+              "call",
+              "other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
       "Contact": {
         "additionalProperties": false,
         "properties": {
@@ -10335,6 +10353,16 @@
               }
             ]
           },
+          "analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SiteAssetAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "bytes": {
             "anyOf": [
               {
@@ -10366,6 +10394,33 @@
               }
             ]
           },
+          "focalPoint": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "x": {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "y": {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "height": {
             "anyOf": [
               {
@@ -10383,12 +10438,20 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
             "type": "string"
           },
+          "kind": {
+            "enum": [
+              "image",
+              "logo"
+            ],
+            "type": "string"
+          },
           "license": {
             "enum": [
               "owner_site",
               "stock",
               "ai_generated",
-              "uploaded"
+              "uploaded",
+              "system_generated"
             ],
             "type": "string"
           },
@@ -10411,6 +10474,44 @@
           "mime": {
             "type": "string"
           },
+          "ownership": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "confirmedAt": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "confirmedBy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "method": {
+                    "enum": [
+                      "claim_form",
+                      "email",
+                      "call",
+                      "other"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "confirmedAt",
+                  "confirmedBy",
+                  "method"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "publicUrl": {
             "anyOf": [
               {
@@ -10421,6 +10522,15 @@
                 "type": "null"
               }
             ]
+          },
+          "restrictions": {
+            "items": {
+              "enum": [
+                "preview_only"
+              ],
+              "type": "string"
+            },
+            "type": "array"
           },
           "siteId": {
             "anyOf": [
@@ -10434,6 +10544,16 @@
                 "type": "null"
               }
             ]
+          },
+          "source": {
+            "enum": [
+              "upload",
+              "owner_site",
+              "stock",
+              "ai",
+              "wordmark"
+            ],
+            "type": "string"
           },
           "status": {
             "enum": [
@@ -10501,7 +10621,225 @@
           "licenseDetails",
           "alt",
           "dominantColors",
+          "kind",
+          "source",
+          "restrictions",
+          "focalPoint",
+          "analysis",
+          "ownership",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "SiteAssetAnalysis": {
+        "additionalProperties": false,
+        "properties": {
+          "containsPeople": {
+            "type": "boolean"
+          },
+          "containsText": {
+            "type": "boolean"
+          },
+          "depicts": {
+            "enum": [
+              "interior",
+              "exterior",
+              "product",
+              "food",
+              "people",
+              "team",
+              "logo",
+              "landscape",
+              "texture",
+              "other"
+            ],
+            "type": "string"
+          },
+          "heroSuitability": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "identifiablePeople": {
+            "type": "boolean"
+          },
+          "mood": {
+            "items": {
+              "maxLength": 30,
+              "type": "string"
+            },
+            "maxItems": 5,
+            "type": "array"
+          },
+          "quality": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sharpness": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "depicts",
+          "containsText",
+          "containsPeople",
+          "identifiablePeople",
+          "quality",
+          "heroSuitability",
+          "mood",
+          "sharpness"
+        ],
+        "type": "object"
+      },
+      "SiteAssetCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maxLength": 150,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "pattern": "^[a-z]{2}$",
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assetId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "license": {
+            "enum": [
+              "owner_site",
+              "stock",
+              "ai_generated",
+              "uploaded",
+              "system_generated"
+            ],
+            "type": "string"
+          },
+          "previewUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reasons": {
+            "items": {
+              "maxLength": 120,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "restrictions": {
+            "items": {
+              "enum": [
+                "preview_only"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "score": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "source": {
+            "enum": [
+              "upload",
+              "owner_site",
+              "stock",
+              "ai",
+              "wordmark"
+            ],
+            "type": "string"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "assetId",
+          "previewUrl",
+          "width",
+          "height",
+          "license",
+          "attribution",
+          "restrictions",
+          "alt",
+          "score",
+          "reasons"
         ],
         "type": "object"
       },
@@ -10516,6 +10854,33 @@
           }
         },
         "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "SiteAssetSuggestions": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SiteAssetCandidate"
+            },
+            "type": "array"
+          },
+          "role": {
+            "enum": [
+              "hero",
+              "gallery",
+              "about",
+              "og",
+              "logo",
+              "favicon"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
           "items"
         ],
         "type": "object"
@@ -25547,6 +25912,138 @@
         ]
       }
     },
+    "/v1/sites/{id}/asset-suggestions": {
+      "get": {
+        "operationId": "suggestSiteAssets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "required": false,
+            "schema": {
+              "default": "gallery",
+              "enum": [
+                "hero",
+                "gallery",
+                "about",
+                "og",
+                "logo",
+                "favicon"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "enum": [
+                "upload",
+                "owner_site",
+                "stock",
+                "ai",
+                "wordmark"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAssetSuggestions"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The site’s images ranked for a role (hero, gallery…), with the reasons",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/v1/sites/{id}/assets": {
       "get": {
         "operationId": "listSiteAssets",
@@ -25717,6 +26214,70 @@
         ]
       }
     },
+    "/v1/sites/{id}/assets/refresh": {
+      "post": {
+        "operationId": "refreshSiteAssets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Collect the business’s images again (its website, a wordmark when it has no logo)",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/v1/sites/{id}/assets/{assetId}": {
       "delete": {
         "operationId": "deleteSiteAsset",
@@ -25794,6 +26355,125 @@
           }
         },
         "summary": "Delete an image no version of the site uses",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/assets/{assetId}/confirm-ownership": {
+      "post": {
+        "operationId": "confirmSiteAssetOwnership",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmAssetOwnershipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAsset"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Record that the business owns an image from its website (lifts preview_only)",
         "tags": [
           "sites"
         ]

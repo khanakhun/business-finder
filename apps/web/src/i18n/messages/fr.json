@@ -2453,7 +2453,8 @@
         "owner_site": "Du site de l’entreprise",
         "stock": "Banque d’images (licence)",
         "ai_generated": "Générée par IA",
-        "uploaded": "Envoyée"
+        "uploaded": "Envoyée",
+        "system_generated": "Créée par nous (logotype)"
       },
       "alt": "Texte alternatif",
       "altHelp": "Décrivez ce que montre l’image, pour les personnes qui utilisent un lecteur d’écran.",
@@ -2477,7 +2478,9 @@
       "attribution": "Mention de crédit",
       "uploading": "Envoi…",
       "processing": "Traitement de l’image…",
-      "upload": "Envoyer et utiliser"
+      "upload": "Envoyer et utiliser",
+      "previewOnly": "Aperçu seulement",
+      "previewOnlyHelp": "Du site de l’entreprise : utilisable dans un aperçu, pas sur un site en ligne tant que l’entreprise n’a pas confirmé qu’elle en est propriétaire."
     },
     "versions": {
       "button": "Versions",

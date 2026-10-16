@@ -1,9 +1,12 @@
 import { newId } from '@bf/contracts';
 import type {
+  AssetStatus,
   NewVersion,
+  SiteAssetsRepository,
   SiteInsights,
   SiteListFilter,
   SitesRepository,
+  StoredAsset,
   StoredPublication,
   StoredSite,
   StoredVersion,
@@ -211,3 +214,75 @@ export const NO_INSIGHTS: SiteInsights = {
     last30Days: { pageViews: 0, uniqueEstimate: 0 },
   }),
 };
+
+/** Site assets in memory, with the compare-and-set the database applies. */
+export class InMemoryAssets implements SiteAssetsRepository {
+  readonly rows = new Map<string, StoredAsset>();
+  async insert(asset: Parameters<SiteAssetsRepository['insert']>[0]): Promise<StoredAsset> {
+    const { createdBy: _createdBy, ...rest } = asset;
+    const row: StoredAsset = {
+      kind: 'image',
+      source: 'upload',
+      sourceUrl: null,
+      dhash: null,
+      restrictions: [],
+      focalPoint: null,
+      ...rest,
+      ownership: null,
+      analysis: null,
+      status: 'pending',
+      width: null,
+      height: null,
+      publicUrl: null,
+      variants: null,
+      dominantColors: null,
+      sha256: rest.sha256 ?? null,
+      processingStartedAt: null,
+      createdAt: new Date('2026-10-14T12:00:00.000Z'),
+    };
+    this.rows.set(row.id, row);
+    return row;
+  }
+  async get(organizationId: string, siteId: string, assetId: string) {
+    const row = this.rows.get(assetId);
+    return row?.organizationId === organizationId && row.siteId === siteId ? row : undefined;
+  }
+  async byId(assetId: string) {
+    return this.rows.get(assetId);
+  }
+  async list() {
+    return [...this.rows.values()];
+  }
+  lock(organizationId: string, siteId: string, assetId: string) {
+    return this.get(organizationId, siteId, assetId);
+  }
+  async failStale(cutoffs: { startedBefore: Date; createdBefore: Date }) {
+    const stale = [...this.rows.values()].filter(
+      (row) =>
+        row.status === 'processing' &&
+        (row.processingStartedAt
+          ? row.processingStartedAt < cutoffs.startedBefore
+          : row.createdAt < cutoffs.createdBefore),
+    );
+    for (const row of stale) this.rows.set(row.id, { ...row, status: 'failed' });
+    return stale;
+  }
+  async transition(
+    assetId: string,
+    from: readonly AssetStatus[],
+    changes: Partial<StoredAsset>,
+    startedAt?: Date,
+  ) {
+    const row = this.rows.get(assetId);
+    if (!row || !from.includes(row.status)) return false;
+    if (startedAt && row.processingStartedAt?.getTime() !== startedAt.getTime()) return false;
+    this.rows.set(assetId, { ...row, ...changes });
+    return true;
+  }
+  async referenced() {
+    return false;
+  }
+  async delete(assetId: string) {
+    this.rows.delete(assetId);
+  }
+}

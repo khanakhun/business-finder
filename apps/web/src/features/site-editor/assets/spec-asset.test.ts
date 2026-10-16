@@ -28,6 +28,12 @@ const library = (overrides: Partial<SiteAsset> = {}): SiteAsset => ({
   licenseDetails: { author: 'Studio Test' },
   alt: { fr: 'La terrasse au coucher du soleil', en: 'The terrace at sunset', de: 'Die Terrasse' },
   dominantColors: ['#112233', '#445566', '#778899', '#aabbcc', '#ddeeff', '#000000'],
+  kind: 'image',
+  source: 'upload',
+  restrictions: [],
+  focalPoint: null,
+  analysis: null,
+  ownership: null,
   createdAt: '2026-10-01T10:00:00.000Z',
   ...overrides,
 });

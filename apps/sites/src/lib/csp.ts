@@ -6,6 +6,8 @@ export interface SiteCspOptions {
   readonly apiOrigin: string;
   /** The CDN of site images (`SITES_ASSETS_BASE_URL`): the only image host besides the page itself. */
   readonly assetsOrigin: string;
+  /** Stock CDNs the site's images are hotlinked from (`hotlinkOrigins` of its spec, BF-038); none by default. */
+  readonly imageOrigins?: readonly string[];
   /** Booking pages a site may frame (`embedOrigins` of its spec); none by default. */
   readonly frameOrigins: readonly string[];
 }
@@ -27,7 +29,7 @@ export function buildSiteCsp(nonce: string, options: SiteCspOptions): string {
     `style-src 'self' 'nonce-${nonce}'`,
     `style-src-elem 'self' 'nonce-${nonce}'`,
     "style-src-attr 'unsafe-inline'",
-    `img-src 'self' data: ${options.assetsOrigin}`,
+    `img-src 'self' data: ${[options.assetsOrigin, ...(options.imageOrigins ?? [])].join(' ')}`,
     "font-src 'self'",
     `connect-src 'self' ${options.apiOrigin}${options.dev ? ' ws:' : ''}`,
     `frame-src ${options.frameOrigins.length > 0 ? options.frameOrigins.join(' ') : "'none'"}`,

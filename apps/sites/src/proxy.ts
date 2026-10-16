@@ -1,4 +1,4 @@
-import { embedOrigins } from '@bf/site-blocks';
+import { embedOrigins, hotlinkOrigins } from '@bf/site-blocks';
 import { type NextRequest, NextResponse } from 'next/server';
 import { buildSiteCsp } from './lib/csp.ts';
 import { sitesEnvironment } from './lib/env.ts';
@@ -70,6 +70,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     apiOrigin: new URL(env.API_URL).origin,
     assetsOrigin: new URL(env.SITES_ASSETS_BASE_URL).origin,
     frameOrigins: embedOrigins(spec),
+    imageOrigins: hotlinkOrigins(spec),
   });
   requestHeaders.set('x-nonce', nonce);
   // The decoded path (the route was resolved from decoded segments: `/%65n/x` is `/en/x`).

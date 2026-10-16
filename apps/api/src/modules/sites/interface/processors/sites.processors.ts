@@ -1,6 +1,7 @@
 import {
   SitesAssetAnalyzeJob,
   SitesAssetCollectJob,
+  SitesAssetGenerateJob,
   SitesAssetProcessJob,
   SitesExpireJob,
   SitesRevalidateJob,
@@ -16,6 +17,7 @@ import { SiteAssetCommands } from '../../application/site-assets.ts';
 import { SiteThumbnailCommands } from '../../application/site-thumbnails.ts';
 import { SiteViewsFlusher } from '../../application/site-views.ts';
 import { SiteCommands } from '../../application/sites.commands.ts';
+import { StockAndAiImages } from '../../application/stock-and-ai.ts';
 import { RendererRevalidator } from '../../infrastructure/renderer-revalidator.ts';
 
 @Processor(QUEUES.sitesRevalidate.name, { concurrency: QUEUES.sitesRevalidate.concurrency })
@@ -114,6 +116,27 @@ export class SitesAssetCollectProcessor extends TypedProcessor<
     const result = await this.sourcing.collect(payload.organizationId, payload.siteId, context.signal);
     context.logger.info({ siteId: payload.siteId, ...result }, 'site images collected');
     return result;
+  }
+}
+
+@Processor(QUEUES.sitesAssetGenerate.name, { concurrency: QUEUES.sitesAssetGenerate.concurrency })
+export class SitesAssetGenerateProcessor extends TypedProcessor<
+  typeof SitesAssetGenerateJob,
+  { readonly stored: number }
+> {
+  protected readonly definition = SitesAssetGenerateJob;
+
+  constructor(private readonly images: StockAndAiImages) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof SitesAssetGenerateJob.schema>, context: JobContext) {
+    const stored = await this.images.runGeneration(payload);
+    context.logger.info(
+      { siteId: payload.siteId, generationId: payload.generationId, stored },
+      'AI images generated',
+    );
+    return { stored };
   }
 }
 

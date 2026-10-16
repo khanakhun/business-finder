@@ -108,6 +108,11 @@ describe('buildSiteCsp', () => {
     frameOrigins: [],
   };
 
+  it('allows hotlinked stock images only from the origins the site uses (BF-038)', () => {
+    const csp = buildSiteCsp('abc', { ...base, imageOrigins: ['https://images.unsplash.com'] });
+    expect(csp).toContain("img-src 'self' data: https://assets.example https://images.unsplash.com");
+  });
+
   it('allows scripts by nonce only, images from our CDN, the API for the beacon, and no frame by default', () => {
     const csp = buildSiteCsp('abc', base);
     expect(csp).toContain("script-src 'self' 'nonce-abc' 'strict-dynamic'");

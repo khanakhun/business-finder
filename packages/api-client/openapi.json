@@ -4894,6 +4894,38 @@
         },
         "type": "object"
       },
+      "GenerateSiteAssetsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect": {
+            "default": "16:9",
+            "enum": [
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4"
+            ],
+            "type": "string"
+          },
+          "count": {
+            "default": 2,
+            "maximum": 4,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "prompt": {
+            "maxLength": 400,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt",
+          "aspect",
+          "count"
+        ],
+        "type": "object"
+      },
       "GeoAreaFeature": {
         "additionalProperties": false,
         "properties": {
@@ -5294,6 +5326,19 @@
           "signupMode",
           "googleEnabled",
           "minPasswordLength"
+        ],
+        "type": "object"
+      },
+      "ImportSiteAssetRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "candidateId": {
+            "pattern": "^stock:[a-z]{2,20}:[A-Za-z0-9_-]{1,64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidateId"
         ],
         "type": "object"
       },
@@ -10221,7 +10266,8 @@
               "foursquare",
               "huggingface",
               "zerobounce",
-              "unsplash"
+              "unsplash",
+              "pexels"
             ],
             "type": "string"
           },
@@ -10433,6 +10479,13 @@
               }
             ]
           },
+          "hosting": {
+            "enum": [
+              "self",
+              "hotlink"
+            ],
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
@@ -10622,6 +10675,7 @@
           "alt",
           "dominantColors",
           "kind",
+          "hosting",
           "source",
           "restrictions",
           "focalPoint",
@@ -10782,6 +10836,17 @@
               }
             ]
           },
+          "provider": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "reasons": {
             "items": {
               "maxLength": 120,
@@ -10836,10 +10901,31 @@
           "height",
           "license",
           "attribution",
+          "provider",
           "restrictions",
           "alt",
           "score",
           "reasons"
+        ],
+        "type": "object"
+      },
+      "SiteAssetGeneration": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "maximum": 4,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "generationId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "generationId",
+          "count"
         ],
         "type": "object"
       },
@@ -10855,6 +10941,41 @@
         },
         "required": [
           "items"
+        ],
+        "type": "object"
+      },
+      "SiteAssetSources": {
+        "additionalProperties": false,
+        "properties": {
+          "ai": {
+            "additionalProperties": false,
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "remainingToday": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "enabled",
+              "remainingToday"
+            ],
+            "type": "object"
+          },
+          "stock": {
+            "items": {
+              "maxLength": 40,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "stock",
+          "ai"
         ],
         "type": "object"
       },
@@ -25912,6 +26033,77 @@
         ]
       }
     },
+    "/v1/sites/{id}/asset-sources": {
+      "get": {
+        "operationId": "getSiteAssetSources",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAssetSources"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The stock providers configured and the AI images left today (the editor’s \"Find more images\")",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/v1/sites/{id}/asset-suggestions": {
       "get": {
         "operationId": "suggestSiteAssets",
@@ -26209,6 +26401,218 @@
           }
         },
         "summary": "Start an image upload: a pending image and a presigned URL to PUT its bytes to",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/assets/generate": {
+      "post": {
+        "operationId": "generateSiteAssets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateSiteAssetsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAssetGeneration"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Generate illustrative AI images (no people, text or logos) into the site’s library",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/assets/import": {
+      "post": {
+        "operationId": "importSiteAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportSiteAssetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAsset"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Bring a stock photo into the site’s library (credited; Unsplash hotlinked and its download tracked)",
         "tags": [
           "sites"
         ]

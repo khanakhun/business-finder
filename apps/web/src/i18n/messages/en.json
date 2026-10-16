@@ -385,7 +385,8 @@
       "foursquare": "Foursquare",
       "huggingface": "Hugging Face",
       "unsplash": "Unsplash",
-      "zerobounce": "ZeroBounce"
+      "zerobounce": "ZeroBounce",
+      "pexels": "Pexels"
     },
     "secrets": {
       "google_places": "Google Places API key",
@@ -395,7 +396,8 @@
       "foursquare": "Foursquare API key",
       "huggingface": "Hugging Face token",
       "unsplash": "Unsplash access key",
-      "zerobounce": "ZeroBounce API key"
+      "zerobounce": "ZeroBounce API key",
+      "pexels": "Pexels API key"
     },
     "statusWorkspace": "Set for this workspace",
     "statusGlobal": "Using the platform key",
@@ -2421,7 +2423,8 @@
       "tabs": {
         "site": "This site",
         "library": "Library",
-        "upload": "Upload"
+        "upload": "Upload",
+        "more": "Find more"
       },
       "noSiteImages": "This site has no image yet: pick one from the library or upload one.",
       "back": "Back",
@@ -2480,7 +2483,29 @@
       "processing": "Processing the image…",
       "upload": "Upload and use",
       "previewOnly": "Preview only",
-      "previewOnlyHelp": "From the business’s website: usable in a preview, not on a live site until the business confirms it owns it."
+      "previewOnlyHelp": "From the business’s website: usable in a preview, not on a live site until the business confirms it owns it.",
+      "more": {
+        "stockTitle": "Stock photos ({providers})",
+        "stockQuery": "Search stock photos",
+        "stockPlaceholder": "e.g. turquoise sea, salon interior",
+        "search": "Search",
+        "searching": "Searching…",
+        "searchFailed": "The search failed. Try again.",
+        "noResults": "No photo matches.",
+        "importing": "Adding to the library…",
+        "importSlow": "The photo is still being processed: pick it from the library in a moment.",
+        "importFailed": "The photo could not be added. Try another.",
+        "aiTitle": "AI illustrations",
+        "aiHelp": "Ambience only (textures, landscapes, objects): never people, text, logos or the business’s real premises. Shown as “Illustration” on the site. {count, plural, =0 {None left today.} one {# left today.} other {# left today.}}",
+        "aiPrompt": "Describe the illustration",
+        "aiPlaceholder": "e.g. calm turquoise sea with palm shadows",
+        "aspect": "Proportions",
+        "generate": "Generate 2 images",
+        "generating": "Generating…",
+        "generated": "Done: the new images are in the library.",
+        "refused": "Not allowed: AI images show no people, text, logos or brands.",
+        "generateFailed": "The images could not be generated. Try again later."
+      }
     },
     "versions": {
       "button": "Versions",

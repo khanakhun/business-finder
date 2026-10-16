@@ -3,6 +3,7 @@ import { HoursCompact } from '../blocks/hours.tsx';
 import { AddressLines } from '../blocks/location.tsx';
 import { SocialList } from '../blocks/social-links.tsx';
 import type { RenderContext } from '../renderer/types.ts';
+import { Credits } from './credits.tsx';
 
 /** The footer: brand and tagline; with `columns`, contact, hours and the menu. */
 export function Footer({ ctx }: { ctx: RenderContext }) {
@@ -12,7 +13,12 @@ export function Footer({ ctx }: { ctx: RenderContext }) {
   const tagline = footer.tagline ? <p className="bf-muted max-w-xs">{ctx.t(footer.tagline)}</p> : null;
   const socials =
     footer.showSocials && contact.socials?.length ? <SocialList ctx={ctx} variant="icons" /> : null;
-  const rights = <p className="bf-muted text-sm">{ctx.strings.allRights(brand.name)}</p>;
+  const rights = (
+    <div className="flex flex-col gap-1">
+      <p className="bf-muted text-sm">{ctx.strings.allRights(brand.name)}</p>
+      <Credits ctx={ctx} />
+    </div>
+  );
 
   if (footer.variant === 'simple') {
     return (

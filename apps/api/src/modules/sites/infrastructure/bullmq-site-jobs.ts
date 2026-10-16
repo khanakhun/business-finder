@@ -4,6 +4,7 @@ import {
   type SiteId,
   SitesAssetAnalyzeJob,
   SitesAssetCollectJob,
+  SitesAssetGenerateJob,
   SitesAssetProcessJob,
   SitesExpireJob,
   SitesRevalidateJob,
@@ -22,6 +23,7 @@ import type {
   SiteRevalidation,
   SiteScreenshotQueue,
 } from '../application/ports.ts';
+import type { GenerationQueue } from '../application/stock-and-ai.ts';
 
 /** Revalidations go through a job: retried with backoff while the renderer is down. */
 @Injectable()
@@ -139,6 +141,30 @@ export class BullmqAssetSourcingQueue implements AssetSourcingQueue {
     });
   }
 }
+
+@Injectable()
+export class BullmqGenerationQueue implements GenerationQueue {
+  private readonly jobs: TypedProducer<typeof SitesAssetGenerateJob>;
+
+  constructor(@InjectQueue(QUEUES.sitesAssetGenerate.name) queue: Queue) {
+    this.jobs = new TypedProducer(queue, SitesAssetGenerateJob);
+  }
+
+  async generate(input: Parameters<GenerationQueue['generate']>[0]): Promise<void> {
+    await this.jobs.add({
+      orgId: input.organizationId as OrgId,
+      idempotencyKey: `asset-generate:${input.generationId}`,
+      organizationId: input.organizationId,
+      siteId: input.siteId as SiteId,
+      generationId: input.generationId,
+      prompt: input.prompt,
+      aspect: input.aspect,
+      count: input.count,
+    });
+  }
+}
+
+export const OPENAPI_GENERATION_QUEUE: GenerationQueue = { generate: async () => {} };
 
 export const OPENAPI_SOURCING_QUEUE: AssetSourcingQueue = {
   collect: async () => {},

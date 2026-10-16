@@ -1,13 +1,17 @@
-import type { AiGateway } from '@bf/ai';
+import { type AiGateway, type BudgetGuard, type LlmCallRecorder, loadPromptRegistry } from '@bf/ai';
 import type { ApiEnv } from '@bf/config';
 import type { DbClient } from '@bf/db';
 import { type DynamicModule, Module } from '@nestjs/common';
-import { AI_GATEWAY } from '../platform/ai/ai.module.ts';
+import type { Redis } from 'ioredis';
+import { AI_BUDGET_GUARD, AI_GATEWAY } from '../platform/ai/ai.module.ts';
+import { LlmCallRepository } from '../platform/ai/llm-call.repository.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
+import { VALKEY } from '../platform/valkey/valkey.module.ts';
+import { SecretResolver } from '../workspace/index.ts';
 import {
   AssetSourcing,
   IMAGE_ANALYZER,
@@ -43,7 +47,21 @@ import { SiteViewRecorder, SiteViewsFlusher } from './application/site-views.ts'
 import { SiteCommands } from './application/sites.commands.ts';
 import { SiteQueries } from './application/sites.queries.ts';
 import { SiteRenderSubscriber } from './application/sites.subscribers.ts';
+import {
+  AI_IMAGE_ALLOWANCE,
+  AI_IMAGE_SETTINGS,
+  GENERATION_QUEUE,
+  IMAGE_GENERATOR,
+  STOCK_PROVIDERS,
+  StockAndAiImages,
+} from './application/stock-and-ai.ts';
+import { HOTLINK_HOSTS } from './domain/assets/licensing-profile.ts';
 import { sitesShareCookieDomain } from './domain/hosting.ts';
+import {
+  FakeImageGenerator,
+  LedgerAiImageAllowance,
+  OpenAiImageGenerator,
+} from './infrastructure/assets/ai-image.adapters.ts';
 import {
   AiImageAnalyzer,
   DrizzleOwnerSiteImages,
@@ -53,11 +71,19 @@ import {
   OpentypeWordmarkMaker,
 } from './infrastructure/assets/sourcing.adapters.ts';
 import {
+  FakeStockProvider,
+  GuardedStockProvider,
+  PexelsProvider,
+  UnsplashProvider,
+} from './infrastructure/assets/stock.adapters.ts';
+import {
   BullmqAssetProcessingQueue,
   BullmqAssetSourcingQueue,
+  BullmqGenerationQueue,
   BullmqSiteRevalidation,
   BullmqSiteScreenshotQueue,
   OPENAPI_ASSET_QUEUE,
+  OPENAPI_GENERATION_QUEUE,
   OPENAPI_SCREENSHOT_QUEUE,
   OPENAPI_SITE_REVALIDATION,
   OPENAPI_SOURCING_QUEUE,
@@ -87,6 +113,7 @@ import { SitesController } from './interface/http/sites.controller.ts';
 import {
   SitesAssetAnalyzeProcessor,
   SitesAssetCollectProcessor,
+  SitesAssetGenerateProcessor,
   SitesAssetProcessProcessor,
   SitesExpireProcessor,
   SitesRevalidateProcessor,
@@ -149,6 +176,7 @@ export class SitesModule {
               { provide: SITE_REVALIDATION, useValue: OPENAPI_SITE_REVALIDATION },
               { provide: ASSET_PROCESSING_QUEUE, useValue: OPENAPI_ASSET_QUEUE },
               { provide: ASSET_SOURCING_QUEUE, useValue: OPENAPI_SOURCING_QUEUE },
+              { provide: GENERATION_QUEUE, useValue: OPENAPI_GENERATION_QUEUE },
               { provide: SITE_SCREENSHOT_QUEUE, useValue: OPENAPI_SCREENSHOT_QUEUE },
               { provide: SITE_ORIGINALS, useValue: new InMemoryObjectStorage() },
               { provide: SITE_ARTIFACTS, useValue: new InMemoryObjectStorage() },
@@ -159,6 +187,7 @@ export class SitesModule {
               { provide: SITE_REVALIDATION, useClass: BullmqSiteRevalidation },
               { provide: ASSET_PROCESSING_QUEUE, useClass: BullmqAssetProcessingQueue },
               { provide: ASSET_SOURCING_QUEUE, useClass: BullmqAssetSourcingQueue },
+              { provide: GENERATION_QUEUE, useClass: BullmqGenerationQueue },
               { provide: SITE_SCREENSHOT_QUEUE, useClass: BullmqSiteScreenshotQueue },
               { provide: SCREENSHOT_DELAY_MS, useValue: 15_000 },
               {
@@ -200,6 +229,7 @@ export class SitesModule {
             return {
               baseDomain: api.SITES_BASE_DOMAIN,
               assetHosts: [new URL(api.SITES_ASSETS_BASE_URL).hostname],
+              hotlinkHosts: HOTLINK_HOSTS,
             };
           },
         },
@@ -236,6 +266,44 @@ export class SitesModule {
             fakeScreenshots(env as ApiEnv) ? new FakeImageAnalyzer() : new AiImageAnalyzer(gateway),
         },
         AssetSourcing,
+        // Stock photos and AI images (BF-038 part 2): fakes (no network, no cost) where the site intel is faked.
+        {
+          provide: STOCK_PROVIDERS,
+          inject: [APP_ENV, SecretResolver, VALKEY],
+          useFactory: (env: AppEnv, secrets: SecretResolver, valkey: Redis) =>
+            fakeScreenshots(env as ApiEnv)
+              ? [new FakeStockProvider()]
+              : [new UnsplashProvider(secrets), new PexelsProvider(secrets)].map(
+                  (provider) => new GuardedStockProvider(provider, valkey),
+                ),
+        },
+        {
+          provide: IMAGE_GENERATOR,
+          inject: [APP_ENV, SecretResolver],
+          useFactory: (env: AppEnv, secrets: SecretResolver) =>
+            fakeScreenshots(env as ApiEnv)
+              ? new FakeImageGenerator()
+              : new OpenAiImageGenerator((env as ApiEnv).AI_IMAGE_MODEL, secrets, loadPromptRegistry()),
+        },
+        {
+          provide: AI_IMAGE_ALLOWANCE,
+          inject: [AI_BUDGET_GUARD, LlmCallRepository, VALKEY],
+          useFactory: (budget: BudgetGuard, ledger: LlmCallRecorder, valkey: Redis) =>
+            new LedgerAiImageAllowance(budget, ledger, valkey),
+        },
+        {
+          provide: AI_IMAGE_SETTINGS,
+          inject: [APP_ENV],
+          useFactory: (appEnv: AppEnv) => {
+            const env = appEnv as ApiEnv;
+            return {
+              dailyCap: env.AI_IMAGES_DAILY_CAP,
+              priceUsd: env.AI_IMAGE_PRICE_USD,
+              unsplashAppName: env.UNSPLASH_APP_NAME,
+            };
+          },
+        },
+        StockAndAiImages,
         { provide: SITE_INSIGHTS, useClass: SiteInsightsReader },
         SiteCommands,
         SiteQueries,
@@ -256,6 +324,7 @@ export class SitesModule {
               SitesAssetProcessProcessor,
               SitesAssetCollectProcessor,
               SitesAssetAnalyzeProcessor,
+              SitesAssetGenerateProcessor,
               SitesScreenshotProcessor,
               SitesViewsFlushProcessor,
               SitesViewsFlushScheduler,

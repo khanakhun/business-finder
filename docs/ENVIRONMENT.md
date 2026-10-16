@@ -93,6 +93,9 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `AI_MODEL_FALLBACKS` | AI providers | api, worker | no |  |  | JSON map: model id or tier → models tried when it is unavailable, in order. |
 | `AI_EMBEDDING_MODEL` | AI providers | api, worker | no | `openai:text-embedding-3-small` |  | Embedding model (1536 dimensions by default). |
 | `AI_PRICING` | AI providers | api, worker | no |  |  | JSON map: model id → USD per million input/output/cached tokens. Unpriced models cost null. |
+| `AI_IMAGE_MODEL` | AI providers | api, worker | no | `gpt-image-2` |  | OpenAI image model for illustrative AI images (BF-038). Verify the current ID and price. |
+| `AI_IMAGE_PRICE_USD` | AI providers | api, worker | no | `0.06` |  | Cost recorded per generated image (medium quality, 1536 px): budgets count it. |
+| `AI_IMAGES_DAILY_CAP` | AI providers | api, worker | no | `24` |  | AI images a workspace may generate per day (0 turns AI images off). |
 | `AI_BUDGET_MONTHLY_SOFT_USD` | AI providers | api, worker | no | `25` |  | Per-workspace monthly AI spend that triggers a warning. |
 | `AI_BUDGET_MONTHLY_HARD_USD` | AI providers | api, worker | no | `100` |  | Per-workspace monthly AI spend above which non-essential tasks stop. |
 | `AI_TRACE_CONTENT` | AI providers | api, worker | no | `false` |  | Send prompt and response bodies to tracing/Langfuse (emails and phones masked). Keep off in production. |
@@ -105,6 +108,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `HF_TOKEN` | Provider keys (workspace fallback) | api, worker | no |  | yes | Hugging Face access token. |
 | `ZEROBOUNCE_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | ZeroBounce API key (e-mail verification without SMTP port 25). |
 | `UNSPLASH_ACCESS_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Unsplash access key (stock photos). |
+| `PEXELS_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Pexels API key (stock photos). |
+| `UNSPLASH_APP_NAME` | Provider keys (workspace fallback) | api, worker | no | `business_finder` |  | The app name in Unsplash attribution links (utm_source), as registered with Unsplash. |
 | `BETTER_AUTH_SECRET` | Auth & secrets | api, worker | yes |  | yes | Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32 |
 | `SIGNUP_MODE` | Auth & secrets | api, worker | no |  |  | Who may create an account. Default: invite_only in production, open otherwise. |
 | `SIGNUP_ALLOWED_EMAIL_DOMAINS` | Auth & secrets | api, worker | no |  |  | Comma-separated email domains that may self-register when SIGNUP_MODE=allowlist. |

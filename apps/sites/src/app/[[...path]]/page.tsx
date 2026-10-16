@@ -1,5 +1,5 @@
 import { signSiteViewToken } from '@bf/contracts';
-import { defaultPageHref, faviconHref, pickText, SitePage } from '@bf/site-blocks';
+import { defaultPageHref, faviconHref, hotlinkSrcSet, pickText, SitePage } from '@bf/site-blocks';
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -83,7 +83,10 @@ export default async function SitePageRoute(props: Props) {
         preview={tenant.environment === 'preview'}
         previewActions={actions}
         agencyName={tenant.agencyName}
-        assetsResolver={(asset) => ({ src: asset.url, srcSet: tenant.images[asset.url] })}
+        assetsResolver={(asset) => ({
+          src: asset.url,
+          srcSet: asset.hosting === 'hotlink' ? hotlinkSrcSet(asset.url) : tenant.images[asset.url],
+        })}
       />
       {token ? (
         <ViewBeacon

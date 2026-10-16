@@ -18,6 +18,12 @@ export const ASSET_LICENSES = [
 /** How an image is served: from our storage (`self`), or from the stock provider's CDN when its terms require it. */
 export const ASSET_HOSTINGS = ['self', 'hotlink'] as const;
 
+/** Stock providers' CDNs an image may be hotlinked from (their terms require it: Unsplash). */
+export const HOTLINK_HOSTS = ['images.unsplash.com'] as const;
+
+/** Hosts a credit may link to (the photographer's profile on the stock site). */
+export const CREDIT_HOSTS = ['unsplash.com', 'www.pexels.com', 'pexels.com'] as const;
+
 /** What an image may not be used for: `preview_only` (an owner-site image whose ownership is not confirmed). */
 export const ASSET_RESTRICTIONS = ['preview_only'] as const;
 
@@ -47,6 +53,9 @@ export const AssetSchema = z
       .optional()
       .describe('preview_only: usable in a preview, not on a live site (ownership not confirmed yet).'),
     attribution: plainText(200, 'Credit line when the license requires one.').optional(),
+    attributionUrl: HttpsUrlSchema.optional().describe(
+      "Where the credit links (the photographer's page on the stock site; unsplash.com or pexels.com only).",
+    ),
     focalPoint: z
       .object({
         x: z.number().min(0).max(1).describe('From the left, 0–1.'),

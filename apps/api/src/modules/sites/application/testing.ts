@@ -222,6 +222,7 @@ export class InMemoryAssets implements SiteAssetsRepository {
     const { createdBy: _createdBy, ...rest } = asset;
     const row: StoredAsset = {
       kind: 'image',
+      hosting: 'self',
       source: 'upload',
       sourceUrl: null,
       dhash: null,

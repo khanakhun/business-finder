@@ -1,4 +1,4 @@
-import { hostOf, type SiteSpec } from '@bf/site-schema';
+import { HOTLINK_HOSTS, hostOf, type SiteSpec } from '@bf/site-schema';
 
 /**
  * Booking providers whose pages may be shown in a frame (they allow it and need no third-party script of ours). The
@@ -37,4 +37,40 @@ export function embedOrigins(spec: SiteSpec): string[] {
     page.blocks.some((block) => block.type === 'booking' && block.variant === 'embed'),
   );
   return url && embeds && isEmbeddable(url) ? [new URL(url).origin] : [];
+}
+
+/**
+ * The image origins a site hotlinks from (BF-038: stock photos whose provider requires it), for the renderer's CSP
+ * `img-src`: only the allowed provider CDNs, only when an image of the site uses one.
+ */
+export function hotlinkOrigins(spec: SiteSpec): string[] {
+  const origins = new Set<string>();
+  for (const asset of spec.assets) {
+    if (asset.hosting !== 'hotlink') continue;
+    try {
+      const url = new URL(asset.url);
+      if (url.protocol === 'https:' && (HOTLINK_HOSTS as readonly string[]).includes(url.hostname))
+        origins.add(url.origin);
+    } catch {
+      // An unparseable URL is refused by the validator; it never widens the policy.
+    }
+  }
+  return [...origins];
+}
+
+/** A hotlinked Unsplash image at several widths (its own resizing parameters; the `ixid` stays). */
+export function hotlinkSrcSet(url: string): string | undefined {
+  try {
+    const base = new URL(url);
+    if (base.hostname !== 'images.unsplash.com') return undefined;
+    return [480, 768, 1200, 1920]
+      .map((width) => {
+        const sized = new URL(base);
+        sized.searchParams.set('w', String(width));
+        return `${sized.toString()} ${width}w`;
+      })
+      .join(', ');
+  } catch {
+    return undefined;
+  }
 }

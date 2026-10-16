@@ -12,7 +12,12 @@ export { Footer } from './layout/footer.tsx';
 export { Header } from './layout/header.tsx';
 export { BlockRenderer, blockTones, UnknownBlockError } from './renderer/block-renderer.tsx';
 export { PlainLink, ResponsiveImage } from './renderer/defaults.tsx';
-export { BOOKING_EMBED_HOSTS, embedOrigins } from './renderer/embeds.ts';
+export {
+  BOOKING_EMBED_HOSTS,
+  embedOrigins,
+  hotlinkOrigins,
+  hotlinkSrcSet,
+} from './renderer/embeds.ts';
 export { faviconHref } from './renderer/favicon.ts';
 export { BLOCK_COMPONENTS } from './renderer/registry.ts';
 export {

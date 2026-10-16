@@ -62,6 +62,22 @@ export const aiEnv = z.object({
     ),
     '{"<model-id>":{"inputPerMTok":1,"outputPerMTok":5}}',
   ).describe('JSON map: model id → USD per million input/output/cached tokens. Unpriced models cost null.'),
+  AI_IMAGE_MODEL: z
+    .string()
+    .min(1)
+    .default('gpt-image-2')
+    .describe('OpenAI image model for illustrative AI images (BF-038). Verify the current ID and price.'),
+  AI_IMAGE_PRICE_USD: z.coerce
+    .number()
+    .nonnegative()
+    .default(0.06)
+    .describe('Cost recorded per generated image (medium quality, 1536 px): budgets count it.'),
+  AI_IMAGES_DAILY_CAP: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(24)
+    .describe('AI images a workspace may generate per day (0 turns AI images off).'),
   AI_BUDGET_MONTHLY_SOFT_USD: usd(25).describe('Per-workspace monthly AI spend that triggers a warning.'),
   AI_BUDGET_MONTHLY_HARD_USD: usd(100).describe(
     'Per-workspace monthly AI spend above which non-essential tasks stop.',

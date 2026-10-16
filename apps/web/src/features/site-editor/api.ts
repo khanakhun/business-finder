@@ -4,7 +4,11 @@ import { ApiError } from '@bf/api-client';
 import type {
   CreateSiteAssetUploadRequest,
   SiteAsset,
+  SiteAssetCandidate,
+  SiteAssetGeneration,
   SiteAssetList,
+  SiteAssetSources,
+  SiteAssetSuggestions,
   SiteAssetUpload,
   SiteDetail,
   SitePublication,
@@ -207,4 +211,41 @@ export async function uploadAsset(
     params: { path: { id: siteId, assetId: upload.asset.id } },
   });
   return finalized.data as SiteAsset;
+}
+
+/** The configured stock providers and today's AI images (the picker's "Find more images" tab, BF-038). */
+export async function fetchAssetSources(siteId: string): Promise<SiteAssetSources> {
+  const { data } = await apiClient().GET('/v1/sites/{id}/asset-sources', {
+    params: { path: { id: siteId } },
+  });
+  return data as SiteAssetSources;
+}
+
+/** Stock photos for a query (credited candidates, not yet in the library). */
+export async function searchStock(siteId: string, q: string): Promise<readonly SiteAssetCandidate[]> {
+  const { data } = await apiClient().GET('/v1/sites/{id}/asset-suggestions', {
+    params: { path: { id: siteId }, query: { role: 'gallery', source: 'stock', q } },
+  });
+  return (data as SiteAssetSuggestions).items;
+}
+
+/** Brings a stock candidate into the library (hotlinked or copied, credited). */
+export async function importStock(siteId: string, candidateId: string): Promise<SiteAsset> {
+  const { data } = await apiClient().POST('/v1/sites/{id}/assets/import', {
+    params: { path: { id: siteId } },
+    body: { candidateId },
+  });
+  return data as SiteAsset;
+}
+
+/** Queues illustrative AI images; they arrive in the library once generated, processed and checked. */
+export async function generateImages(
+  siteId: string,
+  body: { prompt: string; aspect: '16:9' | '4:3' | '1:1' | '3:4'; count: number },
+): Promise<SiteAssetGeneration> {
+  const { data } = await apiClient().POST('/v1/sites/{id}/assets/generate', {
+    params: { path: { id: siteId } },
+    body,
+  });
+  return data as SiteAssetGeneration;
 }

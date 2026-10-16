@@ -3018,6 +3018,12 @@
           "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Credit line when the license requires one."
         },
+        "attributionUrl": {
+          "description": "Where the credit links (the photographer's page on the stock site; unsplash.com or pexels.com only).",
+          "type": "string",
+          "maxLength": 500,
+          "pattern": "^https:\\/\\/[^\\s/$.?#\\\\][^\\s\\\\]*$"
+        },
         "focalPoint": {
           "description": "Point to keep in view when cropping (0–1 from the top left).",
           "type": "object",

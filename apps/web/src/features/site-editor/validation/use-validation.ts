@@ -1,6 +1,6 @@
 'use client';
 
-import { type Issue, validateSite } from '@bf/site-schema';
+import { HOTLINK_HOSTS, type Issue, validateSite } from '@bf/site-schema';
 import * as React from 'react';
 import type { ValidationRequest } from './validation.worker.ts';
 
@@ -25,7 +25,11 @@ export function useValidation(spec: unknown, assetHosts: readonly string[], dela
       worker.current = null;
       sent.current += 1;
       setIssues(
-        validateSite(latest.current.spec, { assetHosts: [...latest.current.assetHosts], mode: 'published' }),
+        validateSite(latest.current.spec, {
+          assetHosts: [...latest.current.assetHosts],
+          hotlinkHosts: [...HOTLINK_HOSTS],
+          mode: 'published',
+        }),
       );
     };
     instance.onmessage = (event: MessageEvent<{ id: number; issues: Issue[] }>) => {
@@ -43,7 +47,14 @@ export function useValidation(spec: unknown, assetHosts: readonly string[], dela
       sent.current += 1;
       const request: ValidationRequest = { id: sent.current, spec, assetHosts };
       if (worker.current) worker.current.postMessage(request);
-      else setIssues(validateSite(spec, { assetHosts: [...assetHosts], mode: 'published' }));
+      else
+        setIssues(
+          validateSite(spec, {
+            assetHosts: [...assetHosts],
+            hotlinkHosts: [...HOTLINK_HOSTS],
+            mode: 'published',
+          }),
+        );
     }, delay);
     return () => clearTimeout(timer);
   }, [spec, assetHosts, delay]);

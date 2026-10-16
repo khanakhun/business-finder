@@ -198,6 +198,25 @@ describe('analysis, suggestions and ownership', () => {
     expect(await sourcing.analyze('0199e0a0-0000-7000-8000-00000000dead')).toBe('skipped');
   });
 
+  it('discards an AI image the vision check finds showing people (image policy)', async () => {
+    const [photo] = (await readyImages()).filter((row) => row.kind === 'image');
+    if (!photo) throw new Error('expected a photo');
+    assets.rows.set(photo.id, { ...photo, source: 'ai', license: 'ai_generated', restrictions: [] });
+    const spy = vi.spyOn(FakeImageAnalyzer.prototype, 'analyze').mockResolvedValueOnce({
+      depicts: 'people',
+      containsText: false,
+      containsPeople: true,
+      identifiablePeople: true,
+      quality: 4,
+      heroSuitability: 4,
+      mood: [],
+      alt: { fr: 'Une personne' },
+    });
+    expect(await sourcing.analyze(photo.id)).toBe('skipped');
+    expect(assets.rows.get(photo.id)?.status).toBe('failed');
+    spy.mockRestore();
+  });
+
   it('ranks the library for a role with reasons, filtered by source and words', async () => {
     await readyImages();
     const hero = await sourcing.suggestions(actor, siteId, { role: 'hero' });

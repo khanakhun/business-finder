@@ -211,6 +211,13 @@
       "when": 1792180439710,
       "tag": "0029_site_asset_sourcing",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792181598432,
+      "tag": "0030_site_asset_hosting",
+      "breakpoints": true
     }
   ]
 }

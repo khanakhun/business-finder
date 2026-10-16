@@ -1,0 +1,2 @@
+ALTER TABLE "site_assets" ADD COLUMN "hosting" text DEFAULT 'self' NOT NULL;--> statement-breakpoint
+ALTER TABLE "site_assets" ADD CONSTRAINT "ck_site_assets__hosting" CHECK ("site_assets"."hosting" IN ('self', 'hotlink'));

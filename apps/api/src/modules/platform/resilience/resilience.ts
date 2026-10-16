@@ -81,6 +81,24 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /** Stock photo APIs (BF-038: Unsplash, Pexels): quick searches, one retry; their quotas are guarded apart. */
+  stock: {
+    timeoutMs: 10_000,
+    maxRetries: 1,
+    initialDelayMs: 500,
+    maxDelayMs: 2_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
+  /** AI image generation (BF-038): a minute or more per batch; no retry (a retry would bill twice). */
+  'ai-image': {
+    timeoutMs: 180_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 120_000,
+  },
   /** One image downloaded by intel through its SSRF guard (BF-038): intel's deadline is 20 s; one retry. */
   'intel-image': {
     timeoutMs: 30_000,

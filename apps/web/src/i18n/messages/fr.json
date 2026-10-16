@@ -1,0 +1,110 @@
+{
+  "app": {
+    "name": "Business Finder",
+    "skipToContent": "Aller au contenu"
+  },
+  "nav": {
+    "groups": {
+      "prospects": "Prospects",
+      "websites": "Sites web",
+      "outreach": "Prospection",
+      "workspace": "Espace de travail"
+    },
+    "home": "Vue d’ensemble",
+    "search": "Recherche",
+    "pipeline": "Suivi commercial",
+    "sites": "Sites",
+    "generation": "Génération",
+    "inbox": "Boîte de réception",
+    "sequences": "Séquences",
+    "templates": "Modèles",
+    "mailboxes": "Boîtes d’envoi",
+    "analytics": "Statistiques",
+    "settings": "Paramètres",
+    "collapse": "Réduire la barre latérale",
+    "expand": "Déployer la barre latérale",
+    "label": "Navigation principale"
+  },
+  "topbar": {
+    "workspace": "Mon espace",
+    "switchWorkspace": "Changer d’espace",
+    "notifications": "Notifications",
+    "noNotifications": "Aucune notification pour l’instant",
+    "account": "Compte",
+    "signedOut": "La connexion arrive bientôt",
+    "openMenu": "Ouvrir la navigation",
+    "commandPalette": "Rechercher une commande"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Comme le système"
+  },
+  "commands": {
+    "placeholder": "Tapez une commande ou le nom d’une page",
+    "empty": "Aucune commande correspondante",
+    "title": "Palette de commandes",
+    "groups": {
+      "navigation": "Aller à",
+      "preferences": "Préférences",
+      "help": "Aide"
+    },
+    "goTo": "Aller à : {page}",
+    "useLightTheme": "Utiliser le thème clair",
+    "useDarkTheme": "Utiliser le thème sombre",
+    "useSystemTheme": "Suivre le thème du système",
+    "switchLanguage": "Passer en {language}",
+    "showShortcuts": "Afficher les raccourcis clavier",
+    "toggleSidebar": "Réduire ou déployer la barre latérale"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "description": "Naviguez sans la souris.",
+    "openPalette": "Ouvrir la palette de commandes",
+    "showShortcuts": "Afficher cette liste",
+    "toggleSidebar": "Réduire ou déployer la barre latérale",
+    "close": "Fermer"
+  },
+  "home": {
+    "title": "Vue d’ensemble",
+    "description": "Votre journée en un coup d’œil. Les résumés de recherche, de suivi et de prospection apparaîtront ici.",
+    "apiStatus": {
+      "title": "Connexion au serveur",
+      "connected": "Connecté",
+      "checking": "Vérification de la connexion",
+      "version": "Version",
+      "environment": "Environnement",
+      "commit": "Build",
+      "serverTime": "Heure du serveur",
+      "unknownCommit": "Build local"
+    }
+  },
+  "placeholder": {
+    "title": "{section} est en préparation",
+    "description": "Cette partie de Business Finder apparaîtra ici dans une prochaine version. En attendant, utilisez la palette de commandes pour vous déplacer.",
+    "openPalette": "Ouvrir la palette de commandes"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "description": "Les préférences de l’espace, les fournisseurs, les boîtes d’envoi et les membres se géreront ici.",
+    "appearance": "Apparence",
+    "appearanceDescription": "Choisissez la langue et le thème de couleur pour ce navigateur."
+  },
+  "errors": {
+    "retry": "Réessayer",
+    "reference": "Référence",
+    "copyReference": "Copier la référence",
+    "copied": "Copié",
+    "pageTitle": "Cette page n’a pas pu s’afficher",
+    "pageDescription": "Réessayez. Si le problème persiste, transmettez la référence au support.",
+    "notFoundTitle": "Page introuvable",
+    "notFoundDescription": "La page demandée n’existe pas ou a été déplacée.",
+    "backHome": "Aller à la vue d’ensemble"
+  }
+}

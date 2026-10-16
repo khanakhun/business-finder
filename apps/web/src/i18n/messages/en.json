@@ -1,0 +1,110 @@
+{
+  "app": {
+    "name": "Business Finder",
+    "skipToContent": "Skip to content"
+  },
+  "nav": {
+    "groups": {
+      "prospects": "Prospects",
+      "websites": "Websites",
+      "outreach": "Outreach",
+      "workspace": "Workspace"
+    },
+    "home": "Overview",
+    "search": "Search",
+    "pipeline": "Pipeline",
+    "sites": "Sites",
+    "generation": "Generation",
+    "inbox": "Inbox",
+    "sequences": "Sequences",
+    "templates": "Templates",
+    "mailboxes": "Mailboxes",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "label": "Main navigation"
+  },
+  "topbar": {
+    "workspace": "My workspace",
+    "switchWorkspace": "Switch workspace",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications yet",
+    "account": "Account",
+    "signedOut": "Signing in arrives soon",
+    "openMenu": "Open navigation",
+    "commandPalette": "Search commands"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Match system"
+  },
+  "commands": {
+    "placeholder": "Type a command or a page name",
+    "empty": "No matching commands",
+    "title": "Command palette",
+    "groups": {
+      "navigation": "Go to",
+      "preferences": "Preferences",
+      "help": "Help"
+    },
+    "goTo": "Go to {page}",
+    "useLightTheme": "Use light theme",
+    "useDarkTheme": "Use dark theme",
+    "useSystemTheme": "Match system theme",
+    "switchLanguage": "Switch to {language}",
+    "showShortcuts": "Show keyboard shortcuts",
+    "toggleSidebar": "Collapse or expand the sidebar"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "description": "Move around without the mouse.",
+    "openPalette": "Open the command palette",
+    "showShortcuts": "Show this list",
+    "toggleSidebar": "Collapse or expand the sidebar",
+    "close": "Close"
+  },
+  "home": {
+    "title": "Overview",
+    "description": "Your day at a glance. Search, pipeline and outreach summaries will appear here.",
+    "apiStatus": {
+      "title": "Connection to the server",
+      "connected": "Connected",
+      "checking": "Checking the connection",
+      "version": "Version",
+      "environment": "Environment",
+      "commit": "Build",
+      "serverTime": "Server time",
+      "unknownCommit": "Local build"
+    }
+  },
+  "placeholder": {
+    "title": "{section} is being built",
+    "description": "This part of Business Finder will appear here in an upcoming release. Use the command palette to move around in the meantime.",
+    "openPalette": "Open the command palette"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Workspace preferences, providers, mailboxes and members will be managed here.",
+    "appearance": "Appearance",
+    "appearanceDescription": "Choose the language and colour theme for this browser."
+  },
+  "errors": {
+    "retry": "Try again",
+    "reference": "Reference",
+    "copyReference": "Copy reference",
+    "copied": "Copied",
+    "pageTitle": "This page could not be shown",
+    "pageDescription": "Try again. If it keeps happening, share the reference with support.",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you asked for does not exist or has moved.",
+    "backHome": "Go to the overview"
+  }
+}

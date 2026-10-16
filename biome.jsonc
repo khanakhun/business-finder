@@ -17,9 +17,11 @@
       "!**/coverage",
       "!**/dist",
       "!**/.next",
+      "!**/next-env.d.ts",
       "!**/.turbo",
       // Generated and checked by their own tests (`api:openapi`, `contracts:jsonschema`).
       "!packages/api-client/openapi.json",
+      "!packages/api-client/src/schema.d.ts",
       "!packages/contracts/generated"
     ]
   },
@@ -37,6 +39,12 @@
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "all"
+    }
+  },
+  "css": {
+    "parser": {
+      // Tailwind v4 directives (@theme, @custom-variant, @apply, @source) in the design system's CSS.
+      "tailwindDirectives": true
     }
   },
   "json": {
@@ -114,7 +122,9 @@
       "includes": [
         "apps/*/src/app/**/{page,layout,template,loading,error,global-error,not-found,default}.tsx",
         "apps/*/src/app/**/{opengraph-image,twitter-image,icon,apple-icon,sitemap,robots,manifest}.{ts,tsx}",
-        "apps/*/src/{middleware,instrumentation}.ts"
+        "apps/*/src/{middleware,instrumentation}.ts",
+        // next-intl loads its request config through a default export.
+        "apps/*/src/i18n/request.ts"
       ],
       "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
     },

@@ -1,0 +1,9 @@
+{
+  "extends": "@bf/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "plugins": [],
+    // Lets shadcn-generated files keep their `@bf/ui/...` self-references.
+    "paths": { "@bf/ui/*": ["./src/*"] }
+  },
+  "include": ["src", "*.config.ts"]
+}

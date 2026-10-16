@@ -73,12 +73,12 @@ packages/api-client/{openapi.json, src/{schema.d.ts, client.ts, query.ts}}
 - Accessibility: axe on `/` and `/settings`.
 
 ## Acceptance criteria
-- [ ] `pnpm --filter @bf/web dev` shows the shell; navigation and command palette work by keyboard.
-- [ ] EN/FR switch persists via cookie; all shell strings translated.
-- [ ] `pnpm api:codegen` regenerates the client from the API; home page shows API version via the typed client.
-- [ ] Problem+json errors render with trace id.
-- [ ] Axe: zero serious/critical violations on shell pages; Playwright smoke passes in CI-like run.
-- [ ] CSP with nonces active in production build (verified by response headers).
+- [x] `pnpm --filter @bf/web dev` shows the shell; navigation and command palette work by keyboard.
+- [x] EN/FR switch persists via cookie; all shell strings translated.
+- [x] `pnpm api:codegen` regenerates the client from the API; home page shows API version via the typed client.
+- [x] Problem+json errors render with trace id.
+- [x] Axe: zero serious/critical violations on shell pages; Playwright smoke passes in CI-like run.
+- [x] CSP with nonces active in production build (verified by response headers).
 
 ## Agent prompt
 ```text
@@ -102,3 +102,30 @@ light/dark and EN/FR in the PR.
 ## References
 - docs/PRD.md §4–§5 · docs/ARCHITECTURE.md §3–§4 · docs/conventions/security.md §8
 - Next.js: https://nextjs.org/docs · shadcn/ui monorepo: https://ui.shadcn.com/docs/monorepo · next-intl: https://next-intl.dev/ · openapi-fetch: https://openapi-ts.dev/openapi-fetch/
+
+## Implementation notes
+- **Versions**: Next.js 16.4.1 (Turbopack, `proxy.ts` replaces middleware), React 19.3.1, Tailwind 4.3.3, next-intl 4.14.9,
+  next-themes 0.4.6, TanStack Query 5.104.2, **TanStack Table 8.21.3** (v9 exists; ticket/architecture specify v8),
+  shadcn CLI 4.21.5 (radix-ui 1.8.1), openapi-typescript 7.13.0, openapi-fetch 0.17.0, Playwright 1.64.1, axe 4.13.0.
+- **Design**: harbour/chart tokens (cool chart-paper greys, slate ink, lagoon teal for action/focus, buoy amber for
+  attention), Atkinson Hyperlegible Next (legibility for non-specialist daily users), the lagoon "waterline" marks
+  active nav / focus / selected rows. Sentence case everywhere; no all-caps labels.
+- **shadcn in a package**: the CLI rewrote `cn` imports to shadcn's new `cn` npm package; replaced with the local
+  `lib/utils.ts`. `BreadcrumbPage` fixed (current page is not a link). Skeletons use neutral `muted`, not the accent.
+- **CSP**: per-request nonce + `'strict-dynamic'` for scripts (security.md §8). DECISION: styles allow `'unsafe-inline'`
+  — sonner injects `<style>` at runtime and Radix uses style attributes; neither can carry a nonce (the e2e CSP check
+  caught both). `upgrade-insecure-requests` only when served over HTTPS.
+- **i18n**: cookie `bf_locale` (no URL prefix), default from `Accept-Language`; typed message keys; EN/FR parity test;
+  a TypeScript-AST test fails on hard-coded JSX text.
+- **Bugs found by e2e and fixed**: infinite render loop (unstable `useChangeLocale` → commands re-registered every
+  render → navigation cancelled); hydration mismatch of the theme icon; section-wide `loading.tsx` turned 404 into 200.
+- **Bundle**: palette, shortcuts dialog, mobile nav, toaster and top-bar menus load on intent; deep `@bf/ui/...` imports
+  (the barrel defeated tree-shaking); native `title` instead of Radix Tooltip in the collapsed sidebar.
+  The toast viewport mounts on the first toast (`getToast()` in `lib/toast.tsx`): sonner was ~11 kB loaded right after
+  hydration, the timing-dependent part of the old 195–215 kB spread. Shell now **186 kB gzip** in 15 files, stable.
+  Not done: scoping `NextIntlClientProvider` messages — they are ~3 kB of HTML (not JS), and root-level
+  `useTranslations()` in client components would need key-level picking; revisit when messages grow.
+- **E2E flakiness traced to the API**: with Valkey down, every request waited ~10 s in ioredis's offline queue before
+  the throttler failed open (fixed in BF-006's throttler, see its notes). E2E: 17/17 in 3 consecutive runs, with infra
+  down and with infra up.
+- `next-env.d.ts` is generated (git-ignored, excluded from Biome); `typecheck` runs `next typegen` first.

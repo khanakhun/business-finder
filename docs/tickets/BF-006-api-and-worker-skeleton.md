@@ -135,7 +135,11 @@ Delivered as three stacked commits (platform + system + OpenAPI · queue + worke
   JSON Schema components; the document is OpenAPI **3.1** (JSON Schema 2020-12). Generation runs offline (2 s).
 - **Throttler storage written in-house** (`@nest-lab/throttler-storage-redis` only supports Nest ≤ 11): atomic Lua
   on Valkey. DECISION: **fails open** when Valkey is down (requests allowed, warning logged, readiness reports it).
-- **Valkey roles**: the shared connection fails fast (`maxRetriesPerRequest: 1`) so HTTP never hangs; BullMQ gets
+- **Fix found in BF-007's e2e runs**: failing open still made each request wait ~10 s while ioredis reconnected
+  (commands queue offline; only the first request failed fast). Now the shared connection has `commandTimeout: 500`
+  and the throttler skips Valkey while it is `reconnecting`/`closed` and warns once per outage. The integration test
+  checks five consecutive requests (< 1 s each).
+- **Valkey roles**: the shared connection fails fast (`maxRetriesPerRequest: 1`, `commandTimeout`) so HTTP never hangs; BullMQ gets
   connection *options* (it owns and closes its connections) — blocking for workers, fail-fast for HTTP producers.
 - **@bf/queue is framework-free**: `TypedProducer` (validation, trace context, job id from idempotency key) and
   `createJobRunner` (Template Method: validate → SET NX idempotency → consumer span → log context → handler →

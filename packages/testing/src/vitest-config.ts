@@ -20,6 +20,8 @@ export interface VitestConfigOptions {
    * is covered by integration tests.
    */
   readonly coverageInclude?: readonly string[];
+  /** Test environment; `happy-dom` for React components. Default `node`. */
+  readonly environment?: 'node' | 'happy-dom';
   /** Vite plugins, e.g. `unplugin-swc` for NestJS decorator metadata. */
   readonly plugins?: readonly PluginOption[];
   /** Vitest global setup files, e.g. `PG_GLOBAL_SETUP` for integration tests that need Postgres. */
@@ -63,6 +65,7 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
     coverageExclude = [],
     coverageInclude = ['src/**/*.{ts,tsx}'],
     plugins = [],
+    environment = 'node',
     ci = process.env.CI === 'true',
   } = options;
   const isUnit = type === 'unit';
@@ -74,6 +77,7 @@ export function defineVitestConfig(options: VitestConfigOptions): ViteUserConfig
       exclude: ['**/node_modules/**', '**/dist/**', ...(isUnit ? [INT_TESTS_ANYWHERE] : [])],
       // A misconfigured glob must fail loudly instead of reporting green with zero tests.
       passWithNoTests: false,
+      environment,
       setupFiles: [SETUP_FILE, ...setupFiles],
       ...(globalSetup.length > 0 ? { globalSetup: [...globalSetup] } : {}),
       reporters: ci ? ['default', 'junit'] : ['default'],

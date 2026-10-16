@@ -70,6 +70,76 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Businesses the workspace tracks, most recently added first */
+        get: operations["listBusinesses"];
+        put?: never;
+        /** Add a business by hand (tracked by the workspace) */
+        post: operations["createBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A tracked business with provenance, contacts, categories, hours and media */
+        get: operations["getBusiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A tracked business's contact points */
+        get: operations["listBusinessContacts"];
+        put?: never;
+        /** Add a contact point by hand (provenance `manual`); an existing one is returned */
+        post: operations["addBusinessContact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/track": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Track a business in the workspace (idempotent: 201 when added, 200 when already tracked) */
+        post: operations["trackBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/events/{eventId}/replay": {
         parameters: {
             query?: never;
@@ -454,6 +524,12 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        /** @description A contact point the business publishes (no person names: contacts are shared facts). */
+        AddContactRequest: {
+            /** @enum {string} */
+            type: "email" | "phone" | "whatsapp" | "website_form" | "social";
+            value: string;
+        };
         AiUsage: {
             budget: {
                 hardUsd: number;
@@ -541,9 +617,131 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        BusinessDetail: {
+            address: {
+                city?: string;
+                /** @description ISO 3166-1 alpha-2, e.g. BL (Saint-Barthélemy), MF (Saint-Martin), FR. */
+                countryCode?: string;
+                line1?: string;
+                line2?: string;
+                postalCode?: string;
+                region?: string;
+            } | null;
+            /** @description Provenance of each golden field. */
+            attributes: {
+                [key: string]: components["schemas"]["Provenance"];
+            };
+            categories: {
+                /** Format: uuid */
+                categoryId: string;
+                confidence: number;
+                isPrimary: boolean;
+            }[];
+            contacts: components["schemas"]["Contact"][];
+            countryCode: string | null;
+            dataQuality: number | null;
+            displayName: string;
+            /** Format: date-time */
+            firstSeenAt: string;
+            formattedAddress: string | null;
+            hours: {
+                /** @description HH:MM */
+                closesAt: string;
+                /** @description HH:MM */
+                opensAt: string;
+                /** @description 0 = Monday. */
+                weekday: number;
+            }[];
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            id: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            locality: string | null;
+            location: components["schemas"]["LatLng"] | null;
+            media: {
+                /** Format: uuid */
+                id: string;
+                /** @enum {string} */
+                kind: "photo" | "logo" | "screenshot_desktop" | "screenshot_mobile" | "og_image";
+                /** @enum {string} */
+                license: "owner_site" | "provider_restricted" | "stock" | "ai_generated" | "unknown";
+                url: string | null;
+            }[];
+            /** @enum {string} */
+            operatingStatus: "operational" | "closed_temporarily" | "closed_permanently" | "unknown";
+            orgState: components["schemas"]["OrgBusinessState"];
+            /** @enum {string} */
+            pipelineStatus: "new" | "qualified" | "disqualified" | "contacted" | "engaged" | "meeting" | "proposal" | "won" | "lost";
+            postalCode: string | null;
+            priceLevel: number | null;
+            primaryCategoryId: string | null;
+            /** @description E.164. */
+            primaryPhone: string | null;
+            ratingAvg: number | null;
+            ratingCount: number | null;
+            /** @description Optimistic concurrency version. */
+            version: number;
+            websiteUrl: string | null;
+        };
+        BusinessPage: {
+            items: components["schemas"]["BusinessSummary"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
+        BusinessSummary: {
+            countryCode: string | null;
+            displayName: string;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            id: string;
+            locality: string | null;
+            location: components["schemas"]["LatLng"] | null;
+            /** @enum {string} */
+            operatingStatus: "operational" | "closed_temporarily" | "closed_permanently" | "unknown";
+            /** @enum {string} */
+            pipelineStatus: "new" | "qualified" | "disqualified" | "contacted" | "engaged" | "meeting" | "proposal" | "won" | "lost";
+            primaryCategoryId: string | null;
+            /** @description E.164. */
+            primaryPhone: string | null;
+            ratingAvg: number | null;
+            ratingCount: number | null;
+            websiteUrl: string | null;
+        };
         ChangeMemberRoleRequest: {
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
+        };
+        Contact: {
+            confidence: number;
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            normalizedValue: string;
+            /** @description Only when published by the business itself (data minimization). */
+            personName: string | null;
+            publishedOnSite: boolean;
+            /** @enum {string} */
+            source: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "website" | "manual" | "import";
+            sourceUrl: string | null;
+            /** @description email: generic | personal | department | unknown; phone: mobile | landline | unknown; social: network. */
+            subtype: string;
+            /** @enum {string} */
+            type: "email" | "phone" | "whatsapp" | "website_form" | "social";
+            value: string;
+            /** @enum {string} */
+            verificationStatus: "unknown" | "valid" | "invalid" | "catch_all" | "risky" | "disposable";
+            verifiedAt: string | null;
+        };
+        ContactList: {
+            items: components["schemas"]["Contact"][];
         };
         CreateApiKeyRequest: {
             /** @description Omit for a key that does not expire. */
@@ -567,6 +765,18 @@ export type components = {
             revokedAt: string | null;
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
+        };
+        CreateManualBusinessRequest: {
+            countryCode: string;
+            displayName: string;
+            /** Format: email */
+            email?: string;
+            formattedAddress?: string;
+            locality?: string;
+            location?: components["schemas"]["LatLng"];
+            phone?: string;
+            postalCode?: string;
+            websiteUrl?: string;
         };
         FeatureFlags: {
             [key: string]: boolean;
@@ -608,6 +818,11 @@ export type components = {
             email: unknown;
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
+        };
+        /** @description WGS84 coordinates in decimal degrees. */
+        LatLng: {
+            lat: number;
+            lng: number;
         };
         /** @description The signed-in user, their active workspace, role and permissions. */
         Me: {
@@ -696,6 +911,15 @@ export type components = {
             role: "owner" | "admin" | "member" | "viewer";
             slug: string;
         };
+        OrgBusinessState: {
+            /** @enum {string} */
+            addedVia: "discovery" | "search" | "manual" | "import";
+            doNotContact: boolean;
+            /** @enum {string} */
+            pipelineStatus: "new" | "qualified" | "disqualified" | "contacted" | "engaged" | "meeting" | "proposal" | "won" | "lost";
+            /** Format: date-time */
+            trackedAt: string;
+        };
         OrgSettings: {
             agencyName: string | null;
             features: {
@@ -759,6 +983,16 @@ export type components = {
             /** Format: uri */
             type: string;
         };
+        Provenance: {
+            confidence: number;
+            /** Format: date-time */
+            observedAt: string;
+            /** @enum {string} */
+            source: "google_places" | "overture" | "foursquare" | "osm" | "gmaps_scraper" | "website" | "manual" | "import";
+            /** @description The provider's id for the record the value came from. */
+            sourceRef: string | null;
+            value: unknown;
+        };
         PutSecretRequest: {
             value: string;
         };
@@ -815,6 +1049,14 @@ export type components = {
         TestNotificationAccepted: {
             /** Format: uuid */
             eventId: string;
+        };
+        TrackBusinessRequest: {
+            addedRef?: string;
+            /**
+             * @default manual
+             * @enum {string}
+             */
+            addedVia: "discovery" | "search" | "manual" | "import";
         };
         TransferOwnershipRequest: {
             /**
@@ -1108,6 +1350,446 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listBusinesses: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createBusiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateManualBusinessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listBusinessContacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    addBusinessContact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddContactRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Contact"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    trackBusiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrackBusinessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgBusinessState"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

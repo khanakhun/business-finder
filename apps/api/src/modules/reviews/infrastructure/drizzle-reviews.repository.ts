@@ -146,7 +146,7 @@ export class DrizzleReviewInsightsRepository implements ReviewInsightsRepository
     );
   }
 
-  async withSource(organizationId: string, source: ReviewSource): Promise<string[]> {
+  async withSource(organizationId: string, source: ReviewSource, limit: number): Promise<string[]> {
     const rows = await getExecutor(this.db)
       .select({ businessId: reviewInsights.businessId })
       .from(reviewInsights)
@@ -155,7 +155,9 @@ export class DrizzleReviewInsightsRepository implements ReviewInsightsRepository
           eq(reviewInsights.organizationId, organizationId),
           sql`${reviewInsights.sourceStats} ? ${source}`,
         ),
-      );
+      )
+      .orderBy(asc(reviewInsights.businessId))
+      .limit(limit);
     return rows.map((r) => r.businessId);
   }
 }

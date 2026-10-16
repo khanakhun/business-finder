@@ -57,13 +57,16 @@ const clock = fixedClock(new Date());
 
 /** Everything the classifier was asked, to prove it only sees anonymized text. */
 const classified: PreparedReview[] = [];
+const forgotten: string[] = [];
 const fake = new FakeReviewClassifier();
 const recording: ReviewClassifier = {
   classify: (org, reviews) => {
     classified.push(...reviews);
     return fake.classify(org, reviews);
   },
-  forget: async () => {},
+  forget: async (org, source) => {
+    forgotten.push(`${org}:${source}`);
+  },
 };
 const OVERRIDES = [{ token: REVIEW_CLASSIFIER, value: recording }];
 
@@ -285,8 +288,10 @@ describe('licensing gates', () => {
     const outcome = await t.app
       .get(ReviewMiningService)
       .analyze(org, await subjectOf(id), batch('google_places'), { allowed: async () => false });
-    expect(outcome.analysed).toBe(0);
+    expect(outcome).toMatchObject({ analysed: 0, dropped: true });
     expect(await db.select().from(reviewInsights).where(eq(reviewInsights.businessId, id))).toEqual([]);
+    // Verdicts cached while classifying are forgotten with it.
+    expect(forgotten).toContain(`${org}:google_places`);
   });
 
   it('keeps the scraper source off while the scraper itself is not allowed, and audits the choice', async () => {
@@ -423,7 +428,13 @@ describe('retention', () => {
     // Past the Google expiry, before the purge: the pasted part is still shown, Google's is not.
     clock.set(new Date((row?.expiresAt ?? new Date()).getTime() + 60_000));
     const shown = (await owner.get(`/v1/businesses/${id}/review-insights`).expect(200)).body.insights;
-    expect(shown).toMatchObject({ sources: ['manual'], sampleSize: 1, expiresAt: null });
+    // Google's rating observations expired with it: no rating is shown from them.
+    expect(shown).toMatchObject({
+      sources: ['manual'],
+      sampleSize: 1,
+      expiresAt: null,
+      ratingSnapshot: null,
+    });
     expect(JSON.stringify(shown.evidence)).not.toContain('google_places');
 
     const purge = worker.get(NightlyMaintenance).all().get('review_insights_retention');

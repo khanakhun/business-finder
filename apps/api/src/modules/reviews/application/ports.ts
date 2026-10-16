@@ -119,8 +119,8 @@ export interface ReviewInsightsRepository {
   delete(organizationId: string, businessId: string): Promise<void>;
   /** Rows whose earliest contribution expired before `now`. */
   expiring(now: Date, limit: number): Promise<Array<{ organizationId: string; businessId: string }>>;
-  /** The workspace's businesses with a contribution from `source`. */
-  withSource(organizationId: string, source: ReviewSource): Promise<string[]>;
+  /** Up to `limit` of the workspace's businesses with a contribution from `source`, in id order. */
+  withSource(organizationId: string, source: ReviewSource, limit: number): Promise<string[]>;
 }
 export const REVIEW_INSIGHTS = Symbol('REVIEW_INSIGHTS');
 

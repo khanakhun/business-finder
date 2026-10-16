@@ -9,7 +9,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import type { AuthContext } from '../../platform/security/auth-context.ts';
-import { type CombinedInsights, combineInsights } from '../domain/insights.ts';
+import type { CombinedInsights } from '../domain/insights.ts';
 import {
   REVIEW_INSIGHTS,
   REVIEW_SUBJECTS,
@@ -31,6 +31,7 @@ export class ReviewInsightsQuery {
     @Inject(REVIEW_SUBJECTS) private readonly subjects: ReviewSubjectReader,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly gates: ReviewGates,
+    private readonly mining: ReviewMiningService,
   ) {}
 
   async execute(auth: AuthContext, businessId: string): Promise<BusinessReviewInsights> {
@@ -45,11 +46,7 @@ export class ReviewInsightsQuery {
     const combined = !row
       ? null
       : expired
-        ? combineInsights(
-            row.contributions,
-            { snapshot: row.combined.ratingSnapshot, trend: row.combined.ratingTrend },
-            now,
-          )
+        ? await this.mining.combinedAt(businessId, row.contributions, now)
         : row.combined;
     return {
       insights: combined ? toReviewInsights(businessId, combined) : null,
@@ -103,6 +100,11 @@ export class AnalyzePastedReviewsCommand {
       },
       { allowed: () => this.gates.isAllowed(organizationId, 'manual') },
     );
+    if (outcome.dropped) {
+      throw new ConflictError('Pasted reviews are turned off for this workspace.', {
+        details: { reason: 'LICENSING_DISABLED' },
+      });
+    }
     if (outcome.analysed === 0) {
       throw new ConflictError('None of the pasted reviews could be analysed.', {
         details: { reason: 'NOTHING_ANALYSED' },

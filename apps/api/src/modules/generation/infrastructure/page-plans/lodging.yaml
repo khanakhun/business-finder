@@ -1,0 +1,32 @@
+id: lodging
+match: [lodging]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: image_full, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: cards, requires: { kinds: [amenity, service, language_spoken, award], min: 2 } }
+      - { type: about, variant: split, otherwise: centered, requires: { images: 1 } }
+      - { type: booking, variant: link, requires: { kinds: [booking_provider] } }
+      - { type: testimonials, variant: carousel, requires: { kinds: [testimonial] } }
+      - { type: location, variant: map_split, requires: { kinds: [address, geo] } }
+      - { type: contact, variant: split }
+  - kind: services
+    slug: services
+    requires: { kinds: [service, amenity], min: 4 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: services, variant: cards, requires: { kinds: [service] }, section: true, fills: [service, price] }
+  - kind: gallery
+    slug: galerie
+    requires: { images: 6 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: gallery, variant: masonry, requires: { images: 6 } }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

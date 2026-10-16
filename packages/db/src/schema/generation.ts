@@ -86,6 +86,8 @@ export const generationJobs = pgTable(
       .references(() => businesses.id, { onDelete: 'cascade' }),
     /** The site generated into (an existing one to regenerate, or the one the first success creates). */
     siteId: uuid().references(() => sites.id, { onDelete: 'set null' }),
+    /** What a person changed in the brief (BF-040 `BriefOverrides`), applied by the workspace builder. */
+    briefOverrides: jsonb().$type<Record<string, unknown>>(),
     position: smallint().notNull(),
     /** 1 is the most urgent … 10. */
     priority: smallint().notNull(),

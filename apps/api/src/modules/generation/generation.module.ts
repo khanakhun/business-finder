@@ -12,7 +12,9 @@ import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
 import { SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
+import { BriefService, PAGE_PLAN_TEMPLATES } from './application/brief.service.ts';
 import {
+  BRIEF_SOURCES_READER,
   FACT_OVERLAY_REPOSITORY,
   FACT_SNAPSHOTS,
   FACT_SOURCES_READER,
@@ -63,6 +65,7 @@ import {
   StaticEngineRegistry,
 } from './infrastructure/defaults/defaults.ts';
 import { FakeEngine } from './infrastructure/defaults/fake.engine.ts';
+import { DrizzleBriefSources } from './infrastructure/drizzle-brief-sources.ts';
 import {
   DrizzleFactOverlay,
   DrizzleFactSnapshots,
@@ -72,6 +75,7 @@ import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
+import { pagePlans } from './infrastructure/page-plans.ts';
 import {
   DrizzleSiteFactExtractions,
   DrizzleSitePages,
@@ -139,6 +143,9 @@ export class GenerationModule {
         },
         { provide: SITE_FACT_TELEMETRY, useValue: PROMETHEUS_SITE_FACT_TELEMETRY },
         SiteFactExtraction,
+        { provide: BRIEF_SOURCES_READER, useClass: DrizzleBriefSources },
+        { provide: PAGE_PLAN_TEMPLATES, useFactory: () => pagePlans() },
+        BriefService,
         {
           provide: ENGINE_REGISTRY,
           inject: [APP_ENV],
@@ -255,7 +262,7 @@ export class GenerationModule {
             ]
           : []),
       ],
-      exports: [GenerationCommands, GenerationQueries, FactRegistryService, SiteFactExtraction],
+      exports: [GenerationCommands, GenerationQueries, FactRegistryService, SiteFactExtraction, BriefService],
     };
   }
 }

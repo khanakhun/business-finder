@@ -811,6 +811,66 @@
         ],
         "type": "object"
       },
+      "BriefOverrides": {
+        "additionalProperties": false,
+        "properties": {
+          "extraInstructions": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "locales": {
+            "items": {
+              "pattern": "^[a-z]{2}$",
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array"
+          },
+          "pagePlanId": {
+            "pattern": "^[a-z0-9_-]{1,60}$",
+            "type": "string"
+          },
+          "pages": {
+            "items": {
+              "enum": [
+                "home",
+                "menu",
+                "services",
+                "products",
+                "about",
+                "contact",
+                "booking",
+                "gallery"
+              ],
+              "type": "string"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "type": "array"
+          },
+          "style": {
+            "enum": [
+              "luxe",
+              "modern",
+              "warm",
+              "minimal",
+              "coastal"
+            ],
+            "type": "string"
+          },
+          "tone": {
+            "enum": [
+              "friendly",
+              "refined",
+              "professional",
+              "energetic"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "BulkEnrichRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2967,6 +3027,9 @@
             "items": {
               "additionalProperties": false,
               "properties": {
+                "briefOverrides": {
+                  "$ref": "#/components/schemas/BriefOverrides"
+                },
                 "budgetUsd": {
                   "exclusiveMinimum": 0,
                   "maximum": 100,
@@ -5565,6 +5628,672 @@
         "required": [
           "items",
           "nextCursor"
+        ],
+        "type": "object"
+      },
+      "GenerationBrief": {
+        "additionalProperties": false,
+        "properties": {
+          "audience": {
+            "additionalProperties": false,
+            "properties": {
+              "hints": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "evidence": {
+                      "items": {
+                        "pattern": "^(fact_[a-z_]+_[0-9a-f]{12}|theme_[a-z_]+|finding_[a-z0-9_.-]+)$",
+                        "type": "string"
+                      },
+                      "maxItems": 10,
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "text": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "evidence"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 6,
+                "type": "array"
+              },
+              "market": {
+                "enum": [
+                  "luxury_tourism",
+                  "tourism",
+                  "residents",
+                  "mixed"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "market",
+              "hints"
+            ],
+            "type": "object"
+          },
+          "briefVersion": {
+            "const": 1,
+            "type": "number"
+          },
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "constraints": {
+            "additionalProperties": false,
+            "properties": {
+              "doNotMention": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "frenchTypography": {
+                "type": "boolean"
+              },
+              "maxHeadlineChars": {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              "maxParagraphChars": {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              "neutralCopyWhenMissing": {
+                "const": true,
+                "type": "boolean"
+              },
+              "noInventedFacts": {
+                "const": true,
+                "type": "boolean"
+              },
+              "tone": {
+                "enum": [
+                  "friendly",
+                  "refined",
+                  "professional",
+                  "energetic"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tone",
+              "noInventedFacts",
+              "neutralCopyWhenMissing",
+              "frenchTypography",
+              "doNotMention",
+              "maxHeadlineChars",
+              "maxParagraphChars"
+            ],
+            "type": "object"
+          },
+          "design": {
+            "additionalProperties": false,
+            "properties": {
+              "density": {
+                "enum": [
+                  "compact",
+                  "comfortable",
+                  "airy"
+                ],
+                "type": "string"
+              },
+              "imagery": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "palette": {
+                "additionalProperties": false,
+                "properties": {
+                  "accent": {
+                    "pattern": "^#[0-9a-f]{6}$",
+                    "type": "string"
+                  },
+                  "primary": {
+                    "pattern": "^#[0-9a-f]{6}$",
+                    "type": "string"
+                  },
+                  "source": {
+                    "enum": [
+                      "brand",
+                      "category",
+                      "style"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "primary",
+                  "accent",
+                  "source"
+                ],
+                "type": "object"
+              },
+              "reasons": {
+                "items": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              "style": {
+                "enum": [
+                  "luxe",
+                  "modern",
+                  "warm",
+                  "minimal",
+                  "coastal"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "style",
+              "reasons",
+              "palette",
+              "imagery",
+              "density"
+            ],
+            "type": "object"
+          },
+          "extraInstructions": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identity": {
+            "additionalProperties": false,
+            "properties": {
+              "area": {
+                "anyOf": [
+                  {
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "categoryLabel": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "en": {
+                        "maxLength": 100,
+                        "type": "string"
+                      },
+                      "fr": {
+                        "maxLength": 100,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "en",
+                      "fr"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "categoryPath": {
+                "anyOf": [
+                  {
+                    "maxLength": 200,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "maxLength": 600,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "locality": {
+                "anyOf": [
+                  {
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "name": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "nameFactId": {
+                "anyOf": [
+                  {
+                    "pattern": "^(fact_[a-z_]+_[0-9a-f]{12}|theme_[a-z_]+|finding_[a-z0-9_.-]+)$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "nameFactId",
+              "categoryPath",
+              "categoryLabel",
+              "locality",
+              "area",
+              "description"
+            ],
+            "type": "object"
+          },
+          "locales": {
+            "additionalProperties": false,
+            "properties": {
+              "available": {
+                "items": {
+                  "pattern": "^[a-z]{2}$",
+                  "type": "string"
+                },
+                "maxItems": 4,
+                "minItems": 1,
+                "type": "array"
+              },
+              "default": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "available",
+              "default"
+            ],
+            "type": "object"
+          },
+          "offer": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "enum": [
+                  "new_website",
+                  "website_redesign",
+                  "ai_receptionist",
+                  "booking_system",
+                  "local_seo"
+                ],
+                "type": "string"
+              },
+              "improvements": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "ref": {
+                      "pattern": "^(fact_[a-z_]+_[0-9a-f]{12}|theme_[a-z_]+|finding_[a-z0-9_.-]+)$",
+                      "type": "string"
+                    },
+                    "text": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ref",
+                    "text"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 10,
+                "type": "array"
+              }
+            },
+            "required": [
+              "id",
+              "improvements"
+            ],
+            "type": "object"
+          },
+          "pagePlan": {
+            "additionalProperties": false,
+            "properties": {
+              "collapsed": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "into": {
+                      "maxLength": 20,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "maxLength": 20,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "reason": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "into",
+                    "reason"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 8,
+                "type": "array"
+              },
+              "id": {
+                "maxLength": 60,
+                "minLength": 1,
+                "type": "string"
+              },
+              "matched": {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              "pages": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "blocks": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "fills": {
+                            "items": {
+                              "maxLength": 40,
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "maxItems": 10,
+                            "type": "array"
+                          },
+                          "type": {
+                            "maxLength": 40,
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "variant": {
+                            "maxLength": 40,
+                            "minLength": 1,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 20,
+                      "minItems": 1,
+                      "type": "array"
+                    },
+                    "kind": {
+                      "enum": [
+                        "home",
+                        "menu",
+                        "services",
+                        "products",
+                        "about",
+                        "contact",
+                        "booking",
+                        "gallery"
+                      ],
+                      "type": "string"
+                    },
+                    "slug": {
+                      "pattern": "^(|[a-z0-9-]{1,40})$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "kind",
+                    "blocks"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 8,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "id",
+              "matched",
+              "pages",
+              "collapsed"
+            ],
+            "type": "object"
+          },
+          "painPoints": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "remedy": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "tag": {
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tag",
+                "remedy"
+              ],
+              "type": "object"
+            },
+            "maxItems": 8,
+            "type": "array"
+          },
+          "sellingPoints": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "evidence": {
+                  "items": {
+                    "pattern": "^(fact_[a-z_]+_[0-9a-f]{12}|theme_[a-z_]+|finding_[a-z0-9_.-]+)$",
+                    "type": "string"
+                  },
+                  "maxItems": 6,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "text": {
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text",
+                "evidence"
+              ],
+              "type": "object"
+            },
+            "maxItems": 6,
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "enum": [
+                    "no_display_phone",
+                    "no_display_email",
+                    "no_contact_channel",
+                    "no_hours",
+                    "no_large_image",
+                    "single_locale",
+                    "no_services",
+                    "no_owner_site_facts",
+                    "few_facts"
+                  ],
+                  "type": "string"
+                },
+                "message": {
+                  "maxLength": 300,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "type": "object"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "required": [
+          "briefVersion",
+          "businessId",
+          "identity",
+          "offer",
+          "audience",
+          "locales",
+          "pagePlan",
+          "sellingPoints",
+          "painPoints",
+          "design",
+          "constraints",
+          "extraInstructions",
+          "warnings"
+        ],
+        "type": "object"
+      },
+      "GenerationBriefPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "brief": {
+            "$ref": "#/components/schemas/GenerationBrief"
+          },
+          "pagePlans": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "matched": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "id",
+                "matched"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "registry": {
+            "additionalProperties": false,
+            "properties": {
+              "byKind": {
+                "additionalProperties": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "display": {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    "internal": {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "display",
+                    "internal"
+                  ],
+                  "type": "object"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "display": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "internal": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "display",
+              "internal",
+              "byKind"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "brief",
+          "registry",
+          "pagePlans"
         ],
         "type": "object"
       },
@@ -20275,6 +21004,137 @@
           }
         },
         "summary": "Change a fact the workspace stated",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/generation-brief": {
+      "get": {
+        "operationId": "getGenerationBrief",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offer",
+            "required": false,
+            "schema": {
+              "enum": [
+                "new_website",
+                "website_redesign",
+                "ai_receptionist",
+                "booking_system",
+                "local_seo"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locales",
+            "required": false,
+            "schema": {
+              "description": "Comma-separated, e.g. \"fr,en\".",
+              "pattern": "^[a-z]{2}(,[a-z]{2}){0,3}$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "style",
+            "required": false,
+            "schema": {
+              "enum": [
+                "luxe",
+                "modern",
+                "warm",
+                "minimal",
+                "coastal"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationBriefPreview"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The brief a generation would start from: page plan, locales, design, warnings and registry counts",
         "tags": [
           "generation"
         ]

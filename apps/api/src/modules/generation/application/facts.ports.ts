@@ -121,3 +121,32 @@ export interface SiteFactExtractionStore {
 export interface SiteFactTelemetry {
   verified(stats: ExtractionStats): void;
 }
+
+// The generation brief (BF-040): what the brief builder reads besides the registry.
+
+export const BRIEF_SOURCES_READER = Symbol('BRIEF_SOURCES_READER');
+
+export interface BriefSources {
+  readonly businessName: string;
+  readonly category: { readonly path: string; readonly labels: { en: string; fr: string } } | null;
+  readonly locality: string | null;
+  readonly countryCode: string | null;
+  readonly hasWebsite: boolean;
+  /** Languages declared and detected on the latest crawl of the business's site. */
+  readonly siteLanguages: readonly string[];
+  /** The workspace's review themes for the business: pain tag → mentions. */
+  readonly reviewThemes: Readonly<Record<string, number>>;
+  readonly findings: readonly {
+    readonly code: string;
+    readonly severity: 'critical' | 'major' | 'minor' | 'info';
+    readonly recommendation: string;
+    readonly offers: readonly string[];
+  }[];
+  readonly workspaceLocales: readonly string[];
+  /** Image candidates known for the business (its site's images, the crawl's), and those ≥ 1200 px wide. */
+  readonly images: { readonly count: number; readonly large: number };
+}
+
+export interface BriefSourcesReader {
+  read(organizationId: string, businessId: string): Promise<BriefSources | undefined>;
+}

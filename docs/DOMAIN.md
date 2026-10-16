@@ -49,7 +49,9 @@
 | **Lead** (site lead) | A submission from a preview/live site form ("I'm interested", contact request). |
 | **Generation batch / job** | A user request to generate sites for N businesses (batch) and one job per business, with priority, engine and status. |
 | **Engine** | A strategy that produces a SiteSpec: `blocks`, `claude-agent-sdk`, `claude-code`, `codex`. |
-| **Brief** | Generation input: facts, brand, reviews highlights, audit findings, offer, locales, page plan, constraints. |
+| **Brief** | Generation input: facts, brand, reviews highlights, audit findings, offer, locales, page plan, constraints. Built deterministically (`GenerationBrief`, `briefVersion: 1`); every audience hint and selling point cites fact, review-theme or finding ids, and missing facts become warnings. A person may adjust it per job (`briefOverrides`: locales, page plan or custom pages, style, tone, operator instructions). |
+| **Page plan** | The pages and blocks a site gets, from a template per taxonomy prefix (`page-plans/*.yaml`, most specific match wins). A page or block without the facts it needs collapses into another page or is left out, never filled. |
+| **Starter spec** | A valid SiteSpec built from the brief and the display facts only (neutral, digit-free placeholder copy listed as `TODO-COPY` annotations); engines refine it. |
 | **Fact registry** | The set of verified facts a generator may use (name, address, phones, emails, hours, services, prices if published). Anything else is not a fact. Each fact carries its provenance and a usage: `display` only when one provenance is licensed for display (the business's own site or JSON-LD, open data, a workspace member); facts known only from restricted providers stay `internal`. A workspace's own statements (the overlay) win over global facts of single-valued kinds; generations read a deduplicated snapshot. |
 | **Quality gate** | A check in the chain run on generated versions (schema, facts, copy, a11y, Lighthouse, visual critic). |
 | **Sandbox / Runner** | Isolated container in which coding-agent engines run. |

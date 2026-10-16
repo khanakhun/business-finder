@@ -30,6 +30,8 @@ export function sourceOfProvider(provider: SourceProvider): FactSource {
 }
 
 export function usageFor(kind: RegistryFactKind, sources: readonly FactSource[]): FactUsage {
+  // DECISION(BF-040): the business's name is the subject of the site, never licensed content: always displayable.
+  if (kind === 'name') return 'display';
   if (kind === 'testimonial')
     return sources.some((source) => source === 'owner_site' || source === 'jsonld') ? 'display' : 'internal';
   return sources.some((source) => DISPLAY_SOURCES.has(source)) ? 'display' : 'internal';

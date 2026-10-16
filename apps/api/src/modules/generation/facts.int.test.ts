@@ -219,4 +219,23 @@ describe('fact registry (BF-040)', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.facts).toEqual(first.facts);
   });
+  it('previews the generation brief with its page plan, warnings and registry counts', async () => {
+    const { body } = await viewer
+      .get(`/v1/businesses/${businessId}/generation-brief?locales=fr,en&style=coastal`)
+      .expect(200);
+    expect(body.brief).toMatchObject({
+      briefVersion: 1,
+      businessId,
+      identity: { locality: 'Gustavia' },
+      locales: { available: ['fr', 'en'], default: 'fr' },
+      design: { style: 'coastal' },
+      pagePlan: { id: 'default' },
+    });
+    expect(body.brief.pagePlan.pages[0].kind).toBe('home');
+    expect(body.brief.warnings.map((w: { code: string }) => w.code)).toContain('no_display_phone');
+    expect(body.registry.byKind.phone).toEqual({ display: 0, internal: 1 });
+    expect(body.pagePlans.map((p: { id: string }) => p.id)).toContain('food_drink');
+    await outsider.get(`/v1/businesses/${businessId}/generation-brief`).expect(404);
+    await member.get(`/v1/businesses/${businessId}/generation-brief?locales=fr;en`).expect(422);
+  });
 });

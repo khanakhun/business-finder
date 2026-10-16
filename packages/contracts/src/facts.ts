@@ -101,20 +101,24 @@ const base = {
   usage: FactUsageSchema,
 };
 
-const structured = (Object.keys(FactValueSchemas) as (keyof typeof FactValueSchemas)[]).map((kind) =>
-  z.object({ ...base, kind: z.literal(kind), value: FactValueSchemas[kind] }),
-);
+const typed = <K extends keyof typeof FactValueSchemas>(kind: K) =>
+  z.object({ ...base, kind: z.literal(kind), value: FactValueSchemas[kind] });
 type TextKind = Exclude<RegistryFactKind, keyof typeof FactValueSchemas>;
 const textKinds = REGISTRY_FACT_KINDS.filter((kind) => !(kind in FactValueSchemas)) as TextKind[];
 
 export const RegistryFactSchema = z
   .discriminatedUnion('kind', [
-    ...(structured as [(typeof structured)[number], ...(typeof structured)[number][]]),
-    z.object({
-      ...base,
-      kind: z.enum(textKinds as unknown as readonly [TextKind, ...TextKind[]]),
-      value: text(2000),
-    }),
+    typed('geo'),
+    typed('hours'),
+    typed('price'),
+    typed('social'),
+    typed('testimonial'),
+    typed('team_member'),
+    typed('year_founded'),
+    typed('booking_provider'),
+    typed('menu_item'),
+    typed('brand_color'),
+    z.object({ ...base, kind: z.enum(textKinds as [TextKind, ...TextKind[]]), value: text(2000) }),
   ])
   .meta({ id: 'RegistryFact' });
 export type RegistryFact = z.infer<typeof RegistryFactSchema>;
@@ -153,6 +157,14 @@ export function toSiteFactKind(kind: RegistryFactKind): string | undefined {
     team_member: 'team_member',
     year_founded: 'year',
     award: 'award',
+    // Text the business states about itself: sites may quote it, the validator checks it like any fact.
+    tagline: 'other',
+    about_summary: 'other',
+    menu_section: 'other',
+    amenity: 'other',
+    language_spoken: 'other',
+    payment_method: 'other',
+    area_served: 'other',
   };
   return map[kind];
 }

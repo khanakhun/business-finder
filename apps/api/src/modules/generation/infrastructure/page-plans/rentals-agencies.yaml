@@ -1,0 +1,34 @@
+id: rentals_agencies
+match: [lodging.villa_rental_agency, lodging.vacation_rental, real_estate]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: image_full, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: cards, requires: { kinds: [service, amenity, language_spoken, area_served, award], min: 2 } }
+      - { type: gallery, variant: carousel, requires: { images: 3 } }
+      - { type: cta_banner, variant: image, otherwise: solid, requires: { images: 2 } }
+      - { type: testimonials, variant: carousel, requires: { kinds: [testimonial] } }
+      - { type: about, variant: centered }
+      - { type: contact, variant: split }
+  - kind: services
+    slug: services
+    requires: { kinds: [service], min: 3 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: services, variant: cards, requires: { kinds: [service] }, section: true, fills: [service, price] }
+      - { type: booking, variant: link, requires: { kinds: [booking_provider] } }
+  - kind: about
+    slug: a-propos
+    requires: { kinds: [about_summary, tagline, team_member, year_founded, award], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: about, variant: story, otherwise: centered, requires: { images: 1 } }
+      - { type: team, variant: grid, requires: { kinds: [team_member] }, section: true }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

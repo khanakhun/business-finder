@@ -1,0 +1,35 @@
+id: retail
+match: [retail_shopping, home_construction.construction_supplies, industry_trade]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: split, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: inline, requires: { kinds: [service, amenity, payment_method, area_served], min: 2 } }
+      - { type: services, variant: cards, requires: { kinds: [service], min: 1 }, fills: [service] }
+      - { type: about, variant: centered }
+      - { type: hours, variant: compact, requires: { kinds: [hours] } }
+      - { type: location, variant: map_split, requires: { kinds: [address, geo] } }
+      - { type: contact, variant: split }
+  - kind: products
+    slug: produits
+    requires: { kinds: [service], min: 5 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: services, variant: grid, requires: { kinds: [service] }, fills: [service, price] }
+      - { type: gallery, variant: grid, requires: { images: 3 } }
+  - kind: about
+    slug: a-propos
+    requires: { kinds: [about_summary, tagline, team_member, year_founded, award], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: about, variant: story, otherwise: centered, requires: { images: 1 } }
+      - { type: team, variant: list, requires: { kinds: [team_member] }, section: true }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: hours, variant: table, requires: { kinds: [hours] } }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

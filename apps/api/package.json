@@ -82,6 +82,7 @@
     "rxjs": "catalog:",
     "sharp": "catalog:",
     "tldts": "catalog:",
+    "yaml": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

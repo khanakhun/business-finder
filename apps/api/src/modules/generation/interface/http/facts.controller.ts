@@ -2,20 +2,36 @@ import {
   type BusinessFacts,
   BusinessFactsSchema,
   CreateOrgBusinessFactRequestSchema,
+  type GenerationBriefPreview,
+  GenerationBriefPreviewSchema,
+  GenerationBriefQuerySchema,
   type OrgBusinessFact,
   OrgBusinessFactSchema,
   UpdateOrgBusinessFactRequestSchema,
 } from '@bf/contracts';
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
+import { BriefService } from '../../application/brief.service.ts';
 import { type FactActor, FactRegistryService } from '../../application/facts.service.ts';
 
 class CreateBody extends zodDto(CreateOrgBusinessFactRequestSchema) {}
 class UpdateBody extends zodDto(UpdateOrgBusinessFactRequestSchema) {}
+class BriefQuery extends zodDto(GenerationBriefQuerySchema) {}
 
 const uuid = new ParseUUIDPipe({ version: '7' });
 
@@ -24,15 +40,36 @@ function actorOf(auth: AuthContext): FactActor {
   return { organizationId: auth.orgId, userId: auth.userId ?? null };
 }
 
-/** A business's fact registry (BF-040) and the workspace's own statements about it. */
+/** A business's fact registry and generation brief (BF-040), and the workspace's own statements about it. */
 @ApiTags('generation')
-@Controller('businesses/:id/facts')
+@Controller('businesses/:id')
 export class FactsController {
-  constructor(private readonly facts: FactRegistryService) {}
+  constructor(
+    private readonly facts: FactRegistryService,
+    private readonly briefs: BriefService,
+  ) {}
+
+  @Get('generation-brief')
+  @RequirePermission('business:read')
+  @ApiRoute({
+    summary:
+      'The brief a generation would start from: page plan, locales, design, warnings and registry counts',
+    operationId: 'getGenerationBrief',
+    query: BriefQuery,
+    response: { status: 200, schema: GenerationBriefPreviewSchema },
+    errors: [400, 401, 403, 404, 422],
+  })
+  brief(
+    @Ctx() auth: AuthContext,
+    @Param('id', uuid) id: string,
+    @Query() query: BriefQuery,
+  ): Promise<GenerationBriefPreview> {
+    return this.briefs.preview(actorOf(auth), id, query);
+  }
 
   // DECISION(BF-040): reading the registry needs `business:read` (like every other read of a business); the ticket's
   // `business:write` guards the overlay's changes.
-  @Get()
+  @Get('facts')
   @RequirePermission('business:read')
   @ApiRoute({
     summary:
@@ -45,7 +82,7 @@ export class FactsController {
     return this.facts.registry(actorOf(auth), id);
   }
 
-  @Post()
+  @Post('facts')
   @RequirePermission('business:write')
   @ApiRoute({
     summary: 'State a fact about a business for this workspace (the global graph is unchanged)',
@@ -62,7 +99,7 @@ export class FactsController {
     return this.facts.create(actorOf(auth), id, body);
   }
 
-  @Patch(':factId')
+  @Patch('facts/:factId')
   @RequirePermission('business:write')
   @ApiRoute({
     summary: 'Change a fact the workspace stated',
@@ -80,7 +117,7 @@ export class FactsController {
     return this.facts.update(actorOf(auth), id, factId, body);
   }
 
-  @Delete(':factId')
+  @Delete('facts/:factId')
   @HttpCode(204)
   @RequirePermission('business:write')
   @ApiRoute({

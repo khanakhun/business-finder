@@ -1,0 +1,35 @@
+id: trades_services
+match: [home_services, home_construction, professional_services, health_medical, finance_insurance, technology_media, automotive_transport.automotive_services, pets_animals, education, events_creative]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: split, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: icons, requires: { kinds: [service, area_served, award, year_founded, language_spoken], min: 2 } }
+      - { type: services, variant: list, requires: { kinds: [service], min: 1 }, fills: [service, price] }
+      - { type: about, variant: centered }
+      - { type: testimonials, variant: quotes, requires: { kinds: [testimonial] } }
+      - { type: cta_banner, variant: outline }
+      - { type: contact, variant: split }
+  - kind: services
+    slug: services
+    requires: { kinds: [service], min: 4 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: services, variant: grid, requires: { kinds: [service] }, fills: [service, price] }
+      - { type: faq, variant: accordion, requires: { kinds: [area_served, payment_method, language_spoken], min: 2 } }
+  - kind: about
+    slug: a-propos
+    requires: { kinds: [about_summary, tagline, team_member, year_founded, award], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: about, variant: story, otherwise: centered, requires: { images: 1 } }
+      - { type: team, variant: list, requires: { kinds: [team_member] }, section: true }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: hours, variant: table, requires: { kinds: [hours] } }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

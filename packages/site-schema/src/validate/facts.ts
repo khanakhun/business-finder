@@ -106,18 +106,21 @@ const norm = (value: string) =>
 /** The national number: the last 9 digits (country code and trunk 0 dropped; FR, BL and most of Europe). */
 const national = (value: string) => digits(value).slice(-9);
 
-const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\beuros?\b|\bdollars?\b|\blivres?\b`;
+const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\bCHF\b|\beuros?\b|\bdollars?\b|\blivres?\b|\bfrancs?\b`;
 const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?`;
-const PRICE = new RegExp(`(?:(${CURRENCY})\\s?(${AMOUNT}))|(?:(${AMOUNT})\\s?(${CURRENCY}))`, 'giu');
+const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
 const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,}\d/g;
-const EMAIL_LITERAL = /[\p{L}\p{N}._%+-]{1,64}@[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}/gu;
+/** E-mail addresses, also spelled out against scrapers (`name @ domain.fr`, `name(at)domain.fr`). */
+const EMAIL_LITERAL =
+  /[\p{L}\p{N}._%+-]{1,64}(?:\s{0,2}@\s{0,2}|\s?[([]at[)\]]\s?)[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}/gu;
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
 
 const currencyOf = (mark: string) => {
   const m = mark.toLowerCase();
   if (m === '€' || m.startsWith('eur')) return 'EUR';
   if (m === '$' || m === 'usd' || m.startsWith('dollar')) return 'USD';
+  if (m === 'chf' || m.startsWith('franc')) return 'CHF';
   return 'GBP';
 };
 
@@ -206,7 +209,10 @@ const NOT_TEXT_ROOTS = new Set([
 
 function* texts(spec: SiteSpec): Generator<{ text: string; path: Path }> {
   for (const { value, path, key } of walk(spec)) {
-    if (typeof value !== 'string' || NOT_TEXT_ROOTS.has(String(path[0]))) continue;
+    if (typeof value !== 'string') continue;
+    // The contact facts are compared to their facts; only the hours note is free text.
+    const note = path[0] === 'contact' && path[1] === 'hours' && path[2] === 'note';
+    if (NOT_TEXT_ROOTS.has(String(path[0])) && !note) continue;
     if (NOT_TEXT_KEYS.has(String(key)) || String(key).endsWith('AssetId')) continue;
     const parent = String(path.at(-2));
     if (parent === 'factIds' || parent === 'assetIds') continue;
@@ -305,6 +311,21 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       (f) => norm(f.value) === norm(contact.address?.formatted ?? ''),
       'the address',
     );
+  const addressFact = contact.address ? facts.get(contact.address.factId) : undefined;
+  if (contact.address && addressFact?.kind === 'address') {
+    for (const part of ['street', 'postalCode', 'locality', 'region'] as const) {
+      const value = contact.address[part];
+      if (value && !norm(addressFact.value).includes(norm(value))) {
+        issues.push(
+          error(
+            ['contact', 'address', part],
+            'fact_mismatch',
+            `Write the ${part} as the address fact states it.`,
+          ),
+        );
+      }
+    }
+  }
   // DECISION(BF-033): hours facts are free text in the registry's first version (BF-040): checked by kind only.
   if (contact.hours)
     check(['contact', 'hours'], contact.hours.factId, ['hours'], () => true, 'the opening hours');
@@ -358,8 +379,12 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
             at('members', n),
             member.factId,
             ['team_member'],
-            (f) => norm(f.value.name) === norm(member.name),
-            'the team member',
+            (f) =>
+              norm(f.value.name) === norm(member.name) &&
+              (f.value.role === undefined ||
+                member.role === undefined ||
+                Object.values(member.role).some((role) => norm(role ?? '') === norm(f.value.role ?? ''))),
+            'the team member (name and role)',
           );
         }
       }
@@ -390,15 +415,23 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const emails = of('email').map((f) => norm(f.value));
   const prices = of('price').map((f) => f.value);
   const years = of('year').map((f) => f.value);
-  const factText = registry.facts
-    .filter((fact) => typeof fact.value === 'string')
-    .map((fact) => digits(String(fact.value)))
-    .join(' ');
-  const inFactText = (number: string) => number.length > 0 && factText.includes(number);
+  // Numbers a fact states in its own text (a legal notice's SIRET, a share capital, an award's year): whole numbers
+  // only, and only from the kinds that state numbers in prose — never a phone, address or hours fact's digits.
+  const stating = registry.facts.filter((fact) => ['legal_id', 'award', 'other'].includes(fact.kind));
+  const statedNumbers = new Set(
+    stating.flatMap((fact) =>
+      [
+        ...String(fact.value)
+          .normalize('NFKC')
+          .matchAll(/\d+(?:[ \u00A0\u202F.,-]\d+)*/g),
+      ].map((m) => digits(m[0])),
+    ),
+  );
+  const statedPrices = stating.flatMap((fact) => literals(String(fact.value)).prices);
   for (const { text, path } of texts(spec)) {
     const found = literals(text);
     for (const phone of found.phones) {
-      if (!phones.includes(national(phone)) && !inFactText(digits(phone)))
+      if (!phones.includes(national(phone)) && !statedNumbers.has(digits(phone)))
         issues.push(
           error(path, 'unsupported_literal', `Remove the phone number "${phone}" or use the contact facts.`),
         );
@@ -411,7 +444,8 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
     }
     for (const price of found.prices) {
       const known = prices.some((p) => p.amount === price.amount && p.currency === price.currency);
-      if (!known && !inFactText(digits(String(price.amount))))
+      const stated = statedPrices.some((p) => p.amount === price.amount && p.currency === price.currency);
+      if (!known && !stated)
         issues.push(
           error(
             path,
@@ -421,7 +455,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
         );
     }
     for (const year of found.years) {
-      if (!years.includes(year) && !inFactText(String(year)))
+      if (!years.includes(year) && !statedNumbers.has(String(year)))
         issues.push(error(path, 'unsupported_literal', `Remove the year ${year}: it is not a fact.`));
     }
   }

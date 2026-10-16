@@ -138,6 +138,40 @@ describe('validateFacts', () => {
     expect(found(spec, legal)).toEqual([]);
   });
 
+  it('never takes a price or a year from the digits of a phone, an address or the hours', () => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: 'Coupe 59 €, depuis 1800.', en: 'Cut €12, since 1800.' };
+    expect(found(spec)).toEqual([
+      'unsupported_literal@pages.0.blocks.0.props.subtitle.fr',
+      'unsupported_literal@pages.0.blocks.0.props.subtitle.fr',
+      'unsupported_literal@pages.0.blocks.0.props.subtitle.en',
+      'unsupported_literal@pages.0.blocks.0.props.subtitle.en',
+    ]);
+  });
+
+  it('scans the hours note and compares the address parts', () => {
+    const spec = salon();
+    if (spec.contact.hours)
+      spec.contact.hours.note = { fr: 'Fermé depuis 1998, appelez 0690 99 99 99', en: 'Closed since 1998' };
+    if (spec.contact.address) spec.contact.address.street = '99 avenue Inventée';
+    expect(found(spec)).toEqual([
+      'fact_mismatch@contact.address.street',
+      'unsupported_literal@contact.hours.note.fr',
+      'unsupported_literal@contact.hours.note.fr',
+      'unsupported_literal@contact.hours.note.en',
+    ]);
+  });
+
+  it("compares a team member's role when both say one", () => {
+    const villa: SiteSpec = read('villa-agency.json');
+    const team = villa.pages[0]?.blocks[2];
+    if (team?.type === 'team' && team.props.members[0])
+      team.props.members[0].role = { en: 'Owner', fr: 'Propriétaire' };
+    expect(validateFacts(villa, registry('villa-agency')).map((issue) => issue.code)).toEqual([
+      'fact_mismatch',
+    ]);
+  });
+
   it('refuses a registry with two facts of the same id', () => {
     const facts = registry().facts;
     expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);
@@ -156,6 +190,9 @@ describe('literals', () => {
     ['1 250 000 €', [{ amount: 1250000, currency: 'EUR' }]],
     ['65 euros', [{ amount: 65, currency: 'EUR' }]],
     ['$65', [{ amount: 65, currency: 'USD' }]],
+    ['Coupe 35  €', [{ amount: 35, currency: 'EUR' }]],
+    ['CHF 35', [{ amount: 35, currency: 'CHF' }]],
+    ['35 francs', [{ amount: 35, currency: 'CHF' }]],
   ])('reads the price in %j', (text, expected) => {
     expect(literals(text).prices.map(({ amount, currency }) => ({ amount, currency }))).toEqual(expected);
     expect(literals(text).phones).toEqual([]);
@@ -179,6 +216,10 @@ describe('literals', () => {
       prices: [],
       years: [2015, 2024, 1987],
     });
+  });
+
+  it('finds e-mail addresses spelled out', () => {
+    expect(literals('faux @ exemple.fr, faux(at)exemple.fr, faux [at] exemple.fr').emails).toHaveLength(3);
   });
 
   it('finds unicode and full-width e-mail addresses', () => {

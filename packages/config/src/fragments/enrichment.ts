@@ -26,14 +26,15 @@ export const enrichmentEnv = z.object({
   PAGESPEED_RATE_PER_MINUTE: z.coerce
     .number()
     .int()
-    .min(1)
+    // Each audit takes two runs (mobile and desktop) at once.
+    .min(2)
     .max(10_000)
     .default(200)
     .describe('PageSpeed Insights runs per minute per key (Google default: 400 per 100 s; keep headroom).'),
   PAGESPEED_DAILY_QUOTA: z.coerce
     .number()
     .int()
-    .min(1)
+    .min(2)
     .max(10_000_000)
     .default(24_000)
     .describe('PageSpeed Insights runs per day per key (Google default: 25,000 per project).'),

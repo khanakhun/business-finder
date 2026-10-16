@@ -25,6 +25,7 @@ import {
   type StepExecution,
   type StepResult,
 } from '../../domain/enrichment-step.ts';
+import { analysableUrl } from '../website-url.ts';
 
 // The website audit steps (BF-030): `psi` (PageSpeed Insights, mobile + desktop) and `vision_audit` (vision grade of
 // the crawl's screenshots). Both write their part of the snapshot's audit, which recomputes findings, score and
@@ -41,16 +42,15 @@ const MAX_DEFERRAL_MS = 60_000;
 
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
-/** A crawl the audit can grade: a live page of the business (not parked, broken, blocked or a social profile). */
-const readable = (snapshot: WebsiteSnapshotRecord) =>
-  !snapshot.intel.socialOnly &&
-  (snapshot.intel.reachability === 'ok' || snapshot.intel.reachability === 'redirected');
 /**
- * PageSpeed also measures a site that blocked our crawler: Google's Lighthouse often gets through, and the site may
- * well work for visitors (else it would never be measured nor ever be `weak`).
+ * A crawl the audit can measure: a live page of the business (not parked, broken, blocked or a social profile).
+ * DECISION(BF-030): `blocked` is never measured, not even by PageSpeed: it also stands for a robots.txt opt-out of
+ * our bot and for addresses our SSRF guard refused (the crawl does not say which), and an opt-out must not become
+ * findings or a `weak` status. Such sites keep a presence-only audit (`ok`, unmeasured).
  */
 const measurable = (snapshot: WebsiteSnapshotRecord) =>
-  readable(snapshot) || (!snapshot.intel.socialOnly && snapshot.intel.reachability === 'blocked');
+  !snapshot.intel.socialOnly &&
+  (snapshot.intel.reachability === 'ok' || snapshot.intel.reachability === 'redirected');
 
 /** The snapshot the crawl of this run (or a fresh earlier one) produced, else the business's latest. */
 async function snapshotFor(
@@ -203,24 +203,6 @@ export class PsiStep implements EnrichmentStep {
   }
 }
 
-/**
- * The URL handed to PageSpeed: http(s) only, credentials stripped (never sent to Google), no IP-literal hosts (quota
- * spent on nothing). Null when it cannot be analysed.
- */
-export function analysableUrl(raw: string): string | null {
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return null;
-  }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
-  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(url.hostname) || url.hostname.startsWith('[')) return null;
-  url.username = '';
-  url.password = '';
-  return url.toString();
-}
-
 const isPageFailure = (error: unknown) =>
   error instanceof ExternalServiceError && error.details?.reason === 'PAGE_FAILED';
 
@@ -273,8 +255,7 @@ export class VisionAuditStep implements EnrichmentStep {
   async execute(execution: StepExecution): Promise<StepResult> {
     const snapshot = await snapshotFor(execution, this.options.snapshots);
     if (!snapshot) return { outcome: 'skipped', reason: 'not_applicable', costUsd: 0 };
-    // A blocked crawl's screenshots show the block page, not the site: nothing to grade.
-    if (!readable(snapshot))
+    if (!measurable(snapshot))
       return done(await this.options.audits.record(snapshot, {}), 0, { graded: false });
     try {
       const graded = await this.options.grader.grade(

@@ -88,6 +88,10 @@ export const VISION_CRITERIA = [
 export const VisionCriterionSchema = z.enum(VISION_CRITERIA);
 export type VisionCriterion = z.infer<typeof VisionCriterionSchema>;
 
+/**
+ * The vision grade. Its `summary` and criteria `evidence` are model output that screenshot content can influence:
+ * untrusted text. Briefs and outreach never quote it, or wrap it as untrusted data (ai-engineering.md).
+ */
 export const VisionGradeSchema = z
   .object({
     criteria: z.record(

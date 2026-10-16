@@ -77,6 +77,11 @@ export class ValkeyRateLimiter implements RateLimiter {
 
   /** One attempt: 0 when the tokens were taken, else the wait in ms. */
   async tryTake(key: string, limit: { capacity: number; perSecond: number; cost?: number }): Promise<number> {
+    const cost = limit.cost ?? 1;
+    // A programming error, not a runtime condition: a cost above capacity could never be served.
+    if (!Number.isInteger(cost) || cost < 1 || cost > limit.capacity) {
+      throw new RangeError(`Token cost ${cost} must be an integer between 1 and the capacity`);
+    }
     const wait = await this.valkey.eval(
       TOKEN_BUCKET,
       1,
@@ -84,7 +89,7 @@ export class ValkeyRateLimiter implements RateLimiter {
       limit.capacity,
       limit.perSecond,
       this.useClientTime ? this.clock.now().getTime() : '',
-      limit.cost ?? 1,
+      cost,
     );
     return Number(wait);
   }

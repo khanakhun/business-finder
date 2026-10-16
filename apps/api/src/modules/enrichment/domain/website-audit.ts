@@ -206,8 +206,8 @@ export const RULES: readonly Rule[] = [
   {
     code: 'low_performance_score',
     evaluate: ({ psi }) => {
-      // Mobile first (most visitors), desktop when only desktop was measured.
-      const strategy = psi?.mobile ? 'mobile' : 'desktop';
+      // Mobile first (most visitors), desktop when mobile has no performance score.
+      const strategy = typeof psi?.mobile?.scores.performance === 'number' ? 'mobile' : 'desktop';
       const value = psi?.[strategy]?.scores.performance ?? null;
       return value !== null && value < 50
         ? {
@@ -468,7 +468,7 @@ export function qualityScore(facts: AuditFacts, findings: readonly Finding[]): n
 }
 
 /**
- * Website status: presence first (parked, social profile, broken), then the score — strong ≥ 80, ok 60–79,
+ * Website status: presence first (parked, social profile, blocked → ok, broken), then the score — strong ≥ 80, ok 60–79,
  * weak < 60. Unmeasured readable sites are `weak` with a critical or two major findings, else `ok`.
  */
 export function websiteStatus(
@@ -478,10 +478,10 @@ export function websiteStatus(
 ): WebsiteStatus {
   if (facts.snapshot.reachability === 'parked') return 'parked';
   if (facts.snapshot.socialOnly) return 'social_only';
-  if (BROKEN.has(facts.snapshot.reachability) || facts.snapshot.reachability === 'blocked') {
-    // A site that blocks our crawler may well work for visitors: only real failures are "broken".
-    return facts.snapshot.reachability === 'blocked' ? (score === null ? 'ok' : statusOf(score)) : 'broken';
-  }
+  // A site that blocks our crawler (bot wall, robots.txt opt-out, refused address) may well work for visitors and is
+  // never measured: neither broken nor weak, whatever was passed in.
+  if (facts.snapshot.reachability === 'blocked') return 'ok';
+  if (BROKEN.has(facts.snapshot.reachability)) return 'broken';
   if (score !== null) return statusOf(score);
   const critical = findings.filter((f) => f.severity === 'critical').length;
   const majorCount = findings.filter((f) => f.severity === 'major').length;

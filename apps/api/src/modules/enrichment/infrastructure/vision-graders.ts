@@ -2,7 +2,7 @@ import { type AiGateway, WebsiteVisionGrade, type WebsiteVisionGradeOutput } fro
 import { type Clock, VISION_CRITERIA, type VisionGrade } from '@bf/contracts';
 import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
 import type { VisionGrader, WebsiteSnapshotRecord } from '../application/ports.ts';
-import { analysableUrl } from './steps/website-audit.steps.ts';
+import { contextUrl } from './website-url.ts';
 
 // Vision grading of a snapshot's screenshots (BF-030): `website.vision_grade` (smart tier) through the AI gateway,
 // and a deterministic fake for tests and E2E (`FAKE_WEBSITE_AUDIT`).
@@ -46,7 +46,7 @@ export class LlmVisionGrader implements VisionGrader {
     signal: AbortSignal,
   ): Promise<{ readonly grade: VisionGrade; readonly costUsd: number } | null> {
     // The page's address as context, credentials stripped (never sent to the model).
-    const url = analysableUrl(snapshot.intel.finalUrl ?? snapshot.url);
+    const url = contextUrl(snapshot.intel.finalUrl ?? snapshot.url);
     if (!url) return null;
     const { desktopKey, mobileKey } = snapshot.intel.screenshots;
     // Only this business's crawl artifacts, whatever a stored key says.

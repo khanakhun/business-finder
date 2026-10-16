@@ -66,10 +66,14 @@ export class RealtimeConnection {
     this.listening.clear();
     for (const type of [RESYNC_EVENT, ...Object.keys(realtimeInvalidations), ...this.handlers.keys()])
       this.listen(type);
-    const recovering = this.attempt > 0 && this.lastEventId === undefined;
+    // Once per source: its later native reconnects resume with Last-Event-ID (or the server sends a resync).
+    let recovering = this.attempt > 0 && this.lastEventId === undefined;
     source.onopen = () => {
       this.attempt = 0;
-      if (recovering) void this.queryClient.invalidateQueries();
+      if (recovering) {
+        recovering = false;
+        void this.queryClient.invalidateQueries();
+      }
     };
     source.onerror = () => {
       // CONNECTING: the browser is retrying on its own. CLOSED: it gave up, so we take over.

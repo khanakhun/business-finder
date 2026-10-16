@@ -14,8 +14,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { WebsiteSnapshotRecord } from '../application/ports.ts';
 import { StepDeferredError, type StepExecution } from '../domain/enrichment-step.ts';
 import { PageSpeedClient, toPsiStrategyResult } from './pagespeed.ts';
-import { analysableUrl, PSI_MAX_DEFERRALS, PsiStep, VisionAuditStep } from './steps/website-audit.steps.ts';
+import { PSI_MAX_DEFERRALS, PsiStep, VisionAuditStep } from './steps/website-audit.steps.ts';
 import { FakeVisionGrader, imageType, LlmVisionGrader } from './vision-graders.ts';
+import { analysableUrl, contextUrl } from './website-url.ts';
 
 const NOW = new Date('2026-10-14T12:00:00.000Z');
 const clock = fixedClock(NOW);
@@ -249,16 +250,20 @@ describe('PsiStep', () => {
     expect(record.mock.calls[0]?.[0]).toMatchObject({ businessId: 'biz-1' });
   });
 
-  it('measures a site that blocks our crawler; spends no quota on a URL it cannot analyse', async () => {
+  it('never measures a blocked crawl (robots opt-out, refused address); spends no quota on an IP host', async () => {
     const run = vi.fn(async () => result(50));
     const { step, record, tryTake } = psiSetup(run);
     (step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
       byId: async () => snapshot({ reachability: 'blocked' }),
       latest: async () => undefined,
     };
-    expect(await step.execute(execution())).toMatchObject({ outcome: 'done', outputRef: { measured: true } });
-    expect(run).toHaveBeenCalledTimes(2);
-    expect(record.mock.calls[0]?.[1]).toHaveProperty('psi.mobile');
+    expect(await step.execute(execution())).toMatchObject({
+      outcome: 'done',
+      outputRef: { measured: false },
+    });
+    expect(run).not.toHaveBeenCalled();
+    expect(tryTake).not.toHaveBeenCalled();
+    expect(record.mock.calls[0]?.[1]).toEqual({});
     const ip = psiSetup(run);
     (ip.step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
       byId: async () => snapshot({ finalUrl: 'http://203.0.113.7/' }),
@@ -408,14 +413,18 @@ describe('screenshot and URL guards', () => {
   });
 
   it('hands PageSpeed only http(s) URLs without credentials or IP hosts', () => {
-    expect(analysableUrl('https://user:pass@bistro.example/menu?x=1')).toBe(
-      'https://bistro.example/menu?x=1',
+    // Credentials, session tokens and fragments never leave us.
+    expect(analysableUrl('https://user:pass@bistro.example/menu?sid=abc#top')).toBe(
+      'https://bistro.example/menu',
     );
     expect(analysableUrl('http://bistro.example/')).toBe('http://bistro.example/');
     expect(analysableUrl('ftp://bistro.example/')).toBeNull();
     expect(analysableUrl('http://10.0.0.1/')).toBeNull();
     expect(analysableUrl('http://[::1]/')).toBeNull();
     expect(analysableUrl('not a url')).toBeNull();
+    // The vision model gets the same address as context, IP hosts included (no quota at stake).
+    expect(contextUrl('http://u:p@203.0.113.7/?token=x')).toBe('http://203.0.113.7/');
+    expect(contextUrl('javascript:alert(1)')).toBeNull();
   });
 
   it('grades only this business’s real screenshots, and counts injection warnings', async () => {

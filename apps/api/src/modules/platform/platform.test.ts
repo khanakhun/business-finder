@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { loadAppEnv } from './config/app-env.ts';
 import { resolveRequestId } from './context/request-context.ts';
 import { toProblem } from './errors/problem-details.filter.ts';
+import { ValkeyRateLimiter } from './rate-limit/valkey-rate-limiter.ts';
 import { buildPolicy, executeWithSignal, isTransient, WithResilience } from './resilience/resilience.ts';
 import { zodDto } from './validation/zod-dto.ts';
 import { ZodValidationPipe } from './validation/zod-validation.pipe.ts';
@@ -235,5 +236,19 @@ describe('loadAppEnv', () => {
 
   it('needs no environment in openapi mode', () => {
     expect(loadAppEnv('openapi').NODE_ENV).toBe('development');
+  });
+});
+
+describe('ValkeyRateLimiter', () => {
+  it('refuses a token cost that could never be served, before calling Valkey', async () => {
+    const valkey = { eval: vi.fn(async () => 0) };
+    const limiter = new ValkeyRateLimiter(valkey as never, { now: () => new Date() });
+    for (const cost of [0, -1, 1.5, 3]) {
+      await expect(limiter.tryTake('k', { capacity: 2, perSecond: 1, cost })).rejects.toBeInstanceOf(
+        RangeError,
+      );
+    }
+    expect(valkey.eval).not.toHaveBeenCalled();
+    expect(await limiter.tryTake('k', { capacity: 2, perSecond: 1, cost: 2 })).toBe(0);
   });
 });

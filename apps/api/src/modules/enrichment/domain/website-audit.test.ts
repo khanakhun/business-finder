@@ -398,8 +398,8 @@ describe('quality score and status', () => {
         }),
       ).websiteStatus,
     ).toBe('weak');
-    // A crawler-blocking site with a measured score follows the score.
-    expect(websiteStatus(facts({ snapshot: snapshot({ reachability: 'blocked' }) }), [], 40)).toBe('weak');
+    // A crawler-blocking site is never weak, whatever score is passed in (it may be an opt-out).
+    expect(websiteStatus(facts({ snapshot: snapshot({ reachability: 'blocked' }) }), [], 40)).toBe('ok');
     // Exactly 25 on mobile performance is major, below is critical.
     expect(
       evaluateFindings(facts({ psi: { mobile: strategy({ performance: 25 }), desktop: null } }))[0]?.severity,
@@ -485,12 +485,7 @@ describe('language and performance edge cases', () => {
     });
   });
 
-  it('rates a site that blocks our crawler from PageSpeed alone', () => {
-    const blocked = facts({ snapshot: snapshot({ reachability: 'blocked' }), vision: null });
-    const findings = evaluateFindings(blocked);
-    const score = qualityScore(blocked, findings);
-    expect(score).not.toBeNull();
-    expect(websiteStatus(blocked, findings, score)).toBe(score !== null && score >= 80 ? 'strong' : 'ok');
+  it('never rates a blocked site weak, even with measurements (an opt-out is no selling point)', () => {
     const slow = facts({
       snapshot: snapshot({ reachability: 'blocked' }),
       vision: null,
@@ -499,9 +494,18 @@ describe('language and performance edge cases', () => {
         desktop: null,
       },
     });
-    const slowFindings = evaluateFindings(slow);
-    expect(websiteStatus(slow, slowFindings, qualityScore(slow, slowFindings))).toBe('weak');
-    // Unmeasured, a blocked site is not presented as broken.
-    expect(websiteStatus({ ...blocked, psi: null }, [], null)).toBe('ok');
+    const findings = evaluateFindings(slow);
+    expect(websiteStatus(slow, findings, qualityScore(slow, findings))).toBe('ok');
+    expect(websiteStatus({ ...slow, psi: null }, [], null)).toBe('ok');
+  });
+
+  it('uses desktop when mobile was measured without a performance score', () => {
+    const mobile = { ...strategy({}), scores: { ...strategy({}).scores, performance: null } };
+    const findings = evaluateFindings(
+      facts({ psi: { mobile: mobile as never, desktop: strategy({ performance: 30 }) } }),
+    );
+    expect(findings.find((f) => f.code === 'low_performance_score')?.metric?.name).toBe(
+      'psi.desktop.performance',
+    );
   });
 });

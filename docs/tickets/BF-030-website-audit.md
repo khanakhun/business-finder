@@ -81,8 +81,9 @@ Two enrichment steps (`psi`, `vision_audit`) and a deterministic findings engine
   one of the business's newest crawl, whatever order snapshots are written in. Outages and quotas: the part is left
   out and the step asks for a re-check within the hour (never rethrown); configuration errors (refused key, no model
   key) fail the step. Unreachable, parked and social-only sites get a presence-only audit without calling anything.
-  A site that blocks our crawler is measured by PageSpeed only (Lighthouse often gets through; its screenshots show
-  the block page, so no vision grade).
+  DECISION: a crawl marked `blocked` is never measured, not even by PageSpeed, and is never `weak`: `blocked` also
+  stands for a robots.txt opt-out of our bot and for addresses the SSRF guard refused. URLs sent to Google and to
+  the model lose credentials, query and fragment.
 - **DECISION — no website**: `none` is never stored (no crawl, no audit). `GET /v1/businesses/:id/website-audit`
   returns `status: 'none'` for a business without a website, so scoring (BF-031) and outreach read one field.
 - **PageSpeed** (verified 2026-10-16): `GET pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed` with

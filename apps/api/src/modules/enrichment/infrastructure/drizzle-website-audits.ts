@@ -55,12 +55,15 @@ export class DrizzleWebsiteAuditRepository implements WebsiteAuditRepository {
       .values({ businessId: audit.businessId, snapshotId: audit.snapshotId, ...values, isLatest: false })
       .onConflictDoUpdate({ target: websiteAudits.snapshotId, set: { ...values, updatedAt: sql`now()` } });
     // Latest = the audit of the business's newest crawl, whichever snapshot was written last (a re-check of an older
-    // crawl never takes it back).
-    await x.execute(sql`UPDATE ${websiteAudits} wa SET is_latest = (wa.snapshot_id = (
-        SELECT a.snapshot_id FROM ${websiteAudits} a JOIN ${websiteSnapshots} s ON s.id = a.snapshot_id
-        WHERE a.business_id = ${audit.businessId}
-        ORDER BY s.fetched_at DESC, a.snapshot_id DESC LIMIT 1))
-      WHERE wa.business_id = ${audit.businessId}`);
+    // crawl never takes it back). Index-driven (snapshots by business and fetch time; the latest audit; this one) and
+    // only rows whose flag changes are written: under the business lock, at most one row is latest.
+    await x.execute(sql`WITH newest AS (
+        SELECT s.id FROM ${websiteSnapshots} s JOIN ${websiteAudits} a ON a.snapshot_id = s.id
+        WHERE s.business_id = ${audit.businessId}
+        ORDER BY s.fetched_at DESC NULLS LAST, s.id DESC LIMIT 1)
+      UPDATE ${websiteAudits} wa SET is_latest = (wa.snapshot_id = (SELECT id FROM newest))
+      WHERE ((wa.business_id = ${audit.businessId} AND wa.is_latest) OR wa.snapshot_id = (SELECT id FROM newest))
+        AND wa.is_latest IS DISTINCT FROM (wa.snapshot_id = (SELECT id FROM newest))`);
     const [row] = await x.select().from(websiteAudits).where(eq(websiteAudits.snapshotId, audit.snapshotId));
     return toRecord(row as Row);
   }

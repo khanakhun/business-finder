@@ -48,3 +48,4 @@ export const PriceSchema = z
   .strict()
   .describe('A published price; `factId` must name a price fact with the same amount.')
   .meta({ id: 'Price' });
+export type Price = z.infer<typeof PriceSchema>;

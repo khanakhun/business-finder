@@ -37,6 +37,7 @@ import {
   OPENAPI_ASSET_QUEUE,
   OPENAPI_SCREENSHOT_QUEUE,
   OPENAPI_SITE_REVALIDATION,
+  SCREENSHOT_DELAY_MS,
   SITES_EXPIRY_AUTOSTART,
   SITES_VIEWS_AUTOSTART,
   SitesExpiryScheduler,
@@ -131,6 +132,7 @@ export class SitesModule {
               { provide: SITE_REVALIDATION, useClass: BullmqSiteRevalidation },
               { provide: ASSET_PROCESSING_QUEUE, useClass: BullmqAssetProcessingQueue },
               { provide: SITE_SCREENSHOT_QUEUE, useClass: BullmqSiteScreenshotQueue },
+              { provide: SCREENSHOT_DELAY_MS, useValue: 15_000 },
               {
                 provide: SITE_ORIGINALS,
                 inject: [APP_ENV],

@@ -1,9 +1,9 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import { siteAssets, siteVersions } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
-import type { SiteAssetsRepository, StoredAsset } from '../application/ports.ts';
+import type { AssetStatus, SiteAssetsRepository, StoredAsset } from '../application/ports.ts';
 
 const columns = {
   id: siteAssets.id,
@@ -21,6 +21,7 @@ const columns = {
   licenseDetails: siteAssets.licenseDetails,
   alt: siteAssets.alt,
   dominantColors: siteAssets.dominantColors,
+  sha256: siteAssets.sha256,
   createdAt: siteAssets.createdAt,
 };
 
@@ -67,8 +68,17 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
       .limit(500);
   }
 
-  async update(assetId: string, changes: Parameters<SiteAssetsRepository['update']>[1]): Promise<void> {
-    await getExecutor(this.db).update(siteAssets).set(changes).where(eq(siteAssets.id, assetId));
+  async transition(
+    assetId: string,
+    from: readonly AssetStatus[],
+    changes: Parameters<SiteAssetsRepository['transition']>[2],
+  ): Promise<boolean> {
+    const rows = await getExecutor(this.db)
+      .update(siteAssets)
+      .set(changes)
+      .where(and(eq(siteAssets.id, assetId), inArray(siteAssets.status, [...from])))
+      .returning({ id: siteAssets.id });
+    return rows.length > 0;
   }
 
   /** A text search of the versions' specs (an image is named by its id or one of its URLs). */

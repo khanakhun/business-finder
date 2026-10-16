@@ -1,7 +1,7 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import { sitePublications, sites } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { SiteThumbnailsRepository, StoredThumbnails } from '../application/ports.ts';
 
@@ -32,10 +32,18 @@ export class DrizzleSiteThumbnailsRepository implements SiteThumbnailsRepository
     return row?.thumbnails ?? null;
   }
 
-  async set(siteId: string, thumbnails: StoredThumbnails): Promise<void> {
-    await getExecutor(this.db)
+  async setIfActive(siteId: string, thumbnails: StoredThumbnails): Promise<boolean> {
+    const rows = await getExecutor(this.db)
       .update(sites)
       .set({ thumbnails: { ...thumbnails } })
-      .where(eq(sites.id, siteId));
+      .where(
+        and(
+          eq(sites.id, siteId),
+          sql`EXISTS (SELECT 1 FROM ${sitePublications} WHERE ${sitePublications.id} = ${thumbnails.publicationId}
+                AND ${sitePublications.siteId} = ${siteId} AND ${sitePublications.status} = 'active')`,
+        ),
+      )
+      .returning({ id: sites.id });
+    return rows.length > 0;
   }
 }

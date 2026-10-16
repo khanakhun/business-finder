@@ -15,12 +15,21 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, createTestWorker, type TestApp } from '../../../test/create-test-app.ts';
 import { FakeMailer } from '../../../test/fake-mailer.ts';
-import { type Browser, createWorkspace, signUpVerified } from '../../../test/identity-helpers.ts';
+import {
+  type Browser,
+  createWorkspace,
+  inviteAndJoin,
+  signUpVerified,
+} from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
 import { PUBLIC_FILES, SITE_ARTIFACTS, SITE_ORIGINALS, UPLOAD_SIGNER } from './application/ports.ts';
 import { SiteViewsFlusher } from './application/site-views.ts';
-import { SITES_EXPIRY_AUTOSTART, SITES_VIEWS_AUTOSTART } from './infrastructure/bullmq-site-jobs.ts';
+import {
+  SCREENSHOT_DELAY_MS,
+  SITES_EXPIRY_AUTOSTART,
+  SITES_VIEWS_AUTOSTART,
+} from './infrastructure/bullmq-site-jobs.ts';
 import { FakeUploadSigner, InMemoryPublicFiles } from './infrastructure/site-asset-storage.ts';
 
 // Sites media (BF-035 part 2) end to end: image uploads (checked bytes, processed variants, deletion only when no
@@ -39,6 +48,8 @@ const ENV = {
   SITES_ASSETS_BASE_URL: ASSETS_BASE,
   SITES_VIEW_TOKEN_SECRET: VIEW_SECRET,
   FAKE_SITE_INTEL: 'true',
+  // supertest connects from the loopback: the tests name each visitor's address in X-Forwarded-For.
+  AUTH_TRUSTED_PROXIES: '127.0.0.1,::1,::ffff:127.0.0.1',
 };
 
 const mailer = new FakeMailer();
@@ -50,11 +61,13 @@ const overrides = [
   { token: SITE_ARTIFACTS, value: artifacts },
   { token: PUBLIC_FILES, value: publicFiles },
   { token: UPLOAD_SIGNER, value: new FakeUploadSigner() },
+  { token: SCREENSHOT_DELAY_MS, value: 0 },
 ];
 let t: TestApp;
 let worker: INestApplicationContext;
 let db: DbClient;
 let member: Browser;
+let viewer: Browser;
 let outsider: Browser;
 let org: string;
 
@@ -99,6 +112,7 @@ beforeAll(async () => {
     await worker.get<Queue>(getQueueToken(queue)).obliterate({ force: true });
   member = await signUpVerified(t, mailer, 'member@media.test', 'Mia Member');
   org = await createWorkspace(member, 'Agence Media');
+  viewer = (await inviteAndJoin(t, mailer, member, 'viewer@media.test', 'viewer')).client;
   outsider = await signUpVerified(t, mailer, 'outsider@media.test', 'Oscar Outsider');
   await createWorkspace(outsider, 'Ailleurs');
 }, 60_000);
@@ -137,14 +151,16 @@ describe('site images', () => {
       const asset = body.items.find((item: { id: string }) => item.id === assetId);
       return asset?.status === 'ready' ? asset : undefined;
     });
-    // 480 and 768 fit; 1200 and 1920 would enlarge a 1000 px image, so they are not made.
+    // 480 and 768 fit, and the image's own 1000; 1200 and 1920 would enlarge it, so they are not made.
     expect(ready.variants.map((v: { width: number; format: string }) => `${v.width}.${v.format}`)).toEqual([
       '480.webp',
       '480.avif',
       '768.webp',
       '768.avif',
+      '1000.webp',
+      '1000.avif',
     ]);
-    expect(ready.publicUrl).toBe(`${ASSETS_BASE}/sites/${site.id}/${assetId}/768.webp`);
+    expect(ready.publicUrl).toBe(`${ASSETS_BASE}/sites/${site.id}/${assetId}/1000.webp`);
     expect(ready.dominantColors).toEqual([expect.stringMatching(/^#[0-9a-f]{6}$/)]);
     const variant = publicFiles.files.get(`sites/${site.id}/${assetId}/768.webp`);
     expect(variant?.contentType).toBe('image/webp');
@@ -224,6 +240,38 @@ describe('site images', () => {
   });
 });
 
+describe('image permissions and refusals', () => {
+  it('lets viewers list images but not upload, finalize or delete them, and hides them from other workspaces', async () => {
+    const site = await newSite('Image Rights');
+    const upload = await member
+      .post(`/v1/sites/${site.id}/assets`, { mime: 'image/png', bytes: 100, license: 'uploaded' })
+      .expect(201);
+    const assetId: string = upload.body.asset.id;
+    await viewer.get(`/v1/sites/${site.id}/assets`).expect(200);
+    await viewer
+      .post(`/v1/sites/${site.id}/assets`, { mime: 'image/png', bytes: 100, license: 'uploaded' })
+      .expect(403);
+    await viewer.post(`/v1/sites/${site.id}/assets/${assetId}/finalize`).expect(403);
+    await viewer.delete(`/v1/sites/${site.id}/assets/${assetId}`).expect(403);
+    await outsider.post(`/v1/sites/${site.id}/assets/${assetId}/finalize`).expect(404);
+  });
+
+  it('refuses an image that cannot be decoded, and a second finalize of a refused image', async () => {
+    const site = await newSite('Unreadable');
+    // A JPEG signature followed by garbage: the type matches, the decoder fails.
+    const bytes = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 7)]);
+    const upload = await member
+      .post(`/v1/sites/${site.id}/assets`, { mime: 'image/jpeg', bytes: bytes.length, license: 'uploaded' })
+      .expect(201);
+    const assetId: string = upload.body.asset.id;
+    await originals.put(`orgs/${org}/sites/${site.id}/assets/${assetId}/original`, bytes, 'image/jpeg');
+    const refused = await member.post(`/v1/sites/${site.id}/assets/${assetId}/finalize`).expect(422);
+    expect(refused.body).toMatchObject({ reason: 'ASSET_UNREADABLE' });
+    const again = await member.post(`/v1/sites/${site.id}/assets/${assetId}/finalize`).expect(409);
+    expect(again.body).toMatchObject({ reason: 'ASSET_FAILED' });
+  });
+});
+
 describe('pictures of published sites', () => {
   it('photographs a site after it is published and serves the pictures to the workspace only', async () => {
     const site = await newSite('Pictures');
@@ -245,15 +293,29 @@ describe('pictures of published sites', () => {
 });
 
 describe('views', () => {
-  const beacon = (body: object, userAgent = 'Mozilla/5.0 (Test) visitor-a') =>
-    request(t.app.getHttpServer()).post('/v1/public/sites/views').set('User-Agent', userAgent).send(body);
+  const beacon = (body: object, ip = '203.0.113.7', userAgent = 'Mozilla/5.0 (Test) visitor-a') =>
+    request(t.app.getHttpServer())
+      .post('/v1/public/sites/views')
+      .set('User-Agent', userAgent)
+      .set('X-Forwarded-For', ip)
+      .send(body);
+  const viewedEvents = (siteId: string) =>
+    db
+      .select({ type: outboxEvents.type, payload: outboxEvents.payload, context: outboxEvents.context })
+      .from(outboxEvents)
+      .where(sql`${outboxEvents.type} = 'site.viewed' AND ${outboxEvents.payload}->>'siteId' = ${siteId}`);
 
   it('counts anonymous views per day with unique visitors, stores no IP or user agent, and emits hourly events', async () => {
     const site = await newSite('Views');
     const token = await signSiteViewToken(site.id, VIEW_SECRET);
     await beacon({ token, pageId: 'home', locale: 'fr', c: 'camp-1' }).expect(204);
-    await beacon({ token, pageId: 'home', locale: 'fr' }).expect(204);
-    await beacon({ token, pageId: 'services', locale: 'en' }, 'Mozilla/5.0 (Test) visitor-b').expect(204);
+    // Another browser on the same network is the same visitor.
+    await beacon({ token, pageId: 'home', locale: 'fr' }, '203.0.113.7', 'Mozilla/5.0 (Other)').expect(204);
+    await beacon(
+      { token, pageId: 'services', locale: 'en' },
+      '198.51.100.9',
+      'Mozilla/5.0 (Test) visitor-b',
+    ).expect(204);
     // A forged token or another site's token counts nothing, and says nothing.
     const forged = `${token.slice(0, -4)}AAAA`;
     await beacon({ token: forged, pageId: 'home', locale: 'fr' }).expect(204);
@@ -271,26 +333,42 @@ describe('views', () => {
     });
     // Nothing about visitors in the database: no column holds an IP or a user agent, and no event mentions them.
     const dump = JSON.stringify(await db.select().from(siteViewDaily));
-    expect(dump).not.toMatch(/visitor-a|127\.0\.0\.1|::1|Mozilla/);
+    expect(dump).not.toMatch(/visitor-a|203\.0\.113|198\.51|Mozilla/);
     // The app's clock is two days behind the worker's: that hour is over, so its event is out.
-    const events = await db
-      .select({ type: outboxEvents.type, payload: outboxEvents.payload, context: outboxEvents.context })
-      .from(outboxEvents)
-      .where(sql`${outboxEvents.type} = 'site.viewed' AND ${outboxEvents.payload}->>'siteId' = ${site.id}`);
+    const events = await viewedEvents(site.id);
     expect(events).toHaveLength(1);
     expect(events[0]?.payload).toMatchObject({
       pageViews: 3,
       uniqueEstimate: 2,
       hourStart: '2026-10-14T12:00:00.000Z',
     });
-    expect(JSON.stringify(events)).not.toMatch(/visitor-a|Mozilla|127\.0\.0\.1/);
+    expect(JSON.stringify(events)).not.toMatch(/visitor-a|Mozilla|203\.0\.113|198\.51/);
 
-    // A second flush finds nothing new; the detail shows the totals.
+    // A late view of that hour and two more flushes: the day's totals grow, the hour's event is never emitted again.
+    await beacon({ token, pageId: 'home', locale: 'fr' }, '192.0.2.44').expect(204);
+    await worker.get(SiteViewsFlusher).flush();
     expect((await worker.get(SiteViewsFlusher).flush()).events).toBe(0);
+    expect(await viewedEvents(site.id)).toHaveLength(1);
     const detail = (await member.get(`/v1/sites/${site.id}`).expect(200)).body;
     expect(detail.views).toEqual({
-      last7Days: { pageViews: 3, uniqueEstimate: 2 },
-      last30Days: { pageViews: 3, uniqueEstimate: 2 },
+      last7Days: { pageViews: 4, uniqueEstimate: 3 },
+      last30Days: { pageViews: 4, uniqueEstimate: 3 },
     });
+  });
+
+  it('counts at most 30 views a day per visitor, and at most 50 campaigns (the rest as ~other)', async () => {
+    const site = await newSite('Capped Views');
+    const token = await signSiteViewToken(site.id, VIEW_SECRET);
+    for (let n = 0; n < 35; n += 1)
+      await beacon({ token, pageId: 'home', locale: 'fr' }, '203.0.113.50').expect(204);
+    for (let n = 0; n < 52; n += 1)
+      await beacon({ token, pageId: 'home', locale: 'fr', c: `camp-${n}` }, `198.51.100.${n + 1}`).expect(
+        204,
+      );
+    await worker.get(SiteViewsFlusher).flush();
+    const [day] = await db.select().from(siteViewDaily).where(eq(siteViewDaily.siteId, site.id));
+    expect(day?.pageViews).toBe(30 + 52);
+    expect(Object.keys(day?.byCampaign ?? {})).toHaveLength(51);
+    expect(day?.byCampaign['~other']).toBe(2);
   });
 });

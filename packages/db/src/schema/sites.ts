@@ -218,3 +218,15 @@ export const siteViewDaily = pgTable(
     check('ck_site_view_daily__counts', sql`${table.pageViews} >= 0 AND ${table.uniqueEstimate} >= 0`),
   ],
 );
+
+/** The hours whose `site.viewed` event is recorded (BF-035): one event per site and hour, whatever the flushes. */
+export const siteViewHours = pgTable(
+  'site_view_hours',
+  {
+    siteId: uuid()
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    hourStart: timestamp({ withTimezone: true, mode: 'string' }).notNull(),
+  },
+  (table) => [primaryKey({ name: 'pk_site_view_hours', columns: [table.siteId, table.hourStart] })],
+);

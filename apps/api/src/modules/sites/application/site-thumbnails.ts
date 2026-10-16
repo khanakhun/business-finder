@@ -19,6 +19,9 @@ import {
 } from './ports.ts';
 import { SiteViewsFlusher } from './site-views.ts';
 
+/** Where a site's pictures go in the artifacts bucket (keys are prefixed with the workspace, like every object). */
+const artifactsPrefix = (organizationId: string, siteId: string) => `orgs/${organizationId}/sites/${siteId}/`;
+
 /**
  * Pictures of published sites for the dashboard's cards (BF-035): after each publication, a job asks services/intel
  * to photograph the home page (desktop and mobile); the keys are kept on the site, the files stay in the private
@@ -46,25 +49,26 @@ export class SiteThumbnailCommands {
     });
   }
 
-  /** The job: photographs the publication while it is active; idempotent (a retake overwrites the same keys). */
+  /**
+   * The job: photographs the publication while it is active; idempotent (a retake overwrites the same keys). The
+   * pictures are kept only if the publication is still active when they are stored (one statement): a late job of an
+   * earlier publication never replaces a later one's.
+   */
   async capture(siteId: string, publicationId: string, signal: AbortSignal): Promise<'taken' | 'skipped'> {
     const publication = await this.thumbnails.publication(siteId, publicationId);
     if (publication?.status !== 'active') return 'skipped';
     const keys = await this.screenshotter.capture(
       publicationUrl(publication.hostname),
-      `sites/${siteId}/${publicationId}`,
+      `${artifactsPrefix(publication.organizationId, siteId)}${publicationId}`,
       signal,
     );
-    // A later publication's pictures are not replaced by an earlier one's late job.
-    const current = await this.thumbnails.publication(siteId, publicationId);
-    if (current?.status !== 'active') return 'skipped';
-    await this.thumbnails.set(siteId, {
+    const stored = await this.thumbnails.setIfActive(siteId, {
       publicationId,
       takenAt: this.clock.now().toISOString(),
       desktopKey: keys.desktopKey,
       mobileKey: keys.mobileKey,
     });
-    return 'taken';
+    return stored ? 'taken' : 'skipped';
   }
 
   /** A picture of a site of the workspace (404 when the site, or that picture, does not exist). */
@@ -74,7 +78,9 @@ export class SiteThumbnailCommands {
     const thumbnails = await this.thumbnails.get(site.id);
     const key = kind === 'desktop' ? thumbnails?.desktopKey : thumbnails?.mobileKey;
     // Only keys under the site's own prefix (written by the job above) are ever read.
-    const object = key?.startsWith(`sites/${site.id}/`) ? await this.artifacts.get(key) : undefined;
+    const object = key?.startsWith(artifactsPrefix(organizationId, site.id))
+      ? await this.artifacts.get(key)
+      : undefined;
     if (!object) throw new NotFoundError('SiteThumbnail', `${siteId}/${kind}`);
     return object;
   }

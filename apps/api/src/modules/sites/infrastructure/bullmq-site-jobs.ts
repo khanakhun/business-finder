@@ -99,21 +99,31 @@ export class BullmqAssetProcessingQueue implements AssetProcessingQueue {
   }
 }
 
+/** How long after a publication its pictures are taken (the renderer's revalidation runs first); tests set 0. */
+export const SCREENSHOT_DELAY_MS = Symbol('ScreenshotDelayMs');
+
 @Injectable()
 export class BullmqSiteScreenshotQueue implements SiteScreenshotQueue {
   private readonly jobs: TypedProducer<typeof SitesScreenshotJob>;
 
-  constructor(@InjectQueue(QUEUES.sitesScreenshot.name) queue: Queue) {
+  constructor(
+    @InjectQueue(QUEUES.sitesScreenshot.name) queue: Queue,
+    @Inject(SCREENSHOT_DELAY_MS) private readonly delayMs: number,
+  ) {
     this.jobs = new TypedProducer(queue, SitesScreenshotJob);
   }
 
   async capture(input: Parameters<SiteScreenshotQueue['capture']>[0]): Promise<void> {
-    await this.jobs.add({
-      orgId: input.organizationId as OrgId,
-      idempotencyKey: input.idempotencyKey,
-      siteId: input.siteId as SiteId,
-      publicationId: input.publicationId,
-    });
+    await this.jobs.add(
+      {
+        orgId: input.organizationId as OrgId,
+        idempotencyKey: input.idempotencyKey,
+        siteId: input.siteId as SiteId,
+        publicationId: input.publicationId,
+      },
+      // The same event refreshes the renderer: photograph the new page, not the cached one.
+      { delay: this.delayMs },
+    );
   }
 }
 

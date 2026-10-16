@@ -16,7 +16,7 @@ import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
-import { sniffImageType } from '../domain/image-type.ts';
+import { MAX_IMAGE_PIXELS, sniffImageType } from '../domain/image-type.ts';
 import {
   ASSET_PROCESSING_QUEUE,
   type AssetProcessingQueue,
@@ -35,12 +35,18 @@ import {
 } from './ports.ts';
 import type { SiteActor } from './sites.commands.ts';
 
-/** Widths of the public variants (never enlarged: a smaller image keeps its own width). */
+/** Widths of the public variants (never enlarged: an image between two steps also gets its own width). */
 export const VARIANT_WIDTHS = [480, 768, 1200, 1920] as const;
 /** How long a presigned upload URL is valid. */
 const UPLOAD_SECONDS = 15 * 60;
-/** Images larger than this many pixels are refused (decompression bombs). */
-export const MAX_PIXELS = 40_000_000;
+
+/** The widths an image of `width` pixels is published at: the steps it reaches, and its own below the largest. */
+export function variantWidths(width: number): number[] {
+  const steps: number[] = VARIANT_WIDTHS.filter((step) => step <= width);
+  const largest = VARIANT_WIDTHS[VARIANT_WIDTHS.length - 1] ?? 1920;
+  if (width > 0 && width < largest && !steps.includes(width)) steps.push(width);
+  return steps;
+}
 
 const toAsset = (asset: StoredAsset): SiteAsset => ({
   id: asset.id,
@@ -62,6 +68,8 @@ const toAsset = (asset: StoredAsset): SiteAsset => ({
   dominantColors: asset.dominantColors,
   createdAt: asset.createdAt.toISOString(),
 });
+
+const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
 
 /**
  * Site images (BF-035): the browser uploads the original straight to the private bucket with a presigned URL (the
@@ -127,20 +135,30 @@ export class SiteAssetCommands {
   /**
    * Checks the uploaded original and queues its processing. Refused (marked failed, the object deleted): a size or
    * type that differs from the declaration, an image that cannot be decoded or is too large. Not a transaction: a
-   * refusal must stick. Calling it again while processing re-queues the same job (idempotent per asset).
+   * refusal must stick. Every status change is a compare-and-set, so two finalizes and the job never undo each other.
    */
   async finalize(actor: SiteActor, siteId: string, assetId: string): Promise<SiteAsset> {
     const asset = await this.asset(actor, siteId, assetId);
     if (asset.status === 'ready') return toAsset(asset);
-    const object = asset.status === 'failed' ? undefined : await this.originals.get(asset.storageKey);
+    if (asset.status === 'failed')
+      throw new ConflictError('The image was refused: upload it again.', {
+        details: { reason: 'ASSET_FAILED' },
+      });
+    // Already checked: queue it again (a no-op while its job runs or has run).
+    if (asset.status === 'processing') {
+      await this.queue.process(asset.id, actor.organizationId);
+      return toAsset(asset);
+    }
+    const object = await this.originals.get(asset.storageKey);
     if (!object)
       throw new ConflictError('The image has not been uploaded yet.', {
         details: { reason: 'ASSET_NOT_UPLOADED' },
       });
     const refuse = async (message: string, reason: string) => {
-      await this.assets.update(asset.id, { status: 'failed' });
-      // Best effort: a failed asset is never processed or served, whether or not its original is gone.
-      await this.originals.delete(asset.storageKey).catch(() => undefined);
+      if (await this.assets.transition(asset.id, ['pending'], { status: 'failed' })) {
+        // Best effort: a failed asset is never processed or served, whether or not its original is gone.
+        await this.originals.delete(asset.storageKey).catch(() => undefined);
+      }
       return new ValidationError(message, [{ path: ['file'], message, code: reason.toLowerCase() }], {
         details: { reason },
       });
@@ -156,16 +174,20 @@ export class SiteAssetCommands {
     } catch {
       throw await refuse('The image cannot be read.', 'ASSET_UNREADABLE');
     }
-    if (size.width * size.height > MAX_PIXELS)
+    if (size.width * size.height > MAX_IMAGE_PIXELS)
       throw await refuse('The image is too large.', 'ASSET_TOO_LARGE');
-    await this.assets.update(asset.id, {
-      status: 'processing',
+    const checked = {
+      status: 'processing' as const,
       width: size.width,
       height: size.height,
-      sha256: createHash('sha256').update(object.body).digest('hex'),
-    });
+      sha256: sha256(object.body),
+    };
+    if (!(await this.assets.transition(asset.id, ['pending'], checked))) {
+      // Another finalize got there first: answer with what it did.
+      return toAsset(await this.asset(actor, siteId, assetId));
+    }
     await this.queue.process(asset.id, actor.organizationId);
-    return toAsset({ ...asset, status: 'processing', width: size.width, height: size.height });
+    return toAsset({ ...asset, ...checked });
   }
 
   async list(actor: SiteActor, siteId: string): Promise<SiteAsset[]> {
@@ -173,16 +195,26 @@ export class SiteAssetCommands {
     return (await this.assets.list(actor.organizationId, site)).map(toAsset);
   }
 
-  /** Deletes an asset no version of the site names (its original and variants go with it). */
+  /**
+   * Deletes an asset no version of the site names (its original and variants go with it). The site row is locked
+   * first: a version naming the image cannot commit between the check and the delete. An image being processed is
+   * deleted once it is ready or failed (the job would publish its variants after the delete).
+   */
   @Transactional()
   async remove(actor: SiteActor, siteId: string, assetId: string): Promise<void> {
+    const site = await this.sites.lockSite(actor.organizationId, siteId);
+    if (!site) throw new NotFoundError('Site', siteId);
     const asset = await this.asset(actor, siteId, assetId);
+    if (asset.status === 'processing')
+      throw new ConflictError('The image is being processed: delete it in a moment.', {
+        details: { reason: 'ASSET_PROCESSING' },
+      });
     const needles = [
       asset.id,
       ...(asset.publicUrl ? [asset.publicUrl] : []),
       ...(asset.variants ?? []).map((v) => v.url),
     ];
-    if (asset.siteId && (await this.assets.referenced(asset.siteId, needles))) {
+    if (await this.assets.referenced(site.id, needles)) {
       throw new ConflictError('A version of the site uses this image.', {
         details: { reason: 'ASSET_IN_USE' },
       });
@@ -194,21 +226,25 @@ export class SiteAssetCommands {
     });
   }
 
-  /** The processing job: public variants (WebP and AVIF per width) and dominant colours; idempotent. */
+  /**
+   * The processing job: public variants (WebP and AVIF per width) and dominant colours, from the bytes finalize
+   * checked (re-hashed: an upload replaced since is refused). Idempotent; the variants it wrote are removed when the
+   * asset changed meanwhile (deleted).
+   */
   async process(assetId: string): Promise<'ready' | 'failed' | 'skipped'> {
     const asset = await this.assets.byId(assetId);
-    if (!asset || asset.status === 'ready') return 'skipped';
-    if (asset.status !== 'processing') return 'skipped';
+    if (asset?.status !== 'processing') return 'skipped';
     const object = await this.originals.get(asset.storageKey);
-    if (!object) {
-      await this.assets.update(asset.id, { status: 'failed' });
+    if (
+      !object ||
+      !asset.sha256 ||
+      sha256(object.body) !== asset.sha256 ||
+      sniffImageType(object.body) !== asset.mime
+    ) {
+      await this.fail(asset.id);
       return 'failed';
     }
-    const widths = VARIANT_WIDTHS.filter((width) => width <= (asset.width ?? 0));
-    const encoded = await this.images.variants(
-      object.body,
-      widths.length > 0 ? widths : [asset.width ?? 480],
-    );
+    const encoded = await this.images.variants(object.body, variantWidths(asset.width ?? 0));
     const base = `sites/${asset.siteId ?? 'library'}/${asset.id}`;
     const variants = [];
     for (const variant of encoded) {
@@ -225,13 +261,22 @@ export class SiteAssetCommands {
     // The default: 1200 px WebP, or the largest WebP when the image is smaller.
     const webp = variants.filter((variant) => variant.format === 'webp');
     const preferred = webp.find((variant) => variant.width === 1200) ?? webp.at(-1);
-    await this.assets.update(asset.id, {
+    const done = await this.assets.transition(asset.id, ['processing'], {
       status: 'ready',
       variants,
       publicUrl: preferred?.url ?? null,
       dominantColors: await this.images.dominantColors(object.body, 3),
     });
+    if (!done) {
+      for (const variant of variants) await this.publicFiles.delete(variant.key);
+      return 'skipped';
+    }
     return 'ready';
+  }
+
+  /** The job gave up (its last attempt failed): the asset is failed, not left processing. */
+  async fail(assetId: string): Promise<void> {
+    await this.assets.transition(assetId, ['processing'], { status: 'failed' });
   }
 
   private async site(actor: SiteActor, siteId: string): Promise<string> {

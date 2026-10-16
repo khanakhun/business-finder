@@ -33,6 +33,6 @@ export class PublicSiteViewsController {
   })
   async record(@Body() body: BeaconBody): Promise<void> {
     const request = getRequestContext();
-    await this.recorder.record(body, { ip: request?.ip, userAgent: request?.userAgent });
+    await this.recorder.record(body, { ip: request?.ip });
   }
 }

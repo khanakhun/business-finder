@@ -1,5 +1,5 @@
 {
-  "id": "9aaf83ba-b46c-4dd8-ae77-163b1b854ef8",
+  "id": "cfa48c42-2619-4236-be3c-fe63ed7f179c",
   "prevId": "6d748167-28f0-45c7-8861-94f84b0d9428",
   "version": "7",
   "dialect": "postgresql",
@@ -8584,6 +8584,46 @@
           "value": "\"site_view_daily\".\"page_views\" >= 0 AND \"site_view_daily\".\"unique_estimate\" >= 0"
         }
       },
+      "isRLSEnabled": false
+    },
+    "public.site_view_hours": {
+      "name": "site_view_hours",
+      "schema": "",
+      "columns": {
+        "site_id": {
+          "name": "site_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hour_start": {
+          "name": "hour_start",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "site_view_hours_site_id_sites_id_fk": {
+          "name": "site_view_hours_site_id_sites_id_fk",
+          "tableFrom": "site_view_hours",
+          "tableTo": "sites",
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pk_site_view_hours": {
+          "name": "pk_site_view_hours",
+          "columns": ["site_id", "hour_start"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.sites": {

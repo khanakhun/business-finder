@@ -169,17 +169,25 @@ export interface DayViews {
 
 /** Where views are counted until they are flushed (Valkey). */
 export interface SiteViewCounter {
+  /** The day's random salt of visitor hashes (created on first use, gone after two days: never stored elsewhere). */
+  dailySalt(day: string): Promise<string>;
+  /**
+   * Counts a view, atomically; false when the visitor already sent the most views a day counts for that site. A
+   * campaign beyond the first `MAX_CAMPAIGNS` of the day is counted as `~other`.
+   */
   record(view: {
     siteId: string;
     day: string;
     hour: string;
-    /** A daily-salted hash of the visitor (never an IP or a user agent). */
+    /** A daily-salted hash of the visitor's network address (never an IP or a user agent). */
     visitor: string;
     locale: string;
     campaign?: string | undefined;
-  }): Promise<void>;
-  takeDays(limit: number): Promise<DayViews[]>;
-  returnDays(views: readonly DayViews[]): Promise<void>;
+  }): Promise<boolean>;
+  /** (day, site) pairs with views not yet written, with their totals and a version that changes with each view. */
+  pendingDays(limit: number): Promise<(DayViews & { readonly version: string })[]>;
+  /** Marks pairs written, unless a view arrived since they were read (their version moved: the next flush). */
+  clearDays(views: readonly { siteId: string; day: string; version: string }[]): Promise<void>;
   completedHours(
     beforeHour: string,
     limit: number,
@@ -196,6 +204,8 @@ export interface SiteViewsRepository {
   totals(siteId: string, fromDay: string): Promise<{ pageViews: number; uniqueEstimate: number }>;
   /** The workspace and business of sites (those that exist). */
   refs(siteIds: readonly string[]): Promise<{ id: string; organizationId: string; businessId: string }[]>;
+  /** Claims a site's hour for its `site.viewed` event; false when it was already claimed (one event per hour). */
+  claimHour(siteId: string, hourStart: string): Promise<boolean>;
 }
 export const SITE_VIEWS_REPOSITORY = Symbol('SiteViewsRepository');
 
@@ -220,14 +230,18 @@ export interface StoredAsset {
   readonly licenseDetails: Record<string, string> | null;
   readonly alt: Record<string, string> | null;
   readonly dominantColors: string[] | null;
+  /** The SHA-256 of the original as checked at finalize (the job processes those bytes only). */
+  readonly sha256: string | null;
   readonly createdAt: Date;
 }
+
+export type AssetStatus = StoredAsset['status'];
 
 export interface SiteAssetsRepository {
   insert(
     asset: Omit<
       StoredAsset,
-      'status' | 'width' | 'height' | 'publicUrl' | 'variants' | 'dominantColors' | 'createdAt'
+      'status' | 'width' | 'height' | 'publicUrl' | 'variants' | 'dominantColors' | 'sha256' | 'createdAt'
     > & {
       createdBy: string | null;
     },
@@ -236,12 +250,15 @@ export interface SiteAssetsRepository {
   /** By id only (the processing job). */
   byId(assetId: string): Promise<StoredAsset | undefined>;
   list(organizationId: string, siteId: string): Promise<StoredAsset[]>;
-  update(
+  /**
+   * Applies the changes only while the asset is in one of `from` (compare-and-set: two finalizes, a late job or a
+   * deletion never overwrite each other); returns whether it did.
+   */
+  transition(
     assetId: string,
-    changes: Partial<Omit<StoredAsset, 'id' | 'organizationId' | 'siteId' | 'storageKey'>> & {
-      sha256?: string;
-    },
-  ): Promise<void>;
+    from: readonly AssetStatus[],
+    changes: Partial<Omit<StoredAsset, 'id' | 'organizationId' | 'siteId' | 'storageKey' | 'createdAt'>>,
+  ): Promise<boolean>;
   /** Whether a version of the site names the asset (its id or one of its URLs). */
   referenced(siteId: string, needles: readonly string[]): Promise<boolean>;
   delete(assetId: string): Promise<void>;
@@ -274,6 +291,7 @@ export const PUBLIC_FILES = Symbol('PublicFiles');
 
 /** Image decoding and re-encoding (sharp). */
 export interface ImageProcessor {
+  /** Oriented dimensions; throws for an image it cannot read or a format outside `DECODABLE_FORMATS`. */
   inspect(image: Buffer): Promise<{ width: number; height: number }>;
   /** Oriented, metadata stripped, resized (never enlarged) and re-encoded. */
   variants(
@@ -306,7 +324,8 @@ export interface SiteThumbnailsRepository {
     publicationId: string,
   ): Promise<{ organizationId: string; hostname: string; status: StoredPublication['status'] } | undefined>;
   get(siteId: string): Promise<StoredThumbnails | null>;
-  set(siteId: string, thumbnails: StoredThumbnails): Promise<void>;
+  /** Stores the pictures while their publication is still active (one statement); returns whether it did. */
+  setIfActive(siteId: string, thumbnails: StoredThumbnails): Promise<boolean>;
 }
 export const SITE_THUMBNAILS_REPOSITORY = Symbol('SiteThumbnailsRepository');
 

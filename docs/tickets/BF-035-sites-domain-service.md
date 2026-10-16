@@ -79,9 +79,9 @@ modules/sites/
 ## Acceptance criteria
 - [x] Sites/versions/publications/assets/views tables with immutability and grants.
 - [x] Commands for create/version/ops/publish/extend/unpublish/rollback/archive with permissions and events.
-- [ ] Renderer read model + HMAC revalidation + screenshot thumbnails.
-- [ ] Asset upload pipeline with licensing and processing.
-- [ ] Privacy-preserving view analytics and hourly `site.viewed` events.
+- [x] Renderer read model + HMAC revalidation + screenshot thumbnails.
+- [x] Asset upload pipeline with licensing and processing.
+- [x] Privacy-preserving view analytics and hourly `site.viewed` events.
 - [x] Preview expiry job.
 
 ## Agent prompt
@@ -144,6 +144,32 @@ Verify: pnpm verify && pnpm test:int.
   `noindex` and the banner on previews. Facts validation (strict mode) waits for the fact registry (BF-040). Preview URLs
   are `https://<slug>.<SITES_BASE_DOMAIN>/` (a lowercase hostname, validated).
 
-**Part 2 (planned):** asset upload/finalize/processing, screenshot thumbnails, view analytics and hourly
-`site.viewed` events.
+**Part 2:**
+- Images: `POST /v1/sites/:id/assets` declares type, size and license and returns a presigned PUT to the private
+  assets bucket (`orgs/<org>/sites/<site>/assets/<id>/original`; type and length signed, 15 minutes);
+  `POST …/assets/:assetId/finalize` sniffs the bytes, checks the size, decodes the dimensions (JPEG/PNG/WebP/AVIF only,
+  ≤ 40 MP) and records their SHA-256; a `sites-asset-process` job re-checks that hash, then writes stripped WebP and
+  AVIF variants (480/768/1200/1920 px reached by the image, and its own width below 1920; never enlarged) to the public
+  sites bucket behind `SITES_ASSETS_BASE_URL`, with dominant colours. Status changes are compare-and-set (two
+  finalizes, a late job and a delete never undo each other); the job's last failed attempt marks the image failed. An
+  image is deleted only when no version names it (site row locked) and not while it is processed.
+- Pictures: a `site.published` subscriber queues `sites-screenshot` (15 s later, after the renderer's refresh);
+  services/intel photographs the home page (desktop, mobile) into the artifacts bucket under
+  `orgs/<org>/sites/<site>/<publication>`; the keys are kept in `sites.thumbnails` only while that publication is
+  active; members read them at `GET /v1/sites/:id/thumbnails/:kind` (nosniff, sandbox CSP). `FAKE_SITE_INTEL` draws
+  placeholders.
+- Views: `POST /v1/public/sites/views` (anonymous, always 204, 120/min per client IP) takes the page's signed site token
+  (`SITES_VIEW_TOKEN_SECRET`, shared with the renderer). The visitor is a hash of their network address (IPv4, IPv6
+  /64) with a random salt of the day kept in Valkey two days; one Lua script counts the view (at most 30 a day per
+  visitor and site; at most 50 campaign references a day, the rest as `~other`) in day and hour counters and
+  HyperLogLogs. Every 5 minutes the worker writes pending days to `site_view_daily` (totals only grow; a pair leaves the
+  pending set only if no view arrived meanwhile) and emits one `site.viewed` per site and completed hour (2 minutes of
+  grace; claimed in `site_view_hours`, so never twice). No IP, user agent or hash is stored in the database or events.
+- The site detail carries `thumbnails` and 7/30-day `views` (unique visitors summed over days).
+- Decisions: the upload route is `POST /assets` (not `/assets/upload-url`); originals stay in the private assets bucket
+  and only re-encoded variants are public; pictures are a `sites.thumbnails` column, not `site_assets` rows (they are
+  not site content); public variant keys are `sites/<site>/<asset>/…` (no workspace id in public URLs); local previews
+  get no real pictures (intel's SSRF guard refuses `*.localhost`); the anonymous throttle now keys on the proxy-aware
+  client IP (it keyed on the proxy's). Follow-ups: a bucket lifecycle rule for originals never finalized; a per-site
+  image quota.
 

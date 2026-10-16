@@ -1,6 +1,7 @@
 // Site views (BF-035): counted per site and UTC day (flushed to site_view_daily) and per UTC hour (the hourly
-// `site.viewed` events). Unique visitors are a HyperLogLog estimate over a daily-salted hash of IP and user agent:
-// neither is ever stored, and a visitor cannot be followed from one day to the next.
+// `site.viewed` events). Unique visitors are a HyperLogLog estimate over a hash of the visitor's network address
+// with a random salt of the day (kept in Valkey for two days): no address is stored, and a day's hashes cannot be
+// linked to another day's.
 
 /** The UTC day of a moment (`2026-10-14`). */
 export const dayOf = (at: Date) => at.toISOString().slice(0, 10);

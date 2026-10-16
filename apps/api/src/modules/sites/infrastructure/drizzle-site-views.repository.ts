@@ -1,5 +1,5 @@
 import { type DbClient, getExecutor } from '@bf/db';
-import { sites, siteViewDaily } from '@bf/db/schema';
+import { sites, siteViewDaily, siteViewHours } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, gte, inArray, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
@@ -32,17 +32,19 @@ export class DrizzleSiteViewsRepository implements SiteViewsRepository {
         byCampaign: view.byCampaign,
       }));
     if (rows.length === 0) return 0;
-    // Totals are absolute (recounted from Valkey): a later flush of the same day replaces them.
+    // Totals are absolute (recounted from Valkey) and only grow within a day: an older reading written last (two
+    // flushes overlapping) never lowers them.
+    const newer = sql`excluded.page_views >= ${siteViewDaily.pageViews}`;
     await executor
       .insert(siteViewDaily)
       .values(rows)
       .onConflictDoUpdate({
         target: [siteViewDaily.siteId, siteViewDaily.day],
         set: {
-          pageViews: sql`excluded.page_views`,
-          uniqueEstimate: sql`excluded.unique_estimate`,
-          byLocale: sql`excluded.by_locale`,
-          byCampaign: sql`excluded.by_campaign`,
+          pageViews: sql`greatest(${siteViewDaily.pageViews}, excluded.page_views)`,
+          uniqueEstimate: sql`greatest(${siteViewDaily.uniqueEstimate}, excluded.unique_estimate)`,
+          byLocale: sql`CASE WHEN ${newer} THEN excluded.by_locale ELSE ${siteViewDaily.byLocale} END`,
+          byCampaign: sql`CASE WHEN ${newer} THEN excluded.by_campaign ELSE ${siteViewDaily.byCampaign} END`,
         },
       });
     return rows.length;
@@ -65,5 +67,14 @@ export class DrizzleSiteViewsRepository implements SiteViewsRepository {
       .select({ id: sites.id, organizationId: sites.organizationId, businessId: sites.businessId })
       .from(sites)
       .where(inArray(sites.id, [...siteIds]));
+  }
+
+  async claimHour(siteId: string, hourStart: string): Promise<boolean> {
+    const rows = await getExecutor(this.db)
+      .insert(siteViewHours)
+      .values({ siteId, hourStart })
+      .onConflictDoNothing()
+      .returning({ siteId: siteViewHours.siteId });
+    return rows.length > 0;
   }
 }

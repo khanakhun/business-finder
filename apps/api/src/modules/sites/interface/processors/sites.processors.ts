@@ -70,9 +70,19 @@ export class SitesAssetProcessProcessor extends TypedProcessor<
   }
 
   async handle(payload: z.output<typeof SitesAssetProcessJob.schema>, context: JobContext) {
-    const outcome = await this.assets.process(payload.assetId);
-    context.logger.info({ assetId: payload.assetId, outcome }, 'site asset processed');
-    return { outcome };
+    try {
+      const outcome = await this.assets.process(payload.assetId);
+      context.logger.info({ assetId: payload.assetId, outcome }, 'site asset processed');
+      return { outcome };
+    } catch (error) {
+      // The last attempt: the image is failed (the member uploads it again), never left processing.
+      if (context.attempt >= (QUEUES.sitesAssetProcess.defaultJobOptions.attempts ?? 1)) {
+        await this.assets.fail(payload.assetId);
+        context.logger.warn({ err: error, assetId: payload.assetId }, 'site asset processing failed');
+        return { outcome: 'failed' };
+      }
+      throw error;
+    }
   }
 }
 

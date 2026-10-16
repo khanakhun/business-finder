@@ -1,9 +1,17 @@
 import sharp from 'sharp';
 import type { ImageProcessor } from '../application/ports.ts';
-import { MAX_PIXELS } from '../application/site-assets.ts';
+import { DECODABLE_FORMATS, MAX_IMAGE_PIXELS } from '../domain/image-type.ts';
 
 /** Decoding stops on corrupt data and above the pixel limit (decompression bombs). */
-const decode = (image: Buffer) => sharp(image, { limitInputPixels: MAX_PIXELS, failOn: 'error' });
+const decode = (image: Buffer) => sharp(image, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: 'error' });
+
+/** Refuses anything but the accepted types before decoding it (libvips also reads SVG, TIFF, GIF…). */
+async function checkedFormat(image: Buffer) {
+  const metadata = await decode(image).metadata();
+  if (!DECODABLE_FORMATS.has(metadata.format))
+    throw new Error(`Unsupported image format: ${metadata.format}`);
+  return metadata;
+}
 
 const hex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
 
@@ -13,19 +21,19 @@ const hex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
  */
 export class SharpImageProcessor implements ImageProcessor {
   async inspect(image: Buffer): Promise<{ width: number; height: number }> {
-    const metadata = await decode(image).metadata();
+    const metadata = await checkedFormat(image);
     return { width: metadata.autoOrient.width, height: metadata.autoOrient.height };
   }
 
   async variants(image: Buffer, widths: readonly number[]) {
+    await checkedFormat(image);
     const out: { width: number; format: 'webp' | 'avif'; body: Buffer }[] = [];
+    // One encoding at a time: a 40 MP image decodes to about 160 MB.
     for (const width of widths) {
-      const resized = decode(image).autoOrient().resize({ width, withoutEnlargement: true });
-      const [webp, avif] = await Promise.all([
-        resized.clone().webp({ quality: 80 }).toBuffer({ resolveWithObject: true }),
-        resized.clone().avif({ quality: 55, effort: 4 }).toBuffer({ resolveWithObject: true }),
-      ]);
+      const resize = () => decode(image).autoOrient().resize({ width, withoutEnlargement: true });
+      const webp = await resize().webp({ quality: 80 }).toBuffer({ resolveWithObject: true });
       out.push({ width: webp.info.width, format: 'webp', body: webp.data });
+      const avif = await resize().avif({ quality: 55, effort: 4 }).toBuffer({ resolveWithObject: true });
       out.push({ width: avif.info.width, format: 'avif', body: avif.data });
     }
     return out;

@@ -23,3 +23,9 @@ export function sniffImageType(bytes: Uint8Array): SiteImageType | undefined {
   }
   return undefined;
 }
+
+/** Images larger than this many pixels are refused (decompression bombs: 40 MP is about 160 MB decoded). */
+export const MAX_IMAGE_PIXELS = 40_000_000;
+
+/** What the decoder may read (sharp's names): the types above only, never SVG, TIFF, GIF or others it knows. */
+export const DECODABLE_FORMATS: ReadonlySet<string> = new Set(['jpeg', 'png', 'webp', 'heif']);

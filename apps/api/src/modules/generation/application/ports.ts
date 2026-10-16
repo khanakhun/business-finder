@@ -295,7 +295,26 @@ export const CANCEL_SIGNALS = Symbol('CancelSignals');
 /** Live events for the dashboard (Valkey stream per job; the SSE endpoint tails it in part 2). */
 export interface EventStream {
   publish(jobId: string, entries: readonly { seq: number; event: EngineEvent }[]): Promise<void>;
+  /** The job's new status on its stream (the SSE endpoint closes once it is settled). */
+  status(jobId: string, status: GenerationJobStatus): Promise<void>;
 }
+
+/** Throttled updates for the dashboard on the workspace's realtime channel (not domain events). */
+export interface LiveUpdates {
+  job(job: StoredJob): Promise<void>;
+  batch(batch: StoredBatch): Promise<void>;
+}
+export const LIVE_UPDATES = Symbol('LiveUpdates');
+
+/** Metrics of the orchestration (the infrastructure records them; tests leave them out). */
+export interface GenerationTelemetry {
+  leaseWait(engine: EngineId): void;
+  queueWait(engine: EngineId, seconds: number): void;
+  phase(engine: EngineId, phase: 'prepare' | 'run', seconds: number): void;
+  sandboxes(held: number): void;
+  settled(job: StoredJob, outcome: GenerationJobStatus): void;
+}
+export const GENERATION_TELEMETRY = Symbol('GenerationTelemetry');
 export const EVENT_STREAM = Symbol('EventStream');
 
 /** Private storage of attempts' artifacts (specs, workspace bundles). */

@@ -637,6 +637,10 @@
       "system_test": {
         "title": "Notification de test",
         "body": "Les notifications fonctionnent."
+      },
+      "site_needs_review": {
+        "title": "Un site généré est à revoir",
+        "body": "{business} : le site n’a pas été publié ({reason})."
       }
     },
     "preferences": {
@@ -653,7 +657,8 @@
         "discovery_completed": "Découverte terminée",
         "mailbox_paused": "Boîte d’envoi en pause",
         "member_joined": "Nouveaux membres",
-        "system_test": "Notifications de test"
+        "system_test": "Notifications de test",
+        "site_needs_review": "Sites à revoir"
       }
     }
   },

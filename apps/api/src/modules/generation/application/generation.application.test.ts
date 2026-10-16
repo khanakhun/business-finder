@@ -113,7 +113,7 @@ beforeEach(() => {
     queues,
     leases,
     cancels,
-    { publish: async () => undefined },
+    { publish: async () => undefined, status: async () => undefined },
     artifacts,
     preparer,
     budget,

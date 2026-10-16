@@ -305,3 +305,29 @@ export const GenerationQualityJob = defineJob('generation-quality', 'evaluate', 
 
 /** Every minute: attempts whose heartbeat stopped are failed and retried (a worker died). */
 export const GenerationReaperJob = defineJob('generation-reaper', 'reap', {});
+
+/** Realtime message types on the workspace channel (UI notifications, not domain events; throttled per job). */
+export const GENERATION_JOB_UPDATED = 'generation.job.updated';
+export const GENERATION_BATCH_UPDATED = 'generation.batch.updated';
+
+/** A batch finished (every job settled): its creator is notified. */
+export const GenerationBatchCompleted = defineEvent(
+  'generation.batch.completed',
+  1,
+  z.object({
+    batchId: z.uuid(),
+    createdBy: z.string().nullable(),
+    status: GenerationBatchStatusSchema,
+    succeeded: z.number().int().nonnegative(),
+    total: z.number().int().nonnegative(),
+  }),
+);
+
+export const RegenerateSiteRequestSchema = z
+  .object({
+    engine: EngineRequestSchema.default('auto'),
+    /** What to change (passed to the engine's brief by BF-040/BF-047). */
+    instructions: z.string().trim().max(2000).optional(),
+  })
+  .meta({ id: 'RegenerateSiteRequest' });
+export type RegenerateSiteRequest = z.input<typeof RegenerateSiteRequestSchema>;

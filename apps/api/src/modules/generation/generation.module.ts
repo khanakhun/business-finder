@@ -7,8 +7,10 @@ import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.t
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
+import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
 import { SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
 import { GenerationCommands } from './application/generation.commands.ts';
+import { GenerationNotifications } from './application/generation.notifications.ts';
 import { GenerationQuality } from './application/generation.quality.ts';
 import { GenerationQueries } from './application/generation.queries.ts';
 import { GenerationRunner } from './application/generation.runner.ts';
@@ -23,14 +25,16 @@ import {
   GENERATION_QUEUES,
   GENERATION_REPOSITORY,
   GENERATION_SETTINGS,
+  GENERATION_TELEMETRY,
   type GenerationLimits,
   LEASE_SEMAPHORE,
+  LIVE_UPDATES,
   QUALITY_PIPELINE,
   SITE_HAND_OFF,
   WORKSPACE_BUDGET,
   WORKSPACE_PREPARER,
 } from './application/ports.ts';
-import { JobTransitions } from './application/transitions.ts';
+import { JobTransitions, SETTLED_HOOK } from './application/transitions.ts';
 import {
   BullmqGenerationQueues,
   GENERATION_REAPER_AUTOSTART,
@@ -45,6 +49,9 @@ import {
 } from './infrastructure/defaults/defaults.ts';
 import { FakeEngine } from './infrastructure/defaults/fake.engine.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
+import { JobEventTail } from './infrastructure/job-event-tail.ts';
+import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
+import { PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
 import { SitesModuleHandOff } from './infrastructure/sites-hand-off.ts';
 import {
   ValkeyCancelSignals,
@@ -80,7 +87,7 @@ export class GenerationModule {
   static forRoot(mode: AppMode): DynamicModule {
     return {
       module: GenerationModule,
-      imports: [SitesModule.forRoot(mode)],
+      imports: [SitesModule.forRoot(mode), RealtimeModule.forRoot(mode)],
       controllers: mode === 'worker' ? [] : [GenerationController],
       providers: [
         { provide: GENERATION_REPOSITORY, useClass: DrizzleGenerationRepository },
@@ -168,6 +175,19 @@ export class GenerationModule {
                 useFactory: (valkey: Redis) => new ValkeyEventStream(valkey),
               },
             ]),
+        { provide: GENERATION_TELEMETRY, useValue: PROMETHEUS_TELEMETRY },
+        { provide: SETTLED_HOOK, useValue: PROMETHEUS_TELEMETRY.settled },
+        {
+          provide: LIVE_UPDATES,
+          inject: [RealtimePublisher],
+          useFactory: (realtime: RealtimePublisher) => new RealtimeLiveUpdates(realtime),
+        },
+        {
+          provide: JobEventTail,
+          inject: [VALKEY],
+          useFactory: (valkey: Redis | null) => new JobEventTail(valkey as Redis),
+        },
+        GenerationNotifications,
         JobTransitions,
         GenerationCommands,
         GenerationQueries,

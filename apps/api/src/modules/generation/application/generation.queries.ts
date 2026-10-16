@@ -114,6 +114,13 @@ export class GenerationQueries {
     return { ...toJob(job), attempts: (await this.repository.attempts(job.id)).map(toAttempt) };
   }
 
+  /** A job's persisted events after `afterSeq` (the SSE replay), at most 2 000. */
+  async events(organizationId: string, jobId: string, afterSeq: number) {
+    const job = await this.repository.job(organizationId, jobId);
+    if (!job) throw new NotFoundError('GenerationJob', jobId);
+    return this.repository.events(job.id, Number.isFinite(afterSeq) ? afterSeq : 0, 2_000);
+  }
+
   async listEngines(organizationId: string): Promise<GenerationEngineListing> {
     const load = await this.repository.engineLoad(organizationId);
     return {

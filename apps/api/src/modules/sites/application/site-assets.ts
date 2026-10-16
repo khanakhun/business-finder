@@ -39,6 +39,8 @@ import type { SiteActor } from './sites.commands.ts';
 export const VARIANT_WIDTHS = [480, 768, 1200, 1920] as const;
 /** How long a presigned upload URL is valid. */
 const UPLOAD_SECONDS = 15 * 60;
+/** Processing takes seconds: an image processing for longer than this has lost its job. */
+export const STALE_PROCESSING_MS = 30 * 60_000;
 
 /** The widths an image of `width` pixels is published at: the steps it reaches, and its own below the largest. */
 export function variantWidths(width: number): number[] {
@@ -181,6 +183,7 @@ export class SiteAssetCommands {
       width: size.width,
       height: size.height,
       sha256: sha256(object.body),
+      processingStartedAt: this.clock.now(),
     };
     if (!(await this.assets.transition(asset.id, ['pending'], checked))) {
       // Another finalize got there first: answer with what it did.
@@ -204,8 +207,10 @@ export class SiteAssetCommands {
   async remove(actor: SiteActor, siteId: string, assetId: string): Promise<void> {
     const site = await this.sites.lockSite(actor.organizationId, siteId);
     if (!site) throw new NotFoundError('Site', siteId);
-    const asset = await this.asset(actor, siteId, assetId);
-    if (asset.status === 'processing')
+    // The row locked and read now: a finalize or a job finishing meanwhile waits, then finds it gone.
+    const asset = await this.assets.lock(actor.organizationId, site.id, assetId);
+    if (!asset) throw new NotFoundError('SiteAsset', assetId);
+    if (asset.status === 'processing' && !this.stale(asset))
       throw new ConflictError('The image is being processed: delete it in a moment.', {
         details: { reason: 'ASSET_PROCESSING' },
       });
@@ -222,7 +227,7 @@ export class SiteAssetCommands {
     await this.assets.delete(asset.id);
     await afterCommit(this.db, async () => {
       await this.originals.delete(asset.storageKey);
-      for (const variant of asset.variants ?? []) await this.publicFiles.delete(variant.key);
+      for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key);
     });
   }
 
@@ -263,6 +268,7 @@ export class SiteAssetCommands {
     const preferred = webp.find((variant) => variant.width === 1200) ?? webp.at(-1);
     const done = await this.assets.transition(asset.id, ['processing'], {
       status: 'ready',
+      processingStartedAt: null,
       variants,
       publicUrl: preferred?.url ?? null,
       dominantColors: await this.images.dominantColors(object.body, 3),
@@ -274,9 +280,40 @@ export class SiteAssetCommands {
     return 'ready';
   }
 
-  /** The job gave up (its last attempt failed): the asset is failed, not left processing. */
+  /**
+   * The job gave up (its last attempt failed): the asset is failed, not left processing, and any variant it had
+   * already written is removed (their keys are known from the widths).
+   */
   async fail(assetId: string): Promise<void> {
-    await this.assets.transition(assetId, ['processing'], { status: 'failed' });
+    const asset = await this.assets.byId(assetId);
+    if (!asset || !(await this.assets.transition(assetId, ['processing'], { status: 'failed' }))) return;
+    for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
+  }
+
+  /** Images whose job died (a killed worker never reaches `fail`): failed after `STALE_PROCESSING_MS` (hourly). */
+  async failStale(limit = 500): Promise<number> {
+    const stale = await this.assets.failStale(
+      new Date(this.clock.now().getTime() - STALE_PROCESSING_MS),
+      limit,
+    );
+    for (const asset of stale)
+      for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
+    return stale.length;
+  }
+
+  private stale(asset: StoredAsset): boolean {
+    const started = asset.processingStartedAt?.getTime() ?? 0;
+    return this.clock.now().getTime() - started > STALE_PROCESSING_MS;
+  }
+
+  /** Every public key an asset may have: those it lists, and those its widths give (a job that stopped midway). */
+  private variantKeys(asset: StoredAsset): string[] {
+    const base = `sites/${asset.siteId ?? 'library'}/${asset.id}`;
+    const derived = variantWidths(asset.width ?? 0).flatMap((width) => [
+      `${base}/${width}.webp`,
+      `${base}/${width}.avif`,
+    ]);
+    return [...new Set([...(asset.variants ?? []).map((variant) => variant.key), ...derived])];
   }
 
   private async site(actor: SiteActor, siteId: string): Promise<string> {

@@ -77,4 +77,12 @@ export class DrizzleSiteViewsRepository implements SiteViewsRepository {
       .returning({ siteId: siteViewHours.siteId });
     return rows.length > 0;
   }
+
+  async pruneHours(before: string, limit: number): Promise<number> {
+    const rows = await getExecutor(this.db).execute<{ site_id: string }>(sql`
+      DELETE FROM ${siteViewHours}
+      WHERE ctid IN (SELECT ctid FROM ${siteViewHours} WHERE ${siteViewHours.hourStart} < ${before} LIMIT ${limit})
+      RETURNING site_id`);
+    return rows.length;
+  }
 }

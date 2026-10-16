@@ -206,6 +206,8 @@ export interface SiteViewsRepository {
   refs(siteIds: readonly string[]): Promise<{ id: string; organizationId: string; businessId: string }[]>;
   /** Claims a site's hour for its `site.viewed` event; false when it was already claimed (one event per hour). */
   claimHour(siteId: string, hourStart: string): Promise<boolean>;
+  /** Forgets claims of hours before `before` (their counters are gone from Valkey); returns how many. */
+  pruneHours(before: string, limit: number): Promise<number>;
 }
 export const SITE_VIEWS_REPOSITORY = Symbol('SiteViewsRepository');
 
@@ -232,6 +234,8 @@ export interface StoredAsset {
   readonly dominantColors: string[] | null;
   /** The SHA-256 of the original as checked at finalize (the job processes those bytes only). */
   readonly sha256: string | null;
+  /** When processing started (null outside `processing`). */
+  readonly processingStartedAt: Date | null;
   readonly createdAt: Date;
 }
 
@@ -241,7 +245,15 @@ export interface SiteAssetsRepository {
   insert(
     asset: Omit<
       StoredAsset,
-      'status' | 'width' | 'height' | 'publicUrl' | 'variants' | 'dominantColors' | 'sha256' | 'createdAt'
+      | 'status'
+      | 'width'
+      | 'height'
+      | 'publicUrl'
+      | 'variants'
+      | 'dominantColors'
+      | 'sha256'
+      | 'processingStartedAt'
+      | 'createdAt'
     > & {
       createdBy: string | null;
     },
@@ -249,6 +261,10 @@ export interface SiteAssetsRepository {
   get(organizationId: string, siteId: string, assetId: string): Promise<StoredAsset | undefined>;
   /** By id only (the processing job). */
   byId(assetId: string): Promise<StoredAsset | undefined>;
+  /** The asset, its row locked until the transaction ends (a delete reads its current state, not a stale one). */
+  lock(organizationId: string, siteId: string, assetId: string): Promise<StoredAsset | undefined>;
+  /** Marks failed the assets processing since before `before` (a job that died); returns them. */
+  failStale(before: Date, limit: number): Promise<StoredAsset[]>;
   list(organizationId: string, siteId: string): Promise<StoredAsset[]>;
   /**
    * Applies the changes only while the asset is in one of `from` (compare-and-set: two finalizes, a late job or a

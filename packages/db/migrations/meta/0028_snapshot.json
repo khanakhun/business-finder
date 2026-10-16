@@ -1,5 +1,5 @@
 {
-  "id": "cfa48c42-2619-4236-be3c-fe63ed7f179c",
+  "id": "036683fa-78d3-4724-a993-67b00293253b",
   "prevId": "6d748167-28f0-45c7-8861-94f84b0d9428",
   "version": "7",
   "dialect": "postgresql",
@@ -8060,6 +8060,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
+        },
+        "processing_started_at": {
+          "name": "processing_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_by": {
           "name": "created_by",

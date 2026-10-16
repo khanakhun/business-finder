@@ -23,7 +23,16 @@ import {
 } from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
-import { PUBLIC_FILES, SITE_ARTIFACTS, SITE_ORIGINALS, UPLOAD_SIGNER } from './application/ports.ts';
+import {
+  PUBLIC_FILES,
+  SITE_ARTIFACTS,
+  SITE_ORIGINALS,
+  SITE_THUMBNAILS_REPOSITORY,
+  SITE_VIEW_COUNTER,
+  type SiteThumbnailsRepository,
+  type SiteViewCounter,
+  UPLOAD_SIGNER,
+} from './application/ports.ts';
 import { SiteViewsFlusher } from './application/site-views.ts';
 import {
   SCREENSHOT_DELAY_MS,
@@ -42,6 +51,7 @@ const fixtures = join(
 const salonSpec = (): Record<string, unknown> =>
   JSON.parse(readFileSync(join(fixtures, 'salon-gustavia.json'), 'utf8'));
 const ASSETS_BASE = 'https://assets.bf-sites.test';
+const NOW_ISO = '2026-10-14T12:00:00.000Z';
 const VIEW_SECRET = 'view-secret-for-tests-only-0123456789abcdef';
 const ENV = {
   SITES_BASE_DOMAIN: 'sites.test',
@@ -370,5 +380,31 @@ describe('views', () => {
     expect(day?.pageViews).toBe(30 + 52);
     expect(Object.keys(day?.byCampaign ?? {})).toHaveLength(51);
     expect(day?.byCampaign['~other']).toBe(2);
+  });
+
+  it('keeps a day pending when a view arrives while it is being written (nothing lost)', async () => {
+    const counter = worker.get<SiteViewCounter>(SITE_VIEW_COUNTER);
+    const { id: siteId } = await newSite('Pending Views');
+    const view = (visitor: string) =>
+      counter.record({ siteId, day: '2026-10-14', hour: '2026-10-14T12:00:00.000Z', visitor, locale: 'fr' });
+    const pendingFor = async () => (await counter.pendingDays(10_000)).filter((day) => day.siteId === siteId);
+    await view('a');
+    const read = await pendingFor();
+    await view('b');
+    await counter.clearDays(read);
+    expect(await pendingFor()).toHaveLength(1);
+    await counter.clearDays(await pendingFor());
+    expect(await pendingFor()).toEqual([]);
+  });
+});
+
+describe('pictures of an ended publication', () => {
+  it('are not stored once the publication is no longer active', async () => {
+    const thumbnails = worker.get<SiteThumbnailsRepository>(SITE_THUMBNAILS_REPOSITORY);
+    const site = await newSite('Old Pictures');
+    const preview = await member.post(`/v1/sites/${site.id}/preview`, { versionId: site.v1 }).expect(201);
+    await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(204);
+    const late = { publicationId: preview.body.id, takenAt: NOW_ISO, desktopKey: null, mobileKey: null };
+    expect(await thumbnails.setIfActive(site.id, late)).toBe(false);
   });
 });

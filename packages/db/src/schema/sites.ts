@@ -189,6 +189,8 @@ export const siteAssets = pgTable(
     focalPoint: jsonb().$type<{ x: number; y: number }>(),
     /** `pending` until the upload is finalized and processed. */
     status: text().$type<'pending' | 'processing' | 'ready' | 'failed'>().notNull().default('pending'),
+    /** When processing started (a job that died leaves it: past a while the image counts as failed). */
+    processingStartedAt: timestamp({ withTimezone: true }),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
     createdAt: tz().notNull().defaultNow(),
   },

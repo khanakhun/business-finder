@@ -40,11 +40,17 @@ export class SitesExpireProcessor extends TypedProcessor<
 > {
   protected readonly definition = SitesExpireJob;
 
-  constructor(private readonly commands: SiteCommands) {
+  constructor(
+    private readonly commands: SiteCommands,
+    private readonly assets: SiteAssetCommands,
+  ) {
     super();
   }
 
   async handle(_payload: z.output<typeof SitesExpireJob.schema>, context: JobContext) {
+    // The hourly sweep also fails images whose processing job died.
+    const staleImages = await this.assets.failStale();
+    if (staleImages > 0) context.logger.warn({ staleImages }, 'site images left processing marked failed');
     let expired = 0;
     // In batches until none is due (each preview ends in its own transaction), at most 20 per run (the next hour
     // continues; a preview that keeps failing is retried there and logged).

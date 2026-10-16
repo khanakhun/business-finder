@@ -20,13 +20,28 @@ const FLUSH_ROUNDS = 20;
 /** An hour is complete this long after it ends (a view stamped 12:59:59 may land a little later). */
 const HOUR_GRACE_MS = 2 * 60_000;
 
-/** The part of an address that names a visitor's network: an IPv4 address, an IPv6 /64 (a device rotates the rest). */
+/**
+ * The part of an address that names a visitor's network: an IPv4 address, or an IPv6 /64 (a device rotates the
+ * rest), written in full (`2001:db8::1:2:3:4:5` is `2001:0db8:0000:0001`) so one network has one name.
+ */
 export function networkOf(ip: string | undefined): string {
   if (!ip) return '';
-  const v4 = ip.replace(/^::ffff:/i, '');
+  const address = ip.trim().toLowerCase().replace(/%.*$/, '');
+  const v4 = address.replace(/^::ffff:/, '');
   if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(v4)) return v4;
-  const groups = ip.toLowerCase().split('::')[0]?.split(':') ?? [];
-  return groups.slice(0, 4).join(':');
+  if (!/^[0-9a-f:]+$/.test(address) || address.split('::').length > 2) return '';
+  const [head = '', tail] = address.split('::');
+  const left = head ? head.split(':') : [];
+  const right = tail === undefined ? [] : tail ? tail.split(':') : [];
+  const groups =
+    tail === undefined
+      ? left
+      : [...left, ...Array<string>(Math.max(0, 8 - left.length - right.length)).fill('0'), ...right];
+  if (groups.length !== 8 || groups.some((group) => group.length > 4)) return '';
+  return groups
+    .slice(0, 4)
+    .map((group) => group.padStart(4, '0'))
+    .join(':');
 }
 
 /**
@@ -93,6 +108,8 @@ export class SiteViewsFlusher {
       await this.counter.clearDays(days);
       if (days.length < FLUSH_BATCH) break;
     }
+    // Claims of hours whose counters are gone from Valkey (two days) can never matter again.
+    await this.repository.pruneHours(hourOf(new Date(this.clock.now().getTime() - 3 * 86_400_000)), 5_000);
     let emitted = 0;
     const complete = hourOf(new Date(this.clock.now().getTime() - HOUR_GRACE_MS));
     const hours = await this.counter.completedHours(complete, FLUSH_BATCH);

@@ -1,7 +1,7 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import { siteAssets, siteVersions } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { AssetStatus, SiteAssetsRepository, StoredAsset } from '../application/ports.ts';
 
@@ -22,6 +22,7 @@ const columns = {
   alt: siteAssets.alt,
   dominantColors: siteAssets.dominantColors,
   sha256: siteAssets.sha256,
+  processingStartedAt: siteAssets.processingStartedAt,
   createdAt: siteAssets.createdAt,
 };
 
@@ -57,6 +58,35 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
       .where(eq(siteAssets.id, assetId))
       .limit(1);
     return row;
+  }
+
+  async lock(organizationId: string, siteId: string, assetId: string) {
+    const [row] = await getExecutor(this.db)
+      .select(columns)
+      .from(siteAssets)
+      .where(
+        and(
+          eq(siteAssets.id, assetId),
+          eq(siteAssets.organizationId, organizationId),
+          eq(siteAssets.siteId, siteId),
+        ),
+      )
+      .for('update')
+      .limit(1);
+    return row;
+  }
+
+  async failStale(before: Date, limit: number) {
+    const stale = getExecutor(this.db)
+      .select({ id: siteAssets.id })
+      .from(siteAssets)
+      .where(and(eq(siteAssets.status, 'processing'), lt(siteAssets.processingStartedAt, before)))
+      .limit(limit);
+    return getExecutor(this.db)
+      .update(siteAssets)
+      .set({ status: 'failed', processingStartedAt: null })
+      .where(and(inArray(siteAssets.id, stale), eq(siteAssets.status, 'processing')))
+      .returning(columns);
   }
 
   async list(organizationId: string, siteId: string) {

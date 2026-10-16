@@ -30,6 +30,7 @@ class InMemoryAssets implements SiteAssetsRepository {
       variants: null,
       dominantColors: null,
       sha256: null,
+      processingStartedAt: null,
       createdAt: new Date('2026-10-14T12:00:00.000Z'),
     };
     this.rows.set(row.id, row);
@@ -44,6 +45,16 @@ class InMemoryAssets implements SiteAssetsRepository {
   }
   async list() {
     return [...this.rows.values()];
+  }
+  lock(organizationId: string, siteId: string, assetId: string) {
+    return this.get(organizationId, siteId, assetId);
+  }
+  async failStale(before: Date) {
+    const stale = [...this.rows.values()].filter(
+      (row) => row.status === 'processing' && (row.processingStartedAt?.getTime() ?? 0) < before.getTime(),
+    );
+    for (const row of stale) this.rows.set(row.id, { ...row, status: 'failed' });
+    return stale;
   }
   async transition(assetId: string, from: readonly AssetStatus[], changes: Partial<StoredAsset>) {
     const row = this.rows.get(assetId);
@@ -199,5 +210,39 @@ describe('SiteAssetCommands', () => {
       images.inspect = original;
     }
     expect(await originals.get(assets.rows.get(id)?.storageKey ?? '')).toBeUndefined();
+  });
+
+  it('fails an image whose job died, after a while, and removes the variants it had written', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    // A job that wrote one variant, then died (no `fail`): the image is still processing.
+    await publicFiles.put(`sites/${siteId}/${id}/480.webp`, Buffer.from('x'), 'image/webp');
+    expect(await commands.failStale()).toBe(0);
+    await expect(commands.remove(actor, siteId, id)).rejects.toMatchObject({
+      details: { reason: 'ASSET_PROCESSING' },
+    });
+    const later = new SiteAssetCommands(
+      sites,
+      assets,
+      { presignPut: async () => ({ url: 'https://uploads.test/x', headers: {} }) },
+      originals,
+      publicFiles,
+      images,
+      { process: async () => undefined },
+      fixedClock('2026-10-14T13:00:00.000Z'),
+      fakeDb,
+    );
+    expect(await later.failStale()).toBe(1);
+    expect(assets.rows.get(id)?.status).toBe('failed');
+    expect(publicFiles.files.size).toBe(0);
+  });
+
+  it('removes the variants a failed last attempt had written', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    await publicFiles.put(`sites/${siteId}/${id}/768.avif`, Buffer.from('x'), 'image/avif');
+    await commands.fail(id);
+    expect(assets.rows.get(id)?.status).toBe('failed');
+    expect(publicFiles.files.size).toBe(0);
   });
 });

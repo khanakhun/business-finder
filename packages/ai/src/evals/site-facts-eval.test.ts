@@ -45,5 +45,5 @@ describe('generation.extract_site_facts eval (replay)', () => {
     expect(report.means['hallucinations.rejected']).toBe(1);
     expect(report.means['recall.services_prices_hours']).toBeGreaterThanOrEqual(0.8);
     expect(report.means['warnings.injection']).toBe(1);
-  });
+  }, 30_000);
 });

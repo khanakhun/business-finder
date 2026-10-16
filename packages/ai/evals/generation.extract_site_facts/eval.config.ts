@@ -72,11 +72,19 @@ function same(a: Unit, b: Unit): boolean {
   }
 }
 
-const verified = (output: unknown, row: { input: unknown }): VerifiedSiteFact[] =>
-  verifySiteFactCandidates(
-    (output as ExtractSiteFactsOutput | undefined)?.candidates ?? [],
+/** Verified once per answer (three aggregates read it). */
+const verifiedCache = new WeakMap<object, VerifiedSiteFact[]>();
+function verified(output: unknown, row: { input: unknown }): VerifiedSiteFact[] {
+  if (!output || typeof output !== 'object') return [];
+  const cached = verifiedCache.get(output);
+  if (cached) return cached;
+  const accepted = verifySiteFactCandidates(
+    (output as ExtractSiteFactsOutput).candidates ?? [],
     (row.input as Input).pages,
   ).accepted;
+  verifiedCache.set(output, accepted);
+  return accepted;
+}
 
 const RECALL_KINDS = new Set(['service', 'price', 'hours']);
 

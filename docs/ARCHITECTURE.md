@@ -358,9 +358,11 @@ conclusive verdict wins): **Reacher** (self-hosted SMTP, needs outbound port 25,
 always behind a politeness Decorator that resolves the mail hosts itself, refuses non-public addresses and takes a
 token per mail server (a workspace's half share first, then the server's; an empty bucket defers the step, bounded),
 **ZeroBounce** (key from the vault, billed per conclusive answer, guarded by the workspace's actual monthly spend) and
-**DNS** (MX / null MX only). A verifier that fails transiently makes the step retry instead of recording `unknown`;
-verdicts reach contacts through business-graph (`RecordEmailVerificationCommand`), never downgrading a conclusive one.
-A step stopped after paying (failure, cancel, deferral) books what it spent (`StepInterruptedError`). `POST
+**DNS** (MX / null MX only). When a verifier that could have answered is down, the answer is only *provisional*
+(never cached; the address is due again within the hour) and the step goes on with the other addresses — an outage
+never leaves a run waiting. Verdicts reach contacts through business-graph (`RecordEmailVerificationCommand`), never
+downgrading a conclusive one. A step stopped after paying (cancel, deferral) books what it spent
+(`StepInterruptedError`). `POST
 /v1/contacts/:id/verify` starts an `email_verify` run; `POST /v1/workspace/diagnostics/smtp-port` tells whether port
 25 is open. Request URLs in traces are redacted (keys and addresses in query strings).
 

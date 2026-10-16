@@ -75,7 +75,8 @@ Every email contact is classified (generic/personal/department, free-mail, dispo
   (default off); secret `zerobounce` (deployment fallback `ZEROBOUNCE_API_KEY`).
 - **Schema** (migration 0020, additive): `business_contacts.verification_details`, `published_context`, `is_free_mail`;
   `enrichment_steps.deferrals`; `enrichment_email_verdicts` (key `sha256(lower(email))` — the address is never stored —
-  status, details, cost, checked/expires, inconclusive streak; purged nightly once expired).
+  status, details, cost, checked/expires, inconclusive streak; purged nightly a full TTL after expiry, so the streak
+  survives for the backoff).
 - **Classification** (business-graph domain): `EmailAddress` FR/EN dictionaries (+ `bureau`), free-mail list (data,
   FR overseas and Caribbean ISPs included), disposable list (CC0 `disposable-email-domains` pinned to a commit, regenerated
   by `pnpm email:disposable-update [commit]`, subdomains match), `matchesWebsiteDomain`. Free-mail is stored on write;
@@ -91,11 +92,13 @@ Every email contact is classified (generic/personal/department, free-mail, dispo
   spend, 4xx/429 kept out of the shared breaker); DNS (MX, null MX, implicit MX). Status mapping is pure
   (`fromReacher`/`fromZeroBounce`/`fromDns`, recorded-shape fixtures). `EmailVerificationService`: suppression port
   (no-op until BF-049, warned about in production) → cache (DNS-only `unknown` never hides a mailbox check) →
-  disposable classification → chain. A transient failure without a conclusive answer propagates (retry) — no
-  `unknown` is cached or recorded; conclusive verdicts are never downgraded or replaced by older ones.
+  disposable classification → chain. A transient failure without a conclusive answer gives a *provisional* answer
+  (never cached, due again within the hour); conclusive verdicts are never downgraded or replaced by older ones. Paid
+  checks see the step's unbooked spend in the budget guard.
 - **Step** `email_verify` (optional dependency on `site_intel`; `provider` cost; estimate = known addresses, or up to
-  20 when there is a website): isolates per-address permanent failures; a transient one stops it with what it spent
-  (`StepInterruptedError`); busy mail servers are left for last and the step defers once for them (`StepDeferredError`,
+  20 more when there is a website): no address stops the others (permanent failures counted, transient ones due again
+  within the hour); only a stop (cancel, shutdown) interrupts it with what it spent (`StepInterruptedError`); busy
+  mail servers are left for last and the step defers once for them (`StepDeferredError`,
   at most 6 times, then finishes with `recheckAt`); `recheckAt` also marks inconclusive verdicts, and the nightly refresh
   picks those up. Engine additions: optional dependencies (planner, readiness, `withoutOptionalDependencies`), deferral
   counter, spend booked on every exit path (`addSpend`).

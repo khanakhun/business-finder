@@ -263,8 +263,14 @@ export interface SiteAssetsRepository {
   byId(assetId: string): Promise<StoredAsset | undefined>;
   /** The asset, its row locked until the transaction ends (a delete reads its current state, not a stale one). */
   lock(organizationId: string, siteId: string, assetId: string): Promise<StoredAsset | undefined>;
-  /** Marks failed the assets processing since before `before` (a job that died); returns them. */
-  failStale(before: Date, limit: number): Promise<StoredAsset[]>;
+  /**
+   * Marks failed the assets still processing whose job started before `startedBefore`, or that never started and
+   * were uploaded before `createdBefore` (a lost job); returns them.
+   */
+  failStale(
+    cutoffs: { readonly startedBefore: Date; readonly createdBefore: Date },
+    limit: number,
+  ): Promise<StoredAsset[]>;
   list(organizationId: string, siteId: string): Promise<StoredAsset[]>;
   /**
    * Applies the changes only while the asset is in one of `from` (compare-and-set: two finalizes, a late job or a
@@ -274,6 +280,8 @@ export interface SiteAssetsRepository {
     assetId: string,
     from: readonly AssetStatus[],
     changes: Partial<Omit<StoredAsset, 'id' | 'organizationId' | 'siteId' | 'storageKey' | 'createdAt'>>,
+    /** Also requires this processing start (a fencing token: only the job that stamped it may finish it). */
+    startedAt?: Date,
   ): Promise<boolean>;
   /** Whether a version of the site names the asset (its id or one of its URLs). */
   referenced(siteId: string, needles: readonly string[]): Promise<boolean>;

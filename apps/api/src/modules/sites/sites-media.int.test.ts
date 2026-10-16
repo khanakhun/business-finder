@@ -37,6 +37,7 @@ import {
   type SiteViewsRepository,
   UPLOAD_SIGNER,
 } from './application/ports.ts';
+import { staleCutoffs } from './application/site-assets.ts';
 import { SiteViewsFlusher } from './application/site-views.ts';
 import {
   SCREENSHOT_DELAY_MS,
@@ -433,9 +434,12 @@ describe('maintenance queries', () => {
     const running = row('running', 5);
     const queued = row('queued', null, 2);
     const lost = row('lost', null, 30);
-    await db.insert(siteAssets).values([died, running, queued, lost]);
-    const failed = await assets.failStale(new Date(Date.now() - 30 * 60_000), 100);
-    expect(failed.map((asset) => asset.id).sort()).toEqual([died.id, lost.id].sort());
+    // Around the one-day cutoff for a job that never started.
+    const almostDay = row('almost-a-day', null, 23 + 50 / 60);
+    const pastDay = row('past-a-day', null, 24 + 10 / 60);
+    await db.insert(siteAssets).values([died, running, queued, lost, almostDay, pastDay]);
+    const failed = await assets.failStale(staleCutoffs(new Date()), 100);
+    expect(failed.map((asset) => asset.id).sort()).toEqual([died.id, lost.id, pastDay.id].sort());
     expect(failed.every((asset) => asset.status === 'failed')).toBe(true);
     expect((await assets.lock(org, site.id, running.id))?.status).toBe('processing');
 

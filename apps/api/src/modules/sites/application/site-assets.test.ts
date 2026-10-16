@@ -49,23 +49,26 @@ class InMemoryAssets implements SiteAssetsRepository {
   lock(organizationId: string, siteId: string, assetId: string) {
     return this.get(organizationId, siteId, assetId);
   }
-  async failStale(before: Date) {
-    // As the database does: started before `before`, or never started and uploaded a day (minus the 30 minutes
-    // `before` already subtracts) earlier.
-    const neverStartedBefore = before.getTime() - 86_400_000 + 30 * 60_000;
+  async failStale(cutoffs: { startedBefore: Date; createdBefore: Date }) {
     const stale = [...this.rows.values()].filter(
       (row) =>
         row.status === 'processing' &&
         (row.processingStartedAt
-          ? row.processingStartedAt.getTime() < before.getTime()
-          : row.createdAt.getTime() < neverStartedBefore),
+          ? row.processingStartedAt < cutoffs.startedBefore
+          : row.createdAt < cutoffs.createdBefore),
     );
     for (const row of stale) this.rows.set(row.id, { ...row, status: 'failed' });
     return stale;
   }
-  async transition(assetId: string, from: readonly AssetStatus[], changes: Partial<StoredAsset>) {
+  async transition(
+    assetId: string,
+    from: readonly AssetStatus[],
+    changes: Partial<StoredAsset>,
+    startedAt?: Date,
+  ) {
     const row = this.rows.get(assetId);
     if (!row || !from.includes(row.status)) return false;
+    if (startedAt && row.processingStartedAt?.getTime() !== startedAt.getTime()) return false;
     this.rows.set(assetId, { ...row, ...changes });
     return true;
   }
@@ -274,7 +277,8 @@ describe('SiteAssetCommands', () => {
     await expect(at('2026-10-14T18:00:00.000Z').remove(actor, siteId, id)).rejects.toMatchObject({
       details: { reason: 'ASSET_PROCESSING' },
     });
-    // A day later its job is presumed lost: deletable, and failed by the sweep.
+    // A day later its job is presumed lost: failed by the sweep, then deletable.
+    expect(await at('2026-10-15T13:00:00.000Z').failStale()).toBe(1);
     await at('2026-10-15T13:00:00.000Z').remove(actor, siteId, id);
     expect(assets.rows.has(id)).toBe(false);
   });
@@ -295,5 +299,39 @@ describe('SiteAssetCommands', () => {
       images.dominantColors = original;
     }
     expect(started).toEqual(new Date('2026-10-14T12:00:00.000Z'));
+  });
+
+  it('lets only the delivery that stamped the job finish it, and never deletes the winner’s files', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    const later = new SiteAssetCommands(
+      sites,
+      assets,
+      { presignPut: async () => ({ url: 'https://uploads.test/x', headers: {} }) },
+      originals,
+      publicFiles,
+      images,
+      { process: async () => undefined },
+      fixedClock('2026-10-14T12:05:00.000Z'),
+      fakeDb,
+    );
+    const original = images.dominantColors;
+    let second: string | undefined;
+    images.dominantColors = async (image, count) => {
+      // A stalled job delivered again while the first one still runs: it re-stamps and finishes first.
+      if (second === undefined) {
+        second = 'running';
+        second = await later.process(id);
+      }
+      return original(image, count);
+    };
+    try {
+      expect(await commands.process(id)).toBe('skipped');
+    } finally {
+      images.dominantColors = original;
+    }
+    expect(second).toBe('ready');
+    expect(assets.rows.get(id)?.status).toBe('ready');
+    expect(publicFiles.files.size).toBeGreaterThan(0);
   });
 });

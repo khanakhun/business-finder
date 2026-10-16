@@ -44,6 +44,12 @@ export const STALE_PROCESSING_MS = 30 * 60_000;
 /** A finalized image whose job never started (a lost queue) is failed after a day. */
 export const NEVER_STARTED_MS = 86_400_000;
 
+/** The one rule of staleness: the hourly sweep and a delete apply the same cutoffs. */
+export const staleCutoffs = (now: Date) => ({
+  startedBefore: new Date(now.getTime() - STALE_PROCESSING_MS),
+  createdBefore: new Date(now.getTime() - NEVER_STARTED_MS),
+});
+
 /** The widths an image of `width` pixels is published at: the steps it reaches, and its own below the largest. */
 export function variantWidths(width: number): number[] {
   const steps: number[] = VARIANT_WIDTHS.filter((step) => step <= width);
@@ -241,7 +247,8 @@ export class SiteAssetCommands {
     const asset = await this.assets.byId(assetId);
     if (asset?.status !== 'processing') return 'skipped';
     // The job's start, not the finalize's: time waiting in the queue never makes an image stale.
-    if (!(await this.assets.transition(asset.id, ['processing'], { processingStartedAt: this.clock.now() })))
+    const startedAt = this.clock.now();
+    if (!(await this.assets.transition(asset.id, ['processing'], { processingStartedAt: startedAt })))
       return 'skipped';
     const object = await this.originals.get(asset.storageKey);
     if (
@@ -270,15 +277,24 @@ export class SiteAssetCommands {
     // The default: 1200 px WebP, or the largest WebP when the image is smaller.
     const webp = variants.filter((variant) => variant.format === 'webp');
     const preferred = webp.find((variant) => variant.width === 1200) ?? webp.at(-1);
-    const done = await this.assets.transition(asset.id, ['processing'], {
-      status: 'ready',
-      processingStartedAt: null,
-      variants,
-      publicUrl: preferred?.url ?? null,
-      dominantColors: await this.images.dominantColors(object.body, 3),
-    });
+    // Fenced by this job's own start: a second delivery of the job (a stalled one retried) cannot finish it too.
+    const done = await this.assets.transition(
+      asset.id,
+      ['processing'],
+      {
+        status: 'ready',
+        processingStartedAt: null,
+        variants,
+        publicUrl: preferred?.url ?? null,
+        dominantColors: await this.images.dominantColors(object.body, 3),
+      },
+      startedAt,
+    );
     if (!done) {
-      for (const variant of variants) await this.publicFiles.delete(variant.key);
+      // Another delivery finished it (the same keys: its files stay), or it was deleted or failed meanwhile.
+      const current = await this.assets.byId(asset.id);
+      if (current?.status !== 'ready')
+        for (const variant of variants) await this.publicFiles.delete(variant.key);
       return 'skipped';
     }
     return 'ready';
@@ -299,10 +315,7 @@ export class SiteAssetCommands {
    * or a day after their upload when no job ever started (a lost queue). Hourly.
    */
   async failStale(limit = 500): Promise<number> {
-    const stale = await this.assets.failStale(
-      new Date(this.clock.now().getTime() - STALE_PROCESSING_MS),
-      limit,
-    );
+    const stale = await this.assets.failStale(staleCutoffs(this.clock.now()), limit);
     for (const asset of stale)
       for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
     return stale.length;
@@ -310,10 +323,10 @@ export class SiteAssetCommands {
 
   /** Processing for too long: 30 minutes after its job started, or a day after the upload if no job ever started. */
   private stale(asset: StoredAsset): boolean {
-    const since = asset.processingStartedAt
-      ? asset.processingStartedAt.getTime() + STALE_PROCESSING_MS
-      : asset.createdAt.getTime() + NEVER_STARTED_MS;
-    return this.clock.now().getTime() > since;
+    const { startedBefore, createdBefore } = staleCutoffs(this.clock.now());
+    return asset.processingStartedAt
+      ? asset.processingStartedAt < startedBefore
+      : asset.createdAt < createdBefore;
   }
 
   /** Every public key an asset may have: those it lists, and those its widths give (a job that stopped midway). */

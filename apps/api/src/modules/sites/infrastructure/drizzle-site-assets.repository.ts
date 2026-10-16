@@ -4,7 +4,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { AssetStatus, SiteAssetsRepository, StoredAsset } from '../application/ports.ts';
-import { NEVER_STARTED_MS, STALE_PROCESSING_MS } from '../application/site-assets.ts';
 
 const columns = {
   id: siteAssets.id,
@@ -77,7 +76,7 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
     return row;
   }
 
-  async failStale(before: Date, limit: number) {
+  async failStale(cutoffs: { readonly startedBefore: Date; readonly createdBefore: Date }, limit: number) {
     const stale = getExecutor(this.db)
       .select({ id: siteAssets.id })
       .from(siteAssets)
@@ -85,12 +84,9 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
         and(
           eq(siteAssets.status, 'processing'),
           or(
-            lt(siteAssets.processingStartedAt, before),
-            // Never started (its job was lost): a day after the upload.
-            and(
-              isNull(siteAssets.processingStartedAt),
-              lt(siteAssets.createdAt, new Date(before.getTime() - NEVER_STARTED_MS + STALE_PROCESSING_MS)),
-            ),
+            lt(siteAssets.processingStartedAt, cutoffs.startedBefore),
+            // Never started (its job was lost).
+            and(isNull(siteAssets.processingStartedAt), lt(siteAssets.createdAt, cutoffs.createdBefore)),
           ),
         ),
       )
@@ -115,11 +111,18 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
     assetId: string,
     from: readonly AssetStatus[],
     changes: Parameters<SiteAssetsRepository['transition']>[2],
+    startedAt?: Date,
   ): Promise<boolean> {
     const rows = await getExecutor(this.db)
       .update(siteAssets)
       .set(changes)
-      .where(and(eq(siteAssets.id, assetId), inArray(siteAssets.status, [...from])))
+      .where(
+        and(
+          eq(siteAssets.id, assetId),
+          inArray(siteAssets.status, [...from]),
+          startedAt ? eq(siteAssets.processingStartedAt, startedAt) : undefined,
+        ),
+      )
       .returning({ id: siteAssets.id });
     return rows.length > 0;
   }

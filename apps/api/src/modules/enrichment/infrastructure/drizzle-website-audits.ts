@@ -56,11 +56,12 @@ export class DrizzleWebsiteAuditRepository implements WebsiteAuditRepository {
       .onConflictDoUpdate({ target: websiteAudits.snapshotId, set: { ...values, updatedAt: sql`now()` } });
     // Latest = the audit of the business's newest crawl, whichever snapshot was written last (a re-check of an older
     // crawl never takes it back). Index-driven (snapshots by business and fetch time; the latest audit; this one) and
-    // only rows whose flag changes are written: under the business lock, at most one row is latest.
+    // only rows whose flag changes are written: under the business lock, at most one row is latest. `newest` is never
+    // empty here (the upsert above just wrote an audit of this business).
     await x.execute(sql`WITH newest AS (
         SELECT s.id FROM ${websiteSnapshots} s JOIN ${websiteAudits} a ON a.snapshot_id = s.id
         WHERE s.business_id = ${audit.businessId}
-        ORDER BY s.fetched_at DESC NULLS LAST, s.id DESC LIMIT 1)
+        ORDER BY s.fetched_at DESC, s.id DESC LIMIT 1)
       UPDATE ${websiteAudits} wa SET is_latest = (wa.snapshot_id = (SELECT id FROM newest))
       WHERE ((wa.business_id = ${audit.businessId} AND wa.is_latest) OR wa.snapshot_id = (SELECT id FROM newest))
         AND wa.is_latest IS DISTINCT FROM (wa.snapshot_id = (SELECT id FROM newest))`);

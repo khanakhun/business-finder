@@ -70,7 +70,7 @@ export class LlmVisionGrader implements VisionGrader {
         input: {
           businessName: subject.displayName.slice(0, 200),
           ...(subject.categoryLabel ? { category: subject.categoryLabel.slice(0, 100) } : {}),
-          url,
+          url: url.slice(0, 500),
         },
         images,
       },

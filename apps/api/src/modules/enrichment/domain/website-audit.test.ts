@@ -485,24 +485,22 @@ describe('language and performance edge cases', () => {
     });
   });
 
-  it('never rates a blocked site weak, even with measurements (an opt-out is no selling point)', () => {
+  it('never rates a blocked site, even with stored measurements (an opt-out is no selling point)', () => {
     const slow = facts({
       snapshot: snapshot({ reachability: 'blocked' }),
-      vision: null,
+      vision: vision(2),
       psi: {
         mobile: strategy({ performance: 20, accessibility: 40, seo: 40, bestPractices: 40 }),
         desktop: null,
       },
     });
-    const findings = evaluateFindings(slow);
-    expect(websiteStatus(slow, findings, qualityScore(slow, findings))).toBe('ok');
-    expect(websiteStatus({ ...slow, psi: null }, [], null)).toBe('ok');
+    expect(assessWebsite(slow)).toEqual({ findings: [], qualityScore: null, websiteStatus: 'ok' });
+    expect(websiteStatus(slow, [], 20)).toBe('ok');
   });
 
   it('uses desktop when mobile was measured without a performance score', () => {
-    const mobile = { ...strategy({}), scores: { ...strategy({}).scores, performance: null } };
     const findings = evaluateFindings(
-      facts({ psi: { mobile: mobile as never, desktop: strategy({ performance: 30 }) } }),
+      facts({ psi: { mobile: strategy({ performance: null }), desktop: strategy({ performance: 30 }) } }),
     );
     expect(findings.find((f) => f.code === 'low_performance_score')?.metric?.name).toBe(
       'psi.desktop.performance',

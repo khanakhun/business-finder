@@ -373,8 +373,9 @@ per day (the step defers, bounded). `vision_audit` runs after the crawl and Page
 crawl's screenshots (artifacts bucket, this business's prefix only) are graded by `website.vision_grade` (smart-tier
 vision, anchored 8-criteria rubric with evidence). Each step writes its part of the snapshot's `website_audits` row
 under an advisory lock and recomputes, with pure rules, the findings (Rules Engine / Specification, 28 codes), the
-quality score (documented weighted composite) and the website status; the newest snapshot's audit is `is_latest`
-(search `website=weak`, scoring BF-031). Unreachable, parked and social-only sites get a presence-only audit. Outages
+quality score (documented weighted composite) and the website status; the audit of the newest audited snapshot is
+`is_latest` (search `website=weak`, scoring BF-031). Unreachable, parked, social-only and blocked sites get a
+presence-only audit. Outages
 and quotas leave a part out and ask for a re-check within the hour; configuration errors (a refused key, no model
 key) fail the step.
 

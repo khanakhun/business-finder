@@ -1,8 +1,8 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { BLOCK_TYPES, BlockSchema, blockVariants } from '../spec/blocks/index.ts';
 import { SiteSpecSchema } from '../spec/site.ts';
-import { CATALOG } from './catalog.ts';
+import { CATALOG, thumbnailPath } from './catalog.ts';
 import { blockMarkdown, catalogFiles, examplesFrom } from './render-markdown.ts';
 
 const sites = ['salon-gustavia', 'cafe-saint-jean', 'hardware-store-lorient', 'villa-agency'].map((name) =>
@@ -40,11 +40,22 @@ describe('block catalog', () => {
     }
   });
 
+  it('has a thumbnail for every block variant (pnpm --filter @bf/site-blocks thumbnails)', () => {
+    for (const type of BLOCK_TYPES)
+      for (const variant of blockVariants(type))
+        expect(
+          existsSync(new URL(`../../generated/catalog/${thumbnailPath(type, variant)}`, import.meta.url)),
+          `${type}/${variant}`,
+        ).toBe(true);
+  });
+
   it('matches the committed markdown, with no stale file (run pnpm site-schema:catalog)', () => {
     const files = catalogFiles(examples);
-    expect(readdirSync(new URL('../../generated/catalog/', import.meta.url)).sort()).toEqual(
-      [...files.keys()].sort(),
+    // The markdown files (the thumbnails/ folder next to them is the block library's, BF-034).
+    const markdown = readdirSync(new URL('../../generated/catalog/', import.meta.url)).filter((file) =>
+      file.endsWith('.md'),
     );
+    expect(markdown.sort()).toEqual([...files.keys()].sort());
     for (const [file, content] of files) {
       expect(readFileSync(new URL(`../../generated/catalog/${file}`, import.meta.url), 'utf8'), file).toBe(
         content,

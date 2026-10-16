@@ -298,7 +298,14 @@ describe('activity timeline', () => {
     const task = await owner.post(`/v1/businesses/${id}/tasks`, { title: 'Call' }).expect(201);
     await owner.patch(`/v1/tasks/${task.body.id}`, { status: 'done' }).expect(200);
 
-    const items = await timeline(viewer, id, 7);
+    // Scoring may add a `score.updated` entry (do-not-contact moves the tier to X): CRM entries are checked here.
+    await expect
+      .poll(async () => (await timeline(viewer, id, 7)).filter((a) => a.type !== 'score.updated').length, {
+        timeout: 20_000,
+        interval: 200,
+      })
+      .toBe(7);
+    const items = (await timeline(viewer, id, 7)).filter((a) => a.type !== 'score.updated');
     expect(new Set(items.map((a) => a.type))).toEqual(
       new Set([
         'status.changed',
@@ -320,7 +327,9 @@ describe('activity timeline', () => {
     const rest = await viewer.get(
       `/v1/businesses/${id}/activities?limit=10&cursor=${encodeURIComponent(page.body.nextCursor)}`,
     );
-    expect(rest.body.items).toHaveLength(4);
+    const total = (await viewer.get(`/v1/businesses/${id}/activities?limit=50`).expect(200)).body.items
+      .length;
+    expect(rest.body.items).toHaveLength(total - 3);
     expect(rest.body.nextCursor).toBeNull();
     await outsider.get(`/v1/businesses/${id}/activities`).expect(404);
     const rows = await db

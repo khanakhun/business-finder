@@ -145,8 +145,16 @@ describe('POST /v1/businesses (manual add)', () => {
       .select()
       .from(outboxEvents)
       .where(sql`${outboxEvents.payload}->>'businessId' = ${id}`);
-    expect(events.map((e) => e.type)).toEqual(['business.created']);
-    expect(events[0]).toMatchObject({ organizationId: orgId, payload: { businessId: id, source: 'manual' } });
+    // The golden record is created, then tracked by the workspace (BF-031 scores it).
+    expect(events.map((e) => e.type).sort()).toEqual(['business.created', 'org_business.tracked']);
+    expect(events.find((e) => e.type === 'business.created')).toMatchObject({
+      organizationId: orgId,
+      payload: { businessId: id, source: 'manual' },
+    });
+    expect(events.find((e) => e.type === 'org_business.tracked')).toMatchObject({
+      organizationId: orgId,
+      payload: { businessId: id, addedVia: 'manual' },
+    });
 
     const audit = await db
       .select()
@@ -292,7 +300,7 @@ describe('contacts', () => {
       .select({ type: outboxEvents.type, payload: outboxEvents.payload })
       .from(outboxEvents)
       .where(sql`${outboxEvents.payload}->>'businessId' = ${business.id}`);
-    expect(events).toEqual([
+    expect(events.filter((event) => event.type !== 'org_business.tracked')).toEqual([
       { type: 'business.updated', payload: { businessId: business.id, fields: ['contacts'] } },
     ]);
   });

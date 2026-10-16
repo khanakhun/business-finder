@@ -1,0 +1,8 @@
+{
+  "extends": "@bf/tsconfig/library.json",
+  "compilerOptions": {
+    // CLIs in src/cli run directly under Node type stripping.
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src", "*.config.ts"]
+}

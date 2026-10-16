@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { defineVitestConfig, SETUP_FILE, UNIT_COVERAGE_THRESHOLDS } from './vitest-config.ts';
+import {
+  defineVitestConfig,
+  PG_GLOBAL_SETUP,
+  SETUP_FILE,
+  UNIT_COVERAGE_THRESHOLDS,
+} from './vitest-config.ts';
 
 describe('defineVitestConfig', () => {
   describe('unit', () => {
@@ -66,6 +71,18 @@ describe('defineVitestConfig', () => {
   it('appends package-specific setup files after the shared one', () => {
     const { test } = defineVitestConfig({ type: 'unit', setupFiles: ['./src/test-setup.ts'] });
     expect(test?.setupFiles).toEqual([SETUP_FILE, './src/test-setup.ts']);
+  });
+
+  it('appends package-specific coverage exclusions', () => {
+    const { test } = defineVitestConfig({ type: 'unit', coverageExclude: ['src/cli/**'] });
+    expect(test?.coverage?.exclude).toEqual(expect.arrayContaining(['**/*.test.{ts,tsx}', 'src/cli/**']));
+  });
+
+  it('registers global setup files only when asked', () => {
+    expect(defineVitestConfig({ type: 'int' }).test).not.toHaveProperty('globalSetup');
+    const { test } = defineVitestConfig({ type: 'int', globalSetup: [PG_GLOBAL_SETUP] });
+    expect(test?.globalSetup).toEqual([PG_GLOBAL_SETUP]);
+    expect(PG_GLOBAL_SETUP).toMatch(/db[/\\]global-setup\.ts$/);
   });
 
   it('adds a JUnit report in CI', () => {

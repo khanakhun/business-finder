@@ -73,8 +73,13 @@ export interface ScoringRepository {
   setPrimaryProfile(organizationId: string, profileId: string, userId: string | null): Promise<void>;
   /** The database's clock (one for every process). */
   databaseNow(): Promise<Date>;
-  /** Serializes score writes per business of the workspace (row locks on its workspace rows, in id order). */
-  lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void>;
+  /**
+   * Serializes score writes per business of the workspace (row locks on its workspace rows, in id order); returns
+   * the businesses locked (one no longer tracked is not written).
+   */
+  lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<Set<string>>;
+  /** The active version of each of these profiles, read now (under the batch's locks). */
+  activeVersions(profileIds: readonly string[]): Promise<Map<string, number>>;
   /** The current scores of these businesses (fingerprints to skip unchanged writes). */
   currentScores(
     organizationId: string,

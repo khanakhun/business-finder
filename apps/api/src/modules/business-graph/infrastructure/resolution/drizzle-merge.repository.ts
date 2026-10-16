@@ -104,6 +104,10 @@ export class DrizzleMergeRepository implements MergeRepository {
     // (with its reason), every tag and the survivor's owner (else the merged one's). Counters are refreshed by the
     // CRM when it re-points notes and tasks (BF-024).
     const further = sql`${rank('f.pipeline_status')} > ${rank('s.pipeline_status')}`;
+    // Both businesses' workspace rows in id order first: other writers (scoring batches) lock them the same way.
+    await executor.execute(sql`
+      SELECT 1 FROM org_businesses WHERE business_id IN (${fromId}, ${toId})
+      ORDER BY business_id, organization_id FOR UPDATE`);
     const suppressed = await executor.execute<{
       organization_id: string;
       reason: string | null;

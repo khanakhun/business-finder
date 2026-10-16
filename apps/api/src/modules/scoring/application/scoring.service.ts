@@ -1,13 +1,6 @@
 import { createHash } from 'node:crypto';
-import {
-  type Clock,
-  FEATURE_SET_VERSION,
-  type FeatureVector,
-  SCORING_SCORES_UPDATED,
-  ScoreUpdated,
-} from '@bf/contracts';
+import { FEATURE_SET_VERSION, type FeatureVector, SCORING_SCORES_UPDATED, ScoreUpdated } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { RealtimePublisher } from '../../realtime/index.ts';
@@ -61,7 +54,6 @@ export class ScoringService {
   constructor(
     @Inject(SCORING_REPOSITORY) private readonly repository: ScoringRepository,
     @Inject(FACTS_ASSEMBLER) private readonly assembler: FactsAssembler,
-    @Inject(CLOCK) private readonly clock: Clock,
     private readonly events: EventRecorder,
     private readonly realtime: RealtimePublisher,
   ) {}
@@ -110,9 +102,10 @@ export class ScoringService {
     profiles: readonly ActiveProfile[],
     options: { readonly force?: boolean; readonly notify?: boolean },
   ): Promise<ComputeOutcome> {
-    // One clock for every process (the database's), taken before the facts: it orders concurrent writes.
+    // One clock for every process (the database's), taken before the facts: it orders concurrent writes and is the
+    // facts' point in time (time-based features agree across processes).
     const computedAt = await this.repository.databaseNow();
-    const facts = await this.assembler.assemble(organizationId, businessIds, this.clock.now());
+    const facts = await this.assembler.assemble(organizationId, businessIds, computedAt);
     // The engine is pure: score everything first, then decide and write under the businesses' locks.
     const scored = facts.flatMap((business) =>
       profiles.map((profile) => {
@@ -178,9 +171,12 @@ export class ScoringService {
     readonly businesses: ReadonlySet<string>;
   }> {
     if (scored.length === 0) return { written: 0, unchanged: 0, businesses: new Set() };
-    await this.repository.lockBusinesses(organizationId, businessIds);
-    // Read under the locks: a primary switch or a newer version committed meanwhile is what this batch sees.
+    const locked = await this.repository.lockBusinesses(organizationId, businessIds);
+    // Read under the locks: a primary switch or an activation committed meanwhile is what this batch sees.
     const primary = await this.primaryProfileId(organizationId);
+    const active = await this.repository.activeVersions([
+      ...new Set(scored.map(({ profile }) => profile.id)),
+    ]);
     const current = await this.repository.currentScores(organizationId, businessIds);
     const writes: ScoreWriteRequest[] = [];
     const previous = new Map<string, { score: number; tier: ScoreWrite['tier'] }>();
@@ -191,15 +187,21 @@ export class ScoringService {
         stored?.profileVersion === write.profileVersion &&
         stored.featureSetVersion === write.featureSetVersion &&
         stored.factsHash === write.factsHash;
-      // Another job wrote newer facts or versions meanwhile (versions only go up), or nothing changed (unless
-      // forced): leave the stored score.
+      // A write of a version that is no longer active comes from a job that started before an activation: drop it.
+      // Against the stored row, the active version wins (whatever its number: a rollback is allowed); same version,
+      // a newer feature set wins; same feature set, the later computation wins.
       // DECISION(BF-031): an unchanged write keeps its computed_at, so facts going A → B → A may let a slow job
       // holding B land after the second A; the next change of facts corrects it.
+      if (!locked.has(write.businessId) || active.get(profile.id) !== write.profileVersion) {
+        unchanged += 1;
+        continue;
+      }
       const newer =
         stored !== undefined &&
-        (stored.computedAt.getTime() > write.computedAt.getTime() ||
-          stored.profileVersion > write.profileVersion ||
-          stored.featureSetVersion > write.featureSetVersion);
+        stored.profileVersion === write.profileVersion &&
+        (stored.featureSetVersion > write.featureSetVersion ||
+          (stored.featureSetVersion === write.featureSetVersion &&
+            stored.computedAt.getTime() > write.computedAt.getTime()));
       if (newer || (same && !force)) {
         unchanged += 1;
         continue;

@@ -11,7 +11,6 @@ import { ScoringService, vectorHash } from './scoring.service.ts';
 const ORG = '01990000-0000-7000-8000-0000000000a1';
 const BUSINESS = '01990000-0000-7000-8000-0000000000c1';
 const NOW = new Date('2026-10-14T12:00:00.000Z');
-const clock = fixedClock(NOW);
 
 const active = (offer: 'new_website' | 'local_seo'): ActiveProfile => ({
   id: BUILTIN_PROFILE_IDS[offer],
@@ -42,12 +41,15 @@ const stored = (overrides: Partial<Stored> & Pick<Stored, 'profileId'>): Stored 
   ...overrides,
 });
 
-function setup(current: Map<string, Stored[]> = new Map()) {
+function setup(current: Map<string, Stored[]> = new Map(), versions: Record<string, number> = {}) {
   const writes: ScoreWriteRequest[][] = [];
   const repository = {
     activeProfiles: vi.fn(async () => [active('new_website'), active('local_seo')]),
     primaryProfileId: vi.fn(async () => null),
-    lockBusinesses: vi.fn(async () => {}),
+    lockBusinesses: vi.fn(async (_org: string, ids: readonly string[]) => new Set(ids)),
+    activeVersions: vi.fn(
+      async (ids: readonly string[]) => new Map(ids.map((id) => [id, versions[id] ?? 1] as const)),
+    ),
     databaseNow: vi.fn(async () => NOW),
     currentScores: vi.fn(async () => current),
     writeScores: vi.fn(async (batch: readonly ScoreWriteRequest[]) => {
@@ -61,7 +63,7 @@ function setup(current: Map<string, Stored[]> = new Map()) {
   };
   const events = { record: vi.fn(async () => ({})) };
   const realtime = { publish: vi.fn(async () => ({})) };
-  const service = new ScoringService(repository, assembler, clock, events as never, realtime as never);
+  const service = new ScoringService(repository, assembler, events as never, realtime as never);
   return { service, writes, events, realtime, repository, assembler };
 }
 
@@ -115,35 +117,44 @@ describe('ScoringService', () => {
     expect(bumped.writes[0]?.map((write) => write.history)).toEqual([true, true]);
   });
 
-  it('never overwrites a score computed from newer facts (a concurrent job)', async () => {
-    const newer = new Date(NOW.getTime() + 1_000);
-    const { service, writes } = setup(
-      new Map([
-        [
-          BUSINESS,
-          [
-            stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, computedAt: newer }),
-            stored({ profileId: BUILTIN_PROFILE_IDS.local_seo, computedAt: newer }),
-          ],
-        ],
-      ]),
-    );
-    expect(await service.compute(ORG, [BUSINESS], { force: true })).toEqual({
-      scored: 2,
-      written: 0,
-      unchanged: 2,
-    });
-    expect(writes).toEqual([]);
+  it('drops a write of a version no longer active (the job started before an activation)', async () => {
+    const { service, writes } = setup(new Map(), { [BUILTIN_PRIMARY_PROFILE_ID]: 2 });
+    expect(await service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1, unchanged: 1 });
+    expect(writes[0]?.map((write) => write.profileId)).toEqual([BUILTIN_PROFILE_IDS.local_seo]);
   });
 
-  it('never writes over a newer profile or feature-set version (versions only go up)', async () => {
+  it('lets the active version win over the stored one, whatever the numbers and times', async () => {
+    // A newer version computed earlier than a stale v1 row written later: the active version is written.
+    const later = new Date(NOW.getTime() + 60_000);
+    const upgraded = setup(
+      new Map([
+        [BUSINESS, [stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 1, computedAt: later })]],
+      ]),
+      { [BUILTIN_PRIMARY_PROFILE_ID]: 2 },
+    );
+    // (The profile's own config is v1's here; only the version number matters for the guard.)
+    (upgraded.repository.activeProfiles as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      { ...active('new_website'), activeVersion: 2 },
+    ]);
+    expect(await upgraded.service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1 });
+    // A rollback to v1 is written over the stored v2.
+    const rolledBack = setup(
+      new Map([[BUSINESS, [stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 2 })]]]),
+    );
+    (rolledBack.repository.activeProfiles as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      active('new_website'),
+    ]);
+    expect(await rolledBack.service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1 });
+  });
+
+  it('never writes over a newer feature set or a later computation of the same version', async () => {
     const { service, writes } = setup(
       new Map([
         [
           BUSINESS,
           [
-            stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 2 }),
-            stored({ profileId: BUILTIN_PROFILE_IDS.local_seo, featureSetVersion: 2 }),
+            stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, featureSetVersion: 2 }),
+            stored({ profileId: BUILTIN_PROFILE_IDS.local_seo, computedAt: new Date(NOW.getTime() + 1_000) }),
           ],
         ],
       ]),
@@ -152,6 +163,13 @@ describe('ScoringService', () => {
       written: 0,
       unchanged: 2,
     });
+    expect(writes).toEqual([]);
+  });
+
+  it('writes nothing for a business no longer tracked (not locked)', async () => {
+    const { service, repository, writes } = setup();
+    (repository.lockBusinesses as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(new Set());
+    expect(await service.compute(ORG, [BUSINESS])).toMatchObject({ written: 0, unchanged: 2 });
     expect(writes).toEqual([]);
   });
 

@@ -209,15 +209,16 @@ export class DrizzleScoringRepository implements ScoringRepository {
 
   async databaseNow(): Promise<Date> {
     const [row] = await getExecutor(this.db).execute<{ now: Date | string }>(sql`SELECT now() AS now`);
-    return new Date(row?.now ?? Date.now());
+    if (!row) throw new Error('SELECT now() returned no row');
+    return new Date(row.now);
   }
 
-  async lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void> {
-    if (businessIds.length === 0) return;
+  async lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<Set<string>> {
+    if (businessIds.length === 0) return new Set();
     // Row locks on the workspace's rows (no shared lock-table entries), in id order: concurrent batches never wait
     // on each other in a cycle, and the listing columns updated later in the transaction are already ours.
-    await getExecutor(this.db).execute(sql`
-      SELECT 1 FROM ${orgBusinesses}
+    const rows = await getExecutor(this.db).execute<{ business_id: string }>(sql`
+      SELECT business_id FROM ${orgBusinesses}
       WHERE organization_id = ${organizationId}
         AND business_id = ANY(${sql`ARRAY[${sql.join(
           businessIds.map((id) => sql`${id}`),
@@ -225,6 +226,16 @@ export class DrizzleScoringRepository implements ScoringRepository {
         )}]::uuid[]`})
       ORDER BY business_id
       FOR NO KEY UPDATE`);
+    return new Set(rows.map((row) => row.business_id));
+  }
+
+  async activeVersions(profileIds: readonly string[]): Promise<Map<string, number>> {
+    if (profileIds.length === 0) return new Map();
+    const rows = await getExecutor(this.db)
+      .select({ id: scoringProfiles.id, version: scoringProfiles.activeVersion })
+      .from(scoringProfiles)
+      .where(inArray(scoringProfiles.id, [...profileIds]));
+    return new Map(rows.flatMap((row) => (row.version === null ? [] : [[row.id, row.version] as const])));
   }
 
   async currentScores(organizationId: string, businessIds: readonly string[]) {
@@ -310,6 +321,10 @@ export class DrizzleScoringRepository implements ScoringRepository {
   }
 
   async denormalizePrimary(organizationId: string, primaryProfileId: string): Promise<void> {
+    // The workspace's rows in id order first, as scoring batches lock them (no deadlock with a running batch).
+    await getExecutor(this.db).execute(sql`
+      SELECT 1 FROM ${orgBusinesses} WHERE organization_id = ${organizationId}
+      ORDER BY business_id FOR NO KEY UPDATE`);
     await getExecutor(this.db).execute(sql`
       UPDATE ${orgBusinesses} ob
       SET score = bs.score, tier = bs.tier, score_profile_id = CASE WHEN bs.score IS NULL THEN NULL ELSE bs.profile_id END

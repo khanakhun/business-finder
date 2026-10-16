@@ -50,7 +50,10 @@ export function createMigrator<T>(schema: z.ZodType<T>, latest: number, upcaster
       const upcaster = byVersion.get(from);
       if (!upcaster) throw new MigrationError('missing_upcaster', `No upcaster from version ${from}.`);
       try {
-        spec = { ...upcaster.up(spec), schemaVersion: from + 1 };
+        const next = upcaster.up(spec);
+        if (!next || typeof next !== 'object' || Array.isArray(next))
+          throw new Error('it returned no object');
+        spec = { ...next, schemaVersion: from + 1 };
       } catch (caught) {
         throw new MigrationError(
           'upcaster_failed',

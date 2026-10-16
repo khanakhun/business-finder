@@ -144,11 +144,15 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
         0,
         copy(operation.page),
       );
+      if (operation.navigation) next.navigation = copy(operation.navigation);
       return [{ op: 'removePage', pageId: operation.page.id }];
     }
     case 'removePage': {
       const index = pageIndex(next, operation.pageId);
-      const uses = pageUses(next, operation.pageId);
+      // The page's own links (a back-to-top action) go with it.
+      const uses = pageUses(next, operation.pageId).filter(
+        (path) => !(path[0] === 'pages' && path[1] === index),
+      );
       if (uses.length > 0) {
         throw new OperationError(
           'page_in_use',
@@ -159,10 +163,8 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
       const [page] = next.pages.splice(index, 1) as [Page];
       const navigation = copy(next.navigation);
       next.navigation.items = next.navigation.items.filter((item) => item.pageId !== operation.pageId);
-      return [
-        { op: 'addPage', page, index },
-        { op: 'setNavigation', navigation },
-      ];
+      // One inverse operation (a batch's inverse is never longer than the batch).
+      return [{ op: 'addPage', page, index, navigation }];
     }
     case 'renamePage': {
       const page = next.pages[pageIndex(next, operation.pageId)] as Page;

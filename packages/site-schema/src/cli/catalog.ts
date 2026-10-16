@@ -12,8 +12,16 @@ const sites = ['salon-gustavia', 'cafe-saint-jean', 'hardware-store-lorient', 'v
   SiteSpecSchema.parse(JSON.parse(readFileSync(new URL(`fixtures/${name}.json`, root), 'utf8'))),
 );
 const expected = catalogFiles(examplesFrom(sites));
-mkdirSync(dir, { recursive: true });
-const existing = readdirSync(dir).filter((file) => file.endsWith('.md'));
+const listed = (): string[] => {
+  try {
+    return readdirSync(dir);
+  } catch {
+    return [];
+  }
+};
+// --check never writes.
+if (!check) mkdirSync(dir, { recursive: true });
+const existing = listed().filter((file) => file.endsWith('.md'));
 const stale = existing.filter((file) => !expected.has(file));
 const changed = [...expected].filter(([file, content]) => {
   try {

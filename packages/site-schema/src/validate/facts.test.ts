@@ -172,6 +172,43 @@ describe('validateFacts', () => {
     ]);
   });
 
+  it('compares e-mail addresses as addresses, not as words', () => {
+    const spec = salon();
+    if (spec.contact.email) spec.contact.email.value = 'bonjour@salon.lumiere.example';
+    hero(spec).subtitle = {
+      fr: 'Écrivez à bonjour_salon-lumiere@example.fr',
+      en: 'Write to bonjour@salon-lumiere.example',
+    };
+    expect(found(spec)).toEqual([
+      'fact_mismatch@contact.email',
+      'unsupported_literal@pages.0.blocks.0.props.subtitle.fr',
+    ]);
+  });
+
+  it('tells North American numbers apart (no last-9-digits match between full numbers)', () => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: 'Appelez le +1 312 555 0100', en: 'Call +1 212 555 0100' };
+    const facts = withFacts([fact('phone.us', 'phone', '+1 212 555 0100')]);
+    expect(found(spec, facts)).toEqual(['unsupported_literal@pages.0.blocks.0.props.subtitle.fr']);
+  });
+
+  it('matches address parts as whole words, years an award states, and a real address spelled out', () => {
+    const street = salon();
+    if (street.contact.address) street.contact.address.street = '2 rue du Port';
+    expect(found(street)).toEqual(['fact_mismatch@contact.address.street']);
+    const award = salon();
+    hero(award).subtitle = { fr: 'Prix 2019 et prix 2015-2019', en: 'Award 2019' };
+    expect(found(award, withFacts([fact('award.1', 'award', 'Prix du meilleur salon 2015-2019')]))).toEqual(
+      [],
+    );
+    const spelled = salon();
+    hero(spelled).subtitle = {
+      fr: 'Écrivez à bonjour (at) salon-lumiere.example',
+      en: 'Write to bonjour @ salon-lumiere.example',
+    };
+    expect(found(spelled)).toEqual([]);
+  });
+
   it('refuses a registry with two facts of the same id', () => {
     const facts = registry().facts;
     expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);
@@ -207,6 +244,14 @@ describe('literals', () => {
     expect(literals(text).phones.map((phone) => phone.normalize('NFKC').replace(/\s/g, ' '))).toEqual(
       expected,
     );
+  });
+
+  it('reads dates as years, not phone numbers, and books as books', () => {
+    expect(literals('Le 12/05/2024 et le 2023-06-01')).toMatchObject({ phones: [], years: [2024, 2023] });
+    expect(literals('Plus de 2 000 livres en rayon').prices).toEqual([]);
+    expect(literals('20 livres sterling').prices).toEqual([
+      { amount: 20, currency: 'GBP', text: '20 livres sterling' },
+    ]);
   });
 
   it('reads years, year ranges and areas apart', () => {

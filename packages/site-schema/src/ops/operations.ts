@@ -39,7 +39,11 @@ const op = <T extends string, S extends z.ZodRawShape>(name: T, shape: S, descri
 const index = z.number().int().nonnegative().max(1000);
 
 export const BaseOperationSchema = z.discriminatedUnion('op', [
-  op('addPage', { page: PageSchema, index: index.optional() }, 'Add a page (at the end by default).'),
+  op(
+    'addPage',
+    { page: PageSchema, index: index.optional(), navigation: NavigationSchema.optional() },
+    'Add a page (at the end by default), and set the menu with it when given.',
+  ),
   op(
     'removePage',
     { pageId: PageIdSchema },

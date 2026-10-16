@@ -77,5 +77,10 @@ describe('createMigrator (the harness future versions use)', () => {
       { from: 2, up: (spec) => ({ ...spec, tags: [] }) },
     ]);
     expect(code(() => broken({ schemaVersion: 1, title: 'Café' }))).toBe('upcaster_failed');
+    const empty = createMigrator(V3, 3, [
+      { from: 1, up: () => null as never },
+      { from: 2, up: (spec) => ({ ...spec, tags: [] }) },
+    ]);
+    expect(code(() => empty({ schemaVersion: 1, title: 'Café' }))).toBe('upcaster_failed');
   });
 });

@@ -299,6 +299,38 @@ describe('operations', () => {
     expect(probe.logoAssetId).toBeUndefined();
   });
 
+  it('removes a page that only links to itself, and undoes it in one operation', () => {
+    const selfLinked = apply(salon, {
+      op: 'addBlock',
+      pageId: 'services',
+      block: {
+        id: 'cta-self1',
+        type: 'cta_banner',
+        variant: 'solid',
+        props: { title: L('Haut'), cta: { kind: 'page', label: L('Haut'), pageId: 'services' } },
+      },
+    }).spec;
+    const done = apply(selfLinked, { op: 'removePage', pageId: 'services' });
+    expect(done.inverse).toMatchObject({ op: 'addPage', navigation: selfLinked.navigation });
+    expect(apply(done.spec, done.inverse).spec).toStrictEqual(selfLinked);
+  });
+
+  it('undoes a full batch with an inverse that is a valid batch', () => {
+    const page = (n: number) => ({
+      ...structuredClone(at(salon.pages[1])),
+      id: `bulk-${n}`,
+      slug: `bulk-${n}`,
+      blocks: [ctaBanner(`cta-bulk${n}`)],
+    });
+    const ops: BaseOperation[] = Array.from({ length: MAX_BATCH / 2 }, (_, n) => [
+      { op: 'addPage', page: page(n) } as const,
+      { op: 'removePage', pageId: `bulk-${n}` } as const,
+    ]).flat();
+    const done = applyAll(salon, ops);
+    expect(OperationSchema.safeParse(done.inverse).success).toBe(true);
+    expect(apply(done.spec, done.inverse).spec).toStrictEqual(salon);
+  });
+
   it('keeps batches flat and bounded', () => {
     const one: BaseOperation = {
       op: 'updateText',
@@ -357,7 +389,7 @@ function pick(spec: SiteSpec, [kind, a, b]: readonly [number, number, number], n
     p.blocks.flatMap((g, j) => (g.type === 'gallery' ? [{ i, j, ids: g.props.assetIds }] : [])),
   )[0];
   const image = spec.assets.find((asset) => asset.kind === 'image');
-  switch (kind % 18) {
+  switch (kind % 24) {
     case 0:
       return {
         op: 'addBlock',
@@ -470,7 +502,7 @@ function pick(spec: SiteSpec, [kind, a, b]: readonly [number, number, number], n
             assetId: image.id,
           }
         : null;
-    default:
+    case 17:
       return gallery && gallery.ids.length > 3
         ? {
             op: 'removeAssetRef',
@@ -478,6 +510,37 @@ function pick(spec: SiteSpec, [kind, a, b]: readonly [number, number, number], n
             index: a % gallery.ids.length,
           }
         : null;
+    case 18: {
+      const added = spec.pages.find((p) => p.id.startsWith('prop-'));
+      return added ? { op: 'removePage', pageId: added.id } : null;
+    }
+    case 19: {
+      const added = spec.assets.find((asset) => asset.id.startsWith('img-prop'));
+      return added ? { op: 'removeAsset', assetId: added.id } : null;
+    }
+    case 20: {
+      const logo = spec.assets.find((asset) => asset.kind === 'logo');
+      return {
+        op: 'assignAsset',
+        path: ['layout', 'header', 'logoAssetId'],
+        assetId: logo && b % 2 === 0 ? logo.id : null,
+      };
+    }
+    case 21:
+      return { op: 'setContact', contact: { ...spec.contact } };
+    case 22:
+      return {
+        op: 'setSettings',
+        settings: { ...spec.settings, analytics: b % 2 === 0 ? 'none' : 'cookieless' },
+      };
+    default: {
+      // A small batch of the simple edits above.
+      const ops = [4, 5, 10, 12].slice(0, 2 + (a % 3)).flatMap((k) => {
+        const one = pick(spec, [k, a, b], n);
+        return one && one.op !== 'batch' ? [one] : [];
+      });
+      return ops.length > 0 ? { op: 'batch', ops } : null;
+    }
   }
 }
 

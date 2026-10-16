@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { FactIdSchema, SiteLocaleSchema } from '../spec/localized.ts';
 import type { SiteSpec } from '../spec/site.ts';
 import { error, type Issue } from './issues.ts';
-import { isLocalized, type Path, walk } from './walk.ts';
+import { type Path, walk } from './walk.ts';
 
 // The facts validator (BF-033): a site may only state what the fact registry (BF-040) holds. Every fact id it names
 // must exist and be of the right kind, contact values and prices must equal their facts, and phone numbers,
@@ -104,9 +104,26 @@ const norm = (value: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 /** The national number: the last 9 digits (country code and trunk 0 dropped; FR, BL and most of Europe). */
-const national = (value: string) => digits(value).slice(-9);
+/** For comparing e-mail addresses: compatibility forms and case folded, nothing else (`jean.dupont` ≠ `jean@dupont`). */
+const mailbox = (value: string) => value.normalize('NFKC').trim().toLowerCase();
+/**
+ * Two phone numbers are the same line: equal digits, or one written nationally (a trunk `0`) whose number without it
+ * ends the other (`0590 00 01 01` and `+590 590 00 01 01`). Full international numbers must be equal (`+1 212…` is not
+ * `+1 312…`).
+ */
+function samePhone(a: string, b: string): boolean {
+  const [da, db] = [digits(a).replace(/^00/, ''), digits(b).replace(/^00/, '')];
+  if (da === db) return true;
+  const national = (value: string, raw: string) =>
+    /^\s*\(?0/.test(raw.normalize('NFKC')) ? value.slice(1) : null;
+  const na = national(da, a);
+  const nb = national(db, b);
+  return (
+    (na !== null && na.length >= 8 && db.endsWith(na)) || (nb !== null && nb.length >= 8 && da.endsWith(nb))
+  );
+}
 
-const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\bCHF\b|\beuros?\b|\bdollars?\b|\blivres?\b|\bfrancs?\b`;
+const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\bCHF\b|\beuros?\b|\bdollars?\b|\blivres? sterling\b|\bfrancs?\b`;
 const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?`;
 const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
@@ -169,6 +186,14 @@ export function literals(input: string): Literals {
     years.push(Number(from), Number(to));
     return blank(match);
   });
+  // Dates (dd/mm/yyyy, yyyy-mm-dd) are not phone numbers: their year is checked.
+  text = text.replace(
+    /\b(?:\d{1,2}[/.-]\d{1,2}[/.-](\d{4})|(\d{4})-\d{1,2}-\d{1,2})\b/g,
+    (match, y1: string | undefined, y2: string | undefined) => {
+      years.push(Number(y1 ?? y2));
+      return blank(match);
+    },
+  );
   const emails: string[] = [];
   text = text.replace(EMAIL_LITERAL, (match) => {
     emails.push(match);
@@ -276,7 +301,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'phone'],
       contact.phone.factId,
       ['phone'],
-      (f) => national(f.value) === national(contact.phone?.value ?? ''),
+      (f) => samePhone(f.value, contact.phone?.value ?? ''),
       'the phone number',
     );
   if (contact.whatsapp)
@@ -284,7 +309,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'whatsapp'],
       contact.whatsapp.factId,
       ['whatsapp', 'phone'],
-      (f) => national(f.value) === national(contact.whatsapp?.value ?? ''),
+      (f) => samePhone(f.value, contact.whatsapp?.value ?? ''),
       'the WhatsApp number',
     );
   if (contact.email)
@@ -292,7 +317,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'email'],
       contact.email.factId,
       ['email'],
-      (f) => norm(f.value) === norm(contact.email?.value ?? ''),
+      (f) => mailbox(f.value) === mailbox(contact.email?.value ?? ''),
       'the e-mail address',
     );
   if (contact.bookingUrl)
@@ -315,7 +340,8 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   if (contact.address && addressFact?.kind === 'address') {
     for (const part of ['street', 'postalCode', 'locality', 'region'] as const) {
       const value = contact.address[part];
-      if (value && !norm(addressFact.value).includes(norm(value))) {
+      // Whole words: `2 rue du Port` is not in `12 rue du Port`.
+      if (value && !` ${norm(addressFact.value)} `.includes(` ${norm(value)} `)) {
         issues.push(
           error(
             ['contact', 'address', part],
@@ -411,8 +437,8 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   }
 
   // Literal values in any text must be facts (or appear in a fact's own text: a legal id, a share capital).
-  const phones = [...of('phone'), ...of('whatsapp')].map((f) => national(f.value));
-  const emails = of('email').map((f) => norm(f.value));
+  const phones = [...of('phone'), ...of('whatsapp')].map((f) => f.value);
+  const emails = of('email').map((f) => mailbox(f.value));
   const prices = of('price').map((f) => f.value);
   const years = of('year').map((f) => f.value);
   // Numbers a fact states in its own text (a legal notice's SIRET, a share capital, an award's year): whole numbers
@@ -423,21 +449,25 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       [
         ...String(fact.value)
           .normalize('NFKC')
-          .matchAll(/\d+(?:[ \u00A0\u202F.,-]\d+)*/g),
+          .matchAll(/\d+(?:[ \u00A0\u202F.,]\d+)*/g),
       ].map((m) => digits(m[0])),
     ),
   );
+  for (const fact of stating)
+    for (const year of literals(String(fact.value)).years) statedNumbers.add(String(year));
   const statedPrices = stating.flatMap((fact) => literals(String(fact.value)).prices);
   for (const { text, path } of texts(spec)) {
     const found = literals(text);
     for (const phone of found.phones) {
-      if (!phones.includes(national(phone)) && !statedNumbers.has(digits(phone)))
+      if (!phones.some((known) => samePhone(known, phone)) && !statedNumbers.has(digits(phone)))
         issues.push(
           error(path, 'unsupported_literal', `Remove the phone number "${phone}" or use the contact facts.`),
         );
     }
     for (const email of found.emails) {
-      if (!emails.includes(norm(email)))
+      // A spelled-out address (`name (at) domain`) is compared as written with `@`.
+      const spelled = email.replace(/\s{0,2}@\s{0,2}|\s?[([]at[)\]]\s?/i, '@');
+      if (!emails.includes(mailbox(spelled)))
         issues.push(
           error(path, 'unsupported_literal', `Remove the e-mail address "${email}": it is not a fact.`),
         );

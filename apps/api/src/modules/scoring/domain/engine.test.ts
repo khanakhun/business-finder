@@ -67,11 +67,14 @@ describe('scoring engine properties', () => {
   it('is monotone: a value the transform rates higher never lowers the score (never raises it, if weight < 0)', () => {
     // Without gates (a gate may depend on the changed feature by design).
     const ungated = builtins.map((config) => ({ ...config, gates: [] }) as ScoringProfileConfig);
-    const keyed = fc
-      .constantFrom(...FEATURE_KEYS)
-      .chain((key) => fc.tuple(fc.constant(key), arbitraryValue(key)));
+    // A feature the profile weighs, and another value for it.
+    const cases = ungated.chain((config) =>
+      fc
+        .constantFrom(...(Object.keys(config.weights) as FeatureKey[]))
+        .chain((key) => fc.tuple(fc.constant(config), fc.constant(key), arbitraryValue(key))),
+    );
     fc.assert(
-      fc.property(vectors, ungated, keyed, (vector, config, [key, other]) => {
+      fc.property(vectors, cases, (vector, [config, key, other]) => {
         const weight = config.weights[key] ?? 0;
         const rate = (value: FeatureValue) =>
           applyTransform(config.transforms[key], value) ?? config.missing[key] ?? null;
@@ -120,19 +123,50 @@ describe('scoring engine', () => {
     // 100 × (30 × 1 + 50 × 0.5 + 0 − 20 × 1) ÷ 100 = 35
     expect(result.score).toBe(35);
     expect(result.contributions).toEqual([
-      { feature: 'vision_overall', rawValue: null, transformed: null, weight: 20, contribution: 0 },
-      { feature: 'rating_avg', rawValue: 4, transformed: 0.5, weight: 50, contribution: 25 },
-      { feature: 'multi_location', rawValue: true, transformed: 1, weight: -20, contribution: -20 },
-      { feature: 'has_phone', rawValue: true, transformed: 1, weight: 30, contribution: 30 },
+      {
+        feature: 'vision_overall',
+        rawValue: null,
+        transformed: null,
+        imputed: null,
+        weight: 20,
+        contribution: 0,
+      },
+      { feature: 'rating_avg', rawValue: 4, transformed: 0.5, imputed: null, weight: 50, contribution: 25 },
+      {
+        feature: 'multi_location',
+        rawValue: true,
+        transformed: 1,
+        imputed: null,
+        weight: -20,
+        contribution: -20,
+      },
+      { feature: 'has_phone', rawValue: true, transformed: 1, imputed: null, weight: 30, contribution: 30 },
     ]);
-    // The profile's missing value stands in: + 20 × 0.9.
-    expect(scoreVector({ ...config, missing: { vision_overall: 0.9 } }, vector).score).toBe(53);
+    // The profile's missing value stands in: + 20 × 0.9; it says so, and reads only a `missing` text.
+    const filled = scoreVector({ ...config, missing: { vision_overall: 0.9 } }, vector);
+    expect(filled.score).toBe(53);
+    expect(filled.contributions[0]).toMatchObject({ rawValue: null, transformed: 0.9, imputed: 'profile' });
+    expect(filled.reasons.map((reason) => reason.feature)).not.toContain('vision_overall');
+    const explained = scoreVector(
+      {
+        ...config,
+        missing: { vision_overall: 0.9 },
+        reasonTemplates: {
+          vision_overall: { missing: { en: 'Design not graded.', fr: 'Design non noté.' } },
+        },
+      },
+      vector,
+    );
+    expect(explained.reasons.find((reason) => reason.feature === 'vision_overall')?.text.en).toBe(
+      'Design not graded.',
+    );
     // A registry default stands in first: has_phone missing → false → 0.
     expect(
       scoreVector(config, { rating_avg: 5 }).contributions.find((c) => c.feature === 'has_phone'),
     ).toMatchObject({
       rawValue: false,
       transformed: 0,
+      imputed: 'default',
     });
     // Negative totals clamp to 0.
     expect(scoreVector(config, { multi_location: true }).score).toBe(0);

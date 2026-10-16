@@ -98,8 +98,14 @@ describe('scoring contracts', () => {
       expect(description.en && description.fr, key).toBeTruthy();
       for (const [value, text] of Object.entries(reasons)) {
         expect(text?.en && text.fr, `${key}.${value}`).toBeTruthy();
-        if (type === 'boolean') expect(['true', 'false', 'value']).toContain(value);
-        if (type === 'enum') expect([...(values ?? []), 'value']).toContain(value);
+        const allowed = [
+          'value',
+          'missing',
+          ...(type === 'boolean' ? ['true', 'false'] : []),
+          ...(type === 'enum' ? (values ?? []) : []),
+          ...(FEATURE_DEFINITIONS[key].pivot !== undefined ? ['below', 'above'] : []),
+        ];
+        expect(allowed, `${key}.${value}`).toContain(value);
       }
     }
   });
@@ -169,7 +175,7 @@ describe('profile problems', () => {
         ],
       }),
     );
-    expect(problems.map((problem) => problem.path)).toEqual([
+    expect(problems.map((problem) => problem.path.join('.'))).toEqual([
       'transforms.has_phone',
       'transforms.website_status',
       'transforms.rating_avg',
@@ -177,13 +183,26 @@ describe('profile problems', () => {
       'transforms.price_level',
       'missing.vision_overall',
       'reasonTemplates.has_phone.yes',
-      'gates[0].when',
-      'gates[1].id',
-      'gates[1].when.not',
-      'gates[2].id',
-      'gates[2].when.any[0]',
-      'gates[3].when',
+      'gates.0.when',
+      'gates.1.id',
+      'gates.1.when.not',
+      'gates.2.id',
+      'gates.2.when.any.0',
+      'gates.3.when',
     ]);
+    // Paths are arrays: a dotted feature key stays one segment.
+    expect(
+      profileProblems(
+        config({
+          weights: { has_phone: 10 },
+          transforms: { 'pain_share.booking_friction': { kind: 'linear', min: 0, max: 1 } },
+        }),
+      )[0]?.path,
+    ).toEqual(['transforms', 'pain_share.booking_friction']);
+    // A missing value for a feature with a registry default can never apply.
+    expect(
+      profileProblems(config({ weights: { has_phone: 10 }, missing: { has_phone: 1 } })).map((p) => p.path),
+    ).toEqual([['missing', 'has_phone']]);
     // A zero weight needs nothing.
     expect(profileProblems(config({ weights: { has_website: 10, rating_avg: 0 } }))).toEqual([]);
   });

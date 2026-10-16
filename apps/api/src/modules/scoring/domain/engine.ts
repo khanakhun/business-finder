@@ -17,8 +17,8 @@ import { applyTransform } from './transforms.ts';
 // profile version always give the same score, contributions and reasons.
 //
 // score = clamp(Σ contribution, 0, 100), contribution = 100 × weight × transformed ÷ Σ positive weights. A missing
-// feature takes its registry default, else the profile's `missing` value, else contributes nothing (its weight still
-// counts, so for a positive weight missing data never raises a score). Then gates: an exclusion gives tier X and 0, a
+// feature takes its registry default, else the profile's `missing` value (which can raise a score: the built-ins use
+// it for redesign and booking only, each with a cap), else contributes nothing while its weight still counts. Then gates: an exclusion gives tier X and 0, a
 // cap lowers the score; `do_not_contact` always excludes, whatever the profile says. Tiers: A from `tiers.A`, B from
 // `tiers.B`, else C.
 
@@ -33,6 +33,10 @@ export const DO_NOT_CONTACT_GATE: Gate = {
 const ORDER = new Map(FEATURE_KEYS.map((key, index) => [key, index]));
 const round = (value: number) => Math.round(value * 10_000) / 10_000;
 
+/**
+ * Scores a feature vector of the current `FEATURE_SET_VERSION` (an older snapshot misses newer keys, which would
+ * read as missing: recompute the features from the facts instead of re-scoring old snapshots).
+ */
 export function scoreVector(config: ScoringProfileConfig, stored: FeatureVector): ScoreResult {
   // Registry defaults stand in for missing values; a profile's `missing` value for what is still missing.
   const vector = withDefaults(stored);
@@ -43,12 +47,16 @@ export function scoreVector(config: ScoringProfileConfig, stored: FeatureVector)
   const contributions: ScoreContribution[] = weighted.map((feature) => {
     const weight = config.weights[feature] ?? 0;
     const rawValue = vector[feature] ?? null;
-    const transformed =
-      applyTransform(config.transforms[feature], rawValue) ?? config.missing[feature] ?? null;
+    const own = stored[feature] ?? null;
+    const known = typeof own === 'number' ? Number.isFinite(own) : own !== null;
+    const measured = applyTransform(config.transforms[feature], rawValue);
+    const filled = measured === null ? (config.missing[feature] ?? null) : null;
+    const transformed = measured ?? filled;
     return {
       feature,
       rawValue,
       transformed: transformed === null ? null : round(transformed),
+      imputed: filled !== null ? 'profile' : !known && rawValue !== null ? 'default' : null,
       weight,
       contribution:
         transformed === null || positive === 0 ? 0 : round((100 * weight * transformed) / positive),

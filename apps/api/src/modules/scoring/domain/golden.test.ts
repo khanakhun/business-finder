@@ -35,8 +35,8 @@ const EXPECTED: [string, string, (string | null)[]][] = [
     'XXXXX',
     ['do_not_contact', 'do_not_contact', 'do_not_contact', 'do_not_contact', 'do_not_contact'],
   ],
-  ['Garage, unreachable', 'CCCCC', ['unreachable', 'no_website_to_redesign', null, null, null]],
-  ['Spa, broken site, many complaints', 'BAAAC', [null, null, null, null, null]],
+  ['Garage, unreachable', 'CCCCC', ['unreachable', null, null, null, null]],
+  ['Spa, broken site, many complaints', 'BBACC', [null, null, null, 'booking_not_checked', null]],
   ['Chain boutique, shared website', 'CCCCC', [null, null, null, 'offer_rarely_fits', null]],
   [
     'Won customer, no website',
@@ -77,8 +77,8 @@ describe('built-in profiles (golden)', () => {
     const scored = all.filter((result) => result.tier !== 'X');
     for (const result of scored) expect(result.reasons.length).toBeGreaterThan(0);
     for (const reason of scored.flatMap((result) => result.reasons)) {
-      expect(reason.text.en).not.toContain('{value}');
-      expect(reason.text.fr).not.toContain('{value}');
+      expect(reason.text.en).not.toMatch(/\{value\}|null|undefined|NaN/);
+      expect(reason.text.fr).not.toMatch(/\{value\}|null|undefined|NaN/);
     }
   });
 });

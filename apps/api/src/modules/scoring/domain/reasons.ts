@@ -77,8 +77,9 @@ function keysOf(raw: FeatureValue, pivot: number | undefined): string[] {
 function text(config: ScoringProfileConfig, contribution: ScoreContribution) {
   const definition = FEATURE_DEFINITIONS[contribution.feature];
   const raw = contribution.rawValue;
-  // The profile's texts win over the registry's; within each, the most specific key.
-  const keys = keysOf(raw, definition.pivot);
+  // The profile's texts win over the registry's; within each, the most specific key. A value the profile filled in
+  // reads its `missing` text only (or gives no reason).
+  const keys = contribution.imputed === 'profile' ? ['missing'] : keysOf(raw, definition.pivot);
   const pick = (texts: ReasonTexts | undefined) =>
     keys.map((key) => texts?.[key]).find((template) => template !== undefined);
   const template = pick(config.reasonTemplates[contribution.feature]) ?? pick(definition.reasons);

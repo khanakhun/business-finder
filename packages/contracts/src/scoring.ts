@@ -40,8 +40,9 @@ interface Text {
 
 /**
  * Reason texts of a feature: by boolean or enum value (`true`, `false`, `closed_permanently`…), below or above the
- * feature's `pivot` (`below`, `above`), or for any value (`value`, with `{value}`). A contribution reads the most
- * specific one there is, the profile's before the registry's.
+ * feature's `pivot` (`below`, `above`), for any value (`value`, with `{value}`), or for a missing value a profile
+ * filled in (`missing`). A contribution reads the most specific one there is, the profile's before the registry's;
+ * a filled-in value reads only `missing` (never "null").
  */
 export type ReasonTexts = Readonly<Partial<Record<string, Text>>>;
 
@@ -164,7 +165,10 @@ const DEFINITIONS = {
     range: [0, 100],
     description: { en: 'Website quality score (0–100).', fr: 'Score de qualité du site (0–100).' },
     source: 'website audit (BF-030)',
-    reasons: { value: { en: 'Website quality score {value}.', fr: 'Score de qualité du site : {value}.' } },
+    reasons: {
+      value: { en: 'Website quality score {value}.', fr: 'Score de qualité du site : {value}.' },
+      missing: { en: 'The website could not be measured.', fr: 'Le site n’a pas pu être mesuré.' },
+    },
   },
   psi_mobile_performance: {
     group: 'presence',
@@ -235,10 +239,13 @@ const DEFINITIONS = {
     unit: 'none',
     description: { en: 'The website offers online booking.', fr: 'Le site propose la réservation en ligne.' },
     source: 'website crawl (BF-026)',
-    reasons: yesNo(
-      { en: 'Already takes bookings online.', fr: 'Prend déjà des réservations en ligne.' },
-      { en: 'No online booking.', fr: 'Pas de réservation en ligne.' },
-    ),
+    reasons: {
+      ...yesNo(
+        { en: 'Already takes bookings online.', fr: 'Prend déjà des réservations en ligne.' },
+        { en: 'No online booking.', fr: 'Pas de réservation en ligne.' },
+      ),
+      missing: { en: 'No online booking seen.', fr: 'Aucune réservation en ligne repérée.' },
+    },
   },
   has_online_menu: {
     group: 'presence',
@@ -367,7 +374,7 @@ const DEFINITIONS = {
       fr: 'Nombre d’avis, en échelle logarithmique (log10 de 1 + nombre).',
     },
     source: 'business record',
-    reasons: { value: { en: '{value} reviews.', fr: '{value} avis.' } },
+    reasons: { value: { en: 'Reviews: {value}.', fr: 'Avis : {value}.' } },
   },
   owner_response_rate: {
     group: 'business',
@@ -708,13 +715,14 @@ const ProfileConfigObjectSchema = z.object({
   reasonTemplates: z.partialRecord(FeatureKeySchema, ReasonTextsSchema).default({}),
 });
 
+export type ProblemPath = readonly (string | number)[];
 export interface ProfileProblem {
-  /** Dotted path in the config (`transforms.rating_avg`, `gates[0].when.any[1]`). */
-  readonly path: string;
+  /** Path in the config (`['transforms', 'pain_share.booking_friction']`, `['gates', 0, 'when', 'any', 1]`). */
+  readonly path: ProblemPath;
   readonly message: string;
 }
 export const ProfileProblemSchema = z
-  .object({ path: z.string(), message: z.string() })
+  .object({ path: z.array(z.union([z.string(), z.number()])), message: z.string() })
   .meta({ id: 'ScoringProfileProblem' });
 
 const FITS: Record<FeatureDefinition['type'], readonly Transform['kind'][]> = {
@@ -723,17 +731,17 @@ const FITS: Record<FeatureDefinition['type'], readonly Transform['kind'][]> = {
   enum: ['enumMap'],
 };
 
-function conditionProblems(condition: GateCondition, path: string, problems: ProfileProblem[]): void {
+function conditionProblems(condition: GateCondition, path: ProblemPath, problems: ProfileProblem[]): void {
   if ('all' in condition) {
-    for (const [i, part] of condition.all.entries()) conditionProblems(part, `${path}.all[${i}]`, problems);
+    for (const [i, part] of condition.all.entries()) conditionProblems(part, [...path, 'all', i], problems);
     return;
   }
   if ('any' in condition) {
-    for (const [i, part] of condition.any.entries()) conditionProblems(part, `${path}.any[${i}]`, problems);
+    for (const [i, part] of condition.any.entries()) conditionProblems(part, [...path, 'any', i], problems);
     return;
   }
   if ('not' in condition) {
-    conditionProblems(condition.not, `${path}.not`, problems);
+    conditionProblems(condition.not, [...path, 'not'], problems);
     return;
   }
   const definition = FEATURE_DEFINITIONS[condition.feature];
@@ -760,13 +768,14 @@ function conditionProblems(condition: GateCondition, path: string, problems: Pro
 
 /**
  * What the schema's shapes cannot say (BF-031), shared by the API and the profile editor (BF-032): a transform must
- * fit its feature's type, an enum needs an `enumMap`, a number off the 0–1 scale needs a transform, gate values and
- * reason keys must exist, gate ids must be unique (and not the engine's own). Empty when the profile is usable.
+ * fit its feature's type, an enum needs an `enumMap`, a number off the 0–1 scale needs a transform, a `missing`
+ * value needs a feature that can be missing, gate values and reason keys must exist, gate ids must be unique (and
+ * not the engine's own). Empty when the profile is usable.
  */
 export function profileProblems(config: z.output<typeof ProfileConfigObjectSchema>): ProfileProblem[] {
   const problems: ProfileProblem[] = [];
   if (!Object.values(config.weights).some((weight) => (weight ?? 0) > 0)) {
-    problems.push({ path: 'weights', message: 'At least one feature needs a positive weight' });
+    problems.push({ path: ['weights'], message: 'At least one feature needs a positive weight' });
   }
   for (const [key, weight] of Object.entries(config.weights) as [FeatureKey, number][]) {
     if (weight === 0) continue;
@@ -774,16 +783,16 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     const transform = config.transforms[key];
     if (transform && !FITS[definition.type].includes(transform.kind)) {
       problems.push({
-        path: `transforms.${key}`,
+        path: ['transforms', key],
         message: `A ${definition.type} feature cannot use ${transform.kind}`,
       });
     }
     if (!transform && definition.type === 'enum') {
-      problems.push({ path: `transforms.${key}`, message: 'An enum feature needs an enumMap transform' });
+      problems.push({ path: ['transforms', key], message: 'An enum feature needs an enumMap transform' });
     }
     if (!transform && definition.type === 'number' && definition.unit !== 'share') {
       problems.push({
-        path: `transforms.${key}`,
+        path: ['transforms', key],
         message: 'This number is not on 0–1: it needs a transform',
       });
     }
@@ -791,7 +800,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
       for (const value of Object.keys(transform.map)) {
         if (!(definition.values ?? []).includes(value)) {
           problems.push({
-            path: `transforms.${key}.map.${value}`,
+            path: ['transforms', key, 'map', value],
             message: `${value} is not a value of ${key}`,
           });
         }
@@ -801,8 +810,13 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
   for (const section of ['transforms', 'missing'] as const) {
     for (const key of Object.keys(config[section]) as FeatureKey[]) {
       if (config.weights[key] === undefined) {
-        problems.push({ path: `${section}.${key}`, message: 'Set for a feature without a weight' });
+        problems.push({ path: [section, key], message: 'Set for a feature without a weight' });
       }
+    }
+  }
+  for (const key of Object.keys(config.missing) as FeatureKey[]) {
+    if (FEATURE_DEFINITIONS[key].missingDefault !== undefined) {
+      problems.push({ path: ['missing', key], message: `${key} is never missing (it has a default)` });
     }
   }
   for (const [key, texts] of Object.entries(config.reasonTemplates) as [
@@ -812,6 +826,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     const definition = FEATURE_DEFINITIONS[key];
     const allowed = new Set([
       'value',
+      'missing',
       ...(definition.type === 'boolean' ? ['true', 'false'] : []),
       ...(definition.type === 'enum' ? (definition.values ?? []) : []),
       ...(definition.pivot !== undefined ? ['below', 'above'] : []),
@@ -819,7 +834,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     for (const value of Object.keys(texts)) {
       if (!allowed.has(value)) {
         problems.push({
-          path: `reasonTemplates.${key}.${value}`,
+          path: ['reasonTemplates', key, value],
           message: `${value} is not a value of ${key}`,
         });
       }
@@ -828,10 +843,10 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
   const ids = new Set<string>([DO_NOT_CONTACT_GATE_ID]);
   for (const [i, gate] of config.gates.entries()) {
     if (ids.has(gate.id)) {
-      problems.push({ path: `gates[${i}].id`, message: `Gate id ${gate.id} is reserved or used twice` });
+      problems.push({ path: ['gates', i, 'id'], message: `Gate id ${gate.id} is reserved or used twice` });
     }
     ids.add(gate.id);
-    conditionProblems(gate.when, `gates[${i}].when`, problems);
+    conditionProblems(gate.when, ['gates', i, 'when'], problems);
   }
   return problems;
 }
@@ -839,14 +854,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
 /** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path). */
 export const ScoringProfileConfigSchema = ProfileConfigObjectSchema.superRefine((config, ctx) => {
   for (const problem of profileProblems(config)) {
-    ctx.addIssue({
-      code: 'custom',
-      path: problem.path
-        .split(/[.[\]]+/)
-        .filter(Boolean)
-        .map((part) => (/^\d+$/.test(part) ? Number(part) : part)),
-      message: problem.message,
-    });
+    ctx.addIssue({ code: 'custom', path: [...problem.path], message: problem.message });
   }
 }).meta({ id: 'ScoringProfileConfig' });
 export type ScoringProfileConfig = z.infer<typeof ScoringProfileConfigSchema>;
@@ -858,9 +866,12 @@ export type ScoringProfileConfigInput = z.input<typeof ScoringProfileConfigSchem
 export const ScoreContributionSchema = z
   .object({
     feature: FeatureKeySchema,
+    /** The value scored: the snapshot's, or the registry default that stood in for a missing one. */
     rawValue: FeatureValueSchema,
-    /** 0–1 after the transform; null when the feature was missing. */
+    /** 0–1 after the transform (or the profile's `missing` value); null when nothing stood in. */
     transformed: z.number().min(0).max(1).nullable(),
+    /** What stood in for a missing value: the registry default, the profile's `missing` value, or nothing. */
+    imputed: z.enum(['default', 'profile']).nullable(),
     weight: z.number(),
     /** Score points (signed). */
     contribution: z.number(),

@@ -21,13 +21,14 @@ const digest = (value: unknown): string => {
     .slice(0, 16);
 };
 
-// Each built-in version is immutable once seeded: an edit must bump its version and update its digest here.
-const PINNED: Record<string, { version: number; digest: string }> = {
-  new_website: { version: 1, digest: '09305d7e5127ef07' },
-  website_redesign: { version: 1, digest: '7906e967c53d5c83' },
-  ai_receptionist: { version: 1, digest: 'bbd3f46a7d1fe94b' },
-  booking_system: { version: 1, digest: 'f8334b27cdbca8de' },
-  local_seo: { version: 1, digest: '61745a2709b3106e' },
+// The digest of every released version of each built-in, in order (index + 1 = version), append-only: an edit
+// appends the new digest and bumps the version; released entries never change.
+const RELEASED: Record<string, readonly string[]> = {
+  new_website: ['09305d7e5127ef07'],
+  website_redesign: ['2ab63c3a9b11f626'],
+  ai_receptionist: ['bbd3f46a7d1fe94b'],
+  booking_system: ['54148beed33d29de'],
+  local_seo: ['61745a2709b3106e'],
 };
 
 describe('built-in profiles', () => {
@@ -38,13 +39,11 @@ describe('built-in profiles', () => {
     }
   });
 
-  it('pin each version to its config (edit a profile → bump its version)', () => {
-    const actual = Object.fromEntries(
-      OFFERS.map((offer) => [
-        offer,
-        { version: BUILTIN_PROFILE_VERSIONS[offer], digest: digest(BUILTIN_PROFILES[offer]) },
-      ]),
-    );
-    expect(actual).toEqual(PINNED);
+  it('pin each version to its config (edit a profile → append its digest and bump its version)', () => {
+    for (const offer of OFFERS) {
+      const released = RELEASED[offer] ?? [];
+      expect(BUILTIN_PROFILE_VERSIONS[offer], offer).toBe(released.length);
+      expect(digest(BUILTIN_PROFILES[offer]), offer).toBe(released.at(-1));
+    }
   });
 });

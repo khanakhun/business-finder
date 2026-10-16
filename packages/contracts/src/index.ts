@@ -641,6 +641,7 @@ export {
   type GateCondition,
   GateConditionSchema,
   GateSchema,
+  type ProblemPath,
   type ProfileProblem,
   ProfileProblemSchema,
   profileProblems,

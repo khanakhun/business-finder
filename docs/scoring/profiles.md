@@ -17,8 +17,10 @@ duplicates one to customize it (BF-032). Change a weight here and in code togeth
    `log` (`log(1 + x) ÷ log(1 + max)`), `boolean`, `enumMap`. Booleans default to 1/0; shares (0–1) need no
    transform. Numeric transforms are monotone; for "less is better" use `inverse` or a negative weight.
 3. **Weighted sum**: `score = clamp(100 × Σ weight × transformed ÷ Σ positive weights, 0, 100)`. A missing feature
-   takes the profile's `missing` value if it sets one, else contributes nothing while its weight still counts: for
-   a positive weight, missing data never raises a score. Negative weights lower it.
+   takes the profile's `missing` value if it sets one — which can raise a score; the built-ins use it only for
+   redesign and booking, each paired with a cap — else contributes nothing while its weight still counts. Negative
+   weights lower the score. Each contribution says what stood in (`imputed`: the registry default or the profile's
+   `missing` value).
 4. **Gates** (conditions on the features, defaults applied; a comparison with a missing value is false, so
    `not: { eq }` matches a missing value while `neq` does not): an *exclusion* gives tier **X**, score 0 and no
    reasons but its own; a *cap* limits the score (the lowest cap wins; an exclusion wins over caps; a cap that does
@@ -26,7 +28,7 @@ duplicates one to customize it (BF-032). Change a weight here and in code togeth
 5. **Tiers**: A from the profile's `A` threshold, B from `B`, else C.
 6. **Reasons**: the three strongest contributions each way, in EN/FR: the profile's `reasonTemplates` first, then
    the registry's texts — by value (`true`, `false`, an enum value), by side of the feature's pivot (`below`,
-   `above`), else `value`.
+   `above`), else `value`. A value the profile filled in reads only a `missing` text (no text, no reason).
 
 `category_offer_relevance` is one key whose value is the relevance of the profile's own offer (stored per score):
 one key per offer would add five mostly irrelevant features to every snapshot.
@@ -87,8 +89,8 @@ Extra gate: `has_working_website` (status ok/strong) caps at 30 — that busines
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 | `multi_location` | −6 | yes/no | Chains have central sites. |
 
-Missing values: quality, design, PageSpeed and load time count as 0.9 when missing — a site that cannot be audited
-(broken, unreadable) is a poor one. Extra gates: `no_website_to_redesign` (status none/parked/social only) caps at
+Missing value: no quality score at all (nothing could be measured: a broken or unreadable site) counts as 0.9 — a
+poor site. A single failed measurement (PageSpeed quota, model outage) stays missing. Extra gates: `no_website_to_redesign` (status none/parked/social only) caps at
 20 — that business belongs to the new website offer; `not_audited_yet` (a website, no audit) caps at 40 until the
 audit runs. A broken site scores both offers (it may need a rebuild).
 
@@ -128,7 +130,8 @@ Extra gate: `no_phone_line` (no phone) caps at 40.
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 
 Missing value: `has_booking_tool` counts as "no tool" when unknown (no readable site, e.g. only a social page).
-Extra gate: `already_books_online` caps at 35.
+Extra gates: `booking_not_checked` (a website whose crawl did not say — not crawled yet, blocked, broken — other
+than a social page or a parked domain) caps at 40 until it does; `already_books_online` caps at 35.
 
 ## `local_seo` — businesses customers struggle to find (tiers A ≥ 65, B ≥ 45)
 
@@ -164,6 +167,6 @@ Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their 
 | Permanently closed café | X | X | X | X | X |
 | Do-not-contact bakery | X | X | X | X | X |
 | Garage, unreachable | C | C | C | C | C |
-| Spa, broken site, many complaints | B | A | A | A | C |
+| Spa, broken site, many complaints | B | B | A | C | C |
 | Chain boutique, shared website | C | C | C | C | C |
 | Won customer, no website | C | C | C | C | C |

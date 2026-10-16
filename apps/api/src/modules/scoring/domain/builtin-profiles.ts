@@ -164,13 +164,9 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
       has_https: notHaving,
       has_contact_form: notHaving,
     },
-    // A site that cannot be audited (broken, unreadable) counts as a poor one.
-    missing: {
-      website_quality_score: 0.9,
-      vision_overall: 0.9,
-      psi_mobile_performance: 0.9,
-      lcp_mobile_seconds: 0.9,
-    },
+    // No quality score at all (nothing could be measured: a broken or unreadable site) counts as a poor site. A
+    // single failed measurement (PageSpeed quota, model outage) leaves its feature missing instead.
+    missing: { website_quality_score: 0.9 },
     gates: [
       ...COMMON_GATES,
       {
@@ -247,7 +243,7 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
       has_website: 3,
       has_phone: 3,
     },
-    // Unknown (no readable site, e.g. only a social page): no booking tool seen.
+    // Unknown (no readable site, e.g. only a social page): no booking tool seen (capped while not checked).
     missing: { has_booking_tool: 1 },
     transforms: {
       has_booking_tool: notHaving,
@@ -257,6 +253,22 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
     },
     gates: [
       ...COMMON_GATES,
+      {
+        // The crawl did not say (not crawled yet, blocked, broken): "no tool" is a guess until it does.
+        id: 'booking_not_checked',
+        when: {
+          all: [
+            { feature: 'has_website', eq: true },
+            { feature: 'has_booking_tool', isNull: true },
+            { not: { feature: 'website_status', in: ['social_only', 'parked'] } },
+          ],
+        },
+        effect: { type: 'cap', max: 40 },
+        reason: {
+          en: 'The website was not checked for online booking yet.',
+          fr: 'La réservation en ligne du site n’a pas encore été vérifiée.',
+        },
+      },
       {
         id: 'already_books_online',
         when: { feature: 'has_booking_tool', eq: true },

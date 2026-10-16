@@ -610,35 +610,40 @@ function pick(spec: SiteSpec, [kind, a, b]: readonly [number, number, number], n
 }
 
 describe('operation properties', () => {
-  it.each(FIXTURES)('undoes any sequence of operations on %s exactly, staying valid', (name) => {
-    const original = load(name);
-    let applied = 0;
-    fc.assert(
-      fc.property(
-        fc.array(fc.tuple(fc.nat(), fc.nat(), fc.nat()), { minLength: 1, maxLength: 12 }),
-        (picks) => {
-          let spec = original;
-          const inverses: Operation[] = [];
-          picks.forEach((choice, n) => {
-            const operation = pick(spec, choice, n);
-            if (!operation) return;
-            try {
-              const done = apply(spec, operation);
-              spec = done.spec;
-              inverses.unshift(OperationSchema.parse(JSON.parse(JSON.stringify(done.inverse))));
-              applied += 1;
-            } catch (caught) {
-              if (!(caught instanceof OperationError)) throw caught;
-            }
-          });
-          expect(SiteSpecSchema.safeParse(spec).success).toBe(true);
-          for (const inverse of inverses) spec = apply(spec, inverse).spec;
-          expect(spec).toStrictEqual(original);
-        },
-      ),
-      { numRuns: 150, seed: 20261016 },
-    );
-    // Most picks apply: the property is about operations, not refusals.
-    expect(applied).toBeGreaterThan(500);
-  });
+  it.each(FIXTURES)(
+    'undoes any sequence of operations on %s exactly, staying valid',
+    (name) => {
+      const original = load(name);
+      let applied = 0;
+      fc.assert(
+        fc.property(
+          fc.array(fc.tuple(fc.nat(), fc.nat(), fc.nat()), { minLength: 1, maxLength: 12 }),
+          (picks) => {
+            let spec = original;
+            const inverses: Operation[] = [];
+            picks.forEach((choice, n) => {
+              const operation = pick(spec, choice, n);
+              if (!operation) return;
+              try {
+                const done = apply(spec, operation);
+                spec = done.spec;
+                inverses.unshift(OperationSchema.parse(JSON.parse(JSON.stringify(done.inverse))));
+                applied += 1;
+              } catch (caught) {
+                if (!(caught instanceof OperationError)) throw caught;
+              }
+            });
+            expect(SiteSpecSchema.safeParse(spec).success).toBe(true);
+            for (const inverse of inverses) spec = apply(spec, inverse).spec;
+            expect(spec).toStrictEqual(original);
+          },
+        ),
+        { numRuns: 150, seed: 20261016 },
+      );
+      // Most picks apply: the property is about operations, not refusals.
+      expect(applied).toBeGreaterThan(500);
+      // 150 seeded runs validate the whole site each time: about 2 s locally, more on a shared CI runner.
+    },
+    30_000,
+  );
 });

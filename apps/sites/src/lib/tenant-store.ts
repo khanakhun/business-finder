@@ -92,13 +92,15 @@ export function createTenantStore(
       return tenant;
     } catch (error) {
       if (error instanceof TenantUnavailableError) {
-        failures.set(hostname, true, now + FAILURE_TTL_MS, [`host:${hostname}`]);
+        // A revalidation meanwhile may have fixed the site: then the next request looks again.
+        if (current()) failures.set(hostname, true, now + FAILURE_TTL_MS, [`host:${hostname}`]);
         throw error;
       }
       // The database is unreachable: for a few seconds no request waits for it, and the last known site is served
-      // until its grace (or its expiry) ends.
-      downUntil = clock() + DOWN_FOR_MS;
-      const stale = lastKnown.get(hostname, now);
+      // until its grace (or its expiry) ends, both counted from now (the lookup may have hung until its deadline).
+      const failedAt = clock();
+      downUntil = failedAt + DOWN_FOR_MS;
+      const stale = lastKnown.get(hostname, failedAt);
       log(stale ? 'warn' : 'error', 'site lookup failed', {
         hostname,
         servedStale: Boolean(stale),

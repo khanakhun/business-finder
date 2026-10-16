@@ -193,6 +193,12 @@ test('ignores a visitor’s own proxy headers and look-alike internal paths', as
   expect(lookAlike.status()).toBe(404);
   // A path like any other: not a page of the site, so its 404 page (with that page's own strict policy).
   expect(lookAlike.headers()['content-security-policy']).toContain("default-src 'none'");
+  // The internal routes answer on the internal address only: under a site's hostname they are site paths.
+  for (const path of ['/health/ready', '/api/revalidate']) {
+    const internal = await request.get(siteUrl(SLUGS.active, path));
+    expect(internal.status()).toBe(404);
+    expect(await internal.text()).not.toContain('"ok"');
+  }
   const big = await fetch(`http://127.0.0.1:${sitesPort}/api/revalidate`, {
     method: 'POST',
     headers: { Authorization: `Bearer 1.${'a'.repeat(16)}.${'0'.repeat(64)}` },

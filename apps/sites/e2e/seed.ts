@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { closeDb, createDb, type DbClient } from '@bf/db';
 import { businesses, organization, orgSettings, sitePublications, sites, siteVersions } from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
-import { eq, like } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { BASE_DOMAIN, env } from './env.ts';
 
 // The e2e renderer's data, written straight to the database (the API is not under test here): one workspace with
@@ -27,8 +27,12 @@ export const SLUGS = {
 };
 export const AGENCY = { name: 'Agence Exemple', url: 'https://agence.example' };
 
-/** The local (or CI) database only: the seed deletes and recreates its workspace. */
-export const db = (): DbClient => {
+/**
+ * The local database only (CI runs the same local stack): seeds delete and recreate their workspace. A tunnel to
+ * another database on a loopback port would pass the host check, hence the production refusal and seeds that only
+ * ever delete their own workspace's rows.
+ */
+export const db = (label = 'The e2e seed'): DbClient => {
   const url = env.DATABASE_URL ?? '';
   const host = (() => {
     try {
@@ -37,10 +41,26 @@ export const db = (): DbClient => {
       return '';
     }
   })();
-  if (!['127.0.0.1', 'localhost', '::1'].includes(host) && !process.env.CI)
-    throw new Error(`The e2e seed writes to local databases only, not ${host || 'an unset DATABASE_URL'}.`);
+  if (process.env.NODE_ENV === 'production' || !['127.0.0.1', 'localhost', '[::1]'].includes(host))
+    throw new Error(`${label} writes to local databases only, not ${host || 'an unset DATABASE_URL'}.`);
   return createDb({ url, max: 2 });
 };
+
+/** Deletes a seeded workspace and the businesses of its sites (a site's business is not owned by the workspace). */
+export async function dropWorkspace(client: DbClient, slug: string): Promise<void> {
+  const [org] = await client
+    .select({ id: organization.id })
+    .from(organization)
+    .where(eq(organization.slug, slug));
+  if (!org) return;
+  const owned = await client
+    .select({ businessId: sites.businessId })
+    .from(sites)
+    .where(eq(sites.organizationId, org.id));
+  await client.delete(organization).where(eq(organization.id, org.id));
+  const ids = owned.map((row) => row.businessId);
+  if (ids.length > 0) await client.delete(businesses).where(inArray(businesses.id, ids));
+}
 
 const uuid = () => crypto.randomUUID();
 
@@ -103,9 +123,7 @@ export async function addVersion(
 export async function seed(): Promise<void> {
   const client = db();
   try {
-    await client.delete(organization).where(eq(organization.slug, ORG_SLUG));
-    // Its businesses too (a site's business is not owned by the workspace).
-    await client.delete(businesses).where(like(businesses.displayName, 'E2E %'));
+    await dropWorkspace(client, ORG_SLUG);
     const orgId = uuid();
     await client.insert(organization).values({ id: orgId, name: 'Workspace E2E', slug: ORG_SLUG });
     await client

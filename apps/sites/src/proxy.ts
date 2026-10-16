@@ -27,8 +27,11 @@ const INTERNAL = new Set(['/api/revalidate', '/health/live', '/health/ready']);
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestHeaders = cleanHeaders(request.headers);
   const { pathname } = request.nextUrl;
-  if (INTERNAL.has(pathname)) return NextResponse.next({ request: { headers: requestHeaders } });
   const env = sitesEnvironment();
+  const hostname = siteHostname(request.headers.get('host'), env.SITES_BASE_DOMAIN);
+  // The internal routes answer only on the internal address (the API, the container's health check): under a site's
+  // hostname they are site paths like any other, whatever proxy sits in front.
+  if (INTERNAL.has(pathname) && !hostname) return NextResponse.next({ request: { headers: requestHeaders } });
   const robots = { 'X-Robots-Tag': 'noindex, nofollow' };
   const rewrite = (path: string, extra: Record<string, string> = {}) => {
     for (const [name, value] of Object.entries(extra)) requestHeaders.set(name, value);
@@ -37,7 +40,6 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
       request: { headers: requestHeaders },
     });
   };
-  const hostname = siteHostname(request.headers.get('host'), env.SITES_BASE_DOMAIN);
   let tenant: Tenant | null;
   try {
     tenant = hostname ? await getTenant(hostname) : null;
@@ -87,7 +89,7 @@ function safeDecode(segment: string): string {
 }
 
 export const config = {
-  // Every path but Next's built files: the proxy itself lets the exact internal routes through (their Host is the
-  // internal address), so a look-alike path (`/api/revalidatex`, `/-/x`) is a site path like any other.
+  // Every path but Next's built files: the proxy itself lets the exact internal routes through on the internal address
+  // only, so a look-alike path (`/api/revalidatex`, `/-/x`) is a site path like any other.
   matcher: [{ source: '/((?!_next/static|_next/image).*)' }],
 };

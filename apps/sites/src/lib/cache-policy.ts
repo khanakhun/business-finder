@@ -5,6 +5,8 @@ export const UNKNOWN_TTL_MS = 10_000;
 /** A site whose spec cannot be rendered (a newer schema than this renderer) is retried after this. */
 export const FAILURE_TTL_MS = 30_000;
 /** The longest a lookup may take (the connection timeout is 3 s): a hanging database answers 503, not later. */
+// DECISION(BF-036): shorter than the 5 s statement timeout on purpose: a lookup this slow counts as a database outage
+// (the down window opens, the last known sites are served). The query itself runs on until its statement timeout.
 export const LOOKUP_DEADLINE_MS = 3_500;
 /** After a failed lookup, the database counts as down this long: requests are answered at once, not queued. */
 export const DOWN_FOR_MS = 5_000;

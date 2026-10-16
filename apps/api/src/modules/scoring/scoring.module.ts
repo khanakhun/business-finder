@@ -11,6 +11,7 @@ import { ScoringEditorQueries, ScoringProfileCommands } from './application/prof
 import { ScoringService } from './application/scoring.service.ts';
 import { ScoringSubscribers } from './application/scoring.subscribers.ts';
 import {
+  RecomputeBusinessCommand,
   RecomputeProfileCommand,
   RecomputeRunner,
   ScoringQueries,
@@ -61,6 +62,7 @@ export class ScoringModule {
         { provide: RECOMPUTE_PROGRESS, useClass: RealtimeRecomputeProgress },
         ScoringService,
         ScoringQueries,
+        RecomputeBusinessCommand,
         RecomputeProfileCommand,
         RecomputeRunner,
         SetPrimaryProfileCommand,

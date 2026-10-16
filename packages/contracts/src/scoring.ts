@@ -1120,6 +1120,7 @@ export type ActivateScoringProfileVersionRequest = z.infer<typeof ActivateScorin
 export const ScoringVersionCreatedSchema = z
   .object({ version: z.number().int().positive() })
   .meta({ id: 'ScoringVersionCreated' });
+export type ScoringVersionCreated = z.infer<typeof ScoringVersionCreatedSchema>;
 
 export const ScoringProfileVersionListSchema = z
   .object({

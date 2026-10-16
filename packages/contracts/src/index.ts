@@ -698,6 +698,7 @@ export {
   ScoringRecomputeProgressSchema,
   type ScoringRecomputeResponse,
   ScoringRecomputeResponseSchema,
+  type ScoringVersionCreated,
   ScoringVersionCreatedSchema,
   type SetPrimaryScoringProfileRequest,
   SetPrimaryScoringProfileRequestSchema,

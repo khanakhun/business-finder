@@ -3053,7 +3053,7 @@ export type components = {
                     primaryCategoryId: string | null;
                     score: number | null;
                     statusChangedAt: string | null;
-                    tier: string | null;
+                    tier: ("A" | "B" | "C" | "X") | null;
                 }[];
                 count: number;
                 /** @enum {string} */
@@ -11202,6 +11202,15 @@ export interface operations {
                 };
             };
             /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -11414,6 +11423,15 @@ export interface operations {
                 };
             };
             /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -11495,6 +11513,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11807,6 +11834,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

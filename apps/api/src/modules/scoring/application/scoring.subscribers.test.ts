@@ -19,7 +19,7 @@ function setup() {
     workspacesWithBusinesses: vi.fn(async () => [ORG, OTHER]),
   } as unknown as ScoringRepository;
   const queue: ScoringQueue = { compute: vi.fn(async () => {}), recompute: vi.fn(async () => {}) };
-  return { subscribers: new ScoringSubscribers(repository, queue), queue };
+  return { subscribers: new ScoringSubscribers(repository, queue), queue, repository };
 }
 
 const event = (orgId: string | null, payload: Record<string, unknown>) =>
@@ -68,6 +68,19 @@ describe('ScoringSubscribers', () => {
       version: 2,
       idempotencyKey: `event:evt-1:${OTHER}`,
     });
+  });
+
+  it('recomputes only its workspace when a workspace profile is activated', async () => {
+    const { subscribers, queue, repository } = setup();
+    await subscribers.onActivated(event(ORG, { profileId: 'p1', version: 3 }));
+    expect(queue.recompute).toHaveBeenCalledTimes(1);
+    expect(queue.recompute).toHaveBeenCalledWith({
+      organizationId: ORG,
+      profileId: 'p1',
+      version: 3,
+      idempotencyKey: `event:evt-1:${ORG}`,
+    });
+    expect(repository.workspacesWithBusinesses).not.toHaveBeenCalled();
   });
 
   it('rescores the survivor of a merge for the workspaces tracking it', async () => {

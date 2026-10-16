@@ -56,6 +56,17 @@ export interface ScoringRepository {
   profiles(organizationId: string): Promise<ProfileRecord[]>;
   /** A profile the workspace may see (built-in or its own). */
   profile(organizationId: string, profileId: string): Promise<ProfileRecord | undefined>;
+  /**
+   * A profile the workspace may see, read under a row lock until the transaction ends: `update` for changes to it
+   * (archive, versions), `share` to rely on it staying as read (making it the primary profile).
+   */
+  lockProfile(
+    organizationId: string,
+    profileId: string,
+    mode: 'update' | 'share',
+  ): Promise<ProfileRecord | undefined>;
+  /** Profiles the workspace created (archived ones included). */
+  countOwnProfiles(organizationId: string): Promise<number>;
   version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined>;
   /** Creates the built-in profiles and versions that do not exist yet (idempotent); returns the ones it activated. */
   ensureBuiltins(
@@ -77,14 +88,29 @@ export interface ScoringRepository {
     readonly config: ScoringProfileConfig;
     readonly createdBy: string | null;
   }): Promise<ProfileRecord>;
+  /** Changes a profile of the workspace (never a built-in). */
   updateProfile(
+    organizationId: string,
     profileId: string,
     change: { readonly name?: string; readonly archivedAt?: Date | null },
   ): Promise<void>;
-  versions(profileId: string): Promise<{ readonly version: number; readonly createdAt: Date }[]>;
-  /** The next version of a profile (inactive), numbered under a lock on the profile. */
-  addVersion(profileId: string, config: ScoringProfileConfig, createdBy: string | null): Promise<number>;
-  activate(profileId: string, version: number): Promise<void>;
+  /** The versions of a profile the workspace may see, newest first. */
+  versions(
+    organizationId: string,
+    profileId: string,
+  ): Promise<{ readonly version: number; readonly createdAt: Date }[]>;
+  /**
+   * The next version of a profile of the workspace (inactive), numbered under a lock on the profile (the caller
+   * holds it from `lockProfile`).
+   */
+  addVersion(
+    organizationId: string,
+    profileId: string,
+    config: ScoringProfileConfig,
+    createdBy: string | null,
+  ): Promise<number>;
+  /** Activates a version of a profile of the workspace. */
+  activate(organizationId: string, profileId: string, version: number): Promise<void>;
   /** Tracked businesses with their current score for a profile, stratified by tier (preview). */
   previewSample(
     organizationId: string,

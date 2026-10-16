@@ -61,7 +61,7 @@ export interface BoardCard
   readonly primaryCategoryId: string | null;
   readonly locality: string | null;
   readonly score: number | null;
-  readonly tier: string | null;
+  readonly tier: ScoreTier | null;
 }
 
 export interface CrmRepository {

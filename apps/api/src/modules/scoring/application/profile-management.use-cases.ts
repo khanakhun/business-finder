@@ -12,11 +12,13 @@ import {
   type ScoringProfileSummary,
   ScoringProfileVersionActivated,
   type ScoringProfileVersionList,
+  type ScoringVersionCreated,
   type UpdateScoringProfileRequest,
   ValidationError,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
+import { APP_ENV, type AppEnv } from '../../platform/config/app-env.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { scoreBusiness } from '../domain/engine.ts';
@@ -36,6 +38,8 @@ import { ScoringService } from './scoring.service.ts';
 export class ScoringProfileCommands {
   constructor(
     @Inject(SCORING_REPOSITORY) private readonly repository: ScoringRepository,
+    @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(APP_ENV) private readonly env: AppEnv,
     private readonly scoring: ScoringService,
     private readonly events: EventRecorder,
   ) {}
@@ -47,6 +51,13 @@ export class ScoringProfileCommands {
     userId: string | null,
   ): Promise<ScoringProfileSummary> {
     const source = await this.visible(organizationId, request.fromProfileId);
+    // Every active profile is scored for every tracked business: the workspace's own are capped.
+    // DECISION(BF-032): a soft cap (two concurrent creates may pass it by one); the create route is throttled.
+    if ((await this.repository.countOwnProfiles(organizationId)) >= this.env.SCORING_MAX_WORKSPACE_PROFILES) {
+      throw new ConflictError(
+        `A workspace has at most ${this.env.SCORING_MAX_WORKSPACE_PROFILES} scoring profiles (archived ones count).`,
+      );
+    }
     if (!source.activeVersion) throw new ConflictError('The profile has no active version to start from.');
     const version = await this.repository.version(source.id, source.activeVersion);
     if (!version) throw new NotFoundError('ScoringProfileVersion', `${source.id}@${source.activeVersion}`);
@@ -67,6 +78,7 @@ export class ScoringProfileCommands {
     profileId: string,
     request: UpdateScoringProfileRequest,
   ): Promise<ScoringProfileSummary> {
+    // Locked (`own`): a concurrent switch of the primary profile (which takes a share lock on it) waits for this.
     const profile = await this.own(organizationId, profileId);
     const primary = await this.scoring.primaryProfileId(organizationId);
     if (request.archived && profile.id === primary) {
@@ -74,10 +86,14 @@ export class ScoringProfileCommands {
         'The primary profile cannot be archived: choose another primary profile first.',
       );
     }
-    await this.repository.updateProfile(profile.id, {
-      ...(request.name !== undefined ? { name: request.name } : {}),
-      ...(request.archived !== undefined ? { archivedAt: request.archived ? new Date() : null } : {}),
-    });
+    // Archiving again keeps the first archive time.
+    const archiving = request.archived !== undefined && request.archived !== profile.archived;
+    if (request.name !== undefined || archiving) {
+      await this.repository.updateProfile(organizationId, profile.id, {
+        ...(request.name !== undefined ? { name: request.name } : {}),
+        ...(archiving ? { archivedAt: request.archived ? this.clock.now() : null } : {}),
+      });
+    }
     // Unarchived: it is scored again.
     if (request.archived === false && profile.archived && profile.activeVersion) {
       await this.activated(organizationId, profile.id, profile.activeVersion);
@@ -97,17 +113,27 @@ export class ScoringProfileCommands {
     profileId: string,
     request: CreateScoringProfileVersionRequest,
     userId: string | null,
-  ): Promise<{ readonly version: number }> {
+  ): Promise<ScoringVersionCreated> {
     const profile = await this.own(organizationId, profileId);
     if (request.config.offer !== profile.offer) {
       throw new ValidationError('A version keeps its profile’s offer.', [
         { path: ['config', 'offer'], message: `Expected ${profile.offer}` },
       ]);
     }
-    return { version: await this.repository.addVersion(profile.id, request.config, userId) };
+    const version = await this.repository.addVersion(organizationId, profile.id, request.config, userId);
+    // Numbered under the lock, so the cap holds; the transaction rolls the insert back.
+    if (version > this.env.SCORING_MAX_PROFILE_VERSIONS) {
+      throw new ConflictError(
+        `A profile keeps at most ${this.env.SCORING_MAX_PROFILE_VERSIONS} versions: duplicate it to go on.`,
+      );
+    }
+    return { version };
   }
 
-  /** Activates a saved version: the workspace recomputes with it (progress in realtime). */
+  /**
+   * Activates a saved version: the workspace recomputes with it (progress in realtime). Activating the active version
+   * again is a deliberate re-run of the workspace's scores (the route is throttled).
+   */
   @Transactional()
   async activate(
     organizationId: string,
@@ -120,7 +146,7 @@ export class ScoringProfileCommands {
     if (!(await this.repository.version(profile.id, request.version))) {
       throw new NotFoundError('ScoringProfileVersion', `${profile.id}@${request.version}`);
     }
-    await this.repository.activate(profile.id, request.version);
+    await this.repository.activate(organizationId, profile.id, request.version);
     await this.activated(organizationId, profile.id, request.version);
     const primary = await this.scoring.primaryProfileId(organizationId);
     return { ...this.summary(profile), activeVersion: request.version, primary: profile.id === primary };
@@ -139,9 +165,10 @@ export class ScoringProfileCommands {
     return profile;
   }
 
-  /** A profile of this workspace (built-ins are read-only). */
+  /** A profile of this workspace (built-ins are read-only), locked for the change. */
   private async own(organizationId: string, profileId: string): Promise<ProfileRecord> {
-    const profile = await this.visible(organizationId, profileId);
+    const profile = await this.repository.lockProfile(organizationId, profileId, 'update');
+    if (!profile) throw new NotFoundError('ScoringProfile', profileId);
     if (profile.builtin)
       throw new ConflictError('Built-in profiles are read-only: duplicate one to change it.');
     return profile;
@@ -172,7 +199,7 @@ export class ScoringEditorQueries {
     const profile = await this.repository.profile(organizationId, profileId);
     if (!profile) throw new NotFoundError('ScoringProfile', profileId);
     return {
-      items: (await this.repository.versions(profileId)).map((v) => ({
+      items: (await this.repository.versions(organizationId, profileId)).map((v) => ({
         version: v.version,
         active: v.version === profile.activeVersion,
         createdAt: v.createdAt.toISOString(),
@@ -195,7 +222,7 @@ export class ScoringEditorQueries {
     const facts = await this.assembler.assemble(
       organizationId,
       [...new Set(request.businessIds)],
-      new Date(),
+      this.clock.now(),
     );
     return {
       items: facts.map((business) => {

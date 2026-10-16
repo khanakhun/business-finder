@@ -1,8 +1,8 @@
 import type { DbClient } from '@bf/db';
-import { businesses, businessScores, orgBusinesses } from '@bf/db/schema';
+import { businesses, businessScores, orgBusinesses, scoringProfiles } from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
-import { and, count, eq } from 'drizzle-orm';
+import { and, asc, count, eq, max } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, createTestWorker, type TestApp } from '../../../test/create-test-app.ts';
 import { FakeMailer } from '../../../test/fake-mailer.ts';
@@ -17,7 +17,8 @@ import { BUILTIN_PRIMARY_PROFILE_ID, BUILTIN_PROFILE_IDS } from './application/b
 import { ScoringService } from './application/scoring.service.ts';
 
 // Workspace scoring profiles (BF-032) end to end: duplicate a built-in, version, activate (the workspace recomputes
-// through the outbox), rename, archive; the editor's preview sample and batch explain.
+// through the outbox), rename, archive; the editor's preview sample and batch explain. Caps are lowered (3 profiles,
+// 4 versions) so the tests reach them. The describes run in order and share the profile they create.
 
 const mailer = new FakeMailer();
 let t: TestApp;
@@ -28,6 +29,29 @@ let member: Browser;
 let outsider: Browser;
 let org: string;
 const tracked: string[] = [];
+let outsiderBusiness = '';
+const BUILTINS = Object.keys(BUILTIN_PROFILE_IDS).length;
+
+/** The workspace's score rows (business, profile, score, time) in a stable order. */
+const snapshot = () =>
+  db
+    .select({
+      businessId: businessScores.businessId,
+      profileId: businessScores.profileId,
+      score: businessScores.score,
+      computedAt: businessScores.computedAt,
+    })
+    .from(businessScores)
+    .where(eq(businessScores.organizationId, org))
+    .orderBy(asc(businessScores.businessId), asc(businessScores.profileId));
+
+const lastComputed = async (profileId: string) =>
+  (
+    await db
+      .select({ at: max(businessScores.computedAt) })
+      .from(businessScores)
+      .where(and(eq(businessScores.organizationId, org), eq(businessScores.profileId, profileId)))
+  )[0]?.at ?? null;
 
 const scoresFor = async (profileId: string, version?: number) =>
   (
@@ -44,14 +68,18 @@ const scoresFor = async (profileId: string, version?: number) =>
   )[0]?.n ?? 0;
 
 beforeAll(async () => {
-  t = await createTestApp({ mailer, valkeyDb: 19 });
+  t = await createTestApp({
+    mailer,
+    valkeyDb: 19,
+    env: { SCORING_MAX_WORKSPACE_PROFILES: '3', SCORING_MAX_PROFILE_VERSIONS: '4' },
+  });
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, { mailer });
   owner = await signUpVerified(t, mailer, 'owner@profiles.test', 'Ada Owner');
   org = await createWorkspace(owner, 'Agence Profils');
   ({ client: member } = await inviteAndJoin(t, mailer, owner, 'member@profiles.test', 'member'));
   outsider = await signUpVerified(t, mailer, 'outsider@profiles.test', 'Oscar Outsider');
-  await createWorkspace(outsider, 'Ailleurs');
+  const elsewhere = await createWorkspace(outsider, 'Ailleurs');
   const made = Array.from({ length: 6 }, (_, i) =>
     aBusiness({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null, ratingCount: 20 * i }),
   );
@@ -61,6 +89,12 @@ beforeAll(async () => {
     .values(made.map((b) => ({ organizationId: org, businessId: b.id, addedVia: 'import' as const })));
   tracked.push(...made.map((b) => b.id));
   await t.app.get(ScoringService).compute(org, tracked, { notify: false });
+  const theirs = aBusiness({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
+  await db.insert(businesses).values(theirs);
+  await db
+    .insert(orgBusinesses)
+    .values({ organizationId: elsewhere, businessId: theirs.id, addedVia: 'import' as const });
+  outsiderBusiness = theirs.id;
 }, 60_000);
 
 afterAll(async () => {
@@ -88,8 +122,9 @@ describe('workspace scoring profiles', () => {
     const list = (await owner.get('/v1/scoring/profiles').expect(200)).body.items;
     expect(list.map((p: { id: string }) => p.id)).toContain(profileId);
     await expect.poll(() => scoresFor(profileId), { timeout: 20_000, interval: 200 }).toBe(tracked.length);
-    // Another workspace never sees it.
+    // Another workspace never sees it, nor starts from it.
     await outsider.get(`/v1/scoring/profiles/${profileId}/versions`).expect(404);
+    await outsider.post('/v1/scoring/profiles').send({ fromProfileId: profileId, name: 'Taken' }).expect(404);
   });
 
   it('saves versions (same offer only), activates one, and the workspace recomputes with it', async () => {
@@ -100,10 +135,11 @@ describe('workspace scoring profiles', () => {
       .send({ config: changed })
       .expect(201);
     expect(body).toEqual({ version: 2 });
-    await owner
+    const mismatch = await owner
       .post(`/v1/scoring/profiles/${profileId}/versions`)
       .send({ config: { ...changed, offer: 'booking_system' } })
       .expect(422);
+    expect(mismatch.body.errors).toEqual([{ path: ['config', 'offer'], message: 'Expected local_seo' }]);
     // Saving does not activate.
     expect((await owner.get(`/v1/scoring/profiles/${profileId}/versions`).expect(200)).body.items).toEqual([
       { version: 2, active: false, createdAt: expect.any(String) },
@@ -135,8 +171,49 @@ describe('workspace scoring profiles', () => {
       .send({ fromProfileId: BUILTIN_PROFILE_IDS.local_seo, name: 'Nope' })
       .expect(403);
     await member.post(`/v1/scoring/profiles/${profileId}/activate`).send({ version: 1 }).expect(403);
+    await member.patch(`/v1/scoring/profiles/${profileId}`).send({ name: 'Nope' }).expect(403);
+    await member
+      .post(`/v1/scoring/profiles/${profileId}/versions`)
+      .send({ config: { offer: 'local_seo', weights: { has_phone: 1 }, tiers: { A: 60, B: 30 } } })
+      .expect(403);
     // Members still read versions.
     await member.get(`/v1/scoring/profiles/${profileId}/versions`).expect(200);
+  });
+
+  it('refuses another workspace every change to the profile', async () => {
+    const config = (await owner.get(`/v1/scoring/profiles/${profileId}/versions/1`).expect(200)).body.config;
+    await outsider.patch(`/v1/scoring/profiles/${profileId}`).send({ name: 'Mine' }).expect(404);
+    await outsider.post(`/v1/scoring/profiles/${profileId}/versions`).send({ config }).expect(404);
+    await outsider.post(`/v1/scoring/profiles/${profileId}/activate`).send({ version: 1 }).expect(404);
+    await outsider.get('/v1/scoring/preview-sample').query({ profileId }).expect(404);
+    expect(
+      (await owner.get(`/v1/scoring/profiles/${profileId}/versions`).expect(200)).body.items,
+    ).toHaveLength(2);
+  });
+
+  it('numbers concurrent saves apart, and caps the versions of a profile', async () => {
+    const config = (await owner.get(`/v1/scoring/profiles/${profileId}/versions/1`).expect(200)).body.config;
+    const saves = await Promise.all([
+      owner.post(`/v1/scoring/profiles/${profileId}/versions`).send({ config }).expect(201),
+      owner.post(`/v1/scoring/profiles/${profileId}/versions`).send({ config }).expect(201),
+    ]);
+    expect(saves.map((save) => save.body.version).sort()).toEqual([3, 4]);
+    await owner.post(`/v1/scoring/profiles/${profileId}/versions`).send({ config }).expect(409);
+    const versions = (await owner.get(`/v1/scoring/profiles/${profileId}/versions`).expect(200)).body.items;
+    expect(versions.map((v: { version: number }) => v.version)).toEqual([4, 3, 2, 1]);
+  });
+
+  it('caps the profiles a workspace creates', async () => {
+    for (const name of ['Second', 'Third']) {
+      await owner
+        .post('/v1/scoring/profiles')
+        .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name })
+        .expect(201);
+    }
+    await owner
+      .post('/v1/scoring/profiles')
+      .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name: 'Fourth' })
+      .expect(409);
   });
 
   it('renames and archives (an archived profile is no longer scored; the primary cannot be archived)', async () => {
@@ -152,23 +229,51 @@ describe('workspace scoring profiles', () => {
       .send({ archived: true })
       .expect(200);
     expect(body).toMatchObject({ name: 'Renamed', archived: true });
+    const archivedAt = (await db.select().from(scoringProfiles).where(eq(scoringProfiles.id, profileId)))[0]
+      ?.archivedAt;
+    expect(archivedAt).toBeInstanceOf(Date);
+    // Archiving again keeps the first time.
+    await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: true }).expect(200);
+    expect(
+      (await db.select().from(scoringProfiles).where(eq(scoringProfiles.id, profileId)))[0]?.archivedAt,
+    ).toEqual(archivedAt);
     await owner.post(`/v1/scoring/profiles/${profileId}/activate`).send({ version: 1 }).expect(409);
-    // Five built-ins scored, not the archived one.
-    expect((await t.app.get(ScoringService).compute(org, [tracked[0] ?? ''], { notify: false })).scored).toBe(
-      5,
-    );
+    // Neither primary nor recomputed while archived.
+    await owner.put('/v1/scoring/primary-profile').send({ profileId }).expect(409);
+    await owner.post(`/v1/scoring/profiles/${profileId}/recompute`).expect(409);
+    // The built-ins and the two other workspace profiles are scored, not the archived one.
+    const scored = await t.app.get(ScoringService).compute(org, [tracked[0] ?? ''], { notify: false });
+    expect(scored.scored).toBe(BUILTINS + 2);
     const listed = (await owner.get('/v1/scoring/profiles').expect(200)).body.items.find(
       (p: { id: string }) => p.id === profileId,
     );
     expect(listed).toMatchObject({ archived: true, name: 'Renamed' });
+    // Its last scores are no longer shown on the business.
+    const shown = (await owner.get(`/v1/businesses/${tracked[0]}/scores`).expect(200)).body.items;
+    expect(shown.map((score: { profileId: string }) => score.profileId)).not.toContain(profileId);
+  });
+
+  it('unarchives: the workspace is scored with the profile again', async () => {
+    const before = await lastComputed(profileId);
+    await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: false }).expect(200);
+    await expect
+      .poll(async () => (await lastComputed(profileId))?.getTime() ?? 0, { timeout: 20_000, interval: 200 })
+      .toBeGreaterThan(before?.getTime() ?? 0);
+    const shown = (await owner.get(`/v1/businesses/${tracked[0]}/scores`).expect(200)).body.items;
+    expect(shown.map((score: { profileId: string }) => score.profileId)).toContain(profileId);
   });
 });
 
 describe('business scores', () => {
   it('recomputes one business on demand (members may; another workspace gets 404)', async () => {
     const id = tracked[1] ?? '';
+    const before = await lastComputed(BUILTIN_PRIMARY_PROFILE_ID);
     const { body } = await member.post(`/v1/businesses/${id}/scores/recompute`).expect(200);
-    expect(body.items.length).toBeGreaterThanOrEqual(5);
+    expect(body.items.length).toBeGreaterThanOrEqual(BUILTINS);
+    const primary = body.items.find(
+      (score: { profileId: string }) => score.profileId === BUILTIN_PRIMARY_PROFILE_ID,
+    );
+    expect(new Date(primary.computedAt).getTime()).toBeGreaterThan(before?.getTime() ?? 0);
     await outsider.post(`/v1/businesses/${id}/scores/recompute`).expect(404);
   });
 });
@@ -199,9 +304,23 @@ describe('profile editor preview', () => {
       tiers: { A: 60, B: 30 },
     };
     const draft = { ...config, weights: { has_phone: 20 } };
+    // Settled first: the profile tests' recomputes have finished writing (two reads apart are the same).
+    let previous = '';
+    await expect
+      .poll(
+        async () => {
+          const now = JSON.stringify(await snapshot());
+          const same = now === previous;
+          previous = now;
+          return same;
+        },
+        { timeout: 20_000, interval: 500 },
+      )
+      .toBe(true);
+    const stored = await snapshot();
     const { body } = await owner
       .post('/v1/scoring/explain/batch')
-      .send({ config: draft, businessIds: [...tracked, crypto.randomUUID()] })
+      .send({ config: draft, businessIds: [...tracked, tracked[0], outsiderBusiness, crypto.randomUUID()] })
       .expect(200);
     expect(body.items.map((item: { businessId: string }) => item.businessId).sort()).toEqual(
       [...tracked].sort(),
@@ -211,6 +330,12 @@ describe('profile editor preview', () => {
     await owner.post('/v1/scoring/explain/batch').send({ config: draft, businessIds: tooMany }).expect(422);
     await member.post('/v1/scoring/explain/batch').send({ config: draft, businessIds: tracked }).expect(403);
     // Nothing stored.
-    expect(await scoresFor(BUILTIN_PRIMARY_PROFILE_ID)).toBe(tracked.length);
+    expect(await snapshot()).toEqual(stored);
+    // Another workspace's draft never reads this workspace's businesses.
+    const theirs = await outsider
+      .post('/v1/scoring/explain/batch')
+      .send({ config: draft, businessIds: tracked })
+      .expect(200);
+    expect(theirs.body.items).toEqual([]);
   });
 });

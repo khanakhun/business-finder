@@ -24,6 +24,7 @@ import {
   ScoringProfileVersionSchema,
   type ScoringRecomputeResponse,
   ScoringRecomputeResponseSchema,
+  type ScoringVersionCreated,
   ScoringVersionCreatedSchema,
   SetPrimaryScoringProfileRequestSchema,
   UpdateScoringProfileRequestSchema,
@@ -52,6 +53,7 @@ import {
   ScoringProfileCommands,
 } from '../../application/profile-management.use-cases.ts';
 import {
+  RecomputeBusinessCommand,
   RecomputeProfileCommand,
   ScoringQueries,
   SetPrimaryProfileCommand,
@@ -72,7 +74,10 @@ function workspaceOf(auth: AuthContext): string {
 @ApiTags('scoring')
 @Controller('businesses')
 export class BusinessScoresController {
-  constructor(private readonly queries: ScoringQueries) {}
+  constructor(
+    private readonly queries: ScoringQueries,
+    private readonly recomputeBusiness: RecomputeBusinessCommand,
+  ) {}
 
   @Get(':id/scores')
   @RequirePermission('business:read')
@@ -103,7 +108,7 @@ export class BusinessScoresController {
     @Ctx() auth: AuthContext,
     @Param('id', ParseUUIDPipe) businessId: string,
   ): Promise<BusinessScoreList> {
-    return this.queries.recomputeBusiness(workspaceOf(auth), businessId);
+    return this.recomputeBusiness.execute(workspaceOf(auth), businessId);
   }
 }
 
@@ -214,6 +219,8 @@ export class ScoringProfilesController {
   ) {}
 
   @Post('profiles')
+  // Each new profile is scored for every tracked business of the workspace.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary:
@@ -221,20 +228,22 @@ export class ScoringProfilesController {
     operationId: 'createScoringProfile',
     body: CreateProfileBody,
     response: { status: 201, schema: ScoringProfileSummarySchema },
-    errors: [400, 401, 403, 404, 409, 422],
+    errors: [400, 401, 403, 404, 409, 422, 429],
   })
   create(@Ctx() auth: AuthContext, @Body() body: CreateProfileBody): Promise<ScoringProfileSummary> {
     return this.commands.create(workspaceOf(auth), body, auth.userId);
   }
 
   @Patch('profiles/:id')
+  // Unarchiving recomputes the workspace.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary: 'Rename or (un)archive a workspace profile (an archived profile is no longer scored)',
     operationId: 'updateScoringProfile',
     body: UpdateProfileBody,
     response: { status: 200, schema: ScoringProfileSummarySchema },
-    errors: [400, 401, 403, 404, 409, 422],
+    errors: [400, 401, 403, 404, 409, 422, 429],
   })
   update(
     @Ctx() auth: AuthContext,
@@ -260,19 +269,20 @@ export class ScoringProfilesController {
   }
 
   @Post('profiles/:id/versions')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary: 'Save a draft as a new (inactive, immutable) version of a workspace profile',
     operationId: 'createScoringProfileVersion',
     body: CreateVersionBody,
     response: { status: 201, schema: ScoringVersionCreatedSchema },
-    errors: [400, 401, 403, 404, 409, 422],
+    errors: [400, 401, 403, 404, 409, 422, 429],
   })
   addVersion(
     @Ctx() auth: AuthContext,
     @Param('id', ParseUUIDPipe) profileId: string,
     @Body() body: CreateVersionBody,
-  ): Promise<{ readonly version: number }> {
+  ): Promise<ScoringVersionCreated> {
     return this.commands.addVersion(workspaceOf(auth), profileId, body, auth.userId);
   }
 
@@ -296,13 +306,15 @@ export class ScoringProfilesController {
   }
 
   @Get('preview-sample')
+  // Ranks every tracked business of the workspace.
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary: "A sample of the workspace's businesses (≤ 200), stratified by their tier for a profile",
     operationId: 'getScoringPreviewSample',
     query: SampleQuery,
     response: { status: 200, schema: ScoringPreviewSampleSchema },
-    errors: [400, 401, 403, 404],
+    errors: [400, 401, 403, 404, 429],
   })
   sample(@Ctx() auth: AuthContext, @Query() query: SampleQuery): Promise<ScoringPreviewSample> {
     return this.editor.sample(workspaceOf(auth), query);
@@ -310,7 +322,8 @@ export class ScoringProfilesController {
 
   @Post('explain/batch')
   @HttpCode(200)
-  @Throttle({ default: { limit: 120, ttl: 60_000 } })
+  // A preview of 200 businesses is 4 calls: 15 previews a minute (the editor debounces).
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary: 'Score up to 50 tracked businesses with a draft config, nothing stored (live preview)',

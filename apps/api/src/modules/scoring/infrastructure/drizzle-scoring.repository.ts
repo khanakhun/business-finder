@@ -7,6 +7,7 @@ import {
 } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import {
+  businesses,
   businessScoreHistory,
   businessScores,
   orgBusinesses,
@@ -127,6 +128,27 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return row ? toProfile(row) : undefined;
   }
 
+  async lockProfile(
+    organizationId: string,
+    profileId: string,
+    mode: 'update' | 'share',
+  ): Promise<ProfileRecord | undefined> {
+    const query = getExecutor(this.db)
+      .select()
+      .from(scoringProfiles)
+      .where(and(eq(scoringProfiles.id, profileId), visibleTo(organizationId)));
+    const [row] = await (mode === 'update' ? query.for('update') : query.for('share'));
+    return row ? toProfile(row) : undefined;
+  }
+
+  async countOwnProfiles(organizationId: string): Promise<number> {
+    const [row] = await getExecutor(this.db)
+      .select({ n: count() })
+      .from(scoringProfiles)
+      .where(eq(scoringProfiles.organizationId, organizationId));
+    return row?.n ?? 0;
+  }
+
   async version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined> {
     const [row] = await getExecutor(this.db)
       .select()
@@ -216,32 +238,43 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return { ...toProfile(row), activeVersion: 1 };
   }
 
-  async updateProfile(profileId: string, change: { name?: string; archivedAt?: Date | null }): Promise<void> {
+  async updateProfile(
+    organizationId: string,
+    profileId: string,
+    change: { name?: string; archivedAt?: Date | null },
+  ): Promise<void> {
     await getExecutor(this.db)
       .update(scoringProfiles)
       .set({
         ...(change.name !== undefined ? { name: change.name } : {}),
         ...(change.archivedAt !== undefined ? { archivedAt: change.archivedAt } : {}),
       })
-      .where(eq(scoringProfiles.id, profileId));
+      .where(and(eq(scoringProfiles.id, profileId), eq(scoringProfiles.organizationId, organizationId)));
   }
 
-  async versions(profileId: string): Promise<{ version: number; createdAt: Date }[]> {
+  async versions(organizationId: string, profileId: string): Promise<{ version: number; createdAt: Date }[]> {
     return getExecutor(this.db)
       .select({ version: scoringProfileVersions.version, createdAt: scoringProfileVersions.createdAt })
       .from(scoringProfileVersions)
-      .where(eq(scoringProfileVersions.profileId, profileId))
+      .innerJoin(scoringProfiles, eq(scoringProfiles.id, scoringProfileVersions.profileId))
+      .where(and(eq(scoringProfileVersions.profileId, profileId), visibleTo(organizationId)))
       .orderBy(desc(scoringProfileVersions.version));
   }
 
   async addVersion(
+    organizationId: string,
     profileId: string,
     config: ScoringProfileConfig,
     createdBy: string | null,
   ): Promise<number> {
     const x = getExecutor(this.db);
-    // The profile row is the lock: two saves never take the same number.
-    await x.execute(sql`SELECT 1 FROM ${scoringProfiles} WHERE id = ${profileId} FOR UPDATE`);
+    // The profile row is the lock (taken again here, a no-op under the caller's): two saves never share a number.
+    const [own] = await x
+      .select({ id: scoringProfiles.id })
+      .from(scoringProfiles)
+      .where(and(eq(scoringProfiles.id, profileId), eq(scoringProfiles.organizationId, organizationId)))
+      .for('update');
+    if (!own) throw new Error(`scoring profile ${profileId} is not the workspace's own`);
     const [row] = await x
       .select({ last: sql<number>`coalesce(max(${scoringProfileVersions.version}), 0)::int` })
       .from(scoringProfileVersions)
@@ -251,11 +284,11 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return version;
   }
 
-  async activate(profileId: string, version: number): Promise<void> {
+  async activate(organizationId: string, profileId: string, version: number): Promise<void> {
     await getExecutor(this.db)
       .update(scoringProfiles)
       .set({ activeVersion: version })
-      .where(eq(scoringProfiles.id, profileId));
+      .where(and(eq(scoringProfiles.id, profileId), eq(scoringProfiles.organizationId, organizationId)));
   }
 
   async previewSample(organizationId: string, profileId: string, size: number) {
@@ -271,10 +304,10 @@ export class DrizzleScoringRepository implements ScoringRepository {
         SELECT ob.business_id, b.display_name, bs.score, bs.tier,
           row_number() OVER (PARTITION BY coalesce(bs.tier, '-') ORDER BY md5(ob.business_id::text)) AS n
         FROM ${orgBusinesses} ob
-        JOIN businesses b ON b.id = ob.business_id
+        JOIN ${businesses} b ON b.id = ob.business_id
         LEFT JOIN ${businessScores} bs ON bs.organization_id = ob.organization_id
           AND bs.business_id = ob.business_id AND bs.profile_id = ${profileId}
-        WHERE ob.organization_id = ${organizationId}
+        WHERE ob.organization_id = ${organizationId} AND b.merged_into_id IS NULL
       ) sampled
       ORDER BY n, coalesce(tier, '-')
       LIMIT ${size}`);

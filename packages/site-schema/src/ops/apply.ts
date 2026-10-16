@@ -163,10 +163,17 @@ function applyBase(next: SiteSpec, operation: BaseOperation): BaseOperation[] {
           uses.map((path) => ({ path, message: 'opens this page' })),
         );
       }
-      if (operation.navigation?.items.some((item) => item.pageId === operation.pageId)) {
-        throw new OperationError('page_in_use', `The menu given still opens page "${operation.pageId}".`, [
-          { path: ['navigation'], message: 'opens this page' },
-        ]);
+      const stillOpened = (operation.navigation?.items ?? []).flatMap((item, i) =>
+        item.pageId === operation.pageId
+          ? [{ path: ['navigation', 'items', i, 'pageId'], message: 'opens this page' }]
+          : [],
+      );
+      if (stillOpened.length > 0) {
+        throw new OperationError(
+          'page_in_use',
+          `The menu given still opens page "${operation.pageId}".`,
+          stillOpened,
+        );
       }
       const [page] = next.pages.splice(index, 1) as [Page];
       const navigation = copy(next.navigation);

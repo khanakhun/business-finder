@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "tldts": "catalog:",
+    "libphonenumber-js": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { SiteSpec } from '../spec/site.ts';
 import { type FactRegistry, FactRegistrySchema, literals, validateFacts } from './facts.ts';
+import { validateSite } from './semantic.ts';
 
 const read = (path: string) =>
   JSON.parse(readFileSync(new URL(`../../fixtures/${path}`, import.meta.url), 'utf8'));
@@ -209,24 +210,48 @@ describe('validateFacts', () => {
     expect(found(spelled)).toEqual([]);
   });
 
-  it('matches national numbers without a trunk 0 and the "(0)" style, not a 00 prefix as a trunk', () => {
-    const spec = salon();
-    hero(spec).subtitle = { fr: 'Appelez le (212) 555-0100', en: 'Call +44 (0)20 7946 0000' };
+  it("reads numbers as the business's country writes them, and never matches a number by its ending", () => {
     const facts = withFacts([
-      fact('phone.us', 'phone', '+12125550100'),
+      fact('phone.us', 'phone', '(212) 555-0100'),
       fact('phone.uk', 'phone', '+442079460000'),
     ]);
-    expect(found(spec, facts)).toEqual([]);
-    const contact = salon();
-    if (contact.contact.phone) contact.contact.phone.value = '+12125550100';
-    const national = {
-      facts: registry().facts.map((f) => (f.kind === 'phone' ? { ...f, value: '(212) 555-0100' } : f)),
+    const say = (fr: string, country?: string) => {
+      const spec = salon();
+      if (country && spec.contact.address) spec.contact.address.country = country;
+      hero(spec).subtitle = { fr, en: 'Call us' };
+      return found(spec, facts);
     };
-    expect(found(contact, national)).not.toContain('fact_mismatch@contact.phone');
-    // `0044…` is international (`00` is no trunk 0): equal to `+44…`, and not cut to `044…`.
-    const prefixed = salon();
-    hero(prefixed).subtitle = { fr: 'Appelez le 0044 20 7946 0000', en: 'Call 0044 20 7946 0001' };
-    expect(found(prefixed, facts)).toEqual(['unsupported_literal@pages.0.blocks.0.props.subtitle.en']);
+    const refused = ['unsupported_literal@pages.0.blocks.0.props.subtitle.fr'];
+    // A US business writes US numbers nationally; the "(0)" style and a 00 prefix are read as international.
+    expect(say('Appelez le +1 212 555 0100', 'US')).toEqual([]);
+    expect(say('Appelez le +44 (0)20 7946 0000')).toEqual([]);
+    expect(say('Appelez le 0044 20 7946 0000')).toEqual([]);
+    expect(say('Appelez le 0590 00 01 01 ou le 590 00 01 01')).toEqual([]);
+    // Another country code, a truncated number, or digits before the national number are other lines.
+    expect(say('Appelez le +44 212 555 0100', 'US')).toEqual(refused);
+    expect(say('Appelez le +1 312 212 555 0100', 'US')).toEqual(refused);
+    expect(say('Appelez le 90 00 01 01')).toEqual(refused);
+    expect(say('Appelez le +1 212 555 0100')).toEqual(refused);
+    expect(say('Appelez le 0033 6 12 34 56 78', 'US')).toEqual(refused);
+  });
+
+  it('checks the contact phone in E.164 against a fact written nationally', () => {
+    const spec = salon();
+    if (spec.contact.phone) spec.contact.phone.value = '+590590000102';
+    expect(found(spec)).toEqual(['fact_mismatch@contact.phone']);
+    const national = {
+      facts: registry().facts.map((f) => (f.kind === 'phone' ? { ...f, value: '0590 00 01 01' } : f)),
+    };
+    expect(found(salon(), national)).toEqual([]);
+  });
+
+  it('reads an address whole, before dates and years, and a spelled-out "(AT)" as "@"', () => {
+    const spec = salon();
+    hero(spec).subtitle = {
+      fr: 'Écrivez à evil.com.1.1.2015@x.fr',
+      en: 'Write to bonjour (AT) salon-lumiere.example',
+    };
+    expect(found(spec)).toEqual(['unsupported_literal@pages.0.blocks.0.props.subtitle.fr']);
   });
 
   it('takes years only from what facts state as years, and phone-like ids whole', () => {
@@ -241,6 +266,23 @@ describe('validateFacts', () => {
       'Remove the year 1800: it is not a fact.',
       'Remove the year 1800: it is not a fact.',
     ]);
+  });
+
+  it.each([
+    'Find us @ evil.com',
+    'Find us (at) evil.com',
+    'us  @  evil.com',
+    'evil.com (at) a.bc',
+    'web: evil.com (at) a.bc',
+    'evil.com@a.bc',
+  ])('refuses %j with one validator or the other (an address the web scan leaves is not a fact)', (text) => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: text, en: 'Write to us' };
+    const issues = [
+      ...validateSite(spec, { assetHosts: ['assets.bf-sites.test'] }),
+      ...validateFacts(spec, registry()),
+    ].map((issue) => `${issue.code}@${issue.path.join('.')}`);
+    expect(issues.filter((issue) => issue.endsWith('subtitle.fr'))).not.toEqual([]);
   });
 
   it('refuses a registry with two facts of the same id', () => {

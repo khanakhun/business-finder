@@ -259,6 +259,18 @@ describe('validateSite', () => {
     ).not.toBeNull();
   });
 
+  it('keeps a page link label apart from the text next to it', () => {
+    const spec = with_((s) =>
+      s.pages[1]?.blocks.push({
+        id: 'rich-serv8',
+        type: 'rich_text',
+        variant: 'narrow',
+        props: { body: L('Voir [evil.com](page:home)@x.fr') },
+      }),
+    );
+    expect(found(spec)).toContain('external_url@pages.1.blocks.2.props.body.fr');
+  });
+
   it('warns about texts outside their recommended length', () => {
     const issues = validateSite(
       with_((s) => Object.assign(s.seo.description, { en: 'Too short.' })),
@@ -543,6 +555,11 @@ describe('validateSite', () => {
     'Voir x.cc',
     'Le Z.Bar',
     'Visitez évil.com',
+    'Suivez-nous @evil.com',
+    'Suivez-nous @salon.fr sur Instagram',
+    'Ecrivez a bonjour @evil.com/promo',
+    'evil.com@_.fr',
+    'bonjour@salon-lumiere.example_evil.com',
     'see javascript:evil.com@a.bc',
     'evil・com',
     'evil･com',

@@ -1,7 +1,8 @@
+import { type CountryCode, parsePhoneNumberFromString } from 'libphonenumber-js/min';
 import { z } from 'zod';
 import { FactIdSchema, SiteLocaleSchema } from '../spec/localized.ts';
 import type { SiteSpec } from '../spec/site.ts';
-import { EMAIL_AT, unspell } from './email.ts';
+import { emailPattern, unspell } from './email.ts';
 import { error, type Issue } from './issues.ts';
 import { type Path, walk } from './walk.ts';
 
@@ -109,24 +110,22 @@ const mailbox = (value: string) => value.normalize('NFKC').trim().toLowerCase();
 /** A number as dialled: digits only, a `(0)` after the country code dropped (`+44 (0)20…`), no `00` prefix. */
 const dialled = (raw: string) =>
   digits(raw.normalize('NFKC').replace(/^(\s*(?:\+|00)\s*\d{1,3}\s*)\(\s*0\s*\)/, '$1')).replace(/^00/, '');
-const international = (raw: string) => /^\s*(?:\+|00)/.test(raw.normalize('NFKC'));
+
+/** A number in E.164, read as the business's country writes it (national formats, `(0)`, `00`); else undefined. */
+function e164(raw: string, country: string | undefined): string | undefined {
+  const parsed = parsePhoneNumberFromString(raw.normalize('NFKC'), country as CountryCode | undefined);
+  return parsed?.isPossible() ? parsed.number : undefined;
+}
+
 /**
- * Two phone numbers are the same line: equal digits, or one written nationally (no `+` or `00`; one trunk `0`
- * dropped) whose 8+ digits end the other (`0590 00 01 01` and `+590 590 00 01 01`, `(212) 555-0100` and
- * `+1 212 555 0100`). Two international numbers must be equal (`+1 212…` is not `+1 312…`).
+ * Two phone numbers are the same line: the same E.164 number once read as the business's country writes numbers
+ * (`0590 00 01 01` and `+590 590 00 01 01` in BL; `(212) 555-0100` and `+1 212 555 0100` in the US), else the same
+ * digits. Nothing matches by its ending: `90 00 01 01` or a number under another country code is another line.
  */
-function samePhone(a: string, b: string): boolean {
-  const [da, db] = [dialled(a), dialled(b)];
-  if (da === db) return true;
-  const national = (value: string, raw: string) => {
-    if (international(raw)) return null;
-    return /^\s*\(?0(?!0)/.test(raw.normalize('NFKC')) ? value.slice(1) : value;
-  };
-  const na = national(da, a);
-  const nb = national(db, b);
-  return (
-    (na !== null && na.length >= 8 && db.endsWith(na)) || (nb !== null && nb.length >= 8 && da.endsWith(nb))
-  );
+function samePhone(a: string, b: string, country: string | undefined): boolean {
+  const [ea, eb] = [e164(a, country), e164(b, country)];
+  if (ea !== undefined && eb !== undefined) return ea === eb;
+  return dialled(a) === dialled(b);
 }
 
 const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\bCHF\b|\beuros?\b|\bdollars?\b|\blivres? sterling\b|\bfrancs?\b`;
@@ -134,11 +133,6 @@ const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]
 const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
 const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,}\d/g;
-/** E-mail addresses, also spelled out against scrapers (`name @ domain.fr`, `name(at)domain.fr`). */
-const EMAIL_LITERAL = new RegExp(
-  String.raw`[\p{L}\p{N}._%+-]{1,64}${EMAIL_AT}[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}`,
-  'giu',
-);
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
 
 const currencyOf = (mark: string) => {
@@ -171,6 +165,12 @@ export interface Literals {
 export function literals(input: string): Literals {
   let text = input.normalize('NFKC');
   const blank = (match: string) => ' '.repeat(match.length);
+  // E-mails first: a date, a year range or a price inside an address must not cut it apart.
+  const emails: string[] = [];
+  text = text.replace(emailPattern(), (match) => {
+    emails.push(match);
+    return blank(match);
+  });
   const prices: Literals['prices'] = [];
   text = text.replace(
     PRICE,
@@ -202,11 +202,6 @@ export function literals(input: string): Literals {
       return blank(match);
     },
   );
-  const emails: string[] = [];
-  text = text.replace(EMAIL_LITERAL, (match) => {
-    emails.push(match);
-    return blank(match);
-  });
   const phones: string[] = [];
   text = text.replace(PHONE, (match) => {
     if (digits(match).length < 8) return match;
@@ -256,6 +251,8 @@ function* texts(spec: SiteSpec): Generator<{ text: string; path: Path }> {
 export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const issues: Issue[] = [];
   const facts = new Map(registry.facts.map((fact) => [fact.id, fact]));
+  // Numbers are read as the business's country writes them.
+  const country = spec.contact.address?.country;
   const of = <K extends FactKind>(kind: K) =>
     registry.facts.filter((fact) => fact.kind === kind) as FactOf<K>[];
 
@@ -309,7 +306,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'phone'],
       contact.phone.factId,
       ['phone'],
-      (f) => samePhone(f.value, contact.phone?.value ?? ''),
+      (f) => samePhone(f.value, contact.phone?.value ?? '', country),
       'the phone number',
     );
   if (contact.whatsapp)
@@ -317,7 +314,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'whatsapp'],
       contact.whatsapp.factId,
       ['whatsapp', 'phone'],
-      (f) => samePhone(f.value, contact.whatsapp?.value ?? ''),
+      (f) => samePhone(f.value, contact.whatsapp?.value ?? '', country),
       'the WhatsApp number',
     );
   if (contact.email)
@@ -468,7 +465,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   for (const { text, path } of texts(spec)) {
     const found = literals(text);
     for (const phone of found.phones) {
-      if (!phones.some((known) => samePhone(known, phone)) && !statedNumbers.has(digits(phone)))
+      if (!phones.some((known) => samePhone(known, phone, country)) && !statedNumbers.has(digits(phone)))
         issues.push(
           error(path, 'unsupported_literal', `Remove the phone number "${phone}" or use the contact facts.`),
         );

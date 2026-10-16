@@ -5,7 +5,7 @@ import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
 import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
-import { EMAIL_AT } from './email.ts';
+import { emailPattern } from './email.ts';
 import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
 import { HTML_TAG, parseRichText, withoutPageLinks } from './rich-text.ts';
@@ -320,11 +320,13 @@ const skipped = (path: Path) => {
   if (LOCALES.has(key)) return true;
   return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
 };
-/** An e-mail address, also spelled out (anchored and bounded: linear on long words). */
-const EMAIL = new RegExp(
-  String.raw`(?<![\w.+-])([\w.+-]{1,64})${EMAIL_AT}[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}`,
-  'gi',
-);
+/**
+ * E-mail addresses (the facts validator's shared pattern).
+ * DECISION(BF-033): an address, plain or spelled out, is left to `validateFacts` (it must be the contact e-mail
+ * fact) unless it is dressed as a web address; a site is only checked for invented addresses with a registry, which
+ * every engine and editor path has (`applyAndValidate(…, { registry })`).
+ */
+const EMAIL = emailPattern();
 /** A URL scheme (`http:`, `javascript:`…): an e-mail after one in the same word is a URL's user part. */
 const URL_SCHEME = /(?:^|[^\w+.-])(?:https?|ftps?|sftp|wss?|file|javascript|data|intent|ssh|smb):/i;
 
@@ -389,11 +391,13 @@ const urlsRule: Rule = (spec, options) => {
     const rich = isRichText(path);
     // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
     // is not: folded first, then judged by `www.` or what is just before it (`/`, `\\`, a URL scheme).
-    const words = (rich ? withoutPageLinks(text) : text)
+    const words = (rich ? withoutPageLinks(text, ' ') : text)
       .normalize('NFKC')
       .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
-        dressedEmail(local, whole.slice(0, offset)) ? address : '',
-      );
+        dressedEmail(local, whole.slice(0, offset)) ? address : ' ',
+      )
+      // Any other `@` starts a handle, not an address: what follows it is read as a word (`@evil.com` is a domain).
+      .replace(/@/g, ' ');
     if (hasWebAddress(words)) {
       issues.push(
         error(

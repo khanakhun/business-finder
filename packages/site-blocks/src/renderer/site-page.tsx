@@ -15,11 +15,19 @@ export interface SitePageProps extends RenderOptions {
   readonly locale: SiteLocale;
 }
 
-/** The page a spec's page is in a locale. Throws when the page does not exist. */
+/** A page id the site does not have. */
+export class PageNotFoundError extends Error {
+  constructor(readonly pageId: string) {
+    super(`The site has no page "${pageId}".`);
+    this.name = 'PageNotFoundError';
+  }
+}
+
+/** A spec's page by id (or the page itself). Throws `PageNotFoundError` when the page does not exist. */
 export function findPage(spec: SiteSpec, page: Page | string): Page {
   if (typeof page !== 'string') return page;
   const found = spec.pages.find((candidate) => candidate.id === page);
-  if (!found) throw new Error(`The site has no page "${page}".`);
+  if (!found) throw new PageNotFoundError(page);
   return found;
 }
 

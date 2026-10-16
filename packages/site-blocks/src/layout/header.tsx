@@ -21,7 +21,6 @@ function Brand({ ctx }: { ctx: RenderContext }) {
           alt={brand.name}
           width={logo.width}
           height={logo.height}
-          priority
           className="h-10 w-auto max-w-[12rem] object-contain"
         />
       ) : (
@@ -47,7 +46,6 @@ function Languages({ ctx, className }: { ctx: RenderContext; className?: string 
               href={href}
               hrefLang={locale}
               lang={locale}
-              aria-label={name}
               aria-current={locale === ctx.locale ? 'page' : undefined}
               className={cx(
                 'bf-nav-link !min-h-11 px-2 text-xs font-semibold uppercase tracking-widest',
@@ -55,6 +53,8 @@ function Languages({ ctx, className }: { ctx: RenderContext; className?: string 
               )}
             >
               {locale}
+              {/* The accessible name keeps the visible code (label in name) and says the language. */}
+              <span className="sr-only"> – {name}</span>
             </Link>
           </li>
         );
@@ -161,12 +161,15 @@ export function Header({ ctx }: { ctx: RenderContext }) {
         >
           <div className="bf-container flex items-center justify-between py-4">
             <Brand ctx={ctx} />
+            {/* Focus moves into the menu when it opens. */}
             <button
               type="button"
               className="bf-icon-btn"
               popoverTarget={MENU_ID}
               popoverTargetAction="hide"
               aria-label={ctx.strings.closeMenu}
+              // biome-ignore lint/a11y/noAutofocus: inside a popover, autofocus applies when it opens (never on page load)
+              autoFocus
             >
               <Icon name="close" size={24} />
             </button>

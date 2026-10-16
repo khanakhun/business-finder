@@ -1,11 +1,10 @@
 import { Icon } from '../icons/icon.tsx';
 import type { BlockProps } from '../renderer/types.ts';
-import { itemHeading, Paragraphs, Section, SectionHead } from './shared.tsx';
+import { Paragraphs, Section, SectionHead } from './shared.tsx';
 
 /** Common questions: native `<details>` (keyboard and screen readers work without script). */
 export function Faq({ block, ctx, tone }: BlockProps<'faq'>) {
   const { props, variant } = block;
-  const Question = itemHeading(props.heading);
   return (
     <Section id={block.id} type="faq" variant={variant} tone={tone} labelled={Boolean(props.heading)}>
       <div className="bf-container">
@@ -15,7 +14,7 @@ export function Faq({ block, ctx, tone }: BlockProps<'faq'>) {
             {props.items.map((item, i) => (
               <details key={i} className="bf-details">
                 <summary>
-                  <Question className="text-[1.05rem] font-semibold">{ctx.t(item.question)}</Question>
+                  <span className="text-[1.05rem] font-semibold">{ctx.t(item.question)}</span>
                   <Icon name="plus" className="bf-chevron bf-icon" />
                 </summary>
                 <Paragraphs text={ctx.t(item.answer)} className="bf-muted pb-6" />

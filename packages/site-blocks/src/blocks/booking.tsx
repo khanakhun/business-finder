@@ -20,9 +20,10 @@ export function Booking({ block, ctx, tone }: BlockProps<'booking'>) {
           embed ? (
             <BookingEmbed
               src={url}
-              host={hostOfUrl(url)}
               label={ctx.t(props.label)}
-              strings={ctx.strings.booking}
+              notice={ctx.strings.booking.notice(hostOfUrl(url))}
+              show={ctx.strings.booking.show}
+              frameTitle={ctx.strings.booking.frameTitle}
             />
           ) : (
             <Link href={url} className="bf-btn bf-btn-primary">

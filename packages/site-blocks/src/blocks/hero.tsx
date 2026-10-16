@@ -12,7 +12,10 @@ export function Hero({ block, ctx, index }: BlockProps<'hero'>) {
     </h1>
   );
   const subtitle = props.subtitle ? <p className="bf-lead">{ctx.t(props.subtitle)}</p> : null;
-  const actions = <Actions primary={props.primaryCta} secondary={props.secondaryCta} ctx={ctx} />;
+  const actions =
+    ctx.cta(props.primaryCta) || ctx.cta(props.secondaryCta) ? (
+      <Actions primary={props.primaryCta} secondary={props.secondaryCta} ctx={ctx} />
+    ) : null;
   const image = ctx.image(props.imageAssetId);
   const frame = (className: string) => ({ id: block.id, type: 'hero', variant, labelled: true, className });
 

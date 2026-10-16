@@ -3,7 +3,7 @@
 import type { SiteLocale } from '@bf/site-schema';
 import { useEffect, useState } from 'react';
 import { formatTime, type OpenStatus, openStatus, type Weekly, weekdayName } from '../format/hours.ts';
-import { uiStrings } from '../i18n/strings.ts';
+import type { OpenNowLabels } from '../i18n/strings.ts';
 
 /**
  * "Open now" (an island): computed in the browser with the visitor's clock, in the business's time zone, and
@@ -14,10 +14,12 @@ export function OpenNow({
   weekly,
   timeZone,
   locale,
+  labels,
 }: {
   weekly: Weekly;
   timeZone: string;
   locale: SiteLocale;
+  labels: OpenNowLabels;
 }) {
   const [status, setStatus] = useState<OpenStatus | null>(null);
   useEffect(() => {
@@ -28,20 +30,30 @@ export function OpenNow({
   }, [weekly, timeZone]);
   return (
     <p className="min-h-8" aria-live="polite">
-      {status ? <StatusBadge status={status} locale={locale} /> : null}
+      {status ? <StatusBadge status={status} locale={locale} labels={labels} /> : null}
     </p>
   );
 }
 
-export function StatusBadge({ status, locale }: { status: OpenStatus; locale: SiteLocale }) {
-  const strings = uiStrings(locale);
+const fill = (template: string, values: Record<string, string>) =>
+  template.replace(/\{(\w+)\}/g, (slot, name: string) => values[name] ?? slot);
+
+export function StatusBadge({
+  status,
+  locale,
+  labels,
+}: {
+  status: OpenStatus;
+  locale: SiteLocale;
+  labels: OpenNowLabels;
+}) {
   const detail = status.open
-    ? strings.closesAt(formatTime(status.closesAt, locale))
+    ? fill(labels.closesAt, { time: formatTime(status.closesAt, locale) })
     : status.opensAt
-      ? strings.opensAt(
-          status.opensAt.today ? strings.today.toLowerCase() : weekdayName(status.opensAt.day, locale),
-          formatTime(status.opensAt.time, locale),
-        )
+      ? fill(labels.opensAt, {
+          day: status.opensAt.today ? labels.today.toLowerCase() : weekdayName(status.opensAt.day, locale),
+          time: formatTime(status.opensAt.time, locale),
+        })
       : '';
   return (
     <span className="bf-badge">
@@ -50,7 +62,7 @@ export function StatusBadge({ status, locale }: { status: OpenStatus; locale: Si
         style={{ color: status.open ? '#2f7d4f' : 'var(--bf-muted)' }}
         aria-hidden="true"
       />
-      <span className="font-semibold">{status.open ? strings.openNow : strings.closedNow}</span>
+      <span className="font-semibold">{status.open ? labels.openNow : labels.closedNow}</span>
       {detail ? <span className="bf-muted">· {detail}</span> : null}
     </span>
   );

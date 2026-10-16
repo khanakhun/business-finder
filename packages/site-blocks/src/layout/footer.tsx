@@ -1,7 +1,6 @@
 import { contactChannels } from '../blocks/contact.tsx';
 import { HoursCompact } from '../blocks/hours.tsx';
 import { AddressLines } from '../blocks/location.tsx';
-import { cx } from '../blocks/shared.tsx';
 import { SocialList } from '../blocks/social-links.tsx';
 import type { RenderContext } from '../renderer/types.ts';
 
@@ -46,10 +45,10 @@ export function Footer({ ctx }: { ctx: RenderContext }) {
             <h2 className={heading}>{ctx.strings.contact}</h2>
             <div className="flex flex-col gap-3">
               <AddressLines ctx={ctx} />
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col">
                 {channels.map((channel) => (
                   <li key={channel.key}>
-                    <Link href={channel.href} className="bf-link bf-num">
+                    <Link href={channel.href} className="bf-link bf-num inline-flex min-h-11 items-center">
                       {channel.value}
                     </Link>
                   </li>
@@ -71,12 +70,12 @@ export function Footer({ ctx }: { ctx: RenderContext }) {
             <h2 id="bf-footer-menu" className={heading}>
               {ctx.strings.menu}
             </h2>
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col">
               {navigation.items.map((item) => {
                 const href = ctx.pageHref(item.pageId);
                 return href ? (
                   <li key={item.pageId}>
-                    <Link href={href} className={cx('bf-link inline-flex min-h-8 items-center')}>
+                    <Link href={href} className="bf-link inline-flex min-h-11 items-center">
                       {ctx.t(item.label)}
                     </Link>
                   </li>

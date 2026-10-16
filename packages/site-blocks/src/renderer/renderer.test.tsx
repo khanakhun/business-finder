@@ -58,8 +58,11 @@ describe('SitePage', () => {
     );
     expect(screen.getByText('Skip to content')).toBeInTheDocument();
     const languages = screen.getAllByRole('list', { name: 'Languages' })[0] as HTMLElement;
-    expect(within(languages).getByRole('link', { name: 'Français' })).toHaveAttribute('href', '/');
-    expect(within(languages).getByRole('link', { name: 'English' })).toHaveAttribute('aria-current', 'page');
+    expect(within(languages).getByRole('link', { name: 'fr – Français' })).toHaveAttribute('href', '/');
+    expect(within(languages).getByRole('link', { name: 'en – English' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 
   it('is deterministic: the same input gives the same HTML', () => {

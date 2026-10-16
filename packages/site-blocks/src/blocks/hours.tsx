@@ -1,5 +1,5 @@
-import { WEEKDAYS } from '@bf/site-schema';
-import { formatSpan, groupDays, type Weekly, weekdayName } from '../format/hours.ts';
+import { formatSpan, groupDays, WEEKDAYS, type Weekly, weekdayName } from '../format/hours.ts';
+import { openNowLabels } from '../i18n/strings.ts';
 import { OpenNow } from '../islands/open-now.tsx';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
 import { cx, Section, SectionHead } from './shared.tsx';
@@ -61,14 +61,22 @@ export function Hours({ block, ctx, tone }: BlockProps<'hours'>) {
   const hours = ctx.spec.contact.hours;
   if (!hours) return null;
   const heading = props.heading ?? undefined;
-  const notes = [props.note, hours.note].filter((note) => note !== undefined).map((note) => ctx.t(note));
+  // The block's note and the hours' own note, once each.
+  const notes = [
+    ...new Set([props.note, hours.note].filter((note) => note !== undefined).map((note) => ctx.t(note))),
+  ];
   return (
     <Section id={block.id} type="hours" variant={variant} tone={tone} labelled>
       <div className="bf-container">
         <SectionHead blockId={block.id} heading={heading} fallback={ctx.strings.hours} ctx={ctx} />
         <div className={cx('mx-auto flex flex-col gap-6', variant === 'table' ? 'max-w-xl' : 'max-w-md')}>
           {ctx.timeZone ? (
-            <OpenNow weekly={hours.weekly} timeZone={ctx.timeZone} locale={ctx.locale} />
+            <OpenNow
+              weekly={hours.weekly}
+              timeZone={ctx.timeZone}
+              locale={ctx.locale}
+              labels={openNowLabels(ctx.locale)}
+            />
           ) : null}
           {variant === 'table' ? (
             <HoursTable weekly={hours.weekly} ctx={ctx} />

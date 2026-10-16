@@ -33,7 +33,7 @@ export function CtaBanner({ block, ctx, tone }: BlockProps<'cta_banner'>) {
       type="cta_banner"
       variant={variant}
       labelled
-      className={cx(image ? 'bf-on-image bf-overlay overflow-hidden' : 'bf-on-primary')}
+      className={cx(image ? 'bf-on-image bf-overlay bf-overlay-strong overflow-hidden' : 'bf-on-primary')}
     >
       {image ? (
         <Media

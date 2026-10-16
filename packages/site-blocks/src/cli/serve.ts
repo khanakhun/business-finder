@@ -19,7 +19,13 @@ const TYPES: Record<string, string> = {
 export function serve(root: string, port: number) {
   const base = resolve(root);
   const server = createServer((request, response) => {
-    const path = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+    let path: string;
+    try {
+      path = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+    } catch {
+      response.writeHead(400).end();
+      return;
+    }
     let file = normalize(join(base, path));
     if (file !== base && !file.startsWith(base + sep)) {
       response.writeHead(403).end();

@@ -23,7 +23,7 @@ function Quote({ item, ctx, large = false }: { item: Item; ctx: RenderContext; l
           large ? 'bf-h2 !text-[clamp(1.4rem,1.1rem+1.4vw,2.2rem)] !leading-snug' : 'text-[1.05em]',
         )}
       >
-        <p>“{quote.text}”</p>
+        <p>{ctx.strings.quote(quote.text)}</p>
       </blockquote>
       <figcaption className="bf-muted mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         {item.author ? <span className="font-semibold text-[var(--bf-text)]">{item.author}</span> : null}
@@ -38,7 +38,7 @@ function Quote({ item, ctx, large = false }: { item: Item; ctx: RenderContext; l
 export function Testimonials({ block, ctx, tone }: BlockProps<'testimonials'>) {
   const { props, variant } = block;
   const items = props.items;
-  const label = props.heading ? undefined : ctx.strings.reviewOn('').trim();
+  const label = props.heading ? undefined : ctx.strings.reviews;
   return (
     <Section
       id={block.id}

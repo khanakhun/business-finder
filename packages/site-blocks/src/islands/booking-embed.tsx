@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import type { UiStrings } from '../i18n/strings.ts';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * The booking provider's page in a frame (an island), loaded only when the visitor asks for it: until then no
@@ -9,21 +8,31 @@ import type { UiStrings } from '../i18n/strings.ts';
  */
 export function BookingEmbed({
   src,
-  host,
   label,
-  strings,
+  notice,
+  show,
+  frameTitle,
 }: {
   src: string;
-  host: string;
+  /** The page's own button label (opens the provider's page). */
   label: string;
-  strings: UiStrings['booking'];
+  /** Names the provider before anything loads. */
+  notice: string;
+  show: string;
+  frameTitle: string;
 }) {
   const [shown, setShown] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+  // The visitor asked for the calendar: focus moves to it (the button they pressed is gone).
+  useEffect(() => {
+    if (shown) frame.current?.focus();
+  }, [shown]);
   if (shown) {
     return (
       <iframe
+        ref={frame}
         src={src}
-        title={strings.frameTitle}
+        title={frameTitle}
         className="h-[44rem] w-full max-w-4xl rounded-card border border-[var(--bf-line)] bg-white"
         sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
         referrerPolicy="strict-origin-when-cross-origin"
@@ -33,10 +42,10 @@ export function BookingEmbed({
   }
   return (
     <div className="bf-card flex w-full max-w-2xl flex-col items-center gap-5 !h-auto">
-      <p className="bf-muted text-sm">{strings.notice(host)}</p>
+      <p className="bf-muted text-sm">{notice}</p>
       <div className="bf-actions justify-center">
         <button type="button" className="bf-btn bf-btn-primary" onClick={() => setShown(true)}>
-          {strings.show}
+          {show}
         </button>
         <a href={src} className="bf-btn bf-btn-secondary">
           {label}

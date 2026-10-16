@@ -1,8 +1,11 @@
-import { WEEKDAYS } from '@bf/site-schema';
-
 // Opening hours (BF-034): weekday names and times in the visitor's language, and whether the business is open now in
 // its own time zone. Pure functions: the "open now" island calls them in the browser with the current time.
 
+/**
+ * The weekdays as the SiteSpec keys them (same as `WEEKDAYS` in @bf/site-schema, tested). Declared here so the "open
+ * now" island does not bundle the schema and zod.
+ */
+export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
 export interface Span {
   readonly open: string;
@@ -93,7 +96,8 @@ export function openStatus(weekly: Weekly, now: Date, timeZone: string): OpenSta
     const overnight = close <= open;
     if (minute >= open && (overnight || minute < close)) return { open: true, closesAt: span.close };
   }
-  for (let offset = 0; offset < 7; offset += 1) {
+  // Today (later), the next six days, then today next week (a business open one day a week).
+  for (let offset = 0; offset <= 7; offset += 1) {
     const candidate = next(day, offset);
     const spans = [...weekly[candidate]].sort((a, b) => minutes(a.open) - minutes(b.open));
     const upcoming = spans.find((span) => offset > 0 || minutes(span.open) > minute);

@@ -30,13 +30,21 @@ function build() {
       let css: string;
       try {
         css = readFileSync(join(pkgDir, sheet), 'utf8');
-      } catch {
-        continue; // a family without italics
+      } catch (error) {
+        // Only a family without italics may lack a stylesheet.
+        if (sheet.includes('italic') && (error as NodeJS.ErrnoException).code === 'ENOENT') continue;
+        throw error;
       }
       const faces = fontFaces(css, files);
       rules.push(...faces.rules);
       for (const url of faces.urls) copyFileSync(join(pkgDir, 'files', url), join(fonts, url));
     }
+    if (
+      !rules.some(
+        (rule) => rule.includes(`"${files.family}"`) && rule.includes('-latin-') && !rule.includes('italic'),
+      )
+    )
+      throw new Error(`No upright latin face for ${files.family} in ${files.pkg}`);
     copyFileSync(join(pkgDir, 'LICENSE'), join(fonts, 'licenses', `${files.slug}.txt`));
   }
   const tailwind = join(dist, 'tailwind.css');

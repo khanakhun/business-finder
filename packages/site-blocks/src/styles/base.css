@@ -40,10 +40,27 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* The focus ring is the text colour (white over photos, the label colour on the primary colour). */
   .bf-site :focus-visible {
-    outline: 2px solid currentColor;
+    outline: 2px solid var(--bf-text);
     outline-offset: 3px;
     border-radius: 2px;
+  }
+
+  /* Context overrides of the ring colour, after the base. */
+  .bf-site .bf-on-image :focus-visible,
+  .bf-site .bf-header[data-variant="transparent"] > .bf-container :focus-visible {
+    outline-color: #fff;
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: the photo viewer is dark */
+  .bf-site .bf-lightbox :focus-visible {
+    outline-color: #fff;
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: as above */
+  .bf-site .bf-on-primary :focus-visible {
+    outline-color: var(--bf-on-primary);
   }
 
   .bf-site ::selection {
@@ -101,6 +118,8 @@
     text-transform: var(--bf-heading-case);
     text-wrap: balance;
     font-optical-sizing: auto;
+    /* A display face with one weight (DM Serif Display) is not thickened artificially. */
+    font-synthesis-weight: none;
   }
 
   .bf-display {
@@ -416,6 +435,15 @@
     );
   }
 
+  /* Centred text over a photo (the CTA banner): a flat scrim dark enough for white text on a bright photo. */
+  .bf-overlay-strong::after {
+    background: rgb(0 0 0 / max(0.58, var(--bf-overlay)));
+  }
+
+  [data-overlay="gradient"] .bf-overlay-strong::after {
+    background: rgb(0 0 0 / max(0.58, var(--bf-overlay)));
+  }
+
   /* Galleries */
   .bf-carousel {
     display: grid;
@@ -548,7 +576,7 @@
     color: #fff;
   }
 
-  .bf-header[data-variant="transparent"] .bf-btn-primary {
+  .bf-header[data-variant="transparent"] > .bf-container .bf-btn-primary {
     background: #fff;
     color: #111;
   }

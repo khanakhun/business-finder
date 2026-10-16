@@ -35,6 +35,12 @@ describe('renderStaticPage', () => {
       inlineCss: true,
     });
     expect(html).toContain('<style>.a{b:c}<\\/style><script>x</script></style>');
+    // Inlined, the font URLs point at the fonts, not at the page's folder.
+    const nested = renderStaticPage(salon, 'services', 'en', {
+      css: '@font-face{src:url(./fonts/a.woff2)}',
+      inlineCss: true,
+    }).html;
+    expect(nested).toContain('url(/fonts/a.woff2)');
     const cdn = renderStaticPage(salon, 'home', 'fr', {
       css: TEST_CSS,
       stylesheetHref: 'https://cdn.test/v1/styles.css',
@@ -63,8 +69,20 @@ describe('renderStaticPage', () => {
     expect(once).not.toContain('name="robots"');
   });
 
-  it('throws for a page the site does not have', () => {
+  it('throws for a page the site does not have, and for a spec the schema refuses', () => {
     expect(() => renderStaticPage(salon, 'nowhere', 'fr', { css: TEST_CSS })).toThrow(/no page "nowhere"/);
+    const hostile = {
+      ...salon,
+      theme: { ...salon.theme, palette: { ...salon.theme.palette, background: '#fff"><script>x</script>' } },
+    };
+    expect(() => renderStaticPage(hostile, 'home', 'fr', { css: TEST_CSS })).toThrow();
+  });
+
+  it('leaves out language alternates without the site origin (they must be absolute) and names the OG locale', () => {
+    const { html } = renderStaticPage(salon, 'home', 'en', { css: TEST_CSS });
+    expect(html).not.toContain('hreflang');
+    expect(html).not.toContain('rel="canonical"');
+    expect(html).toContain('<meta property="og:locale" content="en_US">');
   });
 });
 

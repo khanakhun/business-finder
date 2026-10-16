@@ -44,21 +44,20 @@ export function Menu({ block, ctx, tone }: BlockProps<'menu'>) {
         <SectionHead blockId={block.id} heading={props.heading} intro={props.intro} ctx={ctx} />
         <div
           className={cx(
-            'grid gap-x-[calc(var(--bf-gap)*2.5)] gap-y-[calc(var(--bf-gap)*1.75)]',
+            'grid',
+            variant === 'cards'
+              ? 'gap-[var(--bf-gap)]'
+              : 'gap-x-[calc(var(--bf-gap)*2.5)] gap-y-[calc(var(--bf-gap)*1.75)]',
             variant === 'columns' && sections.length > 1 && 'lg:grid-cols-2',
             variant === 'list' && 'mx-auto max-w-2xl',
-            variant === 'cards' && 'gap-[var(--bf-gap)] md:grid-cols-2',
+            variant === 'cards' && 'md:grid-cols-2',
           )}
         >
           {sections.map((section, i) => (
-            <section
-              key={i}
-              className={cx('flex flex-col gap-6', variant === 'cards' && 'bf-card')}
-              aria-label={ctx.t(section.title)}
-            >
+            <div key={i} className={cx('flex flex-col gap-6', variant === 'cards' && 'bf-card')}>
               <h3 className="bf-h3 border-b border-[var(--bf-line)] pb-3">{ctx.t(section.title)}</h3>
               <Dishes section={section} ctx={ctx} />
-            </section>
+            </div>
           ))}
         </div>
         {props.note ? (

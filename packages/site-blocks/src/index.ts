@@ -18,7 +18,7 @@ export {
   resolveCta,
   resolveImage,
 } from './renderer/resolvers.ts';
-export { findPage, SitePage, type SitePageProps } from './renderer/site-page.tsx';
+export { findPage, PageNotFoundError, SitePage, type SitePageProps } from './renderer/site-page.tsx';
 export type * from './renderer/types.ts';
 export {
   STYLE_FAMILIES,

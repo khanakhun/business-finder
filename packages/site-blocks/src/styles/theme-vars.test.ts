@@ -50,6 +50,14 @@ describe('themeToCssVars', () => {
     }
   });
 
+  it('never puts anything but a colour in a colour variable (the spec may not be validated yet)', () => {
+    const vars = themeToCssVars({
+      ...salon.theme,
+      palette: { ...salon.theme.palette, primary: 'red;background:url(//x)' },
+    });
+    expect(vars['--bf-primary']).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+
   it('writes the variables as declarations (no braces or semicolons inside a value)', () => {
     for (const style of THEME_STYLES) {
       for (const value of Object.values(familyVars(STYLE_FAMILIES[style])))

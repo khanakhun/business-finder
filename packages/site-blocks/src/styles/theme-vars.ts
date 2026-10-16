@@ -55,12 +55,24 @@ export function familyVars(family: StyleFamily): CssVars {
   };
 }
 
+/** A #rrggbb colour, else the fallback (the schema checks colours; this keeps a style attribute safe regardless). */
+const color = (value: string | undefined, fallback: string) =>
+  value && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+
 /** Every CSS variable a site's theme sets (palette, fonts, tokens and its style family). */
 export function themeToCssVars(theme: Theme): CssVars {
-  const family = STYLE_FAMILIES[theme.style];
-  const { palette } = theme;
+  const family = STYLE_FAMILIES[theme.style] ?? STYLE_FAMILIES.modern;
+  const palette = {
+    primary: color(theme.palette.primary, '#1f2937'),
+    secondary: theme.palette.secondary === undefined ? undefined : color(theme.palette.secondary, '#1f2937'),
+    accent: color(theme.palette.accent, '#1f2937'),
+    background: color(theme.palette.background, '#ffffff'),
+    surface: color(theme.palette.surface, '#f5f5f5'),
+    text: color(theme.palette.text, '#111111'),
+    mutedText: color(theme.palette.mutedText, '#4b5563'),
+  };
   const fonts = fontStacks(theme.typography.pairId);
-  const radius = RADIUS[theme.radius];
+  const radius = RADIUS[theme.radius] ?? RADIUS.md;
   const imageRadius = theme.imageTreatment === 'plain' ? '0px' : radius.card;
   return {
     '--bf-primary': palette.primary,
@@ -77,8 +89,8 @@ export function themeToCssVars(theme: Theme): CssVars {
     '--bf-radius-button': radius.button,
     '--bf-radius-card': radius.card,
     '--bf-radius-image': imageRadius,
-    '--bf-section-space': rem(SECTION_SPACE[theme.density] * family.rhythm),
-    '--bf-gap': rem(GAP[theme.density]),
+    '--bf-section-space': rem((SECTION_SPACE[theme.density] ?? SECTION_SPACE.comfortable) * family.rhythm),
+    '--bf-gap': rem(GAP[theme.density] ?? GAP.comfortable),
     ...familyVars(family),
   };
 }
@@ -88,7 +100,7 @@ export function themeToCssVars(theme: Theme): CssVars {
  * alternation, ornaments, buttons and image frames by them).
  */
 export function themeDataAttributes(theme: Theme): Readonly<Record<`data-${string}`, string>> {
-  const family = STYLE_FAMILIES[theme.style];
+  const family = STYLE_FAMILIES[theme.style] ?? STYLE_FAMILIES.modern;
   return {
     'data-style': family.id,
     'data-cards': family.border.cards,
@@ -97,7 +109,9 @@ export function themeDataAttributes(theme: Theme): Readonly<Record<`data-${strin
     'data-heading-align': family.section.headingAlign,
     'data-secondary-button': family.button.secondary,
     'data-overlay': family.image.overlayShape,
-    'data-image': theme.imageTreatment,
+    'data-image': ['plain', 'rounded', 'framed'].includes(theme.imageTreatment)
+      ? theme.imageTreatment
+      : 'plain',
   };
 }
 

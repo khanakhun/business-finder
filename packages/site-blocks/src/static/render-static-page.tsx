@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import type { Page, SiteLocale, SiteSpec } from '@bf/site-schema';
+import { type Page, type SiteLocale, SiteLocaleSchema, type SiteSpec, SiteSpecSchema } from '@bf/site-schema';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { pairPreloads } from '../fonts/families.ts';
 import { defaultPageHref, pickText } from '../renderer/resolvers.ts';
@@ -28,6 +28,15 @@ export function readStylesheet(): string {
   builtCss ??= readFileSync(new URL('../../dist/styles.css', import.meta.url), 'utf8');
   return builtCss;
 }
+
+/** Open Graph locales (`fr_FR`) of the site languages. */
+const OG_LOCALES: Readonly<Record<SiteLocale, string>> = {
+  fr: 'fr_FR',
+  en: 'en_US',
+  nl: 'nl_NL',
+  es: 'es_ES',
+  de: 'de_DE',
+};
 
 const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -83,18 +92,19 @@ function head(
   const ogImage = page.seo.ogImageAssetId
     ? spec.assets.find((asset) => asset.id === page.seo.ogImageAssetId)
     : undefined;
-  const ogImageUrl = ogImage ? (options.assetsResolver?.(ogImage).src ?? ogImage.url) : undefined;
+  const ogImageUrl = ogImage ? absolute(options.assetsResolver?.(ogImage).src ?? ogImage.url) : undefined;
   const lines = [
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<title>${text(page.seo.title)}</title>`,
     `<meta name="description" content="${text(page.seo.description)}">`,
     spec.settings.noindex ? '<meta name="robots" content="noindex, nofollow">' : '',
-    `<meta name="theme-color" content="${spec.theme.palette.background}">`,
+    `<meta name="theme-color" content="${escapeHtml(spec.theme.palette.background)}">`,
     options.origin
       ? `<link rel="canonical" href="${escapeHtml(absolute(hrefFor(page, locale, spec)))}">`
       : '',
-    ...(spec.locales.length > 1
+    // Language alternates need absolute URLs: only with the site's origin.
+    ...(options.origin && spec.locales.length > 1
       ? [
           ...spec.locales.map(
             (alternate) =>
@@ -107,13 +117,15 @@ function head(
     `<meta property="og:title" content="${text(page.seo.title)}">`,
     `<meta property="og:description" content="${text(page.seo.description)}">`,
     `<meta property="og:site_name" content="${escapeHtml(spec.brand.name)}">`,
-    `<meta property="og:locale" content="${locale}">`,
+    `<meta property="og:locale" content="${OG_LOCALES[locale]}">`,
     ogImageUrl ? `<meta property="og:image" content="${escapeHtml(ogImageUrl)}">` : '',
     ...pairPreloads(spec.theme.typography.pairId).map(
-      (file) => `<link rel="preload" href="${fontsHref}${file}" as="font" type="font/woff2" crossorigin>`,
+      (file) =>
+        `<link rel="preload" href="${escapeHtml(fontsHref + file)}" as="font" type="font/woff2" crossorigin>`,
     ),
     options.inlineCss
-      ? `<style>${css.replace(/<\/style/gi, '<\\/style')}</style>`
+      ? // Inlined, the stylesheet's relative font URLs would resolve against the page: point them at the fonts.
+        `<style>${css.replaceAll('url(./fonts/', `url(${fontsHref}`).replace(/<\/style/gi, '<\\/style')}</style>`
       : `<link rel="stylesheet" href="${escapeHtml(stylesheet)}">`,
     `<script type="application/ld+json">${scriptJson(localBusiness(spec, locale, options.origin ? absolute(hrefFor(page, locale, spec)) : undefined))}</script>`,
   ];
@@ -130,14 +142,17 @@ export function renderStaticPage(
   locale: SiteLocale,
   options: StaticRenderOptions = {},
 ): { html: string; css: string } {
-  const page = findPage(spec, pageId);
+  // Agents' output reaches this renderer: it renders only a spec the schema accepts.
+  const site = SiteSpecSchema.parse(spec);
+  const page = findPage(site, pageId);
+  const lang = SiteLocaleSchema.parse(locale);
   const css = options.css ?? readStylesheet();
-  const body = renderToStaticMarkup(<SitePage spec={spec} page={page} locale={locale} {...options} />);
+  const body = renderToStaticMarkup(<SitePage spec={site} page={page} locale={lang} {...options} />);
   const html = [
     '<!doctype html>',
-    `<html lang="${locale}" style="background:${spec.theme.palette.background}">`,
+    `<html lang="${lang}" style="background:${escapeHtml(site.theme.palette.background)}">`,
     '<head>',
-    head(spec, page, locale, options, css),
+    head(site, page, lang, options, css),
     '</head>',
     `<body>${body}</body>`,
     '</html>',

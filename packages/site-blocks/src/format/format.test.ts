@@ -101,15 +101,57 @@ describe('opening hours', () => {
   });
 
   it('is never open with no hours, and treats 00:00–00:00 as the whole day', () => {
-    expect(openStatus(week({}), new Date(), 'Europe/Paris')).toEqual({ open: false });
+    expect(openStatus(week({}), new Date('2026-10-12T10:00:00Z'), 'Europe/Paris')).toEqual({ open: false });
     const always = week({ mon: day([{ open: '00:00', close: '00:00' }]) });
     expect(openStatus(always, new Date('2026-10-12T16:00:00Z'), 'Europe/Paris').open).toBe(true);
+  });
+
+  it('opens next week on the same weekday when today was its only day and it has closed', () => {
+    const mondays = week({ mon: day([{ open: '09:00', close: '12:00' }]) });
+    expect(openStatus(mondays, new Date('2026-10-12T11:00:00Z'), 'Europe/Paris')).toEqual({
+      open: false,
+      opensAt: { day: 'mon', time: '09:00', today: false },
+    });
+  });
+
+  it('keeps a Sunday night span open into Monday, closed at its closing minute', () => {
+    const late = week({ sun: day([{ open: '22:00', close: '02:00' }]) });
+    // Monday 01:00 and 02:00 in Paris (UTC+2).
+    expect(openStatus(late, new Date('2026-10-11T23:00:00Z'), 'Europe/Paris')).toEqual({
+      open: true,
+      closesAt: '02:00',
+    });
+    expect(openStatus(late, new Date('2026-10-12T00:00:00Z'), 'Europe/Paris').open).toBe(false);
+  });
+
+  it('is open at the opening minute and closed at the closing minute', () => {
+    expect(openStatus(shop, new Date('2026-10-12T07:00:00Z'), 'Europe/Paris').open).toBe(true);
+    expect(openStatus(shop, new Date('2026-10-12T10:30:00Z'), 'Europe/Paris').open).toBe(false);
+  });
+
+  it('follows summer time and keeps an overnight span open through the autumn change', () => {
+    // 2026-03-29: Paris moves to UTC+2 at 01:00 UTC; 07:30 UTC is 09:30 local.
+    const sunday = week({ sun: day([{ open: '09:00', close: '10:00' }]) });
+    expect(openStatus(sunday, new Date('2026-03-29T07:30:00Z'), 'Europe/Paris').open).toBe(true);
+    // 2026-10-25: back to UTC+1 at 01:00 UTC. Saturday 22:00–03:00 local.
+    const saturday = week({ sat: day([{ open: '22:00', close: '03:00' }]) });
+    expect(openStatus(saturday, new Date('2026-10-25T00:30:00Z'), 'Europe/Paris').open).toBe(true); // 02:30 CEST
+    expect(openStatus(saturday, new Date('2026-10-25T01:30:00Z'), 'Europe/Paris').open).toBe(true); // 02:30 CET
+    expect(openStatus(saturday, new Date('2026-10-25T02:30:00Z'), 'Europe/Paris').open).toBe(false); // 03:30 CET
   });
 
   it('knows single-zone countries only', () => {
     expect(timeZoneOf('BL')).toBe('America/St_Barthelemy');
     expect(timeZoneOf('US')).toBeUndefined();
     expect(timeZoneOf(undefined)).toBeUndefined();
+  });
+});
+
+describe('weekdays', () => {
+  it('are the schema’s weekdays (declared apart so the island does not bundle the schema)', async () => {
+    const schema = await import('@bf/site-schema');
+    const { WEEKDAYS } = await import('./hours.ts');
+    expect(WEEKDAYS).toEqual(schema.WEEKDAYS);
   });
 });
 
@@ -125,6 +167,10 @@ describe('prices and phones', () => {
     expect(formatPhone('+33261910303', 'FR')).toBe('02 61 91 03 03');
     expect(formatPhone('+33261910303', 'BL')).toBe('+33 2 61 91 03 03');
     expect(formatPhone('not a number')).toBe('not a number');
+    // +590 is shared by Guadeloupe, Saint-Barthélemy and Saint-Martin: a BL mobile is national on a BL site.
+    expect(formatPhone('+590690000101', 'BL')).toBe('0690 00 01 01');
+    expect(formatPhone('+590590270000', 'FR')).toBe('+590 590 27 00 00');
+    expect(formatPhone('+33261910303', 'ZZ')).toBe('+33 2 61 91 03 03');
     expect(whatsappLink('+590 690 00 01 01')).toBe('https://wa.me/590690000101');
   });
 });

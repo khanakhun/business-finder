@@ -45,7 +45,9 @@ function Zoomable({
             width={image.width}
             height={image.height}
           />
-          <figcaption className="text-sm opacity-85">{image.alt}</figcaption>
+          <figcaption aria-hidden="true" className="text-sm opacity-85">
+            {image.alt}
+          </figcaption>
         </figure>
         <button
           type="button"
@@ -53,6 +55,8 @@ function Zoomable({
           popoverTarget={viewerId}
           popoverTargetAction="hide"
           aria-label={ctx.strings.close}
+          // biome-ignore lint/a11y/noAutofocus: inside a popover, autofocus applies when it opens (never on page load)
+          autoFocus
         >
           <Icon name="close" size={24} />
         </button>

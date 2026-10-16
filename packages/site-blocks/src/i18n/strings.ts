@@ -38,6 +38,9 @@ export interface UiStrings {
   readonly rating: (stars: number) => string;
   readonly reviewOn: (source: string) => string;
   readonly translated: string;
+  /** A quotation in the language's marks (« … » with narrow no-break spaces in French, „…“ in German). */
+  readonly quote: (text: string) => string;
+  readonly reviews: string;
   readonly enlarge: (alt: string) => string;
   readonly close: string;
   readonly photos: string;
@@ -108,6 +111,8 @@ const fr: UiStrings = {
   rating: (stars) => `${stars} sur 5 étoiles`,
   reviewOn: (source) => `Avis publié sur ${source}`,
   translated: 'Traduit',
+  quote: (text) => `«${NNBSP}${text}${NNBSP}»`,
+  reviews: 'Avis',
   enlarge: (alt) => `Agrandir la photo${NNBSP}: ${alt}`,
   close: 'Fermer',
   photos: 'Photos',
@@ -176,6 +181,8 @@ const en: UiStrings = {
   rating: (stars) => `${stars} out of 5 stars`,
   reviewOn: (source) => `Review published on ${source}`,
   translated: 'Translated',
+  quote: (text) => `“${text}”`,
+  reviews: 'Reviews',
   enlarge: (alt) => `Enlarge photo: ${alt}`,
   close: 'Close',
   photos: 'Photos',
@@ -243,6 +250,8 @@ const nl: UiStrings = {
   rating: (stars) => `${stars} van 5 sterren`,
   reviewOn: (source) => `Recensie op ${source}`,
   translated: 'Vertaald',
+  quote: (text) => `“${text}”`,
+  reviews: 'Recensies',
   enlarge: (alt) => `Foto vergroten: ${alt}`,
   close: 'Sluiten',
   photos: "Foto's",
@@ -309,6 +318,8 @@ const es: UiStrings = {
   rating: (stars) => `${stars} de 5 estrellas`,
   reviewOn: (source) => `Opinión publicada en ${source}`,
   translated: 'Traducido',
+  quote: (text) => `«${text}»`,
+  reviews: 'Opiniones',
   enlarge: (alt) => `Ampliar la foto: ${alt}`,
   close: 'Cerrar',
   photos: 'Fotos',
@@ -376,6 +387,8 @@ const de: UiStrings = {
   rating: (stars) => `${stars} von 5 Sternen`,
   reviewOn: (source) => `Bewertung auf ${source}`,
   translated: 'Übersetzt',
+  quote: (text) => `„${text}“`,
+  reviews: 'Bewertungen',
   enlarge: (alt) => `Foto vergrößern: ${alt}`,
   close: 'Schließen',
   photos: 'Fotos',
@@ -406,3 +419,23 @@ const de: UiStrings = {
 export const UI_STRINGS: Readonly<Record<SiteLocale, UiStrings>> = { fr, en, nl, es, de };
 
 export const uiStrings = (locale: SiteLocale): UiStrings => UI_STRINGS[locale];
+
+/** The words of the "open now" island as plain strings (islands get serializable props): `{time}`, `{day}` slots. */
+export interface OpenNowLabels {
+  readonly openNow: string;
+  readonly closedNow: string;
+  readonly closesAt: string;
+  readonly opensAt: string;
+  readonly today: string;
+}
+
+export function openNowLabels(locale: SiteLocale): OpenNowLabels {
+  const strings = UI_STRINGS[locale];
+  return {
+    openNow: strings.openNow,
+    closedNow: strings.closedNow,
+    closesAt: strings.closesAt('{time}'),
+    opensAt: strings.opensAt('{day}', '{time}'),
+    today: strings.today,
+  };
+}

@@ -34,7 +34,7 @@ const snapshot = (overrides: Partial<AuditSnapshot> = {}): AuditSnapshot => ({
     page('menu', 'https://site.example/menu'),
     page('booking', 'https://site.example/booking'),
   ],
-  languages: { declared: ['fr', 'en'], detected: ['fr'], hreflang: [], hasLanguageSwitcher: true },
+  languages: { declared: ['fr', 'en'], detected: ['fr', 'en'], hreflang: [], hasLanguageSwitcher: true },
   contacts: {
     emails: [{ value: 'contact@site.example' }],
     phones: [{ value: '+33199001234' }],
@@ -281,6 +281,29 @@ describe('findings rules', () => {
     ).toEqual([]);
   });
 
+  it('builds evidence from measurements only, never page text or model prose', () => {
+    const findings = evaluateFindings(
+      facts({
+        snapshot: snapshot({
+          tech: [
+            { name: 'jQuery', version: '1.12.4', categories: [], confidence: 100 },
+            // Not a version: ignored, and never repeated.
+            { name: 'WordPress', version: '4 — call +33 1 99 00 12 34', categories: [], confidence: 100 },
+          ],
+        }),
+        vision: {
+          ...vision(8, { modernity: 2 }),
+          criteria: {
+            ...vision(8, { modernity: 2 }).criteria,
+            modernity: { score: 2, evidence: 'Banner says: ask Marie at +33 1 99 00 12 34' },
+          },
+        },
+      }),
+    );
+    expect(findings.map((f) => f.code)).toEqual(['dated_design', 'outdated_jquery']);
+    expect(findings.map((f) => f.evidence)).toEqual(['Visual grade — modernity: 2/10.', 'jQuery 1.x.']);
+  });
+
   it('applies context rules only to the businesses they concern', () => {
     const plain = { countryCode: 'US', categoryAttributes: {}, servesFood: false };
     const bare = snapshot({
@@ -352,6 +375,37 @@ describe('quality score and status', () => {
     expect(qualityScore(facts({ vision: null, psi: null }), [])).toBeNull();
   });
 
+  it('pins the boundaries of the score and the status', () => {
+    // The 40-point cap: a base of 89 minus four critical findings (60 points) is 49, not 29.
+    const critical = evaluateFindings(facts({ snapshot: snapshot({ reachability: 'parked' }) }))[0];
+    expect(qualityScore(facts(), [critical, critical, critical, critical] as never)).toBe(49);
+    expect(websiteStatus(facts(), [], 60)).toBe('ok');
+    const unmeasured = { psi: null, vision: null };
+    // One major finding alone keeps an unmeasured site ok; one critical makes it weak.
+    expect(
+      assessWebsite(
+        facts({
+          ...unmeasured,
+          snapshot: snapshot({ security: { https: false, hsts: false, mixedContent: false } }),
+        }),
+      ).websiteStatus,
+    ).toBe('ok');
+    expect(
+      assessWebsite(
+        facts({
+          ...unmeasured,
+          snapshot: snapshot({ tls: { valid: false, expiresAt: null, issuer: null } }),
+        }),
+      ).websiteStatus,
+    ).toBe('weak');
+    // A crawler-blocking site with a measured score follows the score.
+    expect(websiteStatus(facts({ snapshot: snapshot({ reachability: 'blocked' }) }), [], 40)).toBe('weak');
+    // Exactly 25 on mobile performance is major, below is critical.
+    expect(
+      evaluateFindings(facts({ psi: { mobile: strategy({ performance: 25 }), desktop: null } }))[0]?.severity,
+    ).toBe('major');
+  });
+
   it('derives the status from presence, then the score', () => {
     const at = (overrides: Partial<AuditFacts>) => assessWebsite(facts(overrides)).websiteStatus;
     expect(at({})).toBe('strong');
@@ -387,5 +441,67 @@ describe('quality score and status', () => {
     expect(websiteStatus(facts(), [], 80)).toBe('strong');
     expect(websiteStatus(facts(), [], 79)).toBe('ok');
     expect(websiteStatus(facts(), [], 59)).toBe('weak');
+  });
+});
+
+describe('language and performance edge cases', () => {
+  const languages = (value: AuditSnapshot['languages']) =>
+    codes(facts({ snapshot: snapshot({ languages: value }) }));
+
+  it('reads the languages from the text and hreflang, not a theme’s declared lang', () => {
+    // A French site whose theme declares `en-US`: English is missing.
+    expect(
+      languages({ declared: ['en-US'], detected: ['fr'], hreflang: [], hasLanguageSwitcher: false }),
+    ).toContain('missing_english');
+    // `x-default` is no language; `en-GB` alternates count as English.
+    expect(
+      languages({
+        declared: ['fr'],
+        detected: ['fr'],
+        hreflang: [
+          { lang: 'x-default', url: 'https://s.example/' },
+          { lang: 'en-GB', url: 'https://s.example/en' },
+        ],
+        hasLanguageSwitcher: true,
+      }),
+    ).not.toContain('missing_english');
+    // Nothing detected: the declared language is all there is.
+    expect(
+      languages({ declared: ['fr-FR'], detected: [], hreflang: [], hasLanguageSwitcher: false }),
+    ).toContain('missing_english');
+    // Nothing known at all: no language finding.
+    const unknown = languages({ declared: [], detected: [], hreflang: [], hasLanguageSwitcher: false });
+    expect(unknown).not.toContain('missing_english');
+    expect(unknown).not.toContain('missing_french');
+  });
+
+  it('falls back to desktop for the performance score when mobile was not measured', () => {
+    const findings = evaluateFindings(
+      facts({ psi: { mobile: null, desktop: strategy({ performance: 40 }) } }),
+    );
+    expect(findings.find((f) => f.code === 'low_performance_score')).toMatchObject({
+      evidence: 'PageSpeed performance on desktop: 40/100.',
+      metric: { name: 'psi.desktop.performance', value: 40, threshold: 50 },
+    });
+  });
+
+  it('rates a site that blocks our crawler from PageSpeed alone', () => {
+    const blocked = facts({ snapshot: snapshot({ reachability: 'blocked' }), vision: null });
+    const findings = evaluateFindings(blocked);
+    const score = qualityScore(blocked, findings);
+    expect(score).not.toBeNull();
+    expect(websiteStatus(blocked, findings, score)).toBe(score !== null && score >= 80 ? 'strong' : 'ok');
+    const slow = facts({
+      snapshot: snapshot({ reachability: 'blocked' }),
+      vision: null,
+      psi: {
+        mobile: strategy({ performance: 20, accessibility: 40, seo: 40, bestPractices: 40 }),
+        desktop: null,
+      },
+    });
+    const slowFindings = evaluateFindings(slow);
+    expect(websiteStatus(slow, slowFindings, qualityScore(slow, slowFindings))).toBe('weak');
+    // Unmeasured, a blocked site is not presented as broken.
+    expect(websiteStatus({ ...blocked, psi: null }, [], null)).toBe('ok');
   });
 });

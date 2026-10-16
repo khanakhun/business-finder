@@ -307,11 +307,13 @@ export class EnrichmentQueries {
     private readonly audits: WebsiteAuditService,
   ) {}
 
-  /** The audit of the latest crawl (BF-030), or null before the first audit. */
+  /** The audit of the latest crawl (BF-030), or null before the first audit; `none` without a website. */
   async websiteAudit(organizationId: string, businessId: string): Promise<BusinessWebsiteAudit> {
     await this.assertTracked(organizationId, businessId);
     const audit = await this.audits.latest(businessId);
+    const subject = await this.subjects.subject(businessId);
     return {
+      status: subject?.websiteUrl ? (audit?.websiteStatus ?? null) : 'none',
       audit: audit
         ? {
             id: audit.id,

@@ -1952,6 +1952,7 @@ export type components = {
         };
         BusinessWebsiteAudit: {
             audit: components["schemas"]["WebsiteAudit"] | null;
+            status: ("none" | "parked" | "social_only" | "broken" | "weak" | "ok" | "strong") | null;
         };
         CategoryAttributes: {
             [key: string]: boolean;

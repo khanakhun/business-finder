@@ -1,6 +1,6 @@
 import { fixedClock } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
-import { businesses, orgBusinesses, websiteAudits } from '@bf/db/schema';
+import { businessCategories, businesses, categories, orgBusinesses, websiteAudits } from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
@@ -9,6 +9,15 @@ import { createTestApp, createTestWorker, type TestApp } from '../../../test/cre
 import { FakeMailer } from '../../../test/fake-mailer.ts';
 import { type Browser, createWorkspace, signUpVerified } from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
+import {
+  WEBSITE_AUDITS,
+  WEBSITE_SNAPSHOTS,
+  type WebsiteAuditRepository,
+  type WebsiteSnapshotRepository,
+} from './application/ports.ts';
+import { WebsiteAuditService } from './application/website-audit.service.ts';
+import { FakePageSpeed } from './infrastructure/pagespeed.ts';
+import { FakeVisionGrader } from './infrastructure/vision-graders.ts';
 
 // Website audit (BF-030) end to end: HTTP app + worker on real Postgres and Valkey, the real `psi` and `vision_audit`
 // steps over the fake crawl, PageSpeed and vision grader (FAKE_SITE_INTEL, FAKE_WEBSITE_AUDIT: a host containing
@@ -16,7 +25,8 @@ import { DB_CLIENT } from '../platform/db/db.module.ts';
 
 const mailer = new FakeMailer();
 const ENV = { FAKE_SITE_INTEL: 'true', FAKE_EMAIL_VERIFIER: 'true', FAKE_WEBSITE_AUDIT: 'true' };
-const clock = fixedClock(new Date());
+// A fixed instant (findings depend on the year); app and worker share it.
+const clock = fixedClock('2026-10-14T12:00:00.000Z');
 let t: TestApp;
 let worker: INestApplicationContext;
 let db: DbClient;
@@ -72,6 +82,7 @@ describe('website audit', () => {
       vision: { overall: 8, model: 'fake-vision-grader' },
       websiteStatus: 'strong',
     });
+    expect(body.status).toBe('strong');
     expect(body.audit.qualityScore).toBeGreaterThanOrEqual(80);
     // The fake crawl: copyright 2021, no contact form, no phone (an e-mail is there).
     expect(body.audit.findings.map((f: { code: string }) => f.code)).toEqual(
@@ -139,7 +150,111 @@ describe('website audit', () => {
   it('skips businesses without a website and keeps workspaces apart', async () => {
     const id = await track(null);
     expect(await audit(id)).toMatchObject({ site_intel: 'skipped', psi: 'skipped', vision_audit: 'skipped' });
-    expect((await owner.get(`/v1/businesses/${id}/website-audit`).expect(200)).body.audit).toBeNull();
+    // No website: no audit, and the status says so (scoring and outreach read it).
+    expect((await owner.get(`/v1/businesses/${id}/website-audit`).expect(200)).body).toEqual({
+      audit: null,
+      status: 'none',
+    });
     await outsider.get(`/v1/businesses/${id}/website-audit`).expect(404);
+  });
+});
+
+describe('audit storage', () => {
+  it('keeps the newest crawl latest, merges parts per strategy and moves updatedAt', async () => {
+    const id = await track('https://www.storage-audit.com/');
+    await audit(id);
+    clock.advance(60_000);
+    await audit(id, ['site_intel', 'vision_audit']);
+    const service = t.app.get(WebsiteAuditService);
+    const snapshots = t.app.get<WebsiteSnapshotRepository>(WEBSITE_SNAPSHOTS);
+    const rows = await db.select().from(websiteAudits).where(eq(websiteAudits.businessId, id));
+    const newest = (await snapshots.latest(id))?.id as string;
+    const older = rows.find((row) => row.snapshotId !== newest);
+    expect(older).toBeDefined();
+    // A late write for the older crawl does not take "latest" back.
+    const olderSnapshot = await snapshots.byId(older?.snapshotId as string);
+    await service.record(olderSnapshot as never, { vision: null });
+    const latest = (await owner.get(`/v1/businesses/${id}/website-audit`).expect(200)).body.audit;
+    expect(latest.snapshotId).toBe(newest);
+    expect(
+      (await db.select().from(websiteAudits).where(eq(websiteAudits.businessId, id))).filter(
+        (r) => r.isLatest,
+      ),
+    ).toHaveLength(1);
+
+    // Concurrent parts on one crawl merge; a mobile-only re-check keeps the desktop result.
+    const snapshot = await snapshots.latest(id);
+    const mobile = await new FakePageSpeed(clock).run('https://slow.example/', 'mobile');
+    const grade = (await new FakeVisionGrader(clock).grade('org', snapshot as never)).grade;
+    const before = latest.updatedAt;
+    await Promise.all([
+      service.record(snapshot as never, { psi: { mobile, desktop: null } }),
+      service.record(snapshot as never, { vision: { ...grade, overall: 5 } }),
+    ]);
+    const merged = await t.app.get<WebsiteAuditRepository>(WEBSITE_AUDITS).latest(id);
+    expect(merged?.psi?.mobile?.scores.performance).toBe(28);
+    expect(merged?.psi?.desktop?.scores.performance).toBe(95);
+    expect(merged?.vision?.overall).toBe(5);
+    expect(Date.parse(merged?.updatedAt.toISOString() ?? '')).toBeGreaterThan(Date.parse(before));
+  });
+
+  it('filters weak on the latest audit only', async () => {
+    const id = await track('https://www.history-audit.com/');
+    await audit(id);
+    clock.advance(60_000);
+    await audit(id, ['site_intel', 'vision_audit']);
+    // An older audit said weak; the latest says strong.
+    await db
+      .update(websiteAudits)
+      .set({ websiteStatus: 'weak' })
+      .where(and(eq(websiteAudits.businessId, id), eq(websiteAudits.isLatest, false)));
+    const listing = (await owner.get('/v1/businesses').query({ website: 'weak', limit: 100 }).expect(200))
+      .body;
+    expect(listing.items.map((item: { id: string }) => item.id)).not.toContain(id);
+    await db
+      .update(websiteAudits)
+      .set({ websiteStatus: 'parked' })
+      .where(and(eq(websiteAudits.businessId, id), eq(websiteAudits.isLatest, true)));
+    const parked = (await owner.get('/v1/businesses').query({ website: 'weak', limit: 100 }).expect(200))
+      .body;
+    expect(parked.items.map((item: { id: string }) => item.id)).not.toContain(id);
+  });
+
+  it('reads the primary category attributes from the root down, the child overriding its ancestors', async () => {
+    const id = await track('https://www.facts-audit.com/');
+    const [root] = await db
+      .insert(categories)
+      .values({
+        slug: 'bf030_root',
+        path: 'bf030_root',
+        labels: { en: 'Root', fr: 'Racine' },
+        attributes: { appointmentBased: true, tourismFacing: true },
+      })
+      .returning();
+    const [child] = await db
+      .insert(categories)
+      .values({
+        slug: 'bf030_child',
+        parentId: root?.id,
+        path: 'bf030_root.bf030_child',
+        labels: { en: 'Child', fr: 'Enfant' },
+        attributes: { appointmentBased: false },
+      })
+      .returning();
+    await db.insert(businessCategories).values({
+      businessId: id,
+      categoryId: child?.id as string,
+      isPrimary: true,
+      confidence: 1,
+      source: 'manual',
+    });
+    const facts = await t.app.get<WebsiteAuditRepository>(WEBSITE_AUDITS).businessFacts(id);
+    expect(facts).toMatchObject({
+      categoryAttributes: { appointmentBased: false, tourismFacing: true },
+      servesFood: false,
+      categoryLabel: 'Child',
+    });
+    const none = await t.app.get<WebsiteAuditRepository>(WEBSITE_AUDITS).businessFacts(await track(null));
+    expect(none).toMatchObject({ categoryAttributes: {}, servesFood: false, categoryLabel: null });
   });
 });

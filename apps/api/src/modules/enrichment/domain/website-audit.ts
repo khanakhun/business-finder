@@ -10,9 +10,11 @@ import {
   type WebsiteStatus,
 } from '@bf/contracts';
 
-// Website audit rules (BF-030, pure): a Rules Engine over the snapshot, PageSpeed and the vision grade. Each rule is a
-// Specification (`applies`) that yields a finding with its evidence; the quality score is a documented weighted
+// Website audit rules (BF-030, pure): a Rules Engine over the snapshot, PageSpeed and the vision grade. Each rule is
+// a Specification (`evaluate`) that yields a finding with its evidence; the quality score is a documented weighted
 // composite (Strategy) and the website status follows from presence and score. Reproducible from stored inputs.
+// Evidence is built from measurements and fixed text only — never page text or model prose (findings feed outreach
+// and briefs).
 
 /** The snapshot facts the rules read (a subset of SiteIntel, as stored). */
 export type AuditSnapshot = Pick<
@@ -87,20 +89,26 @@ const BROKEN: ReadonlySet<SiteIntel['reachability']> = new Set([
 const readable = (facts: AuditFacts) =>
   !facts.snapshot.socialOnly &&
   (facts.snapshot.reachability === 'ok' || facts.snapshot.reachability === 'redirected');
-const languagesOf = (snapshot: AuditSnapshot) =>
-  new Set(
-    [
-      ...snapshot.languages.declared,
-      ...snapshot.languages.detected,
-      ...snapshot.languages.hreflang.map((h) => h.lang),
-    ]
-      .map((lang) => lang.toLowerCase().slice(0, 2))
-      .filter(Boolean),
+/**
+ * The languages the site is written in: detected from its text plus its hreflang alternates; the declared `lang`
+ * only when nothing was detected (themes often ship `lang="en-US"` on a French site). ISO 639-1 codes only
+ * (`x-default` is not a language).
+ */
+const languagesOf = (snapshot: AuditSnapshot) => {
+  const { declared, detected, hreflang } = snapshot.languages;
+  const read = [...detected, ...hreflang.map((h) => h.lang)];
+  return new Set(
+    (read.length > 0 ? read : declared)
+      .map((lang) => lang.toLowerCase().split(/[-_]/)[0] ?? '')
+      .filter((lang) => /^[a-z]{2}$/.test(lang)),
   );
-const major = (version: string | null) => {
-  const parsed = Number.parseInt(version ?? '', 10);
-  return Number.isFinite(parsed) ? parsed : null;
 };
+/**
+ * The major version of a well-formed version string (`1.12.4` → 1); null otherwise. Evidence never repeats the
+ * string itself: it comes from the page.
+ */
+const major = (version: string | null) =>
+  version && /^\d+(\.\d+){0,3}$/.test(version) ? Number.parseInt(version, 10) : null;
 const seconds = (msValue: number) => `${(msValue / 1000).toFixed(1)} s`;
 const visionScore = (facts: AuditFacts, criterion: keyof VisionGrade['criteria']) =>
   facts.vision?.criteria[criterion]?.score ?? null;
@@ -165,7 +173,7 @@ export const RULES: readonly Rule[] = [
       const value = visionScore(facts, 'mobile_usability');
       return value !== null && value <= 4
         ? {
-            evidence: facts.vision?.criteria.mobile_usability.evidence ?? 'Mobile usability graded low.',
+            evidence: `Visual grade — mobile usability: ${value}/10.`,
             metric: { name: 'vision.mobile_usability', value, threshold: 4 },
           }
         : null;
@@ -198,11 +206,13 @@ export const RULES: readonly Rule[] = [
   {
     code: 'low_performance_score',
     evaluate: ({ psi }) => {
-      const value = psi?.mobile?.scores.performance ?? null;
+      // Mobile first (most visitors), desktop when only desktop was measured.
+      const strategy = psi?.mobile ? 'mobile' : 'desktop';
+      const value = psi?.[strategy]?.scores.performance ?? null;
       return value !== null && value < 50
         ? {
-            evidence: `PageSpeed performance on mobile: ${value}/100.`,
-            metric: { name: 'psi.mobile.performance', value, threshold: 50 },
+            evidence: `PageSpeed performance on ${strategy}: ${value}/100.`,
+            metric: { name: `psi.${strategy}.performance`, value, threshold: 50 },
             // Very slow sites lose most mobile visitors.
             ...(value < 25 ? { severity: 'critical' as const } : {}),
           }
@@ -284,7 +294,7 @@ export const RULES: readonly Rule[] = [
       const value = visionScore(facts, 'cta_clarity');
       return value !== null && value <= 4
         ? {
-            evidence: facts.vision?.criteria.cta_clarity.evidence ?? 'Call to action graded low.',
+            evidence: `Visual grade — call to action: ${value}/10.`,
             metric: { name: 'vision.cta_clarity', value, threshold: 4 },
           }
         : null;
@@ -310,7 +320,7 @@ export const RULES: readonly Rule[] = [
       const version = major(jquery?.version ?? null);
       return readable(facts) && version !== null && version < 3
         ? {
-            evidence: `jQuery ${jquery?.version}.`,
+            evidence: `jQuery ${version}.x.`,
             metric: { name: 'jquery.major', value: version, threshold: 3 },
           }
         : null;
@@ -324,7 +334,7 @@ export const RULES: readonly Rule[] = [
       // WordPress 6 is the maintained major line (5 and older no longer get feature releases).
       return readable(facts) && version !== null && version < 6
         ? {
-            evidence: `WordPress ${wordpress?.version}.`,
+            evidence: `WordPress ${version}.x.`,
             metric: { name: 'wordpress.major', value: version, threshold: 6 },
           }
         : null;
@@ -336,7 +346,7 @@ export const RULES: readonly Rule[] = [
       const value = visionScore(facts, 'modernity');
       return value !== null && value <= 4
         ? {
-            evidence: facts.vision?.criteria.modernity.evidence ?? 'Design graded dated.',
+            evidence: `Visual grade — modernity: ${value}/10.`,
             metric: { name: 'vision.modernity', value, threshold: 4 },
           }
         : null;

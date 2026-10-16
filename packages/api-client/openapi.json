@@ -1915,10 +1915,30 @@
                 "type": "null"
               }
             ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "parked",
+                  "social_only",
+                  "broken",
+                  "weak",
+                  "ok",
+                  "strong"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
-          "audit"
+          "audit",
+          "status"
         ],
         "type": "object"
       },

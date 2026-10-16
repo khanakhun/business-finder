@@ -150,6 +150,7 @@ export class BusinessEnrichmentController {
   }
 
   @Get(':id/website-audit')
+  // Every role holds business:read; another workspace's business is a 404 (tested).
   @RequirePermission('business:read')
   @ApiRoute({
     summary:

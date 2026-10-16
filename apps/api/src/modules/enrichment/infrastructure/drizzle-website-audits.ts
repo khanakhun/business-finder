@@ -1,8 +1,8 @@
 import type { CategoryAttributes } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
-import { businesses, websiteAudits } from '@bf/db/schema';
+import { businesses, websiteAudits, websiteSnapshots } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { AuditBusinessFacts, WebsiteAuditRecord, WebsiteAuditRepository } from '../application/ports.ts';
 
@@ -31,8 +31,9 @@ export class DrizzleWebsiteAuditRepository implements WebsiteAuditRepository {
 
   async lockForSnapshot(businessId: string, snapshotId: string): Promise<WebsiteAuditRecord | undefined> {
     const x = getExecutor(this.db);
-    // A missing row cannot be locked: the advisory lock serializes the two steps writing the same snapshot.
-    await x.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`website-audit:${snapshotId}`}, 0))`);
+    // Per business: writes of one snapshot (PageSpeed, vision) and of successive snapshots never interleave, so
+    // parts merge and exactly one audit stays latest. (A missing row cannot be locked with FOR UPDATE.)
+    await x.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${`website-audit:${businessId}`}, 0))`);
     const [row] = await x
       .select()
       .from(websiteAudits)
@@ -48,24 +49,19 @@ export class DrizzleWebsiteAuditRepository implements WebsiteAuditRepository {
       findings: audit.findings,
       qualityScore: audit.qualityScore,
       websiteStatus: audit.websiteStatus,
-      isLatest: true,
     };
-    const [row] = await x
-      .insert(websiteAudits)
-      .values({ businessId: audit.businessId, snapshotId: audit.snapshotId, ...values })
-      .onConflictDoUpdate({ target: websiteAudits.snapshotId, set: values })
-      .returning();
-    // The audited snapshot is the business's newest (steps run right after the crawl): earlier audits step aside.
     await x
-      .update(websiteAudits)
-      .set({ isLatest: false })
-      .where(
-        and(
-          eq(websiteAudits.businessId, audit.businessId),
-          ne(websiteAudits.snapshotId, audit.snapshotId),
-          eq(websiteAudits.isLatest, true),
-        ),
-      );
+      .insert(websiteAudits)
+      .values({ businessId: audit.businessId, snapshotId: audit.snapshotId, ...values, isLatest: false })
+      .onConflictDoUpdate({ target: websiteAudits.snapshotId, set: { ...values, updatedAt: sql`now()` } });
+    // Latest = the audit of the business's newest crawl, whichever snapshot was written last (a re-check of an older
+    // crawl never takes it back).
+    await x.execute(sql`UPDATE ${websiteAudits} wa SET is_latest = (wa.snapshot_id = (
+        SELECT a.snapshot_id FROM ${websiteAudits} a JOIN ${websiteSnapshots} s ON s.id = a.snapshot_id
+        WHERE a.business_id = ${audit.businessId}
+        ORDER BY s.fetched_at DESC, a.snapshot_id DESC LIMIT 1))
+      WHERE wa.business_id = ${audit.businessId}`);
+    const [row] = await x.select().from(websiteAudits).where(eq(websiteAudits.snapshotId, audit.snapshotId));
     return toRecord(row as Row);
   }
 
@@ -74,6 +70,7 @@ export class DrizzleWebsiteAuditRepository implements WebsiteAuditRepository {
       .select()
       .from(websiteAudits)
       .where(and(eq(websiteAudits.businessId, businessId), eq(websiteAudits.isLatest, true)))
+      .orderBy(desc(websiteAudits.updatedAt))
       .limit(1);
     return row ? toRecord(row) : undefined;
   }

@@ -122,17 +122,19 @@ async function toError(response: Response): Promise<Error> {
   }
   const body = ErrorBody.safeParse(await response.json().catch(() => undefined));
   const message = body.success ? (body.data.error.message ?? '') : '';
-  // 400 is either a bad key (configuration) or a page Lighthouse could not load (this site, not us).
-  const reason =
-    response.status === 400 && /api key/i.test(message)
+  // A page Lighthouse could not load (this site, not us) comes as a 400 or a 500 ("Lighthouse returned error: …"):
+  // never retried nor counted by the breaker shared by every workspace. Another 400 is a bad key (configuration).
+  const pageFailed =
+    /lighthouse returned error/i.test(message) || (response.status === 400 && !/api key/i.test(message));
+  const reason = pageFailed
+    ? 'PAGE_FAILED'
+    : response.status === 400
       ? 'KEY_INVALID'
-      : response.status === 400
-        ? 'PAGE_FAILED'
-        : response.status === 403
-          ? 'FORBIDDEN'
-          : `HTTP_${response.status}`;
+      : response.status === 403
+        ? 'FORBIDDEN'
+        : `HTTP_${response.status}`;
   return new ExternalServiceError('pagespeed', `answered ${response.status}`, {
-    details: { reason, retryable: response.status >= 500 },
+    details: { reason, retryable: !pageFailed && response.status >= 500 },
   });
 }
 

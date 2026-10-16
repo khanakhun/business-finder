@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { AiOutputInvalidError } from '@bf/ai';
 import {
   type Clock,
   ExternalServiceError,
@@ -31,15 +32,25 @@ import {
 // hour (an engine retry would loop, BF-028 lesson); only configuration errors (a refused key, no model key) fail it.
 
 const RETRY_LATER_MS = 3_600_000;
-/** Waits for the PageSpeed per-minute bucket before giving up for this run (re-checked later). */
-export const PSI_MAX_DEFERRALS = 10;
+/**
+ * Waits for the PageSpeed quota before giving up for this run (re-checked later): with the backoff below, about
+ * 10 minutes in all, enough for a bulk run to drain through the per-minute bucket.
+ */
+export const PSI_MAX_DEFERRALS = 15;
+const MAX_DEFERRAL_MS = 60_000;
 
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
-/** A crawl the audit can measure: a live page of the business (not parked, broken or a social profile). */
-const measurable = (snapshot: WebsiteSnapshotRecord) =>
+/** A crawl the audit can grade: a live page of the business (not parked, broken, blocked or a social profile). */
+const readable = (snapshot: WebsiteSnapshotRecord) =>
   !snapshot.intel.socialOnly &&
   (snapshot.intel.reachability === 'ok' || snapshot.intel.reachability === 'redirected');
+/**
+ * PageSpeed also measures a site that blocked our crawler: Google's Lighthouse often gets through, and the site may
+ * well work for visitors (else it would never be measured nor ever be `weak`).
+ */
+const measurable = (snapshot: WebsiteSnapshotRecord) =>
+  readable(snapshot) || (!snapshot.intel.socialOnly && snapshot.intel.reachability === 'blocked');
 
 /** The snapshot the crawl of this run (or a fresh earlier one) produced, else the business's latest. */
 async function snapshotFor(
@@ -86,6 +97,8 @@ export interface PsiStepOptions {
   readonly clock: Clock;
   readonly logger: Logger;
   readonly ttlDays: number;
+  /** Spreads deferred steps over time (tests pass a constant). */
+  readonly random?: () => number;
 }
 
 export class PsiStep implements EnrichmentStep {
@@ -117,14 +130,16 @@ export class PsiStep implements EnrichmentStep {
     if (!measurable(snapshot))
       return done(await this.options.audits.record(snapshot, {}), 0, { measured: false });
 
+    const url = analysableUrl(snapshot.intel.finalUrl ?? snapshot.url);
+    if (!url) return done(await this.options.audits.record(snapshot, {}), 0, { measured: false });
     const key = await this.options.key(execution.organizationId);
     const wait = await this.takeQuota(key);
     if (wait > 0) {
-      if (execution.deferrals < PSI_MAX_DEFERRALS) throw new StepDeferredError(wait, 0);
+      if (execution.deferrals < PSI_MAX_DEFERRALS)
+        throw new StepDeferredError(this.deferral(wait, execution), 0);
       const audit = await this.options.audits.record(snapshot, {});
       return done(audit, 0, { measured: false, quota: true, recheckAt: this.later() });
     }
-    const url = snapshot.intel.finalUrl ?? snapshot.url;
     const results: Partial<Record<(typeof PSI_STRATEGIES)[number], PsiStrategyResult>> = {};
     const errors: unknown[] = [];
     for (const strategy of PSI_STRATEGIES) {
@@ -151,25 +166,59 @@ export class PsiStep implements EnrichmentStep {
     return done(audit, 0, { measured, ...(retry ? { recheckAt: this.later() } : {}) });
   }
 
-  /** Two runs' worth from the per-minute and per-day buckets of the key; the wait in ms when empty. */
+  /**
+   * Two runs' worth (all or none) from the per-minute, then the per-day bucket of the key; the wait in ms when
+   * empty. The day bucket refills continuously (Google's quota resets daily): it smooths the spend, and Google's
+   * own 429 is handled like any quota. Two minute tokens are lost when only the day bucket is empty (rare).
+   */
   private async takeQuota(key: string | undefined): Promise<number> {
     const bucket = `psi:${key ? hash(key).slice(0, 16) : 'anonymous'}`;
     const { perMinute, perDay } = this.options.quota;
-    for (const [suffix, capacity, perSecond] of [
-      ['minute', perMinute, perMinute / 60],
-      ['day', perDay, perDay / 86_400],
-    ] as const) {
-      for (let run = 0; run < PSI_STRATEGIES.length; run++) {
-        const wait = await this.options.limiter.tryTake(`${bucket}:${suffix}`, { capacity, perSecond });
-        if (wait > 0) return wait;
-      }
-    }
-    return 0;
+    const cost = PSI_STRATEGIES.length;
+    const minute = await this.options.limiter.tryTake(`${bucket}:minute`, {
+      capacity: perMinute,
+      perSecond: perMinute / 60,
+      cost,
+    });
+    if (minute > 0) return minute;
+    return this.options.limiter.tryTake(`${bucket}:day`, {
+      capacity: perDay,
+      perSecond: perDay / 86_400,
+      cost,
+    });
+  }
+
+  /**
+   * How long to wait for the quota: at least the bucket's own wait, doubling from 1 s up to a minute with each
+   * deferral, plus up to 50% jitter so a bulk run's waiting steps do not all wake at once.
+   */
+  private deferral(wait: number, execution: StepExecution): number {
+    const backoff = Math.min(MAX_DEFERRAL_MS, 1_000 * 2 ** execution.deferrals);
+    const random = this.options.random ?? Math.random;
+    return Math.ceil(Math.max(wait, backoff) * (1 + random() / 2));
   }
 
   private later(): string {
     return new Date(this.options.clock.now().getTime() + RETRY_LATER_MS).toISOString();
   }
+}
+
+/**
+ * The URL handed to PageSpeed: http(s) only, credentials stripped (never sent to Google), no IP-literal hosts (quota
+ * spent on nothing). Null when it cannot be analysed.
+ */
+export function analysableUrl(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(url.hostname) || url.hostname.startsWith('[')) return null;
+  url.username = '';
+  url.password = '';
+  return url.toString();
 }
 
 const isPageFailure = (error: unknown) =>
@@ -224,7 +273,8 @@ export class VisionAuditStep implements EnrichmentStep {
   async execute(execution: StepExecution): Promise<StepResult> {
     const snapshot = await snapshotFor(execution, this.options.snapshots);
     if (!snapshot) return { outcome: 'skipped', reason: 'not_applicable', costUsd: 0 };
-    if (!measurable(snapshot))
+    // A blocked crawl's screenshots show the block page, not the site: nothing to grade.
+    if (!readable(snapshot))
       return done(await this.options.audits.record(snapshot, {}), 0, { graded: false });
     try {
       const graded = await this.options.grader.grade(
@@ -245,7 +295,9 @@ export class VisionAuditStep implements EnrichmentStep {
       // The model is down or answered badly: the audit goes on without the grade, which is retried within the hour.
       this.options.logger.warn({ error: describe(error) }, 'vision grade failed');
       const audit = await this.options.audits.record(snapshot, {});
-      return done(audit, 0, {
+      // An invalid answer was still billed: book it on the run (budgets, spend).
+      const spent = error instanceof AiOutputInvalidError ? (error.costUsd ?? 0) : 0;
+      return done(audit, spent, {
         graded: false,
         recheckAt: new Date(this.options.clock.now().getTime() + RETRY_LATER_MS).toISOString(),
       });

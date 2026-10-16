@@ -297,8 +297,8 @@ export const FINDING_DEFINITIONS = {
     severity: 'major',
     title: { en: 'Poor performance score', fr: 'Mauvais score de performance' },
     explanation: {
-      en: 'Google’s PageSpeed performance score on mobile is below 50.',
-      fr: 'Le score de performance PageSpeed de Google sur mobile est inférieur à 50.',
+      en: 'Google’s PageSpeed performance score is below 50 (on mobile, else on desktop).',
+      fr: 'Le score de performance PageSpeed de Google est inférieur à 50 (sur mobile, sinon sur ordinateur).',
     },
     recommendation: {
       en: 'Rebuild on a fast, modern stack.',
@@ -536,6 +536,11 @@ export type Finding = z.infer<typeof FindingSchema>;
 // ---------------------------------------------------------------------------------------------------------------
 // Audit
 
+/**
+ * DECISION(BF-030): `none` (no website) is never stored: a business without a website has no crawl, hence no audit.
+ * Consumers (scoring, outreach, the listing filter `website=none`) derive it from `businesses.website_url IS NULL`,
+ * the strongest offer signal (`new_website`); `BusinessWebsiteAudit.status` reports it for such a business.
+ */
 export const WEBSITE_STATUSES = ['none', 'parked', 'social_only', 'broken', 'weak', 'ok', 'strong'] as const;
 export const WebsiteStatusSchema = z.enum(WEBSITE_STATUSES);
 export type WebsiteStatus = z.infer<typeof WebsiteStatusSchema>;
@@ -567,6 +572,10 @@ export type WebsiteAudit = z.infer<typeof WebsiteAuditSchema>;
 
 /** `GET /v1/businesses/:id/website-audit`: the audit of the business's latest crawl, if any. */
 export const BusinessWebsiteAuditSchema = z
-  .object({ audit: WebsiteAuditSchema.nullable() })
+  .object({
+    audit: WebsiteAuditSchema.nullable(),
+    /** `none` for a business without a website, else the latest audit's status (null before the first audit). */
+    status: WebsiteStatusSchema.nullable(),
+  })
   .meta({ id: 'BusinessWebsiteAudit' });
 export type BusinessWebsiteAudit = z.infer<typeof BusinessWebsiteAuditSchema>;

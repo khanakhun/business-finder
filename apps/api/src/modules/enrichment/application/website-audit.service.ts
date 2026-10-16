@@ -29,7 +29,14 @@ export class WebsiteAuditService {
     part: { readonly psi?: PsiResult | null; readonly vision?: VisionGrade | null },
   ): Promise<WebsiteAuditRecord> {
     const current = await this.audits.lockForSnapshot(snapshot.businessId, snapshot.id);
-    const psi = part.psi ?? current?.psi ?? null;
+    // Per strategy: a re-check that measured only mobile keeps the desktop result of the same crawl.
+    const psi =
+      part.psi || current?.psi
+        ? {
+            mobile: part.psi?.mobile ?? current?.psi?.mobile ?? null,
+            desktop: part.psi?.desktop ?? current?.psi?.desktop ?? null,
+          }
+        : null;
     const vision = part.vision ?? current?.vision ?? null;
     const business = await this.audits.businessFacts(snapshot.businessId);
     const outcome = assessWebsite({

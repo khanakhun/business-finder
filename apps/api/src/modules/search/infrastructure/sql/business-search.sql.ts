@@ -52,6 +52,8 @@ export function dimensionSql(spec: ListingSpec): Partial<Record<FacetDimension, 
   if (f.website === 'none') dims.website = sql`${businesses.websiteUrl} IS NULL`;
   if (f.website === 'has') dims.website = sql`${businesses.websiteUrl} IS NOT NULL`;
   // `weak` (BF-030): the latest website audit rates the site poorly (or the site is broken).
+  // DECISION(BF-030): a read of enrichment's `website_audits` table (like the enrichment read models): the listing
+  // filter needs it in the same query, and only enrichment writes it.
   if (f.website === 'weak') {
     dims.website = sql`EXISTS (SELECT 1 FROM ${websiteAudits} wa WHERE wa.business_id = ${businesses.id}
       AND wa.is_latest AND wa.website_status = ANY(${arrayOf(WEAK_WEBSITE_STATUSES, 'text')}))`;

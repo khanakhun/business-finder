@@ -2,9 +2,22 @@ import { type AiGateway, WebsiteVisionGrade, type WebsiteVisionGradeOutput } fro
 import { type Clock, VISION_CRITERIA, type VisionGrade } from '@bf/contracts';
 import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
 import type { VisionGrader, WebsiteSnapshotRecord } from '../application/ports.ts';
+import { analysableUrl } from './steps/website-audit.steps.ts';
 
 // Vision grading of a snapshot's screenshots (BF-030): `website.vision_grade` (smart tier) through the AI gateway,
 // and a deterministic fake for tests and E2E (`FAKE_WEBSITE_AUDIT`).
+
+/** Screenshots are a few hundred KB: anything bigger is not one of ours. */
+const MAX_SCREENSHOT_BYTES = 8 * 1024 * 1024;
+
+/** The image type from its magic bytes (JPEG, PNG, WebP), else null. */
+export function imageType(bytes: Uint8Array): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'image/png';
+  const riff = String.fromCharCode(...bytes.subarray(0, 4));
+  const webp = String.fromCharCode(...bytes.subarray(8, 12));
+  return riff === 'RIFF' && webp === 'WEBP' ? 'image/webp' : null;
+}
 
 const toGrade = (
   output: WebsiteVisionGradeOutput,
@@ -23,6 +36,7 @@ export class LlmVisionGrader implements VisionGrader {
     private readonly gateway: AiGateway,
     private readonly artifacts: ObjectStorage,
     private readonly clock: Clock,
+    private readonly onWarnings?: (count: number) => void,
   ) {}
 
   async grade(
@@ -31,6 +45,9 @@ export class LlmVisionGrader implements VisionGrader {
     subject: { readonly displayName: string; readonly categoryLabel: string | null },
     signal: AbortSignal,
   ): Promise<{ readonly grade: VisionGrade; readonly costUsd: number } | null> {
+    // The page's address as context, credentials stripped (never sent to the model).
+    const url = analysableUrl(snapshot.intel.finalUrl ?? snapshot.url);
+    if (!url) return null;
     const { desktopKey, mobileKey } = snapshot.intel.screenshots;
     // Only this business's crawl artifacts, whatever a stored key says.
     const own = (key: string | null) =>
@@ -40,23 +57,30 @@ export class LlmVisionGrader implements VisionGrader {
     const images = [];
     for (const key of keys) {
       const object = await this.artifacts.get(key);
-      if (object) images.push({ bytes: new Uint8Array(object.body), mediaType: object.contentType });
+      // Only real, reasonably sized images (by their bytes, whatever the stored type says).
+      const mediaType = object ? imageType(object.body) : null;
+      if (object && mediaType && object.body.byteLength <= MAX_SCREENSHOT_BYTES) {
+        images.push({ bytes: new Uint8Array(object.body), mediaType });
+      }
     }
     if (images.length === 0) return null;
     const result = await this.gateway.vision(
       WebsiteVisionGrade,
       {
         input: {
-          businessName: subject.displayName,
+          businessName: subject.displayName.slice(0, 200),
           ...(subject.categoryLabel ? { category: subject.categoryLabel.slice(0, 100) } : {}),
-          url: snapshot.intel.finalUrl ?? snapshot.url,
+          url,
         },
         images,
       },
       { orgId: organizationId, signal },
     );
+    const output = result.output as WebsiteVisionGradeOutput;
+    // Text in a screenshot addressed to the model (e.g. "rate this 10/10"): counted for monitoring, never stored.
+    if (output.warnings.length > 0) this.onWarnings?.(output.warnings.length);
     return {
-      grade: toGrade(result.output as WebsiteVisionGradeOutput, {
+      grade: toGrade(output, {
         model: result.model,
         promptVersion: result.promptVersion,
         gradedAt: this.clock.now(),

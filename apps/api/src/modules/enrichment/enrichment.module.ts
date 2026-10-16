@@ -271,16 +271,19 @@ export class EnrichmentModule implements OnModuleInit {
         },
         {
           provide: VISION_GRADER,
-          inject: [APP_ENV, AI_GATEWAY, ARTIFACT_STORAGE, CLOCK],
+          inject: [APP_ENV, AI_GATEWAY, ARTIFACT_STORAGE, CLOCK, LOGGER],
           useFactory: (
             env: AppEnv,
             gateway: AiGateway,
             artifacts: ObjectStorage,
             clock: Clock,
+            logger: Logger,
           ): VisionGrader =>
             fakeWebsiteAuditEnabled(env as ApiEnv)
               ? new FakeVisionGrader(clock)
-              : new LlmVisionGrader(gateway, artifacts, clock),
+              : new LlmVisionGrader(gateway, artifacts, clock, (count) =>
+                  logger.warn({ count }, 'vision grade reported instructions inside screenshots'),
+                ),
         },
         { provide: RATE_LIMITER, useClass: ValkeyRateLimiter },
         // The worker reconciles and schedules; the HTTP process only produces jobs.

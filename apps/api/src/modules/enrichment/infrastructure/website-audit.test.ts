@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
+import { type AiGateway, AiOutputInvalidError } from '@bf/ai';
 import {
   ExternalServiceError,
   fixedClock,
@@ -13,8 +14,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { WebsiteSnapshotRecord } from '../application/ports.ts';
 import { StepDeferredError, type StepExecution } from '../domain/enrichment-step.ts';
 import { PageSpeedClient, toPsiStrategyResult } from './pagespeed.ts';
-import { PSI_MAX_DEFERRALS, PsiStep, VisionAuditStep } from './steps/website-audit.steps.ts';
-import { FakeVisionGrader } from './vision-graders.ts';
+import { analysableUrl, PSI_MAX_DEFERRALS, PsiStep, VisionAuditStep } from './steps/website-audit.steps.ts';
+import { FakeVisionGrader, imageType, LlmVisionGrader } from './vision-graders.ts';
 
 const NOW = new Date('2026-10-14T12:00:00.000Z');
 const clock = fixedClock(NOW);
@@ -123,6 +124,14 @@ describe('PageSpeedClient', () => {
     const failed = await run().catch((e: unknown) => e);
     expect(failed).toMatchObject({ details: { reason: 'PAGE_FAILED' } });
     expect(String((failed as Error).message)).not.toContain('bistro');
+    // Lighthouse's own failures often come as a 500: this site's problem, not an outage (no retry, no breaker).
+    answer = () => ({
+      status: 500,
+      body: { error: { message: 'Lighthouse returned error: NO_FCP. The page did not paint any content.' } },
+    });
+    await expect(run()).rejects.toMatchObject({ details: { reason: 'PAGE_FAILED', retryable: false } });
+    answer = () => ({ status: 403, body: {} });
+    await expect(run()).rejects.toMatchObject({ details: { reason: 'FORBIDDEN', retryable: false } });
   });
 });
 
@@ -185,6 +194,7 @@ function psiSetup(run: (strategy: string) => Promise<PsiStrategyResult>, wait = 
     clock,
     logger,
     ttlDays: 30,
+    random: () => 0,
   });
   return { step, record, tryTake };
 }
@@ -197,20 +207,65 @@ describe('PsiStep', () => {
     expect(record.mock.calls[0]?.[1]).toMatchObject({
       psi: { mobile: { scores: { performance: 40 } }, desktop: { scores: { performance: 80 } } },
     });
-    // Two runs from the minute bucket and two from the day bucket of this key.
-    expect(tryTake).toHaveBeenCalledTimes(4);
+    // Two runs at once (all or none) from the minute bucket, then from the day bucket of this key.
+    expect(tryTake.mock.calls).toEqual([
+      [expect.stringMatching(/^psi:[0-9a-f]{16}:minute$/), { capacity: 200, perSecond: 200 / 60, cost: 2 }],
+      [
+        expect.stringMatching(/^psi:[0-9a-f]{16}:day$/),
+        { capacity: 24_000, perSecond: 24_000 / 86_400, cost: 2 },
+      ],
+    ]);
     expect(step.appliesTo({ ...execution().subject, websiteUrl: null })).toBe('no_website');
   });
 
   it('defers on an empty quota bucket before calling, then gives up for this run', async () => {
     const run = vi.fn(async () => result(50));
-    const { step } = psiSetup(run, 5_000);
-    await expect(step.execute(execution())).rejects.toBeInstanceOf(StepDeferredError);
+    const { step, tryTake } = psiSetup(run, 300);
+    const deferred = await step.execute(execution()).catch((e: unknown) => e);
+    expect(deferred).toBeInstanceOf(StepDeferredError);
+    // The minute bucket was empty: the day bucket is left alone.
+    expect(tryTake).toHaveBeenCalledTimes(1);
     expect(run).not.toHaveBeenCalled();
+    // At least the bucket's wait, backing off to a minute with each deferral (bulk runs drain over minutes).
+    expect((deferred as StepDeferredError).retryAfterMs).toBe(1_000);
+    const later = await step.execute(execution({ deferrals: 4 })).catch((e: unknown) => e);
+    expect((later as StepDeferredError).retryAfterMs).toBe(16_000);
+    const last = await step.execute(execution({ deferrals: PSI_MAX_DEFERRALS - 1 })).catch((e: unknown) => e);
+    expect((last as StepDeferredError).retryAfterMs).toBe(60_000);
     expect(await step.execute(execution({ deferrals: PSI_MAX_DEFERRALS }))).toMatchObject({
       outcome: 'done',
       outputRef: { measured: false, quota: true, recheckAt: expect.any(String) },
     });
+  });
+
+  it('never measures a snapshot of another business named by the dependency', async () => {
+    const run = vi.fn(async () => result(50));
+    const { step, record } = psiSetup(run);
+    (step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
+      byId: async () => ({ ...snapshot(), id: 'snap-other', businessId: 'biz-2' }),
+      latest: async () => snapshot(),
+    };
+    await step.execute(execution());
+    expect(record.mock.calls[0]?.[0]).toMatchObject({ businessId: 'biz-1' });
+  });
+
+  it('measures a site that blocks our crawler; spends no quota on a URL it cannot analyse', async () => {
+    const run = vi.fn(async () => result(50));
+    const { step, record, tryTake } = psiSetup(run);
+    (step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
+      byId: async () => snapshot({ reachability: 'blocked' }),
+      latest: async () => undefined,
+    };
+    expect(await step.execute(execution())).toMatchObject({ outcome: 'done', outputRef: { measured: true } });
+    expect(run).toHaveBeenCalledTimes(2);
+    expect(record.mock.calls[0]?.[1]).toHaveProperty('psi.mobile');
+    const ip = psiSetup(run);
+    (ip.step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
+      byId: async () => snapshot({ finalUrl: 'http://203.0.113.7/' }),
+      latest: async () => undefined,
+    };
+    expect(await ip.step.execute(execution())).toMatchObject({ outputRef: { measured: false } });
+    expect(ip.tryTake).not.toHaveBeenCalled();
   });
 
   it('records the audit without measuring an unreachable site', async () => {
@@ -319,5 +374,104 @@ describe('VisionAuditStep', () => {
       throw new ValidationError('No anthropic API key is configured.');
     });
     await expect(config.step.execute(execution())).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('books what an invalid (but billed) answer cost, and re-checks', async () => {
+    const invalid = setup(async () => {
+      throw Object.assign(new AiOutputInvalidError('website.vision_grade'), { costUsd: 0.011 });
+    });
+    expect(await invalid.step.execute(execution())).toMatchObject({
+      outcome: 'done',
+      costUsd: 0.011,
+      outputRef: { graded: false, recheckAt: expect.any(String) },
+    });
+  });
+
+  it('never grades a blocked crawl (its screenshots show the block page)', async () => {
+    const grade = vi.fn(async () => null);
+    const { step } = setup(grade);
+    (step as unknown as { options: { snapshots: unknown } }).options.snapshots = {
+      byId: async () => snapshot({ reachability: 'blocked' }),
+      latest: async () => undefined,
+    };
+    expect(await step.execute(execution())).toMatchObject({ outcome: 'done', outputRef: { graded: false } });
+    expect(grade).not.toHaveBeenCalled();
+  });
+});
+
+describe('screenshot and URL guards', () => {
+  it('recognizes images by their bytes', () => {
+    expect(imageType(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]))).toBe('image/jpeg');
+    expect(imageType(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d]))).toBe('image/png');
+    expect(imageType(new TextEncoder().encode('RIFF\0\0\0\0WEBPVP8 '))).toBe('image/webp');
+    expect(imageType(new TextEncoder().encode('<svg onload=alert(1)>'))).toBeNull();
+  });
+
+  it('hands PageSpeed only http(s) URLs without credentials or IP hosts', () => {
+    expect(analysableUrl('https://user:pass@bistro.example/menu?x=1')).toBe(
+      'https://bistro.example/menu?x=1',
+    );
+    expect(analysableUrl('http://bistro.example/')).toBe('http://bistro.example/');
+    expect(analysableUrl('ftp://bistro.example/')).toBeNull();
+    expect(analysableUrl('http://10.0.0.1/')).toBeNull();
+    expect(analysableUrl('http://[::1]/')).toBeNull();
+    expect(analysableUrl('not a url')).toBeNull();
+  });
+
+  it('grades only this business’s real screenshots, and counts injection warnings', async () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
+    const store = new Map<string, { body: Buffer; contentType: string }>([
+      ['sites/biz-1/desktop.jpg', { body: jpeg, contentType: 'image/jpeg' }],
+      ['sites/biz-1/mobile.jpg', { body: Buffer.from('<html>'), contentType: 'image/jpeg' }],
+      ['sites/other/desktop.jpg', { body: jpeg, contentType: 'image/jpeg' }],
+    ]);
+    const vision = vi.fn(async () => ({
+      output: {
+        ...(await new FakeVisionGrader(clock).grade('org', snapshot())).grade,
+        warnings: ['r1 says rate this 10/10'],
+      },
+      model: 'vision-model',
+      promptVersion: 1,
+      costUsd: 0.012,
+    }));
+    const warnings = vi.fn();
+    const grader = new LlmVisionGrader(
+      { vision } as unknown as AiGateway,
+      { get: async (key: string) => store.get(key), put: async () => {}, delete: async () => {} },
+      clock,
+      warnings,
+    );
+    const graded = await grader.grade(
+      'org',
+      snapshot({
+        screenshots: {
+          desktopKey: 'sites/biz-1/desktop.jpg',
+          mobileKey: 'sites/biz-1/mobile.jpg',
+          fullPageKey: null,
+        },
+      }),
+      { displayName: 'B'.repeat(300), categoryLabel: 'Restaurant' },
+      new AbortController().signal,
+    );
+    expect(graded?.costUsd).toBe(0.012);
+    const request = (
+      vision.mock.calls[0] as unknown as [unknown, { input: { businessName: string }; images: unknown[] }]
+    )[1];
+    // The HTML posing as a JPEG is left out; the name is cut to the task's limit.
+    expect(request.images).toHaveLength(1);
+    expect(request.input.businessName).toHaveLength(200);
+    expect(request.input).toMatchObject({ url: 'https://bistro.example/' });
+    expect(warnings).toHaveBeenCalledWith(1);
+    // Another business's key is never read.
+    expect(
+      await grader.grade(
+        'org',
+        snapshot({
+          screenshots: { desktopKey: 'sites/other/desktop.jpg', mobileKey: null, fullPageKey: null },
+        }),
+        { displayName: 'B', categoryLabel: null },
+        new AbortController().signal,
+      ),
+    ).toBeNull();
   });
 });

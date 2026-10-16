@@ -232,6 +232,13 @@
       "when": 1792185880908,
       "tag": "0032_fact_registry",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792187579247,
+      "tag": "0033_site_fact_extractions",
+      "breakpoints": true
     }
   ]
 }

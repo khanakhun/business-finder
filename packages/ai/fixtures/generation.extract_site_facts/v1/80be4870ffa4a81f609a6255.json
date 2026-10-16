@@ -1,0 +1,413 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Gustavia Wheels",
+    "businessCategory": "Car rental",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://gustaviawheels.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Gustavia Wheels\n\nCar and electric vehicle rental at Saint-Jean airport, with free delivery anywhere on the island.\n\n## Our fleet (daily rates, unlimited mileage)\n\n- Compact (Example Twingo or similar) — €60\n- Mini SUV — €80\n- Electric mini SUV — €95\n- Convertible 4x4 — €130\n- 7-seat van — €160\n\nDiscount of 15% for rentals of 7 days or more. Full insurance with a €1,000 excess included. Drivers must be 21 or over.\n\n## Opening hours\n\nMonday–Saturday 8am–6pm, Sunday 9am–12pm. After-hours returns by arrangement.\n\n## Why us\n\n- Family-run since 1998\n- Child seats free of charge\n- Chargers for electric cars at the agency\n- Roadside assistance 24/7\n\nGustavia Wheels, Aéroport Gustave III, Saint-Jean 97133\n+590 590 00 31 23 · rent@gustaviawheels.example\n\nWe accept Visa, Mastercard and Amex. A credit card deposit is required.\n\n© Gustavia Wheels · Rental conditions · Privacy policy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Car and electric vehicle rental at Saint-Jean airport, with free delivery anywhere on the island.",
+        "text": "Car and electric vehicle rental at Saint-Jean airport, with free delivery anywhere on the island.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Compact (Example Twingo or similar) — €60",
+        "text": "Compact",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Compact (Example Twingo or similar) — €60",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": "daily",
+          "item": "Compact"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Mini SUV — €80",
+        "text": "Mini SUV",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mini SUV — €80",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": "daily",
+          "item": "Mini SUV"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Electric mini SUV — €95",
+        "text": "Electric mini SUV",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Electric mini SUV — €95",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": "daily",
+          "item": "Electric mini SUV"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Convertible 4x4 — €130",
+        "text": "Convertible 4x4",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Discount of 15% for rentals of 7 days or more.",
+        "text": null,
+        "price": {
+          "amount": 357,
+          "currency": "EUR",
+          "unit": "per week",
+          "item": "Compact"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Convertible 4x4 — €130",
+        "text": null,
+        "price": {
+          "amount": 130,
+          "currency": "EUR",
+          "unit": "daily",
+          "item": "Convertible 4x4"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "7-seat van — €160",
+        "text": "7-seat van",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "7-seat van — €160",
+        "text": null,
+        "price": {
+          "amount": 160,
+          "currency": "EUR",
+          "unit": "daily",
+          "item": "7-seat van"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Monday–Saturday 8am–6pm, Sunday 9am–12pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Family-run since 1998",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1998,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Child seats free of charge",
+        "text": "Child seats free of charge",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Chargers for electric cars at the agency",
+        "text": "Chargers for electric cars",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Roadside assistance 24/7",
+        "text": "Roadside assistance 24/7",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Scooter rental — €45 per day",
+        "text": "Scooter rental",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "with free delivery anywhere on the island.",
+        "text": "Free delivery anywhere on the island",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Gustavia Wheels, Aéroport Gustave III, Saint-Jean 97133",
+        "text": "Aéroport Gustave III, Saint-Jean 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 31 23 · rent@gustaviawheels.example",
+        "text": "+590 590 00 31 23",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 31 23 · rent@gustaviawheels.example",
+        "text": "rent@gustaviawheels.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We accept Visa, Mastercard and Amex.",
+        "text": "Visa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We accept Visa, Mastercard and Amex.",
+        "text": "Mastercard",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We accept Visa, Mastercard and Amex.",
+        "text": "Amex",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

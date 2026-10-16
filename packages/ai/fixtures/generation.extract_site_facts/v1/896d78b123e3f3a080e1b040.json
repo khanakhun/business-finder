@@ -1,0 +1,407 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Flamands Yoga Shala",
+    "businessCategory": "Yoga studio",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://flamandsyoga.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Schedule](/schedule) · [Pricing](/pricing) · [Retreats](/retreats)\n\n# Flamands Yoga Shala\n\nOpen-air yoga above Flamands beach. All levels, all ages, barefoot.\n\n## Classes\n\n- Morning vinyasa (7am, Monday to Saturday)\n- Sunset yin (5:30pm, Tuesday and Thursday)\n- Beach yoga on Sundays at 8am\n- Private sessions at your villa\n\n## Pricing\n\n- Drop-in class: €28\n- 5-class pass: €125 (valid 2 months)\n- 10-class pass: €230 (valid 4 months)\n- Private session: €120 per hour, up to 4 people\n- Mats provided free of charge.\n\nBook your spot on https://www.momoyoga.example/flamands-shala — classes are capped at 12 people.\n\n## Teachers\n\n- Ana Costa, founder, 500h RYT\n- Ben Fischer, yin and meditation\n\n## Retreats\n\nThree-day retreats in May and October, from €890 per person including meals and accommodation.\n\n\"The sunset yin class with the ocean in front of you is pure magic.\" — Kate M., Toronto\n\nFlamands Yoga Shala, Anse des Flamands, 97133 Saint-Barthélemy · WhatsApp +590 690 00 34 56 · hello@flamandsyoga.example\n\nClasses are taught in English; Ana also teaches in Portuguese and French.\n\n© Flamands Yoga Shala · Terms · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Open-air yoga above Flamands beach. All levels, all ages, barefoot.",
+        "text": "Open-air yoga above Flamands beach. All levels, all ages, barefoot.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Morning vinyasa (7am, Monday to Saturday)",
+        "text": "Morning vinyasa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Sunset yin (5:30pm, Tuesday and Thursday)",
+        "text": "Sunset yin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Beach yoga on Sundays at 8am",
+        "text": "Beach yoga on Sundays",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Private sessions at your villa",
+        "text": "Private sessions at your villa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Drop-in class: €28",
+        "text": null,
+        "price": {
+          "amount": 28,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Drop-in class"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "5-class pass: €125 (valid 2 months)",
+        "text": null,
+        "price": {
+          "amount": 125,
+          "currency": "EUR",
+          "unit": null,
+          "item": "5-class pass"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "10-class pass: €230 (valid 4 months)",
+        "text": null,
+        "price": {
+          "amount": 230,
+          "currency": "EUR",
+          "unit": null,
+          "item": "10-class pass"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Morning vinyasa (7am, Monday to Saturday)",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "06:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "tue",
+            "opens": "06:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "wed",
+            "opens": "06:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "thu",
+            "opens": "06:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "fri",
+            "opens": "06:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sat",
+            "opens": "06:00",
+            "closes": "20:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Private session: €120 per hour, up to 4 people",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Private session"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Mats provided free of charge.",
+        "text": "Mats provided free of charge",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Book your spot on https://www.momoyoga.example/flamands-shala",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.momoyoga.example/flamands-shala",
+          "provider": "Momoyoga"
+        }
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ana Costa, founder, 500h RYT",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Ana Costa",
+          "role": "founder"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ben Fischer, yin and meditation",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Ben Fischer",
+          "role": "yin and meditation teacher"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Three-day retreats in May and October",
+        "text": "Three-day retreats in May and October",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Three-day retreats in May and October, from €890 per person including meals and accommodation.",
+        "text": null,
+        "price": {
+          "amount": 890,
+          "currency": "EUR",
+          "unit": "per person",
+          "item": "Three-day retreat"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "10-class pass: €230 (valid 4 months)",
+        "text": null,
+        "price": {
+          "amount": 250,
+          "currency": "EUR",
+          "unit": null,
+          "item": "10-class pass"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"The sunset yin class with the ocean in front of you is pure magic.\" — Kate M., Toronto",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "The sunset yin class with the ocean in front of you is pure magic.",
+          "attribution": "Kate M., Toronto"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Flamands Yoga Shala, Anse des Flamands, 97133 Saint-Barthélemy",
+        "text": "Anse des Flamands, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp +590 690 00 34 56",
+        "text": "+590 690 00 34 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "hello@flamandsyoga.example",
+        "text": "hello@flamandsyoga.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Classes are taught in English; Ana also teaches in Portuguese and French.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Classes are taught in English; Ana also teaches in Portuguese and French.",
+        "text": "Portuguese",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Classes are taught in English; Ana also teaches in Portuguese and French.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

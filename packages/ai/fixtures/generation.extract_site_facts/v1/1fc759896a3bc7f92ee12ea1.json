@@ -1,0 +1,384 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Driftwood Concept Store",
+    "businessCategory": "Boutique",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://driftwoodstore.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Driftwood Concept Store\n\nBeachwear, homeware and gifts made by Caribbean designers, in the heart of Gustavia.\n\n## What you'll find\n\n- Swimwear and linen resort wear\n- Hand-poured candles and ceramics\n- Jewellery by island makers\n- Books, maps and prints of Saint-Barth\n\n## Services\n\n- Gift wrapping, always free\n- Worldwide shipping (DHL, 3 to 5 days)\n- Personal shopping appointments before opening hours\n- Tax-free shopping for non-EU visitors\n\n## Hours\n\nOpen Monday to Saturday from 10am to 7pm, and Sunday from 10am to 1pm in high season (December to April).\n\nDriftwood was opened in 2019 by Zoé Lambert and Mia Chen, two friends who met working on charter yachts.\n\n\"My favourite shop on the island, I never leave empty-handed.\" — Charlotte, Instagram follower\n\nDriftwood Concept Store, Rue du Bord de Mer, Gustavia 97133\n+590 590 00 33 45 · shop@driftwoodstore.example\n\nCards, cash and contactless. We speak English, French and Spanish.\n\n© Driftwood Concept Store · Shipping & returns · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Beachwear, homeware and gifts made by Caribbean designers, in the heart of Gustavia.",
+        "text": "Beachwear, homeware and gifts made by Caribbean designers, in the heart of Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Swimwear and linen resort wear",
+        "text": "Swimwear and linen resort wear",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hand-poured candles and ceramics",
+        "text": "Hand-poured candles and ceramics",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Jewellery by island makers",
+        "text": "Jewellery by island makers",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Books, maps and prints of Saint-Barth",
+        "text": "Books, maps and prints of Saint-Barth",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Gift wrapping, always free",
+        "text": "Gift wrapping, always free",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Worldwide shipping (DHL, 3 to 5 days)",
+        "text": "Worldwide shipping",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Personal shopping appointments before opening hours",
+        "text": "Personal shopping appointments",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Worldwide shipping (DHL, 3 to 5 days)",
+        "text": null,
+        "price": {
+          "amount": 25,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Worldwide shipping"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tax-free shopping for non-EU visitors",
+        "text": "Tax-free shopping for non-EU visitors",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open Monday to Saturday from 10am to 7pm, and Sunday from 10am to 1pm in high season",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "10:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sun",
+            "opens": "10:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Driftwood was opened in 2019 by Zoé Lambert and Mia Chen",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2019,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Driftwood was opened in 2019 by Zoé Lambert and Mia Chen",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Zoé Lambert",
+          "role": "co-founder"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Driftwood was opened in 2019 by Zoé Lambert and Mia Chen",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Mia Chen",
+          "role": "co-founder"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"My favourite shop on the island, I never leave empty-handed.\" — Charlotte, Instagram follower",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "My favourite shop on the island, I never leave empty-handed.",
+          "attribution": "Charlotte"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Driftwood Concept Store, Rue du Bord de Mer, Gustavia 97133",
+        "text": "Rue du Bord de Mer, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Online shop with island-wide delivery",
+        "text": "Online shop",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 33 45 · shop@driftwoodstore.example",
+        "text": "+590 590 00 33 45",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 33 45 · shop@driftwoodstore.example",
+        "text": "shop@driftwoodstore.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards, cash and contactless.",
+        "text": "Cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards, cash and contactless.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Spanish.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Spanish.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Spanish.",
+        "text": "Spanish",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

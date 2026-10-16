@@ -1,0 +1,394 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Massages à Domicile Saint-Barth",
+    "businessCategory": "Massage à domicile",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://massagesdomicile-sbh.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Massages à Domicile Saint-Barth\n\nVotre masseuse diplômée se déplace dans votre villa, votre hôtel ou sur votre bateau, partout sur l’île.\n\n## Les massages\n\n- Massage suédois — 1 h — 150 €\n- Massage aux pierres chaudes — 1 h 15 — 180 €\n- Massage sportif — 1 h — 160 €\n- Réflexologie plantaire — 45 min — 110 €\n- Massage femme enceinte — 1 h — 150 €\n\nTable de massage, huiles bio et musique fournies. Supplément de 30 € pour les interventions sur bateau.\n\n## Disponibilités\n\nDu lundi au samedi de 8h à 20h. Réservation la veille par WhatsApp au +590 690 00 20 12.\n\nJe m’appelle Clara Dufour, masseuse-kinésithérapeute de formation, installée à Saint-Barth depuis 2016.\n\n« Un vrai moment de détente dans notre villa, Clara est très professionnelle. » — Isabelle, Paris\n\nJe parle français et anglais. Paiement en espèces, par carte ou par virement.\n\n© Massages à Domicile Saint-Barth — Mentions légales — Ce site utilise des cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Votre masseuse diplômée se déplace dans votre villa, votre hôtel ou sur votre bateau, partout sur l’île.",
+        "text": "Votre masseuse diplômée se déplace dans votre villa, votre hôtel ou sur votre bateau, partout sur l’île.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "partout sur l’île.",
+        "text": "partout sur l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage suédois — 1 h — 150 €",
+        "text": "Massage suédois",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage suédois — 1 h — 150 €",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": "1 h",
+          "item": "Massage suédois"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage aux pierres chaudes — 1 h 15 — 180 €",
+        "text": "Massage aux pierres chaudes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage aux pierres chaudes — 1 h 15 — 180 €",
+        "text": null,
+        "price": {
+          "amount": 180,
+          "currency": "EUR",
+          "unit": "1 h 15",
+          "item": "Massage aux pierres chaudes"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage sportif — 1 h — 160 €",
+        "text": "Massage sportif",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage sportif — 1 h — 160 €",
+        "text": null,
+        "price": {
+          "amount": 160,
+          "currency": "EUR",
+          "unit": "1 h",
+          "item": "Massage sportif"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi de 8h à 20h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "10:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Réflexologie plantaire — 45 min — 110 €",
+        "text": "Réflexologie plantaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réflexologie plantaire — 45 min — 110 €",
+        "text": null,
+        "price": {
+          "amount": 110,
+          "currency": "EUR",
+          "unit": "45 min",
+          "item": "Réflexologie plantaire"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Massage femme enceinte — 1 h — 150 €",
+        "text": "Massage femme enceinte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Supplément de 30 € pour les interventions sur bateau.",
+        "text": null,
+        "price": {
+          "amount": 30,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Supplément bateau"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi de 8h à 20h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "20:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "20:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservation la veille par WhatsApp au +590 690 00 20 12.",
+        "text": "+590 690 00 20 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Massage aux pierres chaudes — 1 h 15 — 180 €",
+        "text": null,
+        "price": {
+          "amount": 170,
+          "currency": "EUR",
+          "unit": "1 h 15",
+          "item": "Massage aux pierres chaudes"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Je m’appelle Clara Dufour, masseuse-kinésithérapeute de formation",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Clara Dufour",
+          "role": "masseuse-kinésithérapeute"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "installée à Saint-Barth depuis 2016.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2016,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Un vrai moment de détente dans notre villa, Clara est très professionnelle. » — Isabelle, Paris",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Un vrai moment de détente dans notre villa, Clara est très professionnelle.",
+          "attribution": "Isabelle, Paris"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je parle français et anglais.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Je parle français et anglais.",
+        "text": "anglais",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement en espèces, par carte ou par virement.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement en espèces, par carte ou par virement.",
+        "text": "carte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

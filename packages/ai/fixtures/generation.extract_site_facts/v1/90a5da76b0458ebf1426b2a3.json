@@ -1,0 +1,418 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Villas Caraïbes Location",
+    "businessCategory": "Agence de location de villas",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://villascaraibes.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Nos villas](/villas) · [Services](/services) · [L’agence](/agence) · [Contact](/contact)\n\n# Villas Caraïbes Location\n\n## Des villas de charme à Saint-Barthélemy, sélectionnées par des habitants de l’île\n\nDepuis 2004, notre agence familiale propose à la location une cinquantaine de villas, de la case créole au domaine avec piscine à débordement, à Gouverneur, Lurin, Pointe Milou et Petit Cul-de-Sac.\n\n## Notre sélection\n\n- Villa Alizé, 3 chambres, Pointe Milou — à partir de 1 200 € la nuit\n- Villa Corail, 2 chambres, Lurin — à partir de 850 € la nuit\n- Villa Horizon, 5 chambres, Gouverneur — à partir de 3 900 € la nuit\n\nTarifs hors taxe de séjour, minimum 5 nuits. Haute saison : demandez-nous un devis.\n\n## Services inclus\n\n- Accueil à l’aéroport et transfert à la villa\n- Ménage quotidien\n- Conciergerie 7j/7 : chef à domicile, location de voiture, baby-sitting\n\n## L’agence\n\nL’agence est dirigée par Hélène Brin, fondatrice, et Paul Magras, responsable des réservations.\n\n« Hélène a tout organisé de A à Z, de la voiture au chef. Nous reviendrons. » — Famille Durand, juillet 2023\n\nVillas Caraïbes Location, Rue Samuel Fahlberg, 97133 Gustavia\nTél. : +590 590 00 02 34 — info@villascaraibes.example\nDu lundi au vendredi de 8h30 à 17h30.\n\n© Villas Caraïbes Location 2024 — Carte professionnelle n° CPI 0000 0000 000 000 000 — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Des villas de charme à Saint-Barthélemy, sélectionnées par des habitants de l’île",
+        "text": "Des villas de charme à Saint-Barthélemy, sélectionnées par des habitants de l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Depuis 2004, notre agence familiale propose à la location une cinquantaine de villas",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2004,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "à Gouverneur, Lurin, Pointe Milou et Petit Cul-de-Sac.",
+        "text": "Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "à Gouverneur, Lurin, Pointe Milou et Petit Cul-de-Sac.",
+        "text": "Lurin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "à Gouverneur, Lurin, Pointe Milou et Petit Cul-de-Sac.",
+        "text": "Pointe Milou",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "à Gouverneur, Lurin, Pointe Milou et Petit Cul-de-Sac.",
+        "text": "Petit Cul-de-Sac",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Corail, 2 chambres, Lurin — à partir de 850 € la nuit",
+        "text": null,
+        "price": {
+          "amount": 900,
+          "currency": "EUR",
+          "unit": "la nuit",
+          "item": "Villa Corail"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villa Alizé, 3 chambres, Pointe Milou — à partir de 1 200 € la nuit",
+        "text": "Villa Alizé, 3 chambres, Pointe Milou",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Alizé, 3 chambres, Pointe Milou — à partir de 1 200 € la nuit",
+        "text": null,
+        "price": {
+          "amount": 1200,
+          "currency": "EUR",
+          "unit": "la nuit",
+          "item": "Villa Alizé"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villa Corail, 2 chambres, Lurin — à partir de 850 € la nuit",
+        "text": "Villa Corail, 2 chambres, Lurin",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Corail, 2 chambres, Lurin — à partir de 850 € la nuit",
+        "text": null,
+        "price": {
+          "amount": 850,
+          "currency": "EUR",
+          "unit": "la nuit",
+          "item": "Villa Corail"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villa Horizon, 5 chambres, Gouverneur — à partir de 3 900 € la nuit",
+        "text": "Villa Horizon, 5 chambres, Gouverneur",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa Horizon, 5 chambres, Gouverneur — à partir de 3 900 € la nuit",
+        "text": null,
+        "price": {
+          "amount": 3900,
+          "currency": "EUR",
+          "unit": "la nuit",
+          "item": "Villa Horizon"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villa Lagon, 4 chambres, Saint-Jean — à partir de 2 100 € la nuit",
+        "text": "Villa Lagon, 4 chambres, Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Accueil à l’aéroport et transfert à la villa",
+        "text": "Accueil à l’aéroport et transfert à la villa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Ménage quotidien",
+        "text": "Ménage quotidien",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Conciergerie 7j/7 : chef à domicile, location de voiture, baby-sitting",
+        "text": "Conciergerie 7j/7",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Conciergerie 7j/7 : chef à domicile, location de voiture, baby-sitting",
+        "text": "chef à domicile",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "L’agence est dirigée par Hélène Brin, fondatrice, et Paul Magras, responsable des réservations.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Hélène Brin",
+          "role": "fondatrice"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Famille Durand, juillet 2023",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Une agence sérieuse, villa conforme aux photos.",
+          "attribution": "Julien P., Tripadvisor"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "L’agence est dirigée par Hélène Brin, fondatrice, et Paul Magras, responsable des réservations.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Paul Magras",
+          "role": "responsable des réservations"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Hélène a tout organisé de A à Z, de la voiture au chef. Nous reviendrons. » — Famille Durand, juillet 2023",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Hélène a tout organisé de A à Z, de la voiture au chef. Nous reviendrons.",
+          "attribution": "Famille Durand"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villas Caraïbes Location, Rue Samuel Fahlberg, 97133 Gustavia",
+        "text": "Rue Samuel Fahlberg, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : +590 590 00 02 34",
+        "text": "+590 590 00 02 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "info@villascaraibes.example",
+        "text": "info@villascaraibes.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au vendredi de 8h30 à 17h30.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:30",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:30",
+            "closes": "17:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

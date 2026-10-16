@@ -1,0 +1,610 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Café du Port",
+    "businessCategory": "Café",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://cafeduport.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [La carte](/carte) · [Nous trouver](/contact)\n\nCe site utilise des cookies pour améliorer votre expérience. [Accepter] [Refuser]\n\n# Café du Port\n\n## Le petit-déjeuner face aux yachts, depuis 2009\n\nAu Café du Port, on vient pour le café torréfié à Lorient, les viennoiseries du matin et la terrasse ombragée sur le quai de Gustavia. Ouvert depuis 2009, le café est tenu par Aurélie et Marc, qui vous accueillent sept jours sur sept.\n\n### Horaires\n\nTous les jours de 7h à 15h.\n\n### Ce qu’on y trouve\n\n- Café de spécialité, expresso ou filtre\n- Jus pressés minute\n- Brunch le week-end\n- Sandwiches à emporter\n\nTerrasse ombragée et wifi gratuit. Nous acceptons les cartes bancaires et les espèces.\n\n### Ils en parlent\n\n« Le meilleur café de Gustavia, et la terrasse est parfaite pour regarder les bateaux. » — Sophie L., cliente depuis 2015\n\n### Contact\n\nCafé du Port, Quai de la République, 97133 Gustavia\nTél. : 05 90 00 00 12\ncontact@cafeduport.example\n\n© Café du Port 2024 — Mentions légales — Réalisé par Studio Web Example"
+      },
+      {
+        "id": "p2",
+        "url": "https://cafeduport.example/carte",
+        "kind": "menu",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [La carte](/carte) · [Nous trouver](/contact)\n\n# La carte\n\nPrix nets, service compris. Les prix peuvent changer sans préavis.\n\n## Boissons chaudes\n\n- Expresso — 2,50 €\n- Cappuccino — 4,50 €\n- Chocolat chaud maison — 5 €\n\n## Petit-déjeuner\n\n- Formule continentale (boisson chaude, jus, viennoiserie) — 12 €\n- Œufs brouillés au saumon — 14 €\n- Granola maison, yaourt et fruits — 9,50 €\n\n## Brunch (samedi et dimanche)\n\nBrunch servi de 9h à 14h — 28 € par personne.\n\n## À emporter\n\n- Sandwich jambon-beurre — 6 €\n- Salade du jour — 11 €\n\nCarte réalisée avec amour. Photos non contractuelles.\n\n© Café du Port — [Instagram](https://instagram.example/cafeduport)"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Le petit-déjeuner face aux yachts, depuis 2009",
+        "text": "Le petit-déjeuner face aux yachts, depuis 2009",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert depuis 2009, le café est tenu par Aurélie et Marc",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2009,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tous les jours de 7h à 15h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "sat",
+            "opens": "07:00",
+            "closes": "15:00"
+          },
+          {
+            "day": "sun",
+            "opens": "07:00",
+            "closes": "15:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Café de spécialité, expresso ou filtre",
+        "text": "Café de spécialité",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Jus pressés minute",
+        "text": "Jus pressés minute",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Brunch le week-end",
+        "text": "Brunch le week-end",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Sandwiches à emporter",
+        "text": "Sandwiches à emporter",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Terrasse ombragée et wifi gratuit.",
+        "text": "Terrasse ombragée",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous acceptons les cartes bancaires et les espèces.",
+        "text": "cartes bancaires",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Le meilleur café de Gustavia, et la terrasse est parfaite pour regarder les bateaux. » — Sophie L., cliente depuis 2015",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Le meilleur café de Gustavia, et la terrasse est parfaite pour regarder les bateaux.",
+          "attribution": "Sophie L."
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Café du Port, Quai de la République, 97133 Gustavia",
+        "text": "Quai de la République, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 00 12",
+        "text": "05 90 00 00 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous livrons vos commandes à domicile à Gustavia",
+        "text": "Livraison à domicile",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@cafeduport.example",
+        "text": "contact@cafeduport.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Boissons chaudes",
+        "text": "Boissons chaudes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Expresso — 2,50 €",
+        "text": "Expresso",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Expresso — 2,50 €",
+        "text": null,
+        "price": {
+          "amount": 2.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Expresso"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Cappuccino — 4,50 €",
+        "text": "Cappuccino",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Cappuccino — 4,50 €",
+        "text": null,
+        "price": {
+          "amount": 4.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cappuccino"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Chocolat chaud maison — 5 €",
+        "text": "Chocolat chaud maison",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Chocolat chaud maison — 5 €",
+        "text": null,
+        "price": {
+          "amount": 5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Chocolat chaud maison"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Petit-déjeuner",
+        "text": "Petit-déjeuner",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Formule continentale (boisson chaude, jus, viennoiserie) — 12 €",
+        "text": "Formule continentale",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Formule continentale (boisson chaude, jus, viennoiserie) — 12 €",
+        "text": null,
+        "price": {
+          "amount": 12,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Formule continentale"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Œufs brouillés au saumon — 14 €",
+        "text": "Œufs brouillés au saumon",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Brunch servi de 9h à 14h — 32 € par personne.",
+        "text": null,
+        "price": {
+          "amount": 32,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Brunch"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Œufs brouillés au saumon — 14 €",
+        "text": null,
+        "price": {
+          "amount": 14,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Œufs brouillés au saumon"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Granola maison, yaourt et fruits — 9,50 €",
+        "text": "Granola maison, yaourt et fruits",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Granola maison, yaourt et fruits — 9,50 €",
+        "text": null,
+        "price": {
+          "amount": 9.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Granola maison"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Brunch (samedi et dimanche)",
+        "text": "Brunch (samedi et dimanche)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Brunch servi de 9h à 14h",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "14:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "14:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Brunch servi de 9h à 14h — 28 € par personne.",
+        "text": null,
+        "price": {
+          "amount": 28,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Brunch"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "À emporter",
+        "text": "À emporter",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Sandwich jambon-beurre — 6 €",
+        "text": "Sandwich jambon-beurre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Sandwich jambon-beurre — 6 €",
+        "text": null,
+        "price": {
+          "amount": 6,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Sandwich jambon-beurre"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p2",
+        "locale": "fr",
+        "evidence": "Salade du jour — 11 €",
+        "text": "Salade du jour",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p2",
+        "locale": null,
+        "evidence": "Salade du jour — 11 €",
+        "text": null,
+        "price": {
+          "amount": 11,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Salade du jour"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,334 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Caribbean Keys Realty",
+    "businessCategory": "Real estate agency",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://caribbeankeys.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Buy](/buy) · [Sell](/sell) · [Rent](/rent) · [About](/about) · [Contact](/contact)\n\n# Caribbean Keys Realty\n\nBuying, selling and long-term rentals in Saint-Barthélemy, with a team that has lived here for twenty years.\n\n## Services\n\n- Sales of villas, apartments and building plots\n- Free, confidential valuation of your property\n- Long-term rentals for residents and companies\n- Property management for absentee owners\n- Guidance on French purchase procedures and taxes\n\n## The team\n\n- Sophie Laurent, managing director and licensed agent\n- Oliver Grant, sales consultant\n- Amandine Roy, rentals and property management\n\nCaribbean Keys was founded in 2005 and holds a French professional real estate licence.\n\n## Office\n\nLes Mangliers, Saint-Jean 97133\nMonday to Friday, 9am–12:30pm and 2pm–5:30pm. Saturdays by appointment.\n+590 590 00 36 78 · info@caribbeankeys.example\n\nWe speak English, French and Italian.\n\n© Caribbean Keys Realty · Fees · Legal notice"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Buying, selling and long-term rentals in Saint-Barthélemy, with a team that has lived here for twenty years.",
+        "text": "Buying, selling and long-term rentals in Saint-Barthélemy, with a team that has lived here for twenty years.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Sales of villas, apartments and building plots",
+        "text": "Sales of villas, apartments and building plots",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Free, confidential valuation of your property",
+        "text": "Free, confidential valuation of your property",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Long-term rentals for residents and companies",
+        "text": "Long-term rentals for residents and companies",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Property management for absentee owners",
+        "text": "Property management for absentee owners",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Guidance on French purchase procedures and taxes",
+        "text": "Guidance on French purchase procedures and taxes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Luxury holiday villa rentals by the week",
+        "text": "Holiday villa rentals",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sophie Laurent, managing director and licensed agent",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sophie Laurent",
+          "role": "managing director and licensed agent"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Oliver Grant, sales consultant",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Oliver Grant",
+          "role": "sales consultant"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Amandine Roy, rentals and property management",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Amandine Roy",
+          "role": "rentals and property management"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Caribbean Keys was founded in 2005",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2005,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Les Mangliers, Saint-Jean 97133",
+        "text": "Les Mangliers, Saint-Jean 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Monday to Friday, 9am–12:30pm and 2pm–5:30pm. Saturdays by appointment.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "mon",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "tue",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "wed",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "thu",
+            "opens": "14:00",
+            "closes": "17:30"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "12:30"
+          },
+          {
+            "day": "fri",
+            "opens": "14:00",
+            "closes": "17:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fees · Legal notice",
+        "text": null,
+        "price": {
+          "amount": 5,
+          "currency": "EUR",
+          "unit": "per cent",
+          "item": "Agency fees"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 36 78 · info@caribbeankeys.example",
+        "text": "+590 590 00 36 78",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 36 78 · info@caribbeankeys.example",
+        "text": "info@caribbeankeys.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Italian.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Italian.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "We speak English, French and Italian.",
+        "text": "Italian",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

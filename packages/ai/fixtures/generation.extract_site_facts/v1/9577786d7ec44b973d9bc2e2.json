@@ -1,0 +1,465 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Chez Lulu — Beach Bistro",
+    "businessCategory": "Restaurant",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://chezlulu.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "FR | EN\n\n# Chez Lulu — Beach Bistro\n\n**Bistrot de plage à Flamands / Beach bistro in Flamands**\n\nCuisine française et créole, poissons grillés, planches à partager. French and Creole cooking, grilled fish, sharing boards.\n\n## Horaires / Hours\n\nOuvert tous les jours de 12h à 22h. Open daily from noon to 10pm.\n\n## La carte / Menu\n\n### Entrées / Starters\n- Accras de morue / Cod fritters — 13 €\n- Carpaccio de thon / Tuna carpaccio — 21 €\n\n### Plats / Mains\n- Poisson grillé du jour / Grilled catch of the day — 33 €\n- Magret de canard / Duck breast — 31 €\n- Risotto aux légumes / Vegetable risotto — 24 €\n\n### Desserts\n- Crème brûlée à la vanille / Vanilla crème brûlée — 11 €\n\nMenu enfant / Kids menu — 16 €\n\n## Réservations / Reservations\n\nTél. / Phone : 05 90 00 42 34 — WhatsApp : +590 690 00 42 34\nEn ligne / Online : https://www.thefork.example/chez-lulu-flamands\n\nChez Lulu, Anse des Flamands, 97133 Saint-Barthélemy\n\nParking gratuit / Free parking. Chiens acceptés / Dogs welcome.\n\nNous parlons français et anglais / We speak French and English.\n\n© Chez Lulu — Mentions légales / Legal notice"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Bistrot de plage à Flamands / Beach bistro in Flamands",
+        "text": "Bistrot de plage à Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bistrot de plage à Flamands / Beach bistro in Flamands",
+        "text": "Beach bistro in Flamands",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Ouvert tous les jours de 12h à 22h. Open daily from noon to 10pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "tue",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "wed",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "thu",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "fri",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "sat",
+            "opens": "12:00",
+            "closes": "22:00"
+          },
+          {
+            "day": "sun",
+            "opens": "12:00",
+            "closes": "22:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Entrées / Starters",
+        "text": "Entrées",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Accras de morue / Cod fritters — 13 €",
+        "text": "Accras de morue",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Accras de morue / Cod fritters — 13 €",
+        "text": null,
+        "price": {
+          "amount": 13,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Accras de morue"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Carpaccio de thon / Tuna carpaccio — 21 €",
+        "text": "Tuna carpaccio",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Carpaccio de thon / Tuna carpaccio — 21 €",
+        "text": null,
+        "price": {
+          "amount": 21,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tuna carpaccio"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Plats / Mains",
+        "text": "Mains",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Menu enfant / Kids menu — 16 €",
+        "text": null,
+        "price": {
+          "amount": 14,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Kids menu"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Poisson grillé du jour / Grilled catch of the day — 33 €",
+        "text": "Grilled catch of the day",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Poisson grillé du jour / Grilled catch of the day — 33 €",
+        "text": null,
+        "price": {
+          "amount": 33,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Grilled catch of the day"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Magret de canard / Duck breast — 31 €",
+        "text": "Magret de canard",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Magret de canard / Duck breast — 31 €",
+        "text": null,
+        "price": {
+          "amount": 31,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Magret de canard"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Risotto aux légumes / Vegetable risotto — 24 €",
+        "text": "Vegetable risotto",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Risotto aux légumes / Vegetable risotto — 24 €",
+        "text": null,
+        "price": {
+          "amount": 24,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Vegetable risotto"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Crème brûlée à la vanille / Vanilla crème brûlée — 11 €",
+        "text": "Crème brûlée à la vanille",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Crème brûlée à la vanille / Vanilla crème brûlée — 11 €",
+        "text": null,
+        "price": {
+          "amount": 11,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Crème brûlée"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Menu enfant / Kids menu — 16 €",
+        "text": null,
+        "price": {
+          "amount": 16,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Kids menu"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Langouste grillée / Grilled lobster — 65 €",
+        "text": "Grilled lobster",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. / Phone : 05 90 00 42 34",
+        "text": "05 90 00 42 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 42 34",
+        "text": "+590 690 00 42 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "En ligne / Online : https://www.thefork.example/chez-lulu-flamands",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.thefork.example/chez-lulu-flamands",
+          "provider": "TheFork"
+        }
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Chez Lulu, Anse des Flamands, 97133 Saint-Barthélemy",
+        "text": "Anse des Flamands, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Parking gratuit / Free parking.",
+        "text": "Free parking",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Chiens acceptés / Dogs welcome.",
+        "text": "Dogs welcome",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / We speak French and English.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / We speak French and English.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

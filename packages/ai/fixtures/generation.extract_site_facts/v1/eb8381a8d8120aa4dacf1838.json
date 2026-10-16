@@ -1,0 +1,428 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Salon Mélisande",
+    "businessCategory": "Salon de coiffure",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://salonmelisande.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Salon Mélisande\n\nCoiffure et soins capillaires à Saint-Jean / Hair and scalp care in Saint-Jean\n\n## Tarifs / Prices\n\n| Prestation / Service | Prix / Price |\n|---|---|\n| Coupe femme / Women’s cut | 60 € |\n| Coupe homme / Men’s cut | 35 € |\n| Couleur / Colour | à partir de / from 75 € |\n| Balayage | à partir de / from 140 € |\n| Soin profond / Deep conditioning treatment | 40 € |\n| Chignon mariage / Bridal updo | 120 € |\n\n## Horaires / Hours\n\nMardi – samedi / Tuesday – Saturday : 9h – 18h / 9am – 6pm\nFermé dimanche et lundi / Closed Sunday and Monday\n\n## Rendez-vous / Appointments\n\nTél. : 05 90 00 44 56 · WhatsApp : +590 690 00 44 56\nRéservez en ligne / Book online : https://www.planity.example/salon-melisande\n\nSalon Mélisande, Centre Les Amandiers, Saint-Jean, 97133 Saint-Barthélemy\n\nMélisande Petit, fondatrice / founder, coiffe l’île depuis 2010 / has styled the island since 2010.\n\nPaiement par carte ou espèces / Card or cash. Nous parlons français et anglais / French and English spoken.\n\n© Salon Mélisande"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Coiffure et soins capillaires à Saint-Jean / Hair and scalp care in Saint-Jean",
+        "text": "Hair and scalp care in Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Coupe femme / Women’s cut | 60 €",
+        "text": "Women’s cut",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Coupe femme / Women’s cut | 60 €",
+        "text": null,
+        "price": {
+          "amount": 60,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Women’s cut"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Coupe homme / Men’s cut | 35 €",
+        "text": "Men’s cut",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Coupe homme / Men’s cut | 35 €",
+        "text": null,
+        "price": {
+          "amount": 35,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Men’s cut"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Couleur / Colour | à partir de / from 75 €",
+        "text": "Colour",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Couleur / Colour | à partir de / from 75 €",
+        "text": null,
+        "price": {
+          "amount": 75,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Colour"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Balayage | à partir de / from 140 €",
+        "text": "Balayage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Balayage | à partir de / from 140 €",
+        "text": null,
+        "price": {
+          "amount": 140,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Balayage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fermé dimanche et lundi / Closed Sunday and Monday",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Soin profond / Deep conditioning treatment | 40 €",
+        "text": "Deep conditioning treatment",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Soin profond / Deep conditioning treatment | 40 €",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Deep conditioning treatment"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Chignon mariage / Bridal updo | 120 €",
+        "text": "Bridal updo",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Chignon mariage / Bridal updo | 120 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Bridal updo"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mardi – samedi / Tuesday – Saturday : 9h – 18h / 9am – 6pm",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "18:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 44 56",
+        "text": "05 90 00 44 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp : +590 690 00 44 56",
+        "text": "+590 690 00 44 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Extensions / Hair extensions | from 300 €",
+        "text": "Hair extensions",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservez en ligne / Book online : https://www.planity.example/salon-melisande",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.planity.example/salon-melisande",
+          "provider": "Planity"
+        }
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Salon Mélisande, Centre Les Amandiers, Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Centre Les Amandiers, Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mélisande Petit, fondatrice / founder",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Mélisande Petit",
+          "role": "founder"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "coiffe l’île depuis 2010 / has styled the island since 2010.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2010,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Paiement par carte ou espèces / Card or cash.",
+        "text": "Card",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Paiement par carte ou espèces / Card or cash.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / French and English spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Nous parlons français et anglais / French and English spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

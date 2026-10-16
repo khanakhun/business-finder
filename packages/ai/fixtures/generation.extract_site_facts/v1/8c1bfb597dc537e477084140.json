@@ -1,0 +1,461 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Pâtisserie Mathilde",
+    "businessCategory": "Pâtisserie",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://patisseriemathilde.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Boutique](/boutique) · [Commandes](/commandes)\n\n# Pâtisserie Mathilde\n\nPâtisserie fine et chocolaterie à Saint-Jean.\n\nMathilde Roux, cheffe pâtissière formée à Paris, ouvre sa boutique en 2021 après dix ans dans des palaces parisiens.\n\n## En boutique\n\n- Entremets individuels — 8,50 €\n- Tablettes de chocolat grand cru — 9 €\n- Macarons — 2,20 € pièce, 24 € la boîte de 12\n- Cookies aux noix de pécan — 4 €\n\n## Sur commande\n\n- Gâteaux d’anniversaire (6 à 20 parts) — à partir de 45 €\n- Pièces montées et wedding cakes — sur devis\n- Buffets sucrés pour événements — à partir de 18 € par personne\n\nCommandes 72 h à l’avance au 05 90 00 19 01 ou à commandes@patisseriemathilde.example.\n\n## Horaires\n\nMercredi – dimanche : 8h – 13h30\nFermé lundi et mardi.\n\nVilla Créole, Saint-Jean, 97133 Saint-Barthélemy\n\nPaiement : carte bancaire, espèces, Apple Pay.\n\nLauréate du concours « Meilleure pâtisserie des Antilles » 2023.\n\n© Pâtisserie Mathilde — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pâtisserie fine et chocolaterie à Saint-Jean.",
+        "text": "Pâtisserie fine et chocolaterie à Saint-Jean.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mathilde Roux, cheffe pâtissière formée à Paris",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Mathilde Roux",
+          "role": "cheffe pâtissière"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "ouvre sa boutique en 2021 après dix ans dans des palaces parisiens.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2021,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Entremets individuels — 8,50 €",
+        "text": "Entremets individuels",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entremets individuels — 8,50 €",
+        "text": null,
+        "price": {
+          "amount": 8.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Entremets individuels"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Tablettes de chocolat grand cru — 9 €",
+        "text": "Tablettes de chocolat grand cru",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tablettes de chocolat grand cru — 9 €",
+        "text": null,
+        "price": {
+          "amount": 9,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Tablettes de chocolat grand cru"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fermé lundi et mardi.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "13:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Macarons — 2,20 € pièce, 24 € la boîte de 12",
+        "text": "Macarons",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Macarons — 2,20 € pièce, 24 € la boîte de 12",
+        "text": null,
+        "price": {
+          "amount": 2.2,
+          "currency": "EUR",
+          "unit": "pièce",
+          "item": "Macarons"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Macarons — 2,20 € pièce, 24 € la boîte de 12",
+        "text": null,
+        "price": {
+          "amount": 24,
+          "currency": "EUR",
+          "unit": "la boîte de 12",
+          "item": "Macarons"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Cookies aux noix de pécan — 4 €",
+        "text": "Cookies aux noix de pécan",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cookies aux noix de pécan — 4 €",
+        "text": null,
+        "price": {
+          "amount": 4,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cookies aux noix de pécan"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Gâteaux d’anniversaire (6 à 20 parts) — à partir de 45 €",
+        "text": "Gâteaux d’anniversaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "24 € la boîte de 12",
+        "text": null,
+        "price": {
+          "amount": 28,
+          "currency": "EUR",
+          "unit": "la boîte de 12",
+          "item": "Macarons"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Gâteaux d’anniversaire (6 à 20 parts) — à partir de 45 €",
+        "text": null,
+        "price": {
+          "amount": 45,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Gâteaux d’anniversaire"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Pièces montées et wedding cakes — sur devis",
+        "text": "Pièces montées et wedding cakes",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Buffets sucrés pour événements — à partir de 18 € par personne",
+        "text": "Buffets sucrés pour événements",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Buffets sucrés pour événements — à partir de 18 € par personne",
+        "text": null,
+        "price": {
+          "amount": 18,
+          "currency": "EUR",
+          "unit": "par personne",
+          "item": "Buffets sucrés"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Commandes 72 h à l’avance au 05 90 00 19 01",
+        "text": "05 90 00 19 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "ou à commandes@patisseriemathilde.example.",
+        "text": "commandes@patisseriemathilde.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Croissants au beurre — 1,80 €",
+        "text": "Croissants au beurre",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mercredi – dimanche : 8h – 13h30",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "13:30"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "13:30"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "13:30"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "13:30"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "13:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Villa Créole, Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Villa Créole, Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, Apple Pay.",
+        "text": "carte bancaire",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, Apple Pay.",
+        "text": "espèces",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Paiement : carte bancaire, espèces, Apple Pay.",
+        "text": "Apple Pay",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "award",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Lauréate du concours « Meilleure pâtisserie des Antilles » 2023.",
+        "text": "Lauréate du concours « Meilleure pâtisserie des Antilles » 2023",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

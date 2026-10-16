@@ -1,0 +1,536 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "The Saint-Jean Bakehouse",
+    "businessCategory": "Bakery",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://saintjeanbakehouse.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# The Saint-Jean Bakehouse\n\nSourdough, croissants and cakes baked overnight, a two-minute walk from Saint-Jean beach.\n\n## Hours\n\nOpen every day except Monday, 6:30am to 1pm. We usually sell out of croissants by 10am.\n\n## From the oven\n\n- Country sourdough (800 g) — €6.50\n- Butter croissant — €1.80\n- Almond croissant — €3.20\n- Cinnamon bun — €3.50\n- Quiche of the day (slice) — €5.50\n- Birthday cakes to order (48 hours' notice) — from €38\n\n## Coffee\n\n- Espresso — €2.50\n- Latte — €4.20\n\nVilla and hotel deliveries every morning in Saint-Jean, Lorient and Marigot; minimum order €40.\n\nOpened in 2020 by baker Sam Whitaker.\n\nThe Saint-Jean Bakehouse, Les Jardins de Saint-Jean, 97133 Saint-Barthélemy\n+590 590 00 39 01 · orders@saintjeanbakehouse.example\n\nCards and cash. English and French spoken.\n\n© The Saint-Jean Bakehouse · Cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Sourdough, croissants and cakes baked overnight, a two-minute walk from Saint-Jean beach.",
+        "text": "Sourdough, croissants and cakes baked overnight, a two-minute walk from Saint-Jean beach.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open every day except Monday, 6:30am to 1pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "tue",
+            "opens": "06:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "wed",
+            "opens": "06:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "thu",
+            "opens": "06:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "fri",
+            "opens": "06:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "sat",
+            "opens": "06:30",
+            "closes": "13:00"
+          },
+          {
+            "day": "sun",
+            "opens": "06:30",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Country sourdough (800 g) — €6.50",
+        "text": "Country sourdough (800 g)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Country sourdough (800 g) — €6.50",
+        "text": null,
+        "price": {
+          "amount": 6.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Country sourdough"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Butter croissant — €1.80",
+        "text": "Butter croissant",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Butter croissant — €1.80",
+        "text": null,
+        "price": {
+          "amount": 1.8,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Butter croissant"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Almond croissant — €3.20",
+        "text": "Almond croissant",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Almond croissant — €3.20",
+        "text": null,
+        "price": {
+          "amount": 3.2,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Almond croissant"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cinnamon bun — €3.50",
+        "text": "Cinnamon bun",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Cinnamon bun — €3.50",
+        "text": null,
+        "price": {
+          "amount": 3.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Cinnamon bun"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Quiche of the day (slice) — €5.50",
+        "text": "Quiche of the day (slice)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open every day except Monday, 6:30am to 1pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quiche of the day (slice) — €5.50",
+        "text": null,
+        "price": {
+          "amount": 5.5,
+          "currency": "EUR",
+          "unit": "slice",
+          "item": "Quiche of the day"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Birthday cakes to order (48 hours' notice) — from €38",
+        "text": "Birthday cakes to order",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Birthday cakes to order (48 hours' notice) — from €38",
+        "text": null,
+        "price": {
+          "amount": 38,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Birthday cakes"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Espresso — €2.50",
+        "text": "Espresso",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Espresso — €2.50",
+        "text": null,
+        "price": {
+          "amount": 2.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Espresso"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Latte — €4.20",
+        "text": "Latte",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Latte — €4.20",
+        "text": null,
+        "price": {
+          "amount": 4.2,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Latte"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa and hotel deliveries every morning in Saint-Jean, Lorient and Marigot; minimum order €40.",
+        "text": "Villa and hotel deliveries every morning",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa and hotel deliveries every morning in Saint-Jean, Lorient and Marigot",
+        "text": "Saint-Jean",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa and hotel deliveries every morning in Saint-Jean, Lorient and Marigot",
+        "text": "Lorient",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Country sourdough (800 g) — €6.50",
+        "text": null,
+        "price": {
+          "amount": 7.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Country sourdough"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa and hotel deliveries every morning in Saint-Jean, Lorient and Marigot",
+        "text": "Marigot",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Opened in 2020 by baker Sam Whitaker.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2020,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Opened in 2020 by baker Sam Whitaker.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sam Whitaker",
+          "role": "baker"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "The Saint-Jean Bakehouse, Les Jardins de Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Les Jardins de Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 39 01 · orders@saintjeanbakehouse.example",
+        "text": "+590 590 00 39 01",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 39 01 · orders@saintjeanbakehouse.example",
+        "text": "orders@saintjeanbakehouse.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards and cash.",
+        "text": "Cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards and cash.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

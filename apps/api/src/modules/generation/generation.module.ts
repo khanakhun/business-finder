@@ -1,15 +1,26 @@
+import type { AiGateway } from '@bf/ai';
 import type { ApiEnv } from '@bf/config';
+import type { DbClient } from '@bf/db';
 import { HOTLINK_HOSTS } from '@bf/site-schema';
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { Redis } from 'ioredis';
-import { AI_BUDGET_GUARD } from '../platform/ai/ai.module.ts';
+import { AI_BUDGET_GUARD, AI_GATEWAY } from '../platform/ai/ai.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
+import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
 import { SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
-import { FACT_OVERLAY_REPOSITORY, FACT_SNAPSHOTS, FACT_SOURCES_READER } from './application/facts.ports.ts';
+import {
+  FACT_OVERLAY_REPOSITORY,
+  FACT_SNAPSHOTS,
+  FACT_SOURCES_READER,
+  SITE_FACT_EXTRACTIONS,
+  SITE_FACT_EXTRACTOR,
+  SITE_FACT_TELEMETRY,
+  SITE_PAGES_READER,
+} from './application/facts.ports.ts';
 import { FactRegistryService } from './application/facts.service.ts';
 import { GenerationCommands } from './application/generation.commands.ts';
 import { GenerationNotifications } from './application/generation.notifications.ts';
@@ -18,6 +29,7 @@ import { GenerationQueries } from './application/generation.queries.ts';
 import { GenerationRunner } from './application/generation.runner.ts';
 import {
   type AgentEngine,
+  type ArtifactStore,
   CANCEL_SIGNALS,
   ENGINE_REGISTRY,
   type EngineRegistry,
@@ -36,6 +48,7 @@ import {
   WORKSPACE_BUDGET,
   WORKSPACE_PREPARER,
 } from './application/ports.ts';
+import { SiteFactExtraction } from './application/site-facts.extraction.ts';
 import { JobTransitions, SETTLED_HOOK } from './application/transitions.ts';
 import {
   BullmqGenerationQueues,
@@ -59,6 +72,12 @@ import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
+import {
+  DrizzleSiteFactExtractions,
+  DrizzleSitePages,
+  GatewaySiteFactExtractor,
+  PROMETHEUS_SITE_FACT_TELEMETRY,
+} from './infrastructure/site-facts.adapters.ts';
 import { SitesModuleHandOff } from './infrastructure/sites-hand-off.ts';
 import {
   ValkeyCancelSignals,
@@ -103,6 +122,23 @@ export class GenerationModule {
         { provide: FACT_OVERLAY_REPOSITORY, useClass: DrizzleFactOverlay },
         { provide: FACT_SNAPSHOTS, useClass: DrizzleFactSnapshots },
         FactRegistryService,
+        {
+          provide: SITE_PAGES_READER,
+          inject: [DB_CLIENT, GENERATION_ARTIFACTS],
+          useFactory: (db: DbClient, artifacts: ArtifactStore) => new DrizzleSitePages(db, artifacts),
+        },
+        {
+          provide: SITE_FACT_EXTRACTOR,
+          inject: [AI_GATEWAY],
+          useFactory: (gateway: AiGateway) => new GatewaySiteFactExtractor(gateway),
+        },
+        {
+          provide: SITE_FACT_EXTRACTIONS,
+          inject: [DB_CLIENT],
+          useFactory: (db: DbClient) => new DrizzleSiteFactExtractions(db),
+        },
+        { provide: SITE_FACT_TELEMETRY, useValue: PROMETHEUS_SITE_FACT_TELEMETRY },
+        SiteFactExtraction,
         {
           provide: ENGINE_REGISTRY,
           inject: [APP_ENV],
@@ -219,7 +255,7 @@ export class GenerationModule {
             ]
           : []),
       ],
-      exports: [GenerationCommands, GenerationQueries, FactRegistryService],
+      exports: [GenerationCommands, GenerationQueries, FactRegistryService, SiteFactExtraction],
     };
   }
 }

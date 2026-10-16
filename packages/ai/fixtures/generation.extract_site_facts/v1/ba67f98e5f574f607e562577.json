@@ -1,0 +1,490 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Lagoon Spa & Wellness",
+    "businessCategory": "Spa",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://lagoonspa.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Lagoon Spa & Wellness\n\nA quiet spa on the lagoon in Grand Cul-de-Sac. Massages, facials and a hammam, with treatments in-spa or at your villa.\n\n## Treatments\n\n- Signature lagoon massage — 60 min — $160 / 90 min — $220\n- Deep tissue massage — 60 min — $170\n- Hydrating facial — 50 min — $150\n- Couples massage — 60 min — $320 for two\n- Hammam ritual with body scrub — 75 min — $190\n\nVilla visits: add $50 per therapist.\n\n## Hours\n\nOpen every day from 9am to 7pm. Last appointment at 6pm.\n\n## Booking\n\nBook on Mindbody: https://www.mindbody.example/lagoon-spa or call +590 590 00 27 89. WhatsApp +590 690 00 27 89.\n\n## Our therapists\n\n- Nadia Benali, spa manager\n- Chloé Martin, massage therapist\n- Sofia Reyes, aesthetician\n\n\"The hammam ritual was the highlight of our honeymoon.\" — Olivia & James, New York\n\nLagoon Spa & Wellness, Grand Cul-de-Sac, 97133 Saint-Barthélemy · info@lagoonspa.example\n\nEnglish, French and Spanish spoken. Free parking. Gift vouchers available.\n\nThis site uses cookies. © Lagoon Spa & Wellness"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Signature lagoon massage — 60 min — $160 / 90 min — $220",
+        "text": "Signature lagoon massage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Signature lagoon massage — 60 min — $160 / 90 min — $220",
+        "text": null,
+        "price": {
+          "amount": 160,
+          "currency": "USD",
+          "unit": "60 min",
+          "item": "Signature lagoon massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Signature lagoon massage — 60 min — $160 / 90 min — $220",
+        "text": null,
+        "price": {
+          "amount": 220,
+          "currency": "USD",
+          "unit": "90 min",
+          "item": "Signature lagoon massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Deep tissue massage — 60 min — $170",
+        "text": "Deep tissue massage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Deep tissue massage — 60 min — $170",
+        "text": null,
+        "price": {
+          "amount": 170,
+          "currency": "USD",
+          "unit": "60 min",
+          "item": "Deep tissue massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hydrating facial — 50 min — $150",
+        "text": "Hydrating facial",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hydrating facial — 50 min — $150",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "USD",
+          "unit": "50 min",
+          "item": "Hydrating facial"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Couples massage — 60 min — $320 for two",
+        "text": "Couples massage",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Couples massage — 60 min — $320 for two",
+        "text": null,
+        "price": {
+          "amount": 320,
+          "currency": "USD",
+          "unit": "for two",
+          "item": "Couples massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hammam ritual with body scrub — 75 min — $190",
+        "text": "Hammam ritual with body scrub",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Deep tissue massage — 60 min — $170",
+        "text": null,
+        "price": {
+          "amount": 230,
+          "currency": "USD",
+          "unit": "90 min",
+          "item": "Deep tissue massage"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hammam ritual with body scrub — 75 min — $190",
+        "text": null,
+        "price": {
+          "amount": 190,
+          "currency": "USD",
+          "unit": "75 min",
+          "item": "Hammam ritual with body scrub"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Villa visits: add $50 per therapist.",
+        "text": "Villa visits",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Villa visits: add $50 per therapist.",
+        "text": null,
+        "price": {
+          "amount": 50,
+          "currency": "USD",
+          "unit": "per therapist",
+          "item": "Villa visit supplement"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open every day from 9am to 7pm. Last appointment at 6pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "09:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Book on Mindbody: https://www.mindbody.example/lagoon-spa",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://www.mindbody.example/lagoon-spa",
+          "provider": "Mindbody"
+        }
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "or call +590 590 00 27 89.",
+        "text": "+590 590 00 27 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp +590 690 00 27 89.",
+        "text": "+590 690 00 27 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Nadia Benali, spa manager",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Nadia Benali",
+          "role": "spa manager"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Sunrise yoga on the lagoon deck",
+        "text": "Sunrise yoga",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Chloé Martin, massage therapist",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Chloé Martin",
+          "role": "massage therapist"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sofia Reyes, aesthetician",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Sofia Reyes",
+          "role": "aesthetician"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"The hammam ritual was the highlight of our honeymoon.\" — Olivia & James, New York",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "The hammam ritual was the highlight of our honeymoon.",
+          "attribution": "Olivia & James, New York"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Lagoon Spa & Wellness, Grand Cul-de-Sac, 97133 Saint-Barthélemy",
+        "text": "Grand Cul-de-Sac, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "97133 Saint-Barthélemy · info@lagoonspa.example",
+        "text": "info@lagoonspa.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Spanish spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Spanish spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Spanish spoken.",
+        "text": "Spanish",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "amenity",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Free parking.",
+        "text": "Free parking",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

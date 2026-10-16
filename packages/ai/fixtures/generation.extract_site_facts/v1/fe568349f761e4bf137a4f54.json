@@ -1,0 +1,388 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Island Cars Location",
+    "businessCategory": "Location de voitures",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://islandcars.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "# Island Cars Location\n\nLocation de voitures à l’aéroport de Saint-Jean, livraison gratuite à votre villa ou à votre hôtel.\n\nDepuis 1995, Island Cars met à votre disposition une flotte de 80 véhicules récents, climatisés, entretenus dans notre atelier.\n\n## Nos tarifs (par jour, kilométrage illimité)\n\n- Citadine (type Example Mini) — 55 €\n- SUV compact — 85 €\n- 4×4 cabriolet — 120 €\n- Minibus 8 places — 150 €\n\nAssurance tous risques incluse, franchise de 1 000 €. Réduction de 10 % à partir de 7 jours de location.\n\n## Services\n\n- Livraison et reprise à l’aéroport, au port ou à votre villa\n- Siège bébé et rehausseur gratuits sur demande\n- Assistance 24h/24\n\n## Horaires de l’agence\n\nDu lundi au samedi, 8h–18h, et le dimanche de 9h à 13h.\n\nAéroport de Saint-Jean, 97133 Saint-Barthélemy\nTél. : 05 90 00 03 56 — resa@islandcars.example\n\nNous acceptons Visa, Mastercard et American Express.\n\n© Island Cars Location — [Conditions générales de location](/cgl) — [Mentions légales](/mentions)"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de voitures à l’aéroport de Saint-Jean, livraison gratuite à votre villa ou à votre hôtel.",
+        "text": "Location de voitures à l’aéroport de Saint-Jean, livraison gratuite à votre villa ou à votre hôtel.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Depuis 1995, Island Cars met à votre disposition une flotte de 80 véhicules",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1995,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Citadine (type Example Mini) — 55 €",
+        "text": "Citadine",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Citadine (type Example Mini) — 55 €",
+        "text": null,
+        "price": {
+          "amount": 55,
+          "currency": "EUR",
+          "unit": "par jour",
+          "item": "Citadine"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "SUV compact — 85 €",
+        "text": "SUV compact",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "SUV compact — 85 €",
+        "text": null,
+        "price": {
+          "amount": 85,
+          "currency": "EUR",
+          "unit": "par jour",
+          "item": "SUV compact"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réduction de 10 % à partir de 7 jours de location.",
+        "text": null,
+        "price": {
+          "amount": 346.5,
+          "currency": "EUR",
+          "unit": "par semaine",
+          "item": "Citadine"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "4×4 cabriolet — 120 €",
+        "text": "4×4 cabriolet",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "4×4 cabriolet — 120 €",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": "par jour",
+          "item": "4×4 cabriolet"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Minibus 8 places — 150 €",
+        "text": "Minibus 8 places",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Minibus 8 places — 150 €",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": "par jour",
+          "item": "Minibus 8 places"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Location de scooters 125 cm3 — 45 € par jour",
+        "text": "Location de scooters",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Livraison et reprise à l’aéroport, au port ou à votre villa",
+        "text": "Livraison et reprise à l’aéroport, au port ou à votre villa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Siège bébé et rehausseur gratuits sur demande",
+        "text": "Siège bébé et rehausseur gratuits",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Assistance 24h/24",
+        "text": "Assistance 24h/24",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Du lundi au samedi, 8h–18h, et le dimanche de 9h à 13h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "18:00"
+          },
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "13:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Aéroport de Saint-Jean, 97133 Saint-Barthélemy",
+        "text": "Aéroport de Saint-Jean, 97133 Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "et le dimanche de 9h à 13h.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sun",
+            "opens": "09:00",
+            "closes": "17:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tél. : 05 90 00 03 56",
+        "text": "05 90 00 03 56",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "resa@islandcars.example",
+        "text": "resa@islandcars.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous acceptons Visa, Mastercard et American Express.",
+        "text": "Visa",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous acceptons Visa, Mastercard et American Express.",
+        "text": "Mastercard",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Nous acceptons Visa, Mastercard et American Express.",
+        "text": "American Express",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

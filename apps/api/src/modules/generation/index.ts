@@ -8,4 +8,5 @@ export type {
   QualityPipeline,
   WorkspacePreparer,
 } from './application/ports.ts';
+export { SiteFactExtraction } from './application/site-facts.extraction.ts';
 export { GenerationModule } from './generation.module.ts';

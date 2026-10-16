@@ -1,0 +1,376 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Volt Caribbean Electric",
+    "businessCategory": "Electrician",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://voltcaribbean.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Services](/services) · [Solar](/solar) · [Contact](/contact)\n\n# Volt Caribbean Electric\n\nLicensed electricians for villas, shops and boats in Saint-Barthélemy.\n\n## Services\n\n- New installations and rewiring\n- Electrical compliance certificates (Consuel)\n- Fault finding and repairs\n- Solar panels, batteries and inverters\n- Generators and automatic transfer switches\n- EV charger installation\n- Marine electrical work at the dock\n\n## Rates\n\nHourly rate €75 excluding VAT. Diagnostic visit €90. Free quotes for solar and generator projects.\n\n## Hours\n\nMonday to Friday, 7:30am to 4:30pm. Emergency service on weekends for existing clients.\n\nFounded in 2014 by Marco Silva, master electrician. Team of six, all French-certified.\n\nWinner of the island's \"Green Business\" award in 2023 for our solar installations.\n\nVolt Caribbean Electric, Rue de la Colline, Gustavia 97133\n+590 590 00 40 12 · WhatsApp +590 690 00 40 12 · jobs@voltcaribbean.example\n\nEnglish, French and Portuguese spoken.\n\n© Volt Caribbean Electric · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Licensed electricians for villas, shops and boats in Saint-Barthélemy.",
+        "text": "Licensed electricians for villas, shops and boats in Saint-Barthélemy.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "New installations and rewiring",
+        "text": "New installations and rewiring",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Electrical compliance certificates (Consuel)",
+        "text": "Electrical compliance certificates (Consuel)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Fault finding and repairs",
+        "text": "Fault finding and repairs",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Solar panels, batteries and inverters",
+        "text": "Solar panels, batteries and inverters",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Generators and automatic transfer switches",
+        "text": "Generators and automatic transfer switches",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "EV charger installation",
+        "text": "EV charger installation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Marine electrical work at the dock",
+        "text": "Marine electrical work at the dock",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hourly rate €75 excluding VAT.",
+        "text": null,
+        "price": {
+          "amount": 120,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Call-out fee"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Hourly rate €75 excluding VAT.",
+        "text": null,
+        "price": {
+          "amount": 75,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Hourly rate"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Diagnostic visit €90.",
+        "text": null,
+        "price": {
+          "amount": 90,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Diagnostic visit"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Monday to Friday, 7:30am to 4:30pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "tue",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "wed",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "thu",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "fri",
+            "opens": "07:30",
+            "closes": "16:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Founded in 2014 by Marco Silva, master electrician.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2014,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Founded in 2014 by Marco Silva, master electrician.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Marco Silva",
+          "role": "master electrician"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "award",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Winner of the island's \"Green Business\" award in 2023 for our solar installations.",
+        "text": "\"Green Business\" award 2023",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Emergency service on weekends for existing clients.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "12:00"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Volt Caribbean Electric, Rue de la Colline, Gustavia 97133",
+        "text": "Rue de la Colline, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 40 12 · WhatsApp +590 690 00 40 12",
+        "text": "+590 590 00 40 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 590 00 40 12 · WhatsApp +590 690 00 40 12",
+        "text": "+590 690 00 40 12",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "jobs@voltcaribbean.example",
+        "text": "jobs@voltcaribbean.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Portuguese spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Portuguese spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English, French and Portuguese spoken.",
+        "text": "Portuguese",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

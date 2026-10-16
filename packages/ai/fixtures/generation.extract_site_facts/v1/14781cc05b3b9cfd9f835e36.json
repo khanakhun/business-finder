@@ -1,0 +1,373 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Island Hardware & Marine",
+    "businessCategory": "Hardware store",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://islandhardwaremarine.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "[Home](/) · [Departments](/departments) · [Services](/services) · [Contact](/contact)\n\n# Island Hardware & Marine\n\nTools, paint, plumbing, electrical and marine supplies in Public, Gustavia. Serving the island's builders and boat crews since 1984.\n\n## Departments\n\n- Hand and power tools\n- Marine hardware, rope and antifouling\n- Plumbing and electrical\n- Paint (colour matching in store)\n- Garden and pool chemicals\n- Fasteners in stainless steel\n\n## Services\n\n- Key cutting while you wait\n- Propane refills\n- Tool rental: pressure washer €50 per day, generator €90 per day\n- Delivery to the port and to boatyards from €150 of purchases\n\n## Hours\n\nMon–Fri 7am–5pm, Sat 7am–12pm. Closed Sundays and public holidays.\n\nIsland Hardware & Marine, Zone Industrielle de Public, Gustavia 97133\nPhone +590 590 00 32 34 · sales@islandhardwaremarine.example\n\nTrade accounts available for contractors. Cards and cash accepted. English and French spoken.\n\n© Island Hardware & Marine · Cookies · Privacy"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tools, paint, plumbing, electrical and marine supplies in Public, Gustavia.",
+        "text": "Tools, paint, plumbing, electrical and marine supplies in Public, Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Serving the island's builders and boat crews since 1984.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 1984,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Hand and power tools",
+        "text": "Hand and power tools",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Marine hardware, rope and antifouling",
+        "text": "Marine hardware, rope and antifouling",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Plumbing and electrical",
+        "text": "Plumbing and electrical",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Paint (colour matching in store)",
+        "text": "Paint (colour matching in store)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Garden and pool chemicals",
+        "text": "Garden and pool chemicals",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Key cutting while you wait",
+        "text": "Key cutting while you wait",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "generator €90 per day",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": "per day",
+          "item": "generator"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Propane refills",
+        "text": "Propane refills",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tool rental: pressure washer €50 per day, generator €90 per day",
+        "text": "Tool rental",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tool rental: pressure washer €50 per day, generator €90 per day",
+        "text": null,
+        "price": {
+          "amount": 50,
+          "currency": "EUR",
+          "unit": "per day",
+          "item": "pressure washer"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tool rental: pressure washer €50 per day, generator €90 per day",
+        "text": null,
+        "price": {
+          "amount": 90,
+          "currency": "EUR",
+          "unit": "per day",
+          "item": "generator"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Delivery to the port and to boatyards from €150 of purchases",
+        "text": "Delivery to the port and to boatyards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Mon–Fri 7am–5pm, Sat 7am–12pm. Closed Sundays and public holidays.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sat",
+            "opens": "07:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Sat 7am–12pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "sat",
+            "opens": "14:00",
+            "closes": "17:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Island Hardware & Marine, Zone Industrielle de Public, Gustavia 97133",
+        "text": "Zone Industrielle de Public, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Phone +590 590 00 32 34",
+        "text": "+590 590 00 32 34",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "sales@islandhardwaremarine.example",
+        "text": "sales@islandhardwaremarine.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards and cash accepted.",
+        "text": "Cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cards and cash accepted.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "English and French spoken.",
+        "text": "French",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

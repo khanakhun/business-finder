@@ -1,0 +1,485 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Shell Beach Shack",
+    "businessCategory": "Restaurant",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://shellbeachshack.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Shell Beach Shack\n\nTacos, ceviche and frozen margaritas on Shell Beach, Gustavia.\n\nOpen daily from noon to sunset. Kitchen closes at 5pm.\n\n## Menu\n\nAll prices in US dollars. We also accept euros at the daily rate.\n\n### Tacos (two per order)\n- Fish tacos — $18\n- Shrimp tacos — $20\n- Veggie tacos — $15\n\n### Bowls\n- Tuna ceviche — $22\n- Poke bowl — $24\n\n### Drinks\n- Frozen margarita — $14\n- Local beer — $7\n- Fresh coconut — $8\n\n## Beach service\n\nLoungers and umbrellas: $40 per person for the day, including a welcome drink.\n\n## Find us\n\nShell Beach, Gustavia 97133. Walk down from the Anglican church, you can't miss us.\n\nWhatsApp: +590 690 00 25 67 · shack@shellbeachshack.example\n\nCash and cards accepted. Sorry, no reservations.\n\n© Shell Beach Shack"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tacos, ceviche and frozen margaritas on Shell Beach, Gustavia.",
+        "text": "Tacos, ceviche and frozen margaritas on Shell Beach, Gustavia.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tacos (two per order)",
+        "text": "Tacos (two per order)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Fish tacos — $18",
+        "text": "Fish tacos",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fish tacos — $18",
+        "text": null,
+        "price": {
+          "amount": 18,
+          "currency": "USD",
+          "unit": null,
+          "item": "Fish tacos"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Shrimp tacos — $20",
+        "text": "Shrimp tacos",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Shrimp tacos — $20",
+        "text": null,
+        "price": {
+          "amount": 20,
+          "currency": "USD",
+          "unit": null,
+          "item": "Shrimp tacos"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Veggie tacos — $15",
+        "text": "Veggie tacos",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Veggie tacos — $15",
+        "text": null,
+        "price": {
+          "amount": 15,
+          "currency": "USD",
+          "unit": null,
+          "item": "Veggie tacos"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bowls",
+        "text": "Bowls",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Tuna ceviche — $22",
+        "text": "Tuna ceviche",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Open daily from noon to sunset. Kitchen closes at 5pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "tue",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "wed",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "thu",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "fri",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sat",
+            "opens": "12:00",
+            "closes": "19:00"
+          },
+          {
+            "day": "sun",
+            "opens": "12:00",
+            "closes": "19:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Tuna ceviche — $22",
+        "text": null,
+        "price": {
+          "amount": 22,
+          "currency": "USD",
+          "unit": null,
+          "item": "Tuna ceviche"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Poke bowl — $24",
+        "text": "Poke bowl",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Poke bowl — $24",
+        "text": null,
+        "price": {
+          "amount": 24,
+          "currency": "USD",
+          "unit": null,
+          "item": "Poke bowl"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_section",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Drinks",
+        "text": "Drinks",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Frozen margarita — $14",
+        "text": "Frozen margarita",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Frozen margarita — $14",
+        "text": null,
+        "price": {
+          "amount": 14,
+          "currency": "USD",
+          "unit": null,
+          "item": "Frozen margarita"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Local beer — $7",
+        "text": "Local beer",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Local beer — $7",
+        "text": null,
+        "price": {
+          "amount": 7,
+          "currency": "USD",
+          "unit": null,
+          "item": "Local beer"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fish tacos — $18",
+        "text": null,
+        "price": {
+          "amount": 16.5,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Fish tacos"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "menu_item",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Fresh coconut — $8",
+        "text": "Fresh coconut",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Fresh coconut — $8",
+        "text": null,
+        "price": {
+          "amount": 8,
+          "currency": "USD",
+          "unit": null,
+          "item": "Fresh coconut"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Loungers and umbrellas: $40 per person for the day, including a welcome drink.",
+        "text": "Loungers and umbrellas",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Loungers and umbrellas: $40 per person for the day, including a welcome drink.",
+        "text": null,
+        "price": {
+          "amount": 40,
+          "currency": "USD",
+          "unit": "per person for the day",
+          "item": "Loungers and umbrellas"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Shell Beach, Gustavia 97133.",
+        "text": "Shell Beach, Gustavia 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp: +590 690 00 25 67",
+        "text": "+590 690 00 25 67",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "shack@shellbeachshack.example",
+        "text": "shack@shellbeachshack.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cash and cards accepted.",
+        "text": "Cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Cash and cards accepted.",
+        "text": "cards",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

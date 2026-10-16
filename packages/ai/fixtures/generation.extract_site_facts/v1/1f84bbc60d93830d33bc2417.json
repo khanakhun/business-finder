@@ -1,0 +1,427 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Tortue Plongée / Turtle Dive",
+    "businessCategory": "Centre de plongée",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://tortueplongee.example/",
+        "kind": "home",
+        "lang": null,
+        "markdown": "# Tortue Plongée · Turtle Dive\n\nPlongée et snorkeling à Saint-Barth depuis 2003 / Diving and snorkeling in Saint-Barth since 2003.\n\n## Tarifs / Prices\n\n- Baptême / Discover scuba — 100 €\n- Plongée exploration / Fun dive — 85 €\n- Forfait 10 plongées / 10-dive package — 750 €\n- Snorkeling (2 h) — 50 € par personne / per person\n- Plongée de nuit / Night dive — 110 €\n\nÉquipement inclus / Equipment included. Nitrox : +10 €.\n\n## Départs / Departures\n\nTous les jours à 8h30 et 14h / Every day at 8:30am and 2pm. Boutique ouverte de 8h à 17h / Shop open 8am to 5pm.\n\n## L’équipe / Team\n\nPierre Vasseur, moniteur / instructor (CMAS, PADI) · Lisa Hoffmann, monitrice / instructor (PADI)\n\n## Contact\n\nQuai du Port, 97133 Gustavia · 05 90 00 45 67 · +590 690 00 45 67 (WhatsApp) · info@tortueplongee.example\n\nRéservation en ligne / Book online : https://bookings.example/tortue-plongee\n\nLangues / Languages : français, English, Deutsch.\n\n© Tortue Plongée — Ce site utilise des cookies / This site uses cookies"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Plongée et snorkeling à Saint-Barth depuis 2003 / Diving and snorkeling in Saint-Barth since 2003.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2003,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Baptême / Discover scuba — 100 €",
+        "text": "Discover scuba",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Baptême / Discover scuba — 100 €",
+        "text": null,
+        "price": {
+          "amount": 100,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Discover scuba"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Plongée exploration / Fun dive — 85 €",
+        "text": "Fun dive",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Plongée exploration / Fun dive — 85 €",
+        "text": null,
+        "price": {
+          "amount": 85,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Fun dive"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Forfait 10 plongées / 10-dive package — 750 €",
+        "text": "10-dive package",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Forfait 10 plongées / 10-dive package — 750 €",
+        "text": null,
+        "price": {
+          "amount": 750,
+          "currency": "EUR",
+          "unit": null,
+          "item": "10-dive package"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Snorkeling (2 h) — 50 € par personne / per person",
+        "text": "Snorkeling (2 h)",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Formation Open Water / Open Water course — 550 €",
+        "text": "Open Water course",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Snorkeling (2 h) — 50 € par personne / per person",
+        "text": null,
+        "price": {
+          "amount": 50,
+          "currency": "EUR",
+          "unit": "per person",
+          "item": "Snorkeling"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Plongée de nuit / Night dive — 110 €",
+        "text": "Night dive",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Plongée de nuit / Night dive — 110 €",
+        "text": null,
+        "price": {
+          "amount": 110,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Night dive"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Nitrox : +10 €.",
+        "text": null,
+        "price": {
+          "amount": 10,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Nitrox"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Boutique ouverte de 8h à 17h / Shop open 8am to 5pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "tue",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "wed",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "thu",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "fri",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "17:00"
+          },
+          {
+            "day": "sun",
+            "opens": "08:00",
+            "closes": "17:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Pierre Vasseur, moniteur / instructor (CMAS, PADI)",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Pierre Vasseur",
+          "role": "instructor"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lisa Hoffmann, monitrice / instructor (PADI)",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Lisa Hoffmann",
+          "role": "instructor"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quai du Port, 97133 Gustavia",
+        "text": "Quai du Port, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Plongée exploration / Fun dive — 85 €",
+        "text": null,
+        "price": {
+          "amount": 95,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Fun dive"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Quai du Port, 97133 Gustavia · 05 90 00 45 67",
+        "text": "05 90 00 45 67",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "+590 690 00 45 67 (WhatsApp)",
+        "text": "+590 690 00 45 67",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "info@tortueplongee.example",
+        "text": "info@tortueplongee.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "booking_provider",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Réservation en ligne / Book online : https://bookings.example/tortue-plongee",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": {
+          "url": "https://bookings.example/tortue-plongee",
+          "provider": "bookings.example"
+        }
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Langues / Languages : français, English, Deutsch.",
+        "text": "français",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Langues / Languages : français, English, Deutsch.",
+        "text": "English",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "language_spoken",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Langues / Languages : français, English, Deutsch.",
+        "text": "Deutsch",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Reliable Plumbing SBH",
+    "businessCategory": "Plumber",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://reliableplumbingsbh.example/",
+        "kind": "home",
+        "lang": "en",
+        "markdown": "# Reliable Plumbing SBH\n\nPlumbing repairs, water heaters and pool pumps for villas and businesses across Saint-Barthélemy.\n\n## What we do\n\n- Leak detection and repair\n- Solar and electric water heater installation\n- Pool pumps, filters and salt systems\n- Bathroom and kitchen renovations\n- Water tank cleaning and cistern pumps\n- Emergency call-outs\n\n## Rates\n\nCall-out fee €70, then €80 per hour. Emergency call-outs (evenings, Sundays, holidays) €150 call-out fee. Written quotes free for jobs over €500.\n\n## Hours\n\nMonday to Friday 7am–4pm, Saturday 8am–12pm. Emergency line 24/7: +590 690 00 37 89.\n\nRun by Tom Reynolds, a licensed plumber with 18 years on the island. Fully insured (décennale).\n\n\"Tom came within the hour on a Sunday and fixed our burst pipe. Lifesaver.\" — Villa manager, Lurin\n\nreliable@plumbingsbh.example · Lorient 97133\n\nPayment by bank transfer, card or cash. Invoices in English or French.\n\n© Reliable Plumbing SBH · SIRET 000 000 000 00000"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Plumbing repairs, water heaters and pool pumps for villas and businesses across Saint-Barthélemy.",
+        "text": "Plumbing repairs, water heaters and pool pumps for villas and businesses across Saint-Barthélemy.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "for villas and businesses across Saint-Barthélemy.",
+        "text": "across Saint-Barthélemy",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Leak detection and repair",
+        "text": "Leak detection and repair",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Solar and electric water heater installation",
+        "text": "Solar and electric water heater installation",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Pool pumps, filters and salt systems",
+        "text": "Pool pumps, filters and salt systems",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Bathroom and kitchen renovations",
+        "text": "Bathroom and kitchen renovations",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Water tank cleaning and cistern pumps",
+        "text": "Water tank cleaning and cistern pumps",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "a licensed plumber with 18 years on the island.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2006,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Emergency call-outs",
+        "text": "Emergency call-outs",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Call-out fee €70, then €80 per hour.",
+        "text": null,
+        "price": {
+          "amount": 70,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Call-out fee"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Call-out fee €70, then €80 per hour.",
+        "text": null,
+        "price": {
+          "amount": 80,
+          "currency": "EUR",
+          "unit": "per hour",
+          "item": "Hourly rate"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Emergency call-outs (evenings, Sundays, holidays) €150 call-out fee.",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": null,
+          "item": "Emergency call-out fee"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Monday to Friday 7am–4pm, Saturday 8am–12pm.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:00",
+            "closes": "16:00"
+          },
+          {
+            "day": "tue",
+            "opens": "07:00",
+            "closes": "16:00"
+          },
+          {
+            "day": "wed",
+            "opens": "07:00",
+            "closes": "16:00"
+          },
+          {
+            "day": "thu",
+            "opens": "07:00",
+            "closes": "16:00"
+          },
+          {
+            "day": "fri",
+            "opens": "07:00",
+            "closes": "16:00"
+          },
+          {
+            "day": "sat",
+            "opens": "08:00",
+            "closes": "12:00"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Emergency line 24/7: +590 690 00 37 89.",
+        "text": "+590 690 00 37 89",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Run by Tom Reynolds, a licensed plumber with 18 years on the island.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Tom Reynolds",
+          "role": "licensed plumber"
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Air conditioning servicing and installation",
+        "text": "Air conditioning servicing",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "\"Tom came within the hour on a Sunday and fixed our burst pipe. Lifesaver.\" — Villa manager, Lurin",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Tom came within the hour on a Sunday and fixed our burst pipe. Lifesaver.",
+          "attribution": "Villa manager, Lurin"
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "reliable@plumbingsbh.example · Lorient 97133",
+        "text": "reliable@plumbingsbh.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "reliable@plumbingsbh.example · Lorient 97133",
+        "text": "Lorient 97133",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Payment by bank transfer, card or cash.",
+        "text": "bank transfer",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Payment by bank transfer, card or cash.",
+        "text": "card",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "payment_method",
+        "pageId": "p1",
+        "locale": "en",
+        "evidence": "Payment by bank transfer, card or cash.",
+        "text": "cash",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

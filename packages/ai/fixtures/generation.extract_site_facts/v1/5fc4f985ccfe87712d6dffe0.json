@@ -1,0 +1,337 @@
+{
+  "task": "generation.extract_site_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Électricité Caraïbes Services",
+    "businessCategory": "Électricien",
+    "pages": [
+      {
+        "id": "p1",
+        "url": "https://ecs-elec.example/",
+        "kind": "home",
+        "lang": "fr",
+        "markdown": "[Accueil](/) · [Prestations](/prestations) · [Réalisations](/realisations) · [Contact](/contact)\n\n# Électricité Caraïbes Services\n\nÉlectricien qualifié à Saint-Barthélemy — installations, mises aux normes, domotique et photovoltaïque.\n\n## Prestations\n\n- Installation électrique complète (neuf et rénovation)\n- Mise en conformité et attestation Consuel\n- Dépannage et recherche de panne\n- Domotique et éclairage LED\n- Panneaux photovoltaïques et batteries\n- Bornes de recharge pour véhicules électriques\n\n## Tarifs\n\nDiagnostic et devis : gratuits. Taux horaire : 70 € HT. Dépannage urgent (sous 2 h) : forfait 150 € HT.\n\n## Horaires\n\nLundi au vendredi de 7h30 à 16h30.\n\nQualifié Qualifelec depuis 2019. Entreprise fondée en 2011 par Olivier Magras.\n\n« Chantier propre, délais tenus, je recommande. » — Patrick B., villa à Vitet\n\nContact : 05 90 00 10 23 — WhatsApp +590 690 00 11 22 — contact@ecs-elec.example\nZone industrielle de Public, 97133 Gustavia\n\nInterventions sur toute l’île.\n\n© Électricité Caraïbes Services — Mentions légales"
+      }
+    ]
+  },
+  "output": {
+    "candidates": [
+      {
+        "kind": "tagline",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Électricien qualifié à Saint-Barthélemy — installations, mises aux normes, domotique et photovoltaïque.",
+        "text": "Électricien qualifié à Saint-Barthélemy — installations, mises aux normes, domotique et photovoltaïque.",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Installation électrique complète (neuf et rénovation)",
+        "text": "Installation électrique complète",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Mise en conformité et attestation Consuel",
+        "text": "Mise en conformité et attestation Consuel",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Dépannage et recherche de panne",
+        "text": "Dépannage et recherche de panne",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Domotique et éclairage LED",
+        "text": "Domotique et éclairage LED",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Panneaux photovoltaïques et batteries",
+        "text": "Panneaux photovoltaïques et batteries",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "service",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Bornes de recharge pour véhicules électriques",
+        "text": "Bornes de recharge pour véhicules électriques",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entreprise fondée en 2011 par Olivier Magras.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2019,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Taux horaire : 70 € HT.",
+        "text": null,
+        "price": {
+          "amount": 70,
+          "currency": "EUR",
+          "unit": "HT",
+          "item": "Taux horaire"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "price",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Dépannage urgent (sous 2 h) : forfait 150 € HT.",
+        "text": null,
+        "price": {
+          "amount": 150,
+          "currency": "EUR",
+          "unit": "forfait",
+          "item": "Dépannage urgent"
+        },
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "hours",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Lundi au vendredi de 7h30 à 16h30.",
+        "text": null,
+        "price": null,
+        "hours": [
+          {
+            "day": "mon",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "tue",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "wed",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "thu",
+            "opens": "07:30",
+            "closes": "16:30"
+          },
+          {
+            "day": "fri",
+            "opens": "07:30",
+            "closes": "16:30"
+          }
+        ],
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "award",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Qualifié Qualifelec depuis 2019.",
+        "text": "Qualifié Qualifelec depuis 2019",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "year_founded",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entreprise fondée en 2011 par Olivier Magras.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": 2011,
+        "booking": null
+      },
+      {
+        "kind": "team_member",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Entreprise fondée en 2011 par Olivier Magras.",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": {
+          "name": "Olivier Magras",
+          "role": null
+        },
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp +590 690 00 11 22",
+        "text": "+590 690 00 12 21",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "testimonial",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "« Chantier propre, délais tenus, je recommande. » — Patrick B., villa à Vitet",
+        "text": null,
+        "price": null,
+        "hours": null,
+        "testimonial": {
+          "quote": "Chantier propre, délais tenus, je recommande.",
+          "attribution": "Patrick B."
+        },
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "phone",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "Contact : 05 90 00 10 23",
+        "text": "05 90 00 10 23",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "whatsapp",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "WhatsApp +590 690 00 11 22",
+        "text": "+590 690 00 11 22",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "email",
+        "pageId": "p1",
+        "locale": null,
+        "evidence": "contact@ecs-elec.example",
+        "text": "contact@ecs-elec.example",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "address",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Zone industrielle de Public, 97133 Gustavia",
+        "text": "Zone industrielle de Public, 97133 Gustavia",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      },
+      {
+        "kind": "area_served",
+        "pageId": "p1",
+        "locale": "fr",
+        "evidence": "Interventions sur toute l’île.",
+        "text": "toute l’île",
+        "price": null,
+        "hours": null,
+        "testimonial": null,
+        "person": null,
+        "year": null,
+        "booking": null
+      }
+    ],
+    "warnings": []
+  }
+}

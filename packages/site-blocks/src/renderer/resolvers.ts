@@ -11,14 +11,30 @@ export function pickText(text: LocalizedText | undefined, locale: SiteLocale, fa
   return text[locale] ?? text[fallback] ?? Object.values(text).find((value) => value !== undefined) ?? '';
 }
 
+const hasControlCharacter = (text: string) =>
+  Array.from(text).some((char) => {
+    const code = char.charCodeAt(0);
+    return code < 0x20 || code === 0x7f;
+  });
+
 /**
  * A link the renderer may emit, else undefined: http(s), `tel:`, `mailto:`, or a same-site path, query or fragment
  * (`/carte`, never `//evil.example`). The schema checks links; this keeps a page safe regardless (`data:`,
  * `vbscript:` and protocol-relative links are dropped).
  */
 export function safeHref(href: string | undefined): string | undefined {
-  if (!href) return undefined;
-  if (/^[/?#]/.test(href)) return /^\/[/\\]/.test(href) || href.includes('\\') ? undefined : href;
+  // Browsers drop tabs and line breaks inside URLs (`/\t/evil.example` opens evil.example): none is accepted.
+  if (!href || hasControlCharacter(href)) return undefined;
+  if (/^[/?#]/.test(href)) {
+    try {
+      // A same-site reference stays on the page's origin once resolved (`//host` or `/\\host` would leave it).
+      return new URL(href, 'https://same.invalid').origin === 'https://same.invalid' && !href.includes('\\')
+        ? href
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  }
   try {
     return ['https:', 'http:', 'tel:', 'mailto:'].includes(new URL(href).protocol) ? href : undefined;
   } catch {
@@ -119,7 +135,8 @@ export function createRenderContext(
     cta: (action) => (action ? (options.ctaResolver ?? resolveCta)(action, ctx) : null),
     pageHref: (pageId, inLocale = locale) => {
       const target = pages.get(pageId);
-      return target ? hrefForPage(target, inLocale, spec) : undefined;
+      // Every page link goes through the same check as other links (an unvalidated slug or a custom resolver).
+      return target ? safeHref(hrefForPage(target, inLocale, spec)) : undefined;
     },
     fact: (factId) => facts.get(factId),
     country,

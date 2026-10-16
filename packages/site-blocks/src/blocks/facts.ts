@@ -5,6 +5,8 @@ import type { RenderContext } from '../renderer/types.ts';
 /** A price as shown: the amount and currency of its fact when the registry is given (the spec is untrusted). */
 export function shownPrice(price: Price, ctx: RenderContext): string {
   const fact = ctx.fact(price.factId);
+  // With a registry, a price without its fact is not shown (an invented amount).
+  if (ctx.options.facts && fact?.kind !== 'price') return '';
   const value = fact?.kind === 'price' ? { ...price, ...fact.value } : price;
   return formatPrice(value, ctx.locale);
 }
@@ -41,9 +43,17 @@ export function shownReviewer(
   ctx: RenderContext,
 ): { author: string | undefined; rating: number | undefined } {
   const fact = ctx.fact(item.factId);
-  if (fact?.kind !== 'testimonial') return { author: item.author, rating: item.rating };
+  if (fact?.kind !== 'testimonial')
+    // With a registry, a review without its fact shows no author or rating of its own (the spec is untrusted).
+    return ctx.options.facts
+      ? { author: undefined, rating: undefined }
+      : { author: item.author, rating: item.rating };
   return {
     author: item.author ? fact.value.author : undefined,
     rating: item.rating ? fact.value.rating : undefined,
   };
 }
+
+/** A review shown on the page: with a registry, only one backed by a testimonial fact (a quote nobody wrote is not). */
+export const reviewShown = (item: { readonly factId: string }, ctx: RenderContext): boolean =>
+  !ctx.options.facts || ctx.fact(item.factId)?.kind === 'testimonial';

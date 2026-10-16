@@ -18,7 +18,12 @@ export const itemHeading = (sectionHeading: unknown): 'h2' | 'h3' => (sectionHea
  * (`bf-mobile-menu`, `main`). Every id derived from a block starts from it.
  */
 export const blockDomId = (blockId: string) => `b-${blockId}`;
-export const headingId = (blockId: string) => `${blockDomId(blockId)}-title`;
+/**
+ * An id derived from a block's (its heading, a gallery photo, its form): `:` cannot appear in block ids, so a derived id
+ * never equals another block's.
+ */
+export const derivedId = (blockId: string, part: string) => `${blockDomId(blockId)}:${part}`;
+export const headingId = (blockId: string) => derivedId(blockId, 'title');
 
 /** A block's section: its spacing, tone and accessible name. */
 export function Section({

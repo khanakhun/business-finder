@@ -196,7 +196,7 @@ describe('variants that differ', () => {
     expect(list).toHaveAttribute('aria-label');
     const buttons = within(container).getAllByRole('button', { name: /Agrandir la photo/ });
     for (const button of buttons)
-      expect(container.querySelector(`#${button.getAttribute('popovertarget')}`)).toHaveAttribute(
+      expect(container.querySelector(`[id="${button.getAttribute('popovertarget')}"]`)).toHaveAttribute(
         'popover',
         'auto',
       );
@@ -266,5 +266,22 @@ describe('variants that differ', () => {
     // Without a registry (the editor before facts load) the spec's own are shown.
     const unchecked = render(<SitePage spec={spec} page="home" locale="fr" />).container;
     expect(unchecked).toHaveTextContent('Jean-Pierre Martin');
+  });
+
+  it('testimonials: with a registry, a review without its fact is not shown, nor any invented price', () => {
+    const salon = fixture('salon-gustavia');
+    const registry = facts('salon-gustavia');
+    const spec: SiteSpec = structuredClone(salon);
+    for (const block of spec.pages[0]?.blocks ?? []) {
+      if (block.type === 'testimonials')
+        for (const item of block.props.items)
+          Object.assign(item, { factId: 'no-such-fact', author: 'Invented' });
+      if (block.type === 'services')
+        for (const item of block.props.items) if (item.price) item.price.factId = 'no-such-price';
+    }
+    const { container } = render(<SitePage spec={spec} page="home" locale="fr" facts={registry} />);
+    expect(container.querySelector('[data-block="testimonials"]')).toBeNull();
+    expect(container).not.toHaveTextContent('Invented');
+    expect(container.querySelector('[data-block="services"]')).not.toHaveTextContent('€');
   });
 });

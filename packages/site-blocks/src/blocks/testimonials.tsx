@@ -1,6 +1,6 @@
 import { Icon } from '../icons/icon.tsx';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
-import { shownQuote, shownReviewer } from './facts.ts';
+import { reviewShown, shownQuote, shownReviewer } from './facts.ts';
 import { cx, Section, SectionHead, Stars } from './shared.tsx';
 
 type Item = BlockProps<'testimonials'>['block']['props']['items'][number];
@@ -34,7 +34,9 @@ function Quote({ item, ctx, large = false }: { item: Item; ctx: RenderContext; l
 /** Real customer quotes, from the fact registry only. */
 export function Testimonials({ block, ctx, tone }: BlockProps<'testimonials'>) {
   const { props, variant } = block;
-  const items = props.items;
+  // With a registry, only reviews backed by a testimonial fact are shown.
+  const items = props.items.filter((item) => reviewShown(item, ctx));
+  if (items.length === 0) return null;
   const label = props.heading ? undefined : ctx.strings.reviews;
   return (
     <Section

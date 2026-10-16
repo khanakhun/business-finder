@@ -108,7 +108,7 @@ describe('SitePage', () => {
     if (hero) hero.id = '__next_f';
     const { container } = render(<SitePage spec={spec} page="home" locale="fr" />);
     expect(container.querySelector('[id="__next_f"]')).toBeNull();
-    expect(container.querySelector('#b-__next_f-title')).not.toBeNull();
+    expect(container.querySelector('[id="b-__next_f:title"]')).not.toBeNull();
     for (const section of container.querySelectorAll('section[id]')) expect(section.id).toMatch(/^b-/);
   });
 
@@ -300,6 +300,10 @@ describe('safeHref', () => {
     '//evil.example',
     '/\\evil.example',
     '/\\/evil.example',
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r/evil.example',
+    'java\tscript:alert(1)',
     'evil.example',
     '',
     undefined,
@@ -318,5 +322,27 @@ describe('safeHref', () => {
     expect(
       resolveCta({ kind: 'url', url: 'data:text/html,x', label: { fr: 'Voir', en: 'See' } } as never, ctx),
     ).toBeNull();
+  });
+});
+
+describe('links of an unvalidated spec', () => {
+  it('never leaves the site through a page link, and derived ids never collide with block ids', () => {
+    const spec = structuredClone(salon);
+    const target = spec.pages[1];
+    if (target) target.slug = '\t/evil.example';
+    const hero = spec.pages[0]?.blocks[0];
+    const next = spec.pages[0]?.blocks[1];
+    if (hero && next) next.id = `${hero.id}-title`;
+    const { container } = render(<SitePage spec={spec} page="home" locale="fr" />);
+    for (const link of container.querySelectorAll('a[href]')) {
+      const href = link.getAttribute('href') ?? '';
+      expect(
+        new URL(href, 'https://site.example').origin === 'https://site.example' ||
+          /^(https?|tel|mailto):/.test(href),
+      ).toBe(true);
+      expect(href).not.toMatch(/evil\.example/);
+    }
+    const ids = [...container.querySelectorAll('[id]')].map((element) => element.id);
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
   });
 });

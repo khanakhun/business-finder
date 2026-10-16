@@ -122,8 +122,13 @@ const GENERIC_TLDS =
   // Endings of the local market (villas, boats, beauty, food).
   'villas|villa|luxury|yachts|boats|boutique|beauty|spa|hair|salon|bio|voyage|holiday|rentals|house|homes|estate|' +
   'properties|studio|design|agency|services|menu|pizza|wine|bike|fit|ski|surf|golf|events|photo|tours|beach';
+/**
+ * A domain: labels of two or more characters before any ending (a label after `.`, `_` or `*` too: `m.evil.com`,
+ * `x_evil.com`, `*.evil.com`), or a one-character name before a generic ending (`x.com`, `t.me`). Abbreviations
+ * (`p.ex.`) stay text.
+ */
 const DOMAIN = new RegExp(
-  `(?<![\\p{L}\\p{N}@._-])[\\p{L}\\p{N}-]{2,}(?:\\.[\\p{L}\\p{N}-]+)*\\.(?:[a-z]{2}|${GENERIC_TLDS}|xn--[a-z0-9-]+|[\\p{Script=Cyrillic}\\p{Script=Greek}\\p{Script=Arabic}\\p{Script=Han}\\p{Script=Hangul}]{2,})(?![\\p{L}\\p{N}-])`,
+  `(?<![\\p{L}\\p{N}@-])(?:[\\p{L}\\p{N}-]{2,}(?:\\.[\\p{L}\\p{N}-]+)*\\.(?:[a-z]{2}|${GENERIC_TLDS}|xn--[a-z0-9-]+|[\\p{Script=Cyrillic}\\p{Script=Greek}\\p{Script=Arabic}\\p{Script=Han}\\p{Script=Hangul}]{2,})|[\\p{L}\\p{N}]\\.(?:${GENERIC_TLDS}))(?![\\p{L}\\p{N}-])`,
   'iu',
 );
 

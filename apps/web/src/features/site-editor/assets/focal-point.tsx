@@ -9,6 +9,16 @@ export interface FocalPoint {
 }
 
 const STEP = 0.05;
+
+/** The picture's address, only as an object URL (a local file) or a web address (our CDN): never markup. */
+function imageSource(src: string): string | undefined {
+  try {
+    const url = new URL(src);
+    return ['blob:', 'https:', 'http:'].includes(url.protocol) ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
 const clamp = (value: number) => Math.min(1, Math.max(0, Math.round(value * 100) / 100));
 
 /**
@@ -61,7 +71,7 @@ export function FocalPointPicker({
           });
         }}
       >
-        <img src={src} alt={alt} className="block h-auto w-full" draggable={false} />
+        <img src={imageSource(src)} alt={alt} className="block h-auto w-full" draggable={false} />
         <span
           aria-hidden
           className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_2px_rgba(0,0,0,0.6)]"

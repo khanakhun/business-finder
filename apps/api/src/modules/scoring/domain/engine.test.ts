@@ -352,6 +352,18 @@ describe('scoring engine', () => {
       expect(reasons.map((reason) => reason.feature)).toEqual(['has_website', 'has_phone', 'has_whatsapp']);
     });
 
+    it('reads category relevance by side of its pivot (0.5 is the weaker side), in both languages', () => {
+      const config = profile({ weights: { category_offer_relevance: 10 } });
+      const text = (value: number) =>
+        scoreVector(config, { category_offer_relevance: value }).reasons[0]?.text;
+      expect(text(0.5)).toEqual({
+        en: 'This offer is a weaker fit for this kind of business (50% relevance).',
+        fr: 'Cette offre convient moins à ce type d’entreprise (pertinence 50\u202f%).',
+      });
+      expect(text(0.6)?.en).toBe('This kind of business often needs this offer (60% relevance).');
+      expect(text(0.6)?.fr).toContain('souvent');
+    });
+
     it('reads texts by value, by side of the pivot, the profile’s before the registry’s', () => {
       const config = profile({
         weights: { has_booking_tool: 20, website_status: 20, sentiment_avg: 20, has_phone: 20 },

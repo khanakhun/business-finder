@@ -314,11 +314,12 @@ const DEFINITIONS = {
       fr: 'Pertinence de l’offre du profil pour la catégorie de l’entreprise (0–1).',
     },
     source: 'category taxonomy (BF-015)',
-    pivot: 0.5,
+    // Relevance comes in tenths: 0.5 reads as the weaker side.
+    pivot: 0.55,
     reasons: {
       below: {
-        en: 'This offer fits this kind of business only sometimes ({value} relevance).',
-        fr: 'Cette offre ne convient que parfois à ce type d’entreprise (pertinence {value}).',
+        en: 'This offer is a weaker fit for this kind of business ({value} relevance).',
+        fr: 'Cette offre convient moins à ce type d’entreprise (pertinence {value}).',
       },
       above: {
         en: 'This kind of business often needs this offer ({value} relevance).',

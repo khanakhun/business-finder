@@ -101,7 +101,10 @@ describe('built-in profiles (golden)', () => {
         .filter((reason) => reason.feature === 'category_offer_relevance')
         .map((reason) => ({ value: result.features.category_offer_relevance, text: reason.text.en })),
     );
-    expect(relevance.filter(({ value, text }) => Number(value) < 0.5 && text.includes('often'))).toEqual([]);
+    expect(relevance.filter(({ value, text }) => Number(value) < 0.55 && text.includes('often'))).toEqual([]);
+    expect(relevance.filter(({ value, text }) => Number(value) >= 0.55 && !text.includes('often'))).toEqual(
+      [],
+    );
     for (const reason of scored.flatMap((result) => result.reasons)) {
       expect(reason.text.en).not.toMatch(/\{value\}|null|undefined|NaN/);
       expect(reason.text.fr).not.toMatch(/\{value\}|null|undefined|NaN/);

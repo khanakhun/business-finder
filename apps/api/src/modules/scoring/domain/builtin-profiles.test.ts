@@ -112,6 +112,7 @@ describe('blocked crawls', () => {
     // The new website offer's gate makes no claim about it either.
     expect(scoreBusiness(BUILTIN_PROFILES.new_website, blocked).gated).toMatchObject({
       gate: 'has_working_website',
+      applied: true,
       reason: { en: 'The audit flagged no major problem with its website: see the redesign offer.' },
     });
     // Its status is `ok` by convention (never measured): the text claims no assessment.

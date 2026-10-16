@@ -1,7 +1,6 @@
 'use client';
 
 import type { PipelineBoard, PipelineStatus } from '@bf/contracts';
-import { Badge } from '@bf/ui/components/badge';
 import { CategoryPicker } from '@bf/ui/components/category-picker';
 import { ErrorState } from '@bf/ui/components/error-state';
 import { Input } from '@bf/ui/components/input';
@@ -72,7 +71,6 @@ function useBoard(filters: Readonly<Record<string, string>>) {
 }
 
 function CardBody({ card, dragging = false }: { readonly card: Card; readonly dragging?: boolean }) {
-  const t = useTranslations('pipeline');
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
   const { labels } = useCategories();

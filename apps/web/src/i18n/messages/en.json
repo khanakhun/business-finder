@@ -1292,7 +1292,6 @@
     "anyCategory": "Any category",
     "tag": "Tag",
     "error": "The pipeline could not be loaded",
-    "score": "Score {score}",
     "count": "{count, plural, one {# business} other {# businesses}}",
     "more": "{count, plural, one {# more in search} other {# more in search}}",
     "emptyColumn": "No business here",

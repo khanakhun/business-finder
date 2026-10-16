@@ -1292,7 +1292,6 @@
     "anyCategory": "Toutes les catégories",
     "tag": "Étiquette",
     "error": "Impossible de charger le pipeline",
-    "score": "Score {score}",
     "count": "{count, plural, one {# entreprise} other {# entreprises}}",
     "more": "{count, plural, one {# de plus dans la recherche} other {# de plus dans la recherche}}",
     "emptyColumn": "Aucune entreprise ici",

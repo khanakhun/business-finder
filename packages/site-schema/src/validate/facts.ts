@@ -219,7 +219,8 @@ export function literals(input: string, country?: string): Literals {
   text = text
     .replace(/[\p{Pd}\u2212]/gu, '-')
     .replace(/(?<=\d)[\u00B7\u2022\u2027\u2219\u30FB\uFF65](?=\d)/g, '.')
-    .replace(/[ \u00A0\u202F]*[\u00B7\u2022\u2027\u2219\u30FB\uFF65][ \u00A0\u202F]*/g, ' / ');
+    // Bounded spaces: an unbounded run before a missing dot would be rescanned from every space (quadratic).
+    .replace(/[ \u00A0\u202F]{0,3}[\u00B7\u2022\u2027\u2219\u30FB\uFF65][ \u00A0\u202F]{0,3}/g, ' / ');
   const prices: Literals['prices'] = [];
   text = text.replace(
     PRICE,

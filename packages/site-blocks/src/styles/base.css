@@ -232,6 +232,24 @@
     margin-inline: auto;
   }
 
+  /* A head beside other content stays left-aligned whatever the family. */
+  .bf-section .bf-section-head[data-align="start"] {
+    align-items: flex-start;
+    margin-inline: 0;
+    text-align: left;
+  }
+
+  .bf-section .bf-section-head[data-align="start"] > .bf-h2::after {
+    margin-inline: 0;
+  }
+
+  /* A disabled form looks disabled. */
+  fieldset:disabled .bf-input,
+  fieldset:disabled .bf-btn {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
   /* Buttons (44 px targets) */
   .bf-actions {
     display: flex;

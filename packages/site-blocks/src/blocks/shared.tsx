@@ -65,9 +65,12 @@ export function SectionHead({
   intro,
   eyebrow,
   fallback,
+  align,
   ctx,
 }: {
   blockId: string;
+  /** `start` keeps the head left-aligned whatever the family (a head in a column beside other content). */
+  align?: 'start' | undefined;
   heading: LocalizedText | undefined;
   /** A small label shown (as the section's heading) when the block has none. */
   fallback?: string | undefined;
@@ -77,7 +80,7 @@ export function SectionHead({
 }) {
   if (!heading) {
     return fallback ? (
-      <header className="bf-section-head !mb-6">
+      <header className="bf-section-head !mb-6" data-align={align}>
         <h2 id={headingId(blockId)} className="bf-eyebrow">
           {fallback}
         </h2>
@@ -85,7 +88,7 @@ export function SectionHead({
     ) : null;
   }
   return (
-    <header className="bf-section-head">
+    <header className="bf-section-head" data-align={align}>
       {eyebrow ? <span className="bf-eyebrow">{eyebrow}</span> : null}
       <h2 id={headingId(blockId)} className="bf-h2">
         {ctx.t(heading)}

@@ -16,10 +16,15 @@
   "scripts": {
     "build": "tsx src/cli/build.ts",
     "render:fixtures": "tsx src/cli/render-sites.ts",
-    "serve": "tsx src/cli/serve.ts dist/sites",
+    "serve": "tsx src/cli/serve.ts dist",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "gallery": "pnpm build && tsx src/cli/gallery.tsx",
+    "prepare:suites": "pnpm build && tsx src/cli/render-sites.ts && tsx src/cli/gallery.tsx --no-serve",
+    "test:visual": "playwright test --project visual",
+    "test:a11y": "playwright test --project a11y",
+    "test:lighthouse": "mkdir -p .lighthouseci && cd .lighthouseci && lhci autorun --config=../lighthouserc.cjs"
   },
   "dependencies": {
     "@bf/site-schema": "workspace:*",
@@ -30,6 +35,7 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
+    "@axe-core/playwright": "catalog:",
     "@bf/testing": "workspace:*",
     "@bf/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
@@ -45,6 +51,8 @@
     "@fontsource-variable/work-sans": "catalog:",
     "@fontsource/dm-serif-display": "catalog:",
     "@fontsource/lato": "catalog:",
+    "@lhci/cli": "catalog:",
+    "@playwright/test": "catalog:",
     "@tailwindcss/cli": "catalog:",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",

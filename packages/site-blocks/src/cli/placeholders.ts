@@ -1,4 +1,8 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Asset, SiteSpec } from '@bf/site-schema';
+import { FIXTURE_NAMES, readFixture } from './fixtures.ts';
 
 // Placeholder photos for fixture renders (BF-034): the fixtures' assets point at a test host, so the gallery and the
 // visual/Lighthouse suites draw a calm, deterministic image per asset (gradients and soft shapes in the site's
@@ -16,7 +20,7 @@ function mix(a: string, b: string, t: number): string {
   return `#${[0, 1, 2].map((i) => value(i).toString(16).padStart(2, '0')).join('')}`;
 }
 
-/** An SVG standing in for a photo: a sky-to-ground gradient, a horizon and a few soft forms. */
+/** An SVG standing in for a photo: sky, sun, horizon and a few hills in the site's colours. */
 export function placeholderSvg(asset: Asset, spec: SiteSpec): string {
   const { palette } = spec.theme;
   const seed = hash(asset.id);
@@ -28,23 +32,23 @@ export function placeholderSvg(asset: Asset, spec: SiteSpec): string {
   if (asset.kind === 'logo') {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><text x="50%" y="58%" text-anchor="middle" font-family="Georgia, serif" font-size="${Math.round(Math.min(h * 0.42, (w * 0.9) / (spec.brand.name.length * 0.55)))}" fill="${palette.text}" >${spec.brand.name.replace(/[<&>]/g, '')}</text></svg>`;
   }
+  // Flat colour bands and shapes (no gradients: screenshots of them compress well and render the same everywhere).
   const horizon = 0.45 + (seed % 20) / 100;
-  const sun = { x: 0.2 + ((seed >> 5) % 60) / 100, y: 0.18 + ((seed >> 9) % 20) / 100 };
-  const forms = Array.from({ length: 3 }, (_, i) => {
+  const sun = { x: 0.2 + ((seed >> 5) % 60) / 100, y: 0.16 + ((seed >> 9) % 18) / 100 };
+  const band = (from: number, to: number, color: string) =>
+    `<rect y="${(h * from).toFixed(0)}" width="${w}" height="${(h * (to - from)).toFixed(0)}" fill="${color}"/>`;
+  const hills = Array.from({ length: 3 }, (_, i) => {
     const x = (((seed >> (i * 4)) % 100) / 100) * w;
-    const r = (0.18 + ((seed >> (i * 3 + 2)) % 20) / 100) * w;
-    return `<ellipse cx="${x.toFixed(0)}" cy="${(h * (horizon + 0.12 + i * 0.08)).toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r * 0.35).toFixed(0)}" fill="${mix(c1, '#000000', 0.15 + i * 0.1)}" opacity="0.55"/>`;
+    const r = (0.2 + ((seed >> (i * 3 + 2)) % 20) / 100) * w;
+    return `<ellipse cx="${x.toFixed(0)}" cy="${(h * (horizon + 0.14 + i * 0.09)).toFixed(0)}" rx="${r.toFixed(0)}" ry="${(r * 0.32).toFixed(0)}" fill="${mix(c1, '#000000', 0.12 + i * 0.12)}"/>`;
   }).join('');
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice">`,
-    '<defs>',
-    `<linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mix(c3, '#ffffff', 0.35)}"/><stop offset="${horizon}" stop-color="${mix(c2, c3, 0.4)}"/><stop offset="1" stop-color="${mix(c1, '#000000', 0.25)}"/></linearGradient>`,
-    `<radialGradient id="g" cx="${sun.x}" cy="${sun.y}" r="0.5"><stop offset="0" stop-color="#ffffff" stop-opacity="0.75"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>`,
-    '</defs>',
-    `<rect width="${w}" height="${h}" fill="url(#s)"/>`,
-    `<rect width="${w}" height="${h}" fill="url(#g)"/>`,
-    `<rect y="${(h * horizon).toFixed(0)}" width="${w}" height="${(h * (1 - horizon)).toFixed(0)}" fill="${mix(c1, c2, 0.5)}" opacity="0.35"/>`,
-    forms,
+    band(0, 1, mix(c3, '#ffffff', 0.45)),
+    band(horizon * 0.55, horizon, mix(c3, c2, 0.35)),
+    `<circle cx="${(w * sun.x).toFixed(0)}" cy="${(h * sun.y).toFixed(0)}" r="${(Math.min(w, h) * 0.07).toFixed(0)}" fill="${mix(c3, '#ffffff', 0.8)}"/>`,
+    band(horizon, 1, mix(c1, c2, 0.45)),
+    hills,
     '</svg>',
   ].join('');
 }
@@ -53,3 +57,13 @@ export function placeholderSvg(asset: Asset, spec: SiteSpec): string {
 export const placeholderResolver =
   (base = '/assets/') =>
   (asset: Asset) => ({ src: `${base}${asset.id}.svg` });
+
+/** Writes every fixture asset's placeholder to dist/assets/. */
+export function writePlaceholders(): void {
+  const dir = fileURLToPath(new URL('../../dist/assets/', import.meta.url));
+  mkdirSync(dir, { recursive: true });
+  for (const name of FIXTURE_NAMES) {
+    const spec = readFixture(name);
+    for (const asset of spec.assets) writeFileSync(join(dir, `${asset.id}.svg`), placeholderSvg(asset, spec));
+  }
+}

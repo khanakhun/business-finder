@@ -136,6 +136,8 @@ catalog:
   '@fontsource/lato': 5.3.0
   # The block library's island bundle budget test (also tsx's bundler).
   esbuild: 0.28.2
+  # Lighthouse CI runs the block library's performance/accessibility budgets on static fixture renders.
+  '@lhci/cli': 0.15.1
   yaml: 2.9.1
   fast-check: 4.10.2
   '@types/geojson': 7946.0.16

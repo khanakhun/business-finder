@@ -12,9 +12,7 @@ export function RichText({ block, ctx, tone }: BlockProps<'rich_text'>) {
           variant === 'narrow' ? 'max-w-[calc(var(--bf-measure)+6rem)]' : 'max-w-5xl',
         )}
       >
-        <div className="[&_.bf-section-head]:!items-start [&_.bf-section-head]:!text-left [&_.bf-section-head]:!mx-0">
-          <SectionHead blockId={block.id} heading={props.heading} ctx={ctx} />
-        </div>
+        <SectionHead blockId={block.id} heading={props.heading} align="start" ctx={ctx} />
         <RichTextBody
           text={ctx.t(props.body)}
           ctx={ctx}

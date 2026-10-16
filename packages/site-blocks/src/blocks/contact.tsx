@@ -97,8 +97,14 @@ export function Contact({ block, ctx, tone }: BlockProps<'contact'>) {
       <div className="bf-container">
         {variant === 'split' ? (
           <div className={cx('grid gap-[calc(var(--bf-gap)*2)]', contactForm && 'lg:grid-cols-[1fr_1.2fr]')}>
-            <div className="flex flex-col gap-8 [&_.bf-section-head]:!mb-0 [&_.bf-section-head]:!items-start [&_.bf-section-head]:!text-left">
-              <SectionHead blockId={block.id} heading={props.heading} intro={props.intro} ctx={ctx} />
+            <div className="flex flex-col gap-8 [&_.bf-section-head]:!mb-0">
+              <SectionHead
+                blockId={block.id}
+                heading={props.heading}
+                intro={props.intro}
+                align="start"
+                ctx={ctx}
+              />
               {list}
             </div>
             {contactForm}

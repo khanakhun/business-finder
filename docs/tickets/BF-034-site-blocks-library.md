@@ -75,9 +75,9 @@ See Scope → Tests. All suites runnable locally (`pnpm --filter @bf/site-blocks
 ## Acceptance criteria
 - [x] Components for all blocks/variants; five style families; curated self-hosted fonts.
 - [x] `SiteRenderer` API with injectable image/link components; static renderer for agents.
-- [ ] Block gallery and exported thumbnails.
-- [ ] Visual regression, axe and Lighthouse thresholds pass on fixture sites.
-- [ ] PR includes screenshots of all four fixture sites in at least two styles.
+- [x] Block gallery and exported thumbnails.
+- [x] Visual regression, axe and Lighthouse thresholds pass on fixture sites.
+- [x] PR includes screenshots of all four fixture sites in at least two styles.
 
 ## Agent prompt
 ```text
@@ -127,5 +127,19 @@ Verify: pnpm verify; visual, axe and Lighthouse suites green; attach screenshots
   said ≈ 10).
 - `@bf/site-schema` exports `Price` and its fixtures (`./fixtures/*`); boundary rule `site-blocks-browser-safe`.
 
-**Part 2 (planned):** gallery and thumbnails, visual regression, axe and Lighthouse suites, CI job, screenshots.
+**Part 2 (suites):**
+- Block gallery: `pnpm --filter @bf/site-blocks gallery` writes every block × variant × style (42 variants × 5
+  styles) to `dist/gallery/` and serves it with the fixture renders (`dist/sites/<fixture>/<style>/`, all pages and
+  locales) on http://127.0.0.1:4410. Placeholder photos are flat SVG drawings in each site's colours (the fixtures'
+  assets point at a test host).
+- Thumbnails: `pnpm --filter @bf/site-blocks thumbnails` writes the 42 catalog pictures to
+  `packages/site-schema/generated/catalog/thumbnails/<type>/<variant>.png` (≈ 430 kB), the paths the BF-033 catalog
+  names.
+- Visual regression (Playwright 1.64.1): the four fixture homes × five styles × mobile/desktop (full page) and every
+  block variant in luxe and modern: 124 Linux baselines, ≈ 5 MB, `maxDiffPixelRatio` 0.01.
+- Accessibility (@axe-core/playwright 4.13): every page of every fixture in two styles, the mobile menu open, and the
+  skip link; zero serious or critical violations (WCAG 2.2 AA + best practices).
+- Lighthouse CI 0.15.1 (Lighthouse 12.6.1), mobile, five pages: performance 100, accessibility 100, best practices
+  96 (budgets ≥ 0.95). SEO is low by design: previews are `noindex`.
+- CI job `sites` (path-filtered on site-blocks and site-schema): prepare, visual + axe with no retries, Lighthouse.
 

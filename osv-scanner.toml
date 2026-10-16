@@ -7,3 +7,10 @@ ignoreUntil = 2027-01-15
 reason = """esbuild 0.18.20 is a dev-only transitive dependency (drizzle-kit → @esbuild-kit/esm-loader). The \
 advisory concerns esbuild's `serve` dev server (permissive CORS); nothing here runs it. Remove once drizzle-kit \
 drops @esbuild-kit."""
+
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+ignoreUntil = 2027-01-15
+reason = """braces 3.0.3 is a build-time dev dependency (@tailwindcss/cli → @parcel/watcher → micromatch → braces) \
+that expands our own trusted glob patterns while building site-blocks' stylesheet; no input from users or the \
+network reaches it. No fixed version exists yet: remove once micromatch or @parcel/watcher ships one."""

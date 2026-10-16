@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fixture, TEST_CSS } from '../test-utils.tsx';
-import { renderStaticPage, renderStaticSite, staticPath } from './render-static-page.tsx';
+import { faviconHref, renderStaticPage, renderStaticSite, staticPath } from './render-static-page.tsx';
 
 const salon = fixture('salon-gustavia');
 
@@ -76,6 +76,28 @@ describe('renderStaticPage', () => {
     expect(html).toContain('bf-preview-banner');
   });
 
+  it('gives the site an inline icon from its initial and colour, drawing nothing else from the spec', () => {
+    const { html } = renderStaticPage(salon, 'home', 'fr', { css: TEST_CSS });
+    const href = html.match(/<link rel="icon" href="([^"]+)">/)?.[1] ?? '';
+    expect(href).toMatch(/^data:image\/svg\+xml,/);
+    const svg = decodeURIComponent(href.replace('data:image/svg+xml,', '').replaceAll('&amp;', '&'));
+    expect(svg).toContain(`fill='${salon.theme.palette.primary}'`);
+    expect(svg).toContain('>S</text>');
+    const hostile = faviconHref({
+      ...salon,
+      brand: { ...salon.brand, name: '"><img src=x onerror=alert(1)>' },
+    });
+    // Only a Latin letter or digit is drawn (the `i` of `img`), never the markup.
+    expect(decodeURIComponent(hostile)).toContain('>I</text>');
+    expect(decodeURIComponent(hostile)).not.toContain('<img');
+    // A colour that is not hex never reaches the icon: the neutral one is used.
+    const odd = faviconHref({
+      ...salon,
+      theme: { ...salon.theme, palette: { ...salon.theme.palette, primary: 'red;background:url(x)' } },
+    });
+    expect(decodeURIComponent(odd)).toContain("fill='#1f2937'");
+  });
+
   it('throws for a page the site does not have, and for a spec the schema refuses', () => {
     expect(() => renderStaticPage(salon, 'nowhere', 'fr', { css: TEST_CSS })).toThrow(/no page "nowhere"/);
     const hostile = {
@@ -107,5 +129,16 @@ describe('renderStaticSite', () => {
     );
     const home = salon.pages[0];
     if (home) expect(staticPath(salon, home, 'en')).toBe('en/index.html');
+  });
+});
+
+describe('staticPath', () => {
+  it('refuses a page path that could leave the export folder', () => {
+    const page = salon.pages[1] ?? salon.pages[0];
+    if (!page) throw new Error('no page');
+    expect(staticPath(salon, page, salon.defaultLocale)).toBe(`${page.slug}/index.html`);
+    expect(() => staticPath(salon, { ...page, slug: '../../../../tmp/pwn' }, salon.defaultLocale)).toThrow(
+      /Not a page path/,
+    );
   });
 });

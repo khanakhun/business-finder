@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { closeDb, createDb, type DbClient } from '@bf/db';
 import { businesses, organization, orgSettings, sitePublications, sites, siteVersions } from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
-import { eq } from 'drizzle-orm';
+import { eq, like } from 'drizzle-orm';
 import { BASE_DOMAIN, env } from './env.ts';
 
 // The e2e renderer's data, written straight to the database (the API is not under test here): one workspace with
@@ -27,7 +27,20 @@ export const SLUGS = {
 };
 export const AGENCY = { name: 'Agence Exemple', url: 'https://agence.example' };
 
-export const db = (): DbClient => createDb({ url: env.DATABASE_URL ?? '', max: 2 });
+/** The local (or CI) database only: the seed deletes and recreates its workspace. */
+export const db = (): DbClient => {
+  const url = env.DATABASE_URL ?? '';
+  const host = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  })();
+  if (!['127.0.0.1', 'localhost', '::1'].includes(host) && !process.env.CI)
+    throw new Error(`The e2e seed writes to local databases only, not ${host || 'an unset DATABASE_URL'}.`);
+  return createDb({ url, max: 2 });
+};
 
 const uuid = () => crypto.randomUUID();
 
@@ -91,6 +104,8 @@ export async function seed(): Promise<void> {
   const client = db();
   try {
     await client.delete(organization).where(eq(organization.slug, ORG_SLUG));
+    // Its businesses too (a site's business is not owned by the workspace).
+    await client.delete(businesses).where(like(businesses.displayName, 'E2E %'));
     const orgId = uuid();
     await client.insert(organization).values({ id: orgId, name: 'Workspace E2E', slug: ORG_SLUG });
     await client

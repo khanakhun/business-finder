@@ -4,10 +4,24 @@ import type { SiteSpec } from '@bf/site-schema';
 /** Our screenshot bot (services/intel, `SITE_INTEL_USER_AGENT`): it pictures previews for the dashboard. */
 export const PREVIEW_BOT = 'BusinessFinderBot';
 
-/** The page's origin as the visitor sees it (`https://salon-k3x9p2.sites.example`), behind the proxy too. */
-export function requestOrigin(headers: Headers, fallbackProtocol: string): string {
-  const proto = headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || fallbackProtocol.replace(':', '');
-  return `${proto === 'https' ? 'https' : 'http'}://${headers.get('host') ?? 'localhost'}`;
+/** The scheme visitors use: https in production (behind the proxy), else as the request arrived. */
+export function siteScheme(headers: Headers, nodeEnv: string): 'https' | 'http' {
+  if (nodeEnv === 'production') return 'https';
+  return headers.get('x-forwarded-proto')?.split(',')[0]?.trim() === 'https' ? 'https' : 'http';
+}
+
+/**
+ * A site's origin for canonical and alternate links, from its normalised hostname (never the raw Host header):
+ * the port only outside production (`http://salon.sites.localhost:3110` locally).
+ */
+export function siteOrigin(input: {
+  readonly hostname: string;
+  readonly scheme: 'https' | 'http';
+  readonly host: string | null;
+  readonly production: boolean;
+}): string {
+  const port = input.production ? undefined : /:(\d{1,5})$/.exec(input.host ?? '')?.[1];
+  return `${input.scheme}://${input.hostname}${port ? `:${port}` : ''}`;
 }
 
 /**

@@ -30,3 +30,17 @@ export function statusPage(input: {
 /** The policy of a status page: nothing but its own inline style. */
 export const STATUS_PAGE_CSP =
   "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
+/** A status page response: the real code, no cache, never indexed. */
+export function statusResponse(html: string, status: number, headers: Record<string, string> = {}): Response {
+  return new Response(html, {
+    status,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': STATUS_PAGE_CSP,
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Cache-Control': 'no-store',
+      ...headers,
+    },
+  });
+}

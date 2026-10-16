@@ -5,12 +5,14 @@ import { signInternalRequest } from '@bf/contracts';
 import { type SiteSpec, SiteSpecSchema } from '@bf/site-schema';
 import { describe, expect, it } from 'vitest';
 import { preferredLocale } from './accept-language.ts';
+import { cacheUntil, STALE_GRACE_MS, TENANT_TTL_MS, UNKNOWN_TTL_MS } from './cache-policy.ts';
+import { readCappedText } from './capped-body.ts';
 import { buildSiteCsp } from './csp.ts';
 import { siteHostname } from './host.ts';
 import { pageAlternates, resolveRoute } from './locale-routing.ts';
 import { NonceCache } from './nonce-cache.ts';
 import { REVALIDATE_PATH, revalidate, revalidateNonces } from './revalidate.ts';
-import { PREVIEW_BOT, requestOrigin, robotsTxt, sitemapXml } from './seo.ts';
+import { PREVIEW_BOT, robotsTxt, sitemapXml, siteOrigin, siteScheme } from './seo.ts';
 import { statusPage } from './status-page.ts';
 import { RENDERER_STRINGS, rendererStrings } from './strings.ts';
 import { TagCache } from './tag-cache.ts';
@@ -95,6 +97,10 @@ describe('buildSiteCsp', () => {
     expect(csp).toContain("frame-src 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain('upgrade-insecure-requests');
+    // Style elements by nonce; only style attributes inline.
+    expect(csp).toContain("style-src-elem 'self' 'nonce-abc'");
+    expect(csp).toContain("style-src-attr 'unsafe-inline'");
+    expect(csp).not.toMatch(/style-src(-elem)? [^;]*'unsafe-inline'/);
   });
 
   it('frames only the site’s booking provider; development allows eval and the dev socket', () => {
@@ -124,11 +130,14 @@ describe('TagCache', () => {
     expect(cache.get('b.sites', 500)).toBe('B');
   });
 
-  it('keeps at most its size, dropping the oldest first', () => {
+  it('keeps at most its size, dropping the least recently used first', () => {
     const cache = new TagCache<number>(2);
-    for (const n of [1, 2, 3]) cache.set(`k${n}`, n, 10, []);
+    for (const n of [1, 2]) cache.set(`k${n}`, n, 10, []);
+    expect(cache.get('k1', 0)).toBe(1);
+    cache.set('k3', 3, 10, []);
     expect(cache.size).toBe(2);
-    expect(cache.get('k1', 0)).toBeUndefined();
+    expect(cache.get('k2', 0)).toBeUndefined();
+    expect(cache.get('k1', 0)).toBe(1);
     expect(cache.get('k3', 0)).toBe(3);
   });
 });
@@ -243,12 +252,26 @@ describe('robots, sitemap and origin', () => {
     expect(xml).toContain('hreflang="en"');
   });
 
-  it('reads the visitor’s origin behind the proxy', () => {
-    const headers = new Headers({ host: 'a.sites.example', 'x-forwarded-proto': 'https, http' });
-    expect(requestOrigin(headers, 'http:')).toBe('https://a.sites.example');
-    expect(requestOrigin(new Headers({ host: 'a.sites.localhost:3110' }), 'http:')).toBe(
-      'http://a.sites.localhost:3110',
-    );
+  it('builds a site’s origin from its normalised hostname, never the raw Host header', () => {
+    expect(siteScheme(new Headers({ 'x-forwarded-proto': 'http' }), 'production')).toBe('https');
+    expect(siteScheme(new Headers({ 'x-forwarded-proto': 'https, http' }), 'development')).toBe('https');
+    expect(siteScheme(new Headers(), 'development')).toBe('http');
+    expect(
+      siteOrigin({
+        hostname: 'a.sites.example',
+        scheme: 'https',
+        host: 'A.SITES.EXAMPLE.:9999',
+        production: true,
+      }),
+    ).toBe('https://a.sites.example');
+    expect(
+      siteOrigin({
+        hostname: 'a.sites.localhost',
+        scheme: 'http',
+        host: 'a.sites.localhost:3110',
+        production: false,
+      }),
+    ).toBe('http://a.sites.localhost:3110');
   });
 });
 
@@ -273,5 +296,44 @@ describe('status pages and strings', () => {
     }
     expect(rendererStrings('xx')).toBe(RENDERER_STRINGS.en);
     expect(rendererStrings(undefined)).toBe(RENDERER_STRINGS.en);
+  });
+});
+
+describe('readCappedText', () => {
+  const post = (body: string, headers: Record<string, string> = {}) =>
+    new Request('http://x/api/revalidate', { method: 'POST', body, headers });
+
+  it('reads a small body and refuses a large one, declared or not', async () => {
+    expect(await readCappedText(post('{"tags":[]}'), 100)).toBe('{"tags":[]}');
+    expect(await readCappedText(post('x'.repeat(101)), 100)).toBeUndefined();
+    expect(await readCappedText(post('x', { 'content-length': '9999' }), 100)).toBeUndefined();
+    const streamed = new Request('http://x/', {
+      method: 'POST',
+      body: new ReadableStream({
+        start(controller) {
+          for (let i = 0; i < 10; i += 1) controller.enqueue(new Uint8Array(50));
+          controller.close();
+        },
+      }),
+      duplex: 'half',
+    } as RequestInit);
+    expect(await readCappedText(streamed, 100)).toBeUndefined();
+  });
+});
+
+describe('cacheUntil', () => {
+  const now = Date.parse('2026-10-16T12:00:00.000Z');
+
+  it('keeps a lookup a minute, an unknown host ten seconds, and never past a preview’s expiry', () => {
+    expect(cacheUntil({ status: 'active', expiresAt: null }, now)).toBe(now + TENANT_TTL_MS);
+    expect(cacheUntil(null, now)).toBe(now + UNKNOWN_TTL_MS);
+    expect(cacheUntil({ status: 'active', expiresAt: '2026-10-16T12:00:30.000Z' }, now)).toBe(now + 30_000);
+    expect(cacheUntil({ status: 'active', expiresAt: '2026-10-16T12:00:30.000Z' }, now, STALE_GRACE_MS)).toBe(
+      now + 30_000,
+    );
+    // An ended publication has nothing left to expire.
+    expect(cacheUntil({ status: 'expired', expiresAt: '2026-10-15T12:00:00.000Z' }, now)).toBe(
+      now + TENANT_TTL_MS,
+    );
   });
 });

@@ -16,3 +16,5 @@ export const VIEW_SECRET = 'e2e-view-token-secret-not-a-real-one-0123456789';
 export const API_URL = 'http://api.e2e.localhost:4999';
 /** A site's address on the e2e renderer (Chromium resolves *.localhost to the loopback). */
 export const siteUrl = (slug: string, path = '/') => `http://${slug}.${BASE_DOMAIN}:${sitesPort}${path}`;
+/** A site's canonical address in a production build: https, no port (as served behind Caddy). */
+export const canonicalUrl = (slug: string, path = '/') => `https://${slug}.${BASE_DOMAIN}${path}`;

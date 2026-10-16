@@ -8,7 +8,7 @@ const CAMPAIGN = /^[A-Za-z0-9_-]{1,64}$/;
  * The view beacon (BF-035 endpoint): one anonymous request when the page shows, with the site's signed token, the
  * page, its language and the campaign of the link that brought the visitor (`?c=`). No cookie, no storage; nothing
  * is sent when the browser says Do Not Track or Global Privacy Control. A `text/plain` body keeps it a simple
- * request (no preflight; the response is never read).
+ * request (no preflight; the response is never read), sent without credentials.
  */
 export function ViewBeacon({
   endpoint,
@@ -31,7 +31,15 @@ export function ViewBeacon({
       locale,
       ...(campaign && CAMPAIGN.test(campaign) ? { c: campaign } : {}),
     });
-    navigator.sendBeacon?.(endpoint, new Blob([body], { type: 'text/plain' }));
+    // No credentials, ever (sendBeacon would send cookies); kept alive past navigation like a beacon.
+    void fetch(endpoint, {
+      method: 'POST',
+      body,
+      keepalive: true,
+      credentials: 'omit',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+    }).catch(() => undefined);
   }, [endpoint, token, pageId, locale]);
   return null;
 }

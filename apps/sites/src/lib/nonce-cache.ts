@@ -12,8 +12,9 @@ export class NonceCache {
 
   /** Records the nonce; false when it was already used. */
   use(nonce: string, now: number): boolean {
+    // Expired first, then the oldest while full (room for this one: at most `maxEntries`).
     for (const [key, until] of this.seen) {
-      if (until > now && this.seen.size <= this.maxEntries) break;
+      if (until > now && this.seen.size < this.maxEntries) break;
       this.seen.delete(key);
     }
     if ((this.seen.get(nonce) ?? 0) > now) return false;

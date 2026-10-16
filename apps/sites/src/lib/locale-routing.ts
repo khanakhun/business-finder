@@ -27,3 +27,11 @@ export function resolveRoute(spec: SiteSpec, segments: readonly string[]): Route
 export function pageAlternates(spec: SiteSpec, page: Page): Record<string, string> {
   return Object.fromEntries(spec.locales.map((locale) => [locale, defaultPageHref(page, locale, spec)]));
 }
+
+/** The language a path is in (its prefix, else the site's default), found page or not: its 404 speaks it. */
+export function localeOfPath(spec: SiteSpec, segments: readonly string[]): SiteLocale {
+  const [first] = segments;
+  return first !== undefined && spec.locales.includes(first as SiteLocale)
+    ? (first as SiteLocale)
+    : spec.defaultLocale;
+}

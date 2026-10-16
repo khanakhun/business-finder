@@ -6,7 +6,7 @@ interface Entry<T> {
 
 /**
  * A small in-memory cache with lifetimes and tags (cache-aside): an entry lives until its expiry or until one of its
- * tags is invalidated (the API's revalidation calls). Bounded: the oldest entries go first.
+ * tags is invalidated (the API's revalidation calls). Bounded: the least recently used entries go first.
  */
 export class TagCache<T> {
   private readonly entries = new Map<string, Entry<T>>();
@@ -16,10 +16,10 @@ export class TagCache<T> {
   get(key: string, now: number): T | undefined {
     const entry = this.entries.get(key);
     if (!entry) return undefined;
-    if (entry.until <= now) {
-      this.entries.delete(key);
-      return undefined;
-    }
+    this.entries.delete(key);
+    if (entry.until <= now) return undefined;
+    // Least recently used goes first: a read moves the entry to the end.
+    this.entries.set(key, entry);
     return entry.value;
   }
 

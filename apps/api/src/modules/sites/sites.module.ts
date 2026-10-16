@@ -160,6 +160,17 @@ export class SitesModule {
           inject: [APP_ENV],
           useFactory: (env: AppEnv): SiteHosting => {
             const api = env as ApiEnv;
+            // Previews must not share the dashboard's cookies: under the auth cookie domain, every preview host
+            // would receive staff sessions and count as same-site with the API.
+            const cookie = api.AUTH_COOKIE_DOMAIN?.replace(/^\./, '');
+            if (
+              api.NODE_ENV === 'production' &&
+              cookie &&
+              (api.SITES_BASE_DOMAIN === cookie || api.SITES_BASE_DOMAIN.endsWith(`.${cookie}`))
+            )
+              throw new Error(
+                'SITES_BASE_DOMAIN must not be under AUTH_COOKIE_DOMAIN (use a separate domain).',
+              );
             return {
               baseDomain: api.SITES_BASE_DOMAIN,
               assetHosts: [new URL(api.SITES_ASSETS_BASE_URL).hostname],

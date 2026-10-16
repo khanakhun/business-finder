@@ -4,7 +4,7 @@ import { closeDb } from '@bf/db';
 import { sites } from '@bf/db/schema';
 import { expect, test } from '@playwright/test';
 import { eq, sql } from 'drizzle-orm';
-import { REVALIDATE_SECRET, sitesPort, siteUrl } from './env.ts';
+import { canonicalUrl, REVALIDATE_SECRET, sitesPort, siteUrl } from './env.ts';
 import { AGENCY, addVersion, db, fixture, SLUGS } from './seed.ts';
 
 const salon = fixture('salon-gustavia') as {
@@ -32,6 +32,10 @@ async function revalidateTags(tags: string[]): Promise<number> {
 test('renders an active preview: language, SEO rules, banner, strict CSP and no indexing', async ({
   page,
 }) => {
+  const violations: string[] = [];
+  page.on('console', (message) => {
+    if (/Content Security Policy|Refused to/i.test(message.text())) violations.push(message.text());
+  });
   const response = await page.goto(siteUrl(SLUGS.active));
   expect(response?.status()).toBe(200);
   const headers = response?.headers() ?? {};
@@ -45,8 +49,11 @@ test('renders an active preview: language, SEO rules, banner, strict CSP and no 
   await expect(page.locator('.bf-preview-banner')).toContainText(AGENCY.name);
   await expect(page.locator(`link[rel="alternate"][hreflang="${other}"]`)).toHaveAttribute(
     'href',
-    siteUrl(SLUGS.active, `/${other}`),
+    canonicalUrl(SLUGS.active, `/${other}`),
   );
+  // Styled by the block library's stylesheet, nothing refused by the policy.
+  await expect(page.locator('.bf-site')).toHaveCSS('display', /block|flex|grid/);
+  expect(violations).toEqual([]);
   const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
   expect(axe.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
 });
@@ -58,7 +65,7 @@ test('serves the other language under its prefix, and keeps the page when switch
   await expect(page).toHaveTitle(services?.seo.title[other] ?? '');
   await expect(page.locator(`link[rel="alternate"][hreflang="${salon.defaultLocale}"]`)).toHaveAttribute(
     'href',
-    siteUrl(SLUGS.active, `/${services?.slug}`),
+    canonicalUrl(SLUGS.active, `/${services?.slug}`),
   );
 });
 
@@ -88,17 +95,51 @@ test('answers 404 for an unknown host or page, and 410 for an ended preview with
   }
 });
 
-test('sends one cookieless view beacon with the signed token and the campaign', async ({ page, context }) => {
-  await context.addCookies([{ name: 'tracker', value: 'x', domain: 'api.e2e.localhost', path: '/' }]);
+test('sends one view beacon without cookies, with the signed token and the campaign', async ({
+  page,
+  context,
+}) => {
+  // A cookie the browser would send cross-site if it could: the beacon carries none.
+  await context.addCookies([
+    { name: 'session', value: 'x', domain: 'api.e2e.localhost', path: '/', sameSite: 'None', secure: false },
+  ]);
   const beacon = page.waitForRequest((request) => request.url().endsWith('/v1/public/sites/views'));
   await page.route('**/v1/public/sites/views', (route) => route.fulfill({ status: 204 }));
   await page.goto(siteUrl(SLUGS.active, '/?c=spring-mail'));
   const sent = await beacon;
   expect(sent.method()).toBe('POST');
   expect(await sent.headerValue('cookie')).toBeNull();
+  expect(await sent.headerValue('content-type')).toMatch(/^text\/plain/);
   const body = JSON.parse(sent.postData() ?? '{}');
   expect(body).toMatchObject({ pageId: salon.pages[0]?.id, locale: salon.defaultLocale, c: 'spring-mail' });
   expect(body.token).toMatch(/^v1\./);
+});
+
+test('sends no beacon when the browser asks for privacy (GPC)', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, 'globalPrivacyControl', { value: true }));
+  const sent: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().endsWith('/v1/public/sites/views')) sent.push(request.url());
+  });
+  await page.goto(siteUrl(SLUGS.active));
+  await page.waitForLoadState('networkidle');
+  expect(sent).toEqual([]);
+});
+
+test('answers a missing page with a readable 404 (no JavaScript needed), and drops the default prefix', async ({
+  request,
+}) => {
+  const missing = await request.get(siteUrl(SLUGS.active, `/${other}/no-such-page`));
+  expect(missing.status()).toBe(404);
+  const html = await missing.text();
+  expect(html).toContain(`lang="${other}"`);
+  expect(html).toMatch(/Page not found/);
+  expect(html).toContain(`href="/${other}"`);
+  const prefixed = await request.get(siteUrl(SLUGS.active, `/${salon.defaultLocale}/${services?.slug}?c=x`), {
+    maxRedirects: 0,
+  });
+  expect(prefixed.status()).toBe(308);
+  expect(prefixed.headers().location).toMatch(new RegExp(`/${services?.slug}\\?c=x$`));
 });
 
 test('refuses unsigned revalidations, and shows a new version or an ended preview after a signed one', async ({
@@ -140,4 +181,22 @@ test('refuses unsigned revalidations, and shows a new version or an ended previe
   } finally {
     await closeDb(client);
   }
+});
+
+test('ignores a visitor’s own proxy headers and look-alike internal paths', async ({ request }) => {
+  const spoofed = await request.get(siteUrl('nobody-x1y2z3', '/-/x/y'), {
+    headers: { 'x-bf-hostname': `${SLUGS.active}.sites.localhost`, 'x-bf-path': '/', 'x-nonce': 'abc' },
+  });
+  expect(spoofed.status()).toBe(404);
+  expect(await spoofed.text()).not.toContain('Salon');
+  const lookAlike = await request.get(siteUrl(SLUGS.active, '/api/revalidatex/y'));
+  expect(lookAlike.status()).toBe(404);
+  // A path like any other: not a page of the site, so its 404 page (with that page's own strict policy).
+  expect(lookAlike.headers()['content-security-policy']).toContain("default-src 'none'");
+  const big = await fetch(`http://127.0.0.1:${sitesPort}/api/revalidate`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer 1.${'a'.repeat(16)}.${'0'.repeat(64)}` },
+    body: 'x'.repeat(20_000),
+  });
+  expect(big.status).toBe(413);
 });

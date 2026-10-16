@@ -15,7 +15,7 @@ export interface SiteCspOptions {
  * own scripts), images from the page and our CDN, fonts self-hosted, frames only for the approved booking embed,
  * nothing else from anywhere.
  *
- * DECISION(BF-036): styles allow 'unsafe-inline': the theme is applied as CSS variables in a style attribute and
+ * DECISION(BF-036): style attributes allow 'unsafe-inline': the theme is applied as CSS variables in a style attribute and
  * images carry their focal point the same way; neither can carry a nonce. Style values come from the validated spec
  * (hex colours, enums), and styles cannot run code.
  */
@@ -23,7 +23,10 @@ export function buildSiteCsp(nonce: string, options: SiteCspOptions): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${options.dev ? " 'unsafe-eval'" : ''}`,
-    "style-src 'self' 'unsafe-inline'",
+    // Stylesheets and <style> elements by nonce; only style attributes inline (the decision below).
+    `style-src 'self' 'nonce-${nonce}'`,
+    `style-src-elem 'self' 'nonce-${nonce}'`,
+    "style-src-attr 'unsafe-inline'",
     `img-src 'self' data: ${options.assetsOrigin}`,
     "font-src 'self'",
     `connect-src 'self' ${options.apiOrigin}${options.dev ? ' ws:' : ''}`,

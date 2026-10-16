@@ -108,3 +108,16 @@ describe('verifyInternalRequest', () => {
     });
   });
 });
+
+describe('verifyInternalRequest with the shared vectors', () => {
+  it.each(fixture.vectors)('accepts the shared vector: $name', async (v) => {
+    const request = { method: v.method, path: v.path, ...(v.body === undefined ? {} : { body: v.body }) };
+    expect(
+      await verifyInternalRequest(v.authorization, request, { secret: fixture.secret, now: v.timestamp }),
+    ).toEqual({
+      ok: true,
+      timestamp: v.timestamp,
+      nonce: v.nonce,
+    });
+  });
+});

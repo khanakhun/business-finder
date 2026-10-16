@@ -10,12 +10,16 @@ export interface RendererStrings {
   readonly contactAgency: (agency: string) => string;
   readonly unknownTitle: string;
   readonly unknownBody: string;
+  readonly unavailableTitle: string;
+  readonly unavailableBody: string;
   readonly errorTitle: string;
   readonly errorBody: string;
 }
 
 export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
   fr: {
+    unavailableTitle: 'Site momentanément indisponible',
+    unavailableBody: 'Le site ne peut pas être affiché pour le moment. Réessayez dans quelques minutes.',
     notFoundTitle: 'Page introuvable',
     notFoundBody: 'Cette page n’existe pas ou a été déplacée.',
     backHome: 'Retour à l’accueil',
@@ -29,6 +33,8 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'La page n’a pas pu être affichée. Réessayez dans un instant.',
   },
   en: {
+    unavailableTitle: 'Site temporarily unavailable',
+    unavailableBody: 'The site cannot be shown right now. Please try again in a few minutes.',
     notFoundTitle: 'Page not found',
     notFoundBody: 'This page does not exist or has moved.',
     backHome: 'Back to the home page',
@@ -41,6 +47,8 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'The page could not be shown. Please try again in a moment.',
   },
   nl: {
+    unavailableTitle: 'Site tijdelijk niet beschikbaar',
+    unavailableBody: 'De site kan nu niet worden getoond. Probeer het over enkele minuten opnieuw.',
     notFoundTitle: 'Pagina niet gevonden',
     notFoundBody: 'Deze pagina bestaat niet of is verplaatst.',
     backHome: 'Terug naar de startpagina',
@@ -54,6 +62,8 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'De pagina kon niet worden getoond. Probeer het zo meteen opnieuw.',
   },
   es: {
+    unavailableTitle: 'Sitio no disponible temporalmente',
+    unavailableBody: 'El sitio no se puede mostrar en este momento. Inténtelo de nuevo en unos minutos.',
     notFoundTitle: 'Página no encontrada',
     notFoundBody: 'Esta página no existe o se ha movido.',
     backHome: 'Volver al inicio',
@@ -67,6 +77,9 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'No se pudo mostrar la página. Inténtelo de nuevo en un momento.',
   },
   de: {
+    unavailableTitle: 'Website vorübergehend nicht verfügbar',
+    unavailableBody:
+      'Die Website kann gerade nicht angezeigt werden. Bitte versuchen Sie es in ein paar Minuten erneut.',
     notFoundTitle: 'Seite nicht gefunden',
     notFoundBody: 'Diese Seite existiert nicht oder wurde verschoben.',
     backHome: 'Zur Startseite',

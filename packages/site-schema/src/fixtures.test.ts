@@ -58,7 +58,11 @@ describe('fixture sites', () => {
     ],
     [
       'broken-rich-text',
-      ['error:rich_text@pages.1.blocks.2.props.body.fr', 'error:rich_text@pages.1.blocks.2.props.body.fr'],
+      [
+        'error:external_url@pages.1.blocks.2.props.body.fr',
+        'error:rich_text@pages.1.blocks.2.props.body.fr',
+        'error:rich_text@pages.1.blocks.2.props.body.fr',
+      ],
     ],
   ])('%s fails with exactly its issues', (name, expected) => {
     expect([...codes(name)].sort()).toEqual([...expected].sort());

@@ -2,6 +2,9 @@ import { z } from 'zod';
 import { LIMITS } from './limits.ts';
 import { HttpsUrlSchema, localized, PageIdSchema } from './localized.ts';
 
+/** Every kind of action. */
+export const CTA_KINDS = ['call', 'email', 'whatsapp', 'booking', 'directions', 'page', 'url'] as const;
+
 const label = () => localized(LIMITS.ctaLabel.max, 'A short verb phrase, e.g. "Book a table", "Réserver".');
 
 /**

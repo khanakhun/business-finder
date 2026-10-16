@@ -47,6 +47,7 @@ export const SOCIAL_PROFILES: Readonly<
       'www.tripadvisor.es',
       'www.tripadvisor.nl',
     ],
+    path: /^\/[A-Za-z]+_Review-g\d+-d\d+-[\w-]+\.html$/,
   },
   google: {
     hosts: ['g.page', 'maps.app.goo.gl', 'www.google.com', 'maps.google.com'],
@@ -85,4 +86,29 @@ export function isSocialProfile(network: string, url: string): boolean {
   const { pathname, search, hash } = new URL(url);
   if (search || hash || NOT_A_PROFILE.test(pathname) || pathname === '/') return false;
   return profile.path ? profile.path.test(pathname) : true;
+}
+
+/** A URL whose query carries another URL (a redirect: `?u=https://…`). */
+export function carriesUrl(url: string): boolean {
+  try {
+    const { searchParams } = new URL(url);
+    return [...searchParams.values()].some((value) => /^(https?:)?\/\/|^www\./i.test(value.trim()));
+  } catch {
+    return false;
+  }
+}
+
+/** Generic endings a web address in prose is recognised by (two-letter country endings are recognised too). */
+const GENERIC_TLDS =
+  'com|net|org|info|biz|io|co|app|dev|shop|site|online|store|xyz|me|ly|bar|cafe|club|page|link|live|tech|travel|' +
+  'blog|email|world|today|eu|asia|pro|top|vip|art|fun|space|website|restaurant|hotel|immo|paris|bzh|example|test';
+const DOMAIN = new RegExp(
+  `(?<![\\p{L}\\p{N}@._-])[\\p{L}\\p{N}-]{2,}(?:\\.[\\p{L}\\p{N}-]+)*\\.(?:[a-z]{2}|${GENERIC_TLDS})(?![\\p{L}\\p{N}-])`,
+  'iu',
+);
+
+/** A web address in prose: a scheme, `//host`, `www.`, or a domain (look-alike dots and full-width letters folded). */
+export function hasWebAddress(text: string): boolean {
+  const folded = text.normalize('NFKC').replace(/[。．｡․]/g, '.');
+  return /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) || DOMAIN.test(folded);
 }

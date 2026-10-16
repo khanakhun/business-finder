@@ -37,6 +37,13 @@ describe('parseRichText', () => {
     ['see [x](//evil.example)', 'links go to'],
     ['see [x](javascript:alert(1))', 'links go to'],
     ['`code`', 'code'],
+    ['see [x]( https://evil.example/x)', 'links go to'],
+    ['see [x](https://evil.example/x "t")', 'links go to'],
+    ['[r]\n\n[r]:\njavascript:alert(1)', 'reference link definitions'],
+    ['Title\n=====', 'underlined headings'],
+    ['* item', 'use "- "'],
+    ['+ item', 'use "- "'],
+    ['- item\nprose', 'blank line'],
     ['> quote', 'quotes'],
     ['1. first', 'numbered'],
     ['---', 'rules'],
@@ -50,4 +57,40 @@ describe('parseRichText', () => {
     expect(links).toHaveLength(1);
     expect(JSON.stringify(blocks)).not.toContain('https://');
   });
+
+  it.each([
+    [
+      '***both***',
+      [{ type: 'strong', children: [{ type: 'em', children: [{ type: 'text', text: 'both' }] }] }],
+    ],
+    [
+      '**bold *italic* bold**',
+      [
+        {
+          type: 'strong',
+          children: [
+            { type: 'text', text: 'bold ' },
+            { type: 'em', children: [{ type: 'text', text: 'italic' }] },
+            { type: 'text', text: ' bold' },
+          ],
+        },
+      ],
+    ],
+    ['Menu* and conditions* apply', [{ type: 'text', text: 'Menu* and conditions* apply' }]],
+    ['5 * 3 * 2', [{ type: 'text', text: '5 * 3 * 2' }]],
+    ['a \\*literal\\* star', [{ type: 'text', text: 'a *literal* star' }]],
+    ['**open only', [{ type: 'text', text: '**open only' }]],
+  ])('reads emphasis like CommonMark: %j', (text, children) => {
+    expect(parseRichText(text).blocks).toEqual([{ type: 'paragraph', children }]);
+  });
+
+  it.each(['[*', '[**', '[(*', '[*a', '*a* [', '[x](', '**a'])(
+    'parses 5,000 characters of %j in linear time',
+    (unit) => {
+      const text = unit.repeat(Math.floor(5000 / unit.length));
+      const started = performance.now();
+      parseRichText(text);
+      expect(performance.now() - started).toBeLessThan(50);
+    },
+  );
 });

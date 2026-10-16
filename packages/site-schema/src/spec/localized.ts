@@ -62,5 +62,5 @@ export const FactIdSchema = z
 export const HttpsUrlSchema = z
   .string()
   .max(500)
-  .regex(/^https:\/\/[^\s/$.?#][^\s]*$/i)
+  .regex(/^https:\/\/[^\s/$.?#\\][^\s\\]*$/i)
   .describe('An absolute https URL.');

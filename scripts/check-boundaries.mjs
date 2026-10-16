@@ -46,7 +46,7 @@ const INFRASTRUCTURE_MODULES = [
  * The rule table. `from` selects importing files (repo-relative globs), `except` leaves some of them out; each
  * `disallow` entry matches the import:
  * - `workspace`: a glob over the target workspace directory (`apps/web`), reached by package name or relative path;
- *   `exceptSelf` allows the importing file's own workspace.
+ *   `exceptSelf` allows the importing file's own workspace, `exceptWorkspaces` the listed ones.
  * - `modules`: globs over bare module specifiers (`@nestjs/*`, `drizzle-orm`).
  * - `relativeInto`: directory names a relative import must not resolve into, relative to the importing layer's
  *   parent (e.g. a `domain/` file reaching `../infrastructure/`).
@@ -114,10 +114,10 @@ export const RULES = [
           ...['http', 'https', 'net', 'zlib', 'worker_threads'],
         ],
       },
-      // A leaf like @bf/contracts: other internal packages may be Node-bound (@bf/config).
-      { workspace: 'packages/*', exceptSelf: true },
+      // Only @bf/contracts (zod-only, browser-safe): other internal packages may be Node-bound (@bf/config).
+      { workspace: 'packages/*', exceptSelf: true, exceptWorkspaces: ['packages/contracts'] },
     ],
-    message: '@bf/site-schema is browser-safe and self-contained: no Node API or other internal package.',
+    message: '@bf/site-schema is browser-safe: no Node API, and no internal package but @bf/contracts.',
   },
 ];
 
@@ -161,6 +161,7 @@ export function importsOf(root, file, source, workspaces) {
 function violates(entry, file, imp) {
   if (entry.workspace) {
     if (!imp.workspace || !matchesGlob(imp.workspace, entry.workspace)) return false;
+    if ((entry.exceptWorkspaces ?? []).includes(imp.workspace)) return false;
     return !(entry.exceptSelf && imp.workspace === workspaceOf(file));
   }
   if (entry.modules) {

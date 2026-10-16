@@ -36,4 +36,29 @@ describe('JSON Schema documentation', () => {
       expect(undocumented(JSON.parse(jsonSchemaFiles().get(file) ?? '{}'))).toEqual([]);
     },
   );
+
+  it('bounds every text: each string has a pattern, a format, an enum or a constant', () => {
+    const root = JSON.parse(jsonSchemaFiles().get('site-spec.schema.json') ?? '{}') as Node;
+    const loose: string[] = [];
+    const visit = (node: unknown, path: string) => {
+      if (!node || typeof node !== 'object') return;
+      if (Array.isArray(node)) {
+        for (const [i, item] of node.entries()) visit(item, `${path}[${i}]`);
+        return;
+      }
+      const record = node as Node;
+      if (
+        record.type === 'string' &&
+        !record.pattern &&
+        !record.format &&
+        !record.enum &&
+        record.const === undefined
+      ) {
+        loose.push(path);
+      }
+      for (const [key, value] of Object.entries(record)) visit(value, `${path}/${key}`);
+    };
+    visit(root, '');
+    expect(loose).toEqual([]);
+  });
 });

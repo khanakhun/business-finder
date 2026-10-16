@@ -30,7 +30,10 @@ Safety invariants live in the schema and the validator, not in conventions: ever
 team member and price names its fact; an action carries only what its kind uses; links go only to the site's own
 pages, the business's own domain or a known booking provider; social links only to the network's own profile pages;
 images only from our storage; no web address, HTML or hidden characters in text; a preview stays unindexed.
-Consumers still treat a spec as untrusted: BF-035 overwrites the preview settings and resolves assets by id, and the
+Rich text MUST be rendered from `parseRichText`'s output (its blocks and inlines), never with a markdown library:
+CommonMark would turn what the parser refuses (reference links, definitions on the next line) into live links. A `url`
+action goes to the business's own domain only; its booking page is a `booking` action (the fact-backed
+`contact.bookingUrl`). Consumers still treat a spec as untrusted: BF-035 overwrites the preview settings and resolves assets by id, and the
 renderer takes fact values (quotes, prices) from the registry by `factId`.
 
 ## Adding a block type

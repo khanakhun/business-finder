@@ -1,3 +1,4 @@
+import { CTA_KINDS } from '../spec/cta.ts';
 import { SITE_LOCALES } from '../spec/localized.ts';
 
 // Walks a spec (BF-033): every value with its path, so rules can find localized texts, actions and asset references
@@ -34,7 +35,7 @@ export function isCta(
   const record = value as Record<string, unknown>;
   return (
     typeof record.kind === 'string' &&
-    ['call', 'email', 'whatsapp', 'page', 'booking', 'directions', 'url'].includes(record.kind) &&
+    (CTA_KINDS as readonly string[]).includes(record.kind) &&
     isLocalized(record.label)
   );
 }

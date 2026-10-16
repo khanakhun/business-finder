@@ -46,6 +46,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 60,
+              "pattern": "^[^\\p{Cc}\\p{Cf}]*$",
               "description": "The business name exactly as it is known."
             },
             "factId": {
@@ -513,7 +514,7 @@
               "url": {
                 "type": "string",
                 "maxLength": 500,
-                "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                "pattern": "^https:\\/\\/[^\\s/$.?#\\\\][^\\s\\\\]*$",
                 "description": "The business's own profile URL on that network (no query string)."
               },
               "factId": {
@@ -537,7 +538,7 @@
             "value": {
               "type": "string",
               "maxLength": 500,
-              "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+              "pattern": "^https:\\/\\/[^\\s/$.?#\\\\][^\\s\\\\]*$",
               "description": "The booking page URL."
             },
             "factId": {
@@ -1065,7 +1066,7 @@
             "url": {
               "type": "string",
               "maxLength": 500,
-              "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+              "pattern": "^https:\\/\\/[^\\s/$.?#\\\\][^\\s\\\\]*$",
               "description": "An allowlisted https URL."
             }
           },
@@ -3164,7 +3165,7 @@
         "url": {
           "type": "string",
           "maxLength": 500,
-          "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+          "pattern": "^https:\\/\\/[^\\s/$.?#\\\\][^\\s\\\\]*$",
           "description": "The copy on our storage/CDN host (never a third-party URL)."
         },
         "width": {
@@ -3212,10 +3213,11 @@
           "description": "owner_site: from the business's own website; stock: a licensed library; ai_generated; uploaded by the agency or the business."
         },
         "attribution": {
-          "description": "Credit line when the license requires one.",
           "type": "string",
           "minLength": 1,
-          "maxLength": 200
+          "maxLength": 200,
+          "pattern": "^[^\\p{Cc}\\p{Cf}]*$",
+          "description": "Credit line when the license requires one."
         },
         "focalPoint": {
           "description": "Point to keep in view when cropping (0–1 from the top left).",

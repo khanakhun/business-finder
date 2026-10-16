@@ -3,7 +3,7 @@ import { AssetSchema } from './assets.ts';
 import { ContactSchema } from './contact.ts';
 import { LayoutSchema, NavigationSchema } from './layout.ts';
 import { LIMITS } from './limits.ts';
-import { FactIdSchema, localized, SiteLocaleSchema } from './localized.ts';
+import { FactIdSchema, localized, plainText, SiteLocaleSchema } from './localized.ts';
 import { PageSchema } from './page.ts';
 import { ThemeSchema } from './theme.ts';
 
@@ -24,12 +24,7 @@ export const SiteSpecSchema = z
     defaultLocale: SiteLocaleSchema.describe('One of `locales`: served at the site root.'),
     brand: z
       .object({
-        name: z
-          .string()
-          .trim()
-          .min(1)
-          .max(LIMITS.brandName.max)
-          .describe('The business name exactly as it is known.'),
+        name: plainText(LIMITS.brandName.max, 'The business name exactly as it is known.'),
         factId: FactIdSchema.describe('The business-name fact.'),
       })
       .strict()

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LIMITS } from './limits.ts';
-import { ElementIdSchema, HttpsUrlSchema, localized } from './localized.ts';
+import { ElementIdSchema, HttpsUrlSchema, localized, plainText } from './localized.ts';
 
 /**
  * Where an image may come from. `owner_site`: the business's own website; `stock`: a licensed stock library;
@@ -24,13 +24,7 @@ export const AssetSchema = z
       .describe(
         "owner_site: from the business's own website; stock: a licensed library; ai_generated; uploaded by the agency or the business.",
       ),
-    attribution: z
-      .string()
-      .trim()
-      .min(1)
-      .max(200)
-      .optional()
-      .describe('Credit line when the license requires one.'),
+    attribution: plainText(200, 'Credit line when the license requires one.').optional(),
     focalPoint: z
       .object({
         x: z.number().min(0).max(1).describe('From the left, 0–1.'),

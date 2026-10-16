@@ -356,4 +356,76 @@ describe('validateSite', () => {
     expect(onColor('#7a5c3e')).toBe('#ffffff');
     expect(onColor('#f0e000')).toBe('#000000');
   });
+
+  it("sends url actions to the business's own domain only, without a carried URL", () => {
+    const cta = (url: string) =>
+      with_((s) => Object.assign(s.layout.header, { cta: { kind: 'url', label: L('Go'), url } }));
+    const own = { ...OPTIONS, ownDomains: ['salon-lumiere.example'] };
+    expect(found(cta('https://calendly.com/attacker/deposit'), own)).toContain(
+      'external_url@layout.header.cta.url',
+    );
+    expect(found(cta('https://www.salon-lumiere.example/go?to=https://evil.example'), own)).toContain(
+      'external_url@layout.header.cta.url',
+    );
+    const booking = with_((s) =>
+      Object.assign(s.contact.bookingUrl ?? {}, {
+        value: 'https://www.planity.com/r?u=https%3A%2F%2Fevil.example',
+      }),
+    );
+    expect(found(booking)).toContain('external_url@contact.bookingUrl.value');
+  });
+
+  it.each([
+    'Venez sur evil-shop.de',
+    'Notre site salon.bl',
+    'Voir café-lumière.fr',
+    'Voir evil\u3002com',
+    'Voir \uFF57\uFF57\uFF57.evil.com',
+    'Voir //evil.example/x',
+  ])('finds the web address in %j', (title) => {
+    expect(found(with_((s) => Object.assign(s.seo.title, { en: title })))).toContain(
+      'external_url@seo.title.en',
+    );
+  });
+
+  it.each([
+    'Salon à St. Barth',
+    'St.Barth',
+    'Coupe 12.50 €',
+    'v1.2.3',
+    'Voir le menu.pdf',
+    'p.ex. une coupe',
+    'J.-C. et Lun.-Ven.',
+  ])('leaves ordinary text alone: %j', (title) => {
+    expect(found(with_((s) => Object.assign(s.seo.title, { en: `${title} — Salon Lumière` })))).not.toContain(
+      'external_url@seo.title.en',
+    );
+  });
+
+  it('refuses hidden characters in the brand name and backslashes in URLs', () => {
+    expect(found(with_((s) => Object.assign(s.brand, { name: 'Salon \u202eLumière' })))).toEqual([
+      'schema@brand.name',
+    ]);
+    const slash = with_((s) =>
+      Object.assign(s.contact, {
+        socials: [
+          { network: 'instagram', url: 'https://www.instagram.com\\.evil.com/x', factId: 'social.instagram' },
+        ],
+      }),
+    );
+    expect(found(slash)).toEqual(['schema@contact.socials.0.url']);
+  });
+
+  it('accepts only review pages on TripAdvisor', () => {
+    const at = (url: string) =>
+      with_((s) =>
+        Object.assign(s.contact, { socials: [{ network: 'tripadvisor', url, factId: 'social.instagram' }] }),
+      );
+    expect(
+      found(at('https://www.tripadvisor.fr/Restaurant_Review-g147339-d1234567-Reviews-Cafe-Saint_Jean.html')),
+    ).toEqual([]);
+    expect(found(at('https://www.tripadvisor.fr/ShowUrl-a_url.https%3A__2F__2Fevil.example.html'))).toContain(
+      'social_host@contact.socials.0.url',
+    );
+  });
 });

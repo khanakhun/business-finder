@@ -1,13 +1,13 @@
 import type { z } from 'zod';
-import type { BlockType } from '../spec/blocks/index.ts';
+import type { BlockOf, BlockType } from '../spec/blocks/index.ts';
 import { LIMITS, type LimitKey } from '../spec/limits.ts';
 import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
 import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
-import { hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
+import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
-import { parseRichText } from './rich-text.ts';
+import { PAGE_LINK, parseRichText } from './rich-text.ts';
 import { isCta, isLocalized, type Path, walk } from './walk.ts';
 
 // The semantic validator (BF-033): what the schema cannot say. Each rule is a small function over the parsed spec
@@ -132,7 +132,8 @@ const structureRule: Rule = (spec) => {
 };
 
 /** Block variants that show an image (Specification table): the image field they need. */
-const IMAGE_VARIANTS: Partial<Record<BlockType, Readonly<Record<string, string>>>> = {
+type ImageVariants = { readonly [T in BlockType]?: Partial<Readonly<Record<BlockOf<T>['variant'], string>>> };
+const IMAGE_VARIANTS: ImageVariants = {
   hero: { split: 'imageAssetId', image_full: 'imageAssetId' },
   cta_banner: { image: 'imageAssetId' },
   about: { split: 'imageAssetId', story: 'imageAssetId' },
@@ -164,7 +165,9 @@ const heroRule: Rule = (spec) => {
         warning(['pages', i, 'blocks', heroes[0]], 'hero_not_first', 'Move the hero to the top of the page.'),
       );
     for (const [j, block] of page.blocks.entries()) {
-      const field = IMAGE_VARIANTS[block.type]?.[block.variant];
+      const field = (IMAGE_VARIANTS[block.type] as Readonly<Record<string, string>> | undefined)?.[
+        block.variant
+      ];
       if (field && !(block.props as Record<string, unknown>)[field]) {
         issues.push(
           error(
@@ -219,7 +222,9 @@ const ctaRule: Rule = (spec, options) => {
   const issues: Issue[] = [];
   const pages = new Set(spec.pages.map((page) => page.id));
   const { contact } = spec;
-  const allowedUrlHosts = [...(options.ownDomains ?? []), ...(options.bookingHosts ?? KNOWN_BOOKING_HOSTS)];
+  // A `url` action goes to the business's own domain only: a booking provider is reached through `booking` (the
+  // fact-backed booking page), never a page anyone can create there.
+  const allowedUrlHosts = options.ownDomains ?? [];
   for (const { value, path } of walk(spec)) {
     if (!isCta(value)) continue;
     const missing = (fact: string) =>
@@ -245,12 +250,12 @@ const ctaRule: Rule = (spec, options) => {
           issues.push(error([...path, 'pageId'], 'unknown_page', 'Point the action to an existing page id.'));
         break;
       case 'url':
-        if (!value.url || !hostAllowed(value.url, allowedUrlHosts))
+        if (!value.url || !hostAllowed(value.url, allowedUrlHosts) || carriesUrl(value.url))
           issues.push(
             error(
               [...path, 'url'],
               'external_url',
-              "Link only to the business's own domain or its booking provider.",
+              "Link only to the business's own domain (use a booking action for its booking page).",
             ),
           );
         break;
@@ -314,8 +319,6 @@ const skipped = (path: Path) => {
   if (LOCALES.has(key)) return true;
   return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
 };
-const WEB_ADDRESS =
-  /https?:\/\/|\/\/[a-z0-9-]+\.|\bwww\.[a-z0-9-]+\.|\b[a-z0-9-]+(\.[a-z0-9-]+)*\.(com|net|org|fr|io|co|info|biz|shop|site|online|app|dev|example|test)\b/i;
 const EMAIL = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
 
 const urlsRule: Rule = (spec, options) => {
@@ -329,10 +332,11 @@ const urlsRule: Rule = (spec, options) => {
   const booking = spec.contact.bookingUrl;
   if (
     booking &&
-    !hostAllowed(booking.value, [
+    (!hostAllowed(booking.value, [
       ...(options.ownDomains ?? []),
       ...(options.bookingHosts ?? KNOWN_BOOKING_HOSTS),
-    ])
+    ]) ||
+      carriesUrl(booking.value))
   ) {
     issues.push(
       error(
@@ -366,8 +370,8 @@ const urlsRule: Rule = (spec, options) => {
   const scan = (text: string, path: Path) => {
     // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
     const rich = isRichText(path);
-    const words = (rich ? text.replace(/\]\([^)]*\)/g, ']') : text).replace(EMAIL, '');
-    if (WEB_ADDRESS.test(words)) {
+    const words = (rich ? text.replace(PAGE_LINK, '$1') : text).replace(EMAIL, '');
+    if (hasWebAddress(words)) {
       issues.push(
         error(path, 'external_url', 'Remove the web address from the text; use an action instead.'),
       );
@@ -530,8 +534,8 @@ const targetsRule: Rule = (spec) => {
 
 /**
  * WCAG AA: text and muted text 4.5:1 on background and surface; primary, accent and secondary 3:1 on the background
- * (large text, UI); a button label (black or white) 4.5:1 on primary. One suggestion per colour, passing every pair it
- * is in.
+ * (large text, UI). Button labels on primary use `onColor` (black or white always reaches 4.5:1). One suggestion per
+ * colour, passing every pair it is in.
  */
 const PAIRS: readonly (readonly [keyof Palette, readonly (keyof Palette)[], number])[] = [
   ['text', ['background', 'surface'], 4.5],
@@ -564,15 +568,6 @@ const contrastRule: Rule = (spec) => {
         ['theme', 'palette', fg],
         'contrast_low',
         `${fg} has ${ratios}, below ${ratio}:1${fix ? `; try ${fix}` : '; change the background'}.`,
-      ),
-    );
-  }
-  if (contrastRatio(onColor(palette.primary), palette.primary) < 4.5) {
-    issues.push(
-      error(
-        ['theme', 'palette', 'primary'],
-        'contrast_low',
-        'Neither black nor white labels read on primary (4.5:1): make it darker or lighter.',
       ),
     );
   }

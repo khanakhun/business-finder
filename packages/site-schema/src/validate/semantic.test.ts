@@ -719,5 +719,6 @@ describe('validateSite', () => {
     // Four times the text takes about four times the time (a quadratic pattern takes sixteen); and it stays fast.
     expect(large / small).toBeLessThan(8);
     expect(large).toBeLessThan(1500);
-  });
+    // Seven validations of a near-maximal spec: seconds on a busy CI runner (its own assertions measure speed).
+  }, 30_000);
 });

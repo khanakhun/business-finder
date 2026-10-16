@@ -346,7 +346,7 @@ export class AssetSourcing {
    */
   async analyze(assetId: string): Promise<'analyzed' | 'skipped'> {
     const asset = await this.assets.byId(assetId);
-    if (!asset || asset.status !== 'ready' || !asset.siteId || asset.source === 'wordmark') return 'skipped';
+    if (asset?.status !== 'ready' || !asset.siteId || asset.source === 'wordmark') return 'skipped';
     const site = await this.sites.site(asset.organizationId, asset.siteId);
     if (!site) return 'skipped';
     const object = await this.originals.get(asset.storageKey);

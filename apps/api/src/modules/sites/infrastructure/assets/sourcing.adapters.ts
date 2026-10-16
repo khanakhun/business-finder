@@ -61,14 +61,14 @@ export class IntelImageFetcher implements ImageFetcher {
 }
 
 /**
- * Downloads without a network (tests and E2E, `FAKE_SITE_INTEL`; refused in production): a 1600 × 1000 photo (or
+ * Downloads without a network (tests and E2E, `FAKE_SITE_INTEL`; refused in production): a 960 × 640 photo (or
  * a 400 × 160 logo when the URL names one) coloured from the URL's hash, so each URL is its own picture.
  */
 export class FakeImageFetcher implements ImageFetcher {
   async fetch(url: string): Promise<Uint8Array> {
     const digest = createHash('sha256').update(url).digest();
     const logo = /logo/i.test(url);
-    const [width, height] = logo ? [400, 160] : [1600, 1000];
+    const [width, height] = logo ? [400, 160] : [960, 640];
     // Large blocks placed from the hash (so each URL has its own difference hash) over a fine grain (edges: a flat
     // image counts as blurry). A seeded xorshift: the same URL always gives the same bytes.
     let seed = digest.readUInt32BE(0) || 1;

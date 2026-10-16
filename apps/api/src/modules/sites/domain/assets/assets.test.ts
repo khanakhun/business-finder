@@ -3,6 +3,14 @@ import { DHASH_HEIGHT, DHASH_WIDTH, dhash, hamming, isNearDuplicate, laplacianVa
 import { isProviderPhoto, judgeOwnerImage } from './image-policy.ts';
 import { paletteFit, type RankableAsset, rankCandidates } from './ranking.ts';
 
+const GOOD = {
+  quality: 4,
+  heroSuitability: 4,
+  containsText: false,
+  containsPeople: false,
+  identifiablePeople: false,
+} as const;
+
 const photo = (overrides: Partial<RankableAsset> = {}): RankableAsset => ({
   id: 'p',
   kind: 'photo',
@@ -100,7 +108,7 @@ describe('ranking', () => {
   it('lets stock win the hero over a weak own photo, and prefers wide landscapes', () => {
     const ranked = rankCandidates(
       [
-        photo({ id: 'weak-own', analysis: { ...photo().analysis!, quality: 2, heroSuitability: 2 } }),
+        photo({ id: 'weak-own', analysis: { ...GOOD, quality: 2, heroSuitability: 2 } }),
         photo({ id: 'stock', source: 'stock' }),
         photo({ id: 'portrait', source: 'stock', width: 1000, height: 1500 }),
       ],
@@ -110,7 +118,7 @@ describe('ranking', () => {
   });
 
   it('never offers an AI image showing people, and ranks logos for logo roles only', () => {
-    const ai = photo({ id: 'ai', source: 'ai', analysis: { ...photo().analysis!, containsPeople: true } });
+    const ai = photo({ id: 'ai', source: 'ai', analysis: { ...GOOD, containsPeople: true } });
     expect(rankCandidates([ai], { role: 'gallery' })).toEqual([]);
     const logo = photo({ id: 'logo', kind: 'logo', width: 512, height: 512, analysis: null });
     const wordmark = photo({ id: 'wm', kind: 'logo', source: 'wordmark', width: 1200, height: 400 });

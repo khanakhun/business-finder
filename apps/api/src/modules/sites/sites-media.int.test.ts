@@ -319,7 +319,8 @@ describe('image sourcing (BF-038)', () => {
       return items.length === 3 && items.every((item) => item.status === 'ready' && item.analysis)
         ? items
         : undefined;
-    });
+      // Processing (WebP + AVIF variants) and analysis of three images: slow on a CI runner.
+    }, 60_000);
     expect(ready.map((item) => item.kind).sort()).toEqual(['image', 'image', 'logo']);
     const rows = await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id));
     // The provider photo never reached the library.
@@ -352,7 +353,7 @@ describe('image sourcing (BF-038)', () => {
     expect(confirmed.restrictions).toEqual([]);
     expect(confirmed.ownership).toMatchObject({ method: 'claim_form' });
     await outsider.get(`/v1/sites/${site.id}/asset-suggestions?role=hero`).expect(404);
-  }, 60_000);
+  }, 120_000);
 
   it('draws a wordmark when the business has no logo and no website', async () => {
     const site = await newSite('Salon Sans Logo');
@@ -360,12 +361,12 @@ describe('image sourcing (BF-038)', () => {
     const marks = await eventually(async () => {
       const rows = await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id));
       return rows.length === 2 && rows.every((row) => row.status === 'ready') ? rows : undefined;
-    });
+    }, 60_000);
     expect(marks.map((row) => [row.kind, row.source, row.license])).toEqual([
       ['logo', 'wordmark', 'system_generated'],
       ['logo', 'wordmark', 'system_generated'],
     ]);
-  }, 60_000);
+  }, 120_000);
 });
 
 describe('image permissions and refusals', () => {

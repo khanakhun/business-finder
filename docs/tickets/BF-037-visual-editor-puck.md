@@ -172,3 +172,29 @@ visual parity report in the PR.
 ## References
 - ADR-0009 · docs/ARCHITECTURE.md §10 · BF-033 operations · BF-035 APIs
 - Puck docs: https://puckeditor.com/docs · Upgrading to Puck 0.21 (package rename to `@puckeditor/core`): https://puckeditor.com/blog/upgrading-to-puck-021 · Puck repository: https://github.com/measuredco/puck
+
+## Implementation notes
+
+- **Versions**: `@puckeditor/core` 0.23.0 (pinned in the catalog; Tiptap held at 3.31.4, the newest release at least
+  two weeks old). Puck's stylesheet is `no-external.css` (the default one imports a font from another origin, which
+  the dashboard's CSP refuses).
+- **Part 1 (stacked PR 1/3)**:
+  - Adapters (`features/site-editor/adapters/`), pure and property-tested: a page becomes Puck data (block ids as
+    item ids, variant and props side by side, title/slug/SEO on the root). Puck data becomes BF-033 operations:
+    removals, then additions and moves position by position, then variants and props patches (`updateBlockProps`,
+    `null` removes), then the root's rename and SEO texts. A Puck-made item id maps to a stable element id.
+  - Field registry (`puck/field-registry.ts`): a strategy per schema kind, by shared-schema identity (asset, action),
+    by name (facts), then by Zod kind; limits and bounds read from the schema. An unknown kind throws, and a test
+    builds every block. New blocks get schema-valid defaults for the site; a block needing a fact or a missing image
+    is not offered.
+  - Canvas: the block library's components inside Puck's iframe, with the renderer's stylesheet only (served by the
+    dashboard at `/_bf`, like apps/sites) and the page chrome (banner, header, footer); links are inert.
+  - Editor at `/sites/[siteId]/edit` (own route group, no dashboard chrome, lazy bundle): page and language
+    switchers, Puck's viewports, save as operations (⌘/Ctrl+S, a guard on leaving), a conflict dialog on a concurrent
+    save (load the latest; rebase comes in part 2), a read-only canvas without `sites:generate`.
+  - API (BF-035 change, required by this ticket): a version may keep the errors of content still being written; its
+    summary counts them; publishing still refuses every error.
+- **Planned**: part 2 — site settings (theme, contact, navigation, header/footer, locales, SEO, with the missing
+  BF-033 operations), pages, the validation worker and issues panel, local drafts, undo/redo and rebase. Part 3 —
+  versions drawer (diff, restore), publish popover, image library and upload, facts, JSON mode, visual parity, a11y
+  and performance checks.

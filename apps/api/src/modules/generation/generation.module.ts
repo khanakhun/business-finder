@@ -11,7 +11,7 @@ import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/o
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
-import { SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
+import { SiteAssetCommands, SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
 import { BriefService, PAGE_PLAN_TEMPLATES } from './application/brief.service.ts';
 import {
   BRIEF_SOURCES_READER,
@@ -22,6 +22,7 @@ import {
   SITE_FACT_EXTRACTOR,
   SITE_FACT_TELEMETRY,
   SITE_PAGES_READER,
+  type SitePagesReader,
 } from './application/facts.ports.ts';
 import { FactRegistryService } from './application/facts.service.ts';
 import { GenerationCommands } from './application/generation.commands.ts';
@@ -43,6 +44,7 @@ import {
   GENERATION_SETTINGS,
   GENERATION_TELEMETRY,
   type GenerationLimits,
+  type GenerationRepository,
   LEASE_SEMAPHORE,
   LIVE_UPDATES,
   QUALITY_PIPELINE,
@@ -60,7 +62,6 @@ import {
 } from './infrastructure/bullmq-generation-queues.ts';
 import {
   DefaultGenerationSettings,
-  FixtureWorkspacePreparer,
   SchemaOnlyQualityPipeline,
   StaticEngineRegistry,
 } from './infrastructure/defaults/defaults.ts';
@@ -88,6 +89,8 @@ import {
   ValkeyEventStream,
   ValkeyLeaseSemaphore,
 } from './infrastructure/valkey-adapters.ts';
+import { LibrarySiteImages } from './infrastructure/workspace/library-images.ts';
+import { BundleWorkspacePreparer } from './infrastructure/workspace/workspace-builder.ts';
 import { FactsController } from './interface/http/facts.controller.ts';
 import { GenerationController } from './interface/http/generation.controller.ts';
 import {
@@ -185,9 +188,33 @@ export class GenerationModule {
         },
         {
           provide: WORKSPACE_PREPARER,
-          inject: [GENERATION_ARTIFACTS],
-          useFactory: (artifacts: { put: (key: string, body: Buffer, type: string) => Promise<void> }) =>
-            new FixtureWorkspacePreparer((key, body) => artifacts.put(key, body, 'application/json')),
+          inject: [
+            SiteFactExtraction,
+            FactRegistryService,
+            BriefService,
+            SITE_PAGES_READER,
+            SiteAssetCommands,
+            GENERATION_REPOSITORY,
+            GENERATION_ARTIFACTS,
+          ],
+          useFactory: (
+            extraction: SiteFactExtraction,
+            registry: FactRegistryService,
+            briefs: BriefService,
+            pages: SitePagesReader,
+            library: SiteAssetCommands,
+            repository: GenerationRepository,
+            artifacts: ArtifactStore,
+          ) =>
+            new BundleWorkspacePreparer({
+              extraction,
+              registry,
+              briefs,
+              pages,
+              images: new LibrarySiteImages(library),
+              repository,
+              artifacts,
+            }),
         },
         {
           provide: QUALITY_PIPELINE,

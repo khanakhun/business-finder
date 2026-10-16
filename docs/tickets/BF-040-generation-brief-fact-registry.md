@@ -168,11 +168,11 @@ packages/ai/prompts/{extract-site-facts.v1.md, site-agent-rules.v1.md}
 - **Evals:** extraction precision and recall and seeded hallucination rejection; results attached to the PR.
 
 ## Acceptance criteria
-- [ ] Typed fact model with provenance and display/internal usage rules (licensing-aware).
-- [ ] Evidence-verified owner-site extraction (evals pass) and user-asserted fact overlay with API.
-- [ ] Versioned brief with explained page plan, positioning, design direction, selling points, constraints and warnings.
-- [ ] Always-valid starter spec; deterministic workspace bundle implementing `WorkspacePreparer`.
-- [ ] Brief preview API and batch `briefOverrides`.
+- [x] Typed fact model with provenance and display/internal usage rules (licensing-aware).
+- [x] Evidence-verified owner-site extraction (evals pass) and user-asserted fact overlay with API.
+- [x] Versioned brief with explained page plan, positioning, design direction, selling points, constraints and warnings.
+- [x] Always-valid starter spec; deterministic workspace bundle implementing `WorkspacePreparer`.
+- [x] Brief preview API and batch `briefOverrides`.
 
 ## Agent prompt
 ```text

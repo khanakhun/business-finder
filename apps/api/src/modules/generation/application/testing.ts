@@ -142,6 +142,13 @@ export class InMemoryGenerationRepository implements GenerationRepository {
     this.attemptRows.set(attemptId, { ...attempt, ...changes });
     return true;
   }
+  readonly workspaces = new Map<string, { factSnapshotId: string | null; bundleHash: string | null }>();
+  async setAttemptWorkspace(
+    attemptId: string,
+    workspace: { factSnapshotId: string | null; bundleHash: string | null },
+  ) {
+    this.workspaces.set(attemptId, workspace);
+  }
   async heartbeat(attemptId: string, at: Date) {
     const attempt = this.attemptRows.get(attemptId);
     if (attempt) this.attemptRows.set(attemptId, { ...attempt, heartbeatAt: at });

@@ -1,6 +1,8 @@
 import type { DbClient } from '@bf/db';
 import {
   businesses,
+  factRegistrySnapshots,
+  generationArtifacts,
   generationAttempts,
   generationEvents,
   generationJobs,
@@ -25,6 +27,7 @@ import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
 import { GENERATION_ARTIFACTS } from './application/ports.ts';
 import { GENERATION_REAPER_AUTOSTART } from './infrastructure/bullmq-generation-queues.ts';
+import { unpackBundle } from './infrastructure/workspace/tar.ts';
 
 // Generation (BF-039) end to end with the fake engine: batches through the worker to published previews, a review,
 // a repair, failover, cancellation, the batch's sequential mode, the sandbox pool, the reaper, idempotency and authz.
@@ -434,5 +437,39 @@ describe('generation batches', () => {
       .where(eq(generationJobs.batchId, body.id));
     expect(job?.briefOverrides).toEqual(overrides);
     await batchDone(body.id);
+  }, 60_000);
+  it('builds each attempt’s workspace bundle from a pinned fact snapshot', async () => {
+    const id = await business('Café Bundle');
+    const { body } = await member
+      .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'fake' }] })
+      .set('Idempotency-Key', 'batch-bundle-1')
+      .expect(201);
+    await batchDone(body.id);
+    const [attempt] = await db
+      .select({
+        id: generationAttempts.id,
+        factSnapshotId: generationAttempts.factSnapshotId,
+        bundleHash: generationAttempts.bundleHash,
+      })
+      .from(generationAttempts)
+      .innerJoin(generationJobs, eq(generationJobs.id, generationAttempts.jobId))
+      .where(eq(generationJobs.batchId, body.id));
+    expect(attempt?.bundleHash).toMatch(/^[0-9a-f]{64}$/);
+    const [snapshot] = await db
+      .select({ businessId: factRegistrySnapshots.businessId })
+      .from(factRegistrySnapshots)
+      .where(eq(factRegistrySnapshots.id, attempt?.factSnapshotId as string));
+    expect(snapshot?.businessId).toBe(id);
+    const [artifact] = await db
+      .select()
+      .from(generationArtifacts)
+      .where(eq(generationArtifacts.attemptId, attempt?.id as string));
+    expect(artifact).toMatchObject({ kind: 'workspace_bundle', sha256: attempt?.bundleHash });
+    expect(artifact?.storageKey).toMatch(/\.tar\.zst$/);
+    const bundle = await artifacts.get(artifact?.storageKey as string);
+    const files = unpackBundle(bundle as Buffer);
+    expect(JSON.parse(files.get('brief.json')?.toString() ?? '{}').identity.name).toBe('Café Bundle');
+    expect(files.has('site.json') && files.has('facts.json') && files.has('AGENTS.md')).toBe(true);
+    expect(artifact?.bytes).toBe(bundle?.length);
   }, 60_000);
 });

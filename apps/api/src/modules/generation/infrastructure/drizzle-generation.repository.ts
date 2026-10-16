@@ -258,6 +258,16 @@ export class DrizzleGenerationRepository implements GenerationRepository {
       .orderBy(asc(generationAttempts.attemptNo))) as StoredAttempt[];
   }
 
+  async setAttemptWorkspace(
+    attemptId: string,
+    workspace: { factSnapshotId: string | null; bundleHash: string | null },
+  ) {
+    await this.x
+      .update(generationAttempts)
+      .set({ factSnapshotId: workspace.factSnapshotId, bundleHash: workspace.bundleHash })
+      .where(eq(generationAttempts.id, attemptId));
+  }
+
   async finishAttempt(attemptId: string, changes: Parameters<GenerationRepository['finishAttempt']>[1]) {
     // Only a running attempt finishes (the runner and the reaper never both settle it).
     const rows = await this.x

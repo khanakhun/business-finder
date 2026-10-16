@@ -260,9 +260,14 @@ export class GenerationRunner {
         attemptId,
         kind: 'workspace_bundle',
         storageKey: prepared.bundleRef,
-        sha256: createHash('sha256').update(prepared.bundleRef).digest('hex'),
-        bytes: 0,
+        sha256: prepared.bundleHash ?? createHash('sha256').update(prepared.bundleRef).digest('hex'),
+        bytes: prepared.bytes ?? 0,
       });
+      if (prepared.factSnapshotId || prepared.bundleHash)
+        await this.repository.setAttemptWorkspace(attemptId, {
+          factSnapshotId: prepared.factSnapshotId ?? null,
+          bundleHash: prepared.bundleHash ?? null,
+        });
       if (mode === 'create') await this.transitions.move(job.id, 'running');
       const settings = await this.settings.resolve(job.organizationId);
       const running = this.clock.now().getTime();

@@ -55,7 +55,14 @@ export interface WorkspaceSummary {
 
 /** Builds an attempt's workspace (BF-040: brief, facts, assets); here a fixture. */
 export interface WorkspacePreparer {
-  prepare(job: StoredJob): Promise<{ readonly bundleRef: string; readonly summary: WorkspaceSummary }>;
+  prepare(job: StoredJob): Promise<{
+    readonly bundleRef: string;
+    readonly summary: WorkspaceSummary;
+    /** The bundle's SHA-256 and size (BF-040), and the registry snapshot it was built from. */
+    readonly bundleHash?: string;
+    readonly bytes?: number;
+    readonly factSnapshotId?: string;
+  }>;
   /** Without building it: what selection needs (pages, items, languages). */
   estimate(
     job: Pick<StoredJob, 'organizationId' | 'businessId'>,
@@ -226,6 +233,11 @@ export interface GenerationRepository {
   attempt(jobId: string, attemptNo: number): Promise<StoredAttempt | undefined>;
   attemptById(attemptId: string): Promise<StoredAttempt | undefined>;
   attempts(jobId: string): Promise<StoredAttempt[]>;
+  /** What the attempt's workspace was built from (BF-040). */
+  setAttemptWorkspace(
+    attemptId: string,
+    workspace: { factSnapshotId: string | null; bundleHash: string | null },
+  ): Promise<void>;
   finishAttempt(
     attemptId: string,
     changes: Pick<StoredAttempt, 'status' | 'exitReason'> &

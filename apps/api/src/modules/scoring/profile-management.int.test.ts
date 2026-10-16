@@ -290,6 +290,7 @@ describe('stored versions', () => {
       .select()
       .from(scoringProfiles)
       .where(eq(scoringProfiles.organizationId, org))
+      .orderBy(asc(scoringProfiles.createdAt))
       .limit(1);
     if (!own) throw new Error('no workspace profile');
     const v1 = (await owner.get(`/v1/scoring/profiles/${own.id}/versions/1`).expect(200)).body.config;

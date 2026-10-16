@@ -19,11 +19,16 @@ export function NumericInput({
   value,
   onCommit,
   integer = false,
+  min,
+  max,
   ...props
 }: Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'type'> & {
   readonly value: number;
   readonly onCommit: (value: number) => void;
   readonly integer?: boolean;
+  /** Bounds: a typed value outside them is committed clamped (and shown so on leaving the field). */
+  readonly min?: number;
+  readonly max?: number;
 }) {
   const [text, setText] = React.useState(String(value));
   const parsed = parseNumber(text);
@@ -42,7 +47,16 @@ export function NumericInput({
       onChange={(event) => {
         setText(event.target.value);
         const next = parseNumber(event.target.value);
-        if (next !== null && (!integer || Number.isInteger(next))) onCommit(next);
+        if (next !== null && (!integer || Number.isInteger(next))) {
+          onCommit(
+            Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, next)),
+          );
+        }
+      }}
+      // Leaving the field shows what the draft holds (a clamped or unfinished value).
+      onBlur={(event) => {
+        setText(String(value));
+        props.onBlur?.(event);
       }}
     />
   );

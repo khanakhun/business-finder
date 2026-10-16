@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
+import { ConfirmDialog } from '@/components/settings/confirm-dialog.tsx';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { REALTIME_EVENTS } from '@/lib/realtime/invalidations.ts';
 import { useRealtimeEvent } from '@/lib/realtime/provider.tsx';
@@ -72,8 +73,9 @@ function Editor({
   const [draft, setDraft] = React.useState<Draft>(() => toDraft(base));
   const save = useSaveVersion(profileId);
   const { config, issues } = React.useMemo(() => build(draft), [draft]);
-  const pristine = React.useMemo(() => JSON.stringify(build(toDraft(base)).config), [base]);
-  const dirty = config ? JSON.stringify(config) !== pristine : true;
+  // Edits, not validity: a stored version newer rules refuse is not "changed" until edited.
+  const pristine = React.useMemo(() => JSON.stringify(toDraft(base)), [base]);
+  const dirty = !readOnly && JSON.stringify(draft) !== pristine;
   React.useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
   const setConfig = (next: ScoringProfileConfig) => setDraft((current) => ({ ...current, config: next }));
   const sections = [
@@ -188,7 +190,14 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
   const version = useProfileVersion(profileId, selected);
   const sample = usePreviewSample(profileId, canManage);
   const activate = useActivateVersion(profileId);
-  const [progress, setProgress] = React.useState<ScoringRecomputeProgress | null>(null);
+  const [progress, setProgressState] = React.useState<ScoringRecomputeProgress | null>(null);
+  // Read by the realtime handler (latest value, not the render's).
+  const progressRef = React.useRef<ScoringRecomputeProgress | null>(null);
+  const setProgress = (next: ScoringRecomputeProgress | null) => {
+    progressRef.current = next;
+    setProgressState(next);
+  };
+  const [pendingVersion, setPendingVersion] = React.useState<number | null>(null);
   const dirty = React.useRef(false);
   const onDirtyChange = React.useCallback((next: boolean) => {
     dirty.current = next;
@@ -197,8 +206,14 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
   useRealtimeEvent(REALTIME_EVENTS.scoringRecomputeProgressed, (event) => {
     const payload = event.payload as ScoringRecomputeProgress | null;
     if (payload?.profileId !== profileId) return;
-    // Once an activation is under way, events of another version (a late one) are ignored.
-    setProgress((current) => (current && current.version !== payload.version ? current : payload));
+    // While an activation is under way, events of another version (a late one) are ignored.
+    if (
+      progressRef.current &&
+      !progressRef.current.finished &&
+      progressRef.current.version !== payload.version
+    )
+      return;
+    setProgress(payload);
     if (payload.finished)
       void getToast().then((toast) => toast.success(t('recomputed', { count: payload.done })));
   });
@@ -251,8 +266,8 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
               value={selected === null ? '' : String(selected)}
               onValueChange={(v) => {
                 // Another base version starts a new draft: unsaved changes would be lost.
-                if (dirty.current && !window.confirm(t('discardConfirm'))) return;
-                setChosen(Number(v));
+                if (dirty.current) setPendingVersion(Number(v));
+                else setChosen(Number(v));
               }}
             >
               <SelectTrigger id="profile-version" className="w-56">
@@ -329,6 +344,17 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
       ) : (
         <Skeleton className="h-96 w-full" />
       )}
+      <ConfirmDialog
+        open={pendingVersion !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingVersion(null);
+        }}
+        title={t('discardConfirm')}
+        confirmLabel={t('reset')}
+        onConfirm={async () => {
+          if (pendingVersion !== null) setChosen(pendingVersion);
+        }}
+      />
       {canManage ? (
         <section aria-labelledby="compare-title" className="grid gap-3 rounded-lg border p-4">
           <h2 id="compare-title" className="font-semibold">

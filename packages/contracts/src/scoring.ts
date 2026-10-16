@@ -1042,8 +1042,9 @@ export const REASON_PLACEHOLDERS = ['{value}'] as const;
  */
 export function unknownPlaceholders(template: string): string[] {
   let rest = template;
-  // Removed first: what is left of `{{value}}` (`{}`) or a lone brace is flagged.
-  for (const placeholder of REASON_PLACEHOLDERS) rest = rest.replaceAll(placeholder, '');
+  // Blanked first (a space, so the text around never joins into a new placeholder): what is left of `{{value}}`
+  // (`{ }`) or a lone brace is flagged.
+  for (const placeholder of REASON_PLACEHOLDERS) rest = rest.replaceAll(placeholder, ' ');
   const found = rest.match(/\{[^{}]*\}?|\}/g) ?? [];
   return [...new Set(found)];
 }

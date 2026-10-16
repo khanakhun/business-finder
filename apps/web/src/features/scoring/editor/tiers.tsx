@@ -27,6 +27,8 @@ export function TiersEditor({
             <NumericInput
               id={`tier-${tier}`}
               integer
+              min={tier === 'A' ? 1 : 0}
+              max={tier === 'A' ? 100 : 99}
               value={config.tiers[tier]}
               disabled={readOnly}
               className="w-28"

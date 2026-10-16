@@ -171,6 +171,7 @@ export function ProfilesSettings() {
         </SettingsSection>
       ))}
       <ConfirmDialog
+        variant="default"
         open={confirmPrimary !== null}
         onOpenChange={(open) => {
           if (!open) setConfirmPrimary(null);

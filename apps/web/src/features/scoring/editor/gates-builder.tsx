@@ -266,6 +266,8 @@ export function GatesBuilder({
                   <NumericInput
                     id={`gate-${i}-max`}
                     integer
+                    min={0}
+                    max={100}
                     value={gate.effect.max}
                     disabled={readOnly}
                     className="w-24"

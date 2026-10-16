@@ -50,6 +50,7 @@ export function PrimaryProfileSelect() {
         </SelectContent>
       </Select>
       <ConfirmDialog
+        variant="default"
         open={pending !== null}
         onOpenChange={(open) => {
           if (!open) setPending(null);

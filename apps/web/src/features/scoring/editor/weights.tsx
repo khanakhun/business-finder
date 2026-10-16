@@ -67,6 +67,8 @@ export function WeightsEditor({
               <NumericInput
                 id={id}
                 integer
+                min={-100}
+                max={100}
                 value={weight}
                 disabled={readOnly}
                 onCommit={(value) => onChange(withWeight(config, feature, clamp(value)))}

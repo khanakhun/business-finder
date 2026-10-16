@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { FormError, useErrorMessage } from '@/components/auth/fields.tsx';
 
-/** "Are you sure?" for destructive actions; the confirm button is the destructive variant. Failures show inline. */
+/** "Are you sure?" before an action (destructive by default: the confirm button says so). Failures show inline. */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -21,6 +21,7 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   onConfirm,
+  variant = 'destructive',
 }: {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
@@ -28,11 +29,16 @@ export function ConfirmDialog({
   readonly description?: string;
   readonly confirmLabel: string;
   readonly onConfirm: () => Promise<void>;
+  readonly variant?: 'destructive' | 'default';
 }) {
   const t = useTranslations('members');
   const errorMessage = useErrorMessage();
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  // A dialog kept mounted opens without the last attempt's error.
+  React.useEffect(() => {
+    if (open) setError(null);
+  }, [open]);
   return (
     <Dialog
       open={open}
@@ -52,7 +58,7 @@ export function ConfirmDialog({
             {t('cancel')}
           </Button>
           <Button
-            variant="destructive"
+            variant={variant}
             disabled={pending}
             onClick={async () => {
               setPending(true);

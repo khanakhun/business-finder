@@ -148,3 +148,40 @@ test('shows a viewer the canvas read-only, with no save', async ({ page, browser
     await context.close();
   }
 });
+
+test('keeps what is typed while a save runs, and sends one save at a time', async ({ page }) => {
+  const siteId = await createSite(page, 'Salon pendant');
+  await page.goto(`/sites/${siteId}/edit`);
+  await canvas(page).getByRole('heading', { level: 1 }).click();
+  const title = field(page, 'Title (FR)');
+  await title.fill('Coiffure à Gustavia');
+
+  // The save request waits until released.
+  let release: () => void = () => undefined;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let saves = 0;
+  await page.route(`**/v1/sites/${siteId}/operations`, async (route) => {
+    saves += 1;
+    await held;
+    await route.continue();
+  });
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByRole('button', { name: 'Saving…' })).toBeVisible();
+  await title.fill('Coiffure et couleur à Gustavia ');
+  await page.keyboard.press('ControlOrMeta+s');
+  release();
+  await expect(page.getByText('Saved as version 2')).toBeVisible();
+  expect(saves).toBe(1);
+  // What was typed during the save is still there, and still to save.
+  await expect(title).toHaveValue('Coiffure et couleur à Gustavia ');
+  await expect(page.getByText('Unsaved changes')).toBeVisible();
+
+  await page.unroute(`**/v1/sites/${siteId}/operations`);
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByText('Saved as version 3')).toBeVisible();
+  // Stored trimmed: nothing is left to save (no empty versions).
+  await expect(page.getByText('All changes saved')).toBeVisible();
+  expect((await currentVersion(page, siteId)).versionNumber).toBe(3);
+});

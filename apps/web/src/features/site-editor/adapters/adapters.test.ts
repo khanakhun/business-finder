@@ -24,8 +24,23 @@ const PAGES = Object.entries(FIXTURES).flatMap(([name, spec]) =>
 );
 
 /** The data the editor would show after applying `ops`, ids mapped as a save maps them. */
+/** A text as the schema stores it (trimmed, blank languages absent). */
+const trim = (text: Record<string, string | undefined>) =>
+  Object.fromEntries(
+    Object.entries(text)
+      .map(([locale, value]) => [locale, value?.trim()])
+      .filter(([, value]) => value),
+  );
+
 const normalized = (data: EditorData): EditorData => ({
-  root: data.root,
+  root: {
+    props: {
+      ...data.root.props,
+      title: trim(data.root.props.title),
+      seoTitle: trim(data.root.props.seoTitle),
+      seoDescription: trim(data.root.props.seoDescription),
+    },
+  },
   content: data.content.map((item) => {
     const block = itemToBlock(item);
     return { type: block.type, props: { ...block.props, id: block.id, variant: block.variant } } as BlockItem;
@@ -163,6 +178,12 @@ const edit = fc.record({
         at: fc.nat(30),
         value: fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/),
       }),
+      // A text typed with spaces around it (the schema stores it trimmed: nothing is left to save after).
+      fc.record({
+        kind: fc.constant('spaced' as const),
+        at: fc.nat(30),
+        value: fc.stringMatching(/^[A-Za-z]{1,10}$/),
+      }),
       // A translation dropped, an optional prop cleared (both are `null` in the patch).
       fc.record({ kind: fc.constant('dropTranslation' as const), at: fc.nat(30) }),
       fc.record({ kind: fc.constant('clearOptional' as const), at: fc.nat(30) }),
@@ -215,6 +236,12 @@ function play(data: EditorData, steps: Session['steps'], spec: SiteSpec): Editor
         ...item,
         props: { ...item.props, heading: { ...(item.props.heading as object), fr: step.value } },
       };
+    } else if (step.kind === 'spaced' && 'heading' in item.props && item.props.heading) {
+      content[index] = {
+        ...item,
+        props: { ...item.props, heading: { ...(item.props.heading as object), fr: ` ${step.value} ` } },
+      };
+      root = { ...root, seoTitle: { ...root.seoTitle, fr: `${root.seoTitle.fr ?? 'Title'} ` } };
     } else if (step.kind === 'dropTranslation') {
       const heading = item.props.heading as Record<string, string> | undefined;
       if (heading && Object.keys(heading).length > 1) {

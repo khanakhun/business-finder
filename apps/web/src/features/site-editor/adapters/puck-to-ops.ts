@@ -1,4 +1,10 @@
-import type { BaseOperation, Block, LocalizedText, SiteSpec } from '@bf/site-schema';
+import {
+  type BaseOperation,
+  BLOCK_SCHEMAS,
+  type Block,
+  type LocalizedText,
+  type SiteSpec,
+} from '@bf/site-schema';
 import { type BlockItem, type EditorData, findPage, ITEM_KEYS, type PageRootProps } from './spec-to-puck.ts';
 
 // What the editor's Puck data changed on a page, as BF-033 operations (BF-037): the site is saved through the API's
@@ -16,19 +22,33 @@ export function blockIdOf(itemId: string): string {
   return `blk${itemId.replace(/[^A-Za-z0-9]/g, '').slice(-24)}`;
 }
 
-/** The block a Puck item stands for (undefined props dropped: Puck leaves them for cleared optional fields). */
+/**
+ * The block a Puck item stands for (undefined props dropped: Puck leaves them for cleared optional fields), its props
+ * as the schema stores them when they are valid (texts trimmed): what is saved is what is compared next time.
+ */
 export function itemToBlock(item: BlockItem): Block {
   const props: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(item.props)) {
     if ((ITEM_KEYS as readonly string[]).includes(key) || value === undefined) continue;
     props[key] = withoutUndefined(value);
   }
+  const parsed = BLOCK_SCHEMAS[item.type]?.shape.props.safeParse(props);
   return {
     id: blockIdOf(item.props.id),
     type: item.type,
     variant: item.props.variant,
-    props,
+    props: parsed?.success ? parsed.data : props,
   } as Block;
+}
+
+/** A text as the schema stores it: each language trimmed, a blank one absent. */
+function trimmed(text: LocalizedText): LocalizedText {
+  const out: LocalizedText = {};
+  for (const [locale, value] of Object.entries(text) as [keyof LocalizedText, string | undefined][]) {
+    const clean = value?.trim();
+    if (clean) out[locale] = clean;
+  }
+  return out;
 }
 
 function withoutUndefined(value: unknown): unknown {
@@ -80,7 +100,8 @@ export function propsPatch(
 }
 
 /** Per-locale `updateText` operations from `before` to `after` at `path`. */
-function textOps(path: (string | number)[], before: LocalizedText, after: LocalizedText): BaseOperation[] {
+function textOps(path: (string | number)[], before: LocalizedText, edited: LocalizedText): BaseOperation[] {
+  const after = trimmed(edited);
   const ops: BaseOperation[] = [];
   for (const locale of new Set([...Object.keys(before), ...Object.keys(after)]) as Set<keyof LocalizedText>) {
     const now = after[locale];
@@ -94,14 +115,15 @@ function rootOps(spec: SiteSpec, pageId: string, root: PageRootProps): BaseOpera
   const page = findPage(spec, pageId);
   const index = spec.pages.indexOf(page);
   const ops: BaseOperation[] = [];
-  const titleChanged = !deepEqual(page.title, root.title);
+  const title = trimmed(root.title);
+  const titleChanged = !deepEqual(page.title, title);
   // A cleared field gives no slug: the page keeps "" (the home page's) rather than an undefined one.
   const slug = root.slug ?? '';
   if (titleChanged || page.slug !== slug) {
     ops.push({
       op: 'renamePage',
       pageId,
-      title: structuredClone(root.title),
+      title,
       ...(page.slug !== slug ? { slug } : {}),
     });
   }

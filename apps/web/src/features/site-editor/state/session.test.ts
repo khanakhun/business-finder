@@ -1,7 +1,7 @@
 import { type BaseOperation, MAX_BATCH, type SiteSpec, SiteSpecSchema } from '@bf/site-schema';
 import salon from '@bf/site-schema/fixtures/salon-gustavia.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
-import { applyInBatches, whereOf } from './session.ts';
+import { applyInBatches, whereOf, withPageBlocks } from './session.ts';
 
 const spec = SiteSpecSchema.parse(salon) as SiteSpec;
 const labels = { block: (type: string) => `B:${type}`, field: (key: string) => `F:${key}`, page: 'Page' };
@@ -29,5 +29,18 @@ describe('whereOf', () => {
     expect(whereOf(spec, ['pages', 0, 'title', 'fr'], labels)).toBe('Page › F:pageTitle');
     expect(whereOf(spec, ['theme', 'palette', 'text'], labels)).toBeUndefined();
     expect(whereOf(spec, ['pages', 9, 'title'], labels)).toBeUndefined();
+    // A two-letter prop is a prop, not a language.
+    expect(whereOf(spec, ['pages', 0, 'blocks', 0, 'props', 'to'], labels)).toBe('B:hero › F:to');
+  });
+
+  it('names a block added on the canvas against the edited page, not the saved one', () => {
+    const page = spec.pages[0];
+    if (!page) throw new Error('fixture');
+    const added = { id: 'faq-new01', type: 'faq', variant: 'accordion', props: {} } as never;
+    const edited = withPageBlocks(spec, page.id, [added, ...page.blocks]);
+    expect(whereOf(edited, ['pages', 0, 'blocks', 0, 'props', 'heading'], labels)).toBe('B:faq › F:heading');
+    expect(
+      whereOf(spec, ['pages', 0, 'blocks', page.blocks.length, 'props', 'heading'], labels),
+    ).toBeUndefined();
   });
 });

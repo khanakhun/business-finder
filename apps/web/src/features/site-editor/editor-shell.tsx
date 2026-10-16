@@ -28,14 +28,14 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { getToast } from '@/lib/toast.tsx';
-import { applyPuckDataToSpec } from './adapters/puck-to-ops.ts';
+import { applyPuckDataToSpec, itemToBlock } from './adapters/puck-to-ops.ts';
 import { type EditorData, specPageToPuckData } from './adapters/spec-to-puck.ts';
 import { fetchVersion, saveSite, VersionConflict } from './api.ts';
 import { SiteEditorProvider } from './context.tsx';
 import { buildPuckConfig, type ConfigLabels } from './puck/build-config.tsx';
 import { CanvasFrame } from './puck/canvas.tsx';
 import type { FieldSpec } from './puck/field-registry.ts';
-import { applyInBatches, whereOf } from './state/session.ts';
+import { applyInBatches, whereOf, withPageBlocks } from './state/session.ts';
 
 /** The version the editor works from: every save is based on it, and replaces it. */
 interface Base {
@@ -154,7 +154,7 @@ export function SiteEditor({
       try {
         site = applyInBatches(working, pageOps);
       } catch (error) {
-        void reportRefused(error, working);
+        void reportRefused(error, withPageBlocks(working, pageId, data.content.map(itemToBlock)));
         return;
       }
       setWorking(site);
@@ -164,7 +164,8 @@ export function SiteEditor({
   };
 
   const save = React.useCallback(async () => {
-    if (!canEdit || inFlight.current) return;
+    // Not while a conflict is being resolved (a save from the stale base would only conflict again).
+    if (!canEdit || inFlight.current || conflict || reloading) return;
     inFlight.current = true;
     try {
       const toast = await getToast();
@@ -178,7 +179,7 @@ export function SiteEditor({
         // Refused here what the API would refuse (an edit that breaks the schema), naming the field.
         spec = applyInBatches(working, pageOps);
       } catch (error) {
-        await reportRefused(error, working);
+        await reportRefused(error, withPageBlocks(working, pageId, data.content.map(itemToBlock)));
         return;
       }
       setSaving(true);
@@ -202,7 +203,7 @@ export function SiteEditor({
     } finally {
       inFlight.current = false;
     }
-  }, [canEdit, pending, pageOps, working, base, siteId, t, reportRefused]);
+  }, [canEdit, conflict, reloading, pending, pageOps, working, pageId, data, base, siteId, t, reportRefused]);
 
   const reloadLatest = async () => {
     const versionId = conflict?.currentVersionId;

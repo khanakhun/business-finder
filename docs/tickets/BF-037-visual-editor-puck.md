@@ -195,6 +195,7 @@ visual parity report in the PR.
   - API (BF-035 change, required by this ticket): a version may keep the errors of content still being written; its
     summary counts them; publishing still refuses every error.
 - **Planned**: part 2 — site settings (theme, contact, navigation, header/footer, locales, SEO, with the missing
-  BF-033 operations), pages, the validation worker and issues panel, local drafts, undo/redo and rebase. Part 3 —
+  BF-033 operations), pages, the validation worker and issues panel, local drafts, undo/redo and rebase, and the
+  fields' help texts (the schema's descriptions, English only today: translated first). Part 3 —
   versions drawer (diff, restore), publish popover, image library and upload, facts, JSON mode, visual parity, a11y
   and performance checks.

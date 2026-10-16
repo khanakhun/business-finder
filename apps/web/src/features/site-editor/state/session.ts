@@ -1,4 +1,11 @@
-import { applyAll, type BaseOperation, type BlockType, MAX_BATCH, type SiteSpec } from '@bf/site-schema';
+import {
+  applyAll,
+  type BaseOperation,
+  type Block,
+  type BlockType,
+  MAX_BATCH,
+  type SiteSpec,
+} from '@bf/site-schema';
 
 // The editor session's pure parts (BF-037): applying any number of edits, and naming the field a refusal is about.
 
@@ -32,8 +39,8 @@ export function whereOf(
   if (path[2] === 'blocks' && typeof path[3] === 'number') {
     const block = page.blocks[path[3]];
     if (!block) return undefined;
-    const keys = path.slice(5).filter((step): step is string => typeof step === 'string' && step.length > 2);
-    const field = path[4] === 'props' ? keys[0] : undefined;
+    // ['pages', i, 'blocks', j, 'props', <prop>, …]: the prop is the field.
+    const field = path[4] === 'props' && typeof path[5] === 'string' ? path[5] : undefined;
     return field ? `${labels.block(block.type)} › ${labels.field(field)}` : labels.block(block.type);
   }
   const key =
@@ -41,4 +48,15 @@ export function whereOf(
   return typeof key === 'string'
     ? `${labels.page} › ${labels.field(key === 'title' ? 'pageTitle' : key)}`
     : labels.page;
+}
+
+/**
+ * The site with one page's blocks as the canvas has them, unchecked: refusal paths point into the edited site (after
+ * the operations), so they are named against it, not against the site before them.
+ */
+export function withPageBlocks(spec: SiteSpec, pageId: string, blocks: readonly Block[]): SiteSpec {
+  return {
+    ...spec,
+    pages: spec.pages.map((page) => (page.id === pageId ? { ...page, blocks: [...blocks] } : page)),
+  };
 }

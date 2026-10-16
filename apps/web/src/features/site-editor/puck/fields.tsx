@@ -301,8 +301,9 @@ export function AssetListField({
         <ol className="flex flex-col gap-1">
           {ids.map((assetId, index) => {
             const name = byId.get(assetId)?.alt[locale] ?? assetId;
+            // An image may be listed twice: its place in the list is part of its key.
             return (
-              <li key={assetId} className="flex items-center gap-1 text-sm">
+              <li key={`${assetId}:${index}`} className="flex items-center gap-1 text-sm">
                 <span className="flex-1 truncate">{name}</span>
                 {readOnly ? null : (
                   <>
@@ -332,7 +333,7 @@ export function AssetListField({
                       variant="ghost"
                       aria-label={t('remove', { name })}
                       disabled={ids.length <= (min ?? 0)}
-                      onClick={() => onChange(ids.filter((other) => other !== assetId))}
+                      onClick={() => onChange(ids.filter((_, at) => at !== index))}
                     >
                       <XIcon aria-hidden />
                     </Button>

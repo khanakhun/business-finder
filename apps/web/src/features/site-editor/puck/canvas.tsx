@@ -92,10 +92,15 @@ export function CanvasBlock({ type, props }: { readonly type: BlockType; readonl
   });
   // The library's blocks expect valid props: an item being written (a cleared required text, an empty list) shows a
   // placeholder until it is complete, and the boundary keeps any other failure to this block.
-  const valid = BLOCK_SCHEMAS[type].shape.props.safeParse(block.props).success;
-  if (!valid) return <IncompleteBlock />;
+  // A text too long or with a refused character still renders (its field and the save say what to fix); what the
+  // components cannot render (a missing text, an empty list, a wrong type) waits for its fields.
+  const parsed = BLOCK_SCHEMAS[type].shape.props.safeParse(block.props);
+  const renderable =
+    parsed.success ||
+    parsed.error.issues.every((issue) => issue.code === 'too_big' || issue.code === 'invalid_format');
+  if (!renderable) return <IncompleteBlock />;
   return (
-    <BlockBoundary key={JSON.stringify(block.props)}>
+    <BlockBoundary resetKey={props}>
       <BlockRenderer block={block} ctx={ctx} index={Math.max(index, 0)} tone={tone} />
     </BlockBoundary>
   );
@@ -114,11 +119,19 @@ function IncompleteBlock() {
   );
 }
 
-class BlockBoundary extends React.Component<{ readonly children: React.ReactNode }, { failed: boolean }> {
+/** Keeps a block's render failure to the block; the next edit of its props tries again (no remount per keystroke). */
+class BlockBoundary extends React.Component<
+  { readonly resetKey: unknown; readonly children: React.ReactNode },
+  { failed: boolean }
+> {
   override state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+
+  override componentDidUpdate(previous: { readonly resetKey: unknown }) {
+    if (this.state.failed && previous.resetKey !== this.props.resetKey) this.setState({ failed: false });
   }
 
   override render() {

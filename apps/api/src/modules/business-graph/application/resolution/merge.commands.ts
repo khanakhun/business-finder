@@ -109,6 +109,8 @@ export class MergeBusinessesCommand {
       const { mergedIntoId } = business.snapshot();
       if (mergedIntoId) throw new BusinessMergedError(id, mergedIntoId);
     }
+    // Every workspace link involved, locked once in order (one pair at a time would break the order, BF-031).
+    await this.merges.lockOrgLinks(ids);
     let sourcesMoved = 0;
     for (const mergedId of request.mergedIds) {
       sourcesMoved += await this.merges.moveSources(mergedId, request.survivorId);

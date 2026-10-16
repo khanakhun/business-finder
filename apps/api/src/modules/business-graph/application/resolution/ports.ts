@@ -79,6 +79,11 @@ export interface MergeRepository {
   /** Moves contacts the survivor lacks, drops the rest; moves media and reviews; clears categories and hours. */
   moveSideData(fromId: string, toId: string): Promise<void>;
   /**
+   * Locks the workspace links of these businesses at once, in (business, workspace) order: other writers of those
+   * rows (scoring batches) take them in the same order, so a merge of several businesses never deadlocks with them.
+   */
+  lockOrgLinks(businessIds: readonly string[]): Promise<void>;
+  /**
    * Folds workspace links of `fromId` into `toId`: most advanced pipeline status (with its reasons), do-not-contact
    * kept with its reason, tags united, owner kept. Returns the workspaces whose survivor became do-not-contact.
    */

@@ -139,12 +139,15 @@ describe('ScoringService', () => {
     expect(await upgraded.service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1 });
     // A rollback to v1 is written over the stored v2.
     const rolledBack = setup(
-      new Map([[BUSINESS, [stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 2 })]]]),
+      new Map([
+        [BUSINESS, [stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 2, computedAt: later })]],
+      ]),
     );
     (rolledBack.repository.activeProfiles as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
       active('new_website'),
     ]);
     expect(await rolledBack.service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1 });
+    expect(rolledBack.writes[0]?.[0]?.profileVersion).toBe(1);
   });
 
   it('never writes over a newer feature set or a later computation of the same version', async () => {
@@ -164,6 +167,16 @@ describe('ScoringService', () => {
       unchanged: 2,
     });
     expect(writes).toEqual([]);
+  });
+
+  it('drops writes for a profile no longer active, and takes the facts at the database time', async () => {
+    const { service, repository, assembler, writes } = setup();
+    (repository.activeVersions as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      new Map([[BUILTIN_PROFILE_IDS.local_seo, 1]]),
+    );
+    expect(await service.compute(ORG, [BUSINESS])).toMatchObject({ written: 1 });
+    expect(writes[0]?.map((write) => write.profileId)).toEqual([BUILTIN_PROFILE_IDS.local_seo]);
+    expect(assembler.assemble).toHaveBeenCalledWith(ORG, [BUSINESS], NOW);
   });
 
   it('writes nothing for a business no longer tracked (not locked)', async () => {

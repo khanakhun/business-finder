@@ -442,6 +442,7 @@ describe('merge commands', () => {
       ),
       moveSources: vi.fn(async () => 1),
       moveSideData: vi.fn(async () => undefined),
+      lockOrgLinks: vi.fn(async () => undefined),
       mergeOrgLinks: vi.fn(async () => []),
       repointDuplicates: vi.fn(async () => undefined),
       listSources: vi.fn(async () => options.sources ?? []),
@@ -485,6 +486,15 @@ describe('merge commands', () => {
       expect.any(Array),
       expect.objectContaining({ create: false }),
     );
+  });
+
+  it('locks every workspace link involved once, before merging several businesses (no deadlock)', async () => {
+    const h = mergeHarness({ businesses: [live(1), live(2), live(3)], sources: [] });
+    await h.merge.execute(auth, { survivorId: id(1) as never, mergedIds: [id(3) as never, id(2) as never] });
+    expect(h.merges.lockOrgLinks).toHaveBeenCalledExactlyOnceWith([id(1), id(3), id(2)]);
+    const lockedAt = (h.merges.lockOrgLinks as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0] ?? 0;
+    const firstMerge = (h.merges.mergeOrgLinks as ReturnType<typeof vi.fn>).mock.invocationCallOrder[0] ?? 0;
+    expect(lockedAt).toBeLessThan(firstMerge);
   });
 
   it('refuses to merge or split records other workspaces track, unless an operator does it', async () => {

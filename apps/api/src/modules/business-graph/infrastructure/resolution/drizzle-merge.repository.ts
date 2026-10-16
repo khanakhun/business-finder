@@ -88,6 +88,17 @@ export class DrizzleMergeRepository implements MergeRepository {
     await executor.delete(businessHours).where(eq(businessHours.businessId, fromId));
   }
 
+  async lockOrgLinks(businessIds: readonly string[]): Promise<void> {
+    if (businessIds.length === 0) return;
+    await getExecutor(this.db).execute(sql`
+      SELECT 1 FROM org_businesses
+      WHERE business_id = ANY(ARRAY[${sql.join(
+        businessIds.map((id) => sql`${id}`),
+        sql`, `,
+      )}]::uuid[])
+      ORDER BY business_id, organization_id FOR UPDATE`);
+  }
+
   async mergeOrgLinks(
     fromId: string,
     toId: string,
@@ -104,10 +115,8 @@ export class DrizzleMergeRepository implements MergeRepository {
     // (with its reason), every tag and the survivor's owner (else the merged one's). Counters are refreshed by the
     // CRM when it re-points notes and tasks (BF-024).
     const further = sql`${rank('f.pipeline_status')} > ${rank('s.pipeline_status')}`;
-    // Both businesses' workspace rows in id order first: other writers (scoring batches) lock them the same way.
-    await executor.execute(sql`
-      SELECT 1 FROM org_businesses WHERE business_id IN (${fromId}, ${toId})
-      ORDER BY business_id, organization_id FOR UPDATE`);
+    // Both businesses' workspace rows in id order (already ours when the command locked them all first).
+    await this.lockOrgLinks([fromId, toId]);
     const suppressed = await executor.execute<{
       organization_id: string;
       reason: string | null;

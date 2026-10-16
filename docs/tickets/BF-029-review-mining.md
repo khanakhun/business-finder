@@ -96,9 +96,11 @@ A licensing-gated review mining step that turns available review text into aggre
   memoize their definitions per mode (imported by `reviews`).
 - **Concurrency**: merges lock `(workspace, business)` (advisory, transaction-scoped) and hold the source's lock
   shared while re-checking the gate; forgetting a source holds it exclusively.
-- **Rating trend**: `business_rating_observations` (global, with expiry): a source's own rating summary and the golden
-  record's (30 days, as its provenance is usually Google); trend from one source's series spanning ≥ 14 days,
-  ±0.1★; only sources the workspace currently uses count.
+- **Rating trend**: `business_rating_observations` (with expiry): a review source's rating summary belongs to the
+  workspace that fetched it (migration 0022), the golden record's is shared (30 days, as its provenance is usually
+  Google); trend from one source's series spanning ≥ 14 days, ±0.1★; only sources the workspace currently uses count.
+- **Scraper jobs** hold review text and names on the scraper's disk: every job is tracked (Valkey sorted set) until the
+  scraper confirms its deletion, and a nightly sweep deletes stragglers (cancelled runs, deferral caps, outages).
 - **Decisions**: insights per `(organization_id, business_id)` (the ticket lists `business_id` only: gates and pasted
   reviews are per workspace); a new paste replaces the previous one; `estimateCost` is an upper bound including the
   paid Google call; owner reply rate is "at least" (source flag, else the review mentions a reply).

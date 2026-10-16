@@ -293,6 +293,58 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/geo/areas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Typeahead over areas (names and aliases) */
+        get: operations["searchGeoAreas"];
+        put?: never;
+        /** Save a custom area drawn on the map (visible to this workspace only) */
+        post: operations["createGeoArea"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/geo/areas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An area as a GeoJSON Feature */
+        get: operations["getGeoArea"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/geo/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve free text ("St Barth", "Gustavia", "1012", "within 3 km of Lorient") into candidate areas */
+        get: operations["resolveLocation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/identity/config": {
         parameters: {
             query?: never;
@@ -731,6 +783,31 @@ export type components = {
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
         };
+        AreaCandidate: {
+            /** @description Set when the candidate is a stored area. */
+            areaId: string | null;
+            bbox: {
+                east: number;
+                north: number;
+                south: number;
+                west: number;
+            };
+            confidence: number;
+            geometry: components["schemas"]["AreaGeometry"];
+            /** @enum {string} */
+            kind: "country" | "admin1" | "admin2" | "locality" | "district" | "postal_code" | "island" | "custom";
+            label: string;
+            /** @enum {string} */
+            source: "pattern" | "local" | "geocoder";
+        };
+        AreaGeometry: {
+            coordinates: [
+                number,
+                number
+            ][][][];
+            /** @constant */
+            type: "MultiPolygon";
+        } | components["schemas"]["CircleGeometry"];
         AuditLogEntry: {
             action: string;
             actorId: string | null;
@@ -917,6 +994,12 @@ export type components = {
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
         };
+        CircleGeometry: {
+            center: components["schemas"]["LatLng"];
+            radiusM: number;
+            /** @constant */
+            type: "Circle";
+        };
         Contact: {
             confidence: number;
             /** Format: date-time */
@@ -950,6 +1033,24 @@ export type components = {
             name: string;
             /** @description What the key may do; must be a subset of the creator's own permissions. */
             permissions: ("business:read" | "business:write" | "discovery:run" | "sites:read" | "sites:generate" | "sites:publish" | "sites:admin" | "leads:read" | "leads:manage" | "leads:export" | "outreach:send" | "outreach:auto_send" | "templates:manage" | "analytics:read" | "analytics:export" | "settings:manage" | "scoring:manage" | "compliance:manage" | "members:manage" | "billing:manage")[];
+        };
+        CreateCustomAreaRequest: {
+            geometry: {
+                coordinates: [
+                    number,
+                    number
+                ][][];
+                /** @constant */
+                type: "Polygon";
+            } | {
+                coordinates: [
+                    number,
+                    number
+                ][][][];
+                /** @constant */
+                type: "MultiPolygon";
+            };
+            name: string;
         };
         CreatedApiKey: {
             /** Format: date-time */
@@ -990,6 +1091,74 @@ export type components = {
             /** @description The workspace's own choice, or the default when it never chose. */
             workspaceValue: boolean;
         };
+        GeoAreaFeature: {
+            geometry: {
+                coordinates: [
+                    number,
+                    number
+                ][][][];
+                /** @constant */
+                type: "MultiPolygon";
+            };
+            /** Format: uuid */
+            id: string;
+            properties: {
+                /** @description Boundary derived from points (e.g. Voronoi cells), not surveyed. */
+                approximate: boolean;
+                areaKm2: number | null;
+                bbox: {
+                    east: number;
+                    north: number;
+                    south: number;
+                    west: number;
+                } | null;
+                centroid: components["schemas"]["LatLng"] | null;
+                code: string | null;
+                countryCode: string | null;
+                /** @enum {string} */
+                kind: "country" | "admin1" | "admin2" | "locality" | "district" | "postal_code" | "island" | "custom";
+                /** @description Name in the requested locale, with its parent for context ("Gustavia, BL"). */
+                label: string;
+                name: components["schemas"]["GeoAreaName"];
+                parentId: string | null;
+                /** @enum {string} */
+                source: "osm" | "overture" | "census" | "pdok" | "custom" | "nominatim" | "google";
+            };
+            /** @constant */
+            type: "Feature";
+        };
+        GeoAreaList: {
+            items: components["schemas"]["GeoAreaSummary"][];
+        };
+        GeoAreaName: {
+            en: string;
+            fr: string;
+            local?: string;
+        };
+        GeoAreaSummary: {
+            /** @description Boundary derived from points (e.g. Voronoi cells), not surveyed. */
+            approximate: boolean;
+            areaKm2: number | null;
+            bbox: {
+                east: number;
+                north: number;
+                south: number;
+                west: number;
+            } | null;
+            centroid: components["schemas"]["LatLng"] | null;
+            code: string | null;
+            countryCode: string | null;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "country" | "admin1" | "admin2" | "locality" | "district" | "postal_code" | "island" | "custom";
+            /** @description Name in the requested locale, with its parent for context ("Gustavia, BL"). */
+            label: string;
+            name: components["schemas"]["GeoAreaName"];
+            parentId: string | null;
+            /** @enum {string} */
+            source: "osm" | "overture" | "census" | "pdok" | "custom" | "nominatim" | "google";
+        };
         IdentityConfig: {
             googleEnabled: boolean;
             minPasswordLength: number;
@@ -1024,6 +1193,14 @@ export type components = {
         LatLng: {
             lat: number;
             lng: number;
+        };
+        LocationResolution: {
+            candidates: components["schemas"]["AreaCandidate"][];
+            /** @description Index of the confident pick, null when ambiguous or none. */
+            chosen: number | null;
+            /** @description Set when the external geocoder could not be asked, so candidates may be incomplete. */
+            notice: ("geocoder_unavailable" | "geocoder_quota") | null;
+            query: string;
         };
         MatchScore: {
             features: {
@@ -1151,6 +1328,8 @@ export type components = {
         };
         OrgSettings: {
             agencyName: string | null;
+            /** @description Country hint for resolving places typed without one (BL for a Saint-Barth agency). */
+            defaultCountryCode: string | null;
             features: {
                 [key: string]: components["schemas"]["FeatureFlagState"];
             };
@@ -1366,6 +1545,7 @@ export type components = {
         };
         UpdateOrgSettingsRequest: {
             agencyName?: string | null;
+            defaultCountryCode?: string | null;
             features?: components["schemas"]["FeatureFlags"];
             legalName?: string | null;
             locales?: ("fr" | "en")[];
@@ -2751,6 +2931,275 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    searchGeoAreas: {
+        parameters: {
+            query?: {
+                country?: string;
+                kind?: "country" | "admin1" | "admin2" | "locality" | "district" | "postal_code" | "island" | "custom";
+                limit?: number;
+                locale?: "fr" | "en";
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoAreaList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createGeoArea: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCustomAreaRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoAreaSummary"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGeoArea: {
+        parameters: {
+            query?: {
+                locale?: "fr" | "en";
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeoAreaFeature"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    resolveLocation: {
+        parameters: {
+            query: {
+                country?: string;
+                locale?: "fr" | "en";
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocationResolution"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

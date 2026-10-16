@@ -8,5 +8,6 @@ export {
 export { FeatureFlagService } from './application/feature-flags.service.ts';
 export { type ResolvedSecret, SecretResolver } from './application/secret-resolver.ts';
 export { SecretsVault } from './application/secrets-vault.ts';
+export { WorkspaceDefaults } from './application/workspace-defaults.ts';
 export { WorkspaceReadiness } from './application/workspace-readiness.ts';
 export { Audited } from './interface/http/audited.interceptor.ts';

@@ -67,11 +67,45 @@ A `LocationResolver` that turns free text into one or more candidate areas (poly
 - Integration: BL pack import idempotent; resolve queries against imported data; Nominatim adapter with MSW fixtures and rate limiting; cache hits.
 
 ## Acceptance criteria
-- [ ] `geo_areas` populated by the BL pack (island + localities, approximate flags where needed); NL/US packs importable on demand.
-- [ ] `LocationResolver` returns candidates with confidence for all example inputs (tests).
-- [ ] Nominatim adapter rate-limited and cached; Google adapter optional via secret.
-- [ ] Tiling utilities (bbox, circles, quadtree) tested.
-- [ ] Geo APIs available with permissions.
+- [x] `geo_areas` populated by the BL pack (island + localities, approximate flags where needed); NL/US packs importable on demand.
+- [x] `LocationResolver` returns candidates with confidence for all example inputs (tests).
+- [x] Nominatim adapter rate-limited and cached; Google adapter optional via secret.
+- [x] Tiling utilities (bbox, circles, quadtree) tested.
+- [x] Geo APIs available with permissions.
+
+## Implementation notes (BF-017)
+- **Tables** (migration 0009): `geo_areas` as specified plus `normalized_names` (GIN, exact alias lookups),
+  `search_text` (trigram GIN), `organization_id` (custom areas only, enforced by a check), unique
+  `(source, source_ref)`; `geocode_cache` keyed by query, provider, country hint, **locale** and **scope** (workspace
+  id for per-key providers such as Google, so answers paid by one workspace are not served to another);
+  `org_settings.default_country_code`.
+- **Saint-Barthélemy pack** (`pnpm geo:import --pack bl`, idempotent — second run "0 written, 37 unchanged"): island
+  (OSM relation 7552779, islets excluded), 25 quarters from their OSM outlines (traced from the address base, flagged
+  `approximate`), Gustavia as the locality, and 11 hamlets as Voronoi cells within their containing quarter.
+  Aliases: St Barth/St Barts/SBH/Ouanalao/97133…, quarter spellings (Mont Jean → Montjean, Devet, Saline…). Extract
+  committed under `packages/db/seed/geo/bl` with its ODbL README (OSM API extract; Overpass was unavailable).
+- **National packs**: `nl-pc4` and `us-zcta` stream GeoJSONSeq exports (`--file`); ZCTAs filter by `--prefix` (they
+  carry no state). Sources, licences and `ogr2ogr` commands in `geo/application/packs/README.md`; attributions in
+  `docs/ATTRIBUTIONS.md`.
+- **Resolver**: patterns (NL postcode, US ZIP — bare digits only when the country hint allows it, so "97133" in a BL
+  workspace is the island —, EN/FR radius phrases, coordinates) → local lookup (exact names first, trigram second;
+  fuzzy matches capped below the auto-pick threshold; country hint ±, kind bonus) → geocoder. The workspace country
+  biases external answers; an explicit `country` restricts them. Answers stored from the geocoder never
+  short-circuit it.
+- **Geocoders**: Nominatim (1 req/s deployment-wide via a Valkey token, identifying User-Agent + contact,
+  `polygon_geojson`, 90-day cache; only administrative boundaries are stored as areas, validated and size-capped);
+  Google optional (vault key, cached per workspace for ≤ 30 days, failures never cached as "no results"). Empty
+  answers are cached for 6 h. Each workspace may trigger 20 uncached lookups per minute
+  (`GEOCODER_LOOKUPS_PER_MINUTE`); identical lookups in flight share one call. Any geocoder failure degrades to local
+  results with `notice: geocoder_unavailable | geocoder_quota`.
+- **Tiling** (Turf.js, pure): bbox cells clipped to the area, hex-packed circles (column spacing per row so tall
+  areas stay covered), quadtree `subdivide`; capped at 10,000 tiles, minimum 50 m, antimeridian-crossing areas
+  rejected (typed `TilingError`, 422).
+- **APIs**: `GET /v1/geo/resolve`, `GET /v1/geo/areas` (typeahead), `GET /v1/geo/areas/:id` (GeoJSON) —
+  `business:read`; `POST /v1/geo/areas` — `business:write`, ≤ 5,000 vertices / 20 rings, valid per PostGIS
+  (`ST_IsValid`), ≤ 50,000 km², ≤ 200 per workspace, idempotent on (workspace, name, outline), audited.
+- **Out of scope / follow-ups**: `mf` pack (optional), pruning areas dropped from a pack on re-import, EXPLAIN-based
+  performance test at national-pack scale, a fairer (queued) geocoder limiter.
 
 ## Agent prompt
 ```text

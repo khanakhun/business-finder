@@ -126,6 +126,10 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
+| `GEOCODER_PROVIDER` | App-specific | api, worker | no | `nominatim` |  | External geocoder used when an area is not in geo_areas (google uses the google_places secret). |
+| `NOMINATIM_BASE_URL` | App-specific | api, worker | no | `https://nominatim.openstreetmap.org` |  | Nominatim endpoint; point it at a self-hosted instance for volume. |
+| `GEOCODER_LOOKUPS_PER_MINUTE` | App-specific | api, worker | no | `20` |  | External geocoder lookups each workspace may trigger per minute (cache hits are free). |
+| `NOMINATIM_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address sent to Nominatim (User-Agent and `email` parameter), required by its policy. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

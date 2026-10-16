@@ -36,6 +36,15 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 30_000,
   },
+  /** External geocoders (BF-017): short, few retries — users wait for location resolution. */
+  geocoder: {
+    timeoutMs: 8_000,
+    maxRetries: 1,
+    initialDelayMs: 500,
+    maxDelayMs: 2_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,

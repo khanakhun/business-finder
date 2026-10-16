@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { BusinessGraphModule } from './modules/business-graph/index.ts';
+import { GeoModule } from './modules/geo/index.ts';
 import { IdentityModule } from './modules/identity/identity.module.ts';
 import { AiModule } from './modules/platform/ai/ai.module.ts';
 import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
@@ -40,6 +41,7 @@ export class AppModule {
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
         BusinessGraphModule.forRoot(mode),
+        GeoModule.forRoot(mode),
       ],
     };
   }

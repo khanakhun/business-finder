@@ -1,0 +1,3 @@
+{"type": "Feature", "properties": {"postcode": "1012"}, "geometry": {"type": "Polygon", "coordinates": [[[4.886, 52.368], [4.905, 52.368], [4.905, 52.38], [4.886, 52.38], [4.886, 52.368]]]}}
+{"type": "Feature", "properties": {"postcode": "1015"}, "geometry": {"type": "Polygon", "coordinates": [[[4.875, 52.372], [4.888, 52.372], [4.888, 52.385], [4.875, 52.385], [4.875, 52.372]]]}}
+{"type": "Feature", "properties": {"postcode": "bad"}, "geometry": {"type": "Polygon", "coordinates": [[[4.8, 52.3], [4.81, 52.3], [4.81, 52.31], [4.8, 52.31], [4.8, 52.3]]]}}

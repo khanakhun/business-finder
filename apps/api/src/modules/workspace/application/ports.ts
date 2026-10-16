@@ -20,6 +20,7 @@ export interface OrgSettingsRecord {
   readonly primaryLocale: Locale;
   readonly locales: readonly Locale[];
   readonly timezone: string;
+  readonly defaultCountryCode: string | null;
   readonly senderDefaults: SenderDefaults;
   readonly features: FeatureFlags;
   readonly updatedAt: Date | null;

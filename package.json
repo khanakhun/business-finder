@@ -44,7 +44,8 @@
     "api:openapi": "pnpm --filter @bf/api openapi",
     "api:codegen": "pnpm api:openapi && pnpm --filter @bf/api-client codegen",
     "gen:module": "node tools/generators/module/cli.mjs",
-    "gen:module:check": "node tools/generators/module/check.mjs"
+    "gen:module:check": "node tools/generators/module/check.mjs",
+    "geo:import": "pnpm --filter @bf/api geo:import"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

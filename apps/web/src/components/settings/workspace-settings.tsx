@@ -102,6 +102,9 @@ function SettingsForm({ settings }: { readonly settings: OrgSettings }) {
   const [locales, setLocales] = React.useState<Locale[]>(settings.locales);
   const [primaryLocale, setPrimaryLocale] = React.useState<Locale>(settings.primaryLocale);
   const [timezone, setTimezone] = React.useState(settings.timezone);
+  const [defaultCountry, setDefaultCountry] = React.useState<string | undefined>(
+    settings.defaultCountryCode ?? undefined,
+  );
   const [error, setError] = React.useState<string | null>(null);
   const countries = React.useMemo(() => countryOptions(locale), [locale]);
   const zones = React.useMemo(() => timeZoneOptions(), []);
@@ -133,6 +136,7 @@ function SettingsForm({ settings }: { readonly settings: OrgSettings }) {
       locales,
       primaryLocale: locales.includes(primaryLocale) ? primaryLocale : (locales[0] as Locale),
       timezone,
+      defaultCountryCode: defaultCountry ?? null,
     });
   };
 
@@ -260,6 +264,19 @@ function SettingsForm({ settings }: { readonly settings: OrgSettings }) {
                 searchPlaceholder={t('timezoneSearch')}
                 emptyText={t('noTimezone')}
               />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="default-country">{t('defaultCountry')}</Label>
+              <Combobox
+                id="default-country"
+                options={countries}
+                value={defaultCountry}
+                onChange={setDefaultCountry}
+                placeholder={t('defaultCountryPlaceholder')}
+                searchPlaceholder={t('countrySearch')}
+                emptyText={t('noCountry')}
+              />
+              <p className="text-sm text-muted-foreground">{t('defaultCountryHint')}</p>
             </div>
           </div>
         </div>

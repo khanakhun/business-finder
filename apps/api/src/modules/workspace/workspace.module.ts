@@ -25,6 +25,7 @@ import {
 } from './application/secrets.use-cases.ts';
 import { SecretsVault } from './application/secrets-vault.ts';
 import { GetSettingsQuery, LogoUseCases, UpdateSettingsCommand } from './application/settings.use-cases.ts';
+import { WorkspaceDefaults } from './application/workspace-defaults.ts';
 import { WorkspaceReadiness } from './application/workspace-readiness.ts';
 import { DrizzleAuditLogRepository } from './infrastructure/drizzle-audit-log.repository.ts';
 import { DrizzleOrgSettingsRepository } from './infrastructure/drizzle-org-settings.repository.ts';
@@ -44,6 +45,7 @@ const PUBLIC = [
   ConnectionTesterRegistry,
   FeatureFlagService,
   WorkspaceReadiness,
+  WorkspaceDefaults,
 ] as const;
 
 /**

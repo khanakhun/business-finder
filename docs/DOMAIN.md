@@ -19,7 +19,7 @@
 | **Match score** | Explainable 0–1 score that a source record describes a golden record (name, distance, phone, website, category, address; conflicts subtract). ≥ 0.85 merges, 0.60–0.85 creates a new record flagged as a **possible duplicate** for review. |
 | **Merge / split** | Manual tools: merge moves sources, contacts and workspace links into a survivor (the others become read-only); split moves sources to a new golden record. |
 | **Category / Taxonomy** | Our hierarchical category tree (EN/FR labels). Provider categories map onto it. |
-| **Area** | A geographic scope: polygon (island, town, postcode, ZIP) or point + radius. |
+| **Area** | A geographic scope: polygon (island, town, postcode, ZIP) or point + radius. Stored in `geo_areas` (imported packs, geocoder results, workspace-private custom areas); `approximate` marks derived outlines (e.g. Voronoi cells). Free text becomes areas through the **location resolver** (pattern → local lookup → external geocoder), biased by the workspace's default country. |
 | **Search intent** | Structured interpretation of a natural-language prompt: categories, area, filters, keywords, mode (`listings` or `discover`), sort. Always shown to the user as editable chips. |
 | **Discovery run** | A job that queries providers for an intent's categories over an area (tiled), ingests results and optionally triggers enrichment. Has budget and progress. |
 | **Listing** | The searchable view of businesses for a workspace (global facts + workspace state + scores). |

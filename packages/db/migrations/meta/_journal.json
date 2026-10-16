@@ -64,6 +64,13 @@
       "when": 1792051715290,
       "tag": "0008_possible_duplicates_status_index",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792066006253,
+      "tag": "0009_geo_areas",
+      "breakpoints": true
     }
   ]
 }

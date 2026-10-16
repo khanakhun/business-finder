@@ -367,7 +367,10 @@
     "noLogo": "Pas encore de logo.",
     "logoUpdated": "Logo mis à jour.",
     "logoRemoved": "Logo retiré.",
-    "logoTooLarge": "Cette image dépasse 512 Ko."
+    "logoTooLarge": "Cette image dépasse 512 Ko.",
+    "defaultCountry": "Pays par défaut",
+    "defaultCountryPlaceholder": "Choisir un pays",
+    "defaultCountryHint": "Sert à comprendre les lieux saisis sans pays, comme « Saint-Jean »."
   },
   "integrations": {
     "title": "Intégrations",

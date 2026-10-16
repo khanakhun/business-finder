@@ -6,26 +6,28 @@ export const SiteLocaleSchema = z.enum(SITE_LOCALES).describe('A site language (
 export type SiteLocale = z.infer<typeof SiteLocaleSchema>;
 
 /**
- * No control, invisible formatting, ignorable, private-use or unassigned characters (direction overrides, zero-width
- * spaces, variation selectors, the combining grapheme joiner) and only ASCII digits (the site languages write no other: look-alike
- * digits would hide a number from the facts check); line breaks allowed.
+ * Emoji written with their presentation selectors (`❤️`, `☎️`), joined sequences (`👩🏽‍🍳`) and keycaps (`1️⃣`): the
+ * selectors and joiners are invisible, so they are allowed only inside an emoji. Each alternative needs a selector or
+ * joiner, so a bare pictograph matches the plain character class only (no ambiguous, exponential backtracking).
  */
-const SAFE_TEXT = /^(?:[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9]|\n)*$/u;
-const SAFE_LINE = /^(?:[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9])*$/u;
+const PART = String.raw`\p{Extended_Pictographic}(?:[\uFE0E\uFE0F]|\p{Emoji_Modifier})?`;
+const EMOJI = String.raw`${PART}(?:\u200D${PART})+|\p{Extended_Pictographic}[\uFE0E\uFE0F]|[0-9#*]\uFE0F\u20E3`;
+/**
+ * No control, invisible formatting, ignorable, private-use or unassigned characters (direction overrides, zero-width
+ * spaces, stray variation selectors, the combining grapheme joiner) and only ASCII digits (the site languages write
+ * no other: look-alike digits would hide a number from the facts check); line breaks allowed.
+ */
+const CHAR = String.raw`[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9]`;
+const SAFE_TEXT = new RegExp(`^(?:${EMOJI}|${CHAR}|\n)*$`, 'u');
+const SAFE_LINE = new RegExp(`^(?:${EMOJI}|${CHAR})*$`, 'u');
+const UNSAFE_MESSAGE = 'No control or invisible characters, and digits 0-9 only';
 
 /** Text shown on the site (one language): trimmed, bounded, no hidden characters. */
-export const safeText = (max: number) =>
-  z.string().trim().min(1).max(max).regex(SAFE_TEXT, 'No control or invisible characters');
+export const safeText = (max: number) => z.string().trim().min(1).max(max).regex(SAFE_TEXT, UNSAFE_MESSAGE);
 
 /** A single-line text that is not localized (a name, an author), bounded, no hidden characters. */
 export const plainText = (max: number, description: string) =>
-  z
-    .string()
-    .trim()
-    .min(1)
-    .max(max)
-    .regex(SAFE_LINE, 'No control or invisible characters')
-    .describe(description);
+  z.string().trim().min(1).max(max).regex(SAFE_LINE, UNSAFE_MESSAGE).describe(description);
 
 /**
  * Text in the site's languages: `{ "fr": "…", "en": "…" }`. Every site locale must be present (the semantic validator

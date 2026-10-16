@@ -219,8 +219,31 @@ describe('validateSite', () => {
     'Depuis \u0967\u096F\u096F\u096E',
     'Visitez evil\uE000.com',
     'Visitez evil\u0378.com',
+    'Bonjour\u200Dtout le monde',
+    'Fait avec \u2764\u200D',
+    'Merci \uFE0F',
   ])('refuses hidden marks and look-alike digits in text: %j', (title) => {
     expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).toBeNull();
+  });
+
+  it.each([
+    'Fait avec \u2764\uFE0F',
+    '\u260E\uFE0F Appelez-nous',
+    'Ouvert 7j/7 \u2600\uFE0F',
+    '\u2714\uFE0F Sans rendez-vous',
+    '1\uFE0F\u20E3 Réservez',
+    '\u{1F469}\u{1F3FD}\u200D\u{1F373} Notre cheffe',
+    '\u{1F1EB}\u{1F1F7} En français',
+    'Le texte \u2764\uFE0E sobre',
+  ])('accepts emoji with their selectors and joiners: %j', (title) => {
+    expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).not.toBeNull();
+  });
+
+  it('checks long emoji runs in linear time', () => {
+    const title = `${'\u2764'.repeat(40)}\u200B`;
+    const started = performance.now();
+    expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).toBeNull();
+    expect(performance.now() - started).toBeLessThan(200);
   });
 
   it('warns about texts outside their recommended length', () => {
@@ -518,6 +541,11 @@ describe('validateSite', () => {
     'evil.рф',
     'evil.xn--p1ai',
     'Gustavia.Le port',
+    // Combining marks are dropped before the scan: they would otherwise split the address.
+    'Visitez evil.\u0301com',
+    'Visitez evil\u20DD.com',
+    'Visitez evil.c\u0327om',
+    'Visitez evil.\u0335com',
   ])(
     // The last one is meant: a missing space after a full stop reads as an address (the message says so).
     'finds the web address in %j',
@@ -540,14 +568,8 @@ describe('validateSite', () => {
   });
 
   it('validates a near-maximal hostile spec quickly (no quadratic pattern)', () => {
-    const fillers = [
-      'a'.repeat(4900),
-      'a.'.repeat(2450),
-      'a@'.repeat(2450),
-      'a1.'.repeat(1633),
-      'abc.'.repeat(1225),
-      'aé.'.repeat(1633),
-    ];
+    // The fillers an unbounded domain pattern is slowest on (seconds unbounded, milliseconds bounded).
+    const fillers = ['a1.'.repeat(1633), 'a-.'.repeat(1633), '1a.'.repeat(1633)];
     const spec = with_((s) => {
       for (let n = 0; n < 5; n += 1) {
         s.pages.push({

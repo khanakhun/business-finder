@@ -158,6 +158,9 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `OVERPASS_CONTACT_EMAIL` | App-specific | api, worker | no |  |  | Contact address in the Overpass User-Agent (usage policy: identify the application). |
 | `MAPS_SCRAPER_URL` | App-specific | api, worker | no |  |  | Self-hosted gosom/google-maps-scraper web API (only used with FEATURE_MAPS_SCRAPER). |
 | `MAPS_SCRAPER_MAX_TIME_SECONDS` | App-specific | api, worker | no | `300` |  | Time budget of one scraper job (the scraper needs at least 3 minutes). |
+| `GENERATION_FAKE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the scripted fake engine (development, tests and E2E only; refused in production). |
+| `GENERATION_MAX_SANDBOXES` | App-specific | api, worker | no | `4` |  | Sandboxed engine runs at once across the deployment (Claude Code, Codex, …). |
+| `GENERATION_FAKE_DURATION_MS` | App-specific | api, worker | no | `1500` |  | The fake engine's run time (tests set it short, load tests realistic). |
 | `ENRICHMENT_TTL_SITE_INTEL_DAYS` | App-specific | api, worker | no | `30` |  | Days a website crawl (site intel) result stays fresh. |
 | `ENRICHMENT_TTL_EMAIL_VERIFY_DAYS` | App-specific | api, worker | no | `60` |  | Days a e-mail verification result stays fresh. |
 | `ENRICHMENT_TTL_REVIEWS_DAYS` | App-specific | api, worker | no | `30` |  | Days a reviews analysis result stays fresh. |

@@ -228,3 +228,30 @@ Verify: pnpm verify && pnpm test:int; attach the load-test summary (overhead per
 ## References
 - ADR-0006 · ADR-0010 · docs/ARCHITECTURE.md §7, §8 F4, §11 · docs/DOMAIN.md §3.3
 - BullMQ docs (priorities, flows, rate limiting, delayed jobs): https://docs.bullmq.io/ · Valkey streams: https://valkey.io/topics/streams-intro/
+
+## Implementation notes
+
+- **Part 1 (PR 1/2)**:
+  - Contracts (`@bf/contracts/generation.ts`): engines, capabilities, `EngineEvent`, job/batch/attempt DTOs, settings,
+    API requests, `generation.job.status_changed`, a run job per engine queue (`generation-<engine>`), quality and
+    reaper jobs.
+  - Tables (`0031_generation`): `generation_batches` (settings snapshot, counts, derived status, idempotency key),
+    `generation_jobs` (priority, engine and its reason, failover chain, budget/cost, `dispatched_at`),
+    `generation_attempts` (heartbeat, spec ref, exit reason), `generation_events` (gapless `seq` per job),
+    `generation_artifacts` (artifacts bucket under `generation/`).
+  - Domain: the DOMAIN §3.3 transition table (a person may also retry `cancelled` and `needs_review` jobs), failover
+    (retryable vs fatal codes, attempts per engine, the chain), explainable `auto` selection (blocks for simple
+    sites, else the agent with the shortest estimated wait within budget), budgets, batch status and priorities.
+  - Concurrency: worker concurrency per engine queue; Valkey leases per workspace and engine and for the sandbox
+    pool (`GENERATION_MAX_SANDBOXES`), a job without a slot retried after a jittered delay without counting an
+    attempt; a batch's `maxParallel` enforced by a dispatcher that releases waiting jobs in priority order (so a
+    sequential batch is strictly ordered); live reprioritization with BullMQ `changePriority`.
+  - Runner (Template Method): leases → prepare (fixture preparer) → run with events flushed every 250 ms / 50 events
+    and streamed to `gen:job:<id>`, budget, wall time, heartbeat and cancellation → quality job, or the failover
+    policy with exponential backoff. Quality: schema-only pipeline → a version authored `generation_job` (the site
+    created if needed) and a preview when `autoPublishPreview`; a repair attempt (≤ 2) or `needs_review`. Reaper
+    every minute: attempts without a heartbeat for 2 minutes fail as `HEARTBEAT_LOST`; events older than 90 days go.
+  - API: create (idempotent), list, get batch, cancel batch; get, update (priority/engine while waiting), reorder,
+    cancel, retry jobs; list engines. Fake engine with `GENERATION_FAKE_ENGINE` (scripted failures for tests).
+- **Planned (part 2)**: the SSE event stream with replay, throttled realtime updates, notifications, metrics and
+  traces, `POST /v1/sites/:id/regenerate`, the load test.

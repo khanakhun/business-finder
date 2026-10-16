@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { jobIdFor, keys } from './keys.ts';
-import { QUEUE_NAMES, QUEUES } from './registry.ts';
+import { GENERATION_JOB_OPTIONS, QUEUE_NAMES, QUEUES } from './registry.ts';
 
 describe('keys', () => {
   it('derives BullMQ-safe job ids from idempotency keys', () => {
@@ -19,7 +19,10 @@ describe('queue registry', () => {
     for (const name of QUEUE_NAMES) {
       const queue = QUEUES[name];
       expect(queue.name).toMatch(/^[a-z][a-z0-9-]*$/);
-      expect(queue.defaultJobOptions.attempts).toBeGreaterThan(1);
+      // Generation runs are attempted once: the orchestrator retries and fails over (BF-039).
+      if (queue.defaultJobOptions === GENERATION_JOB_OPTIONS)
+        expect(queue.defaultJobOptions.attempts).toBe(1);
+      else expect(queue.defaultJobOptions.attempts).toBeGreaterThan(1);
       expect(queue.defaultJobOptions.removeOnComplete).toBeTruthy();
       expect(queue.concurrency).toBeGreaterThan(0);
     }

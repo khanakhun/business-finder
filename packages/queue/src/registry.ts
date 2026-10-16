@@ -8,6 +8,12 @@ export const DEFAULT_JOB_OPTIONS: DefaultJobOptions = {
   removeOnFail: { age: 7 * 24 * 3600 },
 };
 
+/**
+ * Generation runs are attempted once by BullMQ: retries and failover are the orchestrator's (they are new attempts,
+ * often on another engine), never BullMQ's.
+ */
+export const GENERATION_JOB_OPTIONS: DefaultJobOptions = { ...DEFAULT_JOB_OPTIONS, attempts: 1 };
+
 export interface QueueDefinition {
   readonly name: string;
   readonly defaultJobOptions: DefaultJobOptions;
@@ -83,6 +89,24 @@ export const QUEUES = {
   /** A site's images collected from the business's website and the wordmark (BF-038; downloads through intel). */
   sitesAssetCollect: { name: 'sites-asset-collect', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** AI image generation (one provider call per job, a few images). */
+  /** Site generation (BF-039): one queue per engine; worker concurrency is the engine's deployment-wide maximum. */
+  generationBlocks: { name: 'generation-blocks', defaultJobOptions: GENERATION_JOB_OPTIONS, concurrency: 4 },
+  generationClaudeAgentSdk: {
+    name: 'generation-claude-agent-sdk',
+    defaultJobOptions: GENERATION_JOB_OPTIONS,
+    concurrency: 2,
+  },
+  generationClaudeCode: {
+    name: 'generation-claude-code',
+    defaultJobOptions: GENERATION_JOB_OPTIONS,
+    concurrency: 2,
+  },
+  generationCodex: { name: 'generation-codex', defaultJobOptions: GENERATION_JOB_OPTIONS, concurrency: 2 },
+  generationFake: { name: 'generation-fake', defaultJobOptions: GENERATION_JOB_OPTIONS, concurrency: 4 },
+  /** The quality gates of a finished attempt, then the hand-off to the sites module. */
+  generationQuality: { name: 'generation-quality', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  /** Every minute: attempts whose worker died are failed and retried. */
+  generationReaper: { name: 'generation-reaper', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   sitesAssetGenerate: {
     name: 'sites-asset-generate',
     defaultJobOptions: DEFAULT_JOB_OPTIONS,

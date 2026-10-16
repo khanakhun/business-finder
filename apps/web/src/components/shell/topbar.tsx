@@ -16,6 +16,7 @@ import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { activeNavItem } from '@/lib/navigation.ts';
 import { useSession } from '@/lib/session.tsx';
+import { UnreadBadge, useBellLabel } from '../notifications/unread-badge.tsx';
 import { LazyMenu } from './lazy-menu.tsx';
 
 const menus = () => import('./topbar-menus.tsx');
@@ -29,6 +30,7 @@ export interface TopbarProps {
 
 export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: TopbarProps) {
   const t = useTranslations();
+  const bellLabel = useBellLabel();
   const locale = useLocale();
   const current = activeNavItem(usePathname());
   const workspaceName = useSession().activeOrganization?.name ?? t('workspace.none');
@@ -120,11 +122,12 @@ export function Topbar({ onOpenPalette, onOpenMobileNav, onPalettePrefetch }: To
           trigger={{
             variant: 'ghost',
             size: 'icon',
-            className: 'text-muted-foreground',
-            'aria-label': t('topbar.notifications'),
+            className: 'relative text-muted-foreground',
+            'aria-label': bellLabel,
           }}
         >
           <BellIcon aria-hidden />
+          <UnreadBadge />
         </LazyMenu>
         <LazyMenu
           load={() => menus().then((m) => m.AccountMenu)}

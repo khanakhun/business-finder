@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { EventId, newId, OrgId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import type { Clock } from './time.ts';
 import { IsoDateTimeSchema } from './time.ts';
 
+/** Who caused an event: a signed-in user, an organization API key, the system, or a job. */
 export const ActorSchema = z.object({
-  type: z.enum(['user', 'system', 'job']),
+  type: z.enum(['user', 'api_key', 'system', 'job']),
   id: z.string().nullable(),
 });
 export type Actor = z.infer<typeof ActorSchema>;
@@ -45,6 +47,9 @@ export interface EventDefinition<TType extends string, TPayload extends z.ZodTyp
     readonly clock: Clock;
   }): z.output<ReturnType<typeof domainEventEnvelope<TType, TPayload>>>;
 }
+
+/** The envelope type of a defined event, e.g. `DomainEvent<typeof MemberInvited>`. */
+export type DomainEvent<D extends EventDefinition<string, z.ZodType>> = z.output<D['schema']>;
 
 const eventRegistry = new Map<string, EventDefinition<string, z.ZodType>>();
 
@@ -91,3 +96,15 @@ export function getEventDefinition(
 export function registeredEvents(): ReadonlyArray<{ type: string; version: number }> {
   return [...eventRegistry.values()].map(({ type, version }) => ({ type, version }));
 }
+
+/**
+ * Outbox delivery: one job per event × subscriber (BF-012). The idempotency key is `<eventId>:<subscriberId>`, so
+ * a subscriber handles each event once even when the relay delivers it twice.
+ */
+export const EventDeliveryJob = defineJob('events', 'deliver', {
+  eventId: EventId,
+  subscriberId: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/)
+    .describe('Subscriber id, e.g. `workspace.audit-identity`.'),
+});

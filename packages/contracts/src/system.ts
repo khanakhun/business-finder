@@ -40,3 +40,19 @@ export type PingJobsAccepted = z.infer<typeof PingJobsAcceptedSchema>;
 export const SystemPingJob = defineJob('system', 'ping', {
   sequence: z.number().int().min(0).describe('Position within the request that enqueued it.'),
 });
+
+/** `POST /v1/events/{eventId}/replay`: deliver a recorded event to one subscriber again (owners; BF-012). */
+export const ReplayEventRequestSchema = z
+  .object({
+    subscriberId: z
+      .string()
+      .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/)
+      .describe('Subscriber id, e.g. `workspace.audit-identity`.'),
+  })
+  .meta({ id: 'ReplayEventRequest' });
+export type ReplayEventRequest = z.infer<typeof ReplayEventRequestSchema>;
+
+export const ReplayEventAcceptedSchema = z
+  .object({ jobId: z.string() })
+  .meta({ id: 'ReplayEventAccepted', description: 'The delivery job that will run the subscriber again.' });
+export type ReplayEventAccepted = z.infer<typeof ReplayEventAcceptedSchema>;

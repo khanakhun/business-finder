@@ -22,9 +22,11 @@ export {
 export {
   type Actor,
   ActorSchema,
+  type DomainEvent,
   defineEvent,
   domainEventEnvelope,
   type EventDefinition,
+  EventDeliveryJob,
   getEventDefinition,
   registeredEvents,
 } from './events.ts';
@@ -78,6 +80,18 @@ export {
   type TransferOwnershipRequest,
   TransferOwnershipRequestSchema,
 } from './identity.ts';
+export {
+  ApiKeyCreated,
+  ApiKeyRevoked,
+  IDENTITY_EVENTS,
+  InvitationResent,
+  InvitationRevoked,
+  MemberInvited,
+  MemberJoined,
+  MemberRemoved,
+  MemberRoleChanged,
+  UserSignedUp,
+} from './identity-events.ts';
 export { BusinessId, EventId, type Id, idSchema, isUuidV7, newId, OrgId, SiteId, UserId } from './ids.ts';
 export { type EchoRequest, EchoRequestSchema, type EchoResponse, EchoResponseSchema } from './intel.ts';
 export {
@@ -89,6 +103,28 @@ export {
   signInternalRequest,
 } from './internal-auth.ts';
 export { defineJob, getJobDefinition, type JobDefinition, JobPayloadBase } from './jobs.ts';
+export {
+  NOTIFICATION_CREATED,
+  NOTIFICATION_TYPE_NAMES,
+  NOTIFICATION_TYPES,
+  type Notification,
+  type NotificationPage,
+  NotificationPageSchema,
+  type NotificationPreference,
+  NotificationPreferenceSchema,
+  type NotificationPreferences,
+  NotificationPreferencesSchema,
+  type NotificationQuery,
+  NotificationQuerySchema,
+  NotificationSchema,
+  type NotificationType,
+  NotificationTypeSchema,
+  type TestNotificationAccepted,
+  TestNotificationAcceptedSchema,
+  TestNotificationRequested,
+  type UpdateNotificationPreferencesRequest,
+  UpdateNotificationPreferencesRequestSchema,
+} from './notifications.ts';
 export {
   type CursorData,
   type CursorOptions,
@@ -128,6 +164,10 @@ export {
   PingJobsAcceptedSchema,
   type PingJobsRequest,
   PingJobsRequestSchema,
+  type ReplayEventAccepted,
+  ReplayEventAcceptedSchema,
+  type ReplayEventRequest,
+  ReplayEventRequestSchema,
   type SystemInfo,
   SystemInfoSchema,
   SystemPingJob,

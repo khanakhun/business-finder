@@ -8,7 +8,13 @@ import { APP_ENV, type AppEnv } from '../../platform/config/app-env.ts';
 import { LOGGER } from '../../platform/logging/logger.ts';
 import type { SystemMailer } from '../application/ports.ts';
 import { MESSAGES } from './emails/messages.ts';
-import { Invitation, ResetPassword, TwoFactorEnabled, VerifyEmail } from './emails/templates.tsx';
+import {
+  Invitation,
+  NotificationEmail,
+  ResetPassword,
+  TwoFactorEnabled,
+  VerifyEmail,
+} from './emails/templates.tsx';
 
 /** Renders an email to HTML and plain text. Exported for tests and the template preview. */
 export async function renderEmail(element: React.ReactElement): Promise<{ html: string; text: string }> {
@@ -74,5 +80,9 @@ export class SmtpSystemMailer implements SystemMailer, OnModuleDestroy {
       MESSAGES[locale].twoFactor.subject,
       TwoFactorEnabled({ locale, name }),
     );
+  }
+
+  sendNotification({ to, locale, title, body, url }: Parameters<SystemMailer['sendNotification']>[0]) {
+    return this.send('notification', to, title, NotificationEmail({ locale, title, body, url }));
   }
 }

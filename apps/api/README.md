@@ -101,6 +101,19 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 - `FAKE_CONNECTION_TESTS=true` (development/E2E only, refused in production) registers testers that pass without
   calling providers.
 
+## Domain events and the outbox (BF-012)
+
+- Define events in `@bf/contracts` (`defineEvent('<context>.<entity>_<past_tense>', version, payloadSchema)`), record
+  them inside the use case's transaction with `EventRecorder.record(Definition, { payload })` (org, actor,
+  correlation and causation come from the request or the event being handled).
+- Subscribe with `@OnDomainEvent([Definition], { id: '<context>.<name>' })` on an injectable's method. The id is
+  stable: it keys idempotency (`<eventId>:<id>`). Handlers must be idempotent (e.g. insert with the event id).
+- The worker's `OutboxRelay` (LISTEN `bf_outbox` + 2 s polling, `FOR UPDATE SKIP LOCKED`) enqueues one `events`
+  job per event × subscriber; `EventDeliveryProcessor` runs it with retries; `OutboxReconciler` re-dispatches
+  stuck events. Metrics: `bf_outbox_dispatch_lag_seconds`, `bf_outbox_events_dispatched_total`,
+  `bf_outbox_pending_events`, `bf_events_handled_total`.
+- Owners can re-deliver an event to a subscriber: `POST /v1/events/{eventId}/replay`.
+
 ## Adding things
 
 **A module.** `pnpm gen:module lead-capture` writes contracts, all four layers, a Drizzle repository stub, a

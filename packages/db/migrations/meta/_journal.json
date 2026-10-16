@@ -22,6 +22,20 @@
       "when": 1792031273021,
       "tag": "0002_workspace",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792033817706,
+      "tag": "0003_outbox",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792035083574,
+      "tag": "0004_notifications",
+      "breakpoints": true
     }
   ]
 }

@@ -227,7 +227,8 @@
     "workspace": "Espace de travail",
     "integrations": "Intégrations",
     "features": "Fonctionnalités",
-    "audit": "Journal d'audit"
+    "audit": "Journal d'audit",
+    "notifications": "Notifications"
   },
   "account": {
     "title": "Compte",
@@ -472,6 +473,66 @@
       "identity_member_removed": "Membre retiré",
       "identity_api_key_created": "Clé API créée",
       "identity_api_key_revoked": "Clé API révoquée"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Ce qui s'est passé dans cet espace et demande votre attention.",
+    "empty": "Aucune notification pour le moment.",
+    "emptyUnread": "Vous êtes à jour.",
+    "markAllRead": "Tout marquer comme lu",
+    "markRead": "Marquer comme lu",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "seeAll": "Voir toutes les notifications",
+    "loadMore": "Afficher plus",
+    "unreadLabel": "Notifications ({count} non lues)",
+    "types": {
+      "reply_received": {
+        "title": "Nouvelle réponse de {business}",
+        "body": "Un prospect a répondu à votre e-mail."
+      },
+      "lead_captured": {
+        "title": "Nouveau contact sur {site}",
+        "body": "Quelqu’un a laissé ses coordonnées sur un site d’aperçu."
+      },
+      "batch_completed": {
+        "title": "Génération de sites terminée",
+        "body": "{count} sites d’aperçu sont prêts."
+      },
+      "discovery_completed": {
+        "title": "Découverte terminée",
+        "body": "{count} entreprises trouvées."
+      },
+      "mailbox_paused": {
+        "title": "Boîte d’envoi en pause : {mailbox}",
+        "body": "Les envois sont suspendus pour protéger la délivrabilité."
+      },
+      "member_joined": {
+        "title": "{name} a rejoint l’espace de travail",
+        "body": "Cette personne a accepté son invitation."
+      },
+      "system_test": {
+        "title": "Notification de test",
+        "body": "Les notifications fonctionnent."
+      }
+    },
+    "preferences": {
+      "title": "Notifications",
+      "description": "Choisissez comment être prévenu de chaque type d'événement dans cet espace.",
+      "type": "Événement",
+      "inApp": "Dans l'application",
+      "email": "Par e-mail",
+      "saved": "Préférences enregistrées.",
+      "types": {
+        "reply_received": "Réponses des prospects",
+        "lead_captured": "Contacts sur les sites d’aperçu",
+        "batch_completed": "Génération de sites terminée",
+        "discovery_completed": "Découverte terminée",
+        "mailbox_paused": "Boîte d’envoi en pause",
+        "member_joined": "Nouveaux membres",
+        "system_test": "Notifications de test"
+      }
     }
   }
 }

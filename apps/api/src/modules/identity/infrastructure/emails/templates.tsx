@@ -120,3 +120,26 @@ export function TwoFactorEnabled({ locale, name }: { locale: Locale; name: strin
     </Layout>
   );
 }
+
+/** Generic notification email (BF-012): the notification's title and body, a link, and how to opt out. */
+export function NotificationEmail({
+  locale,
+  title,
+  body,
+  url,
+}: {
+  locale: Locale;
+  title: string;
+  body: string | null;
+  url: string | null;
+}) {
+  const t = MESSAGES[locale].notification;
+  return (
+    <Layout locale={locale} preview={title}>
+      <Heading as="h1">{title}</Heading>
+      {body ? <Text>{body}</Text> : null}
+      {url ? <Cta href={url} label={t.open} /> : null}
+      <Text style={{ color: muted, fontSize: '12px' }}>{t.manage}</Text>
+    </Layout>
+  );
+}

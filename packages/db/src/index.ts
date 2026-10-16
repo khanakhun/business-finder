@@ -3,11 +3,13 @@ export { id, orgId, timestamps } from './columns.ts';
 export { MIGRATIONS_DIR, runMigrations } from './migrate.ts';
 export { runSeeds, type SeedEnvironment, type SeedModule } from './seed/runner.ts';
 export {
+  afterCommit,
   type DbExecutor,
   type DbTransaction,
   getExecutor,
   isInTransaction,
   NestedIsolationLevelError,
+  onAfterCommitError,
   runInTransaction,
   type TransactionOptions,
 } from './tx.ts';

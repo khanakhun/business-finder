@@ -74,3 +74,30 @@ describe('defineEvent', () => {
     expect(() => defineEvent(type, version, z.object({}))).toThrow();
   });
 });
+
+describe('identity events and delivery jobs (BF-012)', () => {
+  it('registers every identity event once, with id-only payloads', async () => {
+    const { IDENTITY_EVENTS, MemberInvited } = await import('./identity-events.ts');
+    expect(IDENTITY_EVENTS.map((e) => e.type)).toContain('identity.member_invited');
+    const event = MemberInvited.create({
+      payload: { invitationId: '01990000-0000-7000-8000-000000000001', role: 'member' },
+      orgId: '01990000-0000-7000-8000-000000000002',
+      actor: { type: 'api_key', id: 'key-1' },
+      correlationId: 'req-1',
+      clock: { now: () => new Date('2026-10-15T00:00:00Z') },
+    });
+    expect(event).toMatchObject({ type: 'identity.member_invited', version: 1, causationId: null });
+    expect(() =>
+      MemberInvited.schema.parse({ ...event, payload: { invitationId: 'x', role: 'member' } }),
+    ).toThrow();
+  });
+
+  it('keys delivery jobs by subscriber id', async () => {
+    const { EventDeliveryJob } = await import('./events.ts');
+    const base = { idempotencyKey: 'e:s', orgId: null, eventId: '01990000-0000-7000-8000-000000000003' };
+    expect(
+      EventDeliveryJob.schema.safeParse({ ...base, subscriberId: 'workspace.audit-identity' }).success,
+    ).toBe(true);
+    expect(EventDeliveryJob.schema.safeParse({ ...base, subscriberId: 'NoDots' }).success).toBe(false);
+  });
+});

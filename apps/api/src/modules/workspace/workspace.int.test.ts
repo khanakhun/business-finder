@@ -3,9 +3,11 @@ import { LOGO_MAX_BYTES } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
 import { auditLogs, secrets } from '@bf/db/schema';
 import { createLogger } from '@bf/observability';
+import type { INestApplicationContext } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
+import { Redis } from 'ioredis';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createTestApp, type TestApp } from '../../../test/create-test-app.ts';
+import { createTestApp, createTestWorker, type TestApp } from '../../../test/create-test-app.ts';
 import { FakeMailer } from '../../../test/fake-mailer.ts';
 import {
   type Browser,
@@ -29,6 +31,8 @@ const PNG = Buffer.concat([
 
 let t: TestApp;
 let db: DbClient;
+// Identity events reach the audit log through the outbox, delivered by a worker (BF-012).
+let worker: INestApplicationContext;
 const mailer = new FakeMailer();
 const storage = new InMemoryObjectStorage();
 // Every log line at trace level, to prove secret values never reach the logs.
@@ -58,6 +62,8 @@ beforeAll(async () => {
     env: { FAKE_CONNECTION_TESTS: 'true', UNSPLASH_ACCESS_KEY: 'global-unsplash-access-key' },
   });
   db = t.app.get(DB_CLIENT);
+  await new Redis(t.env.VALKEY_URL).flushdb();
+  worker = await createTestWorker(t);
   owner = await signUpVerified(t, mailer, 'owner@ws.test', 'Olive Owner');
   orgId = await createWorkspace(owner, 'Agence SBH');
   viewer = (await inviteAndJoin(t, mailer, owner, 'viewer@ws.test', 'viewer')).client;
@@ -67,6 +73,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await worker?.close();
   await t?.close();
 });
 
@@ -215,6 +222,11 @@ describe('secrets', () => {
 
 describe('audit log', () => {
   it('records settings, secrets and member actions with the request context, no secret values', async () => {
+    const actionsNow = async () =>
+      ((await owner.get('/v1/audit-logs?limit=200').expect(200)).body.items as Array<{ action: string }>).map(
+        (i) => i.action,
+      );
+    await expect.poll(actionsNow, { timeout: 10_000 }).toContain('identity.api_key_created');
     const page = await owner.get('/v1/audit-logs?limit=200').expect(200);
     const actions = (page.body.items as Array<{ action: string }>).map((i) => i.action);
     expect(actions).toEqual(

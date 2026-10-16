@@ -10,3 +10,4 @@ for (const file of ['../../../.env', '../../../.env.generated']) {
 export const env: Record<string, string | undefined> = { ...fileEnv, ...process.env };
 export const webUrl = `http://localhost:${env.WEB_PORT ?? '3000'}`;
 export const apiUrl = `http://localhost:${env.API_PORT ?? '4000'}`;
+export const workerMetricsUrl = `http://localhost:${env.WORKER_METRICS_PORT ?? '9464'}/metrics`;

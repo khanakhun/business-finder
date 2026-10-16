@@ -106,8 +106,19 @@ export interface ApiKeyIssuer {
 }
 export const API_KEY_ISSUER = Symbol('ApiKeyIssuer');
 
-/** Port: system emails (verification, reset, invitation, 2FA notice). */
-export type SystemMailer = AuthMailer;
+/** A notification email (BF-012): already translated; `url` is absolute. */
+export interface NotificationEmail {
+  readonly to: string;
+  readonly locale: Locale;
+  readonly title: string;
+  readonly body: string | null;
+  readonly url: string | null;
+}
+
+/** Port: system emails (verification, reset, invitation, 2FA notice, notifications). */
+export type SystemMailer = AuthMailer & {
+  sendNotification(input: NotificationEmail): Promise<void>;
+};
 export const SYSTEM_MAILER = Symbol('SystemMailer');
 
 export type IdentityEvent =
@@ -116,6 +127,13 @@ export type IdentityEvent =
       readonly type: 'identity.member_invited';
       readonly organizationId: string;
       readonly invitationId: string;
+      readonly role: Role;
+    }
+  | {
+      readonly type: 'identity.member_joined';
+      readonly organizationId: string;
+      readonly memberId: string;
+      readonly userId: string;
       readonly role: Role;
     }
   | {
@@ -139,10 +157,7 @@ export type IdentityEvent =
   | { readonly type: 'identity.api_key_created'; readonly organizationId: string; readonly apiKeyId: string }
   | { readonly type: 'identity.api_key_revoked'; readonly organizationId: string; readonly apiKeyId: string };
 
-/**
- * Port: domain events. Recorded in the audit log (BF-011). TODO(BF-012): also publish through the transactional
- * outbox; until then they are logged.
- */
+/** Port: identity domain events, recorded in the transactional outbox (BF-012) and audited by a subscriber. */
 export interface IdentityEvents {
   publish(event: IdentityEvent, actor: { readonly userId: string | null }): Promise<void>;
 }

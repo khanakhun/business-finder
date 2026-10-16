@@ -14,6 +14,7 @@ import {
   ResendInvitationCommand,
   RevokeInvitationCommand,
 } from './application/invitations.commands.ts';
+import { MemberDirectory } from './application/member-directory.ts';
 import { ListMembersQuery } from './application/members.query.ts';
 import {
   ChangeMemberRoleCommand,
@@ -28,12 +29,12 @@ import {
   MEMBERSHIP_REPOSITORY,
   SYSTEM_MAILER,
 } from './application/ports.ts';
-import { AuditingIdentityEvents } from './infrastructure/auditing-identity-events.ts';
 import { BETTER_AUTH, betterAuthProvider } from './infrastructure/better-auth.provider.ts';
 import { BetterAuthApiKeyIssuer } from './infrastructure/better-auth-api-key-issuer.ts';
 import { BetterAuthResolver } from './infrastructure/better-auth-resolver.ts';
 import { DrizzleApiKeyRepository } from './infrastructure/drizzle-api-key.repository.ts';
 import { DrizzleMembershipRepository } from './infrastructure/drizzle-membership.repository.ts';
+import { OutboxIdentityEvents } from './infrastructure/outbox-identity-events.ts';
 import { SmtpSystemMailer } from './infrastructure/smtp-system-mailer.ts';
 import { ApiKeysController } from './interface/http/api-keys.controller.ts';
 import { IdentityConfigController } from './interface/http/identity-config.controller.ts';
@@ -42,23 +43,36 @@ import { MembersController } from './interface/http/members.controller.ts';
 
 /**
  * Identity (ADR-0007): Better Auth (mounted at /api/auth by http.ts), credential resolution for every request,
- * `/v1/me`, members & invitations, API keys. HTTP-only: the worker has no use for sessions.
+ * `/v1/me`, members & invitations, API keys. The worker only gets the read-only member directory and system mail
+ * (for notifications); sessions are HTTP-only.
  */
 @Module({})
 export class IdentityModule {
   static forRoot(mode: AppMode): DynamicModule {
-    if (mode === 'worker') return { module: IdentityModule };
+    const shared = [
+      { provide: MEMBERSHIP_REPOSITORY, useClass: DrizzleMembershipRepository },
+      { provide: SYSTEM_MAILER, useClass: SmtpSystemMailer },
+      MemberDirectory,
+    ];
+    if (mode === 'worker') {
+      return {
+        module: IdentityModule,
+        global: true,
+        providers: shared,
+        exports: [MemberDirectory, SYSTEM_MAILER],
+      };
+    }
     return {
       module: IdentityModule,
+      global: true,
       controllers: [IdentityConfigController, MeController, MembersController, ApiKeysController],
       providers: [
         betterAuthProvider,
         { provide: AUTH_RESOLVER, useClass: BetterAuthResolver },
-        { provide: MEMBERSHIP_REPOSITORY, useClass: DrizzleMembershipRepository },
+        ...shared,
         { provide: API_KEY_REPOSITORY, useClass: DrizzleApiKeyRepository },
         { provide: API_KEY_ISSUER, useClass: BetterAuthApiKeyIssuer },
-        { provide: SYSTEM_MAILER, useClass: SmtpSystemMailer },
-        { provide: IDENTITY_EVENTS, useClass: AuditingIdentityEvents },
+        { provide: IDENTITY_EVENTS, useClass: OutboxIdentityEvents },
         { provide: APP_URL, inject: [APP_ENV], useFactory: (env: AppEnv) => (env as ApiEnv).APP_URL },
         GetMeQuery,
         ListMembersQuery,
@@ -73,7 +87,7 @@ export class IdentityModule {
         CreateApiKeyCommand,
         RevokeApiKeyCommand,
       ],
-      exports: [BETTER_AUTH, AUTH_RESOLVER],
+      exports: [BETTER_AUTH, AUTH_RESOLVER, MemberDirectory, SYSTEM_MAILER],
     };
   }
 }

@@ -30,9 +30,10 @@ export interface AuthMailer {
   sendTwoFactorEnabled(input: { to: string; name: string; locale: Locale }): Promise<void>;
 }
 
-/** Identity events (DOMAIN events in BF-012's outbox; until then the API logs them). */
+/** Identity events raised inside Better Auth; the API records them in its outbox (BF-012). */
 export type AuthEvent =
   | { type: 'identity.user_signed_up'; userId: string; email: string }
+  | { type: 'identity.member_joined'; organizationId: string; memberId: string; userId: string; role: string }
   | {
       type: 'identity.member_invited';
       organizationId: string;
@@ -224,6 +225,17 @@ export function createAuth(options: CreateAuthOptions) {
         invitationExpiresIn: 7 * DAY_SECONDS,
         cancelPendingInvitationsOnReInvite: true,
         requireEmailVerificationOnInvitation: true,
+        organizationHooks: {
+          afterAcceptInvitation: async ({ member, user, organization: org }) => {
+            await emit({
+              type: 'identity.member_joined',
+              organizationId: org.id,
+              memberId: member.id,
+              userId: user.id,
+              role: member.role,
+            });
+          },
+        },
         sendInvitationEmail: async ({ id, email, role, organization: org, inviter }) => {
           await mailer.sendInvitation({
             to: email,

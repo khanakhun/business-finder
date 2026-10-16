@@ -5,7 +5,6 @@ import { createIsolatedDatabase } from '@bf/testing/db';
 import { testValkeyUrl } from '@bf/testing/valkey';
 import type { INestApplication, INestApplicationContext, Type } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.ts';
@@ -99,14 +98,21 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
 }
 
 /** A worker process (processors only) on the same database/Valkey as a test app. Close it before the app. */
-export async function createTestWorker(app: TestApp): Promise<INestApplicationContext> {
+export async function createTestWorker(
+  app: TestApp,
+  options: { readonly mailer?: SystemMailer } = {},
+): Promise<INestApplicationContext> {
   const env = loadAppEnv('worker', {
     ...TEST_ENV,
     DATABASE_URL: app.env.DATABASE_URL,
     VALKEY_URL: app.env.VALKEY_URL,
   });
   const { AppModule: Module_ } = await import('../src/app.module.ts');
-  const worker = await NestFactory.createApplicationContext(Module_.forWorker(env), { logger: false });
-  await worker.init();
-  return worker;
+  // System mail never leaves the test (notification emails are sent by the worker).
+  const moduleRef = await Test.createTestingModule({ imports: [Module_.forWorker(env)] })
+    .overrideProvider(SYSTEM_MAILER)
+    .useValue(options.mailer ?? new FakeMailer())
+    .compile();
+  await moduleRef.init();
+  return moduleRef;
 }

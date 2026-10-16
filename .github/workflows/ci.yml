@@ -40,6 +40,7 @@ jobs:
       db: ${{ steps.present.outputs.db == 'true' && (github.event_name == 'push' || steps.filter.outputs.db == 'true') }}
       e2e: ${{ steps.present.outputs.e2e == 'true' && (github.event_name == 'push' || steps.filter.outputs.e2e == 'true') }}
       sites: ${{ steps.present.outputs.sites == 'true' && (github.event_name == 'push' || steps.filter.outputs.sites == 'true') }}
+      runner: ${{ steps.present.outputs.runner == 'true' && (github.event_name == 'push' || steps.filter.outputs.runner == 'true') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,6 +52,7 @@ jobs:
           echo "db=$(exists packages/db/package.json)" >> "$GITHUB_OUTPUT"
           echo "e2e=$(exists apps/web/playwright.config.ts)" >> "$GITHUB_OUTPUT"
           echo "sites=$(exists packages/site-blocks/playwright.config.ts)" >> "$GITHUB_OUTPUT"
+          echo "runner=$(exists services/agent-runner/Dockerfile)" >> "$GITHUB_OUTPUT"
       - id: filter
         if: github.event_name == 'pull_request'
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
@@ -72,6 +74,10 @@ jobs:
             # pixels too: Tailwind, React, Playwright, fonts).
             sites:
               - '{packages/site-blocks/**,packages/site-schema/**,packages/sitekit/**,pnpm-lock.yaml,pnpm-workspace.yaml,.nvmrc,.github/workflows/ci.yml,.github/actions/setup/**}'
+              - '!**/*.md'
+            # What goes into the agent runner image (BF-043).
+            runner:
+              - '{services/agent-runner/**,packages/sitekit/**,packages/site-blocks/**,packages/site-schema/**,packages/contracts/**,pnpm-lock.yaml,pnpm-workspace.yaml,.github/workflows/ci.yml}'
               - '!**/*.md'
 
   quality:
@@ -312,6 +318,49 @@ jobs:
             packages/site-blocks/.lighthouseci/reports/
           if-no-files-found: ignore
           retention-days: 14
+
+  runner:
+    name: runner
+    needs: changes
+    if: needs.changes.outputs.runner == 'true'
+    runs-on: ubuntu-24.04
+    env:
+      TURBO_TOKEN: ''
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: runner
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Build the agent runner image (BF-043)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: services/agent-runner/Dockerfile
+          load: true
+          tags: bf-agent-runner:ci
+          cache-from: type=gha,scope=agent-runner
+          cache-to: type=gha,mode=max,scope=agent-runner
+      - name: SBOM (syft)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: bf-agent-runner:ci
+          format: spdx-json
+          output-file: agent-runner.sbom.spdx.json
+          upload-artifact: true
+      - name: Vulnerability scan (grype; fails on a critical with a fix available)
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: bf-agent-runner:ci
+          only-fixed: true
+          severity-cutoff: critical
+          fail-build: true
+          output-format: table
+      - name: Smoke test (fake agent edits a site through sitekit; check is done)
+        run: node services/agent-runner/scripts/smoke.ts bf-agent-runner:ci
 
   security:
     name: security

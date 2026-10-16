@@ -52,7 +52,9 @@
     "geo:import": "pnpm --filter @bf/api geo:import",
     "email:disposable-update": "node scripts/update-disposable-domains.mjs",
     "sites:seed": "pnpm --filter @bf/sites seed:fixtures",
-    "sitekit": "pnpm --filter @bf/sitekit --silent sitekit"
+    "sitekit": "pnpm --filter @bf/sitekit --silent sitekit",
+    "runner:build": "docker build -f services/agent-runner/Dockerfile -t bf-agent-runner:dev .",
+    "runner:smoke": "node services/agent-runner/scripts/smoke.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

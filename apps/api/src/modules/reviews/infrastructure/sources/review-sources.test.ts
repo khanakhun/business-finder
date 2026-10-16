@@ -156,7 +156,9 @@ describe('ScraperReviewsSource', () => {
     del: async (key: string) => (store.delete(key) ? 1 : 0),
     eval: async (_script: string, _keys: number, key: string, value: string) =>
       store.get(key) === value && store.delete(key) ? 1 : 0,
-    zadd: async (_key: string, score: number, member: string) => {
+    zadd: async (_key: string, ...args: unknown[]) => {
+      const [score, member] = args.slice(-2) as [number, string];
+      if (args[0] === 'XX' && !tracked.has(member)) return 0;
       tracked.set(member, score);
       return 1;
     },
@@ -285,6 +287,11 @@ describe('ScraperReviewsSource', () => {
     handler = (req, res) => (req.url === '/api/v1/jobs/job-gone' ? json(res, 404, {}) : json(res, 200, {}));
     expect(await source().deleteStaleJobs(NOW)).toBe(2);
     expect([...tracked.keys()]).toEqual(['job-new']);
+    // A delete the scraper refuses moves the job to the back of the queue.
+    tracked.set('job-stuck', NOW.getTime() - 3 * 3_600_000);
+    handler = (_req, res) => json(res, 500, {});
+    await source().deleteStaleJobs(NOW);
+    expect(tracked.get('job-stuck')).toBe(NOW.getTime());
   });
 
   it('fails a failed job, and has nothing for a business without location or row', async () => {

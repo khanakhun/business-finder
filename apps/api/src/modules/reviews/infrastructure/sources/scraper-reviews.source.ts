@@ -205,7 +205,11 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     for (let batch = 0; batch < 100; batch++) {
       const stale = await this.options.valkey.zrangebyscore(JOBS_TO_DELETE, 0, before, 'LIMIT', 0, 500);
       let done = 0;
-      for (const job of stale) if (await this.deleteJob(job)) done += 1;
+      for (const job of stale) {
+        if (await this.deleteJob(job)) done += 1;
+        // A job whose delete fails goes to the back of the queue: it cannot hide newer stale ones.
+        else await this.options.valkey.zadd(JOBS_TO_DELETE, 'XX', now.getTime(), job);
+      }
       deleted += done;
       if (stale.length < 500 || done === 0) break;
     }

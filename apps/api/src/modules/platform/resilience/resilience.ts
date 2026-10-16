@@ -144,8 +144,10 @@ const CANCELLATIONS = new Set(['AbortError', 'JobCancelledError']);
 
 export function buildPolicy(config: ResiliencePolicyConfig): IPolicy {
   // A cancellation (the caller's signal: fetch's AbortError, or the reason it was aborted with, e.g. a cancelled
-  // job) is not an outage: never retried, never counted by the breaker. Callers keep their signal in the call
-  // itself, not `execute`'s (cockatiel's timeout would turn the abort into a TaskCancelledError that counts).
+  // job) is not an outage: never retried, never counted by the breaker. This only works when callers keep their
+  // signal in the call itself rather than passing it to `execute` (cockatiel's timeout turns that abort into a
+  // TaskCancelledError, which counts). TODO(BF-029 follow-up): intel-client, email verifiers and guarded-provider
+  // still pass it to `execute`.
   const transient = handleWhen((error) => isTransient(error) && !isCancellation(error));
   return wrap(
     retry(transient, {

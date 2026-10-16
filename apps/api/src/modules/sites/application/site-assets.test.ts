@@ -339,8 +339,10 @@ describe('SiteAssetCommands', () => {
     const id = await uploaded();
     await commands.finalize(actor, siteId, id);
     const original = images.dominantColors;
+    let written: string[] = [];
     images.dominantColors = async (image, count) => {
-      // The retry re-stamps the image while the first delivery is about to finish.
+      // The retry re-stamps the image while the first delivery is about to finish (every variant is written by now).
+      written = [...publicFiles.files.keys()];
       const row = assets.rows.get(id);
       if (row) assets.rows.set(id, { ...row, processingStartedAt: new Date('2026-10-14T12:05:00.000Z') });
       return original(image, count);
@@ -352,6 +354,34 @@ describe('SiteAssetCommands', () => {
       images.dominantColors = original;
     }
     expect(assets.rows.get(id)?.status).toBe('processing');
-    expect(publicFiles.files.size).toBeGreaterThan(0);
+    expect(written.length).toBeGreaterThan(0);
+    expect([...publicFiles.files.keys()].sort()).toEqual([...written].sort());
+  });
+
+  it('removes what a fenced-out delivery wrote once the image has failed, even if one delete fails', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    const original = images.dominantColors;
+    const remove = publicFiles.delete.bind(publicFiles);
+    let calls = 0;
+    publicFiles.delete = async (key) => {
+      calls += 1;
+      if (calls === 1) throw new Error('storage unavailable');
+      return remove(key);
+    };
+    images.dominantColors = async (image, count) => {
+      // The image failed meanwhile (the stale sweep, or the retry's last attempt) after a re-stamp.
+      const row = assets.rows.get(id);
+      if (row) assets.rows.set(id, { ...row, status: 'failed', processingStartedAt: null });
+      return original(image, count);
+    };
+    try {
+      expect(await commands.process(id)).toBe('skipped');
+    } finally {
+      images.dominantColors = original;
+      publicFiles.delete = remove;
+    }
+    expect(calls).toBeGreaterThan(1);
+    expect(publicFiles.files.size).toBe(1);
   });
 });

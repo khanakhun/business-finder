@@ -295,7 +295,8 @@ export class SiteAssetCommands {
       // cleans up if it dies). Only a deleted or failed image loses the files this one wrote.
       const current = await this.assets.byId(asset.id);
       if (!current || current.status === 'failed')
-        for (const variant of variants) await this.publicFiles.delete(variant.key);
+        // Best effort, like fail(): a retry would find the image settled and skip, so one error must not stop the rest.
+        for (const variant of variants) await this.publicFiles.delete(variant.key).catch(() => undefined);
       return 'skipped';
     }
     return 'ready';

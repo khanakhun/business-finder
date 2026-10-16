@@ -334,6 +334,51 @@ describe('validateFacts', () => {
   });
 
   it.each([
+    'Ouvert 7j/7 • 0590 00 01 01',
+    'Gustavia · 97133 · 0590 00 01 01',
+    'Salon n°2 • 0590 00 01 01',
+    'Pointures 36 · 38 · 40 · 42',
+    'Tailles 36 • 38 • 40 • 42 • 44',
+    'Formats 10 · 15 · 20 · 30 cm',
+    'Ouvert 09 - 12 / 14 - 19',
+    'Horaires 09 - 12 - 14 - 19',
+    'Chambres 01 - 12 / 21 - 32',
+    'Tailles 06 - 08 - 10 - 12 ans',
+    'Suite 0101 - 0202',
+  ])('reads bullets and number lists next to the real phone as prose: %j', (subtitle) => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: subtitle, en: 'Welcome' };
+    expect(found(spec).filter((issue) => issue.includes('subtitle'))).toEqual([]);
+  });
+
+  it('still checks a year written beside the phone with a bullet', () => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: 'Depuis 1952 · 0590 00 01 01', en: 'Welcome' };
+    expect(validateFacts(spec, registry()).map((issue) => issue.message)).toEqual([
+      'Remove the year 1952: it is not a fact.',
+    ]);
+  });
+
+  it.each(['+33 590 00 01 01', '+596 590 00 01 01', '+262 590 00 01 01', '+594 590 00 01 01'])(
+    'refuses the business’s number under another French-plan country code: %j',
+    (number) => {
+      const spec = salon();
+      hero(spec).subtitle = { fr: `Appelez le ${number}`, en: 'Call us' };
+      expect(found(spec)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+    },
+  );
+
+  it('reads spaced parts as a phone when they make a possible number in the site’s country', () => {
+    const bl = salon();
+    hero(bl).subtitle = { fr: 'Appelez le 690 - 12 - 34 - 56', en: 'Call us' };
+    expect(found(bl)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+    const us = salon();
+    if (us.contact.address) us.contact.address.country = 'US';
+    hero(us).subtitle = { fr: 'Appelez le 212 - 555 - 0100', en: 'Call us' };
+    expect(found(us)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+  });
+
+  it.each([
     'Ouvert 10 - 12 / 14 - 19',
     'Tailles 36 - 38 - 40 - 42',
     'Groupes de 10 - 15 / 20 - 30 personnes',

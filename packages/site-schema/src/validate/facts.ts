@@ -115,7 +115,10 @@ const dialled = (raw: string) =>
   digits(raw.normalize('NFKC').replace(/^(\s*(?:\+|00)\s*\d{1,3}\s*)\(\s*0\s*\)/, '$1')).replace(/^00/, '');
 
 const FRENCH_PLAN = ['FR', 'GP', 'BL', 'MF', 'MQ', 'GF', 'RE', 'YT', 'PM'];
-/** Country codes of the French national plan (mainland, the Antilles, Guiana, Réunion and Mayotte, Saint-Pierre). */
+/**
+ * Country codes of the French national plan (mainland, the Antilles, Guiana, Réunion and Mayotte). Saint-Pierre (+508)
+ * has six-digit numbers, so `frenchNational` never reads them: it is listed for completeness only.
+ */
 const FRENCH_CODES = new Set(['33', '590', '594', '596', '262', '508']);
 
 /** A number in E.164, read as the business's country writes it (national formats, `(0)`, `00`); else undefined. */
@@ -130,6 +133,9 @@ function e164(raw: string, country: string | undefined): string | undefined {
  * the territory is in the number (0590 Guadeloupe and the islands, 0696 Martinique, 06 the mainland; some ranges are
  * shared), so two forms are compared as dialled rather than through a territory guessed from the site's country.
  */
+/** Written without a country code (`0590…`, `(212) 555…`), as opposed to `+…` or `00…`. */
+const isNational = (raw: string) => !/^\s*(?:\+|00)/.test(raw.normalize('NFKC'));
+
 function frenchNational(raw: string): string | undefined {
   const text = raw.normalize('NFKC');
   const national = dialled(text);
@@ -147,7 +153,11 @@ function frenchNational(raw: string): string | undefined {
  * else the same digits. Nothing matches by its ending: `90 00 01 01` or a number under another code is another line.
  */
 function samePhone(a: string, b: string, country: string | undefined): boolean {
-  if (country && FRENCH_PLAN.includes(country)) {
+  // Read as dialled in France only when one side is written nationally: two international forms must carry the same
+  // country code (`+33 590…` is not `+590 590…`, it cannot be dialled from abroad).
+  // DECISION(BF-033): a national fact (`0590 00 01 01`) matches any French-plan international form of the same
+  // digits (`+590 590…`, and also `+33 590…`); BF-040 stores phone facts in E.164, which removes the case.
+  if (country && FRENCH_PLAN.includes(country) && isNational(a) !== isNational(b)) {
     const [fa, fb] = [frenchNational(a), frenchNational(b)];
     if (fa !== undefined && fb !== undefined) return fa === fb;
   }
@@ -204,7 +214,12 @@ export function literals(input: string, country?: string): Literals {
   });
   // Every dash is a hyphen and every middle dot a full stop (`06 12 — 34 56 78`, `06·12·34·56·78`): a look-alike
   // separator never hides a number.
-  text = text.replace(/[\p{Pd}\u2212]/gu, '-').replace(/[\u00B7\u2022\u2027\u2219\u30FB\uFF65]/g, '.');
+  // A middle dot between digits is a full stop (`06·12·34·56·78`); a spaced one is a separator, like ` / `
+  // (`Ouvert 7j/7 • 0590 00 01 01` is a phone after a list, not one long number).
+  text = text
+    .replace(/[\p{Pd}\u2212]/gu, '-')
+    .replace(/(?<=\d)[\u00B7\u2022\u2027\u2219\u30FB\uFF65](?=\d)/g, '.')
+    .replace(/[ \u00A0\u202F]*[\u00B7\u2022\u2027\u2219\u30FB\uFF65][ \u00A0\u202F]*/g, ' / ');
   const prices: Literals['prices'] = [];
   text = text.replace(
     PRICE,
@@ -250,7 +265,10 @@ export function literals(input: string, country?: string): Literals {
       // Short parts are one phone only when they read as one (`06 12 - 34 56 78`, `+590 – 690…`, `(212) 555 - 0100`),
       // not ranges of prose (`Ouvert 10 - 12 / 14 - 19`, `Tailles 36 - 38 - 40`, `De 1 500 - 2 000 m²`).
       const phoneLike =
-        !groupHasSingle && (/^\s*[+(0]/.test(group) || e164(group.trim(), country) !== undefined);
+        !groupHasSingle &&
+        (/^\s*[+(]/.test(group) ||
+          /^0\d{9}$/.test(dialled(group)) ||
+          e164(group.trim(), country) !== undefined);
       if (groupDigits >= 8 && phoneLike) {
         phones.push(group.trim());
         out += blank(group);

@@ -10,6 +10,11 @@ const load = (name: string): SiteSpec =>
   JSON.parse(readFileSync(new URL(`../../fixtures/${name}.json`, import.meta.url), 'utf8'));
 const FIXTURES = ['salon-gustavia', 'cafe-saint-jean', 'hardware-store-lorient', 'villa-agency'] as const;
 const L = (text: string) => ({ fr: text, en: text });
+/** The element, or a failing test when it is not there. */
+const at = <T>(value: T | undefined): T => {
+  if (value === undefined) throw new Error('missing fixture element');
+  return value;
+};
 
 const roundTrip = (spec: SiteSpec, operation: Operation) => {
   const done = apply(spec, operation);
@@ -34,7 +39,7 @@ describe('operations', () => {
       {
         op: 'addPage',
         page: {
-          ...structuredClone(salon.pages[1]!),
+          ...structuredClone(at(salon.pages[1])),
           id: 'offers',
           slug: 'offres',
           blocks: [{ ...ctaBanner('cta-offer1') }],
@@ -63,7 +68,13 @@ describe('operations', () => {
     ],
     ['setBlockVariant', { op: 'setBlockVariant', pageId: 'home', blockId: 'serv-home1', variant: 'list' }],
     ['setTheme', { op: 'setTheme', theme: { ...salon.theme, radius: 'full' } }],
-    ['setContact', { op: 'setContact', contact: { ...salon.contact, whatsapp: { value: '+590690000101' } } }],
+    [
+      'setContact',
+      {
+        op: 'setContact',
+        contact: { ...salon.contact, whatsapp: { value: '+590690000101', factId: 'whatsapp.main' } },
+      },
+    ],
     ['setNavigation', { op: 'setNavigation', navigation: { items: salon.navigation.items.slice(0, 2) } }],
     [
       'updateText',
@@ -73,7 +84,7 @@ describe('operations', () => {
       'updateText (removes)',
       { op: 'updateText', path: ['layout', 'footer', 'tagline'], locale: 'en', value: null },
     ],
-    ['addAsset', { op: 'addAsset', asset: { ...salon.assets[1]!, id: 'img-salon-2' } }],
+    ['addAsset', { op: 'addAsset', asset: { ...at(salon.assets[1]), id: 'img-salon-2' } }],
     [
       'assignAsset',
       {
@@ -106,7 +117,7 @@ describe('operations', () => {
   it('removes an unused asset back to its place', () => {
     const withExtra = apply(salon, {
       op: 'addAsset',
-      asset: { ...salon.assets[1]!, id: 'img-salon-2' },
+      asset: { ...at(salon.assets[1]), id: 'img-salon-2' },
       index: 0,
     }).spec;
     roundTrip(withExtra, { op: 'removeAsset', assetId: 'img-salon-2' });
@@ -133,6 +144,27 @@ describe('operations', () => {
       { op: 'assignAsset', path: ['brand', 'name'], assetId: null },
       'invalid_path',
     ],
+    ['a page id that exists', { op: 'addPage', page: structuredClone(at(salon.pages[1])) }, 'duplicate_id'],
+    [
+      'a block id taken elsewhere',
+      { op: 'addPage', page: { ...structuredClone(at(salon.pages[1])), id: 'offers', slug: 'offres' } },
+      'duplicate_id',
+    ],
+    [
+      'an asset id that exists',
+      { op: 'addAsset', asset: structuredClone(at(salon.assets[0])) },
+      'duplicate_id',
+    ],
+    [
+      'a text path that ends in a value',
+      { op: 'updateText', path: ['brand', 'name'], locale: 'en', value: 'x' },
+      'invalid_path',
+    ],
+    [
+      'a path through a value',
+      { op: 'updateText', path: ['brand', 'name', 'en'], locale: 'en', value: 'x' },
+      'invalid_path',
+    ],
     [
       'a result the schema refuses',
       { op: 'setBlockVariant', pageId: 'home', blockId: 'hero-home1', variant: 'spiral' },
@@ -147,6 +179,26 @@ describe('operations', () => {
       expect((caught as OperationError).code).toBe(code);
     }
     expect(salon).toEqual(before);
+  });
+
+  it('clears an entry of an asset list, and puts it back', () => {
+    const cafe = load('cafe-saint-jean');
+    const gallery = ['pages', 0, 'blocks', 1, 'props', 'assetIds', 2];
+    const withFour = apply(cafe, { op: 'addAsset', asset: { ...at(cafe.assets[0]), id: 'img-cafe-4' } }).spec;
+    const grown = apply(withFour, {
+      op: 'updateBlockProps',
+      pageId: 'home',
+      blockId: 'gall-cafe1',
+      props: { assetIds: ['img-cafe-1', 'img-cafe-2', 'img-cafe-3', 'img-cafe-4'] },
+    }).spec;
+    const done = apply(grown, { op: 'assignAsset', path: [...gallery.slice(0, -1), 3], assetId: null });
+    const block = done.spec.pages[0]?.blocks[1];
+    expect(block?.type === 'gallery' && block.props.assetIds).toEqual([
+      'img-cafe-1',
+      'img-cafe-2',
+      'img-cafe-3',
+    ]);
+    expect(apply(done.spec, done.inverse).spec).toEqual(grown);
   });
 
   it('applies a batch all or nothing', () => {

@@ -82,11 +82,11 @@ packages/site-schema/{fixtures/*, generated/site-spec.schema.json}
 - Snapshot: JSON Schema export and catalog markdown deterministic.
 
 ## Acceptance criteria
-- [ ] `SiteSpec` v1 with all blocks, theme, contact, layout, navigation, assets, SEO and settings — documented field by field.
-- [ ] Semantic and facts validators with actionable issues; fixtures validate; broken fixtures fail as expected.
-- [ ] Invertible operations with property tests.
-- [ ] JSON Schema and block catalog generated and committed.
-- [ ] README explains extending the block set.
+- [x] `SiteSpec` v1 with all blocks, theme, contact, layout, navigation, assets, SEO and settings — documented field by field.
+- [x] Semantic and facts validators with actionable issues; fixtures validate; broken fixtures fail as expected.
+- [x] Invertible operations with property tests.
+- [x] JSON Schema and block catalog generated and committed.
+- [x] README explains extending the block set.
 
 ## Agent prompt
 ```text
@@ -112,6 +112,24 @@ Verify: pnpm verify (coverage ≥ 90% for validate/ and ops/); regenerate JSON S
 - WCAG contrast: https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html · JSON Schema 2020-12: https://json-schema.org/
 
 ## Implementation notes
+Built in two stacked PRs: part 1 (#97) the schema, the semantic validator, fixtures and the JSON Schema; part 2 the
+facts validator, the operations, migrations and the block catalog.
+
+- **Schema** (`packages/site-schema/src/spec/`): SiteSpec v1 with 16 block types, every property described for agents
+  (a test fails otherwise), hard length limits in the schema, recommended ranges as warnings. Safety in the schema:
+  every contact detail, testimonial, team member and price names its fact; actions carry only what their kind uses;
+  no hidden characters; reserved slugs. `brand` (fact-backed) added at the root.
+- **Validators**: `validateSite(input, { assetHosts, ownDomains?, bookingHosts?, mode? })` — two phases (schema, then
+  semantic rules), issues with path, code, severity and an actionable message; `parseRichText` is the whitelist
+  rich-text parser the renderer and editor share; `validateFacts(spec, registry)` with literal detection.
+- **Operations**: serializable, checked, invertible; batches all or nothing; property tests on every fixture.
+- **Migrations**: `migrateSpec` with an upcaster harness (`createMigrator`).
+- **Generated** (committed, checked by tests and `pnpm site-schema:check`): `site-spec.schema.json`,
+  `engine-result.schema.json` (2020-12, shared `$defs`, schema order), `catalog/*.md`.
+- **Deviations**: actions are a discriminated union (the ticket's flat shape let a `url` hide on any kind); a price
+  carries its amount (checked against its fact) and a separate `from` flag; testimonial authors are optional
+  (initials, per the attribution policy). The engine-result schema is not yet checked against Codex strict
+  structured outputs (follow-up before BF-042).
 - **Deviation:** `url` actions go to the business's own domains only (the ticket also allowed known booking
   providers): a booking page is reached through the `booking` action, which resolves to the fact-backed
   `contact.bookingUrl` — a provider host also serves pages anyone can create. Engines (BF-040/BF-042) emit `booking`

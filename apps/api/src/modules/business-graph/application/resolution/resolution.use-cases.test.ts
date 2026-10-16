@@ -380,7 +380,7 @@ describe('merge commands', () => {
       ),
       moveSources: vi.fn(async () => 1),
       moveSideData: vi.fn(async () => undefined),
-      mergeOrgLinks: vi.fn(async () => undefined),
+      mergeOrgLinks: vi.fn(async () => []),
       repointDuplicates: vi.fn(async () => undefined),
       listSources: vi.fn(async () => options.sources ?? []),
       copyOrgLinks: vi.fn(async () => undefined),

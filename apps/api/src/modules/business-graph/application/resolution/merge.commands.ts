@@ -1,4 +1,5 @@
 import {
+  DoNotContactSet,
   decodeCursor,
   encodeCursor,
   ForbiddenError,
@@ -112,7 +113,16 @@ export class MergeBusinessesCommand {
     for (const mergedId of request.mergedIds) {
       sourcesMoved += await this.merges.moveSources(mergedId, request.survivorId);
       await this.merges.moveSideData(mergedId, request.survivorId);
-      await this.merges.mergeOrgLinks(mergedId, request.survivorId);
+      // Do-not-contact carried over by the merge is a new suppression for those workspaces (compliance, BF-049).
+      for (const { organizationId, reason } of await this.merges.mergeOrgLinks(
+        mergedId,
+        request.survivorId,
+      )) {
+        await this.events.record(DoNotContactSet, {
+          orgId: organizationId,
+          payload: { businessId: request.survivorId as never, doNotContact: true, reason },
+        });
+      }
       await this.merges.repointDuplicates(mergedId, request.survivorId);
       const merged = loaded.find((b) => b.id === mergedId);
       if (!merged) continue;
@@ -234,6 +244,7 @@ export class ListPossibleDuplicatesQuery {
     const rows = await this.merges.listDuplicates({
       organizationId: workspaceOf(auth),
       status: query.status,
+      ...(query.businessId ? { businessId: query.businessId } : {}),
       limit: query.limit + 1,
       ...(before ? { before } : {}),
     });

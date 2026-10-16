@@ -15,7 +15,7 @@ import {
   RevokeInvitationCommand,
 } from './application/invitations.commands.ts';
 import { MemberDirectory } from './application/member-directory.ts';
-import { ListMembersQuery } from './application/members.query.ts';
+import { ListMembersQuery, ListTeammatesQuery } from './application/members.query.ts';
 import {
   ChangeMemberRoleCommand,
   RemoveMemberCommand,
@@ -76,6 +76,7 @@ export class IdentityModule {
         { provide: APP_URL, inject: [APP_ENV], useFactory: (env: AppEnv) => (env as ApiEnv).APP_URL },
         GetMeQuery,
         ListMembersQuery,
+        ListTeammatesQuery,
         InvitationMailer,
         InviteMemberCommand,
         ResendInvitationCommand,

@@ -1,8 +1,8 @@
-import { NOTIFICATION_CREATED } from '@bf/contracts';
+import { CRM_ACTIVITY_CREATED, NOTIFICATION_CREATED } from '@bf/contracts';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REALTIME_EVENTS, realtimeInvalidations } from './invalidations.ts';
-import { RealtimeConnection } from './provider.tsx';
+import { COALESCE_MS, RealtimeConnection } from './provider.tsx';
 
 class FakeEventSource {
   static readonly CONNECTING = 0;
@@ -69,6 +69,18 @@ describe('RealtimeConnection', () => {
     expect(handler).toHaveBeenCalledWith(event('thing.changed'));
   });
 
+  it('coalesces bursts: one refetch now, one more at the end of the window', () => {
+    vi.useFakeTimers();
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    connection.start();
+    for (let i = 0; i < 50; i++) sources[0]?.emit('thing.changed', event('thing.changed'), `${i}-0`);
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(invalidate).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(COALESCE_MS);
+    expect(invalidate).toHaveBeenCalledTimes(2);
+  });
+
   it('refetches everything on resync', () => {
     const invalidate = vi.spyOn(client, 'invalidateQueries');
     connection.start();
@@ -111,6 +123,9 @@ describe('RealtimeConnection', () => {
 describe('realtime event names', () => {
   it('match the contracts', () => {
     expect(REALTIME_EVENTS.notificationCreated).toBe(NOTIFICATION_CREATED);
+    expect(REALTIME_EVENTS.crmActivityCreated).toBe(CRM_ACTIVITY_CREATED);
+    const event = { type: CRM_ACTIVITY_CREATED, entity: 'business', entityId: 'b1' } as never;
+    expect(realtimeInvalidations[CRM_ACTIVITY_CREATED]?.(event)).toEqual([['business', 'b1'], ['crm']]);
     expect(Object.keys(realtimeInvalidations)).toContain(NOTIFICATION_CREATED);
   });
 });

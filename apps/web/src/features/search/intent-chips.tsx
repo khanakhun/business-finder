@@ -160,7 +160,7 @@ function Range({
 }
 
 const rangeLabel = (
-  t: ReturnType<typeof useTranslations>,
+  t: ReturnType<typeof useTranslations<'search.chips'>>,
   key: 'rating' | 'reviews',
   low: number | null,
   high: number | null,

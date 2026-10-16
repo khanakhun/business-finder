@@ -31,7 +31,13 @@ import { apiClient, queryKeys } from '@/lib/api.ts';
 import { useSession } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { ADD_TO_LIST_DIALOG, registerDefaultBulkActions } from './defaults.ts';
-import { type BulkActionUi, type BulkSelection, bulkActionsFor } from './registry.ts';
+import {
+  type BulkActionUi,
+  type BulkSelection,
+  bulkActionsFor,
+  bulkDialog,
+  registerBulkDialog,
+} from './registry.ts';
 
 const ICONS: Record<string, LucideIcon> = {
   'list-plus': ListPlusIcon,
@@ -139,6 +145,23 @@ function AddToListDialog({
   );
 }
 
+function ActiveDialog({
+  id,
+  props,
+  onClose,
+}: {
+  readonly id: string;
+  readonly props: Record<string, unknown>;
+  readonly onClose: (result: unknown) => void;
+}) {
+  const Dialog_ = bulkDialog(id);
+  return Dialog_ ? <Dialog_ props={props} onClose={onClose} /> : null;
+}
+
+registerBulkDialog(ADD_TO_LIST_DIALOG, ({ props, onClose }) => (
+  <AddToListDialog ids={(props.ids as string[]) ?? []} onClose={onClose} />
+));
+
 /** The bar of bulk actions over the selection (or every result for actions that allow it). */
 export function BulkBar({
   selection,
@@ -222,9 +245,7 @@ export function BulkBar({
             <React.Fragment key={action.id}>{button}</React.Fragment>
           );
         })}
-        {dialog?.id === ADD_TO_LIST_DIALOG ? (
-          <AddToListDialog ids={(dialog.props.ids as string[]) ?? []} onClose={close} />
-        ) : null}
+        {dialog ? <ActiveDialog id={dialog.id} props={dialog.props} onClose={close} /> : null}
       </div>
     </TooltipProvider>
   );

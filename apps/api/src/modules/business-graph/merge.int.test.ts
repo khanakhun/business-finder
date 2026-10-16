@@ -114,6 +114,13 @@ describe('possible duplicates', () => {
       .select()
       .from(possibleDuplicates)
       .where(sql`${possibleDuplicates.businessAId} IN (${a}, ${b})`);
+    // The detail page lists the pairs of one business (BF-024).
+    const ofB = await owner.get(`/v1/businesses/possible-duplicates?businessId=${b}`).expect(200);
+    expect(ofB.body.items.map((i: { id: string }) => i.id)).toEqual([dup?.id]);
+    const ofOther = await owner
+      .get('/v1/businesses/possible-duplicates?businessId=0192a1b2-0000-7000-8000-000000000999')
+      .expect(200);
+    expect(ofOther.body.items).toEqual([]);
     await owner
       .patch(`/v1/businesses/possible-duplicates/${dup?.id}`, { action: 'merge', survivorId: a })
       .expect(204);

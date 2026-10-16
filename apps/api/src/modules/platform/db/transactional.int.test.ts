@@ -19,16 +19,17 @@ class NotesService {
 
   /** Stands in for a repository: knows only the root client, picks up the ambient transaction. */
   private async insert(text: string): Promise<void> {
-    await getExecutor(this.client).execute(sql`INSERT INTO notes (text) VALUES (${text})`);
+    await getExecutor(this.client).execute(sql`INSERT INTO tx_probe (text) VALUES (${text})`);
   }
 }
 
-const count = async () => (await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM notes`))[0]?.n;
+const count = async () =>
+  (await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM tx_probe`))[0]?.n;
 
 beforeAll(async () => {
   database = await createIsolatedDatabase();
   db = createDb({ url: database.url, max: 2 });
-  await db.execute(sql`CREATE TABLE notes (text text NOT NULL)`);
+  await db.execute(sql`CREATE TABLE tx_probe (text text NOT NULL)`);
 });
 
 afterAll(async () => {

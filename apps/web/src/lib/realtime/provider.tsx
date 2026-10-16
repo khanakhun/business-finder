@@ -1,13 +1,15 @@
 'use client';
 
 import type { RealtimeEvent } from '@bf/contracts';
-import { type QueryClient, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, type QueryKey, useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 import { RESYNC_EVENT, realtimeInvalidations } from './invalidations.ts';
 
 type Handler = (event: RealtimeEvent) => void;
 
 const MAX_BACKOFF_MS = 30_000;
+/** Bursts of events (a bulk change of 1,000 businesses) refetch a query at most once per window. */
+export const COALESCE_MS = 500;
 
 /**
  * One EventSource per tab on `/v1/realtime`. The browser reconnects by itself (sending `Last-Event-ID`); when it
@@ -21,6 +23,7 @@ export class RealtimeConnection {
   private attempt = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private stopped = false;
+  private readonly windows = new Map<string, { dirty: boolean; timer: ReturnType<typeof setTimeout> }>();
 
   constructor(
     private readonly url: string,
@@ -37,6 +40,8 @@ export class RealtimeConnection {
   stop(): void {
     this.stopped = true;
     clearTimeout(this.timer);
+    for (const window of this.windows.values()) clearTimeout(window.timer);
+    this.windows.clear();
     this.source?.close();
     this.source = undefined;
   }
@@ -71,6 +76,25 @@ export class RealtimeConnection {
     };
   }
 
+  /** Refetches now, then at most once more at the end of the window if more events asked for it. */
+  private invalidate(queryKey: QueryKey): void {
+    const id = JSON.stringify(queryKey);
+    const open = this.windows.get(id);
+    if (open) {
+      open.dirty = true;
+      return;
+    }
+    void this.queryClient.invalidateQueries({ queryKey });
+    const window = {
+      dirty: false,
+      timer: setTimeout(() => {
+        this.windows.delete(id);
+        if (window.dirty) this.invalidate(queryKey);
+      }, COALESCE_MS),
+    };
+    this.windows.set(id, window);
+  }
+
   private listen(type: string): void {
     if (!this.source || this.listening.has(type)) return;
     this.listening.add(type);
@@ -89,9 +113,7 @@ export class RealtimeConnection {
     } catch {
       return;
     }
-    for (const key of realtimeInvalidations[type]?.(event) ?? []) {
-      void this.queryClient.invalidateQueries({ queryKey: key });
-    }
+    for (const key of realtimeInvalidations[type]?.(event) ?? []) this.invalidate(key);
     for (const handler of this.handlers.get(type) ?? []) handler(event);
   }
 }

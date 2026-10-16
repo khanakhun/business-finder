@@ -86,9 +86,9 @@ stateDiagram-v2
   [*] --> new
   new --> qualified
   new --> disqualified
-  qualified --> contacted : first message sent (auto)
+  qualified --> contacted : first message sent (auto) / by hand
   qualified --> disqualified
-  contacted --> engaged : positive reply / site lead (auto)
+  contacted --> engaged : positive reply / site lead (auto) / by hand
   new --> engaged : site lead (auto)
   qualified --> engaged : site lead (auto)
   contacted --> lost
@@ -102,6 +102,9 @@ stateDiagram-v2
   disqualified --> new : reopen (manual)
   won --> [*]
 ```
+
+`lost` and `disqualified` need a reason. The UI offers only the moves the API lists as allowed for the current
+status (`allowedTransitions`); `crm/domain/pipeline.ts` is the single transition table (BF-024).
 
 ### 3.2 Discovery run
 

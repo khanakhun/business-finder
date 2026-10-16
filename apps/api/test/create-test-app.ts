@@ -12,6 +12,7 @@ import { configureHttp } from '../src/http.ts';
 import { SYSTEM_MAILER, type SystemMailer } from '../src/modules/identity/application/ports.ts';
 import { CLOCK } from '../src/modules/platform/clock/clock.module.ts';
 import { type AppEnv, loadAppEnv } from '../src/modules/platform/config/app-env.ts';
+import { DB_CLIENT } from '../src/modules/platform/db/db.module.ts';
 import { LOGGER } from '../src/modules/platform/logging/logger.ts';
 import {
   InMemoryObjectStorage,
@@ -122,7 +123,11 @@ export async function createTestWorker(
   });
   const { AppModule: Module_ } = await import('../src/app.module.ts');
   // System mail never leaves the test (notification emails are sent by the worker).
+  // The app's own DB client: `@Transactional()` is bound to one client per process (decorators cannot use DI), and a
+  // second client would take it over, leaving the app's repositories outside their transactions.
   let builder = Test.createTestingModule({ imports: [Module_.forWorker(env)] })
+    .overrideProvider(DB_CLIENT)
+    .useValue(app.app.get(DB_CLIENT))
     .overrideProvider(SYSTEM_MAILER)
     .useValue(options.mailer ?? new FakeMailer());
   if (options.clock) builder = builder.overrideProvider(CLOCK).useValue(options.clock);

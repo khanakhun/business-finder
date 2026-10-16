@@ -72,11 +72,55 @@ apps/web/src/app/(dashboard)/{pipeline,tasks}/page.tsx
 - E2E: open business from search → change status → note → task → appears in /tasks → complete; drag card across columns; invalid drag rejected; duplicate merge flow (seeded duplicate pair).
 
 ## Acceptance criteria
-- [ ] Detail page with header, Overview, Contacts and Activity tabs; tabs/actions/activity renderers are registries.
-- [ ] Pipeline state machine enforced server-side; kanban with drag & drop and keyboard alternative.
-- [ ] Notes, tasks, tags, owner, do-not-contact with reasons; activity timeline from events (realtime).
-- [ ] Duplicate review and merge from the UI.
-- [ ] E2E tests pass (EN/FR).
+- [x] Detail page with header, Overview, Contacts and Activity tabs; tabs/actions/activity renderers are registries.
+- [x] Pipeline state machine enforced server-side; kanban with drag & drop and keyboard alternative.
+- [x] Notes, tasks, tags, owner, do-not-contact with reasons; activity timeline from events (realtime).
+- [x] Duplicate review and merge from the UI.
+- [x] E2E tests pass (EN/FR).
+
+## Implementation notes (BF-024)
+- **Pipeline** (`crm/domain/pipeline.ts`): a typed transition table where each edge says who may make it (`manual`
+  for people, `automatic` for the system). `allowedTransitions(status)` is what the API returns with every CRM
+  state and every board card, so the UI only ever offers what the server allows. `lost` and `disqualified` need a
+  reason (stored on `org_businesses`). DECISION: `qualified → contacted` and `contacted → engaged` may also be made
+  by hand (partners call and visit); site-lead jumps stay automatic. `CrmPipeline.markContacted/markEngaged` are the
+  automatic moves for outreach (BF-052) and site leads (BF-046): no-ops when they do not apply. Refused moves are
+  `INVALID_STATE_TRANSITION` → **409** (the error catalog's mapping; the ticket says 422 — see the PR).
+- **Status changes are compare-and-set** (`UPDATE … WHERE pipeline_status = from`): the loser of a race gets 409.
+  Tags, notes and tasks lock the `org_businesses` row (`SELECT … FOR UPDATE`) so counters (`notes_count`,
+  `open_tasks_count`, `next_task_due_at`) and tag edits never lose an update.
+- **API**: `GET /v1/businesses/:id/crm`, `POST …/status`, `PUT …/owner`, `POST …/tags`, `PUT …/do-not-contact`,
+  notes (`GET/POST …/notes`, `PATCH/DELETE /v1/notes/:id`, author only, soft delete), tasks (`GET/POST …/tasks`,
+  `GET /v1/tasks?assignee=me|<id>&due=today|overdue|upcoming|all&status=…&tz=<IANA>`, `PATCH /v1/tasks/:id`),
+  `GET …/activities` (cursor), `GET /v1/pipeline` (counts and the most recently moved cards per status; filters
+  owner, tag, category incl. subcategories, tier), `POST /v1/businesses/bulk/{status,tags}` (≤ 1,000 ids, one
+  transaction each, refusals reported per business). `GET /v1/teammates` (`business:read`): members by name for
+  owner/assignee pickers — no emails (`/v1/members` stays `members:manage`). `GET
+  /v1/businesses/possible-duplicates?businessId=` lists one business's pairs.
+- **"Today"** is the caller's day: `/v1/tasks` takes an IANA `tz` (the web sends the browser's), default UTC.
+- **Activity timeline** (`ActivitySubscriber`, Observer): CRM events, `business.created` and `business.updated`
+  (fanned out to every tracking workspace) become `activities` rows, idempotent on (event, workspace), and publish
+  `crm.activity.created` in realtime (the page, board and task lists refresh; bursts are coalesced client-side to
+  one refetch per 500 ms). Merges re-point notes, tasks and activities to the survivor and refresh its counters.
+- **Merges keep the workspace's CRM state** (BF-016 `mergeOrgLinks`): the further status with its reason and date,
+  do-not-contact with its reason, tags united, the survivor's owner (else the duplicate's). A survivor that becomes
+  do-not-contact through a merge records `crm.do_not_contact.set` for that workspace (compliance, BF-049).
+- **Web**: `/businesses/[id]` (server-fetched business and CRM state, then React Query), `/pipeline` (dnd-kit; only
+  allowed columns accept a drop, optimistic move with rollback; keyboard: the card's status menu), `/tasks`
+  (overdue/today/upcoming/done, complete inline). Registries: tabs (`businessTabs`, lazy via `next/dynamic`),
+  quick actions (`quickActions`; Enrich, Generate site and Send email are placeholders that BF-027/046/052 replace
+  by id; WhatsApp, Call and email are disabled for do-not-contact), activity renderers (`activityRenderers`;
+  unknown types fall back to a generic line), and bulk dialogs on search (`registerBulkDialog`; the CRM replaces
+  BF-023's tags/status placeholders). Notes render with react-markdown: no raw HTML, no images, safe URLs only.
+- **Contacts tab** lists contacts with type, verification and source, and adds manual ones. Contacts are global
+  facts (ADR-0008), so they are not editable from a workspace; people's names belong in notes.
+- **Fixed along the way**: `useRegisterCommands` re-registered on every render when given a fresh array, which
+  looped the search page and blocked every client navigation away from it; the test worker now shares its app's
+  DB client (a second client took `@Transactional()` over and left the app's repositories outside their
+  transactions); `Tabs` inactive triggers now meet contrast.
+- **Follow-ups**: an activity when a workspace starts tracking an existing business (no event yet); task
+  cancelled/reopened events; grouping frequent `business.updated` activities once enrichment runs (BF-027);
+  retention of notes, tasks and activities in the prospect purge (BF-055); suppression-aware WhatsApp (BF-057).
 
 ## Agent prompt
 ```text

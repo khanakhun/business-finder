@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { type BulkAction, bulkActionsFor, registerBulkAction, resetBulkActions } from './registry.ts';
+import {
+  type BulkAction,
+  bulkActionsFor,
+  bulkDialog,
+  registerBulkAction,
+  registerBulkDialog,
+  resetBulkActions,
+} from './registry.ts';
 
 const action = (overrides: Partial<BulkAction>): BulkAction => ({
   id: 'x',
@@ -36,7 +43,7 @@ describe('bulk action registry', () => {
   it('needs a selection unless the action applies to every result, and honours disabled reasons', () => {
     registerBulkAction(action({ id: 'list' }));
     registerBulkAction(action({ id: 'export', permission: 'business:read', allowEmptySelection: true }));
-    registerBulkAction(action({ id: 'status', disabledReason: () => 'search.bulk.needsCrm' }));
+    registerBulkAction(action({ id: 'status', disabledReason: () => 'search.bulk.comingSites' }));
     const none = bulkActionsFor(context([], ['business:read', 'business:write']));
     expect(none.find((a) => a.action.id === 'list')).toMatchObject({
       enabled: false,
@@ -46,7 +53,7 @@ describe('bulk action registry', () => {
     const some = bulkActionsFor(context(['1'], ['business:read', 'business:write']));
     expect(some.find((a) => a.action.id === 'status')).toMatchObject({
       enabled: false,
-      reason: 'search.bulk.needsCrm',
+      reason: 'search.bulk.comingSites',
     });
   });
 
@@ -55,5 +62,16 @@ describe('bulk action registry', () => {
     registerBulkAction(action({ id: 'x', order: 2 }));
     off();
     expect(bulkActionsFor(context(['1'], ['business:write'])).map((a) => a.action.order)).toEqual([2]);
+  });
+
+  it('registers dialogs by id and unregisters only its own', () => {
+    const first = () => null;
+    const second = () => null;
+    const unregisterFirst = registerBulkDialog('d', first);
+    registerBulkDialog('d', second);
+    unregisterFirst();
+    expect(bulkDialog('d')).toBe(second);
+    resetBulkActions();
+    expect(bulkDialog('d')).toBeUndefined();
   });
 });

@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Skeleton } from '@bf/ui/components/skeleton';
 import { GlobeIcon, PhoneIcon, RadarIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
@@ -275,7 +276,9 @@ function SearchScreen() {
                     {opened.primaryPhone}
                   </a>
                 ) : null}
-                <p className="text-muted-foreground">{t('table.detailSoon')}</p>
+                <Button asChild size="sm">
+                  <Link href={`/businesses/${opened.id}`}>{t('table.openPage')}</Link>
+                </Button>
               </div>
             </>
           ) : null}

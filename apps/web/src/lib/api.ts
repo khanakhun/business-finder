@@ -15,6 +15,7 @@ export const queryKeys = {
   system: defineQueryKeys('system', { info: () => ['system', 'info'] as const }),
   identity: defineQueryKeys('identity', {
     members: () => ['identity', 'members'] as const,
+    teammates: () => ['identity', 'teammates'] as const,
     apiKeys: () => ['identity', 'api-keys'] as const,
     sessions: () => ['identity', 'sessions'] as const,
   }),
@@ -39,6 +40,19 @@ export const queryKeys = {
     saved: () => ['search', 'saved'] as const,
     lists: () => ['search', 'lists'] as const,
     list: (id: string) => ['search', 'list', id] as const,
+  }),
+  business: defineQueryKeys('business', {
+    detail: (id: string) => ['business', id, 'detail'] as const,
+    crm: (id: string) => ['business', id, 'crm'] as const,
+    contacts: (id: string) => ['business', id, 'contacts'] as const,
+    notes: (id: string) => ['business', id, 'notes'] as const,
+    tasks: (id: string) => ['business', id, 'tasks'] as const,
+    activities: (id: string) => ['business', id, 'activities'] as const,
+    duplicates: (id: string) => ['business', id, 'duplicates'] as const,
+  }),
+  crm: defineQueryKeys('crm', {
+    board: (filters: Readonly<Record<string, string>>) => ['crm', 'board', filters] as const,
+    tasks: (filters: Readonly<Record<string, string>>) => ['crm', 'tasks', filters] as const,
   }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,

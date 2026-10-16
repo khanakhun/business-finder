@@ -19,6 +19,7 @@
     "@bf/config": "workspace:*",
     "@bf/contracts": "workspace:*",
     "@bf/ui": "workspace:*",
+    "@dnd-kit/core": "catalog:",
     "@tanstack/react-query": "catalog:",
     "lucide-react": "catalog:",
     "maplibre-gl": "catalog:",
@@ -29,6 +30,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-map-gl": "catalog:",
+    "react-markdown": "catalog:",
     "server-only": "catalog:",
     "uqr": "catalog:"
   },

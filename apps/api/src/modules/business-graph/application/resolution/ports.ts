@@ -78,8 +78,14 @@ export interface MergeRepository {
   moveSources(fromId: string, toId: string, sourceIds?: readonly string[]): Promise<number>;
   /** Moves contacts the survivor lacks, drops the rest; moves media and reviews; clears categories and hours. */
   moveSideData(fromId: string, toId: string): Promise<void>;
-  /** Folds workspace links of `fromId` into `toId` (most advanced pipeline status, do-not-contact kept). */
-  mergeOrgLinks(fromId: string, toId: string): Promise<void>;
+  /**
+   * Folds workspace links of `fromId` into `toId`: most advanced pipeline status (with its reasons), do-not-contact
+   * kept with its reason, tags united, owner kept. Returns the workspaces whose survivor became do-not-contact.
+   */
+  mergeOrgLinks(
+    fromId: string,
+    toId: string,
+  ): Promise<ReadonlyArray<{ readonly organizationId: string; readonly reason: string | null }>>;
   /** Every workspace tracking `fromId` also tracks `toId` (split). */
   copyOrgLinks(fromId: string, toId: string): Promise<void>;
   /** Pairs with `fromId` now concern `toId`; the pair between them becomes `merged`. */
@@ -91,6 +97,7 @@ export interface MergeRepository {
   listDuplicates(filter: {
     readonly organizationId: string;
     readonly status: 'open' | 'merged' | 'dismissed';
+    readonly businessId?: string;
     readonly limit: number;
     readonly before?: { readonly createdAt: string; readonly id: string };
   }): Promise<DuplicateRecord[]>;

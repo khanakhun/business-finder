@@ -24,7 +24,8 @@
     "settings": "Settings",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
-    "label": "Main navigation"
+    "label": "Main navigation",
+    "tasks": "Tasks"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -757,7 +758,7 @@
       "open": "Open",
       "openWebsite": "Open website",
       "summary": "Summary",
-      "detailSoon": "The full business page arrives with the CRM."
+      "openPage": "Open business page"
     },
     "facets": {
       "title": "Refine",
@@ -802,7 +803,6 @@
       "enroll": "Email or enroll",
       "forbidden": "You don't have permission",
       "selectFirst": "Select businesses first",
-      "needsCrm": "Available with the business pages (CRM)",
       "comingSites": "Available with site generation",
       "comingOutreach": "Available with outreach",
       "done": "{count, plural, one {Done for # business} other {Done for # businesses}}",
@@ -925,5 +925,287 @@
       "lists": "Lists"
     },
     "error": "Results could not be loaded"
+  },
+  "business": {
+    "title": "Business",
+    "error": "The business could not be loaded",
+    "rating": "{rating} ({count, plural, one {# review} other {# reviews}})",
+    "lostBecause": "Lost: {reason}",
+    "disqualifiedBecause": "Disqualified: {reason}",
+    "tabs": {
+      "overview": "Overview",
+      "contacts": "Contacts",
+      "activity": "Activity"
+    },
+    "actions": {
+      "label": "Quick actions",
+      "openWebsite": "Open website",
+      "call": "Call",
+      "whatsApp": "WhatsApp",
+      "enrich": "Enrich now",
+      "generateSite": "Generate site",
+      "sendEmail": "Send email",
+      "doNotContact": "Marked do not contact",
+      "comingEnrichment": "Available with enrichment",
+      "comingSites": "Available with site generation",
+      "comingOutreach": "Available with outreach"
+    },
+    "status": {
+      "refused": "That move is not allowed from the current status. The page now shows the latest status.",
+      "moved": "Moved to {status}",
+      "reasonTitle": "Why is it {status}?",
+      "reasonDescription": "Teammates see this reason on the business and in its timeline.",
+      "moveTo": "Move to {status}",
+      "change": "Pipeline status of {name}: {status}. Change status",
+      "moveLabel": "Move to",
+      "needsReason": "Needs a reason"
+    },
+    "reason": {
+      "label": "Reason",
+      "cancel": "Cancel"
+    },
+    "owner": {
+      "label": "Owner",
+      "nobody": "No owner"
+    },
+    "tags": {
+      "label": "Tags",
+      "remove": "Remove tag {tag}",
+      "none": "No tags",
+      "new": "New tag",
+      "add": "Add",
+      "addTag": "Add tag"
+    },
+    "doNotContact": {
+      "label": "Do not contact",
+      "marked": "Marked do not contact: outreach will skip this business",
+      "cleared": "Do not contact removed",
+      "title": "Mark as do not contact",
+      "description": "Outreach skips this business in every mailbox and sequence. Say why, for whoever reads this later.",
+      "confirm": "Mark do not contact"
+    },
+    "sources": {
+      "google_places": "Google Places",
+      "overture": "Overture",
+      "foursquare": "Foursquare",
+      "osm": "OpenStreetMap",
+      "gmaps_scraper": "Maps scraper",
+      "website": "Website",
+      "manual": "Added by hand",
+      "import": "Import"
+    },
+    "provenance": {
+      "detail": "Confidence {confidence}, seen {date}"
+    },
+    "operating": {
+      "operational": "Open",
+      "closed_temporarily": "Temporarily closed",
+      "closed_permanently": "Permanently closed",
+      "unknown": "Unknown"
+    },
+    "overview": {
+      "facts": "Facts",
+      "name": "Name",
+      "status": "Status",
+      "address": "Address",
+      "phone": "Phone",
+      "website": "Website",
+      "rating": "Rating",
+      "ratingValue": "{rating} from {count, plural, one {# review} other {# reviews}}",
+      "categories": "Categories",
+      "contacts": "Contacts",
+      "contactsSummary": "{emails, plural, =0 {No email} one {# email} other {# emails}}, {phones, plural, =0 {no phone} one {# phone} other {# phones}}",
+      "quality": "Data quality",
+      "qualityValue": "{score} / 100",
+      "seen": "Seen",
+      "seenValue": "First {first}, last {last}",
+      "unknown": "Unknown",
+      "none": "None",
+      "location": "Location",
+      "noLocation": "No location yet",
+      "hours": "Opening hours",
+      "noHours": "No opening hours yet",
+      "closed": "Closed"
+    },
+    "contacts": {
+      "error": "Contacts could not be loaded",
+      "emptyTitle": "No contacts yet",
+      "empty": "Enrichment finds emails and phone numbers the business publishes. You can also add one you know.",
+      "caption": "Contacts of the business",
+      "type": "Type",
+      "value": "Contact",
+      "verification": "Verification",
+      "source": "Source",
+      "added": "Contact added",
+      "addTitle": "Add a contact",
+      "add": "Add contact",
+      "addHint": "Only contact points the business publishes itself. Keep people's names in notes."
+    },
+    "contactTypes": {
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "website_form": "Contact form",
+      "social": "Social profile"
+    },
+    "verification": {
+      "unknown": "Not checked",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "catch_all": "Catch-all",
+      "risky": "Risky",
+      "disposable": "Disposable"
+    },
+    "notes": {
+      "deleted": "Note deleted",
+      "someone": "A former member",
+      "byline": "{author}, {when}",
+      "pinned": "Pinned",
+      "unpin": "Unpin note",
+      "pin": "Pin note",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "title": "Notes",
+      "new": "New note",
+      "placeholder": "Write a note (markdown)…",
+      "hint": "Markdown works. Ctrl+Enter adds the note.",
+      "add": "Add note",
+      "empty": "No notes yet."
+    },
+    "tasks": {
+      "completed": "Done: {title}",
+      "reopen": "Reopen {title}",
+      "complete": "Mark {title} done",
+      "overdue": "Overdue, due {when}",
+      "noDue": "No due date",
+      "title": "Open tasks",
+      "empty": "Nothing to do on this business.",
+      "new": "New task",
+      "placeholder": "Call back on Monday…",
+      "type": "Type",
+      "due": "Due",
+      "assignee": "Assignee",
+      "me": "Me",
+      "add": "Add task",
+      "added": "Task added: {title}"
+    },
+    "taskTypes": {
+      "call": "Call",
+      "email": "Email",
+      "visit": "Visit",
+      "follow_up": "Follow-up",
+      "other": "Other"
+    },
+    "activity": {
+      "status": "Moved from {from} to {to}",
+      "statusAutomatic": "Moved from {from} to {to} automatically",
+      "someone": "A former member",
+      "owner": "Assigned to {name}",
+      "ownerCleared": "Owner removed",
+      "tagsAdded": "Tagged {tags}.",
+      "tagsRemoved": "Untagged {tags}.",
+      "doNotContactOn": "Marked do not contact",
+      "doNotContactOff": "Do not contact removed",
+      "noteAdded": "Added a note",
+      "tracked": "Started tracking the business",
+      "merged": "Merged a duplicate into this business",
+      "taskCreated": "Created the task {title}",
+      "taskCompleted": "Completed the task {title}",
+      "apiKey": "An API key",
+      "system": "Business Finder",
+      "generic": "Event {type}",
+      "title": "Timeline",
+      "empty": "Nothing has happened yet.",
+      "more": "Show older",
+      "updated": "Updated {count, plural, one {# detail} other {# details}} of the business"
+    },
+    "duplicates": {
+      "label": "Possible duplicates",
+      "maybe": "May be the same business as {name} {locality} ({score}% match)",
+      "compare": "Compare",
+      "dismissed": "Marked as different businesses",
+      "merged": "Businesses merged",
+      "fields": {
+        "name": "Name",
+        "category": "Category",
+        "address": "Address",
+        "phone": "Phone",
+        "website": "Website",
+        "rating": "Rating"
+      },
+      "title": "Same business?",
+      "description": "{score}% match. Keep one: the other is merged into it with its sources, notes, tasks and timeline.",
+      "reasons": "Why they look alike",
+      "thisOne": "This business",
+      "otherOne": "Possible duplicate",
+      "dismiss": "Different businesses",
+      "keep": "Keep {name}"
+    },
+    "bulk": {
+      "tagsTitle": "Tags on {count, plural, one {# business} other {# businesses}}",
+      "tagsDescription": "Separate tags with commas.",
+      "addTags": "Add tags",
+      "removeTags": "Remove tags",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "statusTitle": "Status of {count, plural, one {# business} other {# businesses}}",
+      "statusDescription": "Each business moves only if its current status allows it; the others are left as they are.",
+      "status": "New status",
+      "reason": "Reason",
+      "tooMany": "Select up to 1,000 businesses"
+    }
+  },
+  "pipeline": {
+    "title": "Pipeline",
+    "description": "Drag a business to its next stage. Only the moves its status allows are open.",
+    "filters": "Board filters",
+    "owner": "Owner",
+    "anyOwner": "Any owner",
+    "mine": "Mine",
+    "tier": "Tier",
+    "anyTier": "Any tier",
+    "tierValue": "Tier {tier}",
+    "anyCategory": "Any category",
+    "tag": "Tag",
+    "error": "The pipeline could not be loaded",
+    "score": "Score {score}",
+    "count": "{count, plural, one {# business} other {# businesses}}",
+    "more": "{count, plural, one {# more in search} other {# more in search}}",
+    "emptyColumn": "No business here",
+    "moved": "{name} moved to {status}",
+    "refused": "A business cannot move from {from} to {to}",
+    "reasonTitle": "Why is it {status}?",
+    "reasonDescription": "Teammates see this reason on the business and in its timeline.",
+    "moveTo": "Move to {status}",
+    "a11y": {
+      "picked": "Picked up {name}",
+      "over": "Over {status}",
+      "dropped": "Dropped on {status}",
+      "cancelled": "Move cancelled",
+      "instructions": "Drag with a mouse or finger. With a keyboard, open the card's status menu instead."
+    },
+    "category": "Category"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "description": "What you have to do, soonest first.",
+    "windows": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "done": "Done"
+    },
+    "error": "Tasks could not be loaded",
+    "empty": {
+      "overdue": "Nothing overdue",
+      "today": "Nothing due today",
+      "upcoming": "Nothing planned",
+      "done": "No finished tasks yet"
+    },
+    "emptyHint": "Add tasks from a business page, in its Activity tab.",
+    "toPipeline": "Open the pipeline",
+    "more": "Show more"
   }
 }

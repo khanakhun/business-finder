@@ -428,4 +428,76 @@ describe('validateSite', () => {
       'social_host@contact.socials.0.url',
     );
   });
+
+  it.each([
+    'https://www.salon-lumiere.example/go?u=%5C%5Ce.com',
+    'https://www.salon-lumiere.example/go?u=https:e.com',
+    'https://www.salon-lumiere.example/go?next=evil.com',
+    'https://www.salon-lumiere.example/go?u=ht%09tps://e.com',
+    'https://www.salon-lumiere.example/go#u=https://e.com',
+    'https://www.salon-lumiere.example/go#https://evil.xyz',
+  ])('refuses a url action that redirects: %s', (url) => {
+    const spec = with_((s) => Object.assign(s.layout.header, { cta: { kind: 'url', label: L('Go'), url } }));
+    expect(found(spec, { ...OPTIONS, ownDomains: ['salon-lumiere.example'] })).toContain(
+      'external_url@layout.header.cta.url',
+    );
+  });
+
+  it.each([
+    'see www.evil.com@a.bc',
+    'evil·com',
+    'evil.villas',
+    'evil.рф',
+    'evil.xn--p1ai',
+    'Gustavia.Le port',
+  ])(
+    // The last one is meant: a missing space after a full stop reads as an address (the message says so).
+    'finds the web address in %j',
+    (title) => {
+      expect(found(with_((s) => Object.assign(s.seo.title, { en: `${title} — Salon` })))).toContain(
+        'external_url@seo.title.en',
+      );
+    },
+  );
+
+  it.each([
+    'https://www.tripadvisor.fr/VacationRentalReview-g147339-d7654321-Villa_Les_Palmiers-Gustavia.html',
+    'https://www.tripadvisor.com/AttractionProductReview-g147339-d11223344-Boat_Tour-Gustavia.html',
+    'https://www.tripadvisor.fr/Restaurant_Review-g147339-d1234567-Reviews-Caf%C3%A9_Saint_Jean.html',
+  ])('accepts the TripAdvisor page %s', (url) => {
+    const spec = with_((s) =>
+      Object.assign(s.contact, { socials: [{ network: 'tripadvisor', url, factId: 'social.instagram' }] }),
+    );
+    expect(found(spec)).toEqual([]);
+  });
+
+  it('validates a near-maximal hostile spec quickly (no quadratic pattern)', () => {
+    const filler = 'a'.repeat(4900);
+    const spec = with_((s) => {
+      for (let n = 0; n < 5; n += 1) {
+        s.pages.push({
+          id: `extra-${n}`,
+          slug: `extra-${n}`,
+          title: L('Extra'),
+          seo: {
+            title: L('Extra page of the salon, Gustavia'),
+            description: s.pages[0]?.seo.description ?? L('x'),
+          },
+          blocks: [
+            { id: `hero-x${n}00`, type: 'hero', variant: 'minimal', props: { title: L('Extra') } },
+            ...Array.from({ length: 19 }, (_, j) => ({
+              id: `rich-x${n}${String(j).padStart(2, '0')}`,
+              type: 'rich_text' as const,
+              variant: 'narrow' as const,
+              props: { body: L(filler) },
+            })),
+          ],
+        });
+      }
+    });
+    expect(parseSite(spec).spec).not.toBeNull();
+    const started = performance.now();
+    validateSite(spec, OPTIONS);
+    expect(performance.now() - started).toBeLessThan(1500);
+  });
 });

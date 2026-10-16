@@ -110,3 +110,9 @@ Verify: pnpm verify (coverage ≥ 90% for validate/ and ops/); regenerate JSON S
 ## References
 - ADR-0009 · ADR-0010 · docs/ARCHITECTURE.md §10–§11 · docs/conventions/ai-engineering.md §5
 - WCAG contrast: https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html · JSON Schema 2020-12: https://json-schema.org/
+
+## Implementation notes
+- **Deviation:** `url` actions go to the business's own domains only (the ticket also allowed known booking
+  providers): a booking page is reached through the `booking` action, which resolves to the fact-backed
+  `contact.bookingUrl` — a provider host also serves pages anyone can create. Engines (BF-040/BF-042) emit `booking`
+  actions for booking links.

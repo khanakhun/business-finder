@@ -7,7 +7,7 @@ import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
 import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
-import { PAGE_LINK, parseRichText } from './rich-text.ts';
+import { parseRichText, withoutPageLinks } from './rich-text.ts';
 import { isCta, isLocalized, type Path, walk } from './walk.ts';
 
 // The semantic validator (BF-033): what the schema cannot say. Each rule is a small function over the parsed spec
@@ -319,7 +319,8 @@ const skipped = (path: Path) => {
   if (LOCALES.has(key)) return true;
   return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
 };
-const EMAIL = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
+/** An e-mail address (anchored and bounded: linear on long words). */
+const EMAIL = /(?<![\w.+-])([\w.+-]{1,64})@[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}/g;
 
 const urlsRule: Rule = (spec, options) => {
   const issues: Issue[] = [];
@@ -370,10 +371,17 @@ const urlsRule: Rule = (spec, options) => {
   const scan = (text: string, path: Path) => {
     // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
     const rich = isRichText(path);
-    const words = (rich ? text.replace(PAGE_LINK, '$1') : text).replace(EMAIL, '');
+    // E-mail addresses are the facts validator's; a web address dressed as one (`www.evil.com@a.bc`) is not.
+    const words = (rich ? withoutPageLinks(text) : text).replace(EMAIL, (address, local: string) =>
+      hasWebAddress(local) ? address : '',
+    );
     if (hasWebAddress(words)) {
       issues.push(
-        error(path, 'external_url', 'Remove the web address from the text; use an action instead.'),
+        error(
+          path,
+          'external_url',
+          'Remove the web address from the text (use an action instead); if it is not one, put a space after the full stop.',
+        ),
       );
     }
     if (!rich && /<\/?[a-z!][^>]*>?/i.test(text))

@@ -21,8 +21,11 @@ export interface RichTextResult {
   readonly pageIds: readonly string[];
 }
 
-/** A valid link: a bounded label without brackets or line breaks, then a page target. */
-export const PAGE_LINK = /\[([^[\]\n]{0,200})\]\(page:([a-z][a-z0-9-]{1,31})\)/g;
+/** A valid link: a bounded label without brackets or line breaks, then a page target (global: replace only). */
+const PAGE_LINK = /\[([^[\]\n]{0,200})\]\(page:([a-z][a-z0-9-]{1,31})\)/g;
+
+/** The text with its valid page links replaced by their labels (what the words say). */
+export const withoutPageLinks = (text: string) => text.replace(PAGE_LINK, '$1');
 
 const FORBIDDEN_LINE: readonly [RegExp, string][] = [
   [/^\s{0,3}#{1,6}(\s|$)/, 'headings are not allowed (the page has one heading: its hero)'],
@@ -38,7 +41,7 @@ const FORBIDDEN_LINE: readonly [RegExp, string][] = [
 ];
 
 const FORBIDDEN_INLINE: readonly [RegExp, string][] = [
-  [/<\/?[a-z!][^>\n]*>?/i, 'HTML is not allowed'],
+  [/<[a-z!?/][^>\n]*>?/i, 'HTML is not allowed'],
   [/<[a-z][a-z0-9+.-]*:[^>\n]*>/i, 'autolinks are not allowed'],
   [/!\[/, 'images are not allowed'],
   [/\]\s*\[/, 'reference links are not allowed'],
@@ -103,7 +106,9 @@ function emphasis(text: string, links: readonly Inline[]): Inline[] {
       const top = stack.at(-1);
       if (top && canClose && top.size <= run) {
         stack.pop();
-        children().push({ type: top.size === 2 ? 'strong' : 'em', children: top.children });
+        // Empty emphasis (`a****b`) stays as its stars, like CommonMark.
+        if (top.children.length === 0) pushText('*'.repeat(top.size * 2));
+        else children().push({ type: top.size === 2 ? 'strong' : 'em', children: top.children });
         run -= top.size;
       } else if (canOpen && stack.length < 2) {
         const size: 1 | 2 = run >= 2 && !stack.some((frame) => frame.size === 2) ? 2 : 1;
@@ -148,8 +153,10 @@ export function parseRichText(text: string): RichTextResult {
   const pageIds: string[] = [];
   const blocks: RichBlock[] = [];
   // Every `](` must belong to a page link (a space, a title or another target is not one).
-  if (text.replace(PAGE_LINK, '').includes(']('))
-    problems.add("links go to the site's pages only: [label](page:<id>)");
+  // Square brackets are only for page links: anything else ([x](url), references, definitions in any form) is refused.
+  const rest = text.replace(PAGE_LINK, '');
+  if (rest.includes('](')) problems.add("links go to the site's pages only: [label](page:<id>)");
+  else if (/[[\]]/.test(rest)) problems.add('square brackets are only for page links: [label](page:<id>)');
   for (const chunk of text.split(/\n\s*\n/)) {
     const lines = chunk.split('\n').filter((line) => line.trim() !== '');
     if (lines.length === 0) continue;

@@ -44,6 +44,12 @@ describe('parseRichText', () => {
     ['* item', 'use "- "'],
     ['+ item', 'use "- "'],
     ['- item\nprose', 'blank line'],
+    ['Réservez [ici]\n\n[ici\n]: &#x2F;&#x2F;evil&#x2E;xyz', 'square brackets'],
+    ['[\nr]: javascript:alert(1)\n\n[r]', 'square brackets'],
+    ['[a\\]b]\n\n[a\\]b]: javascript:alert(1)', 'square brackets'],
+    ['- [r]: javascript:alert(1)\n\n[r]', 'square brackets'],
+    ['- [r]: &#x2F;&#x2F;evil&#x2E;xyz\n\n- [r]', 'square brackets'],
+    ['<?xml x?>', 'HTML'],
     ['> quote', 'quotes'],
     ['1. first', 'numbered'],
     ['---', 'rules'],
@@ -80,6 +86,7 @@ describe('parseRichText', () => {
     ['5 * 3 * 2', [{ type: 'text', text: '5 * 3 * 2' }]],
     ['a \\*literal\\* star', [{ type: 'text', text: 'a *literal* star' }]],
     ['**open only', [{ type: 'text', text: '**open only' }]],
+    ['a****b', [{ type: 'text', text: 'a****b' }]],
   ])('reads emphasis like CommonMark: %j', (text, children) => {
     expect(parseRichText(text).blocks).toEqual([{ type: 'paragraph', children }]);
   });

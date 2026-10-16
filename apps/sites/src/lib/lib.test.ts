@@ -11,6 +11,7 @@ import { buildSiteCsp } from './csp.ts';
 import { siteHostname, underSitesDomain } from './host.ts';
 import { pageAlternates, resolveRoute } from './locale-routing.ts';
 import { NonceCache } from './nonce-cache.ts';
+import { previewActionLinks } from './preview-actions.ts';
 import { REVALIDATE_PATH, revalidate, revalidateNonces } from './revalidate.ts';
 import { PREVIEW_BOT, robotsTxt, sitemapXml, siteOrigin, siteScheme } from './seo.ts';
 import { statusPage } from './status-page.ts';
@@ -353,6 +354,30 @@ describe('cacheUntil', () => {
     // An ended publication has nothing left to expire.
     expect(cacheUntil({ status: 'expired', expiresAt: '2026-10-15T12:00:00.000Z' }, now)).toBe(
       now + TENANT_TTL_MS,
+    );
+  });
+});
+
+describe('previewActionLinks', () => {
+  const base = {
+    siteId: 'site-1',
+    claimUrl: 'https://app.example/claim',
+    optOutUrl: 'https://api.example/optout',
+  };
+
+  it('links the claim form and the opt-out, passing an e-mail’s signed reference on', () => {
+    expect(previewActionLinks({ ...base, outreachRef: 'v1.abcdefgh.sig_-' })).toEqual({
+      claim: 'https://app.example/claim?site=site-1',
+      optOut: 'https://api.example/optout?site=site-1&r=v1.abcdefgh.sig_-',
+    });
+  });
+
+  it('shows no button without its URL, and drops a reference that is not one', () => {
+    expect(
+      previewActionLinks({ siteId: 's', claimUrl: undefined, optOutUrl: undefined, outreachRef: undefined }),
+    ).toEqual({});
+    expect(previewActionLinks({ ...base, outreachRef: '"><script>' }).optOut).toBe(
+      'https://api.example/optout?site=site-1',
     );
   });
 });

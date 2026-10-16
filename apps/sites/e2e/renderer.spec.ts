@@ -206,3 +206,18 @@ test('ignores a visitor’s own proxy headers and look-alike internal paths', as
   });
   expect(big.status).toBe(413);
 });
+
+test('offers a preview’s claim and opt-out, passing the e-mail’s signed reference on', async ({ page }) => {
+  await page.goto(siteUrl(SLUGS.active, '/?r=v1.e2e-reference.signature'));
+  const actions = page.getByRole('navigation', { name: /Aperçu proposé/ });
+  await expect(actions.getByRole('link', { name: /C’est mon entreprise/ })).toHaveAttribute(
+    'href',
+    /^https:\/\/app\.e2e\.localhost\/claim\?site=/,
+  );
+  await expect(actions.getByRole('link', { name: /Pas intéressé/ })).toHaveAttribute(
+    'href',
+    /^https:\/\/api\.e2e\.localhost\/v1\/public\/opt-out\?site=[^&]+&r=v1\.e2e-reference\.signature$/,
+  );
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  expect(axe.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([]);
+});

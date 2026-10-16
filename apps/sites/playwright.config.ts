@@ -26,6 +26,9 @@ export default defineConfig({
       API_URL,
       // The fixtures' image host: their images are on our CDN as far as the policy is concerned.
       SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
+      // The preview's claim and opt-out buttons (their backends come with BF-048 and BF-055).
+      SITES_CLAIM_URL: 'https://app.e2e.localhost/claim',
+      SITES_OPT_OUT_URL: 'https://api.e2e.localhost/v1/public/opt-out',
     },
   },
 });

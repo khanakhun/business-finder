@@ -23,3 +23,28 @@
   text-transform: uppercase;
   color: #6b7280;
 }
+
+/* A preview's actions bar (claim, opt out): above the site, in the flow, readable on any theme. */
+.bf-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  font:
+    14px / 1.4 system-ui,
+    sans-serif;
+  color: #f8fafc;
+  background: #0f172a;
+}
+.bf-preview-actions a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bf-preview-actions a:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}

@@ -3,13 +3,17 @@ import { defaultPageHref, faviconHref, pickText, SitePage } from '@bf/site-block
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { PreviewActions } from '@/components/preview-actions.tsx';
 import { ViewBeacon } from '@/components/view-beacon.tsx';
 import { type CurrentSite, currentSite } from '@/lib/current-site.ts';
 import { sitesEnvironment } from '@/lib/env.ts';
 import { pageAlternates, resolveRoute } from '@/lib/locale-routing.ts';
+import { previewActionLinks } from '@/lib/preview-actions.ts';
+import { rendererStrings } from '@/lib/strings.ts';
 
 interface Props {
   readonly params: Promise<{ path?: string[] }>;
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 async function route(
@@ -58,8 +62,23 @@ export default async function SitePageRoute(props: Props) {
   const token = env.SITES_VIEW_TOKEN_SECRET
     ? await signSiteViewToken(tenant.siteId, env.SITES_VIEW_TOKEN_SECRET)
     : undefined;
+  const ref = (await props.searchParams).r;
+  const actions =
+    tenant.environment === 'preview'
+      ? previewActionLinks({
+          siteId: tenant.siteId,
+          claimUrl: env.SITES_CLAIM_URL,
+          optOutUrl: env.SITES_OPT_OUT_URL,
+          outreachRef: typeof ref === 'string' ? ref : undefined,
+        })
+      : {};
   return (
     <>
+      <PreviewActions
+        links={actions}
+        business={tenant.businessName}
+        strings={rendererStrings(current.locale)}
+      />
       <SitePage
         spec={tenant.spec}
         page={current.page.id}

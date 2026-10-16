@@ -179,6 +179,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |
 | `NEXT_PUBLIC_MAP_STYLE_URL` | App-specific | web | no | `https://tiles.openfreemap.org/styles/liberty` |  | MapLibre style for the search map (OpenFreeMap by default: free, no key, OSM attribution). |
 | `SITES_PORT` | App-specific | sites | no | `3100` |  | HTTP port of apps/sites. Set by infra:up from BF_PORT_OFFSET. |
+| `SITES_CLAIM_URL` | App-specific | sites | no |  |  | Where a preview's "This is my business" button leads (the claim form, BF-048); unset: no button. |
+| `SITES_OPT_OUT_URL` | App-specific | sites | no |  |  | Where a preview's "Not interested" button leads (opt-out, BF-055; the e-mail's signed ?r= token is passed on); unset: no button. |
 | `INTEL_HOST` | App-specific | intel | no | `127.0.0.1` |  | Interface services/intel binds to (0.0.0.0 inside its container). |
 | `INTEL_PORT` | App-specific | intel | no | `8000` |  | HTTP port of services/intel. Set by infra:up from BF_PORT_OFFSET. |
 | `INTEL_WORKERS` | App-specific | intel | no | `1` |  | Uvicorn worker processes. Prefer more replicas: metrics and the nonce cache are per process. |

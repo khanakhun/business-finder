@@ -613,19 +613,19 @@ describe('validateSite', () => {
         }
       });
     const full = hostile(1633);
-    const half = hostile(816);
+    const quarter = hostile(408);
     expect(parseSite(full).spec).not.toBeNull();
     const time = (spec: SiteSpec) => {
       const started = performance.now();
       validateSite(spec, OPTIONS);
       return performance.now() - started;
     };
-    time(half); // warm-up
+    time(quarter); // warm-up
     // The best of three runs each: other test files share the machine.
     const best = (spec: SiteSpec) => Math.min(time(spec), time(spec), time(spec));
-    const [small, large] = [best(half), best(full)];
-    // Twice the text takes about twice the time (a quadratic pattern takes four times); and it stays fast.
-    expect(large / small).toBeLessThan(3);
+    const [small, large] = [best(quarter), best(full)];
+    // Four times the text takes about four times the time (a quadratic pattern takes sixteen); and it stays fast.
+    expect(large / small).toBeLessThan(8);
     expect(large).toBeLessThan(1500);
   });
 });

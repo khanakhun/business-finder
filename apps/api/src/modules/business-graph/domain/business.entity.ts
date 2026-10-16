@@ -237,7 +237,8 @@ export class Business {
     return changed;
   }
 
-  setPrimaryCategory(categoryId: string): void {
+  /** `null` when no source classifies the business any more. */
+  setPrimaryCategory(categoryId: string | null): void {
     this.assertWritable();
     if (this.state.primaryCategoryId === categoryId) return;
     this.state = { ...this.state, primaryCategoryId: categoryId };
@@ -246,6 +247,20 @@ export class Business {
       type: 'business.updated',
       definition: BusinessUpdated,
       payload: { businessId: this.state.id, fields: ['primaryCategoryId'] },
+    });
+  }
+
+  /**
+   * Records `business.updated` for data stored beside the aggregate (hours, categories, contacts removed by a
+   * recompute), so subscribers hear about every change in one event per save.
+   */
+  noteChanged(fields: readonly string[]): void {
+    this.assertWritable();
+    if (fields.length === 0) return;
+    this.pending.push({
+      type: 'business.updated',
+      definition: BusinessUpdated,
+      payload: { businessId: this.state.id, fields: [...fields] },
     });
   }
 

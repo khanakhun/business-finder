@@ -16,7 +16,8 @@
     "start:worker": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/worker.ts",
     "dev:api": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts --watch src/main.ts",
     "admin:bootstrap": "node --import @swc-node/register/esm-register src/cli/bootstrap.ts",
-    "secrets:rotate-master": "node --import @swc-node/register/esm-register src/cli/rotate-master-key.ts"
+    "secrets:rotate-master": "node --import @swc-node/register/esm-register src/cli/rotate-master-key.ts",
+    "bench:ingest": "BF_BENCH=1 vitest run --config vitest.int.config.ts src/modules/business-graph/resolution.bench.int.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "catalog:",
@@ -73,6 +74,7 @@
     "@types/supertest": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "ai": "catalog:",
+    "fast-check": "catalog:",
     "otplib": "catalog:",
     "supertest": "catalog:",
     "typescript": "catalog:",

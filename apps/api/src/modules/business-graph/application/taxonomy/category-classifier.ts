@@ -29,6 +29,8 @@ export interface ClassifyInput {
   readonly locale: Locale;
   /** Workspace paying for the LLM fallback (null for platform ingestion). */
   readonly orgId?: string | null;
+  /** `false` skips the LLM step (interactive paths that must answer fast). */
+  readonly useModel?: boolean;
 }
 
 export interface CategoryClassification extends ClassificationResult {
@@ -85,7 +87,7 @@ export class CategoryClassifier {
     proposals.push(synonym);
     if (accepts(synonym)) return this.withIds(snapshot, decide(proposals));
 
-    proposals.push(await this.llmStep(snapshot, input, proposals));
+    if (input.useModel !== false) proposals.push(await this.llmStep(snapshot, input, proposals));
     return this.withIds(snapshot, decide(proposals));
   }
 

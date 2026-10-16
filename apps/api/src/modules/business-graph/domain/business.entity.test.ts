@@ -402,3 +402,23 @@ describe('persistence flags and review fixes', () => {
     }
   });
 });
+
+describe('side data changes', () => {
+  it('clears the primary category and notes external changes in business.updated', () => {
+    const business = newBusiness();
+    business.markSaved(1);
+    business.pullEvents();
+    business.setPrimaryCategory('0199e1b2-0000-7000-8000-0000000000c1');
+    business.setPrimaryCategory(null);
+    business.noteChanged([]);
+    business.noteChanged(['hours', 'categories']);
+    expect(business.snapshot().primaryCategoryId).toBeNull();
+    expect(business.pullEvents()).toEqual([
+      {
+        type: 'business.updated',
+        definition: BusinessUpdated,
+        payload: { businessId: ID, fields: ['primaryCategoryId', 'hours', 'categories'] },
+      },
+    ]);
+  });
+});

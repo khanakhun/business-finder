@@ -50,6 +50,47 @@ export {
   VerificationStatusSchema,
 } from './business.ts';
 export {
+  DUPLICATE_STATUSES,
+  type DuplicateStatus,
+  DuplicateStatusSchema,
+  MATCH_FEATURES,
+  type MatchFeature,
+  MatchFeatureSchema,
+  type MatchScore,
+  MatchScoreSchema,
+  type MergeBusinessesRequest,
+  MergeBusinessesRequestSchema,
+  type MergeBusinessesResult,
+  MergeBusinessesResultSchema,
+  type PossibleDuplicate,
+  type PossibleDuplicatePage,
+  PossibleDuplicatePageSchema,
+  type PossibleDuplicateQuery,
+  PossibleDuplicateQuerySchema,
+  PossibleDuplicateSchema,
+  type ResolvePossibleDuplicateRequest,
+  ResolvePossibleDuplicateRequestSchema,
+  type SplitBusinessRequest,
+  SplitBusinessRequestSchema,
+  type SplitBusinessResult,
+  SplitBusinessResultSchema,
+} from './business-graph/resolution.ts';
+export {
+  INGEST_OUTCOMES,
+  type IngestOutcome,
+  IngestOutcomeSchema,
+  type SourceRecord,
+  type SourceRecordInput,
+  SourceRecordSchema,
+} from './business-graph/source-record.ts';
+export {
+  GOLDEN_FIELDS,
+  type GoldenFieldName,
+  PROVIDER_CONFIDENCE,
+  providerRank,
+  SURVIVORSHIP_PRIORITY,
+} from './business-graph/survivorship.ts';
+export {
   BudgetExceededError,
   ConflictError,
   DomainError,

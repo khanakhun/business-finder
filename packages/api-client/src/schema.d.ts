@@ -123,6 +123,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses/{id}/split": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Move sources to a new business (unmerge) and recompute both */
+        post: operations["splitBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/track": {
         parameters: {
             query?: never;
@@ -138,6 +155,57 @@ export type paths = {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge businesses into a survivor (sources, contacts, workspace links move to it) */
+        post: operations["mergeBusinesses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/possible-duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Possible duplicates among the businesses the workspace tracks, with explainable scores */
+        get: operations["listPossibleDuplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/possible-duplicates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Dismiss a possible duplicate, or merge the pair */
+        patch: operations["resolvePossibleDuplicate"];
         trace?: never;
     };
     "/v1/categories": {
@@ -957,6 +1025,17 @@ export type components = {
             lat: number;
             lng: number;
         };
+        MatchScore: {
+            features: {
+                contribution: number;
+                /** @enum {string} */
+                feature: "name" | "distance" | "phone" | "website" | "category" | "address" | "phoneConflict" | "websiteConflict" | "sameProvider";
+                value: number;
+            }[];
+            /** @description Human-readable explanations, e.g. "same phone +590590…". */
+            reasons: string[];
+            total: number;
+        };
         /** @description The signed-in user, their active workspace, role and permissions. */
         Me: {
             activeOrganization: components["schemas"]["OrganizationSummary"] | null;
@@ -998,6 +1077,23 @@ export type components = {
         MembersOverview: {
             invitations: components["schemas"]["Invitation"][];
             members: components["schemas"]["Member"][];
+        };
+        MergeBusinessesRequest: {
+            mergedIds: string[];
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            survivorId: string;
+        };
+        MergeBusinessesResult: {
+            mergedIds: string[];
+            sourcesMoved: number;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            survivorId: string;
         };
         Notification: {
             bodyKey: string | null;
@@ -1090,6 +1186,39 @@ export type components = {
             /** @description Re-sending the same key enqueues nothing new. */
             idempotencyKey?: string;
         };
+        PossibleDuplicate: {
+            businessA: {
+                displayName: string;
+                /**
+                 * Format: uuid
+                 * @description BusinessId (UUID)
+                 */
+                id: string;
+                locality: string | null;
+            };
+            businessB: {
+                displayName: string;
+                /**
+                 * Format: uuid
+                 * @description BusinessId (UUID)
+                 */
+                id: string;
+                locality: string | null;
+            };
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            reasons: components["schemas"]["MatchScore"];
+            score: number;
+            /** @enum {string} */
+            status: "open" | "merged" | "dismissed";
+        };
+        PossibleDuplicatePage: {
+            items: components["schemas"]["PossibleDuplicate"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
         PostalAddress: {
             city: string;
             /** @description ISO 3166-1 alpha-2, e.g. BL (Saint-Barthélemy), MF (Saint-Martin), FR. */
@@ -1137,6 +1266,15 @@ export type components = {
             /** @description Subscriber id, e.g. `workspace.audit-identity`. */
             subscriberId: string;
         };
+        ResolvePossibleDuplicateRequest: {
+            /** @enum {string} */
+            action: "dismiss" | "merge";
+            /**
+             * Format: uuid
+             * @description Which of the two businesses survives a merge (default: A).
+             */
+            survivorId?: string;
+        };
         ReviewCategoryMappingRequest: {
             /** @enum {string} */
             action: "approve" | "reassign" | "reject";
@@ -1176,6 +1314,22 @@ export type components = {
         SenderDefaults: {
             fromName?: string;
             signatureMarkdown?: string;
+        };
+        SplitBusinessRequest: {
+            sourceIds: string[];
+        };
+        SplitBusinessResult: {
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            newBusinessId: string;
+            sourcesMoved: number;
         };
         /** @description Build and runtime information about the API process. */
         SystemInfo: {
@@ -1870,6 +2024,95 @@ export interface operations {
             };
         };
     };
+    splitBusiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SplitBusinessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SplitBusinessResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     trackBusiness: {
         parameters: {
             query?: never;
@@ -1893,6 +2136,240 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OrgBusinessState"];
                 };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    mergeBusinesses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MergeBusinessesRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeBusinessesResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listPossibleDuplicates: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+                status?: "open" | "merged" | "dismissed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PossibleDuplicatePage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    resolvePossibleDuplicate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolvePossibleDuplicateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Problem details (RFC 9457) */
             400: {

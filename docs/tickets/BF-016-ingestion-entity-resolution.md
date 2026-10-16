@@ -78,11 +78,11 @@ modules/business-graph/
 - Benchmark script with synthetic records (factories) reporting records/minute.
 
 ## Acceptance criteria
-- [ ] Ingestion pipeline with normalize → persist → block → score → decide → merge → emit.
-- [ ] Idempotent, order-independent, concurrency-safe (property and stress tests).
-- [ ] Possible duplicates recorded with explainable scores; merge/split APIs work and re-point all references.
-- [ ] Throughput target met (benchmark in PR).
-- [ ] `docs/DOMAIN.md` updated if resolution concepts changed.
+- [x] Ingestion pipeline with normalize → persist → block → score → decide → merge → emit.
+- [x] Idempotent, order-independent, concurrency-safe (property and stress tests).
+- [x] Possible duplicates recorded with explainable scores; merge/split APIs work and re-point all references.
+- [x] Throughput target met (benchmark in PR).
+- [x] `docs/DOMAIN.md` updated if resolution concepts changed.
 
 ## Agent prompt
 ```text
@@ -104,3 +104,48 @@ Verify: pnpm verify && pnpm test:int; run the benchmark and paste records/minute
 ## References
 - docs/DOMAIN.md · docs/ARCHITECTURE.md §6.2 · ADR-0008 · ADR-0013
 - Fellegi–Sunter record linkage overview: https://en.wikipedia.org/wiki/Record_linkage · fast-check: https://fast-check.dev/ · PostgreSQL advisory locks: https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS
+
+## Implementation notes
+- **Split**: part 1/3 contracts + pure resolution domain (normalizer, blocking, scorer, decision, survivorship,
+  geohash, Jaro–Winkler/token-set implemented locally); part 2/3 pipeline (ingest record/batch commands, advisory
+  locks, golden writer, manual add through ingestion, `RESOLUTION_*` thresholds); part 3/3 merge/split/duplicates
+  APIs, review fixes, migration 0008 (duplicates status index).
+- **Golden record = f(set of sources)**: `computeGolden` picks each field by survivorship (manual → per-field
+  provider priority → confidence → recency → provider ref), unions contacts, aggregates category classifications;
+  every change recomputes from all linked sources (`business_sources.normalized`), which gives order independence
+  and makes split a recompute. Contacts no source backs any more are removed (manual contacts stay).
+- **Pipeline**: parse (422 on invalid) → content hash (record minus fetch times + normalizer version + default
+  region; unchanged → touch `fetched_at`, no LLM) → classify (BF-015, before the transaction) → normalize → one
+  transaction: lock → re-check → upsert source → known source? recompute : block → score → decide → create / link +
+  recompute / flag possible duplicates → events. Payload stored without NUL characters, capped at 256 KB.
+- **Lock protocol** (ingestion, merge, split): phase 1 blocking keys — phones, site match key, geohash6 cell + 8
+  neighbours (whole cells, so name variants collide), normalized name — sorted in one statement; phase 2
+  `business:<id>` keys, sorted. Ingestion follows merges after locking a business; merge/split lock the blocking
+  keys of every source involved. Cell-level locks serialize ingestion within an area (correctness over parallelism).
+- **Scoring**: additive, explainable (`MatchScore.features` + reasons): name 0.40 × similarity, distance 0.25 ×
+  decay (1 ≤ 25 m → 0 at 500 m), phone 0.30, website 0.25, category 0.10 × compatibility, address 0.05 × overlap;
+  conflicts −0.10 (phone, website), another record of the same provider −0.20. Match ≥ 0.85, possible ≥ 0.60
+  (`gmaps_scraper` +0.05).
+- **Manual adds** (`POST /v1/businesses`) are ingested as `manual` source records (values validated first, LLM
+  classification skipped) and may only join a record the workspace alone tracks; otherwise they create their own
+  record (flagged as a possible duplicate) — manual values win survivorship and must not rewrite facts other
+  workspaces rely on (ADR-0008).
+- **Merge/split** (`POST /v1/businesses/merge`, `POST /:id/split`, `GET|PATCH /possible-duplicates`): only on
+  businesses the workspace tracks, and refused (403 `BUSINESS_SHARED`) when another workspace tracks one, unless a
+  platform operator acts. Merge moves sources, contacts (manual protection kept), media, reviews, workspace links
+  (most advanced pipeline status, do-not-contact kept) and open duplicate pairs; merged records become read-only and
+  emit `business.merged`; per-id audit. Split creates a record from the chosen sources, copies workspace links and
+  recomputes both (round trip tested).
+- **Known limitations** (QUESTIONS.md): a chain where only a third record links two others can end as a possible
+  duplicate in some orders (no automatic transitive merge); a known source whose content moves to another place is
+  recomputed in place, not re-linked (use split); classifications are refreshed only when content or normalizer
+  version changes.
+- **Benchmark** (`pnpm --filter @bf/api bench:ingest`, 1,200 synthetic records, one worker, mapping-based
+  classification): 3,341 records/minute (target ≥ 1,000).
+- **Reviews** (fixed): lock coverage (cells without prefix + name), ingestion business locks + merge following,
+  merge/split blocking locks, shared-record guard, manual-add scope, per-source attribution of manual contacts,
+  `linked_by` preserved, manual contact protection on merge, versioned content hash, payload sanitising, logs without
+  PII, duplicates index, per-id merge audit.
+- **Tests**: domain 33 (incl. fast-check order independence, bounds, geohash neighbourhoods); use cases 21; API
+  integration: resolution 9 (idempotency, cross-provider merge, manual precedence, possible duplicate, 6-order
+  independence, batch isolation, 4-worker stress, concurrent name variants), merge 6.

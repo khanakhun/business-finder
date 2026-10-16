@@ -14,15 +14,12 @@ import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import type { AuthContext } from '../../platform/security/auth-context.ts';
 import { AuditLogger } from '../../workspace/index.ts';
-import { Business } from '../domain/business.entity.ts';
 import { BusinessMergedError } from '../domain/errors.ts';
 import { BusinessName } from '../domain/value-objects/business-name.ts';
+import { EmailAddress } from '../domain/value-objects/email-address.ts';
 import { GeoPoint } from '../domain/value-objects/geo-point.ts';
 import { PhoneNumber } from '../domain/value-objects/phone-number.ts';
-import { PostalAddress } from '../domain/value-objects/postal-address.ts';
-import type { ProvenanceInput } from '../domain/value-objects/provenance.ts';
 import { WebsiteUrl } from '../domain/value-objects/website-url.ts';
-import { contentHash } from './content-hash.ts';
 import { toContact, toOrgBusinessState } from './mappers.ts';
 import {
   BUSINESS_REPOSITORY,
@@ -31,27 +28,10 @@ import {
   type ContactRepository,
   ORG_BUSINESS_REPOSITORY,
   type OrgBusinessRepository,
-  SOURCE_RECORD_REPOSITORY,
-  type SourceRecordRepository,
 } from './ports.ts';
+import { recordEvents } from './record-events.ts';
+import { IngestSourceRecordCommand } from './resolution/ingest-source-record.command.ts';
 import { workspaceOf } from './workspace-of.ts';
-
-/** Records the aggregate's pending events in the outbox (inside the caller's transaction). */
-async function recordEvents(recorder: EventRecorder, business: Business): Promise<void> {
-  for (const event of business.pullEvents()) {
-    switch (event.type) {
-      case 'business.created':
-        await recorder.record(event.definition, { payload: event.payload });
-        break;
-      case 'business.updated':
-        await recorder.record(event.definition, { payload: event.payload });
-        break;
-      case 'business.merged':
-        await recorder.record(event.definition, { payload: event.payload });
-        break;
-    }
-  }
-}
 
 /** Adds a business to the workspace (idempotent: tracking it again returns the existing state). */
 @Injectable()
@@ -91,94 +71,63 @@ export class TrackBusinessCommand {
 }
 
 /**
- * A business the workspace adds by hand: a `manual` source record, a golden record and the workspace's link, in one
- * transaction. Workspace input to global facts is audited with the workspace (ADR-0008).
+ * A business the workspace adds by hand: a `manual` source record goes through ingestion (BF-016), so it joins an
+ * existing golden record when it describes one, and the workspace tracks the result. Workspace input to global
+ * facts is attributed and audited (ADR-0008).
  */
 @Injectable()
 export class CreateManualBusinessCommand {
   constructor(
-    @Inject(BUSINESS_REPOSITORY) private readonly businesses: BusinessRepository,
-    @Inject(SOURCE_RECORD_REPOSITORY) private readonly sources: SourceRecordRepository,
     @Inject(ORG_BUSINESS_REPOSITORY) private readonly orgBusinesses: OrgBusinessRepository,
     @Inject(CLOCK) private readonly clock: Clock,
-    private readonly events: EventRecorder,
+    private readonly ingest: IngestSourceRecordCommand,
     private readonly audit: AuditLogger,
   ) {}
 
-  /** Returns the new business id. */
+  /** Returns the id of the business now tracked (new, or the existing one it matched). */
   @Transactional()
   async execute(auth: AuthContext, request: CreateManualBusinessRequest): Promise<string> {
     const organizationId = workspaceOf(auth);
-    const now = this.clock.now();
-    const businessId = newId();
+    // Ingestion drops invalid values; someone typing them deserves a 422 instead.
+    BusinessName.parse(request.displayName);
+    if (request.websiteUrl) WebsiteUrl.parse(request.websiteUrl);
+    if (request.phone) PhoneNumber.parse(request.phone, request.countryCode);
+    if (request.email) EmailAddress.parse(request.email);
+    if (request.location) GeoPoint.of(request.location.lat, request.location.lng);
     const sourceId = newId();
-    const provenance: ProvenanceInput = {
-      source: 'manual',
-      sourceRef: sourceId,
-      confidence: 1,
-      observedAt: now,
-    };
-    const hasAddress = Boolean(request.formattedAddress || request.locality || request.postalCode);
-    // TODO(BF-016): route through ingestion (normalize → match → merge) so a manual add can join an existing record.
-    const business = Business.create({
-      id: businessId,
-      name: BusinessName.parse(request.displayName),
-      countryCode: request.countryCode,
-      website: request.websiteUrl ? WebsiteUrl.parse(request.websiteUrl) : null,
-      phone: request.phone ? PhoneNumber.parse(request.phone, request.countryCode) : null,
-      address: hasAddress
-        ? PostalAddress.of(
-            {
-              ...(request.locality ? { city: request.locality } : {}),
-              ...(request.postalCode ? { postalCode: request.postalCode } : {}),
-              countryCode: request.countryCode,
-            },
-            request.formattedAddress,
-          )
-        : null,
-      location: request.location ? GeoPoint.of(request.location.lat, request.location.lng) : null,
-      operatingStatus: 'operational',
-      provenance,
+    const result = await this.ingest.execute(
+      {
+        provider: 'manual',
+        providerRef: sourceId,
+        fetchedAt: this.clock.now().toISOString(),
+        name: request.displayName,
+        ...(request.location ? { location: request.location } : {}),
+        address: {
+          countryCode: request.countryCode,
+          ...(request.formattedAddress ? { formatted: request.formattedAddress } : {}),
+          ...(request.locality ? { city: request.locality } : {}),
+          ...(request.postalCode ? { postalCode: request.postalCode } : {}),
+        },
+        phones: request.phone ? [request.phone] : [],
+        ...(request.websiteUrl ? { website: request.websiteUrl } : {}),
+        emails: request.email ? [request.email] : [],
+        operatingStatus: 'operational',
+      },
+      { orgId: organizationId, sourceId, defaultRegion: request.countryCode, classifyWithModel: false },
+    );
+    await this.orgBusinesses.track({
+      organizationId,
+      businessId: result.businessId,
+      addedVia: 'manual',
+      addedRef: null,
     });
-    if (request.phone) {
-      business.addContact({
-        id: newId(),
-        type: 'phone',
-        value: request.phone,
-        source: 'manual',
-        confidence: 1,
-        submittedByOrgId: organizationId,
-      });
-    }
-    if (request.email) {
-      business.addContact({
-        id: newId(),
-        type: 'email',
-        value: request.email,
-        source: 'manual',
-        confidence: 1,
-        submittedByOrgId: organizationId,
-      });
-    }
-    await this.businesses.save(business);
-    await this.sources.upsert({
-      id: sourceId,
-      businessId,
-      provider: 'manual',
-      providerRef: sourceId,
-      payload: request,
-      normalized: null,
-      contentHash: contentHash(request),
-      fetchedAt: now,
-      expiresAt: null,
-      matchConfidence: 1,
-      linkedBy: 'manual',
-      submittedByOrgId: organizationId,
+    await this.audit.record({
+      action: 'business.created',
+      entityType: 'business',
+      entityId: result.businessId,
+      metadata: { outcome: result.outcome },
     });
-    await this.orgBusinesses.track({ organizationId, businessId, addedVia: 'manual', addedRef: null });
-    await recordEvents(this.events, business);
-    await this.audit.record({ action: 'business.created', entityType: 'business', entityId: businessId });
-    return businessId;
+    return result.businessId;
   }
 }
 

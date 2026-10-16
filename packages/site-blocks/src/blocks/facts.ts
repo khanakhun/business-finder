@@ -27,8 +27,24 @@ export function shownQuote(
       ? { text: translation, translated: true }
       : { text: fact.value.quote, lang: fact.locale, translated: false };
   }
+  if (fact?.kind === 'testimonial') {
+    // A fact without a language: the spec's words are shown as the reviewer's only when they are the fact's;
+    // anything else is a translation, and says so.
+    const own = item.quote[ctx.locale];
+    if (!own || sameWords(own, fact.value.quote)) return { text: fact.value.quote, translated: false };
+    return { text: own, translated: true };
+  }
   return { text: ctx.t(item.quote), translated: false };
 }
+
+const words = (text: string) =>
+  text
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\p{P}\p{S}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+const sameWords = (a: string, b: string) => words(a) === words(b);
 
 /**
  * A review's author and rating as shown: from its fact when the registry is given (the spec may leave either out,

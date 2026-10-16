@@ -11,7 +11,7 @@ function Dishes({ section, ctx }: { section: MenuSection; ctx: BlockProps<'menu'
         <li key={i} className="flex flex-col gap-1">
           <div className="flex items-baseline">
             <span className="font-medium">{ctx.t(item.name)}</span>
-            {item.price ? (
+            {item.price && shownPrice(item.price, ctx) ? (
               <>
                 <span className="bf-leader" aria-hidden="true" />
                 <span className="bf-num whitespace-nowrap">{shownPrice(item.price, ctx)}</span>

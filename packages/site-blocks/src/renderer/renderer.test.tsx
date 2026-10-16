@@ -304,6 +304,7 @@ describe('safeHref', () => {
     '/\n/evil.example',
     '/\r/evil.example',
     'java\tscript:alert(1)',
+    'tel:+590\n590000101',
     'evil.example',
     '',
     undefined,

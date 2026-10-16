@@ -18,7 +18,7 @@ export function Services({ block, ctx, tone }: BlockProps<'services'>) {
               <li key={i} className="flex flex-col gap-1.5 py-5">
                 <div className="flex items-baseline">
                   <h3 className="bf-h3">{ctx.t(item.title)}</h3>
-                  {item.price ? (
+                  {item.price && shownPrice(item.price, ctx) ? (
                     <>
                       <span className="bf-leader" aria-hidden="true" />
                       <span className="bf-num whitespace-nowrap font-medium">

@@ -284,4 +284,45 @@ describe('variants that differ', () => {
     expect(container).not.toHaveTextContent('Invented');
     expect(container.querySelector('[data-block="services"]')).not.toHaveTextContent('€');
   });
+
+  it('testimonials: a fact without a language shows its own words, or marks the spec’s as a translation', () => {
+    const salon = fixture('salon-gustavia');
+    const registry = facts('salon-gustavia');
+    const unlocalized = {
+      facts: registry.facts.map((fact) =>
+        fact.kind === 'testimonial' ? { ...fact, locale: undefined } : fact,
+      ),
+    } as typeof registry;
+    const testimonial = registry.facts.find((fact) => fact.kind === 'testimonial');
+    if (testimonial?.kind !== 'testimonial') throw new Error('no testimonial fact');
+    const spec: SiteSpec = structuredClone(salon);
+    for (const block of spec.pages[0]?.blocks ?? [])
+      if (block.type === 'testimonials')
+        for (const item of block.props.items)
+          item.quote.en = 'Best salon in the Caribbean, 10/10, 500 happy clients!';
+    const english = render(<SitePage spec={spec} page="home" locale="en" facts={unlocalized} />).container;
+    expect(english.querySelector('[data-block="testimonials"]')).toHaveTextContent(/translated|traduit/i);
+    for (const block of spec.pages[0]?.blocks ?? [])
+      if (block.type === 'testimonials')
+        for (const item of block.props.items) item.quote.en = testimonial.value.quote;
+    const same = render(<SitePage spec={spec} page="home" locale="en" facts={unlocalized} />).container;
+    expect(same.querySelector('[data-block="testimonials"]')).toHaveTextContent(testimonial.value.quote);
+    expect(same.querySelector('[data-block="testimonials"]')).not.toHaveTextContent(/translated|traduit/i);
+  });
+
+  it('menu: an unbacked price leaves no dot leader pointing at nothing', () => {
+    const cafe = fixture('cafe-saint-jean');
+    const registry = facts('cafe-saint-jean');
+    const spec: SiteSpec = structuredClone(cafe);
+    for (const page of spec.pages)
+      for (const block of page.blocks)
+        if (block.type === 'menu')
+          for (const section of block.props.sections)
+            for (const item of section.items) if (item.price) item.price.factId = 'no-such-price';
+    const page = spec.pages.find((candidate) => candidate.blocks.some((block) => block.type === 'menu'));
+    const { container } = render(
+      <SitePage spec={spec} page={page?.id ?? 'home'} locale="fr" facts={registry} />,
+    );
+    expect(container.querySelector('[data-block="menu"] .bf-leader')).toBeNull();
+  });
 });

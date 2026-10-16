@@ -105,6 +105,23 @@ describe('RealtimeConnection', () => {
     expect(sources[1]?.url).toBe('http://api.test/v1/realtime?lastEventId=7-0');
   });
 
+  it('refetches everything once a refused first connection finally opens (nothing to resume from)', () => {
+    vi.useFakeTimers();
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    connection.start();
+    const first = sources[0];
+    if (!first) throw new Error('no source');
+    // A first open is not a recovery.
+    first.onopen?.();
+    expect(invalidate).not.toHaveBeenCalled();
+    // Refused (429: too many streams), then retried with backoff.
+    first.readyState = FakeEventSource.CLOSED;
+    first.onerror?.();
+    vi.advanceTimersByTime(1_000);
+    sources[1]?.onopen?.();
+    expect(invalidate).toHaveBeenCalledWith();
+  });
+
   it('stops for good when stopped', () => {
     vi.useFakeTimers();
     connection.start();

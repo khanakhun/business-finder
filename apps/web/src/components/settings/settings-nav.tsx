@@ -23,11 +23,14 @@ export function SettingsNav() {
     { href: '/settings/api-keys', label: t('apiKeys'), show: canManageSettings },
     { href: '/settings/audit', label: t('audit'), show: canManageSettings },
     { href: '/settings/taxonomy', label: t('taxonomy'), show: canManageSettings },
+    // Everyone reads the scoring profiles; `scoring:manage` edits them.
+    { href: '/settings/scoring', label: t('scoring'), show: true },
   ].filter((item) => item.show);
   return (
     <nav aria-label={t('label')} className="mb-6 flex gap-1 overflow-x-auto border-b">
       {items.map((item) => {
-        const active = pathname === item.href;
+        const active =
+          pathname === item.href || (item.href !== '/settings' && pathname.startsWith(`${item.href}/`));
         return (
           <Link
             key={item.href}

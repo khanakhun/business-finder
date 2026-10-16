@@ -93,7 +93,6 @@ export function Waterfall({ steps }: { readonly steps: readonly WaterfallStep[] 
           <Bar dataKey="base" stackId="w" fill="transparent" tooltipType="none" isAnimationActive={false} />
           <Bar dataKey="delta" stackId="w" isAnimationActive={false}>
             {steps.map((step, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional (two features may share a label)
               <Cell key={`${step.kind}-${i}`} fill={COLOR[step.kind]} />
             ))}
           </Bar>

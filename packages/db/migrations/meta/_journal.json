@@ -169,6 +169,13 @@
       "when": 1792117074477,
       "tag": "0023_website_audits",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792122987540,
+      "tag": "0024_scoring",
+      "breakpoints": true
     }
   ]
 }

@@ -181,3 +181,18 @@ export function parseRichText(text: string): RichTextResult {
   }
   return { blocks, problems: [...problems], pageIds };
 }
+
+const inlineText = (nodes: readonly Inline[]): string =>
+  nodes.map((node) => (node.type === 'text' ? node.text : inlineText(node.children))).join('');
+
+/**
+ * The words a reader sees in rich text: link labels and emphasis joined to their neighbours, markup gone
+ * (`evil[.com](page:home)` and `*evil*.com` read `evil.com`), one line per paragraph or list item. The validators read
+ * this, not the markup.
+ */
+export function richTextWords(text: string): string {
+  return parseRichText(text)
+    .blocks.flatMap((block) => (block.type === 'paragraph' ? [block.children] : block.items))
+    .map(inlineText)
+    .join('\n');
+}

@@ -4,6 +4,7 @@ import { FactIdSchema, SiteLocaleSchema } from '../spec/localized.ts';
 import type { SiteSpec } from '../spec/site.ts';
 import { emailPattern, unspell } from './email.ts';
 import { error, type Issue } from './issues.ts';
+import { richTextWords } from './rich-text.ts';
 import { type Path, walk } from './walk.ts';
 
 // The facts validator (BF-033): a site may only state what the fact registry (BF-040) holds. Every fact id it names
@@ -113,9 +114,20 @@ const dialled = (raw: string) =>
 
 /** A number in E.164, read as the business's country writes it (national formats, `(0)`, `00`); else undefined. */
 function e164(raw: string, country: string | undefined): string | undefined {
-  const parsed = parsePhoneNumberFromString(raw.normalize('NFKC'), country as CountryCode | undefined);
+  const text = raw.normalize('NFKC');
+  const parsed = parsePhoneNumberFromString(text, country as CountryCode | undefined);
+  if (parsed?.isValid()) return parsed.number;
+  // France and its overseas departments share one numbering plan: a mainland mobile (`06…`) on a BL site is French.
+  if (country && FRENCH_PLAN.includes(country)) {
+    for (const other of FRENCH_PLAN) {
+      const candidate = parsePhoneNumberFromString(text, other as CountryCode);
+      if (candidate?.isValid()) return candidate.number;
+    }
+  }
   return parsed?.isPossible() ? parsed.number : undefined;
 }
+
+const FRENCH_PLAN = ['FR', 'GP', 'BL', 'MF', 'MQ', 'GF', 'RE', 'YT', 'PM'];
 
 /**
  * Two phone numbers are the same line: the same E.164 number once read as the business's country writes numbers
@@ -196,7 +208,7 @@ export function literals(input: string): Literals {
   });
   // Dates (dd/mm/yyyy, yyyy-mm-dd) are not phone numbers: their year is checked.
   text = text.replace(
-    /\b(?:\d{1,2}[/.-]\d{1,2}[/.-](\d{4})|(\d{4})-\d{1,2}-\d{1,2})\b/g,
+    /\b(?:\d{1,2}[/.-]\d{1,2}[/.-]((?:1[89]|20)\d{2})|((?:1[89]|20)\d{2})-\d{1,2}-\d{1,2})\b/g,
     (match, y1: string | undefined, y2: string | undefined) => {
       years.push(Number(y1 ?? y2));
       return blank(match);
@@ -204,8 +216,10 @@ export function literals(input: string): Literals {
   );
   const phones: string[] = [];
   text = text.replace(PHONE, (match) => {
-    if (digits(match).length < 8) return match;
-    phones.push(match.trim());
+    // Two numbers side by side (`0590 27 00 00 / 0690 12 34 56`) are two literals.
+    const parts = match.split(/\s+[/–-]\s+/).filter((part) => digits(part).length >= 8);
+    if (parts.length === 0) return match;
+    phones.push(...parts.map((part) => part.trim()));
     return blank(match);
   });
   for (const match of text.matchAll(YEAR)) years.push(Number(match[1]));
@@ -244,15 +258,25 @@ function* texts(spec: SiteSpec): Generator<{ text: string; path: Path }> {
     if (NOT_TEXT_KEYS.has(String(key)) || String(key).endsWith('AssetId')) continue;
     const parent = String(path.at(-2));
     if (parent === 'factIds' || parent === 'assetIds') continue;
-    yield { text: value, path };
+    // Rich text as the reader sees it (`bonjour[@](page:home)evil.fr` reads `bonjour@evil.fr`).
+    const [pages, i, blocks, j, props, body] = path;
+    const rich =
+      pages === 'pages' &&
+      blocks === 'blocks' &&
+      props === 'props' &&
+      body === 'body' &&
+      spec.pages[Number(i)]?.blocks[Number(j)]?.type === 'rich_text';
+    yield { text: rich ? richTextWords(value) : value, path };
   }
 }
 
 export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const issues: Issue[] = [];
   const facts = new Map(registry.facts.map((fact) => [fact.id, fact]));
-  // Numbers are read as the business's country writes them.
-  const country = spec.contact.address?.country;
+  // Numbers are read as the business's country writes them (its address, else its phone's country).
+  const country =
+    spec.contact.address?.country ??
+    (spec.contact.phone ? parsePhoneNumberFromString(spec.contact.phone.value)?.country : undefined);
   const of = <K extends FactKind>(kind: K) =>
     registry.facts.filter((fact) => fact.kind === kind) as FactOf<K>[];
 

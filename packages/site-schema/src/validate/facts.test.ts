@@ -285,6 +285,36 @@ describe('validateFacts', () => {
     expect(issues.filter((issue) => issue.endsWith('subtitle.fr'))).not.toEqual([]);
   });
 
+  it.each([
+    'Voir bonjour[@](page:home)evil.fr',
+    'Voir [evil.com](page:home) @ x.fr',
+    'Voir evil.com[(at)](page:home)x.fr',
+    'Voir [evil.com @](page:home) x.fr',
+  ])('refuses %j in rich text with one validator or the other', (body) => {
+    const spec = salon();
+    spec.pages[1]?.blocks.push({
+      id: 'rich-serv7',
+      type: 'rich_text',
+      variant: 'narrow',
+      props: { body: { fr: body, en: body } },
+    });
+    const issues = [
+      ...validateSite(spec, { assetHosts: ['assets.bf-sites.test'] }),
+      ...validateFacts(spec, registry()),
+    ].map((issue) => `${issue.code}@${issue.path.join('.')}`);
+    expect(issues.filter((issue) => issue.endsWith('props.body.fr'))).not.toEqual([]);
+  });
+
+  it('reads French-plan numbers on an overseas site, two numbers side by side, and no year in a phone', () => {
+    const facts = withFacts([fact('phone.mobile', 'phone', '+33 6 12 34 56 78')]);
+    const spec = salon();
+    hero(spec).subtitle = {
+      fr: 'Appelez le 06 12 34 56 78 ou le 0590 00 01 01 / 06 12 34 56 78',
+      en: 'Call 0590-00-01-01',
+    };
+    expect(found(spec, facts)).toEqual([]);
+  });
+
   it('refuses a registry with two facts of the same id', () => {
     const facts = registry().facts;
     expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);

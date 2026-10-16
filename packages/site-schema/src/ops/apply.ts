@@ -385,18 +385,16 @@ export function applyAll(spec: SiteSpec, operations: readonly BaseOperation[]): 
 }
 
 /**
- * The one entry point for edits from the editor, chat and sitekit: applies, then runs the semantic rules and (with a
- * registry) the facts validator. The caller saves only when there is no error.
+ * The one entry point for edits from the editor, chat and sitekit: applies, then runs the semantic rules and the facts
+ * validator. The caller saves only when there is no error.
  */
 export function applyAndValidate(
   spec: SiteSpec,
   operation: Operation,
-  options: ValidateOptions & { readonly registry?: FactRegistry },
+  options: ValidateOptions & { readonly registry: FactRegistry },
 ): Applied & { readonly issues: readonly Issue[] } {
   const applied = apply(spec, operation);
-  const issues = [
-    ...validateSite(applied.spec, options),
-    ...(options.registry ? validateFacts(applied.spec, options.registry) : []),
-  ];
+  // The registry is required: e-mails and other literals in text are only checked against it.
+  const issues = [...validateSite(applied.spec, options), ...validateFacts(applied.spec, options.registry)];
   return { ...applied, issues };
 }

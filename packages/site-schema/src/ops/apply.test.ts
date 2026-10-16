@@ -3,6 +3,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import type { Block } from '../spec/blocks/index.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
+import { FactRegistrySchema } from '../validate/facts.ts';
 import { apply, applyAll, applyAndValidate } from './apply.ts';
 import {
   type BaseOperation,
@@ -14,6 +15,9 @@ import {
 
 const load = (name: string): SiteSpec =>
   JSON.parse(readFileSync(new URL(`../../fixtures/${name}.json`, import.meta.url), 'utf8'));
+const salonFacts = FactRegistrySchema.parse(
+  JSON.parse(readFileSync(new URL('../../fixtures/facts/salon-gustavia.json', import.meta.url), 'utf8')),
+);
 const FIXTURES = ['salon-gustavia', 'cafe-saint-jean', 'hardware-store-lorient', 'villa-agency'] as const;
 const L = (text: string) => ({ fr: text, en: text });
 const at = <T>(value: T | undefined): T => {
@@ -401,9 +405,28 @@ describe('operations', () => {
     const { issues } = applyAndValidate(
       salon,
       { op: 'updateText', path: ['seo', 'title'], locale: 'en', value: 'Visit www.evil.example now' },
-      { assetHosts: ['assets.bf-sites.test'] },
+      { assetHosts: ['assets.bf-sites.test'], registry: salonFacts },
     );
     expect(issues.map((issue) => issue.code)).toContain('external_url');
+    // The facts validator runs too: an invented e-mail is refused (the address scan leaves e-mails to it).
+    const email = applyAndValidate(
+      salon,
+      { op: 'updateText', path: ['seo', 'title'], locale: 'en', value: 'Write to evil.com@a.bc' },
+      { assetHosts: ['assets.bf-sites.test'], registry: salonFacts },
+    );
+    expect(email.issues.map((issue) => issue.code)).toContain('unsupported_literal');
+  });
+
+  it('points at the menu item that still opens a page being removed', () => {
+    const index = salon.navigation.items.findIndex((item) => item.pageId === 'services');
+    try {
+      apply(salon, { op: 'removePage', pageId: 'services', navigation: salon.navigation });
+      expect.unreachable();
+    } catch (error) {
+      expect((error as OperationError).details).toEqual([
+        { path: ['navigation', 'items', index, 'pageId'], message: 'opens this page' },
+      ]);
+    }
   });
 });
 

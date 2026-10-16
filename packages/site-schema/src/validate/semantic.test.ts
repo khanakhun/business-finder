@@ -259,6 +259,39 @@ describe('validateSite', () => {
     ).not.toBeNull();
   });
 
+  it.each([
+    'Voir evil[.](page:home)com',
+    'Voir evil[](page:home).com',
+    'Voir evil[.com](page:home)',
+    'Voir [evil](page:home).com',
+    'Voir evil.[com](page:home)',
+    'Voir ev[il](page:home).com',
+    'Voir *evil*.com',
+    'Voir evil.*com*',
+    'Voir ev*il.c*om',
+  ])('reads rich text as the reader sees it: %j', (body) => {
+    const spec = with_((s) =>
+      s.pages[1]?.blocks.push({
+        id: 'rich-serv7',
+        type: 'rich_text',
+        variant: 'narrow',
+        props: { body: L(body) },
+      }),
+    );
+    expect(found(spec)).toContain('external_url@pages.1.blocks.2.props.body.fr');
+  });
+
+  it('refuses an address hidden in the brand name and says where handles go', () => {
+    expect(found(with_((s) => Object.assign(s.brand, { name: 'Le@Bonito.St Barth' })))).toContain(
+      'external_url@brand.name',
+    );
+    const issues = validateSite(
+      with_((s) => Object.assign(s.seo.title, { en: 'Follow @nikki.beach — Salon Lumière' })),
+      OPTIONS,
+    );
+    expect(issues[0]?.message).toContain('contact.socials');
+  });
+
   it('keeps a page link label apart from the text next to it', () => {
     const spec = with_((s) =>
       s.pages[1]?.blocks.push({

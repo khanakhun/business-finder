@@ -91,7 +91,16 @@ export function isSocialProfile(network: string, url: string): boolean {
 /** A redirect target: a scheme, `//` or `\\`, a backslash, or a web address (control characters dropped first). */
 const REDIRECT_TARGET = /^[a-z][\w+.-]*:|^[\\/]{2}|\\|^www\./i;
 
-/** A URL whose query or fragment carries another URL (a redirect: `?u=https://…`, `#next=//…`). */
+/** Percent-decoding that never throws (a malformed escape is kept as written). */
+const safeDecode = (value: string) => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
+/** A URL whose query or fragment carries another URL (a redirect: `?u=https://…`, `#next=//…`). Fails closed. */
 export function carriesUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -101,7 +110,7 @@ export function carriesUrl(url: string): boolean {
       ...parsed.searchParams.keys(),
       ...fragment.values(),
       ...fragment.keys(),
-      decodeURIComponent(parsed.hash.slice(1)),
+      safeDecode(parsed.hash.slice(1)),
     ];
     return values.some((raw) => {
       // biome-ignore lint/suspicious/noControlCharactersInRegex: URL parsers drop these, so they hide a scheme
@@ -109,7 +118,8 @@ export function carriesUrl(url: string): boolean {
       return REDIRECT_TARGET.test(value) || hasWebAddress(value);
     });
   } catch {
-    return false;
+    // A URL that cannot be inspected is not a safe link.
+    return true;
   }
 }
 
@@ -125,8 +135,18 @@ const DOMAIN = new RegExp(
   'iu',
 );
 
+const MIDDLE_DOT_DOMAIN = new RegExp(
+  `(?<![\\p{L}\\p{N}-])[\\p{L}\\p{N}-]{2,}·(?:${GENERIC_TLDS})(?![\\p{L}\\p{N}-])`,
+  'iu',
+);
+
 /** A web address in prose: a scheme, `//host`, `www.`, or a domain (look-alike dots and full-width letters folded). */
 export function hasWebAddress(text: string): boolean {
-  const folded = text.normalize('NFKC').replace(/[。．｡․·]/g, '.');
-  return /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) || DOMAIN.test(folded);
+  const folded = text.normalize('NFKC').replace(/[。．｡․]/g, '.');
+  return (
+    /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) ||
+    DOMAIN.test(folded) ||
+    // A middle dot as the dot only before a generic ending: French inclusive writing (ami·es) is not an address.
+    (folded.includes('·') && MIDDLE_DOT_DOMAIN.test(folded))
+  );
 }

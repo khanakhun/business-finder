@@ -116,3 +116,6 @@ Verify: pnpm verify (coverage ≥ 90% for validate/ and ops/); regenerate JSON S
   providers): a booking page is reached through the `booking` action, which resolves to the fact-backed
   `contact.bookingUrl` — a provider host also serves pages anyone can create. Engines (BF-040/BF-042) emit `booking`
   actions for booking links.
+- `url` actions and booking pages carry no redirect: a query or fragment value that looks like a URL (a scheme —
+  even a harmless `?ref=page:2` —, `//`, a backslash, `www.` or a domain) is refused. Strict on purpose: engines
+  link to plain pages.

@@ -50,6 +50,7 @@ describe('parseRichText', () => {
     ['- [r]: javascript:alert(1)\n\n[r]', 'square brackets'],
     ['- [r]: &#x2F;&#x2F;evil&#x2E;xyz\n\n- [r]', 'square brackets'],
     ['<?xml x?>', 'HTML'],
+    ['Prix [2024]', 'square brackets'],
     ['> quote', 'quotes'],
     ['1. first', 'numbered'],
     ['---', 'rules'],

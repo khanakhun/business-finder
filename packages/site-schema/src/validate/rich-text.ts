@@ -40,8 +40,11 @@ const FORBIDDEN_LINE: readonly [RegExp, string][] = [
   [/^\s{0,3}\|/, 'tables are not allowed'],
 ];
 
+/** An HTML tag, comment or processing instruction (`<b>`, `</b>`, `<!--`, `<?xml`). */
+export const HTML_TAG = /<(?:\/?[a-z!]|\?)[^>\n]*>?/i;
+
 const FORBIDDEN_INLINE: readonly [RegExp, string][] = [
-  [/<[a-z!?/][^>\n]*>?/i, 'HTML is not allowed'],
+  [HTML_TAG, 'HTML is not allowed'],
   [/<[a-z][a-z0-9+.-]*:[^>\n]*>/i, 'autolinks are not allowed'],
   [/!\[/, 'images are not allowed'],
   [/\]\s*\[/, 'reference links are not allowed'],

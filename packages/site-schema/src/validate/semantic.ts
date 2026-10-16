@@ -7,7 +7,7 @@ import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
 import { carriesUrl, hasWebAddress, hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
-import { parseRichText, withoutPageLinks } from './rich-text.ts';
+import { HTML_TAG, parseRichText, withoutPageLinks } from './rich-text.ts';
 import { isCta, isLocalized, type Path, walk } from './walk.ts';
 
 // The semantic validator (BF-033): what the schema cannot say. Each rule is a small function over the parsed spec
@@ -373,7 +373,8 @@ const urlsRule: Rule = (spec, options) => {
     const rich = isRichText(path);
     // E-mail addresses are the facts validator's; a web address dressed as one (`www.evil.com@a.bc`) is not.
     const words = (rich ? withoutPageLinks(text) : text).replace(EMAIL, (address, local: string) =>
-      hasWebAddress(local) ? address : '',
+      // Only a strong signal (a scheme, `//`, `www.`): `marie.le@salon.fr` is an ordinary address.
+      /^(?:[a-z][\w+.-]*:|\/\/|www\.)/i.test(local) ? address : '',
     );
     if (hasWebAddress(words)) {
       issues.push(
@@ -384,8 +385,7 @@ const urlsRule: Rule = (spec, options) => {
         ),
       );
     }
-    if (!rich && /<\/?[a-z!][^>]*>?/i.test(text))
-      issues.push(error(path, 'html', 'Remove the HTML: texts are plain.'));
+    if (!rich && HTML_TAG.test(text)) issues.push(error(path, 'html', 'Remove the HTML: texts are plain.'));
   };
 
   for (const { value, path } of walk(spec)) {

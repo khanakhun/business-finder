@@ -436,11 +436,25 @@ describe('validateSite', () => {
     'https://www.salon-lumiere.example/go?u=ht%09tps://e.com',
     'https://www.salon-lumiere.example/go#u=https://e.com',
     'https://www.salon-lumiere.example/go#https://evil.xyz',
+    'https://www.salon-lumiere.example/go?u=https://e.com#%',
+    'https://www.salon-lumiere.example/go#%E0%A4%A&u=https://evil.com',
   ])('refuses a url action that redirects: %s', (url) => {
     const spec = with_((s) => Object.assign(s.layout.header, { cta: { kind: 'url', label: L('Go'), url } }));
     expect(found(spec, { ...OPTIONS, ownDomains: ['salon-lumiere.example'] })).toContain(
       'external_url@layout.header.cta.url',
     );
+  });
+
+  it.each([
+    'marie.le@salon.fr',
+    'anne.ng@gmail.com',
+    'contact.sb@orange.fr',
+    'Nos client·es sont ravi·es',
+    'x </ y',
+  ])('leaves %j alone', (title) => {
+    expect(
+      found(with_((s) => Object.assign(s.seo.title, { en: `${title} — Salon Lumière, Gustavia` }))),
+    ).toEqual([]);
   });
 
   it.each([
@@ -472,7 +486,7 @@ describe('validateSite', () => {
   });
 
   it('validates a near-maximal hostile spec quickly (no quadratic pattern)', () => {
-    const filler = 'a'.repeat(4900);
+    const fillers = ['a'.repeat(4900), 'a.'.repeat(2450), 'a@'.repeat(2450)];
     const spec = with_((s) => {
       for (let n = 0; n < 5; n += 1) {
         s.pages.push({
@@ -489,7 +503,7 @@ describe('validateSite', () => {
               id: `rich-x${n}${String(j).padStart(2, '0')}`,
               type: 'rich_text' as const,
               variant: 'narrow' as const,
-              props: { body: L(filler) },
+              props: { body: L(fillers[j % 3] ?? '') },
             })),
           ],
         });

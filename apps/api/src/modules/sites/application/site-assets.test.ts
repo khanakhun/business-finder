@@ -50,8 +50,15 @@ class InMemoryAssets implements SiteAssetsRepository {
     return this.get(organizationId, siteId, assetId);
   }
   async failStale(before: Date) {
+    // As the database does: started before `before`, or never started and uploaded a day (minus the 30 minutes
+    // `before` already subtracts) earlier.
+    const neverStartedBefore = before.getTime() - 86_400_000 + 30 * 60_000;
     const stale = [...this.rows.values()].filter(
-      (row) => row.status === 'processing' && (row.processingStartedAt?.getTime() ?? 0) < before.getTime(),
+      (row) =>
+        row.status === 'processing' &&
+        (row.processingStartedAt
+          ? row.processingStartedAt.getTime() < before.getTime()
+          : row.createdAt.getTime() < neverStartedBefore),
     );
     for (const row of stale) this.rows.set(row.id, { ...row, status: 'failed' });
     return stale;
@@ -215,7 +222,9 @@ describe('SiteAssetCommands', () => {
   it('fails an image whose job died, after a while, and removes the variants it had written', async () => {
     const id = await uploaded();
     await commands.finalize(actor, siteId, id);
-    // A job that wrote one variant, then died (no `fail`): the image is still processing.
+    // A job that started, wrote one variant, then died (no `fail`): the image is still processing.
+    const row = assets.rows.get(id);
+    if (row) assets.rows.set(id, { ...row, processingStartedAt: new Date('2026-10-14T12:00:00.000Z') });
     await publicFiles.put(`sites/${siteId}/${id}/480.webp`, Buffer.from('x'), 'image/webp');
     expect(await commands.failStale()).toBe(0);
     await expect(commands.remove(actor, siteId, id)).rejects.toMatchObject({
@@ -244,5 +253,47 @@ describe('SiteAssetCommands', () => {
     await commands.fail(id);
     expect(assets.rows.get(id)?.status).toBe('failed');
     expect(publicFiles.files.size).toBe(0);
+  });
+
+  it('never fails an image waiting in the queue, but one whose job never started for a day', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    const at = (iso: string) =>
+      new SiteAssetCommands(
+        sites,
+        assets,
+        { presignPut: async () => ({ url: 'https://uploads.test/x', headers: {} }) },
+        originals,
+        publicFiles,
+        images,
+        { process: async () => undefined },
+        fixedClock(iso),
+        fakeDb,
+      );
+    expect(await at('2026-10-14T18:00:00.000Z').failStale()).toBe(0);
+    await expect(at('2026-10-14T18:00:00.000Z').remove(actor, siteId, id)).rejects.toMatchObject({
+      details: { reason: 'ASSET_PROCESSING' },
+    });
+    // A day later its job is presumed lost: deletable, and failed by the sweep.
+    await at('2026-10-15T13:00:00.000Z').remove(actor, siteId, id);
+    expect(assets.rows.has(id)).toBe(false);
+  });
+
+  it('stamps the processing start when the job starts', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    expect(assets.rows.get(id)?.processingStartedAt).toBeNull();
+    const original = images.dominantColors;
+    let started: Date | null | undefined;
+    images.dominantColors = async (image, count) => {
+      started = assets.rows.get(id)?.processingStartedAt;
+      return original(image, count);
+    };
+    try {
+      await commands.process(id);
+    } finally {
+      images.dominantColors = original;
+    }
+    expect(started).toEqual(new Date('2026-10-14T12:00:00.000Z'));
   });
 });

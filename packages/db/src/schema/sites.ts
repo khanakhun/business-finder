@@ -196,6 +196,10 @@ export const siteAssets = pgTable(
   },
   (table) => [
     index('idx_site_assets__organization_id_site_id').on(table.organizationId, table.siteId),
+    // The hourly sweep of images whose processing job died.
+    index('idx_site_assets__processing')
+      .on(table.processingStartedAt)
+      .where(sql`${table.status} = 'processing'`),
     uniqueIndex('uq_site_assets__storage_key').on(table.storageKey),
     check('ck_site_assets__license', sql`${table.license} IN (${inList(SITE_ASSET_LICENSES)})`),
     check('ck_site_assets__status', sql`${table.status} IN ('pending', 'processing', 'ready', 'failed')`),

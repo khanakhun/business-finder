@@ -41,6 +41,8 @@ export const VARIANT_WIDTHS = [480, 768, 1200, 1920] as const;
 const UPLOAD_SECONDS = 15 * 60;
 /** Processing takes seconds: an image processing for longer than this has lost its job. */
 export const STALE_PROCESSING_MS = 30 * 60_000;
+/** A finalized image whose job never started (a lost queue) is failed after a day. */
+export const NEVER_STARTED_MS = 86_400_000;
 
 /** The widths an image of `width` pixels is published at: the steps it reaches, and its own below the largest. */
 export function variantWidths(width: number): number[] {
@@ -183,7 +185,6 @@ export class SiteAssetCommands {
       width: size.width,
       height: size.height,
       sha256: sha256(object.body),
-      processingStartedAt: this.clock.now(),
     };
     if (!(await this.assets.transition(asset.id, ['pending'], checked))) {
       // Another finalize got there first: answer with what it did.
@@ -239,6 +240,9 @@ export class SiteAssetCommands {
   async process(assetId: string): Promise<'ready' | 'failed' | 'skipped'> {
     const asset = await this.assets.byId(assetId);
     if (asset?.status !== 'processing') return 'skipped';
+    // The job's start, not the finalize's: time waiting in the queue never makes an image stale.
+    if (!(await this.assets.transition(asset.id, ['processing'], { processingStartedAt: this.clock.now() })))
+      return 'skipped';
     const object = await this.originals.get(asset.storageKey);
     if (
       !object ||
@@ -290,7 +294,10 @@ export class SiteAssetCommands {
     for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
   }
 
-  /** Images whose job died (a killed worker never reaches `fail`): failed after `STALE_PROCESSING_MS` (hourly). */
+  /**
+   * Images whose job died (a killed worker never reaches `fail`): failed `STALE_PROCESSING_MS` after their job started,
+   * or a day after their upload when no job ever started (a lost queue). Hourly.
+   */
   async failStale(limit = 500): Promise<number> {
     const stale = await this.assets.failStale(
       new Date(this.clock.now().getTime() - STALE_PROCESSING_MS),
@@ -301,9 +308,12 @@ export class SiteAssetCommands {
     return stale.length;
   }
 
+  /** Processing for too long: 30 minutes after its job started, or a day after the upload if no job ever started. */
   private stale(asset: StoredAsset): boolean {
-    const started = asset.processingStartedAt?.getTime() ?? 0;
-    return this.clock.now().getTime() - started > STALE_PROCESSING_MS;
+    const since = asset.processingStartedAt
+      ? asset.processingStartedAt.getTime() + STALE_PROCESSING_MS
+      : asset.createdAt.getTime() + NEVER_STARTED_MS;
+    return this.clock.now().getTime() > since;
   }
 
   /** Every public key an asset may have: those it lists, and those its widths give (a job that stopped midway). */

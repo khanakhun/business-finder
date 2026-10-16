@@ -1,5 +1,5 @@
 {
-  "id": "036683fa-78d3-4724-a993-67b00293253b",
+  "id": "9a911848-4919-4660-80ef-98570a4eb8c4",
   "prevId": "6d748167-28f0-45c7-8861-94f84b0d9428",
   "version": "7",
   "dialect": "postgresql",
@@ -8099,6 +8099,22 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_site_assets__processing": {
+          "name": "idx_site_assets__processing",
+          "columns": [
+            {
+              "expression": "processing_started_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"site_assets\".\"status\" = 'processing'",
           "concurrently": false,
           "method": "btree",
           "with": {}

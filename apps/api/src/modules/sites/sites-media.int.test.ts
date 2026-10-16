@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { signSiteViewToken } from '@bf/contracts';
+import { newId, signSiteViewToken } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
 import { businesses, orgBusinesses, outboxEvents, siteAssets, siteViewDaily } from '@bf/db/schema';
 import { QUEUES } from '@bf/queue';
@@ -26,11 +26,15 @@ import { InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
 import {
   PUBLIC_FILES,
   SITE_ARTIFACTS,
+  SITE_ASSETS_REPOSITORY,
   SITE_ORIGINALS,
   SITE_THUMBNAILS_REPOSITORY,
   SITE_VIEW_COUNTER,
+  SITE_VIEWS_REPOSITORY,
+  type SiteAssetsRepository,
   type SiteThumbnailsRepository,
   type SiteViewCounter,
+  type SiteViewsRepository,
   UPLOAD_SIGNER,
 } from './application/ports.ts';
 import { SiteViewsFlusher } from './application/site-views.ts';
@@ -406,5 +410,44 @@ describe('pictures of an ended publication', () => {
     await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(204);
     const late = { publicationId: preview.body.id, takenAt: NOW_ISO, desktopKey: null, mobileKey: null };
     expect(await thumbnails.setIfActive(site.id, late)).toBe(false);
+  });
+});
+
+describe('maintenance queries', () => {
+  it('fails only images whose job died or never started for a day, and prunes old hour claims in batches', async () => {
+    const site = await newSite('Maintenance');
+    const assets = worker.get<SiteAssetsRepository>(SITE_ASSETS_REPOSITORY);
+    const row = (name: string, startedMinutesAgo: number | null, createdHoursAgo = 0) => ({
+      id: newId(),
+      organizationId: org,
+      siteId: site.id,
+      storageKey: `orgs/${org}/sites/${site.id}/assets/${name}/original`,
+      mime: 'image/jpeg',
+      license: 'uploaded' as const,
+      status: 'processing' as const,
+      processingStartedAt:
+        startedMinutesAgo === null ? null : new Date(Date.now() - startedMinutesAgo * 60_000),
+      createdAt: new Date(Date.now() - createdHoursAgo * 3_600_000),
+    });
+    const died = row('died', 45);
+    const running = row('running', 5);
+    const queued = row('queued', null, 2);
+    const lost = row('lost', null, 30);
+    await db.insert(siteAssets).values([died, running, queued, lost]);
+    const failed = await assets.failStale(new Date(Date.now() - 30 * 60_000), 100);
+    expect(failed.map((asset) => asset.id).sort()).toEqual([died.id, lost.id].sort());
+    expect(failed.every((asset) => asset.status === 'failed')).toBe(true);
+    expect((await assets.lock(org, site.id, running.id))?.status).toBe('processing');
+
+    const views = worker.get<SiteViewsRepository>(SITE_VIEWS_REPOSITORY);
+    const now = Date.now();
+    const hour = (hoursAgo: number) => new Date(now - hoursAgo * 3_600_000).toISOString();
+    for (const hoursAgo of [100, 90, 80, 1])
+      expect(await views.claimHour(site.id, hour(hoursAgo))).toBe(true);
+    const before = hour(72);
+    expect(await views.pruneHours(before, 2)).toBe(2);
+    expect(await views.pruneHours(before, 2)).toBe(1);
+    expect(await views.pruneHours(before, 2)).toBe(0);
+    expect(await views.claimHour(site.id, hour(1))).toBe(false);
   });
 });

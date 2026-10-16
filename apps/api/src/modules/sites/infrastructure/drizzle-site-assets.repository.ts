@@ -1,9 +1,10 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import { siteAssets, siteVersions } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, inArray, lt, or, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type { AssetStatus, SiteAssetsRepository, StoredAsset } from '../application/ports.ts';
+import { NEVER_STARTED_MS, STALE_PROCESSING_MS } from '../application/site-assets.ts';
 
 const columns = {
   id: siteAssets.id,
@@ -80,7 +81,19 @@ export class DrizzleSiteAssetsRepository implements SiteAssetsRepository {
     const stale = getExecutor(this.db)
       .select({ id: siteAssets.id })
       .from(siteAssets)
-      .where(and(eq(siteAssets.status, 'processing'), lt(siteAssets.processingStartedAt, before)))
+      .where(
+        and(
+          eq(siteAssets.status, 'processing'),
+          or(
+            lt(siteAssets.processingStartedAt, before),
+            // Never started (its job was lost): a day after the upload.
+            and(
+              isNull(siteAssets.processingStartedAt),
+              lt(siteAssets.createdAt, new Date(before.getTime() - NEVER_STARTED_MS + STALE_PROCESSING_MS)),
+            ),
+          ),
+        ),
+      )
       .limit(limit);
     return getExecutor(this.db)
       .update(siteAssets)

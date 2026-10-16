@@ -1,7 +1,8 @@
 import type { JobContext } from '@bf/queue';
 import { describe, expect, it, vi } from 'vitest';
 import type { SiteAssetCommands } from '../../application/site-assets.ts';
-import { SitesAssetProcessProcessor } from './sites.processors.ts';
+import type { SiteCommands } from '../../application/sites.commands.ts';
+import { SitesAssetProcessProcessor, SitesExpireProcessor } from './sites.processors.ts';
 
 const context = (attempt: number) =>
   ({
@@ -24,5 +25,19 @@ describe('SitesAssetProcessProcessor', () => {
     expect(assets.fail).not.toHaveBeenCalled();
     await expect(processor.handle(payload, context(3))).resolves.toEqual({ outcome: 'failed' });
     expect(assets.fail).toHaveBeenCalledWith('0199e0a0-0000-7000-8000-000000000001');
+  });
+});
+
+describe('SitesExpireProcessor', () => {
+  it('sweeps stale images every hour, and still expires previews when the sweep fails', async () => {
+    const commands = { expireDuePreviews: vi.fn(async () => 0) };
+    const assets = { failStale: vi.fn(async () => Promise.reject(new Error('db down'))) };
+    const processor = new SitesExpireProcessor(
+      commands as unknown as SiteCommands,
+      assets as unknown as SiteAssetCommands,
+    );
+    await expect(processor.handle({} as never, context(1))).resolves.toEqual({ expired: 0 });
+    expect(assets.failStale).toHaveBeenCalledOnce();
+    expect(commands.expireDuePreviews).toHaveBeenCalled();
   });
 });

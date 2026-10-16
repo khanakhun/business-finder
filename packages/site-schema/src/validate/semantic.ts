@@ -372,10 +372,13 @@ const urlsRule: Rule = (spec, options) => {
     // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
     const rich = isRichText(path);
     // E-mail addresses are the facts validator's; a web address dressed as one (`www.evil.com@a.bc`) is not.
-    const words = (rich ? withoutPageLinks(text) : text).replace(EMAIL, (address, local: string) =>
-      // Only a strong signal (a scheme, `//`, `www.`): `marie.le@salon.fr` is an ordinary address.
-      /^(?:[a-z][\w+.-]*:|\/\/|www\.)/i.test(local) ? address : '',
-    );
+    // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
+    // is not: folded first, then judged by `www.` or the character just before it.
+    const words = (rich ? withoutPageLinks(text) : text)
+      .normalize('NFKC')
+      .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
+        /^www\./i.test(local) || whole[offset - 1] === '/' ? address : '',
+      );
     if (hasWebAddress(words)) {
       issues.push(
         error(

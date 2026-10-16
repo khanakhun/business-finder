@@ -89,7 +89,7 @@ export function isSocialProfile(network: string, url: string): boolean {
 }
 
 /** A redirect target: a scheme, `//` or `\\`, a backslash, or a web address (control characters dropped first). */
-const REDIRECT_TARGET = /^[a-z][\w+.-]*:|^[\\/]{2}|\\|^www\./i;
+const REDIRECT_TARGET = /^[a-z][\w+.-]*:|^[\\/]{2}|\\|^www\.|^\d{1,3}(?:\.\d{1,3}){3}\b/i;
 
 /** Percent-decoding that never throws (a malformed escape is kept as written). */
 const safeDecode = (value: string) => {
@@ -142,11 +142,12 @@ const MIDDLE_DOT_DOMAIN = new RegExp(
 
 /** A web address in prose: a scheme, `//host`, `www.`, or a domain (look-alike dots and full-width letters folded). */
 export function hasWebAddress(text: string): boolean {
-  const folded = text.normalize('NFKC').replace(/[。．｡․]/g, '.');
+  const folded = text.normalize('NFKC').replace(/[。．｡․‧∙⋅•]/g, '.');
   return (
     /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) ||
     DOMAIN.test(folded) ||
     // A middle dot as the dot only before a generic ending: French inclusive writing (ami·es) is not an address.
+    // DECISION(BF-033): `evil·fr` (a two-letter ending) passes: those endings are inclusive writing too (·es, ·te).
     (folded.includes('·') && MIDDLE_DOT_DOMAIN.test(folded))
   );
 }

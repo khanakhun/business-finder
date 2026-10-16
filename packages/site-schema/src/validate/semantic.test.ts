@@ -437,6 +437,7 @@ describe('validateSite', () => {
     'https://www.salon-lumiere.example/go#u=https://e.com',
     'https://www.salon-lumiere.example/go#https://evil.xyz',
     'https://www.salon-lumiere.example/go?u=https://e.com#%',
+    'https://www.salon-lumiere.example/go?u=93.184.216.34',
     'https://www.salon-lumiere.example/go#%E0%A4%A&u=https://evil.com',
   ])('refuses a url action that redirects: %s', (url) => {
     const spec = with_((s) => Object.assign(s.layout.header, { cta: { kind: 'url', label: L('Go'), url } }));
@@ -458,6 +459,10 @@ describe('validateSite', () => {
   });
 
   it.each([
+    '//evil.com@a.bc',
+    'ftp://evil.com@a.bc',
+    'Ｗｗｗ.evil.com@a.bc',
+    'evil∙com',
     'see www.evil.com@a.bc',
     'evil·com',
     'evil.villas',

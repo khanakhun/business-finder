@@ -3,7 +3,7 @@
 import type { SiteVersion } from '@bf/contracts';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { usePermission } from '@/lib/session.tsx';
+import { usePermission, useSession } from '@/lib/session.tsx';
 
 function Loading() {
   const t = useTranslations('siteEditor');
@@ -29,5 +29,14 @@ export function LazySiteEditor({
   readonly initialVersion: SiteVersion;
 }) {
   const canEdit = usePermission('sites:generate');
-  return <SiteEditor siteId={siteId} initialVersion={initialVersion} canEdit={canEdit} />;
+  const me = useSession();
+  return (
+    <SiteEditor
+      siteId={siteId}
+      initialVersion={initialVersion}
+      canEdit={canEdit}
+      userId={me.user.id}
+      organizationId={me.activeOrganization?.id ?? ''}
+    />
+  );
 }

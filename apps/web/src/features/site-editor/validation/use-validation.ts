@@ -12,9 +12,22 @@ export function useValidation(spec: unknown, assetHosts: readonly string[], dela
   const [issues, setIssues] = React.useState<readonly Issue[]>([]);
   const worker = React.useRef<Worker | null>(null);
   const sent = React.useRef(0);
+  const latest = React.useRef({ spec, assetHosts });
+  latest.current = { spec, assetHosts };
   React.useEffect(() => {
     if (typeof Worker === 'undefined') return;
     const instance = new Worker(new URL('./validation.worker.ts', import.meta.url), { type: 'module' });
+    // A worker that fails to load or crashes: validation goes on in this thread (never a silent "no issues").
+    instance.onerror = (event) => {
+      event.preventDefault();
+      console.error('site editor: validation worker failed; validating on the main thread', event.message);
+      instance.terminate();
+      worker.current = null;
+      sent.current += 1;
+      setIssues(
+        validateSite(latest.current.spec, { assetHosts: [...latest.current.assetHosts], mode: 'published' }),
+      );
+    };
     instance.onmessage = (event: MessageEvent<{ id: number; issues: Issue[] }>) => {
       // Only the latest request's answer counts.
       if (event.data.id === sent.current) setIssues(event.data.issues);

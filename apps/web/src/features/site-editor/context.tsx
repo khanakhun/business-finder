@@ -1,6 +1,6 @@
 'use client';
 
-import type { BaseOperation, Issue, SiteLocale, SiteSpec } from '@bf/site-schema';
+import type { Issue, Operation, SiteLocale, SiteSpec } from '@bf/site-schema';
 import * as React from 'react';
 
 /**
@@ -39,12 +39,19 @@ export interface SiteEditorActions {
    * Applies a site-level change (settings, menu, languages, pages), then opens `open` if given; refusals are
    * reported, nothing changes then.
    */
-  readonly change: (op: BaseOperation, options?: { readonly open?: string }) => void;
+  readonly change: (op: Operation, options?: { readonly open?: string }) => void;
   readonly undo: () => void;
   readonly redo: () => void;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
   readonly openPage: (pageId: string) => void;
+  /**
+   * Registers a field's flush (its pending, debounced value): the editor flushes every field before a change or a
+   * save, so nothing typed is lost. Returns the unregistration.
+   */
+  readonly register: (flush: () => void) => () => void;
+  /** Shows and edits the site in another of its languages. */
+  readonly setLocale: (locale: SiteLocale) => void;
   /** Validation issues of the site as edited (from the worker), and the way to their field. */
   readonly issues: readonly Issue[];
   /** The site the issues' paths point into: as the canvas shows it (the page on screen as edited). */

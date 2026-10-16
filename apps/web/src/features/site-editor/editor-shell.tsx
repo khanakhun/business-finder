@@ -7,6 +7,7 @@ import type { SiteVersion } from '@bf/contracts';
 import {
   type BaseOperation,
   type Issue,
+  type Operation,
   OperationError,
   type SiteLocale,
   type SiteSpec,
@@ -42,6 +43,7 @@ import { clearDraft, type LocalDraft, readDraft, writeDraft } from './state/loca
 import { applyInBatches, canvasSite, whereOf, withPageBlocks } from './state/session.ts';
 import {
   change as applyChange,
+  flatten,
   type Rebased,
   rebase,
   redo as redoChange,
@@ -88,20 +90,26 @@ export function SiteEditor({
   siteId,
   initialVersion,
   canEdit,
+  userId,
+  organizationId,
 }: {
   readonly siteId: string;
   readonly initialVersion: SiteVersion;
   readonly canEdit: boolean;
+  /** Whose drafts these are (a draft is never offered to someone else on the same computer). */
+  readonly userId: string;
+  readonly organizationId: string;
 }) {
   const t = useTranslations('siteEditor');
   const labels = useConfigLabels();
+  const owner = React.useMemo(() => ({ userId, organizationId, siteId }), [userId, organizationId, siteId]);
   const [base, setBase] = React.useState<Base>(() => baseOf(initialVersion));
   // The site with the edits of pages already left and the site-level changes (from `base.spec`), with their history.
-  const [site, setSite] = React.useState<SiteChanges>(() => startChanges(base.spec));
+  const [site, setSiteState] = React.useState<SiteChanges>(() => startChanges(base.spec));
   const [pageId, setPageId] = React.useState(base.spec.pages[0]?.id ?? '');
   const [locale, setLocale] = React.useState<SiteLocale>(base.spec.defaultLocale);
   // The canvas's latest content (Puck's onChange), and what Puck was mounted with.
-  const [data, setData] = React.useState<EditorData>(() => specPageToPuckData(base.spec, pageId));
+  const [data, setDataState] = React.useState<EditorData>(() => specPageToPuckData(base.spec, pageId));
   const [initial, setInitial] = React.useState<EditorData>(data);
   // Bumped to remount Puck with `initial`.
   const [mount, setMount] = React.useState(0);
@@ -113,6 +121,39 @@ export function SiteEditor({
   const [pendingRebase, setPendingRebase] = React.useState<PendingRebase | null>(null);
   const [draftOffer, setDraftOffer] = React.useState<LocalDraft | null>(null);
 
+  // The latest state, for handlers that run late (a field committing on a pause, a change queued behind a save):
+  // they always build on what is current, never on the render that created them.
+  const siteRef = React.useRef(site);
+  const dataRef = React.useRef(data);
+  const pageIdRef = React.useRef(pageId);
+  const baseRef = React.useRef(base);
+  siteRef.current = site;
+  dataRef.current = data;
+  pageIdRef.current = pageId;
+  baseRef.current = base;
+  const setSite = (next: SiteChanges) => {
+    siteRef.current = next;
+    setSiteState(next);
+  };
+  const setData = (next: EditorData) => {
+    dataRef.current = next;
+    setDataState(next);
+  };
+  // Settings fields with a pending (debounced) value: flushed before any change or save, so nothing typed is lost.
+  const flushers = React.useRef(new Set<() => void>());
+  const flushing = React.useRef(false);
+  const flushFields = () => {
+    if (flushing.current) return;
+    flushing.current = true;
+    try {
+      for (const flush of flushers.current) flush();
+    } finally {
+      flushing.current = false;
+    }
+  };
+  // Site changes asked for while a save runs wait for it (they then build on the saved version).
+  const queued = React.useRef<(() => void)[]>([]);
+
   const working = site.working;
   const config = React.useMemo(() => buildPuckConfig(working, labels), [working, labels]);
   const pageOps = React.useMemo(() => applyPuckDataToSpec(working, pageId, data), [working, pageId, data]);
@@ -123,9 +164,15 @@ export function SiteEditor({
   const shown = React.useMemo(() => canvasSite(working, pageId, data), [working, pageId, data]);
   const issues = useValidation(shown, assetHosts);
 
+  // The language written on the canvas is always one of the site's (removing it falls back to the default).
+  React.useEffect(() => {
+    if (!working.locales.includes(locale)) setLocale(working.defaultLocale);
+  }, [working.locales, working.defaultLocale, locale]);
+
   const remount = (spec: SiteSpec, page: string) => {
     const target = spec.pages.some((candidate) => candidate.id === page) ? page : (spec.pages[0]?.id ?? '');
     const fresh = specPageToPuckData(spec, target);
+    pageIdRef.current = target;
     setPageId(target);
     setData(fresh);
     setInitial(fresh);
@@ -153,51 +200,75 @@ export function SiteEditor({
     [t, labels],
   );
 
-  /** The canvas's edits folded into the site (they are saved with the rest); throws when they cannot apply. */
-  const folded = (): SiteChanges =>
-    pageOps.length === 0
-      ? site
-      : { ...site, working: applyInBatches(working, pageOps), pending: [...site.pending, ...pageOps] };
+  /** The canvas's edits as operations, against the latest working site. */
+  const currentPageOps = () =>
+    applyPuckDataToSpec(siteRef.current.working, pageIdRef.current, dataRef.current);
+  const canvasNamed = () =>
+    withPageBlocks(siteRef.current.working, pageIdRef.current, dataRef.current.content.map(itemToBlock));
 
-  const refusedOnCanvas = (error: unknown) =>
-    void reportRefused(error, withPageBlocks(working, pageId, data.content.map(itemToBlock)));
+  /**
+   * The canvas's edits folded into the site (they are saved with the rest); throws when they cannot apply. The site's
+   * undo history ends there: its inverses point at sections by position, which the canvas's edits may have moved.
+   */
+  const folded = (): SiteChanges => {
+    const current = siteRef.current;
+    const ops = currentPageOps();
+    if (ops.length === 0) return current;
+    return {
+      working: applyInBatches(current.working, ops),
+      pending: [...current.pending, ...ops],
+      undo: [],
+      redo: [],
+    };
+  };
 
   const switchPage = (next: string) => {
-    if (next === pageId || inFlight.current) return;
+    flushFields();
+    if (next === pageIdRef.current || inFlight.current) return;
     try {
       const state = folded();
       setSite(state);
       remount(state.working, next);
     } catch (error) {
-      refusedOnCanvas(error);
+      void reportRefused(error, canvasNamed());
     }
   };
 
-  /** Runs a site-level change (or its undo/redo) after folding the canvas's edits in. */
+  /** Runs a site-level change (or its undo/redo) after folding the canvas's edits in; waits for a running save. */
   const siteStep = (step: (state: SiteChanges) => SiteChanges, reshapes: boolean, open?: string) => {
-    if (!canEdit || inFlight.current) return;
+    if (!canEdit) return;
+    if (inFlight.current) {
+      queued.current.push(() => siteStep(step, reshapes, open));
+      return;
+    }
+    flushFields();
     let state: SiteChanges;
     try {
       state = folded();
     } catch (error) {
-      refusedOnCanvas(error);
+      void reportRefused(error, canvasNamed());
       return;
     }
     try {
       const next = step(state);
       setSite(next);
-      if (reshapes || open) remount(next.working, open ?? pageId);
+      if (reshapes || open || state !== siteRef.current) remount(next.working, open ?? pageIdRef.current);
     } catch (error) {
+      setSite(state);
       void reportRefused(error, state.working);
     }
   };
 
-  const save = React.useCallback(async () => {
+  const save = async () => {
     // Not while a conflict is being resolved (a save from the stale base would only conflict again).
     if (!canEdit || inFlight.current || conflict || reloading || pendingRebase) return;
+    flushFields();
     inFlight.current = true;
     try {
       const toast = await getToast();
+      const sent = siteRef.current;
+      const sentPageOps = currentPageOps();
+      const operations = [...sent.pending, ...sentPageOps];
       if (operations.length === 0) {
         toast.message(t('noChanges'));
         return;
@@ -205,19 +276,32 @@ export function SiteEditor({
       let spec: SiteSpec;
       try {
         // Refused here what the API would refuse (an edit that breaks the schema), naming the field.
-        spec = applyInBatches(working, pageOps);
+        spec = applyInBatches(sent.working, sentPageOps);
       } catch (error) {
-        await reportRefused(error, withPageBlocks(working, pageId, data.content.map(itemToBlock)));
+        await reportRefused(error, canvasNamed());
         return;
       }
       setSaving(true);
       try {
-        const version = await saveSite({ siteId, baseVersionId: base.versionId, operations, spec });
+        const version = await saveSite({
+          siteId,
+          baseVersionId: baseRef.current.versionId,
+          operations,
+          spec,
+        });
         const next = baseOf(version);
-        // Only the base moves: the canvas keeps what is on screen (typing during the save stays, as a new change).
+        // Only the base moves: the canvas keeps what is on screen (typing during the save stays, as a new change),
+        // and the settings' history stays (its inverses hold on the saved site) unless the canvas moved sections.
+        baseRef.current = next;
         setBase(next);
-        setSite(startChanges(next.spec));
-        void clearDraft(siteId);
+        const structural = sentPageOps.some((op) => ['addBlock', 'removeBlock', 'moveBlock'].includes(op.op));
+        setSite({
+          working: next.spec,
+          pending: [],
+          undo: structural ? [] : siteRef.current.undo,
+          redo: structural ? [] : siteRef.current.redo,
+        });
+        void clearDraft(owner);
         const errors = version.issues.filter((issue) => issue.severity === 'error').length;
         if (errors > 0)
           toast.warning(t('savedWithErrors', { version: version.versionNumber, count: errors }));
@@ -230,22 +314,12 @@ export function SiteEditor({
       }
     } finally {
       inFlight.current = false;
+      // The changes asked for meanwhile, on the state as it is now.
+      for (const run of queued.current.splice(0)) run();
     }
-  }, [
-    canEdit,
-    conflict,
-    reloading,
-    pendingRebase,
-    operations,
-    working,
-    pageOps,
-    pageId,
-    data,
-    base,
-    siteId,
-    t,
-    reportRefused,
-  ]);
+  };
+  const saveRef = React.useRef(save);
+  saveRef.current = save;
 
   /** Loads the version the conflict named; then either replays the local changes on it, or takes it as it is. */
   const resolveConflict = async (how: 'rebase' | 'discard') => {
@@ -254,17 +328,19 @@ export function SiteEditor({
       setConflict(null);
       return;
     }
+    flushFields();
     setReloading(true);
     try {
       const latest = baseOf(await fetchVersion(siteId, versionId));
       setConflict(null);
       if (how === 'rebase') {
-        setPendingRebase({ ...rebase(latest.spec, operations), onto: latest, reason: 'conflict' });
+        const ops = [...siteRef.current.pending, ...currentPageOps()];
+        setPendingRebase({ ...rebase(latest.spec, ops, base.spec), onto: latest, reason: 'conflict' });
       } else {
         setBase(latest);
         setSite(startChanges(latest.spec));
         remount(latest.spec, pageId);
-        void clearDraft(siteId);
+        void clearDraft(owner);
       }
     } catch {
       // The dialog stays open: loading can be tried again.
@@ -274,7 +350,7 @@ export function SiteEditor({
     }
   };
 
-  /** Takes a rebase: the latest version as the base, the replayed changes as unsaved work. */
+  /** Takes a rebase: its version as the base, the replayed changes as unsaved work. */
   const acceptRebase = () => {
     if (!pendingRebase) return;
     const { onto, applied, spec } = pendingRebase;
@@ -284,10 +360,15 @@ export function SiteEditor({
     setPendingRebase(null);
   };
 
+  /**
+   * Offers the draft's operations replayed on the version open now, the current edits after them; through the
+   * rebase dialog whenever the draft was made on another version or something no longer applies.
+   */
   const restoreDraft = (draft: LocalDraft) => {
-    const replayed = rebase(base.spec, draft.operations);
     setDraftOffer(null);
-    if (replayed.failed.length > 0) {
+    const ops = [...draft.operations, ...siteRef.current.pending, ...currentPageOps()];
+    const replayed = rebase(base.spec, ops, draft.baseVersionId === base.versionId ? base.spec : undefined);
+    if (replayed.failed.length > 0 || draft.baseVersionId !== base.versionId) {
       setPendingRebase({ ...replayed, onto: base, reason: 'draft' });
       return;
     }
@@ -295,19 +376,23 @@ export function SiteEditor({
     remount(replayed.spec, draft.pageId);
   };
 
-  // Unsaved work from an earlier visit: offered back (replayed on the version open now).
+  // Unsaved work from an earlier visit (this person's, in this workspace): offered back.
   React.useEffect(() => {
     if (!canEdit) return;
-    void readDraft(siteId).then((draft) => {
+    void readDraft(owner).then((draft) => {
       if (draft) setDraftOffer(draft);
     });
-  }, [canEdit, siteId]);
-  // Unsaved work is kept in the browser a moment after each change (and dropped once saved or discarded).
+  }, [canEdit, owner]);
+  // Unsaved work is kept in the browser a moment after each change, and erased once there is none left.
   React.useEffect(() => {
-    if (!canEdit || draftOffer || pendingRebase || operations.length === 0) return;
+    if (!canEdit || draftOffer || pendingRebase) return;
     const timer = setTimeout(() => {
+      if (operations.length === 0) {
+        void clearDraft(owner);
+        return;
+      }
       void writeDraft({
-        siteId,
+        ...owner,
         baseVersionId: base.versionId,
         baseVersionNumber: base.versionNumber,
         operations,
@@ -316,19 +401,19 @@ export function SiteEditor({
       });
     }, 1_000);
     return () => clearTimeout(timer);
-  }, [canEdit, draftOffer, pendingRebase, operations, siteId, base, pageId]);
+  }, [canEdit, draftOffer, pendingRebase, operations, owner, base, pageId]);
 
   // ⌘/Ctrl+S saves; leaving with unsaved edits asks first.
   React.useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
         event.preventDefault();
-        void save();
+        void saveRef.current();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [save]);
+  }, []);
   React.useEffect(() => {
     if (!dirty) return;
     const onLeave = (event: BeforeUnloadEvent) => {
@@ -344,13 +429,24 @@ export function SiteEditor({
     [working, pageId, locale, canEdit],
   );
   const actions = {
-    change: (op: BaseOperation, options?: { readonly open?: string }) =>
-      siteStep((state) => applyChange(state, op), RESHAPING.has(op.op), options?.open),
+    change: (op: Operation, options?: { readonly open?: string }) =>
+      siteStep(
+        (state) => applyChange(state, op),
+        flatten(op).some((one) => RESHAPING.has(one.op)),
+        options?.open,
+      ),
     undo: () => siteStep(undoChange, site.undo.at(-1)?.inverse.some((op) => RESHAPING.has(op.op)) ?? false),
-    redo: () => siteStep(redoChange, RESHAPING.has(site.redo.at(-1)?.op ?? 'setTheme')),
+    redo: () => siteStep(redoChange, site.redo.at(-1)?.some((op) => RESHAPING.has(op.op)) ?? false),
     canUndo: site.undo.length > 0,
     canRedo: site.redo.length > 0,
     openPage: switchPage,
+    register: (flush: () => void) => {
+      flushers.current.add(flush);
+      return () => {
+        flushers.current.delete(flush);
+      };
+    },
+    setLocale,
     issues,
     issuesSite: shown,
     showIssue: (issue: Issue) => {
@@ -416,7 +512,12 @@ export function SiteEditor({
                   <span className="text-muted-foreground text-xs" aria-live="polite">
                     {dirty ? t('unsaved') : t('allSaved')}
                   </span>
-                  <Button size="sm" onClick={() => void save()} disabled={saving} title={t('shortcutSave')}>
+                  <Button
+                    size="sm"
+                    onClick={() => void saveRef.current()}
+                    disabled={saving}
+                    title={t('shortcutSave')}
+                  >
                     {saving ? t('saving') : t('save')}
                   </Button>
                 </>
@@ -519,7 +620,7 @@ export function SiteEditor({
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (pendingRebase?.reason === 'draft') void clearDraft(siteId);
+                  if (pendingRebase?.reason === 'draft') void clearDraft(owner);
                   setPendingRebase(null);
                 }}
               >
@@ -546,7 +647,7 @@ export function SiteEditor({
                 variant="outline"
                 onClick={() => {
                   setDraftOffer(null);
-                  void clearDraft(siteId);
+                  void clearDraft(owner);
                 }}
               >
                 {t('draftDiscard')}

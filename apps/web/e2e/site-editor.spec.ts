@@ -259,13 +259,14 @@ test('offers back unsaved changes after a reload', async ({ page }) => {
       page.evaluate(
         (id) =>
           new Promise<boolean>((resolve) => {
-            const request = indexedDB.open('bf-site-editor', 1);
+            // Drafts are keyed by person, workspace and site: any key ending with this site's id.
+            const request = indexedDB.open('bf-site-editor');
             request.onsuccess = () => {
               const db = request.result;
               if (!db.objectStoreNames.contains('drafts')) return resolve(false);
-              const get = db.transaction('drafts').objectStore('drafts').get(id);
-              get.onsuccess = () => resolve(get.result !== undefined);
-              get.onerror = () => resolve(false);
+              const keys = db.transaction('drafts').objectStore('drafts').getAllKeys();
+              keys.onsuccess = () => resolve(keys.result.some((key) => String(key).endsWith(`:${id}`)));
+              keys.onerror = () => resolve(false);
             };
             request.onerror = () => resolve(false);
           }),

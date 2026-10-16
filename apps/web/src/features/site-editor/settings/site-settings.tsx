@@ -29,22 +29,46 @@ import { CtaField } from '../puck/fields.tsx';
 // The site's own settings (BF-037), beside the canvas: theme, menu, header and footer, languages, search texts and
 // settings, each change a BF-033 operation (undoable here); the contact details are facts, shown not edited.
 
-/** A value edited locally and committed when the person pauses or leaves the field (one change, not one per key). */
+/** A value with its texts trimmed (as the schema stores them), for comparing what is typed with what is saved. */
+function normalized(value: unknown): unknown {
+  if (typeof value === 'string') return value.trim();
+  if (Array.isArray(value)) return value.map(normalized);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, normalized(entry)]));
+  return value;
+}
+
+/**
+ * A value edited locally and committed when the person pauses or leaves the field (one change, not one per key).
+ * The editor flushes it before any change or save (`register`), so nothing typed is lost; a new value from outside
+ * replaces the local one only when it says something else (a trailing space being typed stays).
+ */
 function useCommitted<T>(value: T, commit: (next: T) => void, delay = 700) {
+  const { register } = useSiteEditorActions();
   const [draft, setDraft] = React.useState(value);
   const timer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pending = React.useRef(false);
   const latest = React.useRef({ draft, value, commit });
   latest.current = { draft, value, commit };
-  React.useEffect(() => setDraft(value), [value]);
+  React.useEffect(() => {
+    const local = latest.current.draft;
+    if (pending.current) return;
+    if (JSON.stringify(normalized(local)) !== JSON.stringify(normalized(value))) setDraft(value);
+  }, [value]);
   const flush = React.useCallback(() => {
     clearTimeout(timer.current);
+    if (!pending.current) return;
+    pending.current = false;
     const { draft: next, value: current, commit: send } = latest.current;
-    if (JSON.stringify(next) !== JSON.stringify(current)) send(next);
+    if (JSON.stringify(normalized(next)) !== JSON.stringify(normalized(current))) send(next);
   }, []);
-  // Leaving (the panel closed) commits what was typed: nothing is lost to the pause.
+  React.useEffect(() => register(flush), [register, flush]);
+  // Leaving (the panel closed) commits what was typed.
   React.useEffect(() => flush, [flush]);
   const update = (next: T) => {
     setDraft(next);
+    latest.current = { ...latest.current, draft: next };
+    pending.current = true;
     clearTimeout(timer.current);
     timer.current = setTimeout(flush, delay);
   };
@@ -549,8 +573,8 @@ function SearchSection({ spec, readOnly }: { readonly spec: SiteSpec; readonly r
   const { change } = useSiteEditorActions();
   const commit = (key: 'title' | 'description') => (next: LocalizedText | undefined) => {
     const ops = textChanges(['seo', key], spec.seo[key], next);
-    if (ops.length === 1) change(ops[0] as never);
-    else if (ops.length > 1) change({ op: 'batch', ops } as never);
+    if (ops.length === 1 && ops[0]) change(ops[0]);
+    else if (ops.length > 1) change({ op: 'batch', ops });
   };
   return (
     <Section title={t('search')}>

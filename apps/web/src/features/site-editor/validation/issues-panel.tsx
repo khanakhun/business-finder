@@ -1,6 +1,6 @@
 'use client';
 
-import type { Issue } from '@bf/site-schema';
+import type { Issue, SiteLocale } from '@bf/site-schema';
 import { Badge } from '@bf/ui/components/badge';
 import { useGetPuck } from '@puckeditor/core';
 import { CircleAlertIcon, TriangleAlertIcon } from 'lucide-react';
@@ -24,7 +24,7 @@ export function IssuesPanel() {
   const t = useTranslations('siteEditor.issues');
   const labels = useConfigLabels();
   const { pageId } = useSiteEditor();
-  const { issues, issuesSite: spec, showIssue } = useSiteEditorActions();
+  const { issues, issuesSite: spec, showIssue, setLocale } = useSiteEditorActions();
   const getPuck = useGetPuck();
   /** Selects the issue's section on the canvas and focuses its field (another page is opened first). */
   const select = (issue: Issue) => {
@@ -36,10 +36,17 @@ export function IssuesPanel() {
     }
     getPuck().dispatch({ type: 'setUi', ui: { itemSelector: { index: blockIndex, zone: ROOT_ZONE } } });
     if (typeof key !== 'string') return;
-    const label = labels.field(key);
+    // A missing translation: shown in its language, its input focused.
+    const last = issue.path.at(-1);
+    const language = typeof last === 'string' && spec.locales.includes(last as SiteLocale) ? last : undefined;
+    if (language) setLocale(language as SiteLocale);
+    const label = language ? `${labels.field(key)} (${language.toUpperCase()})` : labels.field(key);
     // Once the section's fields are shown: the first visible input of that field.
     setTimeout(() => {
-      const target = [...document.querySelectorAll<HTMLElement>(`[aria-label^="${CSS.escape(label)}"]`)].find(
+      const selector = language
+        ? `[aria-label="${CSS.escape(label)}"]`
+        : `[aria-label^="${CSS.escape(label)}"]`;
+      const target = [...document.querySelectorAll<HTMLElement>(selector)].find(
         (element) => element.offsetParent !== null,
       );
       target?.focus();

@@ -3,6 +3,7 @@
 import { Button } from '@bf/ui/components/button';
 import { ArrowDownIcon, ArrowUpIcon, FileTextIcon, Trash2Icon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import * as React from 'react';
 import { PAGE_TEMPLATES, type PageTemplate, pageFromTemplate } from '../adapters/page-templates.ts';
 import { useSiteEditor, useSiteEditorActions } from '../context.tsx';
 
@@ -24,14 +25,19 @@ export function PagesPanel() {
     if (moved) order.splice(to, 0, moved);
     change({ op: 'reorderPages', order });
   };
-  const templates = PAGE_TEMPLATES.map((template) => ({
-    template,
-    page: pageFromTemplate(template, spec, {
-      spec,
-      placeholder: () => placeholder,
-      title: t(`templates.${template}` as never),
-    }),
-  })).filter((entry) => entry.page !== undefined);
+  // Built when the site changes, not on every keystroke (each template validates a candidate page).
+  const templates = React.useMemo(
+    () =>
+      PAGE_TEMPLATES.map((template) => ({
+        template,
+        page: pageFromTemplate(template, spec, {
+          spec,
+          placeholder: () => placeholder,
+          title: t(`templates.${template}` as never),
+        }),
+      })).filter((entry) => entry.page !== undefined),
+    [spec, placeholder, t],
+  );
   const add = (template: PageTemplate) => {
     const page = templates.find((entry) => entry.template === template)?.page;
     if (!page) return;

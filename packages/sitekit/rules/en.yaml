@@ -1,0 +1,23 @@
+# English copy rules (BF-042).
+cliches:
+  - 'nestled in'
+  - 'look no further'
+  - 'second to none'
+  - 'one-stop shop'
+  - 'state of the art'
+  - 'state-of-the-art'
+  - 'world-class'
+  - 'unparalleled'
+  - 'hidden gem'
+  - 'unforgettable experience'
+  - 'we pride ourselves'
+superlatives:
+  - '\bthe best\b'
+  - '\bbest in\b'
+  - '\bnumber one\b'
+  - '\b(no\.?|#)\s?1\b'
+  - '\bleading\b'
+  - '\bunbeatable\b'
+  - '\bfinest\b'
+cta_verbs: [call, book, reserve, email, write, contact, discover, see, view, order, request, ask, visit, get, try, explore, join, follow, start, send, directions, whatsapp, message, chat]
+stopwords: [the, and, is, are, of, to, in, for, with, on, our, your, we, you, at, by, from, this, that, it, be, as, an, a, or, not]

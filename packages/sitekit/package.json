@@ -15,7 +15,10 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
+    "@bf/site-blocks": "workspace:*",
     "@bf/site-schema": "workspace:*",
+    "playwright": "catalog:",
+    "yaml": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -26,5 +29,10 @@
     "@vitest/coverage-v8": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
-  }
+  },
+  "files": [
+    "src",
+    "rules",
+    "fixtures"
+  ]
 }

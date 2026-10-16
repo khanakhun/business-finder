@@ -71,7 +71,7 @@ jobs:
             # One pattern: with `every`, each positive pattern must match (dependency, Node and job changes move
             # pixels too: Tailwind, React, Playwright, fonts).
             sites:
-              - '{packages/site-blocks/**,packages/site-schema/**,pnpm-lock.yaml,pnpm-workspace.yaml,.nvmrc,.github/workflows/ci.yml,.github/actions/setup/**}'
+              - '{packages/site-blocks/**,packages/site-schema/**,packages/sitekit/**,pnpm-lock.yaml,pnpm-workspace.yaml,.nvmrc,.github/workflows/ci.yml,.github/actions/setup/**}'
               - '!**/*.md'
 
   quality:
@@ -295,6 +295,10 @@ jobs:
         run: pnpm --filter @bf/site-blocks exec playwright test --retries=0
       - name: Lighthouse budgets
         run: pnpm --filter @bf/site-blocks test:lighthouse
+      - name: sitekit screenshots and check in Chromium (BF-042)
+        run: pnpm --filter @bf/sitekit exec vitest run src/lib/screenshot.browser.test.ts
+        env:
+          SITEKIT_BROWSER: '1'
       - name: Upload diffs and reports
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

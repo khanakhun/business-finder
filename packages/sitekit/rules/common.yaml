@@ -1,0 +1,24 @@
+# Copy lint rules shared by every locale (BF-042). Patterns are case-insensitive regular expressions.
+placeholders:
+  - '\blorem\b'
+  - '\bipsum\b'
+  - '\bTODO\b'
+  - '\bTBD\b'
+  - '\bFIXME\b'
+  - '\[[^\]]*\]'
+  - '\{\{'
+  - '\}\}'
+  - '\bxxx+\b'
+  - '\byour (text|title|business name) here\b'
+  - '\bvotre (texte|titre) ici\b'
+alt:
+  # Alt text that describes nothing.
+  banned_prefixes: ['image of', 'picture of', 'photo of', 'image de', 'photo de', 'illustration de']
+  filename: '(\.(jpe?g|png|webp|gif|avif|svg)$)|^(img|dsc|image|photo)[-_ ]?\d+'
+sentence:
+  max_words: 30
+seo:
+  title: [20, 60]
+  description: [120, 160]
+duplicates:
+  min_words: 6

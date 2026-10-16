@@ -533,6 +533,13 @@ test('shows the keyboard shortcuts with ?, and its chrome has no serious axe vio
   await page.goto(`/sites/${siteId}/edit`);
   await expect(canvas(page).getByRole('heading', { level: 1 })).toBeVisible();
   const serious = async (include: string) => {
+    // Contrast is measured once the element has faded in (mid-animation, its text is still translucent).
+    await page
+      .locator(include)
+      .first()
+      .evaluate((element) =>
+        Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished)),
+      );
     const results = await new AxeBuilder({ page })
       .include(include)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

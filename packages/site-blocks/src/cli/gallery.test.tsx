@@ -9,7 +9,8 @@ const shape = (markup: string) =>
     .replace(/ data-variant="[^"]*"/g, '')
     .replace(/ (?:id|aria-labelledby|aria-controls|popovertarget|for|href)="[^"]*"/g, '');
 
-describe('block gallery', () => {
+// The first test renders the whole gallery (every block, variant and style): seconds on a busy CI runner.
+describe('block gallery', { timeout: 30_000 }, () => {
   const examples = galleryExamples();
 
   it.each(BLOCK_TYPES)('shows every %s variant as itself (no two render the same)', (type) => {

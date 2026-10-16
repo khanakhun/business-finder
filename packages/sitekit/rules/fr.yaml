@@ -1,0 +1,25 @@
+# French copy rules (BF-042).
+cliches:
+  - 'au cœur de'
+  - 'à votre écoute'
+  - 'un cadre idyllique'
+  - 'cadre enchanteur'
+  - 'havre de paix'
+  - 'n’hésitez pas à'
+  - "n'hésitez pas à"
+  - 'qualité et savoir-faire'
+  - 'une expérience unique'
+  - 'pour le plus grand plaisir'
+  - 'satisfaction garantie'
+superlatives:
+  - '\ble meilleur\b'
+  - '\bla meilleure\b'
+  - '\bles meilleur(e)?s\b'
+  - '\ble plus (beau|grand|réputé)\b'
+  - '\bn°\s?1\b'
+  - '\bnuméro un\b'
+  - '\bincontournable\b'
+  - '\binégalé(e)?\b'
+  - '\bimbattable\b'
+cta_verbs: [appeler, appelez, réserver, réservez, écrire, écrivez, contacter, contactez, découvrir, découvrez, voir, voyez, commander, commandez, demander, demandez, venir, venez, nous, prendre, prenez, envoyer, envoyez, obtenir, obtenez, essayer, essayez, explorer, explorez, rejoindre, rejoignez, suivre, suivez, itinéraire, whatsapp]
+stopwords: [le, la, les, des, une, un, et, est, dans, pour, avec, sur, au, aux, du, nous, vous, notre, votre, qui, que, en, de, sont, par, pas, plus, ce, cette]

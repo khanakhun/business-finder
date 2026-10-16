@@ -10,15 +10,18 @@ import { type NextRequest, NextResponse } from 'next/server';
  */
 export function buildCsp(
   nonce: string,
-  options: { dev: boolean; apiOrigin: string; https: boolean },
+  options: { dev: boolean; apiOrigin: string; https: boolean; mapOrigin?: string },
 ): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${options.dev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' blob: data:",
+    // The search map (BF-023) loads its style, tiles, glyphs and sprites from the map origin; MapLibre's workers
+    // are blob: URLs.
+    `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}`,
+    "worker-src 'self' blob:",
     "font-src 'self'",
-    `connect-src 'self' ${options.apiOrigin}${options.dev ? ' ws:' : ''}`,
+    `connect-src 'self' ${options.apiOrigin}${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.dev ? ' ws:' : ''}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -34,6 +37,9 @@ export function proxy(request: NextRequest): NextResponse {
     dev: process.env.NODE_ENV === 'development',
     apiOrigin: new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').origin,
     https: (process.env.NEXT_PUBLIC_APP_URL ?? '').startsWith('https://'),
+    mapOrigin: new URL(
+      process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty',
+    ).origin,
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);

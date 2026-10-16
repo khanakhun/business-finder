@@ -148,6 +148,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `WEB_PORT` | App-specific | web | no | `3000` |  | HTTP port of apps/web. Set by infra:up from BF_PORT_OFFSET. |
 | `NEXT_PUBLIC_API_URL` | App-specific | web | no | `http://localhost:4000` |  | API base URL used by the browser. |
 | `NEXT_PUBLIC_APP_URL` | App-specific | web | no | `http://localhost:3000` |  | Dashboard URL used by the browser. |
+| `NEXT_PUBLIC_MAP_STYLE_URL` | App-specific | web | no | `https://tiles.openfreemap.org/styles/liberty` |  | MapLibre style for the search map (OpenFreeMap by default: free, no key, OSM attribution). |
 | `SITES_PORT` | App-specific | sites | no | `3100` |  | HTTP port of apps/sites. Set by infra:up from BF_PORT_OFFSET. |
 | `INTEL_HOST` | App-specific | intel | no | `127.0.0.1` |  | Interface services/intel binds to (0.0.0.0 inside its container). |
 | `INTEL_PORT` | App-specific | intel | no | `8000` |  | HTTP port of services/intel. Set by infra:up from BF_PORT_OFFSET. |

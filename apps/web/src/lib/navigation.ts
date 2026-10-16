@@ -4,6 +4,7 @@ import {
   InboxIcon,
   KanbanSquareIcon,
   LayoutDashboardIcon,
+  ListIcon,
   ListOrderedIcon,
   type LucideIcon,
   MailIcon,
@@ -17,6 +18,7 @@ import {
 export type NavKey =
   | 'home'
   | 'search'
+  | 'lists'
   | 'pipeline'
   | 'sites'
   | 'generation'
@@ -46,6 +48,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     key: 'prospects',
     items: [
       { key: 'search', href: '/search', icon: SearchIcon },
+      { key: 'lists', href: '/lists', icon: ListIcon },
       { key: 'pipeline', href: '/pipeline', icon: KanbanSquareIcon },
     ],
   },

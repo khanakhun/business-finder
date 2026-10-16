@@ -1,5 +1,5 @@
 import type { ColumnDef, RowSelectionState, SortingState } from '@tanstack/react-table';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
@@ -79,5 +79,32 @@ describe('DataTable', () => {
     }));
     render(<Harness data={many} />);
     expect(screen.getAllByRole('row').length).toBeLessThan(100);
+  });
+});
+
+describe('DataTable search hooks', () => {
+  it('marks the keyboard cursor and the highlighted row, reports hover and the end of the scroll', async () => {
+    const hovered: Array<string | null> = [];
+    let ended = 0;
+    const { container } = render(
+      <DataTable
+        columns={columns}
+        data={rows}
+        getRowId={(r) => r.id}
+        empty={null}
+        activeRowId="a"
+        highlightedRowId="c"
+        onRowHover={(row) => hovered.push(row?.id ?? null)}
+        onEndReached={() => ended++}
+      />,
+    );
+    const [, first, second, third] = screen.getAllByRole('row');
+    expect(second).toHaveAttribute('aria-current', 'true');
+    expect(third).toHaveAttribute('data-highlighted', 'true');
+    await userEvent.hover(first as HTMLElement);
+    await userEvent.unhover(first as HTMLElement);
+    expect(hovered).toEqual(['b', null]);
+    fireEvent.scroll(container.firstElementChild as HTMLElement);
+    expect(ended).toBe(1);
   });
 });

@@ -36,7 +36,7 @@ test('workspace identity and address make outreach ready', async ({ page }) => {
   await page.getByLabel('Address', { exact: true }).fill('1 rue de la République');
   await page.getByLabel('City').fill('Gustavia');
   await page.getByLabel('Postal code').fill('97133');
-  await page.getByRole('combobox', { name: 'Country' }).click();
+  await page.getByRole('combobox', { name: 'Country', exact: true }).click();
   await page.getByPlaceholder('Search countries…').fill('Barth');
   await page.getByRole('option', { name: 'St. Barthélemy' }).click();
   await page.getByRole('button', { name: 'Save changes' }).click();

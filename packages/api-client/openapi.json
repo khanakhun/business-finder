@@ -1236,6 +1236,15 @@
       "BusinessListItem": {
         "additionalProperties": false,
         "properties": {
+          "addedVia": {
+            "enum": [
+              "discovery",
+              "search",
+              "manual",
+              "import"
+            ],
+            "type": "string"
+          },
           "countryCode": {
             "type": [
               "string",
@@ -1251,6 +1260,10 @@
               "number",
               "null"
             ]
+          },
+          "hasEmail": {
+            "description": "Whether an email contact is known (the address itself is not listed).",
+            "type": "boolean"
           },
           "id": {
             "description": "BusinessId (UUID)",
@@ -1423,7 +1436,9 @@
           "ownerUserId",
           "trackedAt",
           "lastActivityAt",
-          "distanceMeters"
+          "distanceMeters",
+          "hasEmail",
+          "addedVia"
         ],
         "type": "object"
       },
@@ -7477,6 +7492,36 @@
           },
           {
             "in": "query",
+            "name": "run",
+            "required": false,
+            "schema": {
+              "description": "Businesses a discovery run added to the workspace.",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ],
+              "description": "Only these businesses (e.g. exporting a selection; at most 200)."
+            }
+          },
+          {
+            "in": "query",
             "name": "addedWithinDays",
             "required": false,
             "schema": {
@@ -7996,6 +8041,36 @@
           },
           {
             "in": "query",
+            "name": "run",
+            "required": false,
+            "schema": {
+              "description": "Businesses a discovery run added to the workspace.",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ],
+              "description": "Only these businesses (e.g. exporting a selection; at most 200)."
+            }
+          },
+          {
+            "in": "query",
             "name": "addedWithinDays",
             "required": false,
             "schema": {
@@ -8437,6 +8512,36 @@
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run",
+            "required": false,
+            "schema": {
+              "description": "Businesses a discovery run added to the workspace.",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ],
+              "description": "Only these businesses (e.g. exporting a selection; at most 200)."
             }
           },
           {

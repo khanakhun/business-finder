@@ -1304,10 +1304,14 @@ export type components = {
             updatedAt: string;
         };
         BusinessListItem: {
+            /** @enum {string} */
+            addedVia: "discovery" | "search" | "manual" | "import";
             countryCode: string | null;
             displayName: string;
             /** @description From `near` or the area centre; null otherwise. */
             distanceMeters: number | null;
+            /** @description Whether an email contact is known (the address itself is not listed). */
+            hasEmail: boolean;
             /**
              * Format: uuid
              * @description BusinessId (UUID)
@@ -2772,6 +2776,7 @@ export interface operations {
                 emailVerified?: "true" | "false";
                 hasEmail?: "true" | "false";
                 hasPhone?: "true" | "false";
+                id?: string | string[];
                 includeClosed?: "true" | "false";
                 keyword?: string | string[];
                 limit?: number;
@@ -2785,6 +2790,7 @@ export interface operations {
                 "rating[lte]"?: number;
                 "reviews[gte]"?: number;
                 "reviews[lte]"?: number;
+                run?: string;
                 "score[gte]"?: number;
                 "score[lte]"?: number;
                 sort?: "relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name";
@@ -3336,6 +3342,7 @@ export interface operations {
                 fields?: string | string[];
                 hasEmail?: "true" | "false";
                 hasPhone?: "true" | "false";
+                id?: string | string[];
                 includeClosed?: "true" | "false";
                 keyword?: string | string[];
                 lang?: "en" | "fr";
@@ -3349,6 +3356,7 @@ export interface operations {
                 "rating[lte]"?: number;
                 "reviews[gte]"?: number;
                 "reviews[lte]"?: number;
+                run?: string;
                 "score[gte]"?: number;
                 "score[lte]"?: number;
                 sort?: "relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name";
@@ -3427,6 +3435,7 @@ export interface operations {
                 emailVerified?: "true" | "false";
                 hasEmail?: "true" | "false";
                 hasPhone?: "true" | "false";
+                id?: string | string[];
                 includeClosed?: "true" | "false";
                 keyword?: string | string[];
                 list?: string;
@@ -3439,6 +3448,7 @@ export interface operations {
                 "rating[lte]"?: number;
                 "reviews[gte]"?: number;
                 "reviews[lte]"?: number;
+                run?: string;
                 "score[gte]"?: number;
                 "score[lte]"?: number;
                 status?: string | string[];

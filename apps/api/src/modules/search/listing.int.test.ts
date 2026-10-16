@@ -243,6 +243,8 @@ describe('GET /v1/businesses', () => {
       pipelineStatus: 'qualified',
       ownerUserId: ownerId,
       distanceMeters: null,
+      hasEmail: true,
+      addedVia: 'search',
     });
     expect(await keys('includeClosed=true')).toContain('closed');
     expect((await list('', other)).items.map((i) => keyOf(i.id))).toEqual(['foreign']);
@@ -282,8 +284,16 @@ describe('GET /v1/businesses', () => {
     expect(await keys(`area=${gustavia.id}`)).toEqual(['cafe', 'salon']);
     expect(await keys(`near=${lorient.lat},${lorient.lng}&radiusKm=0.5`)).toEqual(['pizzeria', 'creole']);
     expect(await keys(`owner=${ownerId}`)).toEqual(['salon']);
+    expect(await keys(`id=${ids.salon},${ids.cafe},${ids.untracked}`)).toEqual(['cafe', 'salon']);
     expect(await keys('addedWithinDays=1')).toHaveLength(4);
     await owner.get('/v1/businesses?area=0192a1b2-0000-7000-8000-000000000999').expect(404);
+    const run = '0192a1b2-0000-7000-8000-0000000000ff';
+    await db.execute(sql`UPDATE org_businesses SET added_via = 'discovery', added_ref = ${run}
+      WHERE business_id = ${ids.cafe}`);
+    expect(await keys(`run=${run}`)).toEqual(['cafe']);
+    await db.execute(
+      sql`UPDATE org_businesses SET added_via = 'search', added_ref = NULL WHERE business_id = ${ids.cafe}`,
+    );
   });
 
   it('sorts with nulls last and pages every sort with cursors', async () => {

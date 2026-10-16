@@ -39,6 +39,8 @@ const itemColumns = (origin: ListingSpec['origin']) => ({
   ownerUserId: orgBusinesses.ownerUserId,
   trackedAt: orgBusinesses.createdAt,
   lastActivityAt: orgBusinesses.lastActivityAt,
+  hasEmail: sql<boolean>`EXISTS (SELECT 1 FROM ${businessContacts} bce WHERE bce.business_id = ${businesses.id} AND bce.type = 'email')`,
+  addedVia: orgBusinesses.addedVia,
   distanceMeters: origin
     ? sql<number | null>`ST_Distance(${businesses.location}, ${point(origin)})::float8`
     : sql<null>`NULL`,

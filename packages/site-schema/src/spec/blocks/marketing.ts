@@ -65,7 +65,7 @@ export const HighlightsBlockSchema = block(
       .array(
         z
           .object({
-            icon: z.enum(ICONS),
+            icon: z.enum(ICONS).describe('An icon for the strength.'),
             title: localized(LIMITS.itemTitle.max, 'A short strength, e.g. "Open 7 days".'),
             text: localized(LIMITS.itemText.max, 'One sentence backing it.').optional(),
             factIds: z.array(FactIdSchema).max(5).optional().describe('The facts this highlight states.'),
@@ -73,9 +73,10 @@ export const HighlightsBlockSchema = block(
           .strict(),
       )
       .min(2)
-      .max(6),
+      .max(6)
+      .describe('The strengths, two to six.'),
   },
-  'Three or four strengths of the business at a glance. Only true, fact-backed claims.',
+  'Two to six strengths of the business at a glance (three or four read best). Only true, fact-backed claims.',
 );
 
 export const CtaBannerBlockSchema = block(

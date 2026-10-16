@@ -9,7 +9,7 @@ import { SiteSpecSchema } from './spec/site.ts';
  */
 export const EngineResultSchema = z
   .object({
-    spec: SiteSpecSchema,
+    spec: SiteSpecSchema.describe('The site.'),
     summary: z
       .string()
       .trim()

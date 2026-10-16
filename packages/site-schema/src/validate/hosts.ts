@@ -25,40 +25,64 @@ export const KNOWN_BOOKING_HOSTS = [
   'zenchef.com',
 ] as const;
 
-/** Each network's own hosts (a profile URL must be on one of them). */
-export const SOCIAL_HOSTS: Readonly<Record<string, readonly string[]>> = {
-  instagram: ['instagram.com'],
-  facebook: ['facebook.com', 'fb.com'],
-  tiktok: ['tiktok.com'],
-  linkedin: ['linkedin.com'],
-  youtube: ['youtube.com', 'youtu.be'],
-  x: ['x.com', 'twitter.com'],
-  tripadvisor: [
-    'tripadvisor.com',
-    'tripadvisor.fr',
-    'tripadvisor.co.uk',
-    'tripadvisor.de',
-    'tripadvisor.es',
-    'tripadvisor.nl',
-  ],
-  google: ['google.com', 'g.page', 'maps.app.goo.gl'],
+/**
+ * Each network's own hosts (exactly: no other subdomain, where user content or redirects live), and paths that are
+ * not profiles (redirect pages, sign-in). A profile URL has no query string.
+ */
+export const SOCIAL_PROFILES: Readonly<
+  Record<string, { readonly hosts: readonly string[]; readonly path?: RegExp }>
+> = {
+  instagram: { hosts: ['instagram.com', 'www.instagram.com'] },
+  facebook: { hosts: ['facebook.com', 'www.facebook.com', 'm.facebook.com'] },
+  tiktok: { hosts: ['tiktok.com', 'www.tiktok.com'], path: /^\/@[\w.-]+\/?$/ },
+  linkedin: { hosts: ['linkedin.com', 'www.linkedin.com'], path: /^\/(company|in)\/[\w-]+\/?$/ },
+  youtube: { hosts: ['youtube.com', 'www.youtube.com'], path: /^\/(@[\w.-]+|channel\/[\w-]+|c\/[\w-]+)\/?$/ },
+  x: { hosts: ['x.com', 'twitter.com', 'www.x.com', 'www.twitter.com'], path: /^\/\w{1,15}\/?$/ },
+  tripadvisor: {
+    hosts: [
+      'www.tripadvisor.com',
+      'www.tripadvisor.fr',
+      'www.tripadvisor.co.uk',
+      'www.tripadvisor.de',
+      'www.tripadvisor.es',
+      'www.tripadvisor.nl',
+    ],
+  },
+  google: {
+    hosts: ['g.page', 'maps.app.goo.gl', 'www.google.com', 'maps.google.com'],
+    path: /^\/(maps\/|[\w-]+\/?$)/,
+  },
 };
 
+/** Paths of the networks' redirect and utility pages (never a profile). */
+const NOT_A_PROFILE = /^\/(l\.php|redirect|redir|url|share|login|sharer)/i;
+
+/** An https URL's host, lowercased; null when it is not https or carries credentials or a port. */
 export function hostOf(url: string): string | null {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' ? parsed.hostname.toLowerCase() : null;
+    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.port) return null;
+    return parsed.hostname.toLowerCase();
   } catch {
     return null;
   }
 }
 
-/** The host is one of `allowed` or a subdomain of one. */
-export function hostAllowed(url: string, allowed: readonly string[]): boolean {
+/** The host is one of `allowed` (or a subdomain of one, unless `subdomains` is false). */
+export function hostAllowed(url: string, allowed: readonly string[], { subdomains = true } = {}): boolean {
   const host = hostOf(url);
   if (!host) return false;
   return allowed.some((entry) => {
     const domain = entry.toLowerCase();
-    return host === domain || host.endsWith(`.${domain}`);
+    return host === domain || (subdomains && host.endsWith(`.${domain}`));
   });
+}
+
+/** A URL of the network's own profile pages. */
+export function isSocialProfile(network: string, url: string): boolean {
+  const profile = SOCIAL_PROFILES[network];
+  if (!profile || !hostAllowed(url, profile.hosts, { subdomains: false })) return false;
+  const { pathname, search, hash } = new URL(url);
+  if (search || hash || NOT_A_PROFILE.test(pathname) || pathname === '/') return false;
+  return profile.path ? profile.path.test(pathname) : true;
 }

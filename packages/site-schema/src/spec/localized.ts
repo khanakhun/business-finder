@@ -5,15 +5,34 @@ export const SITE_LOCALES = ['fr', 'en', 'nl', 'es', 'de'] as const;
 export const SiteLocaleSchema = z.enum(SITE_LOCALES).describe('A site language (ISO 639-1).');
 export type SiteLocale = z.infer<typeof SiteLocaleSchema>;
 
+/** No control or invisible formatting characters (direction overrides, zero-width spaces); line breaks allowed. */
+const SAFE_TEXT = /^(?:[^\p{Cc}\p{Cf}]|\n)*$/u;
+const SAFE_LINE = /^[^\p{Cc}\p{Cf}]*$/u;
+
+/** Text shown on the site (one language): trimmed, bounded, no hidden characters. */
+export const safeText = (max: number) =>
+  z.string().trim().min(1).max(max).regex(SAFE_TEXT, 'No control or invisible characters');
+
+/** A single-line text that is not localized (a name, an author), bounded, no hidden characters. */
+export const plainText = (max: number, description: string) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(max)
+    .regex(SAFE_LINE, 'No control or invisible characters')
+    .describe(description);
+
 /**
  * Text in the site's languages: `{ "fr": "…", "en": "…" }`. Every site locale must be present (the semantic validator
  * reports a missing one at its path); the schema bounds each text's length.
  */
 export function localized(max: number, description: string) {
   return z
-    .partialRecord(SiteLocaleSchema, z.string().trim().min(1).max(max))
+    .partialRecord(SiteLocaleSchema, safeText(max))
     .refine((text) => Object.keys(text).length > 0, { message: 'At least one locale' })
-    .describe(`${description} One entry per site locale, at most ${max} characters each.`);
+    .describe(`${description} One entry per site locale, at most ${max} characters each.`)
+    .meta({ minProperties: 1 });
 }
 export type LocalizedText = Partial<Record<SiteLocale, string>>;
 

@@ -12,9 +12,11 @@ const hex = z
 export const PaletteSchema = z
   .object({
     primary: hex.describe(
-      'Brand colour: buttons, links and highlights (#rrggbb). Needs 3:1 contrast on the background.',
+      'Brand colour for buttons and large accents (#rrggbb); body links use the text colour. Needs 3:1 on the background, and black or white must reach 4.5:1 on it (button labels).',
     ),
-    secondary: hex.optional().describe('Optional second brand colour for accents in large areas (#rrggbb).'),
+    secondary: hex
+      .optional()
+      .describe('Optional second brand colour for large areas (#rrggbb). Needs 3:1 on the background.'),
     accent: hex.describe(
       'Small accents: icons, rules, badges (#rrggbb). Needs 3:1 contrast on the background.',
     ),
@@ -24,11 +26,12 @@ export const PaletteSchema = z
     surface: hex.describe('Cards and panels on the background (#rrggbb).'),
     text: hex.describe('Body text (#rrggbb). Needs 4.5:1 contrast on the background and on the surface.'),
     mutedText: hex.describe(
-      'Secondary text such as captions (#rrggbb). Needs 4.5:1 contrast on the background.',
+      'Secondary text such as captions (#rrggbb). Needs 4.5:1 on the background and on the surface.',
     ),
   })
   .strict()
-  .describe('The site palette. Pick colours from the business (logo, photos) and keep text readable.');
+  .describe('The site palette. Pick colours from the business (logo, photos) and keep text readable.')
+  .meta({ id: 'Palette' });
 export type Palette = z.infer<typeof PaletteSchema>;
 
 export const ThemeSchema = z
@@ -40,7 +43,7 @@ export const ThemeSchema = z
           'earthy), minimal (sparse, typographic), coastal (light, airy, sea tones).',
       ),
     palette: PaletteSchema,
-    typography: z.object({ pairId: FontPairIdSchema }).strict(),
+    typography: z.object({ pairId: FontPairIdSchema }).strict().describe('The fonts.'),
     radius: z
       .enum(['none', 'sm', 'md', 'lg', 'full'])
       .describe('Corner rounding of buttons, cards and images.'),
@@ -48,5 +51,6 @@ export const ThemeSchema = z
     imageTreatment: z.enum(['plain', 'rounded', 'framed']).describe('How photos are shown.'),
   })
   .strict()
-  .describe('Visual theme: one style family, a palette, a font pair and a few tokens.');
+  .describe('Visual theme: one style family, a palette, a font pair and a few tokens.')
+  .meta({ id: 'Theme' });
 export type Theme = z.infer<typeof ThemeSchema>;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LIMITS } from '../limits.ts';
-import { FactIdSchema, localized } from '../localized.ts';
+import { FactIdSchema, localized, plainText } from '../localized.ts';
 import { AssetRefSchema, block, heading } from './common.ts';
 
 export const AboutBlockSchema = block(
@@ -27,7 +27,7 @@ export const GalleryBlockSchema = block(
   ['grid', 'masonry', 'carousel'],
   {
     heading: heading().optional(),
-    assetIds: z.array(AssetRefSchema).min(3).max(12),
+    assetIds: z.array(AssetRefSchema).min(3).max(12).describe('Three to twelve image assets.'),
   },
   'Three to twelve photos of the place, the work or the products.',
 );
@@ -48,14 +48,21 @@ export const TestimonialsBlockSchema = block(
               LIMITS.quote.max,
               'The quote as published (translated faithfully for other locales).',
             ),
-            author: z.string().trim().min(1).max(60).describe('As published, e.g. "Marie L.".'),
-            source: z.enum(['google', 'tripadvisor', 'facebook', 'direct']).optional(),
-            rating: z.number().int().min(1).max(5).optional(),
+            author: plainText(
+              60,
+              'As the attribution policy allows: initials, e.g. "Marie L.", or left out.',
+            ).optional(),
+            source: z
+              .enum(['google', 'tripadvisor', 'facebook', 'direct'])
+              .optional()
+              .describe('Where it was published.'),
+            rating: z.number().int().min(1).max(5).optional().describe('Its star rating, as published.'),
           })
           .strict(),
       )
       .min(1)
-      .max(6),
+      .max(6)
+      .describe('The quotes, one to six.'),
   },
   'Real customer quotes from the fact registry only. Never fabricate a testimonial.',
 );
@@ -70,14 +77,15 @@ export const TeamBlockSchema = block(
         z
           .object({
             factId: FactIdSchema.describe('The team-member fact. Required.'),
-            name: z.string().trim().min(1).max(60),
+            name: plainText(60, 'The name as the business presents it, e.g. "Léa M.".'),
             role: localized(LIMITS.itemTitle.max, 'E.g. "Head chef".').optional(),
             photoAssetId: AssetRefSchema.optional(),
           })
           .strict(),
       )
       .min(1)
-      .max(12),
+      .max(12)
+      .describe('The people, as the business presents them.'),
   },
   'People the business presents publicly (team facts only).',
 );

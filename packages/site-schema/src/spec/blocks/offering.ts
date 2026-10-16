@@ -26,7 +26,8 @@ export const ServicesBlockSchema = block(
           .strict(),
       )
       .min(1)
-      .max(12),
+      .max(12)
+      .describe('The services, as the business lists them.'),
   },
   'What the business offers. Prices only when the business publishes them (price facts).',
 );
@@ -51,17 +52,19 @@ export const MenuBlockSchema = block(
                     name: localized(LIMITS.itemTitle.max, 'The dish as the menu names it.'),
                     description: localized(LIMITS.itemText.max, 'Its ingredients or style.').optional(),
                     price: PriceSchema.optional(),
-                    tags: z.array(z.enum(MENU_TAGS)).max(4).optional(),
+                    tags: z.array(z.enum(MENU_TAGS)).max(4).optional().describe('Dietary or house tags.'),
                   })
                   .strict(),
               )
               .min(1)
-              .max(30),
+              .max(30)
+              .describe('The dishes of the section.'),
           })
           .strict(),
       )
       .min(1)
-      .max(10),
+      .max(10)
+      .describe('The menu sections, in menu order.'),
     note: localized(LIMITS.note.max, 'E.g. "Menu changes with the season".').optional(),
   },
   'A food or drinks menu from the business’s published menu (prices are price facts).',

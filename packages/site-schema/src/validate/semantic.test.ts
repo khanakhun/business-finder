@@ -2,14 +2,14 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { SiteSpec } from '../spec/site.ts';
 import type { Issue } from './issues.ts';
-import { parseSite, validateSite } from './semantic.ts';
+import { onColor, parseSite, type ValidateOptions, validateSite } from './semantic.ts';
 
 // Each rule of the semantic validator on its own (the fixtures test the rules together).
 
 const salon = (): SiteSpec =>
   JSON.parse(readFileSync(new URL('../../fixtures/salon-gustavia.json', import.meta.url), 'utf8'));
 const OPTIONS = { assetHosts: ['assets.bf-sites.test'] };
-const found = (spec: unknown, options = OPTIONS) =>
+const found = (spec: unknown, options: ValidateOptions = OPTIONS) =>
   validateSite(spec, options).map((issue: Issue) => `${issue.code}@${issue.path.join('.')}`);
 const with_ = (change: (spec: SiteSpec) => void) => {
   const spec = salon();
@@ -48,7 +48,7 @@ describe('validateSite', () => {
       OPTIONS,
     );
     expect(extra).toEqual([
-      expect.objectContaining({ code: 'locale_missing', severity: 'warning', path: ['seo', 'title', 'de'] }),
+      expect.objectContaining({ code: 'locale_extra', severity: 'warning', path: ['seo', 'title', 'de'] }),
     ]);
   });
 
@@ -95,7 +95,7 @@ describe('validateSite', () => {
           if (hero?.type === 'hero') delete hero.props.imageAssetId;
         }),
       ),
-    ).toContain('hero_image_missing@pages.0.blocks.0.props.imageAssetId');
+    ).toContain('image_missing@pages.0.blocks.0.props.imageAssetId');
   });
 
   it.each([
@@ -117,7 +117,7 @@ describe('validateSite', () => {
     );
     expect(found(page)).toContain('unknown_page@layout.header.cta.pageId');
     const noUrl = with_((s) => Object.assign(s.layout.header, { cta: { kind: 'url', label: L('Go') } }));
-    expect(found(noUrl)).toContain('cta_unresolved@layout.header.cta.url');
+    expect(found(noUrl)).toContain('schema@layout.header.cta.url');
     const external = with_((s) =>
       Object.assign(s.layout.header, {
         cta: { kind: 'url', label: L('Go'), url: 'https://elsewhere.example/x' },
@@ -129,7 +129,7 @@ describe('validateSite', () => {
         cta: { kind: 'url', label: L('Go'), url: 'https://www.salon-lumiere.example/gift' },
       }),
     );
-    expect(found(own, { ...OPTIONS, ownDomains: ['salon-lumiere.example'] } as never)).toEqual([]);
+    expect(found(own, { ...OPTIONS, ownDomains: ['salon-lumiere.example'] })).toEqual([]);
   });
 
   it('checks the header and footer against the contact facts', () => {
@@ -142,7 +142,9 @@ describe('validateSite', () => {
   it('keeps social links on their network', () => {
     const spec = with_((s) =>
       Object.assign(s.contact, {
-        socials: [{ network: 'instagram', url: 'https://www.facebook.com/salon' }],
+        socials: [
+          { network: 'instagram', url: 'https://www.facebook.com/salon', factId: 'social.instagram' },
+        ],
       }),
     );
     expect(found(spec)).toContain('social_host@contact.socials.0.url');
@@ -230,5 +232,128 @@ describe('validateSite', () => {
     );
     expect(issue).toMatchObject({ code: 'contrast_low', path: ['theme', 'palette', 'mutedText'] });
     expect(issue?.message).toMatch(/try #[0-9a-f]{6}/);
+  });
+
+  it('keeps a preview unindexed and bannered (unless published)', () => {
+    const live = with_((s) => Object.assign(s.settings, { noindex: false, previewBanner: false }));
+    expect(found(live)).toEqual([
+      'preview_settings@settings.noindex',
+      'preview_settings@settings.previewBanner',
+    ]);
+    expect(found(live, { ...OPTIONS, mode: 'published' })).toEqual([]);
+  });
+
+  it('lets an action carry only what its kind uses', () => {
+    const smuggled = with_((s) =>
+      Object.assign(s.layout.header, {
+        cta: { kind: 'call', label: L('Go'), url: 'https://evil.example/x' },
+      }),
+    );
+    expect(found(smuggled)[0]).toMatch(/^schema@layout\.header\.cta/);
+  });
+
+  it('needs a fact behind every contact detail', () => {
+    expect(
+      found(with_((s) => s.contact.phone && delete (s.contact.phone as { factId?: string }).factId)),
+    ).toEqual(['schema@contact.phone.factId']);
+  });
+
+  it.each([
+    [
+      'the footer tagline',
+      (s: SiteSpec) => Object.assign(s.layout.footer, { tagline: L('See www.evil.example') }),
+      'layout.footer.tagline.fr',
+    ],
+    [
+      'the site description',
+      (s: SiteSpec) =>
+        Object.assign(s.seo.description, {
+          en: 'Visit https://evil.example for more about our salon, prices and hours in Gustavia, St Barth.',
+        }),
+      'seo.description.en',
+    ],
+    [
+      'a bare domain',
+      (s: SiteSpec) => Object.assign(s.seo.title, { en: 'Go to evil-site.com now' }),
+      'seo.title.en',
+    ],
+    [
+      'a protocol-relative link',
+      (s: SiteSpec) => Object.assign(s.seo.title, { fr: 'Voir //evil.example/x' }),
+      'seo.title.fr',
+    ],
+    [
+      'a plain text field',
+      (s: SiteSpec) =>
+        s.contact.address && Object.assign(s.contact.address, { formatted: 'www.evil.example' }),
+      'contact.address.formatted',
+    ],
+  ] as const)('refuses a web address in %s', (_case, change, path) => {
+    expect(found(with_(change))).toContain(`external_url@${path}`);
+  });
+
+  it('leaves e-mail addresses in text to the facts validator', () => {
+    expect(
+      found(with_((s) => Object.assign(s.layout.footer, { tagline: L('bonjour@salon-lumiere.example') }))),
+    ).toEqual([]);
+  });
+
+  it('refuses HTML in any text', () => {
+    const spec = with_((s) => {
+      const hero = s.pages[0]?.blocks[0];
+      if (hero?.type === 'hero') hero.props.title.en = '<img src=x onerror=alert(1)>';
+    });
+    expect(found(spec)).toContain('html@pages.0.blocks.0.props.title.en');
+  });
+
+  it.each([
+    ['a user page on google.com', 'google', 'https://sites.google.com/view/attacker'],
+    ['a redirect page', 'facebook', 'https://www.facebook.com/l.php?u=https://evil.example'],
+    ['a query string', 'instagram', 'https://www.instagram.com/salonlumiere?next=https://evil.example'],
+    ['the network home page', 'instagram', 'https://www.instagram.com/'],
+    ['a port', 'instagram', 'https://www.instagram.com:8443/salonlumiere'],
+  ])('refuses %s as a social profile', (_case, network, url) => {
+    const spec = with_((s) =>
+      Object.assign(s.contact, { socials: [{ network, url, factId: 'social.instagram' }] }),
+    );
+    expect(found(spec)).toContain('social_host@contact.socials.0.url');
+  });
+
+  it('matches asset hosts exactly and refuses credentials in URLs', () => {
+    const sub = with_((s) =>
+      Object.assign(s.assets[1] ?? {}, { url: 'https://evil.assets.bf-sites.test/x.jpg' }),
+    );
+    expect(found(sub)).toContain('asset_host@assets.1.url');
+    const creds = with_((s) =>
+      Object.assign(s.contact.bookingUrl ?? {}, { value: 'https://user:pass@www.planity.com/x' }),
+    );
+    expect(found(creds)).toContain('external_url@contact.bookingUrl.value');
+  });
+
+  it('refuses reserved slugs and hidden characters', () => {
+    expect(found(with_((s) => Object.assign(s.pages[1] ?? {}, { slug: 'en' })))).toEqual([
+      'schema@pages.1.slug',
+    ]);
+    const hidden = with_((s) => Object.assign(s.seo.title, { en: 'Salon \u202eLumière' }));
+    expect(found(hidden)).toEqual(['schema@seo.title.en']);
+  });
+
+  it('needs an image for every variant that shows one', () => {
+    const spec = with_((s) => {
+      const banner = s.pages[0]?.blocks[4];
+      if (banner?.type === 'cta_banner') banner.variant = 'image';
+    });
+    expect(found(spec)).toEqual(['image_missing@pages.0.blocks.4.props.imageAssetId']);
+  });
+
+  it('checks muted text on the surface, the secondary colour, and button labels on primary', () => {
+    expect(found(with_((s) => Object.assign(s.theme.palette, { surface: '#d8d0c4' })))).toContain(
+      'contrast_low@theme.palette.mutedText',
+    );
+    expect(found(with_((s) => Object.assign(s.theme.palette, { secondary: '#eeeeee' })))).toContain(
+      'contrast_low@theme.palette.secondary',
+    );
+    expect(onColor('#7a5c3e')).toBe('#ffffff');
+    expect(onColor('#f0e000')).toBe('#000000');
   });
 });

@@ -94,8 +94,30 @@ export const RULES = [
     from: ['packages/site-schema/src/**'],
     // Generators and tests run on Node; the schema, validators and operations run in the editor and the runner.
     except: ['packages/site-schema/src/cli/**', 'packages/site-schema/src/**/*.test.ts'],
-    disallow: [{ modules: ['node:*', 'fs', 'fs/*', 'path', 'os', 'crypto', 'url', 'child_process'] }],
-    message: '@bf/site-schema is browser-safe: no Node APIs outside src/cli and tests.',
+    disallow: [
+      {
+        modules: [
+          'node:*',
+          ...[
+            'fs',
+            'fs/*',
+            'path',
+            'os',
+            'crypto',
+            'url',
+            'child_process',
+            'buffer',
+            'stream',
+            'util',
+            'events',
+          ],
+          ...['http', 'https', 'net', 'zlib', 'worker_threads'],
+        ],
+      },
+      // A leaf like @bf/contracts: other internal packages may be Node-bound (@bf/config).
+      { workspace: 'packages/*', exceptSelf: true },
+    ],
+    message: '@bf/site-schema is browser-safe and self-contained: no Node API or other internal package.',
   },
 ];
 

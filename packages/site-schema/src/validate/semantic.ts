@@ -1,27 +1,32 @@
 import type { z } from 'zod';
+import type { BlockType } from '../spec/blocks/index.ts';
 import { LIMITS, type LimitKey } from '../spec/limits.ts';
-import type { SiteLocale } from '../spec/localized.ts';
+import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
 import { type SiteSpec, SiteSpecSchema } from '../spec/site.ts';
+import type { Palette } from '../spec/theme.ts';
 import { contrastRatio, suggestColor } from './contrast.ts';
-import { hostAllowed, KNOWN_BOOKING_HOSTS, SOCIAL_HOSTS } from './hosts.ts';
+import { hostAllowed, isSocialProfile, KNOWN_BOOKING_HOSTS } from './hosts.ts';
 import { error, type Issue, warning } from './issues.ts';
+import { parseRichText } from './rich-text.ts';
 import { isCta, isLocalized, type Path, walk } from './walk.ts';
 
 // The semantic validator (BF-033): what the schema cannot say. Each rule is a small function over the parsed spec
 // (Specification); issues name the path and an actionable fix. Errors block publishing; warnings are advice.
+//
+// Two phases: schema problems first (the rules need a spec that parses); once they are fixed, the semantic issues.
 
 export interface ValidateOptions {
-  /** Our storage/CDN hosts: the only hosts an asset may be served from. */
+  /** Our storage/CDN hosts: the only hosts an asset may be served from (matched exactly). */
   readonly assetHosts: readonly string[];
   /** The business's own domains (its existing website): `url` actions and the booking page may point there. */
   readonly ownDomains?: readonly string[];
   /** Booking providers a booking page may be on (defaults to the known ones). */
   readonly bookingHosts?: readonly string[];
+  /** `preview` (the default): the site must keep `noindex` and the preview banner on. */
+  readonly mode?: 'preview' | 'published';
 }
 
 type Rule = (spec: SiteSpec, options: ValidateOptions) => Issue[];
-
-const pathKey = (path: Path) => path.join('.');
 
 /** Parses with the schema; its problems become issues (an over-long text gets its own code). */
 export function parseSite(input: unknown): { spec: SiteSpec | null; issues: Issue[] } {
@@ -33,10 +38,28 @@ export function parseSite(input: unknown): { spec: SiteSpec | null; issues: Issu
 function schemaIssue(issue: z.core.$ZodIssue): Issue {
   const path = issue.path.map((part) => (typeof part === 'symbol' ? String(part) : part));
   if (issue.code === 'too_big' && issue.origin === 'string') {
-    return error(path, 'text_too_long', `Shorten this text to at most ${String(issue.maximum)} characters.`);
+    return error(path, 'text_too_long', `Shorten this to at most ${String(issue.maximum)} characters.`);
   }
   return error(path, 'schema', issue.message);
 }
+
+const previewRule: Rule = (spec, options) => {
+  if ((options.mode ?? 'preview') !== 'preview') return [];
+  const issues: Issue[] = [];
+  if (!spec.settings.noindex)
+    issues.push(
+      error(['settings', 'noindex'], 'preview_settings', 'Set noindex to true: a preview is never indexed.'),
+    );
+  if (!spec.settings.previewBanner)
+    issues.push(
+      error(
+        ['settings', 'previewBanner'],
+        'preview_settings',
+        'Set previewBanner to true: a preview says it is one.',
+      ),
+    );
+  return issues;
+};
 
 const localesRule: Rule = (spec) => {
   const issues: Issue[] = [];
@@ -68,7 +91,7 @@ const localesRule: Rule = (spec) => {
     for (const locale of Object.keys(value)) {
       if (!spec.locales.includes(locale as SiteLocale)) {
         issues.push(
-          warning([...path, locale], 'locale_missing', `Remove the ${locale} text: it is not a site locale.`),
+          warning([...path, locale], 'locale_extra', `Remove the ${locale} text: it is not a site locale.`),
         );
       }
     }
@@ -81,19 +104,19 @@ const structureRule: Rule = (spec) => {
   if (!spec.pages.some((page) => page.slug === '')) {
     issues.push(error(['pages'], 'home_missing', 'Add a home page (slug "").'));
   }
-  const slugs = new Map<string, number>();
-  const pageIds = new Map<string, number>();
+  const slugs = new Set<string>();
+  const pageIds = new Set<string>();
   for (const [i, page] of spec.pages.entries()) {
     if (slugs.has(page.slug))
       issues.push(
         error(['pages', i, 'slug'], 'duplicate_slug', `Use another slug: "${page.slug}" is taken.`),
       );
-    slugs.set(page.slug, i);
+    slugs.add(page.slug);
     if (pageIds.has(page.id))
       issues.push(
         error(['pages', i, 'id'], 'duplicate_page_id', `Use another page id: "${page.id}" is taken.`),
       );
-    pageIds.set(page.id, i);
+    pageIds.add(page.id);
   }
   const ids = new Set<string>();
   const unique = (id: string, path: Path) => {
@@ -108,10 +131,17 @@ const structureRule: Rule = (spec) => {
   return issues;
 };
 
+/** Block variants that show an image (Specification table): the image field they need. */
+const IMAGE_VARIANTS: Partial<Record<BlockType, Readonly<Record<string, string>>>> = {
+  hero: { split: 'imageAssetId', image_full: 'imageAssetId' },
+  cta_banner: { image: 'imageAssetId' },
+  about: { split: 'imageAssetId', story: 'imageAssetId' },
+};
+
 const heroRule: Rule = (spec) => {
   const issues: Issue[] = [];
   for (const [i, page] of spec.pages.entries()) {
-    const heroes = page.blocks.flatMap((block, j) => (block.type === 'hero' ? [{ block, j }] : []));
+    const heroes = page.blocks.flatMap((block, j) => (block.type === 'hero' ? [j] : []));
     if (heroes.length === 0)
       issues.push(
         error(
@@ -120,27 +150,27 @@ const heroRule: Rule = (spec) => {
           'Start the page with a hero block (its one main heading).',
         ),
       );
-    for (const extra of heroes.slice(1)) {
+    for (const j of heroes.slice(1)) {
       issues.push(
         error(
-          ['pages', i, 'blocks', extra.j],
+          ['pages', i, 'blocks', j],
           'hero_multiple',
           'Keep one hero per page: change this one into another block.',
         ),
       );
     }
-    const first = heroes[0];
-    if (first && first.j !== 0)
+    if (heroes[0] !== undefined && heroes[0] !== 0)
       issues.push(
-        warning(['pages', i, 'blocks', first.j], 'hero_not_first', 'Move the hero to the top of the page.'),
+        warning(['pages', i, 'blocks', heroes[0]], 'hero_not_first', 'Move the hero to the top of the page.'),
       );
-    for (const { block, j } of heroes) {
-      if ((block.variant === 'split' || block.variant === 'image_full') && !block.props.imageAssetId) {
+    for (const [j, block] of page.blocks.entries()) {
+      const field = IMAGE_VARIANTS[block.type]?.[block.variant];
+      if (field && !(block.props as Record<string, unknown>)[field]) {
         issues.push(
           error(
-            ['pages', i, 'blocks', j, 'props', 'imageAssetId'],
-            'hero_image_missing',
-            `Give the ${block.variant} hero an image, or use the centered variant.`,
+            ['pages', i, 'blocks', j, 'props', field],
+            'image_missing',
+            `Give the ${block.variant} ${block.type} an image, or pick a variant without one.`,
           ),
         );
       }
@@ -215,11 +245,7 @@ const ctaRule: Rule = (spec, options) => {
           issues.push(error([...path, 'pageId'], 'unknown_page', 'Point the action to an existing page id.'));
         break;
       case 'url':
-        if (!value.url)
-          issues.push(
-            error([...path, 'url'], 'cta_unresolved', 'Give the url action a URL, or use another kind.'),
-          );
-        else if (!hostAllowed(value.url, allowedUrlHosts))
+        if (!value.url || !hostAllowed(value.url, allowedUrlHosts))
           issues.push(
             error(
               [...path, 'url'],
@@ -258,10 +284,44 @@ const ctaRule: Rule = (spec, options) => {
   return issues;
 };
 
+/** Strings that are not text: URLs (checked against their allowlists), the e-mail address, ids and references. */
+const NOT_TEXT_KEYS = new Set([
+  'url',
+  'id',
+  'pageId',
+  'factId',
+  'type',
+  'variant',
+  'kind',
+  'network',
+  'country',
+  'currency',
+]);
+const NOT_TEXT_PARENTS = new Set([
+  'bookingUrl',
+  'email',
+  'phone',
+  'whatsapp',
+  'factIds',
+  'assetIds',
+  'palette',
+  'typography',
+]);
+const LOCALES: ReadonlySet<string> = new Set(SITE_LOCALES);
+const skipped = (path: Path) => {
+  const key = String(path.at(-1));
+  // A locale's text is scanned with its localized field.
+  if (LOCALES.has(key)) return true;
+  return NOT_TEXT_KEYS.has(key) || key.endsWith('AssetId') || NOT_TEXT_PARENTS.has(String(path.at(-2)));
+};
+const WEB_ADDRESS =
+  /https?:\/\/|\/\/[a-z0-9-]+\.|\bwww\.[a-z0-9-]+\.|\b[a-z0-9-]+(\.[a-z0-9-]+)*\.(com|net|org|fr|io|co|info|biz|shop|site|online|app|dev|example|test)\b/i;
+const EMAIL = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
+
 const urlsRule: Rule = (spec, options) => {
   const issues: Issue[] = [];
   for (const [i, asset] of spec.assets.entries()) {
-    if (!hostAllowed(asset.url, options.assetHosts))
+    if (!hostAllowed(asset.url, options.assetHosts, { subdomains: false }))
       issues.push(
         error(['assets', i, 'url'], 'asset_host', 'Upload the image to our storage and use that URL.'),
       );
@@ -283,28 +343,44 @@ const urlsRule: Rule = (spec, options) => {
     );
   }
   for (const [i, social] of (spec.contact.socials ?? []).entries()) {
-    if (!hostAllowed(social.url, SOCIAL_HOSTS[social.network] ?? []))
+    if (!isSocialProfile(social.network, social.url))
       issues.push(
         error(
           ['contact', 'socials', i, 'url'],
           'social_host',
-          `Use the business's ${social.network} profile URL.`,
+          `Use the business's own ${social.network} profile URL (no redirect, no query).`,
         ),
       );
   }
-  // Free text never carries links (rich text links to own pages only, checked by the rich-text rule).
-  for (const { value, path } of walk(spec.pages)) {
-    if (!isLocalized(value)) continue;
-    for (const [locale, text] of Object.entries(value)) {
-      if (/https?:\/\/|\bwww\.[a-z0-9-]+\./i.test((text ?? '').replace(/\]\(page:[^)]*\)/g, ''))) {
-        issues.push(
-          error(
-            ['pages', ...path, locale],
-            'external_url',
-            'Remove the web address from the text; use an action instead.',
-          ),
-        );
-      }
+  // Text never carries a web address or HTML: links are actions; rich text links to the site's pages only.
+  const isRichText = (path: Path) => {
+    const [pages, i, blocks, j, props, body] = path;
+    return (
+      pages === 'pages' &&
+      blocks === 'blocks' &&
+      props === 'props' &&
+      body === 'body' &&
+      spec.pages[Number(i)]?.blocks[Number(j)]?.type === 'rich_text'
+    );
+  };
+  const scan = (text: string, path: Path) => {
+    // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
+    const rich = isRichText(path);
+    const words = (rich ? text.replace(/\]\([^)]*\)/g, ']') : text).replace(EMAIL, '');
+    if (WEB_ADDRESS.test(words)) {
+      issues.push(
+        error(path, 'external_url', 'Remove the web address from the text; use an action instead.'),
+      );
+    }
+    if (!rich && /<\/?[a-z!][^>]*>?/i.test(text))
+      issues.push(error(path, 'html', 'Remove the HTML: texts are plain.'));
+  };
+
+  for (const { value, path } of walk(spec)) {
+    if (isLocalized(value)) {
+      for (const [locale, text] of Object.entries(value)) scan(text ?? '', [...path, locale]);
+    } else if (typeof value === 'string' && !skipped(path)) {
+      scan(value, path);
     }
   }
   return issues;
@@ -403,16 +479,11 @@ const richTextRule: Rule = (spec) => {
       if (block.type !== 'rich_text') continue;
       for (const [locale, text] of Object.entries(block.props.body)) {
         const path = ['pages', i, 'blocks', j, 'props', 'body', locale];
-        if (/<\/?[a-z][\s\S]*?>/i.test(text ?? ''))
-          issues.push(error(path, 'rich_text', 'Remove the HTML: use the markdown subset only.'));
-        for (const match of (text ?? '').matchAll(/\]\(([^)]*)\)/g)) {
-          const target = match[1] ?? '';
-          const id = target.startsWith('page:') ? target.slice(5) : null;
-          if (!id)
-            issues.push(
-              error(path, 'rich_text', `Link only to the site's pages as (page:<id>), not "${target}".`),
-            );
-          else if (!pages.has(id))
+        const parsed = parseRichText(text ?? '');
+        for (const problem of parsed.problems)
+          issues.push(error(path, 'rich_text', `Fix the text: ${problem}.`));
+        for (const id of parsed.pageIds) {
+          if (!pages.has(id))
             issues.push(error(path, 'unknown_page', `Link to an existing page: there is no page "${id}".`));
         }
       }
@@ -422,7 +493,7 @@ const richTextRule: Rule = (spec) => {
 };
 
 /** Texts with a recommended length (a warning outside it). */
-function targetsRule(spec: SiteSpec): Issue[] {
+const targetsRule: Rule = (spec) => {
   const issues: Issue[] = [];
   const check = (text: Partial<Record<string, string>>, path: Path, limit: LimitKey) => {
     const target = (LIMITS[limit] as { target?: readonly [number, number] }).target;
@@ -430,13 +501,12 @@ function targetsRule(spec: SiteSpec): Issue[] {
     for (const locale of spec.locales) {
       const value = text[locale];
       if (value === undefined) continue;
-      const length = value.length;
-      if (length < target[0] || length > target[1]) {
+      if (value.length < target[0] || value.length > target[1]) {
         issues.push(
           warning(
             [...path, locale],
             'text_length',
-            `Aim for ${target[0]}–${target[1]} characters (now ${length}).`,
+            `Aim for ${target[0]}–${target[1]} characters (now ${value.length}).`,
           ),
         );
       }
@@ -456,34 +526,61 @@ function targetsRule(spec: SiteSpec): Issue[] {
   }
   for (const [i, asset] of spec.assets.entries()) check(asset.alt, ['assets', i, 'alt'], 'alt');
   return issues;
-}
+};
 
-/** Text 4.5:1 on background and surface, muted text 4.5:1 on background, primary and accent 3:1 (large text, UI). */
-const PAIRS = [
-  ['text', 'background', 4.5],
-  ['text', 'surface', 4.5],
-  ['mutedText', 'background', 4.5],
-  ['primary', 'background', 3],
-  ['accent', 'background', 3],
-] as const;
+/**
+ * WCAG AA: text and muted text 4.5:1 on background and surface; primary, accent and secondary 3:1 on the background
+ * (large text, UI); a button label (black or white) 4.5:1 on primary. One suggestion per colour, passing every pair it
+ * is in.
+ */
+const PAIRS: readonly (readonly [keyof Palette, readonly (keyof Palette)[], number])[] = [
+  ['text', ['background', 'surface'], 4.5],
+  ['mutedText', ['background', 'surface'], 4.5],
+  ['primary', ['background'], 3],
+  ['accent', ['background'], 3],
+  ['secondary', ['background'], 3],
+];
+
+/** The button label colour on `primary`: black or white, whichever reads better. */
+export function onColor(background: string): '#000000' | '#ffffff' {
+  return contrastRatio('#000000', background) >= contrastRatio('#ffffff', background) ? '#000000' : '#ffffff';
+}
 
 const contrastRule: Rule = (spec) => {
   const { palette } = spec.theme;
-  return PAIRS.flatMap(([fg, bg, ratio]) => {
-    const actual = contrastRatio(palette[fg], palette[bg]);
-    if (actual >= ratio) return [];
-    const fix = suggestColor(palette[fg], palette[bg], ratio);
-    return [
+  const issues: Issue[] = [];
+  for (const [fg, backgrounds, ratio] of PAIRS) {
+    const color = palette[fg];
+    if (!color) continue;
+    const failing = backgrounds.filter((bg) => contrastRatio(color, palette[bg] as string) < ratio);
+    if (failing.length === 0) continue;
+    const against = backgrounds.map((bg) => palette[bg] as string);
+    const fix = suggestColor(color, against, ratio);
+    const ratios = failing
+      .map((bg) => `${contrastRatio(color, palette[bg] as string).toFixed(2)}:1 on ${bg}`)
+      .join(', ');
+    issues.push(
       error(
         ['theme', 'palette', fg],
         'contrast_low',
-        `${fg} on ${bg} has ${actual.toFixed(2)}:1, below ${ratio}:1${fix ? `; try ${fix}` : '; change the background'}.`,
+        `${fg} has ${ratios}, below ${ratio}:1${fix ? `; try ${fix}` : '; change the background'}.`,
       ),
-    ];
-  });
+    );
+  }
+  if (contrastRatio(onColor(palette.primary), palette.primary) < 4.5) {
+    issues.push(
+      error(
+        ['theme', 'palette', 'primary'],
+        'contrast_low',
+        'Neither black nor white labels read on primary (4.5:1): make it darker or lighter.',
+      ),
+    );
+  }
+  return issues;
 };
 
 const RULES: readonly Rule[] = [
+  previewRule,
   localesRule,
   structureRule,
   heroRule,
@@ -496,15 +593,9 @@ const RULES: readonly Rule[] = [
   contrastRule,
 ];
 
-/** Every issue of a spec (schema first: semantic rules run only on a spec that parses). */
+/** Every issue of a spec: the schema's first (the rules need a spec that parses), then every rule's. */
 export function validateSite(input: unknown, options: ValidateOptions): Issue[] {
   const { spec, issues } = parseSite(input);
   if (!spec) return issues;
-  const seen = new Set<string>();
-  return RULES.flatMap((rule) => rule(spec, options)).filter((issue) => {
-    const key = `${issue.code}:${pathKey(issue.path)}:${issue.message}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return RULES.flatMap((rule) => rule(spec, options));
 }

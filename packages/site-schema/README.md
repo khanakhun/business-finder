@@ -7,7 +7,11 @@ contract. Browser-safe: no Node APIs outside `src/cli` and the tests (`pnpm chec
 ```ts
 import { SiteSpecSchema, validateSite, hasErrors } from '@bf/site-schema';
 
-const issues = validateSite(input, { assetHosts: ['assets.example'], ownDomains: ['the-business.example'] });
+const issues = validateSite(input, {
+  assetHosts: ['assets.example'], // our storage, matched exactly
+  ownDomains: ['the-business.example'], // its existing website (url actions, booking page)
+  mode: 'preview', // the default: noindex and the preview banner must stay on
+});
 if (hasErrors(issues)) …; // each issue: path, code, severity, an actionable message
 ```
 
@@ -17,14 +21,17 @@ if (hasErrors(issues)) …; // each issue: path, code, severity, an actionable m
 |---|---|
 | `src/spec/` | The schema: `site.ts` (root), `theme.ts`, `contact.ts` (the contact facts every block reads), `layout.ts` (header, footer, navigation), `page.ts`, `cta.ts`, `assets.ts`, `blocks/` (16 block types), `localized.ts` (site locales, ids), `limits.ts` (text lengths: the schema's hard maximum and the recommended range). |
 | `src/fonts.ts` | The curated font pairs (`typography.pairId`). |
-| `src/validate/` | `semantic.ts` (`validateSite`: what the schema cannot say — locales complete, references resolve, one hero per page, contact facts behind every action and block, allowlisted hosts only, no links in free text, rich-text subset, WCAG AA contrast with a suggested colour, recommended lengths), `contrast.ts`, `hosts.ts`, `issues.ts`. |
+| `src/validate/` | `semantic.ts` (`validateSite`: what the schema cannot say — preview settings, locales complete, references resolve, one hero per page, images for the variants that show one, contact facts behind every action and block, allowlisted hosts only, no web address or HTML in any text, rich-text subset, WCAG AA contrast with a suggested colour and readable button labels, recommended lengths), `rich-text.ts` (`parseRichText`: the whitelist parser the renderer and editor use too), `contrast.ts`, `hosts.ts`, `issues.ts`. Validation has two phases: schema problems first, then (once they are fixed) the semantic issues. |
 | `src/engine-result.ts` | What an engine returns: `{ spec, summary, factsUsed }`. |
 | `generated/` | `site-spec.schema.json` and `engine-result.schema.json` (JSON Schema 2020-12, descriptions kept). Regenerate with `pnpm site-schema:jsonschema`; `pnpm site-schema:check` and a unit test fail when they are stale. |
 | `fixtures/` | Four fictional sites that validate with no issue (`salon-gustavia`, `cafe-saint-jean`, `hardware-store-lorient`, `villa-agency`) and `broken-*` variants pinned to their issue codes. |
 
-Safety invariants live in the schema and the validator, not in conventions: testimonials and team members need a
-fact, prices are price facts, actions resolve from the contact facts, links go only to the site's own pages, the
-business's own domain or a known booking provider, images only from our storage, no raw HTML.
+Safety invariants live in the schema and the validator, not in conventions: every contact detail, testimonial,
+team member and price names its fact; an action carries only what its kind uses; links go only to the site's own
+pages, the business's own domain or a known booking provider; social links only to the network's own profile pages;
+images only from our storage; no web address, HTML or hidden characters in text; a preview stays unindexed.
+Consumers still treat a spec as untrusted: BF-035 overwrites the preview settings and resolves assets by id, and the
+renderer takes fact values (quotes, prices) from the registry by `factId`.
 
 ## Adding a block type
 

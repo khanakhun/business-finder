@@ -4,7 +4,7 @@
 export interface TextLimit {
   /** Longer is refused by the schema. */
   readonly max: number;
-  /** Outside this range the validator warns (the text still renders). */
+  /** Outside this range the validator warns (the text still renders). Set where the validator checks it. */
   readonly target?: readonly [number, number];
 }
 
@@ -12,22 +12,22 @@ export const LIMITS = {
   brandName: { max: 60 },
   siteTitle: { max: 70, target: [20, 60] },
   siteDescription: { max: 200, target: [120, 160] },
-  pageTitle: { max: 60, target: [3, 40] },
+  pageTitle: { max: 60 },
   seoTitle: { max: 70, target: [20, 60] },
   seoDescription: { max: 200, target: [120, 160] },
   navLabel: { max: 24 },
-  ctaLabel: { max: 30, target: [2, 24] },
+  ctaLabel: { max: 30 },
   eyebrow: { max: 40 },
   heroTitle: { max: 60, target: [4, 60] },
   heroSubtitle: { max: 160, target: [40, 160] },
-  heading: { max: 80, target: [3, 60] },
-  intro: { max: 300, target: [40, 240] },
+  heading: { max: 80 },
+  intro: { max: 300 },
   itemTitle: { max: 60 },
   itemText: { max: 240 },
-  body: { max: 1500, target: [150, 1200] },
-  quote: { max: 400, target: [20, 300] },
+  body: { max: 1500 },
+  quote: { max: 400 },
   faqQuestion: { max: 120 },
-  faqAnswer: { max: 600, target: [40, 400] },
+  faqAnswer: { max: 600 },
   tagline: { max: 120 },
   note: { max: 200 },
   alt: { max: 150, target: [5, 125] },

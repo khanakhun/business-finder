@@ -6,6 +6,7 @@ export const ISSUE_CODES = [
   'text_too_long',
   // Languages
   'locale_missing',
+  'locale_extra',
   'default_locale_unknown',
   'duplicate_locale',
   // Structure and references
@@ -19,7 +20,7 @@ export const ISSUE_CODES = [
   'hero_missing',
   'hero_multiple',
   'hero_not_first',
-  'hero_image_missing',
+  'image_missing',
   'cta_missing',
   'cta_unresolved',
   // Content rules
@@ -31,6 +32,8 @@ export const ISSUE_CODES = [
   'no_contact_channel',
   'block_requirement',
   'rich_text',
+  'html',
+  'preview_settings',
   // Facts (validateFacts)
   'fact_unknown',
   'fact_kind',

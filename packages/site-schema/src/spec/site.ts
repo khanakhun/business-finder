@@ -15,7 +15,7 @@ export const SITE_SCHEMA_VERSION = 1 as const;
  */
 export const SiteSpecSchema = z
   .object({
-    schemaVersion: z.literal(SITE_SCHEMA_VERSION),
+    schemaVersion: z.literal(SITE_SCHEMA_VERSION).describe('The SiteSpec version: 1.'),
     locales: z
       .array(SiteLocaleSchema)
       .min(1)
@@ -30,15 +30,20 @@ export const SiteSpecSchema = z
           .min(1)
           .max(LIMITS.brandName.max)
           .describe('The business name exactly as it is known.'),
-        factId: FactIdSchema.optional(),
+        factId: FactIdSchema.describe('The business-name fact.'),
       })
-      .strict(),
+      .strict()
+      .describe('The business as the site names it.'),
     theme: ThemeSchema,
     contact: ContactSchema,
     layout: LayoutSchema,
     navigation: NavigationSchema,
-    pages: z.array(PageSchema).min(1).max(8),
-    assets: z.array(AssetSchema).max(120),
+    pages: z
+      .array(PageSchema)
+      .min(1)
+      .max(8)
+      .describe('The pages: a home page (slug "") and up to seven more.'),
+    assets: z.array(AssetSchema).max(120).describe('Every image the site uses, on our storage.'),
     seo: z
       .object({
         title: localized(LIMITS.siteTitle.max, 'The site title, e.g. "Café Saint-Jean".'),
@@ -47,15 +52,26 @@ export const SiteSpecSchema = z
           'What the business is and where (120–160 characters).',
         ),
       })
-      .strict(),
+      .strict()
+      .describe('The site-wide search title and description.'),
     settings: z
       .object({
         noindex: z.boolean().describe('Keep search engines out (true for previews).'),
         previewBanner: z.boolean().describe('Show the "concept preview" banner (true for previews).'),
-        analytics: z.enum(['cookieless', 'none']),
-        contactForm: z.object({ enabled: z.boolean() }).strict(),
+        analytics: z
+          .enum(['cookieless', 'none'])
+          .describe('Visit counting: cookieless (no consent banner needed) or none.'),
+        contactForm: z
+          .object({
+            enabled: z
+              .boolean()
+              .describe('Offer the contact form (messages reach the agency, then the business).'),
+          })
+          .strict()
+          .describe('The contact form.'),
       })
-      .strict(),
+      .strict()
+      .describe('Site-wide settings. A preview keeps noindex and the preview banner on.'),
   })
   .strict()
   .meta({ id: 'SiteSpec', title: 'SiteSpec v1' });

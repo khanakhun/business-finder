@@ -15,4 +15,5 @@ export * from './spec/theme.ts';
 export * from './validate/contrast.ts';
 export * from './validate/hosts.ts';
 export * from './validate/issues.ts';
-export { parseSite, type ValidateOptions, validateSite } from './validate/semantic.ts';
+export * from './validate/rich-text.ts';
+export { onColor, parseSite, type ValidateOptions, validateSite } from './validate/semantic.ts';

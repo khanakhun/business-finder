@@ -32,7 +32,11 @@ export const ContactBlockSchema = block(
     intro: intro().optional(),
     showForm: z.boolean().describe('Show the contact form (needs `settings.contactForm.enabled`).'),
     channels: z
-      .object({ phone: z.boolean(), email: z.boolean(), whatsapp: z.boolean() })
+      .object({
+        phone: z.boolean().describe('List the phone number.'),
+        email: z.boolean().describe('List the e-mail address.'),
+        whatsapp: z.boolean().describe('List WhatsApp.'),
+      })
       .strict()
       .describe('Which contact channels to list (only those present in `contact`).'),
   },
@@ -53,12 +57,13 @@ export const FaqBlockSchema = block(
               LIMITS.faqAnswer.max,
               'The answer, from facts only; otherwise invite them to ask.',
             ),
-            factIds: z.array(FactIdSchema).max(10).optional(),
+            factIds: z.array(FactIdSchema).max(10).optional().describe('The facts the answer states.'),
           })
           .strict(),
       )
       .min(1)
-      .max(12),
+      .max(12)
+      .describe('The questions, one to twelve.'),
   },
   'Common questions. Answers may not state anything the facts do not support.',
 );

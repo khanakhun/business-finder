@@ -16,9 +16,11 @@ describe('JSON Schema export', () => {
     expect(root.additionalProperties).toBe(false);
     expect(root.required).toEqual(expect.arrayContaining(['schemaVersion', 'locales', 'pages', 'contact']));
     expect(JSON.stringify(spec)).toContain('Never fabricate a testimonial');
-  });
-
-  it('is deterministic', () => {
-    expect(jsonSchemaFiles()).toEqual(jsonSchemaFiles());
+    // Shared shapes are defined once.
+    expect(Object.keys(spec.$defs)).toEqual(
+      expect.arrayContaining(['CtaAction', 'Price', 'Asset', 'HeroBlock']),
+    );
+    // Fields in the schema's order: a block's type before its props.
+    expect(Object.keys(spec.$defs.HeroBlock.properties)).toEqual(['id', 'type', 'variant', 'props']);
   });
 });

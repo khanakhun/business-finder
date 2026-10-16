@@ -33,17 +33,23 @@ export function contrastRatio(a: string, b: string): number {
 
 /**
  * The colour closest to `color` (same hue, mixed toward black or white, whichever reaches the ratio sooner) that has
- * at least `ratio` against `against`; null if neither direction can.
+ * at least `ratio` against every colour of `against`; null if neither direction can.
  */
-export function suggestColor(color: string, against: string, ratio: number): string | null {
-  if (contrastRatio(color, against) >= ratio) return color;
+export function suggestColor(
+  color: string,
+  against: string | readonly string[],
+  ratio: number,
+): string | null {
+  const backgrounds = typeof against === 'string' ? [against] : against;
+  const passes = (candidate: string) => backgrounds.every((bg) => contrastRatio(candidate, bg) >= ratio);
+  if (passes(color)) return color;
   const rgb = parseHex(color);
   const candidates: { hex: string; step: number }[] = [];
   for (const target of [0, 255]) {
     for (let step = 1; step <= 100; step += 1) {
       const t = step / 100;
       const mixed = toHex(rgb.map((v) => v + (target - v) * t) as [number, number, number]);
-      if (contrastRatio(mixed, against) >= ratio) {
+      if (passes(mixed)) {
         candidates.push({ hex: mixed, step });
         break;
       }

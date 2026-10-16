@@ -275,7 +275,7 @@
                 "price": {
                   "amount": 90,
                   "currency": "EUR",
-                  "unit": "from",
+                  "from": true,
                   "factId": "price.colour"
                 }
               }
@@ -429,6 +429,17 @@
           "variant": "map_split",
           "props": {
             "showDirections": true
+          }
+        },
+        {
+          "id": "soci-cont1",
+          "type": "social_links",
+          "variant": "icons",
+          "props": {
+            "heading": {
+              "fr": "Suivez-nous",
+              "en": "Follow us"
+            }
           }
         }
       ]

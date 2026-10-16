@@ -10,6 +10,7 @@ export interface ProfileRecord {
   readonly name: string;
   readonly builtin: boolean;
   readonly activeVersion: number | null;
+  readonly archived: boolean;
 }
 
 export interface ProfileVersionRecord {
@@ -68,6 +69,28 @@ export interface ScoringRepository {
   ): Promise<{ readonly profileId: string; readonly version: number }[]>;
   /** Workspaces tracking at least one business (a new built-in version recomputes them). */
   workspacesWithBusinesses(): Promise<string[]>;
+  /** A workspace profile at version 1 (active). */
+  createProfile(input: {
+    readonly organizationId: string;
+    readonly offer: Offer;
+    readonly name: string;
+    readonly config: ScoringProfileConfig;
+    readonly createdBy: string | null;
+  }): Promise<ProfileRecord>;
+  updateProfile(
+    profileId: string,
+    change: { readonly name?: string; readonly archivedAt?: Date | null },
+  ): Promise<void>;
+  versions(profileId: string): Promise<{ readonly version: number; readonly createdAt: Date }[]>;
+  /** The next version of a profile (inactive), numbered under a lock on the profile. */
+  addVersion(profileId: string, config: ScoringProfileConfig, createdBy: string | null): Promise<number>;
+  activate(profileId: string, version: number): Promise<void>;
+  /** Tracked businesses with their current score for a profile, stratified by tier (preview). */
+  previewSample(
+    organizationId: string,
+    profileId: string,
+    size: number,
+  ): Promise<{ businessId: string; displayName: string; score: number | null; tier: ScoreTier | null }[]>;
   /** The workspace's primary profile id (null: the default built-in). */
   primaryProfileId(organizationId: string): Promise<string | null>;
   setPrimaryProfile(organizationId: string, profileId: string, userId: string | null): Promise<void>;

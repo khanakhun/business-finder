@@ -15,7 +15,7 @@ import {
   scoringWorkspaceSettings,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, count, eq, gt, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   ActiveProfile,
@@ -40,6 +40,7 @@ const toProfile = (row: ProfileRow): ProfileRecord => ({
   name: row.name,
   builtin: row.builtin,
   activeVersion: row.activeVersion,
+  archived: row.archivedAt !== null,
 });
 
 const toScore = (row: ScoreRow): StoredScore => ({
@@ -93,7 +94,13 @@ export class DrizzleScoringRepository implements ScoringRepository {
           eq(scoringProfileVersions.version, scoringProfiles.activeVersion),
         ),
       )
-      .where(and(visibleTo(organizationId), isNotNull(scoringProfiles.activeVersion)))
+      .where(
+        and(
+          visibleTo(organizationId),
+          isNotNull(scoringProfiles.activeVersion),
+          isNull(scoringProfiles.archivedAt),
+        ),
+      )
       .orderBy(asc(scoringProfiles.builtin), asc(scoringProfiles.offer), asc(scoringProfiles.id));
     return rows.map(({ profile, config }) => ({
       ...toProfile(profile),
@@ -187,6 +194,96 @@ export class DrizzleScoringRepository implements ScoringRepository {
       .selectDistinct({ organizationId: orgBusinesses.organizationId })
       .from(orgBusinesses);
     return rows.map((row) => row.organizationId);
+  }
+
+  async createProfile(input: Parameters<ScoringRepository['createProfile']>[0]): Promise<ProfileRecord> {
+    const x = getExecutor(this.db);
+    const [row] = await x
+      .insert(scoringProfiles)
+      .values({
+        organizationId: input.organizationId,
+        offer: input.offer,
+        name: input.name,
+        builtin: false,
+        createdBy: input.createdBy,
+      })
+      .returning();
+    if (!row) throw new Error('scoring profile insert returned no row');
+    await x
+      .insert(scoringProfileVersions)
+      .values({ profileId: row.id, version: 1, config: input.config, createdBy: input.createdBy });
+    await x.update(scoringProfiles).set({ activeVersion: 1 }).where(eq(scoringProfiles.id, row.id));
+    return { ...toProfile(row), activeVersion: 1 };
+  }
+
+  async updateProfile(profileId: string, change: { name?: string; archivedAt?: Date | null }): Promise<void> {
+    await getExecutor(this.db)
+      .update(scoringProfiles)
+      .set({
+        ...(change.name !== undefined ? { name: change.name } : {}),
+        ...(change.archivedAt !== undefined ? { archivedAt: change.archivedAt } : {}),
+      })
+      .where(eq(scoringProfiles.id, profileId));
+  }
+
+  async versions(profileId: string): Promise<{ version: number; createdAt: Date }[]> {
+    return getExecutor(this.db)
+      .select({ version: scoringProfileVersions.version, createdAt: scoringProfileVersions.createdAt })
+      .from(scoringProfileVersions)
+      .where(eq(scoringProfileVersions.profileId, profileId))
+      .orderBy(desc(scoringProfileVersions.version));
+  }
+
+  async addVersion(
+    profileId: string,
+    config: ScoringProfileConfig,
+    createdBy: string | null,
+  ): Promise<number> {
+    const x = getExecutor(this.db);
+    // The profile row is the lock: two saves never take the same number.
+    await x.execute(sql`SELECT 1 FROM ${scoringProfiles} WHERE id = ${profileId} FOR UPDATE`);
+    const [row] = await x
+      .select({ last: sql<number>`coalesce(max(${scoringProfileVersions.version}), 0)::int` })
+      .from(scoringProfileVersions)
+      .where(eq(scoringProfileVersions.profileId, profileId));
+    const version = (row?.last ?? 0) + 1;
+    await x.insert(scoringProfileVersions).values({ profileId, version, config, createdBy });
+    return version;
+  }
+
+  async activate(profileId: string, version: number): Promise<void> {
+    await getExecutor(this.db)
+      .update(scoringProfiles)
+      .set({ activeVersion: version })
+      .where(eq(scoringProfiles.id, profileId));
+  }
+
+  async previewSample(organizationId: string, profileId: string, size: number) {
+    // Round-robin over the tiers (and the not-yet-scored), each in a stable pseudo-random order: every tier is
+    // represented as evenly as the workspace allows, up to `size`.
+    const rows = await getExecutor(this.db).execute<{
+      business_id: string;
+      display_name: string;
+      score: number | null;
+      tier: ScoreTier | null;
+    }>(sql`
+      SELECT business_id, display_name, score, tier FROM (
+        SELECT ob.business_id, b.display_name, bs.score, bs.tier,
+          row_number() OVER (PARTITION BY coalesce(bs.tier, '-') ORDER BY md5(ob.business_id::text)) AS n
+        FROM ${orgBusinesses} ob
+        JOIN businesses b ON b.id = ob.business_id
+        LEFT JOIN ${businessScores} bs ON bs.organization_id = ob.organization_id
+          AND bs.business_id = ob.business_id AND bs.profile_id = ${profileId}
+        WHERE ob.organization_id = ${organizationId}
+      ) sampled
+      ORDER BY n, coalesce(tier, '-')
+      LIMIT ${size}`);
+    return rows.map((row) => ({
+      businessId: row.business_id,
+      displayName: row.display_name,
+      score: row.score,
+      tier: row.tier,
+    }));
   }
 
   async primaryProfileId(organizationId: string): Promise<string | null> {

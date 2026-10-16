@@ -53,11 +53,15 @@ export class ScoringSubscribers {
     }
   }
 
-  /** A new active version (built-in, at boot): every workspace with businesses recomputes with it. */
+  /**
+   * A new active version: a workspace's own profile recomputes that workspace; a built-in one (no workspace) every
+   * workspace with businesses.
+   */
   @OnDomainEvent(ScoringProfileVersionActivated, { id: 'scoring.recompute-activated-version' })
   async onActivated(event: DomainEvent<typeof ScoringProfileVersionActivated>): Promise<void> {
     const { profileId, version } = event.payload;
-    for (const organizationId of await this.repository.workspacesWithBusinesses()) {
+    const workspaces = event.orgId ? [event.orgId] : await this.repository.workspacesWithBusinesses();
+    for (const organizationId of workspaces) {
       await this.queue.recompute({
         organizationId,
         profileId,

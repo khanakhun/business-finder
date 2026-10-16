@@ -74,6 +74,7 @@ export class ScoringQueries {
         builtin: profile.builtin,
         activeVersion: profile.activeVersion,
         primary: profile.id === primary,
+        archived: profile.archived,
       })),
     };
   }

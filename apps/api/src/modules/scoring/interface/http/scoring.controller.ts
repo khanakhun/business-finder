@@ -1,17 +1,32 @@
 import {
+  ActivateScoringProfileVersionRequestSchema,
   type BusinessScoreList,
   BusinessScoreListSchema,
+  CreateScoringProfileRequestSchema,
+  CreateScoringProfileVersionRequestSchema,
   NotFoundError,
+  ScoringExplainBatchRequestSchema,
+  type ScoringExplainBatchResponse,
+  ScoringExplainBatchResponseSchema,
   ScoringExplainRequestSchema,
   type ScoringExplainResponse,
   ScoringExplainResponseSchema,
+  type ScoringPreviewSample,
+  ScoringPreviewSampleQuerySchema,
+  ScoringPreviewSampleSchema,
   type ScoringProfileList,
   ScoringProfileListSchema,
+  type ScoringProfileSummary,
+  ScoringProfileSummarySchema,
   type ScoringProfileVersion,
+  type ScoringProfileVersionList,
+  ScoringProfileVersionListSchema,
   ScoringProfileVersionSchema,
   type ScoringRecomputeResponse,
   ScoringRecomputeResponseSchema,
+  ScoringVersionCreatedSchema,
   SetPrimaryScoringProfileRequestSchema,
+  UpdateScoringProfileRequestSchema,
 } from '@bf/contracts';
 import {
   Body,
@@ -21,8 +36,10 @@ import {
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
@@ -30,6 +47,10 @@ import { Ctx, RequirePermission } from '../../../platform/security/auth.decorato
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
+import {
+  ScoringEditorQueries,
+  ScoringProfileCommands,
+} from '../../application/profile-management.use-cases.ts';
 import {
   RecomputeProfileCommand,
   ScoringQueries,
@@ -156,5 +177,135 @@ export class ScoringController {
   })
   explain(@Ctx() auth: AuthContext, @Body() body: ExplainBody): Promise<ScoringExplainResponse> {
     return this.queries.explain(workspaceOf(auth), body);
+  }
+}
+
+class CreateProfileBody extends zodDto(CreateScoringProfileRequestSchema) {}
+class UpdateProfileBody extends zodDto(UpdateScoringProfileRequestSchema) {}
+class CreateVersionBody extends zodDto(CreateScoringProfileVersionRequestSchema) {}
+class ActivateBody extends zodDto(ActivateScoringProfileVersionRequestSchema) {}
+class ExplainBatchBody extends zodDto(ScoringExplainBatchRequestSchema) {}
+class SampleQuery extends zodDto(ScoringPreviewSampleQuerySchema) {}
+
+/** The workspace's own profiles and the profile editor (BF-032). Built-in profiles are read-only (409). */
+@ApiTags('scoring')
+@Controller('scoring')
+export class ScoringProfilesController {
+  constructor(
+    private readonly commands: ScoringProfileCommands,
+    private readonly editor: ScoringEditorQueries,
+  ) {}
+
+  @Post('profiles')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary:
+      'Create a workspace profile from a profile it sees (its active config becomes version 1, active)',
+    operationId: 'createScoringProfile',
+    body: CreateProfileBody,
+    response: { status: 201, schema: ScoringProfileSummarySchema },
+    errors: [400, 401, 403, 404, 409, 422],
+  })
+  create(@Ctx() auth: AuthContext, @Body() body: CreateProfileBody): Promise<ScoringProfileSummary> {
+    return this.commands.create(workspaceOf(auth), body, auth.userId);
+  }
+
+  @Patch('profiles/:id')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'Rename or (un)archive a workspace profile (an archived profile is no longer scored)',
+    operationId: 'updateScoringProfile',
+    body: UpdateProfileBody,
+    response: { status: 200, schema: ScoringProfileSummarySchema },
+    errors: [400, 401, 403, 404, 409, 422],
+  })
+  update(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) profileId: string,
+    @Body() body: UpdateProfileBody,
+  ): Promise<ScoringProfileSummary> {
+    return this.commands.update(workspaceOf(auth), profileId, body);
+  }
+
+  @Get('profiles/:id/versions')
+  @RequirePermission('business:read')
+  @ApiRoute({
+    summary: "A profile's versions, newest first",
+    operationId: 'listScoringProfileVersions',
+    response: { status: 200, schema: ScoringProfileVersionListSchema },
+    errors: [401, 403, 404],
+  })
+  versions(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) profileId: string,
+  ): Promise<ScoringProfileVersionList> {
+    return this.editor.versions(workspaceOf(auth), profileId);
+  }
+
+  @Post('profiles/:id/versions')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'Save a draft as a new (inactive, immutable) version of a workspace profile',
+    operationId: 'createScoringProfileVersion',
+    body: CreateVersionBody,
+    response: { status: 201, schema: ScoringVersionCreatedSchema },
+    errors: [400, 401, 403, 404, 409, 422],
+  })
+  addVersion(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) profileId: string,
+    @Body() body: CreateVersionBody,
+  ): Promise<{ readonly version: number }> {
+    return this.commands.addVersion(workspaceOf(auth), profileId, body, auth.userId);
+  }
+
+  @Post('profiles/:id/activate')
+  @HttpCode(202)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'Activate a saved version: the workspace recomputes with it (progress in realtime)',
+    operationId: 'activateScoringProfileVersion',
+    body: ActivateBody,
+    response: { status: 202, schema: ScoringProfileSummarySchema },
+    errors: [400, 401, 403, 404, 409, 422, 429],
+  })
+  activate(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) profileId: string,
+    @Body() body: ActivateBody,
+  ): Promise<ScoringProfileSummary> {
+    return this.commands.activate(workspaceOf(auth), profileId, body);
+  }
+
+  @Get('preview-sample')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: "A sample of the workspace's businesses (≤ 200), stratified by their tier for a profile",
+    operationId: 'getScoringPreviewSample',
+    query: SampleQuery,
+    response: { status: 200, schema: ScoringPreviewSampleSchema },
+    errors: [400, 401, 403, 404],
+  })
+  sample(@Ctx() auth: AuthContext, @Query() query: SampleQuery): Promise<ScoringPreviewSample> {
+    return this.editor.sample(workspaceOf(auth), query);
+  }
+
+  @Post('explain/batch')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 120, ttl: 60_000 } })
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'Score up to 50 tracked businesses with a draft config, nothing stored (live preview)',
+    operationId: 'explainScoreBatch',
+    body: ExplainBatchBody,
+    response: { status: 200, schema: ScoringExplainBatchResponseSchema },
+    errors: [400, 401, 403, 422, 429],
+  })
+  explainBatch(
+    @Ctx() auth: AuthContext,
+    @Body() body: ExplainBatchBody,
+  ): Promise<ScoringExplainBatchResponse> {
+    return this.editor.explainBatch(workspaceOf(auth), body);
   }
 }

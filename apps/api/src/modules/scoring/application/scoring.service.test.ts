@@ -19,6 +19,7 @@ const active = (offer: 'new_website' | 'local_seo'): ActiveProfile => ({
   name: offer,
   builtin: true,
   activeVersion: 1,
+  archived: false,
   config: BUILTIN_PROFILES[offer],
 });
 

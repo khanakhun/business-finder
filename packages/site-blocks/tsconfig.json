@@ -1,0 +1,9 @@
+{
+  "extends": "@bf/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "plugins": [],
+    // Blocks are compiled by the apps (Next.js) and by Vite/tsx here: the automatic runtime, no React import.
+    "jsx": "react-jsx"
+  },
+  "include": ["src", "*.config.ts"]
+}

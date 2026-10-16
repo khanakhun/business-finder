@@ -73,8 +73,8 @@ packages/site-blocks/src/
 See Scope → Tests. All suites runnable locally (`pnpm --filter @bf/site-blocks test`, `test:visual`, `test:a11y`, `test:lighthouse`) and in CI (BF-009 jobs extended).
 
 ## Acceptance criteria
-- [ ] Components for all blocks/variants; five style families; curated self-hosted fonts.
-- [ ] `SiteRenderer` API with injectable image/link components; static renderer for agents.
+- [x] Components for all blocks/variants; five style families; curated self-hosted fonts.
+- [x] `SiteRenderer` API with injectable image/link components; static renderer for agents.
 - [ ] Block gallery and exported thumbnails.
 - [ ] Visual regression, axe and Lighthouse thresholds pass on fixture sites.
 - [ ] PR includes screenshots of all four fixture sites in at least two styles.
@@ -99,3 +99,33 @@ Verify: pnpm verify; visual, axe and Lighthouse suites green; attach screenshots
 ## References
 - ADR-0009 · docs/ARCHITECTURE.md §10
 - Tailwind CSS v4: https://tailwindcss.com/docs · Lighthouse CI: https://github.com/GoogleChrome/lighthouse-ci · axe-core Playwright: https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright · Google Fonts licensing (OFL): https://openfontlicense.org/
+
+## Implementation notes
+
+**Part 1 (library):** `packages/site-blocks`.
+- Every block type × variant of the BF-033 schema (the schema's variant names, which differ from the ticket's draft
+  list: e.g. hero `split|centered|image_full|minimal`), header (`simple|centered|transparent`), footer
+  (`simple|columns`), skip link, preview banner. `BLOCK_COMPONENTS` is typed so a missing type does not compile; an
+  unknown type throws in `mode: 'development'` and is skipped with a logged error otherwise (the default).
+- `SitePage` (the ticket's `SiteRenderer`) takes `spec`, `page`, `locale`, `assetsResolver`, `ctaResolver`,
+  `imageComponent`, `linkComponent`, `hrefForPage`, `facts`, `contactFormAction`, `mapImage`, `agencyName`, `mode`,
+  `logger`. Blocks receive a `RenderContext` prop (Server Components have no React context).
+- Five style families as data (`src/styles/families/*.ts`) → `--bf-*` variables + `data-*` switches; Tailwind v4.3.3
+  CLI builds `dist/styles.css`. Fonts: the seven BF-033 pairs (12 families, OFL) copied from Fontsource 5.3.0
+  (latin + latin-ext, upright and italic) at build; licenses in `LICENSES.md` and `dist/fonts/licenses/`.
+- No client JS for static blocks: mobile menu and photo viewer are native popovers. Islands: "open now" (browser
+  clock, business time zone; empty placeholder on the server), contact form (posts JSON to `contactFormAction`,
+  disabled without it), booking embed (sandboxed frame loaded only on request, allowlisted providers;
+  `embedOrigins(spec)` for the CSP).
+- Static renderer `renderStaticPage` / `renderStaticSite` (`@bf/site-blocks/static`, Node): doctype, lang, title,
+  description, robots on previews, canonical and hreflang (with `origin`), Open Graph, font preloads, the stylesheet
+  linked or inlined, and LocalBusiness JSON-LD with `<` escaped.
+- Deviations: icons are inline SVG (Lucide outlines, ISC) because lucide-react 1.x ships icons as client components;
+  maps are a link to OpenStreetMap or a static image supplied by the renderer (`mapImage`), never third-party tiles
+  at runtime; the spec has no time zone, so "open now" uses the address country's single time zone (none for
+  multi-zone countries; DECISION in `format/hours.ts`); fonts stay at the seven curated pairs of BF-033 (the ticket
+  said ≈ 10).
+- `@bf/site-schema` exports `Price` and its fixtures (`./fixtures/*`); boundary rule `site-blocks-browser-safe`.
+
+**Part 2 (planned):** gallery and thumbnails, visual regression, axe and Lighthouse suites, CI job, screenshots.
+

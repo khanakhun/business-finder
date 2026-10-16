@@ -1,0 +1,722 @@
+/*
+ * The site stylesheet (BF-034): Tailwind utilities for layout plus a few component classes, all driven by the
+ * `--bf-*` variables that `themeToCssVars` sets on `.bf-site` (palette, font pair, theme tokens, style family) and
+ * the `data-*` attributes of `themeDataAttributes`. Nothing here names a colour or a font: a theme changes the look
+ * without changing this file. Built once into dist/styles.css (`pnpm --filter @bf/site-blocks build`).
+ */
+@import "tailwindcss" source(none);
+@source "../";
+
+/* Utilities read the site's variables: bg-surface, text-muted, font-heading, rounded-card… */
+@theme inline {
+  --color-primary: var(--bf-primary);
+  --color-on-primary: var(--bf-on-primary);
+  --color-secondary: var(--bf-secondary);
+  --color-accent: var(--bf-accent);
+  --color-bg: var(--bf-bg);
+  --color-surface: var(--bf-surface);
+  --color-ink: var(--bf-text);
+  --color-muted: var(--bf-muted);
+  --font-heading: var(--bf-font-heading);
+  --font-body: var(--bf-font-body);
+  --radius-btn: var(--bf-radius-button);
+  --radius-card: var(--bf-radius-card);
+  --radius-img: var(--bf-radius-image);
+}
+
+@layer base {
+  .bf-site {
+    --bf-line: color-mix(in srgb, var(--bf-text) 14%, transparent);
+    --bf-hairline: color-mix(in srgb, var(--bf-text) 9%, transparent);
+    min-height: 100vh;
+    background: var(--bf-bg);
+    color: var(--bf-text);
+    font-family: var(--bf-font-body);
+    font-size: var(--bf-body);
+    line-height: var(--bf-body-leading);
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .bf-site :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .bf-site ::selection {
+    background: color-mix(in srgb, var(--bf-accent) 30%, transparent);
+  }
+
+  .bf-site a {
+    color: inherit;
+  }
+
+  .bf-site main:focus {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* Layout */
+  .bf-container {
+    width: 100%;
+    max-width: var(--bf-max-width);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.75rem);
+  }
+
+  .bf-section {
+    position: relative;
+    padding-block: var(--bf-section-space);
+  }
+
+  [data-alternate="surface"] .bf-section[data-tone="alt"] {
+    background: var(--bf-surface);
+  }
+
+  [data-alternate="rule"] .bf-section[data-tone] + .bf-section[data-tone] > .bf-container::before {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-top: calc(var(--bf-section-space) * -1);
+    margin-bottom: var(--bf-section-space);
+    background: var(--bf-line);
+  }
+
+  .bf-stack > * + * {
+    margin-top: var(--bf-gap);
+  }
+
+  /* Type */
+  .bf-display,
+  .bf-h2,
+  .bf-h3 {
+    font-family: var(--bf-font-heading);
+    font-weight: var(--bf-heading-weight);
+    letter-spacing: var(--bf-heading-tracking);
+    line-height: var(--bf-heading-leading);
+    text-transform: var(--bf-heading-case);
+    text-wrap: balance;
+    font-optical-sizing: auto;
+  }
+
+  .bf-display {
+    font-size: var(--bf-display);
+  }
+
+  .bf-h2 {
+    font-size: var(--bf-h2);
+  }
+
+  .bf-h3 {
+    font-size: var(--bf-h3);
+    line-height: 1.25;
+  }
+
+  .bf-eyebrow {
+    display: block;
+    font-family: var(--bf-font-body);
+    font-size: var(--bf-eyebrow-size);
+    font-weight: var(--bf-eyebrow-weight);
+    letter-spacing: var(--bf-eyebrow-tracking);
+    text-transform: var(--bf-eyebrow-case);
+    line-height: 1.4;
+    color: var(--bf-muted);
+  }
+
+  .bf-lead {
+    font-size: var(--bf-lead);
+    line-height: 1.6;
+    color: var(--bf-muted);
+    max-width: var(--bf-measure);
+    text-wrap: pretty;
+  }
+
+  .bf-measure {
+    max-width: var(--bf-measure);
+  }
+
+  .bf-muted {
+    color: var(--bf-muted);
+  }
+
+  .bf-prose {
+    max-width: var(--bf-measure);
+    text-wrap: pretty;
+  }
+
+  .bf-prose > * + * {
+    margin-top: 1.1em;
+  }
+
+  .bf-prose ul {
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+
+  .bf-prose li + li {
+    margin-top: 0.4em;
+  }
+
+  .bf-prose li::marker {
+    color: var(--bf-accent);
+  }
+
+  .bf-prose a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .bf-prose strong {
+    font-weight: 650;
+  }
+
+  .bf-num {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Section heads: alignment and ornament from the family */
+  .bf-section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+    max-width: 44rem;
+  }
+
+  [data-heading-align="center"] .bf-section-head {
+    align-items: center;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  [data-ornament="short-line"] .bf-section-head > .bf-h2::after,
+  [data-ornament="line"] .bf-section-head > .bf-h2::after {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 1px;
+    margin-top: 1.25rem;
+    background: var(--bf-accent);
+  }
+
+  [data-ornament="line"] .bf-section-head > .bf-h2::after {
+    width: 4.5rem;
+    height: 2px;
+  }
+
+  [data-heading-align="center"] .bf-section-head > .bf-h2::after {
+    margin-inline: auto;
+  }
+
+  /* Buttons (44 px targets) */
+  .bf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+
+  .bf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    min-height: 2.75rem;
+    padding: var(--bf-btn-padding);
+    border: var(--bf-border-width) solid transparent;
+    border-radius: var(--bf-radius-button);
+    font-family: var(--bf-font-body);
+    font-size: var(--bf-btn-size);
+    font-weight: var(--bf-btn-weight);
+    letter-spacing: var(--bf-btn-tracking);
+    text-transform: var(--bf-btn-case);
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.25s ease,
+      background-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .bf-btn-primary {
+    background: var(--bf-primary);
+    color: var(--bf-on-primary);
+  }
+
+  .bf-btn-primary:hover {
+    box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--bf-primary) 80%, black);
+    transform: translateY(-1px);
+  }
+
+  .bf-btn-secondary {
+    border-color: currentColor;
+    background: transparent;
+    color: inherit;
+  }
+
+  .bf-btn-secondary:hover {
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  [data-secondary-button="link"] .bf-btn-secondary {
+    padding-inline: 0.25rem;
+    border-color: transparent;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.45em;
+  }
+
+  [data-secondary-button="link"] .bf-btn-secondary:hover {
+    background: transparent;
+    text-decoration-thickness: 2px;
+  }
+
+  .bf-on-primary .bf-btn-primary {
+    background: var(--bf-on-primary);
+    color: var(--bf-primary);
+  }
+
+  .bf-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  .bf-link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  /* Surfaces */
+  .bf-card {
+    height: 100%;
+    padding: clamp(1.5rem, 2.5vw, 2.25rem);
+    border-radius: var(--bf-radius-card);
+    background: var(--bf-surface);
+    box-shadow: var(--bf-shadow-card);
+  }
+
+  .bf-section[data-tone="alt"] .bf-card {
+    background: var(--bf-bg);
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: the family attribute styles cards wherever they sit; it never competes with the alt-tone rule above (different properties) */
+  [data-cards="line"] .bf-card {
+    border: 1px solid var(--bf-line);
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: as above: borders only */
+  [data-cards="hairline"] .bf-card {
+    border: 1px solid var(--bf-hairline);
+  }
+
+  .bf-rule {
+    border: 0;
+    border-top: 1px solid var(--bf-line);
+  }
+
+  .bf-divided > * + * {
+    border-top: 1px solid var(--bf-hairline);
+  }
+
+  .bf-on-primary {
+    background: var(--bf-primary);
+    color: var(--bf-on-primary);
+  }
+
+  .bf-on-primary .bf-eyebrow,
+  .bf-on-primary .bf-lead,
+  .bf-on-primary .bf-muted {
+    color: inherit;
+    opacity: 0.9;
+  }
+
+  .bf-icon {
+    flex: none;
+    color: var(--bf-accent);
+  }
+
+  .bf-icon-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--bf-radius-button);
+    background: color-mix(in srgb, var(--bf-accent) 12%, transparent);
+    color: var(--bf-accent);
+  }
+
+  /* Images: radius and frame from the theme, tone from the family */
+  .bf-media {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--bf-radius-image);
+    background: var(--bf-surface);
+  }
+
+  .bf-media > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--bf-image-filter);
+  }
+
+  [data-image="framed"] .bf-media:not(.bf-bleed) {
+    overflow: visible;
+    padding: 0.625rem;
+    border: 1px solid color-mix(in srgb, var(--bf-accent) 55%, transparent);
+    background: transparent;
+    border-radius: calc(var(--bf-radius-image) + 0.625rem);
+  }
+
+  [data-image="framed"] .bf-media:not(.bf-bleed) > img {
+    border-radius: var(--bf-radius-image);
+  }
+
+  .bf-bleed {
+    border-radius: 0;
+  }
+
+  /* Text over a photo: an overlay keeps white text readable. */
+  .bf-on-image {
+    color: #fff;
+  }
+
+  .bf-on-image .bf-eyebrow,
+  .bf-on-image .bf-lead {
+    color: rgb(255 255 255 / 0.92);
+  }
+
+  .bf-on-image .bf-btn-secondary {
+    color: #fff;
+  }
+
+  .bf-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgb(0 0 0 / var(--bf-overlay));
+  }
+
+  [data-overlay="gradient"] .bf-overlay::after {
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / calc(var(--bf-overlay) + 0.28)) 0%,
+      rgb(0 0 0 / calc(var(--bf-overlay) * 0.8)) 45%,
+      rgb(0 0 0 / calc(var(--bf-overlay) * 0.55)) 100%
+    );
+  }
+
+  /* Galleries */
+  .bf-carousel {
+    display: grid;
+    grid-auto-columns: min(84%, 26rem);
+    grid-auto-flow: column;
+    gap: var(--bf-gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 1rem;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: clamp(1.25rem, 4vw, 2.75rem);
+    scrollbar-width: thin;
+  }
+
+  .bf-carousel > * {
+    scroll-snap-align: start;
+  }
+
+  .bf-masonry {
+    columns: 1;
+    column-gap: var(--bf-gap);
+  }
+
+  .bf-masonry > * {
+    margin-bottom: var(--bf-gap);
+    break-inside: avoid;
+  }
+
+  @media (min-width: 40rem) {
+    .bf-masonry {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .bf-masonry {
+      columns: 3;
+    }
+  }
+
+  .bf-zoom {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: gallery photos only; the lightbox rule below targets other images */
+  .bf-zoom img {
+    transition: transform 0.6s ease;
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: gallery photos only */
+  .bf-zoom:hover img {
+    transform: scale(1.03);
+  }
+
+  /* Popovers: the mobile menu and the photo viewer work without JavaScript. */
+  .bf-popover {
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow-y: auto;
+  }
+
+  .bf-popover:popover-open {
+    display: flex;
+  }
+
+  .bf-popover::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .bf-menu-panel {
+    flex-direction: column;
+    background: var(--bf-bg);
+    color: var(--bf-text);
+  }
+
+  .bf-lightbox {
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 3rem);
+    background: rgb(8 8 8 / 0.94);
+    color: #fff;
+  }
+
+  /* biome-ignore lint/style/noDescendingSpecificity: the viewer's image, never inside .bf-zoom */
+  .bf-lightbox img {
+    max-width: 100%;
+    max-height: calc(100dvh - 8rem);
+    object-fit: contain;
+  }
+
+  .bf-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0.5rem;
+    border: 0;
+    border-radius: var(--bf-radius-button);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .bf-icon-btn:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  /* Header */
+  .bf-header {
+    position: relative;
+    z-index: 20;
+    background: var(--bf-bg);
+  }
+
+  .bf-header[data-variant="transparent"] {
+    position: absolute;
+    inset-inline: 0;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.45), transparent);
+    color: #fff;
+  }
+
+  .bf-header[data-variant="transparent"] .bf-btn-primary {
+    background: #fff;
+    color: #111;
+  }
+
+  .bf-nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .bf-nav-link::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0.55rem;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .bf-nav-link:hover::after,
+  .bf-nav-link[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+
+  .bf-brand {
+    font-family: var(--bf-font-heading);
+    font-weight: var(--bf-heading-weight);
+    font-size: 1.375rem;
+    letter-spacing: var(--bf-heading-tracking);
+    line-height: 1.1;
+    text-decoration: none;
+  }
+
+  /* Accordions (native <details>) */
+  .bf-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 2.75rem;
+    padding-block: 1.25rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .bf-details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .bf-details > summary .bf-chevron {
+    transition: transform 0.25s ease;
+  }
+
+  .bf-details[open] > summary .bf-chevron {
+    transform: rotate(45deg);
+  }
+
+  /* Price lists */
+  .bf-leader {
+    flex: 1;
+    min-width: 1.5rem;
+    margin-inline: 0.75rem;
+    border-bottom: 1px dotted var(--bf-line);
+    transform: translateY(-0.3em);
+  }
+
+  /* Forms */
+  .bf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .bf-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .bf-input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--bf-text) 35%, transparent);
+    border-radius: var(--bf-radius);
+    background: var(--bf-bg);
+    color: var(--bf-text);
+    font: inherit;
+  }
+
+  .bf-input:focus-visible {
+    outline: 2px solid var(--bf-text);
+    outline-offset: 1px;
+    border-color: var(--bf-text);
+  }
+
+  .bf-input[aria-invalid="true"] {
+    border-color: #b42318;
+  }
+
+  .bf-error {
+    font-size: 0.875rem;
+    color: #b42318;
+  }
+
+  /* Small print */
+  .bf-preview-banner {
+    padding: 0.55rem 1rem;
+    background: var(--bf-text);
+    color: var(--bf-bg);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .bf-skip {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--bf-radius-button);
+    background: var(--bf-text);
+    color: var(--bf-bg);
+    transform: translateY(-200%);
+  }
+
+  .bf-skip:focus {
+    transform: none;
+  }
+
+  .bf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid var(--bf-line);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .bf-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+}
+
+/* Reduced motion: no transitions, no smooth scrolling, no hover lifts (unlayered, so it wins over the layers). */
+@media (prefers-reduced-motion: reduce) {
+  .bf-site *,
+  .bf-site *::before,
+  .bf-site *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+
+  .bf-btn-primary:hover,
+  .bf-zoom:hover img {
+    transform: none;
+  }
+}

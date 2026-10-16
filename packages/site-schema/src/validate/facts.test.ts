@@ -351,6 +351,15 @@ describe('validateFacts', () => {
     expect(found(spec).filter((issue) => issue.includes('subtitle'))).toEqual([]);
   });
 
+  it.each([' '.repeat(40), '\n'.repeat(40), ' \t\n'.repeat(15)])(
+    'checks a number split by a run of whitespace as one number (shown as one space): %j',
+    (gap) => {
+      const spec = salon();
+      hero(spec).subtitle = { fr: `Appelez le 0690${gap}123456`, en: 'Call us' };
+      expect(found(spec)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+    },
+  );
+
   it('still checks a year written beside the phone with a bullet', () => {
     const spec = salon();
     hero(spec).subtitle = { fr: 'Depuis 1952 · 0590 00 01 01', en: 'Welcome' };

@@ -128,13 +128,14 @@ function e164(raw: string, country: string | undefined): string | undefined {
   return parsed?.isPossible() ? parsed.number : undefined;
 }
 
+/** Written without a country code (`0590…`, `(212) 555…`), as opposed to `+…` or `00…`. */
+const isNational = (raw: string) => !/^\s*(?:\+|00)/.test(raw.normalize('NFKC'));
+
 /**
  * A number of the French plan as dialled in France (`0` and nine digits), from its national or international form:
  * the territory is in the number (0590 Guadeloupe and the islands, 0696 Martinique, 06 the mainland; some ranges are
  * shared), so two forms are compared as dialled rather than through a territory guessed from the site's country.
  */
-/** Written without a country code (`0590…`, `(212) 555…`), as opposed to `+…` or `00…`. */
-const isNational = (raw: string) => !/^\s*(?:\+|00)/.test(raw.normalize('NFKC'));
 
 function frenchNational(raw: string): string | undefined {
   const text = raw.normalize('NFKC');
@@ -204,7 +205,8 @@ export interface Literals {
  * ranges, phones, years.
  */
 export function literals(input: string, country?: string): Literals {
-  let text = input.normalize('NFKC');
+  // Whitespace runs read as one space, as HTML shows them (40 spaces or line breaks never split a number).
+  let text = input.normalize('NFKC').replace(/\s+/g, ' ');
   const blank = (match: string) => ' '.repeat(match.length);
   // E-mails first: a date, a year range or a price inside an address must not cut it apart.
   const emails: string[] = [];
@@ -212,8 +214,7 @@ export function literals(input: string, country?: string): Literals {
     emails.push(match);
     return blank(match);
   });
-  // Every dash is a hyphen and every middle dot a full stop (`06 12 — 34 56 78`, `06·12·34·56·78`): a look-alike
-  // separator never hides a number.
+  // Every dash is a hyphen (`06 12 — 34 56 78`): a look-alike separator never hides a number.
   // A middle dot between digits is a full stop (`06·12·34·56·78`); a spaced one is a separator, like ` / `
   // (`Ouvert 7j/7 • 0590 00 01 01` is a phone after a list, not one long number).
   text = text

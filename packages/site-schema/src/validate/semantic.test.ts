@@ -239,11 +239,24 @@ describe('validateSite', () => {
     expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).not.toBeNull();
   });
 
-  it('checks long emoji runs in linear time', () => {
-    const title = `${'\u2764'.repeat(40)}\u200B`;
+  it.each([
+    ['bare pictographs', `${'\u2764'.repeat(40)}\u200B`],
+    // A sequence ending with a skin tone: two parses per unit would be 2^24 attempts here.
+    ['joined sequences with skin tones', `${'\u{1F469}\u200D\u{1F373}\u{1F3FD}'.repeat(24)}\u200B`],
+  ])('checks long emoji runs in linear time: %s', (_name, text) => {
     const started = performance.now();
-    expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: title }))).spec).toBeNull();
+    expect(parseSite(with_((s) => Object.assign(s.seo.title, { en: text }))).spec).toBeNull();
+    expect(parseSite(with_((s) => Object.assign(s.brand, { name: text }))).spec).toBeNull();
     expect(performance.now() - started).toBeLessThan(200);
+  });
+
+  it('refuses a stray skin tone outside an emoji', () => {
+    expect(
+      parseSite(with_((s) => Object.assign(s.seo.title, { en: 'Salon a\u{1F3FB} Gustavia' }))).spec,
+    ).toBeNull();
+    expect(
+      parseSite(with_((s) => Object.assign(s.seo.title, { en: 'Bravo \u{1F44D}\u{1F3FD}' }))).spec,
+    ).not.toBeNull();
   });
 
   it('warns about texts outside their recommended length', () => {
@@ -567,34 +580,50 @@ describe('validateSite', () => {
     expect(found(spec)).toEqual([]);
   });
 
-  it('validates a near-maximal hostile spec quickly (no quadratic pattern)', () => {
-    // The fillers an unbounded domain pattern is slowest on (seconds unbounded, milliseconds bounded).
-    const fillers = ['a1.'.repeat(1633), 'a-.'.repeat(1633), '1a.'.repeat(1633)];
-    const spec = with_((s) => {
-      for (let n = 0; n < 5; n += 1) {
-        s.pages.push({
-          id: `extra-${n}`,
-          slug: `extra-${n}`,
-          title: L('Extra'),
-          seo: {
-            title: L('Extra page of the salon, Gustavia'),
-            description: s.pages[0]?.seo.description ?? L('x'),
-          },
-          blocks: [
-            { id: `hero-x${n}00`, type: 'hero', variant: 'minimal', props: { title: L('Extra') } },
-            ...Array.from({ length: 19 }, (_, j) => ({
-              id: `rich-x${n}${String(j).padStart(2, '0')}`,
-              type: 'rich_text' as const,
-              variant: 'narrow' as const,
-              props: { body: L(fillers[j % fillers.length] ?? '') },
-            })),
-          ],
-        });
-      }
-    });
-    expect(parseSite(spec).spec).not.toBeNull();
-    const started = performance.now();
-    validateSite(spec, OPTIONS);
-    expect(performance.now() - started).toBeLessThan(1500);
+  it('validates a near-maximal hostile spec in linear time (no quadratic pattern)', () => {
+    // The fillers an unbounded domain pattern is slowest on (seconds unbounded, milliseconds bounded), and the
+    // e-mail scanner's.
+    const fillers = (n: number) => [
+      'a1.'.repeat(n),
+      'a-.'.repeat(n),
+      '1a.'.repeat(n),
+      'a@'.repeat(Math.floor(n * 1.5)),
+    ];
+    const hostile = (n: number) =>
+      with_((s) => {
+        for (let p = 0; p < 5; p += 1) {
+          s.pages.push({
+            id: `extra-${p}`,
+            slug: `extra-${p}`,
+            title: L('Extra'),
+            seo: {
+              title: L('Extra page of the salon, Gustavia'),
+              description: s.pages[0]?.seo.description ?? L('x'),
+            },
+            blocks: [
+              { id: `hero-x${p}00`, type: 'hero', variant: 'minimal', props: { title: L('Extra') } },
+              ...Array.from({ length: 19 }, (_, j) => ({
+                id: `rich-x${p}${String(j).padStart(2, '0')}`,
+                type: 'rich_text' as const,
+                variant: 'narrow' as const,
+                props: { body: L(fillers(n)[j % 4] ?? '') },
+              })),
+            ],
+          });
+        }
+      });
+    const full = hostile(1633);
+    const half = hostile(816);
+    expect(parseSite(full).spec).not.toBeNull();
+    const time = (spec: SiteSpec) => {
+      const started = performance.now();
+      validateSite(spec, OPTIONS);
+      return performance.now() - started;
+    };
+    time(half); // warm-up
+    const [small, large] = [time(half), time(full)];
+    // Twice the text takes about twice the time (a quadratic pattern takes four times); and it stays fast.
+    expect(large / small).toBeLessThan(3);
+    expect(large).toBeLessThan(1500);
   });
 });

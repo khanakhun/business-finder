@@ -46,7 +46,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 60,
-              "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+              "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
               "description": "The business name exactly as it is known."
             },
             "factId": {
@@ -102,7 +102,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 24,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "A one- or two-word menu label, e.g. \"Services\". One entry per site locale, at most 24 characters each.",
                     "minProperties": 1
@@ -160,7 +160,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 70,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "The site title, e.g. \"Café Saint-Jean\". One entry per site locale, at most 70 characters each.",
               "minProperties": 1
@@ -182,7 +182,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "What the business is and where (120–160 characters). One entry per site locale, at most 200 characters each.",
               "minProperties": 1
@@ -564,28 +564,28 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 120,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Street and number, e.g. \"12 rue du Port\"."
         },
         "postalCode": {
           "type": "string",
           "minLength": 1,
           "maxLength": 20,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Postal code, e.g. \"97133\"."
         },
         "locality": {
           "type": "string",
           "minLength": 1,
           "maxLength": 100,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Town or district, e.g. \"Gustavia\"."
         },
         "region": {
           "type": "string",
           "minLength": 1,
           "maxLength": 100,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Region or island, when it helps."
         },
         "country": {
@@ -597,7 +597,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 300,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "The address on one line, as the business writes it."
         },
         "factId": {
@@ -833,7 +833,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 200,
-            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
           },
           "description": "Exceptions in plain words (holidays, season), e.g. \"Closed in September\". One entry per site locale, at most 200 characters each.",
           "minProperties": 1
@@ -923,7 +923,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 120,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "A line under the brand name. One entry per site locale, at most 120 characters each.",
               "minProperties": 1
@@ -978,7 +978,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 30,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
               "minProperties": 1
@@ -1015,7 +1015,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 30,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
               "minProperties": 1
@@ -1058,7 +1058,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 30,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
               "minProperties": 1
@@ -1110,7 +1110,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 60,
-            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
           },
           "description": "The page name, e.g. \"Menu\". One entry per site locale, at most 60 characters each.",
           "minProperties": 1
@@ -1135,7 +1135,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 70,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "The browser/search title (20–60 characters), e.g. \"Salon Lumière – Hair salon in Gustavia\". One entry per site locale, at most 70 characters each.",
               "minProperties": 1
@@ -1157,7 +1157,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "The search snippet (120–160 characters). One entry per site locale, at most 200 characters each.",
               "minProperties": 1
@@ -1287,7 +1287,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 40,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "A short line above the title, e.g. the place: \"Gustavia · St Barth\". One entry per site locale, at most 40 characters each.",
               "minProperties": 1
@@ -1309,7 +1309,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 60,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "The page headline: what the business is, in its own terms. Up to 60 characters. One entry per site locale, at most 60 characters each.",
               "minProperties": 1
@@ -1331,7 +1331,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 160,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One sentence on why customers come (40–160 characters). One entry per site locale, at most 160 characters each.",
               "minProperties": 1
@@ -1406,7 +1406,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -1465,7 +1465,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 60,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "A short strength, e.g. \"Open 7 days\". One entry per site locale, at most 60 characters each.",
                     "minProperties": 1
@@ -1487,7 +1487,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 240,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "One sentence backing it. One entry per site locale, at most 240 characters each.",
                     "minProperties": 1
@@ -1570,7 +1570,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -1592,7 +1592,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 300,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
               "minProperties": 1
@@ -1621,7 +1621,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 60,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "The service as the business names it. One entry per site locale, at most 60 characters each.",
                     "minProperties": 1
@@ -1643,7 +1643,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 240,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "What it includes, in one or two sentences. One entry per site locale, at most 240 characters each.",
                     "minProperties": 1
@@ -1769,7 +1769,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -1791,7 +1791,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 300,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
               "minProperties": 1
@@ -1820,7 +1820,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 60,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "A menu section, e.g. \"Starters\". One entry per site locale, at most 60 characters each.",
                     "minProperties": 1
@@ -1849,7 +1849,7 @@
                             "type": "string",
                             "minLength": 1,
                             "maxLength": 60,
-                            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                           },
                           "description": "The dish as the menu names it. One entry per site locale, at most 60 characters each.",
                           "minProperties": 1
@@ -1871,7 +1871,7 @@
                             "type": "string",
                             "minLength": 1,
                             "maxLength": 240,
-                            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                           },
                           "description": "Its ingredients or style. One entry per site locale, at most 240 characters each.",
                           "minProperties": 1
@@ -1929,7 +1929,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Menu changes with the season\". One entry per site locale, at most 200 characters each.",
               "minProperties": 1
@@ -1994,7 +1994,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"About us\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2016,7 +2016,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 1500,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Two or three short paragraphs (blank line between) on the business. Facts only. One entry per site locale, at most 1500 characters each.",
               "minProperties": 1
@@ -2096,7 +2096,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2171,7 +2171,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2205,7 +2205,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 400,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "The quote as published (translated faithfully for other locales). One entry per site locale, at most 400 characters each.",
                     "minProperties": 1
@@ -2214,7 +2214,7 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 60,
-                    "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+                    "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
                     "description": "As the attribution policy allows: initials, e.g. \"Marie L.\", or left out."
                   },
                   "source": {
@@ -2300,7 +2300,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Opening hours\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2322,7 +2322,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "An extra line. One entry per site locale, at most 200 characters each.",
               "minProperties": 1
@@ -2383,7 +2383,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Find us\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2409,7 +2409,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 200,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Parking behind the shop\". One entry per site locale, at most 200 characters each.",
               "minProperties": 1
@@ -2472,7 +2472,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Contact us\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2494,7 +2494,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 300,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
               "minProperties": 1
@@ -2588,7 +2588,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "An invitation, e.g. \"Ready for your next cut?\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2610,7 +2610,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 300,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One supporting sentence. One entry per site locale, at most 300 characters each.",
               "minProperties": 1
@@ -2682,7 +2682,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Questions\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2711,7 +2711,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 120,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "A question customers ask. One entry per site locale, at most 120 characters each.",
                     "minProperties": 1
@@ -2733,7 +2733,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 600,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "The answer, from facts only; otherwise invite them to ask. One entry per site locale, at most 600 characters each.",
                     "minProperties": 1
@@ -2815,7 +2815,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"The team\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2836,7 +2836,7 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 60,
-                    "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+                    "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
                     "description": "The name as the business presents it, e.g. \"Léa M.\"."
                   },
                   "role": {
@@ -2856,7 +2856,7 @@
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 60,
-                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                      "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
                     },
                     "description": "E.g. \"Head chef\". One entry per site locale, at most 60 characters each.",
                     "minProperties": 1
@@ -2933,7 +2933,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Book your appointment\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -2955,7 +2955,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 300,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
               "minProperties": 1
@@ -2977,7 +2977,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 30,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "The button, e.g. \"Book online\". One entry per site locale, at most 30 characters each.",
               "minProperties": 1
@@ -3041,7 +3041,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "E.g. \"Follow us\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -3101,7 +3101,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 80,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
               "minProperties": 1
@@ -3123,7 +3123,7 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 5000,
-                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+                "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
               },
               "description": "Limited markdown: paragraphs, **bold**, *italic*, \"- \" lists and links to the site's own pages as [label](page:<pageId>). No HTML, no other links. One entry per site locale, at most 5000 characters each.",
               "minProperties": 1
@@ -3197,7 +3197,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 150,
-            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9]|\\n)*$"
+            "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9]|\\n)*$"
           },
           "description": "What the image shows, for screen readers, e.g. \"Terrace facing the bay at sunset\". One entry per site locale, at most 150 characters each.",
           "minProperties": 1
@@ -3216,7 +3216,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 200,
-          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}[\\uFE0E\\uFE0F]|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}]|[0-9])*$",
+          "pattern": "^(?:\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?(?:\\u200D\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})?)+|\\p{Extended_Pictographic}(?:[\\uFE0E\\uFE0F]|\\p{Emoji_Modifier})|[0-9#*]\\uFE0F\\u20E3|[^\\p{Cc}\\p{Cf}\\p{Co}\\p{Cn}\\p{Cs}\\p{Default_Ignorable_Code_Point}\\p{Nd}\\p{Emoji_Modifier}]|[0-9])*$",
           "description": "Credit line when the license requires one."
         },
         "focalPoint": {

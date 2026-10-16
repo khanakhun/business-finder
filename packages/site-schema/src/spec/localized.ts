@@ -10,14 +10,16 @@ export type SiteLocale = z.infer<typeof SiteLocaleSchema>;
  * selectors and joiners are invisible, so they are allowed only inside an emoji. Each alternative needs a selector or
  * joiner, so a bare pictograph matches the plain character class only (no ambiguous, exponential backtracking).
  */
+// A modifier (skin tone) is part of an emoji only: the plain class below excludes it, so every text has one
+// parse. PART takes one only because a joiner must follow it inside a sequence.
 const PART = String.raw`\p{Extended_Pictographic}(?:[\uFE0E\uFE0F]|\p{Emoji_Modifier})?`;
-const EMOJI = String.raw`${PART}(?:\u200D${PART})+|\p{Extended_Pictographic}[\uFE0E\uFE0F]|[0-9#*]\uFE0F\u20E3`;
+const EMOJI = String.raw`${PART}(?:\u200D${PART})+|\p{Extended_Pictographic}(?:[\uFE0E\uFE0F]|\p{Emoji_Modifier})|[0-9#*]\uFE0F\u20E3`;
 /**
  * No control, invisible formatting, ignorable, private-use or unassigned characters (direction overrides, zero-width
  * spaces, stray variation selectors, the combining grapheme joiner) and only ASCII digits (the site languages write
  * no other: look-alike digits would hide a number from the facts check); line breaks allowed.
  */
-const CHAR = String.raw`[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}]|[0-9]`;
+const CHAR = String.raw`[^\p{Cc}\p{Cf}\p{Co}\p{Cn}\p{Cs}\p{Default_Ignorable_Code_Point}\p{Nd}\p{Emoji_Modifier}]|[0-9]`;
 const SAFE_TEXT = new RegExp(`^(?:${EMOJI}|${CHAR}|\n)*$`, 'u');
 const SAFE_LINE = new RegExp(`^(?:${EMOJI}|${CHAR})*$`, 'u');
 const UNSAFE_MESSAGE = 'No control or invisible characters, and digits 0-9 only';

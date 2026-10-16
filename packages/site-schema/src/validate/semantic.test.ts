@@ -621,7 +621,9 @@ describe('validateSite', () => {
       return performance.now() - started;
     };
     time(half); // warm-up
-    const [small, large] = [time(half), time(full)];
+    // The best of three runs each: other test files share the machine.
+    const best = (spec: SiteSpec) => Math.min(time(spec), time(spec), time(spec));
+    const [small, large] = [best(half), best(full)];
     // Twice the text takes about twice the time (a quadratic pattern takes four times); and it stays fast.
     expect(large / small).toBeLessThan(3);
     expect(large).toBeLessThan(1500);

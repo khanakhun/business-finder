@@ -402,4 +402,37 @@ describe('generation batches', () => {
     expect(list.items).toHaveLength(2);
     expect(list.nextCursor).toBeTruthy();
   }, 60_000);
+  it('keeps a job’s brief overrides, and refuses an unknown page plan', async () => {
+    const id = await business('Salon Overrides');
+    const overrides = {
+      locales: ['en', 'fr'],
+      pagePlanId: 'beauty_wellness',
+      style: 'luxe',
+      extraInstructions: 'Mettre la terrasse en avant',
+    };
+    await member
+      .post('/v1/generation-batches', {
+        items: [{ businessId: id, engine: 'fake', briefOverrides: { pagePlanId: 'nope' } }],
+      })
+      .set('Idempotency-Key', 'batch-overrides-bad')
+      .expect(422);
+    await member
+      .post('/v1/generation-batches', {
+        items: [{ businessId: id, engine: 'fake', briefOverrides: { pages: ['about'] } }],
+      })
+      .set('Idempotency-Key', 'batch-overrides-bad-pages')
+      .expect(422);
+    const { body } = await member
+      .post('/v1/generation-batches', {
+        items: [{ businessId: id, engine: 'fake', briefOverrides: overrides }],
+      })
+      .set('Idempotency-Key', 'batch-overrides-1')
+      .expect(201);
+    const [job] = await db
+      .select({ briefOverrides: generationJobs.briefOverrides })
+      .from(generationJobs)
+      .where(eq(generationJobs.batchId, body.id));
+    expect(job?.briefOverrides).toEqual(overrides);
+    await batchDone(body.id);
+  }, 60_000);
 });

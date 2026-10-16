@@ -12,6 +12,7 @@ const job = (status: StoredJob['status']): StoredJob =>
     businessId: 'biz',
     businessName: 'Salon',
     siteId: null,
+    briefOverrides: null,
     position: 0,
     priority: 1,
     engineRequested: 'auto',

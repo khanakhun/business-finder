@@ -28,6 +28,7 @@ const jobColumns = {
   businessId: generationJobs.businessId,
   businessName: businesses.displayName,
   siteId: generationJobs.siteId,
+  briefOverrides: generationJobs.briefOverrides,
   position: generationJobs.position,
   priority: generationJobs.priority,
   engineRequested: generationJobs.engineRequested,

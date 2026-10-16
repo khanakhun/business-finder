@@ -1,0 +1,39 @@
+id: food_drink
+match: [food_drink]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: image_full, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: icons, requires: { kinds: [service, amenity, award, payment_method], min: 2 } }
+      - { type: about, variant: split, otherwise: centered, requires: { images: 1 } }
+      - { type: testimonials, variant: quotes, requires: { kinds: [testimonial] } }
+      - { type: gallery, variant: masonry, requires: { images: 4 } }
+      - { type: hours, variant: compact, requires: { kinds: [hours] } }
+      - { type: location, variant: map_split, requires: { kinds: [address, geo] } }
+      - { type: contact, variant: split }
+  - kind: menu
+    slug: menu
+    requires: { kinds: [menu_item], min: 6 }
+    # "Our café" on the home page instead of a thin menu.
+    fallback:
+      - { type: services, variant: list, requires: { kinds: [service, menu_section], min: 2 }, fills: [service, menu_section] }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: menu, variant: columns, requires: { kinds: [menu_item], min: 3 }, section: true, fills: [menu_section, menu_item, price] }
+      - { type: cta_banner, variant: solid }
+  - kind: about
+    slug: a-propos
+    requires: { kinds: [about_summary, tagline, team_member, year_founded, award], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: about, variant: story, otherwise: centered, requires: { images: 1 } }
+      - { type: team, variant: grid, requires: { kinds: [team_member] }, section: true }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: hours, variant: table, requires: { kinds: [hours] } }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

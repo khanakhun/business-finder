@@ -244,6 +244,23 @@ export type paths = {
         patch: operations["updateBusinessFact"];
         trace?: never;
     };
+    "/v1/businesses/{id}/generation-brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The brief a generation would start from: page plan, locales, design, warnings and registry counts */
+        get: operations["getGenerationBrief"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/notes": {
         parameters: {
             query?: never;
@@ -2530,6 +2547,16 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        BriefOverrides: {
+            extraInstructions?: string;
+            locales?: string[];
+            pagePlanId?: string;
+            pages?: ("home" | "menu" | "services" | "products" | "about" | "contact" | "booking" | "gallery")[];
+            /** @enum {string} */
+            style?: "luxe" | "modern" | "warm" | "minimal" | "coastal";
+            /** @enum {string} */
+            tone?: "friendly" | "refined" | "professional" | "energetic";
+        };
         BulkEnrichRequest: {
             businessIds: string[];
             /** @default false */
@@ -2962,6 +2989,7 @@ export type components = {
         };
         CreateGenerationBatchRequest: {
             items: {
+                briefOverrides?: components["schemas"]["BriefOverrides"];
                 budgetUsd?: number;
                 /**
                  * Format: uuid
@@ -3467,6 +3495,120 @@ export type components = {
             items: components["schemas"]["GenerationBatch"][];
             nextCursor: string | null;
             totalEstimate?: number;
+        };
+        GenerationBrief: {
+            audience: {
+                hints: {
+                    evidence: string[];
+                    text: string;
+                }[];
+                /** @enum {string} */
+                market: "luxury_tourism" | "tourism" | "residents" | "mixed";
+            };
+            /** @constant */
+            briefVersion: 1;
+            /** Format: uuid */
+            businessId: string;
+            constraints: {
+                doNotMention: string[];
+                frenchTypography: boolean;
+                maxHeadlineChars: number;
+                maxParagraphChars: number;
+                /** @constant */
+                neutralCopyWhenMissing: true;
+                /** @constant */
+                noInventedFacts: true;
+                /** @enum {string} */
+                tone: "friendly" | "refined" | "professional" | "energetic";
+            };
+            design: {
+                /** @enum {string} */
+                density: "compact" | "comfortable" | "airy";
+                imagery: string;
+                palette: {
+                    accent: string;
+                    primary: string;
+                    /** @enum {string} */
+                    source: "brand" | "category" | "style";
+                };
+                reasons: string[];
+                /** @enum {string} */
+                style: "luxe" | "modern" | "warm" | "minimal" | "coastal";
+            };
+            extraInstructions: string | null;
+            identity: {
+                area: string | null;
+                categoryLabel: {
+                    en: string;
+                    fr: string;
+                } | null;
+                categoryPath: string | null;
+                description: string | null;
+                locality: string | null;
+                name: string;
+                nameFactId: string | null;
+            };
+            locales: {
+                available: string[];
+                default: string;
+            };
+            offer: {
+                /** @enum {string} */
+                id: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+                improvements: {
+                    ref: string;
+                    text: string;
+                }[];
+            };
+            pagePlan: {
+                collapsed: {
+                    into: string;
+                    kind: string;
+                    reason: string;
+                }[];
+                id: string;
+                matched: string;
+                pages: {
+                    blocks: {
+                        fills?: string[];
+                        type: string;
+                        variant?: string;
+                    }[];
+                    /** @enum {string} */
+                    kind: "home" | "menu" | "services" | "products" | "about" | "contact" | "booking" | "gallery";
+                    slug: string;
+                }[];
+            };
+            painPoints: {
+                remedy: string;
+                tag: string;
+            }[];
+            sellingPoints: {
+                evidence: string[];
+                text: string;
+            }[];
+            warnings: {
+                /** @enum {string} */
+                code: "no_display_phone" | "no_display_email" | "no_contact_channel" | "no_hours" | "no_large_image" | "single_locale" | "no_services" | "no_owner_site_facts" | "few_facts";
+                message: string;
+            }[];
+        };
+        GenerationBriefPreview: {
+            brief: components["schemas"]["GenerationBrief"];
+            pagePlans: {
+                id: string;
+                matched: string[];
+            }[];
+            registry: {
+                byKind: {
+                    [key: string]: {
+                        display: number;
+                        internal: number;
+                    };
+                };
+                display: number;
+                internal: number;
+            };
         };
         GenerationEngineListing: {
             items: {
@@ -6881,6 +7023,86 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgBusinessFact"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGenerationBrief: {
+        parameters: {
+            query?: {
+                locales?: string;
+                offer?: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+                style?: "luxe" | "modern" | "warm" | "minimal" | "coastal";
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationBriefPreview"];
                 };
             };
             /** @description Problem details (RFC 9457) */

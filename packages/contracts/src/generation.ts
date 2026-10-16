@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BriefOverridesSchema } from './brief.ts';
 import { defineEvent } from './events.ts';
 import { BusinessId, SiteId } from './ids.ts';
 import { defineJob } from './jobs.ts';
@@ -133,6 +134,8 @@ export const CreateGenerationBatchRequestSchema = z
           budgetUsd: budget.optional(),
           /** An existing site to generate a new version of. */
           siteId: SiteId.optional(),
+          /** Adjustments to the brief (BF-040): locales, page plan, style, tone, operator instructions. */
+          briefOverrides: BriefOverridesSchema.optional(),
         }),
       )
       .min(1)

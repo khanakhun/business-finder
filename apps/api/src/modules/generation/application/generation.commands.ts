@@ -10,14 +10,16 @@ import {
   type UpdateGenerationJobRequest,
   ValidationError,
 } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { priorityFor, queuePriority } from '../domain/batch.ts';
+import type { PagePlanTemplate } from '../domain/brief/page-plan.ts';
 import { jobBudget } from '../domain/budget-policy.ts';
 import { selectEngine } from '../domain/engine-selection-policy.ts';
 import { chainAfter } from '../domain/failover-policy.ts';
 import { isCancellable } from '../domain/job-state-machine.ts';
+import { PAGE_PLAN_TEMPLATES } from './brief.service.ts';
 import {
   CANCEL_SIGNALS,
   type CancelSignals,
@@ -59,6 +61,7 @@ export class GenerationCommands {
     @Inject(CANCEL_SIGNALS) private readonly cancels: CancelSignals,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly transitions: JobTransitions,
+    @Optional() @Inject(PAGE_PLAN_TEMPLATES) private readonly templates?: readonly PagePlanTemplate[],
   ) {}
 
   /** Creates the batch and its jobs, then starts dispatching; the same `Idempotency-Key` returns the same batch. */
@@ -152,12 +155,22 @@ export class GenerationCommands {
         engine = requested;
         reason = 'chosen by the person';
       }
+      const pagePlanId = item.briefOverrides?.pagePlanId;
+      if (pagePlanId && this.templates && !this.templates.some((template) => template.id === pagePlanId))
+        throw new ValidationError('Unknown page plan.', [
+          {
+            path: ['items', position, 'briefOverrides', 'pagePlanId'],
+            message: `There is no page plan "${pagePlanId}".`,
+            code: 'unknown_page_plan',
+          },
+        ]);
       jobs.push({
         id: newId(),
         batchId,
         organizationId: actor.organizationId,
         businessId: item.businessId,
         siteId: item.siteId ?? null,
+        briefOverrides: item.briefOverrides ?? null,
         position,
         priority: priorityFor(position, request.items.length, item.priority),
         engineRequested: item.engine,

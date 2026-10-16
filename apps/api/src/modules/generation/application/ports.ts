@@ -1,4 +1,5 @@
 import type {
+  BriefOverrides,
   EngineCapabilities,
   EngineEvent,
   EngineId,
@@ -105,6 +106,8 @@ export interface StoredJob {
   readonly businessId: string;
   readonly businessName: string;
   readonly siteId: string | null;
+  /** The person's adjustments to the brief (BF-040). */
+  readonly briefOverrides: BriefOverrides | null;
   readonly position: number;
   readonly priority: number;
   readonly engineRequested: EngineRequest;

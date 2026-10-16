@@ -1,0 +1,1 @@
+ALTER TABLE "generation_jobs" ADD COLUMN "brief_overrides" jsonb;

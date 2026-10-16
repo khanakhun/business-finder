@@ -1,0 +1,37 @@
+id: beauty_wellness
+match: [beauty_wellness, sports_fitness]
+pages:
+  - kind: home
+    slug: ''
+    blocks:
+      - { type: hero, variant: split, otherwise: centered, requires: { images: 1 } }
+      - { type: highlights, variant: cards, requires: { kinds: [service, amenity, award, language_spoken], min: 2 } }
+      - { type: services, variant: list, requires: { kinds: [service], min: 1 }, fills: [service, price] }
+      - { type: booking, variant: link, requires: { kinds: [booking_provider] } }
+      - { type: testimonials, variant: cards, requires: { kinds: [testimonial] } }
+      - { type: about, variant: centered }
+      - { type: hours, variant: compact, requires: { kinds: [hours] } }
+      - { type: contact, variant: split }
+  - kind: services
+    slug: services
+    requires: { kinds: [service], min: 4 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: services, variant: grid, requires: { kinds: [service] }, fills: [service, price] }
+      - { type: cta_banner, variant: solid }
+  - kind: about
+    slug: a-propos
+    requires: { kinds: [about_summary, tagline, team_member, year_founded, award], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: about, variant: story, otherwise: centered, requires: { images: 1 } }
+      - { type: team, variant: grid, requires: { kinds: [team_member] }, section: true }
+      - { type: gallery, variant: grid, requires: { images: 3 } }
+  - kind: contact
+    slug: contact
+    requires: { kinds: [phone, email, whatsapp, address], min: 2 }
+    blocks:
+      - { type: hero, variant: minimal }
+      - { type: contact, variant: centered }
+      - { type: hours, variant: table, requires: { kinds: [hours] } }
+      - { type: location, variant: map_full, requires: { kinds: [address, geo] } }

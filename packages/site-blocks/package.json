@@ -1,0 +1,66 @@
+{
+  "name": "@bf/site-blocks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The site block library: React blocks, style families, fonts and the static renderer for SiteSpec sites.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./static": "./src/static/render-static-page.tsx",
+    "./styles.css": "./dist/styles.css",
+    "./fonts/*": "./dist/fonts/*"
+  },
+  "scripts": {
+    "build": "tsx src/cli/build.ts",
+    "render:fixtures": "tsx src/cli/render-sites.ts",
+    "serve": "tsx src/cli/serve.ts dist/sites",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@bf/site-schema": "workspace:*",
+    "libphonenumber-js": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@fontsource-variable/cormorant-garamond": "catalog:",
+    "@fontsource-variable/dm-sans": "catalog:",
+    "@fontsource-variable/fraunces": "catalog:",
+    "@fontsource-variable/inter": "catalog:",
+    "@fontsource-variable/josefin-sans": "catalog:",
+    "@fontsource-variable/manrope": "catalog:",
+    "@fontsource-variable/montserrat": "catalog:",
+    "@fontsource-variable/playfair-display": "catalog:",
+    "@fontsource-variable/space-grotesk": "catalog:",
+    "@fontsource-variable/work-sans": "catalog:",
+    "@fontsource/dm-serif-display": "catalog:",
+    "@fontsource/lato": "catalog:",
+    "@tailwindcss/cli": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "esbuild": "catalog:",
+    "happy-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

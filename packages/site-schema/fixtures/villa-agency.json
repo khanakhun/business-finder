@@ -51,8 +51,8 @@
       "cta": {
         "kind": "booking",
         "label": {
-          "fr": "Book a stay",
-          "en": "Réserver"
+          "fr": "Réserver",
+          "en": "Book a stay"
         }
       }
     },

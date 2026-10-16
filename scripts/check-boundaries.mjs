@@ -119,6 +119,40 @@ export const RULES = [
     ],
     message: '@bf/site-schema is browser-safe: no Node API, and no internal package but @bf/contracts.',
   },
+  {
+    id: 'site-blocks-browser-safe',
+    from: ['packages/site-blocks/src/**'],
+    // The blocks render in the browser (the editor canvas, islands); the static renderer, CLIs and tests run on Node.
+    except: [
+      'packages/site-blocks/src/static/**',
+      'packages/site-blocks/src/cli/**',
+      'packages/site-blocks/src/**/*.test.{ts,tsx}',
+      'packages/site-blocks/src/test-utils.tsx',
+    ],
+    disallow: [
+      {
+        modules: [
+          'node:*',
+          'fs',
+          'fs/*',
+          'path',
+          'os',
+          'crypto',
+          'url',
+          'child_process',
+          'module',
+          'http',
+          'https',
+        ],
+      },
+      {
+        workspace: 'packages/*',
+        exceptSelf: true,
+        exceptWorkspaces: ['packages/site-schema', 'packages/contracts'],
+      },
+    ],
+    message: '@bf/site-blocks is browser-safe outside static/ and cli/: no Node API, no server package.',
+  },
 ];
 
 /** Package name → workspace directory (`@bf/web` → `apps/web`) for every apps/* and packages/* workspace. */

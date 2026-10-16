@@ -118,6 +118,24 @@ catalog:
   ai: 7.0.135
   libphonenumber-js: 1.13.15
   tldts: 7.4.18
+  # BF-034: the site block library — Tailwind's CLI builds its stylesheet; tsx runs its TSX scripts (gallery, static
+  # renders); fonts are self-hosted from Fontsource (OFL, latin + latin-ext subsets copied at build).
+  '@tailwindcss/cli': 4.3.3
+  tsx: 4.23.15
+  '@fontsource-variable/playfair-display': 5.3.0
+  '@fontsource-variable/inter': 5.3.0
+  '@fontsource-variable/cormorant-garamond': 5.3.0
+  '@fontsource-variable/montserrat': 5.3.0
+  '@fontsource/dm-serif-display': 5.3.0
+  '@fontsource-variable/dm-sans': 5.3.0
+  '@fontsource-variable/fraunces': 5.3.0
+  '@fontsource-variable/work-sans': 5.3.0
+  '@fontsource-variable/space-grotesk': 5.3.0
+  '@fontsource-variable/manrope': 5.3.0
+  '@fontsource-variable/josefin-sans': 5.3.0
+  '@fontsource/lato': 5.3.0
+  # The block library's island bundle budget test (also tsx's bundler).
+  esbuild: 0.28.2
   yaml: 2.9.1
   fast-check: 4.10.2
   '@types/geojson': 7946.0.16
@@ -156,6 +174,8 @@ allowBuilds:
   esbuild: false
   # @swc/core resolves its native binary from optional platform packages.
   '@swc/core': false
+  # @parcel/watcher (Tailwind's CLI watch mode) ships prebuilt binaries in optional platform packages.
+  '@parcel/watcher': false
   # ssh2/cpu-features (via testcontainers) have optional native speedups we don't need.
   cpu-features: false
   ssh2: false

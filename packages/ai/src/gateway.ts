@@ -438,12 +438,14 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
         const billed = error instanceof AiOutputInvalidError ? error : undefined;
         const ref = billed?.model ?? primary;
         const usage = billed?.usage ?? ZERO_USAGE;
+        const failedCost = billed?.usage ? price(ref.model, usage) : null;
+        if (billed && failedCost !== null) billed.costUsd = failedCost;
         await record({
           ...base,
           provider: ref.provider,
           model: ref.model,
           ...usage,
-          costUsd: billed?.usage ? price(ref.model, usage) : null,
+          costUsd: failedCost,
           latencyMs: Math.round(performance.now() - started),
           status: 'error',
           errorCode: errorCode(error),

@@ -67,9 +67,7 @@ export const WebsiteVisionGrade = defineTask({
   timeoutMs: 60_000,
   // Mobile screenshots are 780 × 1688 px (390 px at 2×): legible without paying for more.
   maxImageDimension: 1_700,
-  // Same screenshots, same grade, for every workspace (public pages of a business).
-  cacheTtlSeconds: 7 * 24 * 3600,
-  cacheScope: 'global',
+  // No response cache: the gateway never caches a call with images (its key would not include them).
   evalSet: 'website.vision_grade',
   variables: (input) => ({
     name: untrusted('business:name', input.businessName, { maxChars: 200, id: 'name' }),

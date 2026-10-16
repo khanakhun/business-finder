@@ -21,6 +21,8 @@ export class AiOutputInvalidError extends ExternalServiceError {
   usage: { inputTokens: number; outputTokens: number; cachedTokens: number } | undefined;
   /** The model that produced the invalid output. */
   model: { provider: 'anthropic' | 'openai'; model: string } | undefined;
+  /** What `usage` cost (set by the gateway when it priced it), for the caller's own spend accounting. */
+  costUsd: number | undefined;
 
   constructor(task: string, cause?: unknown) {
     super('llm', `${task}: the model returned invalid output`, {
@@ -29,6 +31,7 @@ export class AiOutputInvalidError extends ExternalServiceError {
     });
     this.usage = undefined;
     this.model = undefined;
+    this.costUsd = undefined;
   }
 }
 

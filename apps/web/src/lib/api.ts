@@ -57,6 +57,13 @@ export const queryKeys = {
     website: (id: string) => ['business', id, 'website'] as const,
     websiteAudit: (id: string) => ['business', id, 'website-audit'] as const,
     reviews: (id: string) => ['business', id, 'reviews'] as const,
+    scores: (id: string) => ['business', id, 'scores'] as const,
+  }),
+  scoring: defineQueryKeys('scoring', {
+    profiles: () => ['scoring', 'profiles'] as const,
+    versions: (profileId: string) => ['scoring', 'versions', profileId] as const,
+    version: (profileId: string, version: number) => ['scoring', 'version', profileId, version] as const,
+    sample: (profileId: string) => ['scoring', 'sample', profileId] as const,
   }),
   crm: defineQueryKeys('crm', {
     board: (filters: Readonly<Record<string, string>>) => ['crm', 'board', filters] as const,

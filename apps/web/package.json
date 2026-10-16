@@ -31,6 +31,7 @@
     "react-dom": "catalog:",
     "react-map-gl": "catalog:",
     "react-markdown": "catalog:",
+    "recharts": "catalog:",
     "server-only": "catalog:",
     "uqr": "catalog:"
   },

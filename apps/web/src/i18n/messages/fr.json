@@ -1017,7 +1017,8 @@
       "contacts": "Contacts",
       "activity": "Activité",
       "website": "Site web",
-      "reviews": "Avis"
+      "reviews": "Avis",
+      "scores": "Scores"
     },
     "actions": {
       "label": "Actions rapides",
@@ -1594,5 +1595,49 @@
       "done": "Avis analysés."
     },
     "loadFailed": "L’analyse des avis n’a pas pu être chargée."
+  },
+  "scoring": {
+    "badge": {
+      "label": "Niveau {tier}, score {score}",
+      "labelOffer": "Niveau {tier}, score {score} pour {offer}"
+    },
+    "offers": {
+      "new_website": "Nouveau site",
+      "website_redesign": "Refonte du site",
+      "ai_receptionist": "Réceptionniste IA",
+      "booking_system": "Système de réservation",
+      "local_seo": "Référencement local"
+    },
+    "tab": {
+      "primary": "Principal",
+      "meta": "Version {version} du profil · calculé {when}",
+      "total": "Score",
+      "points": "points",
+      "gateExcluded": "Exclue : {reason}",
+      "gateCapped": "Plafonnée : {reason}",
+      "gateNote": "À noter : {reason}",
+      "for": "Ce qui joue pour",
+      "against": "Ce qui joue contre",
+      "nothingAgainst": "Rien ne joue contre.",
+      "details": "Toutes les contributions",
+      "tableCaption": "Chaque critère, sa valeur, son poids et sa contribution en points",
+      "feature": "Critère",
+      "value": "Valeur",
+      "weight": "Poids",
+      "contribution": "Points",
+      "yes": "Oui",
+      "no": "Non",
+      "missing": "Inconnu",
+      "imputed": {
+        "default": "par défaut",
+        "profile": "complété par le profil"
+      },
+      "recompute": "Recalculer",
+      "recomputed": "Scores recalculés.",
+      "recomputeFailed": "Les scores n’ont pas pu être recalculés.",
+      "loadFailed": "Les scores n’ont pas pu être chargés.",
+      "emptyTitle": "Pas encore de score",
+      "emptyDescription": "Les scores apparaissent une fois l’entreprise suivie et enrichie. Recalculez pour la noter maintenant."
+    }
   }
 }

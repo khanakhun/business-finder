@@ -34,6 +34,7 @@ import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { useCrmErrorMessage, useTeammates } from '@/features/business/api.ts';
 import { TeammateAvatar } from '@/features/business/crm/owner-select.tsx';
 import { ReasonDialog, StatusDot, StatusMenu } from '@/features/business/crm/status-menu.tsx';
+import { ScoreBadge, type Tier } from '@/features/scoring/score-badge.tsx';
 import { useCategories } from '@/features/search/hooks.tsx';
 import { apiClient, queryKeys } from '@/lib/api.ts';
 import { usePermission } from '@/lib/session.tsx';
@@ -94,16 +95,7 @@ function CardBody({ card, dragging = false }: { readonly card: Card; readonly dr
         >
           {card.displayName}
         </Link>
-        {card.tier ? (
-          <Badge
-            variant="outline"
-            className="shrink-0 tabular-nums"
-            title={t('score', { score: card.score ?? 0 })}
-          >
-            {card.tier}
-            {card.score !== null ? ` ${card.score}` : ''}
-          </Badge>
-        ) : null}
+        <ScoreBadge score={card.score} tier={card.tier as Tier | null} className="shrink-0" />
       </div>
       {category || card.locality ? (
         <p className="text-xs text-muted-foreground">

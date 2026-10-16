@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "luxury fashion boutiques in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "pediatrician",
+        "labelEn": "Pediatrician",
+        "labelFr": "Pédiatre",
+        "path": "health_medical › medical_specialists › pediatrician"
+      },
+      {
+        "id": "fashion_boutique",
+        "labelEn": "Fashion boutique",
+        "labelFr": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "private_aviation",
+        "labelEn": "Private aviation",
+        "labelFr": "Aviation privée",
+        "path": "automotive_transport › passenger_transport › private_aviation"
+      },
+      {
+        "id": "design_engineering",
+        "labelEn": "Design & engineering",
+        "labelFr": "Conception et ingénierie",
+        "path": "home_construction › design_engineering"
+      },
+      {
+        "id": "jewelry_store",
+        "labelEn": "Jewelry store",
+        "labelFr": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "finance_insurance",
+        "labelEn": "Finance & insurance",
+        "labelFr": "Banque et assurance",
+        "path": "finance_insurance"
+      },
+      {
+        "id": "martial_arts",
+        "labelEn": "Martial arts school",
+        "labelFr": "Club d'arts martiaux",
+        "path": "sports_fitness › martial_arts"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "shoe_store",
+        "labelEn": "Shoe store",
+        "labelFr": "Magasin de chaussures",
+        "path": "retail_shopping › fashion › shoe_store"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "barber",
+        "labelEn": "Barber",
+        "labelFr": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["fashion_boutique"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [4],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "jewelry stores in Gustavia with more than 50 reviews",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "golf_course",
+        "labelEn": "Golf course",
+        "labelFr": "Golf",
+        "path": "sports_fitness › golf_course"
+      },
+      {
+        "id": "jewelry_store",
+        "labelEn": "Jewelry store",
+        "labelFr": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "greengrocer",
+        "labelEn": "Greengrocer",
+        "labelFr": "Primeur",
+        "path": "retail_shopping › food_retail › greengrocer"
+      },
+      {
+        "id": "campground",
+        "labelEn": "Campground",
+        "labelFr": "Camping",
+        "path": "lodging › campground"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "shoe_store",
+        "labelEn": "Shoe store",
+        "labelFr": "Magasin de chaussures",
+        "path": "retail_shopping › fashion › shoe_store"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "fashion_boutique",
+        "labelEn": "Fashion boutique",
+        "labelFr": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "structural_work",
+        "labelEn": "Structural work",
+        "labelFr": "Gros œuvre",
+        "path": "home_construction › structural_work"
+      },
+      {
+        "id": "dietitian",
+        "labelEn": "Dietitian",
+        "labelFr": "Diététicien-nutritionniste",
+        "path": "health_medical › paramedical › dietitian"
+      },
+      {
+        "id": "accountant",
+        "labelEn": "Accountant",
+        "labelFr": "Expert-comptable",
+        "path": "professional_services › accountant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["jewelry_store"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": 51,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

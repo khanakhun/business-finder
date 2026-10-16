@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "my tier A hotel leads",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "wholesaler",
+        "labelEn": "Wholesaler",
+        "labelFr": "Grossiste",
+        "path": "industry_trade › wholesaler"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "swimming_pool",
+        "labelEn": "Swimming pool",
+        "labelFr": "Piscine",
+        "path": "sports_fitness › swimming_pool"
+      },
+      {
+        "id": "travel_services",
+        "labelEn": "Travel services",
+        "labelFr": "Services touristiques",
+        "path": "tourism_leisure › travel_services"
+      },
+      {
+        "id": "vacation_rental",
+        "labelEn": "Vacation rental",
+        "labelFr": "Location saisonnière",
+        "path": "lodging › vacation_rental"
+      },
+      {
+        "id": "business_consultant",
+        "labelEn": "Business consultant",
+        "labelFr": "Conseil en entreprise",
+        "path": "professional_services › business_services › business_consultant"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "cigar_shop",
+        "labelEn": "Cigar shop",
+        "labelFr": "Cave à cigares",
+        "path": "retail_shopping › leisure_gifts › cigar_shop"
+      },
+      {
+        "id": "gift_shop",
+        "labelEn": "Gift & souvenir shop",
+        "labelFr": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["hotel"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": ["A"],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

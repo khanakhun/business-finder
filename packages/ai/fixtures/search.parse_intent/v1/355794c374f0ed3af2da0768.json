@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "mes spas qualifiés",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "lingerie_store",
+        "labelEn": "Lingerie store",
+        "labelFr": "Boutique de lingerie",
+        "path": "retail_shopping › fashion › lingerie_store"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "martial_arts",
+        "labelEn": "Martial arts school",
+        "labelFr": "Club d'arts martiaux",
+        "path": "sports_fitness › martial_arts"
+      },
+      {
+        "id": "reflexology",
+        "labelEn": "Reflexology & energy healing",
+        "labelFr": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "sound_lighting",
+        "labelEn": "Sound & lighting",
+        "labelFr": "Sonorisation et éclairage",
+        "path": "events_creative › events › sound_lighting"
+      },
+      {
+        "id": "campground",
+        "labelEn": "Campground",
+        "labelFr": "Camping",
+        "path": "lodging › campground"
+      },
+      {
+        "id": "personal_trainer",
+        "labelEn": "Personal trainer",
+        "labelFr": "Coach sportif",
+        "path": "sports_fitness › personal_trainer"
+      },
+      {
+        "id": "waxing_salon",
+        "labelEn": "Hair removal",
+        "labelFr": "Épilation",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "wellness",
+        "labelEn": "Wellness",
+        "labelFr": "Bien-être",
+        "path": "beauty_wellness › wellness"
+      },
+      {
+        "id": "butcher",
+        "labelEn": "Butcher",
+        "labelFr": "Boucherie",
+        "path": "retail_shopping › food_retail › butcher"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["spa"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": ["qualified"],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

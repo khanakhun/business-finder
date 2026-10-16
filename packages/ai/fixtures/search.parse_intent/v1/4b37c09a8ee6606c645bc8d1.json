@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants de fruits de mer avec un score supérieur à 70",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "steakhouse",
+        "labelEn": "Steakhouse & grill",
+        "labelFr": "Grill et steakhouse",
+        "path": "food_drink › restaurant › steakhouse"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "passenger_transport",
+        "labelEn": "Passenger transport",
+        "labelFr": "Transport de personnes",
+        "path": "automotive_transport › passenger_transport"
+      },
+      {
+        "id": "speech_therapist",
+        "labelEn": "Speech therapist",
+        "labelFr": "Orthophoniste",
+        "path": "health_medical › paramedical › speech_therapist"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "water_sports",
+        "labelEn": "Water sports",
+        "labelFr": "Sports nautiques",
+        "path": "marine_nautical › water_sports"
+      },
+      {
+        "id": "perfume_cosmetics_store",
+        "labelEn": "Perfume & cosmetics store",
+        "labelFr": "Parfumerie",
+        "path": "retail_shopping › perfume_cosmetics_store"
+      },
+      {
+        "id": "farm",
+        "labelEn": "Farm",
+        "labelFr": "Exploitation agricole",
+        "path": "industry_trade › farm"
+      },
+      {
+        "id": "automotive_services",
+        "labelEn": "Automotive services",
+        "labelFr": "Services automobiles",
+        "path": "automotive_transport › automotive_services"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["seafood_restaurant"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": 70,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

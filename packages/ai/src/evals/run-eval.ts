@@ -18,13 +18,19 @@ export interface EvalReport {
   readonly mode: string;
   readonly startedAt: string;
   readonly rows: readonly RowResult[];
-  /** Mean per scorer (a failed row scores 0). */
+  /** Mean per scorer over the rows it applies to (a failed row scores 0; no applicable row → 1, no rows → 0). */
   readonly means: Record<string, number>;
   readonly thresholds: Readonly<Record<string, number>>;
   readonly failures: readonly string[];
   readonly passed: boolean;
   readonly totalCostUsd: number;
 }
+
+/** No rows at all scores 0 (nothing was shown); rows the scorer never applied to score 1 (nothing to judge). */
+const meanOf = (values: readonly number[], rowCount: number) => {
+  if (rowCount === 0) return 0;
+  return values.length === 0 ? 1 : values.reduce((sum, v) => sum + v, 0) / values.length;
+};
 
 /** Runs every row through the gateway, scores it, and compares the means with the thresholds. */
 export async function runEval(
@@ -50,10 +56,11 @@ export async function runEval(
         const result = await options.gateway.run(config.task, row.input as never, { orgId: null });
         const scores: Record<string, number> = {};
         for (const scorer of config.scorers) {
-          scores[scorer.name] = await scorer.score(result.output, row, {
+          const value = await scorer.score(result.output, row, {
             gateway: options.gateway,
             orgId: null,
           });
+          if (value !== null) scores[scorer.name] = value;
         }
         results[index] = {
           id: row.id,
@@ -79,7 +86,10 @@ export async function runEval(
   const means = Object.fromEntries(
     config.scorers.map((s) => [
       s.name,
-      results.reduce((sum, r) => sum + (r.scores[s.name] ?? 0), 0) / Math.max(results.length, 1),
+      meanOf(
+        results.flatMap((r) => (s.name in r.scores ? [r.scores[s.name] as number] : [])),
+        results.length,
+      ),
     ]),
   );
   const failures = Object.entries(config.thresholds)

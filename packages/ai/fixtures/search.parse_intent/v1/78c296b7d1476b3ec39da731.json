@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "sushi places in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "japanese_restaurant",
+        "labelEn": "Japanese restaurant",
+        "labelFr": "Restaurant japonais",
+        "path": "food_drink › restaurant › japanese_restaurant"
+      },
+      {
+        "id": "asian_restaurant",
+        "labelEn": "Asian restaurant",
+        "labelFr": "Restaurant asiatique",
+        "path": "food_drink › restaurant › asian_restaurant"
+      },
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      },
+      {
+        "id": "handyman",
+        "labelEn": "Handyman",
+        "labelFr": "Homme toutes mains",
+        "path": "home_services › repairs_maintenance › handyman"
+      },
+      {
+        "id": "glazing",
+        "labelEn": "Glazing & windows",
+        "labelFr": "Vitrerie et miroiterie",
+        "path": "home_construction › finishing_trades › glazing"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "boating_services",
+        "labelEn": "Boating services",
+        "labelFr": "Services nautiques",
+        "path": "marine_nautical › boating_services"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "tailor",
+        "labelEn": "Tailor & alterations",
+        "labelFr": "Retouches et couture",
+        "path": "home_services › personal_services › tailor"
+      },
+      {
+        "id": "tanning_salon",
+        "labelEn": "Tanning salon",
+        "labelFr": "Centre de bronzage",
+        "path": "beauty_wellness › beauty_services › tanning_salon"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["japanese_restaurant"],
+    "keywords": ["sushi"],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

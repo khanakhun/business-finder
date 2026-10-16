@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "nos agences immobilières contactées cette semaine",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "real_estate",
+        "labelEn": "Real estate",
+        "labelFr": "Immobilier",
+        "path": "real_estate"
+      },
+      {
+        "id": "real_estate_agency",
+        "labelEn": "Real estate agency",
+        "labelFr": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "theater",
+        "labelEn": "Theater",
+        "labelFr": "Théâtre",
+        "path": "tourism_leisure › attractions_entertainment › theater"
+      },
+      {
+        "id": "aesthetic_medicine",
+        "labelEn": "Aesthetic medicine",
+        "labelFr": "Médecine esthétique",
+        "path": "health_medical › medical_specialists › aesthetic_medicine"
+      },
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "tiling",
+        "labelEn": "Tiling & flooring",
+        "labelFr": "Carrelage et revêtements de sol",
+        "path": "home_construction › finishing_trades › tiling"
+      },
+      {
+        "id": "fishmonger",
+        "labelEn": "Fishmonger",
+        "labelFr": "Poissonnerie",
+        "path": "retail_shopping › food_retail › fishmonger"
+      },
+      {
+        "id": "real_estate_appraiser",
+        "labelEn": "Real estate appraiser",
+        "labelFr": "Expert immobilier",
+        "path": "real_estate › real_estate_appraiser"
+      },
+      {
+        "id": "kitesurfing",
+        "labelEn": "Kitesurfing & windsurfing",
+        "labelFr": "Kitesurf et planche à voile",
+        "path": "marine_nautical › water_sports › kitesurfing"
+      },
+      {
+        "id": "cooking_school",
+        "labelEn": "Cooking classes",
+        "labelFr": "Cours de cuisine",
+        "path": "education › cooking_school"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "property_management",
+        "labelEn": "Property management",
+        "labelFr": "Gestion locative",
+        "path": "real_estate › property_management"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["real_estate_agency"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": ["contacted"],
+      "tags": [],
+      "addedWithinDays": 7
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

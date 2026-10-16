@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "my florists tagged vip",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "leisure_gifts",
+        "labelEn": "Gifts & leisure",
+        "labelFr": "Loisirs et cadeaux",
+        "path": "retail_shopping › leisure_gifts"
+      },
+      {
+        "id": "florist",
+        "labelEn": "Florist",
+        "labelFr": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "secondary_school",
+        "labelEn": "Secondary school",
+        "labelFr": "Collège et lycée",
+        "path": "education › school › secondary_school"
+      },
+      {
+        "id": "toy_store",
+        "labelEn": "Toy store",
+        "labelFr": "Magasin de jouets",
+        "path": "retail_shopping › leisure_gifts › toy_store"
+      },
+      {
+        "id": "art_gallery",
+        "labelEn": "Art gallery",
+        "labelFr": "Galerie d'art",
+        "path": "events_creative › arts_crafts › art_gallery"
+      },
+      {
+        "id": "marina",
+        "labelEn": "Marina",
+        "labelFr": "Port de plaisance",
+        "path": "marine_nautical › boating_services › marina"
+      },
+      {
+        "id": "handyman",
+        "labelEn": "Handyman",
+        "labelFr": "Homme toutes mains",
+        "path": "home_services › repairs_maintenance › handyman"
+      },
+      {
+        "id": "bookstore",
+        "labelEn": "Bookstore",
+        "labelFr": "Librairie",
+        "path": "retail_shopping › leisure_gifts › bookstore"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "currency_exchange",
+        "labelEn": "Currency exchange & money transfer",
+        "labelFr": "Bureau de change et transfert d'argent",
+        "path": "finance_insurance › currency_exchange"
+      },
+      {
+        "id": "beauty_wellness",
+        "labelEn": "Beauty & wellness",
+        "labelFr": "Beauté et bien-être",
+        "path": "beauty_wellness"
+      },
+      {
+        "id": "land_surveyor",
+        "labelEn": "Land surveyor",
+        "labelFr": "Géomètre-expert",
+        "path": "home_construction › design_engineering › land_surveyor"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["florist"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": ["vip"],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

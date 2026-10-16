@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "électriciens à Saint-Barthélémy",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "boat_charter",
+        "labelEn": "Boat & yacht charter",
+        "labelFr": "Location de bateaux",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "electrician",
+        "labelEn": "Electrician",
+        "labelFr": "Électricien",
+        "path": "home_construction › finishing_trades › electrician"
+      },
+      {
+        "id": "hvac",
+        "labelEn": "Air conditioning & HVAC",
+        "labelFr": "Climatisation",
+        "path": "home_construction › finishing_trades › hvac"
+      },
+      {
+        "id": "plumber",
+        "labelEn": "Plumber",
+        "labelFr": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "painter",
+        "labelEn": "Painter & decorator",
+        "labelFr": "Peintre en bâtiment",
+        "path": "home_construction › finishing_trades › painter"
+      },
+      {
+        "id": "roofing",
+        "labelEn": "Roofing",
+        "labelFr": "Couverture et charpente",
+        "path": "home_construction › structural_work › roofing"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "insurance_broker",
+        "labelEn": "Insurance broker",
+        "labelFr": "Courtier en assurances",
+        "path": "finance_insurance › insurance_broker"
+      },
+      {
+        "id": "carpentry",
+        "labelEn": "Carpentry & joinery",
+        "labelFr": "Menuiserie",
+        "path": "home_construction › finishing_trades › carpentry"
+      },
+      {
+        "id": "freight_forwarder",
+        "labelEn": "Freight forwarder",
+        "labelFr": "Transitaire",
+        "path": "automotive_transport › logistics › freight_forwarder"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["electrician"],
+    "keywords": [],
+    "locationText": "Saint-Barthélémy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "salons de coiffure et cafés à Gustavia sans site web",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "hair_salon",
+        "labelEn": "Hair salon",
+        "labelFr": "Salon de coiffure",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "barber",
+        "labelEn": "Barber",
+        "labelFr": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "garden_center",
+        "labelEn": "Garden center",
+        "labelFr": "Jardinerie",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "auto_parts",
+        "labelEn": "Auto parts store",
+        "labelFr": "Pièces auto",
+        "path": "automotive_transport › automotive_services › auto_parts"
+      },
+      {
+        "id": "braiding_salon",
+        "labelEn": "Braiding & natural hair salon",
+        "labelFr": "Salon de tresses et coiffure afro",
+        "path": "beauty_wellness › hair_services › braiding_salon"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "labelEn": "Mobile hairdresser",
+        "labelFr": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hair_salon", "cafe"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

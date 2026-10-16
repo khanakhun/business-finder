@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "scuba diving centers in Philipsburg",
+    "language": "en",
+    "defaultCountry": "SX",
+    "candidates": [
+      {
+        "id": "jet_ski_rental",
+        "labelEn": "Jet ski rental",
+        "labelFr": "Location de jet-ski",
+        "path": "marine_nautical › water_sports › jet_ski_rental"
+      },
+      {
+        "id": "scuba_diving",
+        "labelEn": "Scuba diving",
+        "labelFr": "Plongée sous-marine",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "solar_installer",
+        "labelEn": "Solar installer",
+        "labelFr": "Installateur solaire",
+        "path": "home_construction › finishing_trades › solar_installer"
+      },
+      {
+        "id": "roofing",
+        "labelEn": "Roofing",
+        "labelFr": "Couverture et charpente",
+        "path": "home_construction › structural_work › roofing"
+      },
+      {
+        "id": "pizzeria",
+        "labelEn": "Pizzeria",
+        "labelFr": "Pizzeria",
+        "path": "food_drink › restaurant › pizzeria"
+      },
+      {
+        "id": "kitesurfing",
+        "labelEn": "Kitesurfing & windsurfing",
+        "labelFr": "Kitesurf et planche à voile",
+        "path": "marine_nautical › water_sports › kitesurfing"
+      },
+      {
+        "id": "mobile_phone_store",
+        "labelEn": "Mobile phone store",
+        "labelFr": "Boutique de téléphonie",
+        "path": "retail_shopping › electronics › mobile_phone_store"
+      },
+      {
+        "id": "surf_school",
+        "labelEn": "Surf school",
+        "labelFr": "École de surf",
+        "path": "marine_nautical › water_sports › surf_school"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "pharmacy",
+        "labelEn": "Pharmacy",
+        "labelFr": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "general_contractor",
+        "labelEn": "General contractor",
+        "labelFr": "Entreprise générale du bâtiment",
+        "path": "home_construction › structural_work › general_contractor"
+      },
+      {
+        "id": "water_sports",
+        "labelEn": "Water sports",
+        "labelFr": "Sports nautiques",
+        "path": "marine_nautical › water_sports"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["scuba_diving"],
+    "keywords": [],
+    "locationText": "Philipsburg",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

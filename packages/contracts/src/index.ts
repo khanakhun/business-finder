@@ -389,6 +389,28 @@ export {
   unwrapOr,
 } from './result.ts';
 export {
+  PAIN_SIGNALS,
+  type PainSignal,
+  PainSignalSchema,
+  type ParseSearchIntentRequest,
+  ParseSearchIntentRequestSchema,
+  type ParseSearchIntentResponse,
+  ParseSearchIntentResponseSchema,
+  SCORE_TIERS,
+  ScoreTierSchema,
+  SEARCH_INTENT_WARNINGS,
+  SEARCH_MODES,
+  SEARCH_SORT_FIELDS,
+  type SearchFilters,
+  SearchFiltersSchema,
+  type SearchIntent,
+  SearchIntentSchema,
+  type SearchMode,
+  SearchModeSchema,
+  WEBSITE_FILTERS,
+  WebsiteFilterSchema,
+} from './search-intent.ts';
+export {
   type PingJobsAccepted,
   PingJobsAcceptedSchema,
   type PingJobsRequest,

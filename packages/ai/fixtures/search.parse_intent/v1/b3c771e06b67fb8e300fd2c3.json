@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "les hôtels les plus commentés à Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "engineering_firm",
+        "labelEn": "Engineering firm",
+        "labelFr": "Bureau d'études",
+        "path": "home_construction › design_engineering › engineering_firm"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "casino",
+        "labelEn": "Casino",
+        "labelFr": "Casino",
+        "path": "tourism_leisure › attractions_entertainment › casino"
+      },
+      {
+        "id": "software_company",
+        "labelEn": "Software company",
+        "labelFr": "Éditeur de logiciels",
+        "path": "technology_media › software_company"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "tattoo_studio",
+        "labelEn": "Tattoo & piercing studio",
+        "labelFr": "Salon de tatouage",
+        "path": "beauty_wellness › tattoo_studio"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      },
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      },
+      {
+        "id": "sound_lighting",
+        "labelEn": "Sound & lighting",
+        "labelFr": "Sonorisation et éclairage",
+        "path": "events_creative › events › sound_lighting"
+      },
+      {
+        "id": "telecom_provider",
+        "labelEn": "Telecom & internet provider",
+        "labelFr": "Opérateur télécom et internet",
+        "path": "technology_media › telecom_provider"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["hotel"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "reviews",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "yoga and pilates studios in 94110 with an email",
+    "language": "en",
+    "defaultCountry": "US",
+    "candidates": [
+      {
+        "id": "home_services",
+        "labelEn": "Home & personal services",
+        "labelFr": "Services à domicile et à la personne",
+        "path": "home_services"
+      },
+      {
+        "id": "yoga_studio",
+        "labelEn": "Yoga studio",
+        "labelFr": "Studio de yoga",
+        "path": "sports_fitness › yoga_studio"
+      },
+      {
+        "id": "pilates_studio",
+        "labelEn": "Pilates studio",
+        "labelFr": "Studio de Pilates",
+        "path": "sports_fitness › pilates_studio"
+      },
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "sports_fitness",
+        "labelEn": "Sports & fitness",
+        "labelFr": "Sport et fitness",
+        "path": "sports_fitness"
+      },
+      {
+        "id": "laundry",
+        "labelEn": "Laundry & dry cleaning",
+        "labelFr": "Pressing / Laverie",
+        "path": "home_services › personal_services › laundry"
+      },
+      {
+        "id": "cinema",
+        "labelEn": "Cinema",
+        "labelFr": "Cinéma",
+        "path": "tourism_leisure › attractions_entertainment › cinema"
+      },
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "chauffeur_service",
+        "labelEn": "Private driver",
+        "labelFr": "Chauffeur privé",
+        "path": "automotive_transport › passenger_transport › chauffeur_service"
+      },
+      {
+        "id": "home_care",
+        "labelEn": "Home care",
+        "labelFr": "Aide à domicile",
+        "path": "home_services › personal_services › home_care"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["yoga_studio", "pilates_studio"],
+    "keywords": [],
+    "locationText": "94110",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "closest pharmacies to Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "health_medical",
+        "labelEn": "Health & medical",
+        "labelFr": "Santé",
+        "path": "health_medical"
+      },
+      {
+        "id": "pharmacy",
+        "labelEn": "Pharmacy",
+        "labelFr": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "hospital",
+        "labelEn": "Hospital",
+        "labelFr": "Hôpital",
+        "path": "health_medical › hospital"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "printing",
+        "labelEn": "Printing",
+        "labelFr": "Imprimerie",
+        "path": "professional_services › business_services › printing"
+      },
+      {
+        "id": "structural_work",
+        "labelEn": "Structural work",
+        "labelFr": "Gros œuvre",
+        "path": "home_construction › structural_work"
+      },
+      {
+        "id": "reflexology",
+        "labelEn": "Reflexology & energy healing",
+        "labelFr": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "shoe_repair",
+        "labelEn": "Shoe repair & key cutting",
+        "labelFr": "Cordonnerie",
+        "path": "home_services › personal_services › shoe_repair"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "medical_clinic",
+        "labelEn": "Medical clinic",
+        "labelFr": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "general_practitioner",
+        "labelEn": "General practitioner",
+        "labelFr": "Médecin généraliste",
+        "path": "health_medical › general_practitioner"
+      },
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["pharmacy"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "distance",
+      "direction": "asc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -72,10 +72,49 @@ The main entry point for the sales partner is a prompt such as *"salons de coiff
 - Evals: attach report meeting thresholds.
 
 ## Acceptance criteria
-- [ ] `SearchIntentSchema` and endpoint implemented; outputs validated and grounded.
-- [ ] Location resolution attached with ambiguity handling.
-- [ ] Fallback parser works without AI.
-- [ ] Eval thresholds met (report attached).
+- [x] `SearchIntentSchema` and endpoint implemented; outputs validated and grounded.
+- [x] Location resolution attached with ambiguity handling.
+- [x] Fallback parser works without AI.
+- [ ] Eval thresholds met (report attached). *Replay report attached (all thresholds met on hand-written
+  fixtures); a measurement on a real model is pending an API key — see the notes.*
+
+## Implementation notes (BF-021)
+- **Pipeline** (`SearchIntentService`, Facade + Chain): candidates (top 15 from `CategoryCandidateSearch` over
+  the prompt split into pieces and single trade words, up to 12 pieces) → `search.parse_intent` (smart tier)
+  → grounding/post-processing → `LocationResolver` (workspace country as hint) → response. The model answers
+  with category **slugs**; post-processing maps them to ids, drops descendants of a selected ancestor, clamps
+  and orders numeric filters (a rating of 0 means no filter), and deduplicates lists.
+- **`includeDescendants` is always `true`** (`DECISION(BF-021)`): "restaurants" includes pizzerias.
+- **Grounding**: if *every* category the model returned is outside the candidates, the answer is discarded and
+  the rule-based reading is used; *partially* invalid ids are dropped with a `CATEGORIES_OUTSIDE_CANDIDATES`
+  warning.
+- **Language detection is a heuristic, not franc**: statistical detectors need ~50+ characters and most
+  prompts are shorter. It counts French and English function/trade words (French-only words `sans`, `avec`,
+  `dans` weigh 2; false friends such as `note`, `location`, `plus`, `en` are not counted), accents tip ties to
+  French, and the UI locale breaks remaining ties.
+- **Fallback parser** (no key, budget spent, provider down, or all-invalid categories): category label/synonym
+  matching, a place after a preposition (case-insensitive prepositions, capitalised place or postcode, cut at
+  capitalised stop words; bare `a` only in French; `à la Rochelle` → `la Rochelle`), and the common filters
+  (website, email, phone, ratings, review counts, pipeline statuses after a possessive, recency, sort, target
+  count). Confidence 0.4 with an `AI_UNAVAILABLE_FALLBACK` warning. Lowercase place names are left to the model.
+- **Location**: an unresolved place adds `LOCATION_NOT_FOUND`; a geocoder notice adds
+  `LOCATION_CANDIDATES_INCOMPLETE`; several candidates with none chosen become the clarification question
+  (unless the model already asked one) with up to 4 options.
+- **Cache**: Valkey, 1 h, keyed by workspace + normalized prompt + UI locale + workspace country. Best effort
+  (a Valkey error or a corrupt/outdated entry is a miss). Degraded answers are **not** cached: fallback
+  readings, no candidates, `LOCATION_NOT_FOUND` / `LOCATION_CANDIDATES_INCOMPLETE`. The key has no taxonomy
+  version, so a taxonomy change can be invisible for up to an hour.
+- **Eval** (`packages/ai/evals/search.parse_intent/`, 85 EN/FR rows): scorers category F1, location exact,
+  active-filter exact match, mode exact, clarification precision **and recall** (`DECISION(BF-021)`: recall
+  ≥ 0.8 so a model that never asks cannot pass precision vacuously), and ids-within-candidates. A scorer may
+  return `null` ("not applicable"); a scorer that applied to no row scores 1, an eval with no rows scores 0.
+  The replay fixtures in `packages/ai/fixtures/search.parse_intent/v1` are **hand-written** (no LLM key was
+  available), so the replay report checks the harness and scorers, not the model. A real measurement needs
+  `pnpm eval --task search.parse_intent --record` with an API key; thresholds are unverified on a real model.
+- **Tests**: `TEST_ENV` now sets `GEOCODER_PROVIDER=none` so integration tests never call the real Nominatim;
+  the geo integration test opts back in against its local fake server.
+- **Follow-ups**: real-model eval run and prompt iteration; p95 latency (< 2.5 s) not measured without a key;
+  taxonomy version in the cache key; lowercase place names in the fallback parser.
 
 ## Agent prompt
 ```text

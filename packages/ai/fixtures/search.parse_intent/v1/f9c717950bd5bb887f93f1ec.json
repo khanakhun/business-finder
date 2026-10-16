@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "vegan restaurants in Saint-Barthélemy",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "vacation_rental",
+        "labelEn": "Vacation rental",
+        "labelFr": "Location saisonnière",
+        "path": "lodging › vacation_rental"
+      },
+      {
+        "id": "vegetarian_restaurant",
+        "labelEn": "Vegetarian restaurant",
+        "labelFr": "Restaurant végétarien",
+        "path": "food_drink › restaurant › vegetarian_restaurant"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "physiotherapist",
+        "labelEn": "Physiotherapist",
+        "labelFr": "Masseur-kinésithérapeute",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "dj_entertainment",
+        "labelEn": "DJ & entertainment",
+        "labelFr": "DJ et animation",
+        "path": "events_creative › events › dj_entertainment"
+      },
+      {
+        "id": "cigar_shop",
+        "labelEn": "Cigar shop",
+        "labelFr": "Cave à cigares",
+        "path": "retail_shopping › leisure_gifts › cigar_shop"
+      },
+      {
+        "id": "artist_studio",
+        "labelEn": "Artist studio",
+        "labelFr": "Atelier d'artiste",
+        "path": "events_creative › arts_crafts › artist_studio"
+      },
+      {
+        "id": "fine_dining",
+        "labelEn": "Fine dining restaurant",
+        "labelFr": "Restaurant gastronomique",
+        "path": "food_drink › restaurant › fine_dining"
+      },
+      {
+        "id": "creole_restaurant",
+        "labelEn": "Creole restaurant",
+        "labelFr": "Restaurant créole",
+        "path": "food_drink › restaurant › creole_restaurant"
+      },
+      {
+        "id": "medical_clinic",
+        "labelEn": "Medical clinic",
+        "labelFr": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "french_restaurant",
+        "labelEn": "French restaurant",
+        "labelFr": "Restaurant français",
+        "path": "food_drink › restaurant › french_restaurant"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["vegetarian_restaurant"],
+    "keywords": ["vegan"],
+    "locationText": "Saint-Barthélemy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

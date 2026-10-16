@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "loueurs de voitures et de scooters près de l'aéroport de Saint-Jean",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "pediatrician",
+        "labelEn": "Pediatrician",
+        "labelFr": "Pédiatre",
+        "path": "health_medical › medical_specialists › pediatrician"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "gift_shop",
+        "labelEn": "Gift & souvenir shop",
+        "labelFr": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "school",
+        "labelEn": "Schools",
+        "labelFr": "Établissements scolaires",
+        "path": "education › school"
+      },
+      {
+        "id": "general_contractor",
+        "labelEn": "General contractor",
+        "labelFr": "Entreprise générale du bâtiment",
+        "path": "home_construction › structural_work › general_contractor"
+      },
+      {
+        "id": "locksmith",
+        "labelEn": "Locksmith",
+        "labelFr": "Serrurier",
+        "path": "home_services › repairs_maintenance › locksmith"
+      },
+      {
+        "id": "bike_rental",
+        "labelEn": "Bike rental",
+        "labelFr": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      },
+      {
+        "id": "guest_house",
+        "labelEn": "Guest house",
+        "labelFr": "Maison d'hôtes",
+        "path": "lodging › guest_house"
+      },
+      {
+        "id": "home_retail",
+        "labelEn": "Home & garden",
+        "labelFr": "Maison et jardin",
+        "path": "retail_shopping › home_retail"
+      },
+      {
+        "id": "vehicle_rental",
+        "labelEn": "Vehicle rental",
+        "labelFr": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["car_rental", "scooter_rental"],
+    "keywords": [],
+    "locationText": "aéroport de Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

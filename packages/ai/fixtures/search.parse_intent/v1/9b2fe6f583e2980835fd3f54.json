@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "gyms with a slow website",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "boat_repair",
+        "labelEn": "Boat repair & shipyard",
+        "labelFr": "Chantier naval",
+        "path": "marine_nautical › boating_services › boat_repair"
+      },
+      {
+        "id": "gym",
+        "labelEn": "Gym",
+        "labelFr": "Salle de sport",
+        "path": "sports_fitness › gym"
+      },
+      {
+        "id": "sports_fitness",
+        "labelEn": "Sports & fitness",
+        "labelFr": "Sport et fitness",
+        "path": "sports_fitness"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "yoga_studio",
+        "labelEn": "Yoga studio",
+        "labelFr": "Studio de yoga",
+        "path": "sports_fitness › yoga_studio"
+      },
+      {
+        "id": "repairs_maintenance",
+        "labelEn": "Repairs & maintenance",
+        "labelFr": "Dépannage et entretien",
+        "path": "home_services › repairs_maintenance"
+      },
+      {
+        "id": "lash_brow_bar",
+        "labelEn": "Lash & brow bar",
+        "labelFr": "Bar à cils et sourcils",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "pilates_studio",
+        "labelEn": "Pilates studio",
+        "labelFr": "Studio de Pilates",
+        "path": "sports_fitness › pilates_studio"
+      },
+      {
+        "id": "aparthotel",
+        "labelEn": "Aparthotel",
+        "labelFr": "Résidence hôtelière",
+        "path": "lodging › aparthotel"
+      },
+      {
+        "id": "concierge",
+        "labelEn": "Concierge service",
+        "labelFr": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "nurse",
+        "labelEn": "Home nurse",
+        "labelFr": "Infirmier libéral",
+        "path": "health_medical › paramedical › nurse"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["gym"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "weak",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

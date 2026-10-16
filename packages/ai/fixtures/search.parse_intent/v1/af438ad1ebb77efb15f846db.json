@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants in Saint-Jean rated below 4",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "sport_fishing",
+        "labelEn": "Sport fishing",
+        "labelFr": "Pêche au gros",
+        "path": "marine_nautical › sport_fishing"
+      },
+      {
+        "id": "driving_school",
+        "labelEn": "Driving school",
+        "labelFr": "Auto-école",
+        "path": "automotive_transport › automotive_services › driving_school"
+      },
+      {
+        "id": "garden_center",
+        "labelEn": "Garden center",
+        "labelFr": "Jardinerie",
+        "path": "retail_shopping › home_retail › garden_center"
+      },
+      {
+        "id": "home_decor_store",
+        "labelEn": "Home decor store",
+        "labelFr": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      },
+      {
+        "id": "automotive_transport",
+        "labelEn": "Automotive & transport",
+        "labelFr": "Automobile et transport",
+        "path": "automotive_transport"
+      },
+      {
+        "id": "craft_artisan",
+        "labelEn": "Artisan crafts",
+        "labelFr": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "printing",
+        "labelEn": "Printing",
+        "labelFr": "Imprimerie",
+        "path": "professional_services › business_services › printing"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": 4,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

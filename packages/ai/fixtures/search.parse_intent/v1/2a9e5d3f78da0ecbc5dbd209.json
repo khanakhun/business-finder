@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "restaurants à Saint-Jean où il est difficile de réserver",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "juice_bar",
+        "labelEn": "Juice bar",
+        "labelFr": "Bar à jus",
+        "path": "food_drink › juice_bar"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "leisure_gifts",
+        "labelEn": "Gifts & leisure",
+        "labelFr": "Loisirs et cadeaux",
+        "path": "retail_shopping › leisure_gifts"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "casino",
+        "labelEn": "Casino",
+        "labelFr": "Casino",
+        "path": "tourism_leisure › attractions_entertainment › casino"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "radiology_center",
+        "labelEn": "Radiology center",
+        "labelFr": "Cabinet de radiologie",
+        "path": "health_medical › medical_specialists › radiology_center"
+      },
+      {
+        "id": "insurance_broker",
+        "labelEn": "Insurance broker",
+        "labelFr": "Courtier en assurances",
+        "path": "finance_insurance › insurance_broker"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Jean",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": ["booking_friction"],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "garages automobiles à 33000 Bordeaux avec un e-mail",
+    "language": "fr",
+    "defaultCountry": "FR",
+    "candidates": [
+      {
+        "id": "automotive_services",
+        "labelEn": "Automotive services",
+        "labelFr": "Services automobiles",
+        "path": "automotive_transport › automotive_services"
+      },
+      {
+        "id": "auto_repair",
+        "labelEn": "Auto repair",
+        "labelFr": "Garage automobile",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "physiotherapist",
+        "labelEn": "Physiotherapist",
+        "labelFr": "Masseur-kinésithérapeute",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "auto_body",
+        "labelEn": "Body shop",
+        "labelFr": "Carrosserie",
+        "path": "automotive_transport › automotive_services › auto_body"
+      },
+      {
+        "id": "sound_lighting",
+        "labelEn": "Sound & lighting",
+        "labelFr": "Sonorisation et éclairage",
+        "path": "events_creative › events › sound_lighting"
+      },
+      {
+        "id": "yacht_broker",
+        "labelEn": "Yacht broker",
+        "labelFr": "Courtier en yachts",
+        "path": "marine_nautical › boating_services › yacht_broker"
+      },
+      {
+        "id": "car_dealer",
+        "labelEn": "Car dealer",
+        "labelFr": "Concessionnaire automobile",
+        "path": "automotive_transport › automotive_services › car_dealer"
+      },
+      {
+        "id": "hardware_store",
+        "labelEn": "Hardware store",
+        "labelFr": "Quincaillerie",
+        "path": "home_construction › construction_supplies › hardware_store"
+      },
+      {
+        "id": "pet_store",
+        "labelEn": "Pet store",
+        "labelFr": "Animalerie",
+        "path": "pets_animals › pet_store"
+      },
+      {
+        "id": "tire_shop",
+        "labelEn": "Tire shop",
+        "labelFr": "Pneumatiques",
+        "path": "automotive_transport › automotive_services › tire_shop"
+      },
+      {
+        "id": "architect",
+        "labelEn": "Architect",
+        "labelFr": "Architecte",
+        "path": "home_construction › design_engineering › architect"
+      },
+      {
+        "id": "home_care",
+        "labelEn": "Home care",
+        "labelFr": "Aide à domicile",
+        "path": "home_services › personal_services › home_care"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["auto_repair"],
+    "keywords": [],
+    "locationText": "33000 Bordeaux",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

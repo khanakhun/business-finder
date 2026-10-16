@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "tout ce qui vend des hamacs à Gustavia",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "home_decor_store",
+        "labelEn": "Home decor store",
+        "labelFr": "Boutique de décoration",
+        "path": "retail_shopping › home_retail › home_decor_store"
+      },
+      {
+        "id": "tutoring",
+        "labelEn": "Tutoring",
+        "labelFr": "Soutien scolaire",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "toy_store",
+        "labelEn": "Toy store",
+        "labelFr": "Magasin de jouets",
+        "path": "retail_shopping › leisure_gifts › toy_store"
+      },
+      {
+        "id": "public_community",
+        "labelEn": "Public & community",
+        "labelFr": "Services publics et associations",
+        "path": "public_community"
+      },
+      {
+        "id": "leisure_gifts",
+        "labelEn": "Gifts & leisure",
+        "labelFr": "Loisirs et cadeaux",
+        "path": "retail_shopping › leisure_gifts"
+      },
+      {
+        "id": "airline",
+        "labelEn": "Airline",
+        "labelFr": "Compagnie aérienne",
+        "path": "automotive_transport › passenger_transport › airline"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "dog_trainer",
+        "labelEn": "Dog trainer",
+        "labelFr": "Éducateur canin",
+        "path": "pets_animals › dog_trainer"
+      },
+      {
+        "id": "beauty_wellness",
+        "labelEn": "Beauty & wellness",
+        "labelFr": "Beauté et bien-être",
+        "path": "beauty_wellness"
+      },
+      {
+        "id": "private_chef",
+        "labelEn": "Private chef",
+        "labelFr": "Chef à domicile",
+        "path": "food_drink › private_chef"
+      },
+      {
+        "id": "escape_game",
+        "labelEn": "Escape game",
+        "labelFr": "Escape game",
+        "path": "tourism_leisure › attractions_entertainment › escape_game"
+      },
+      {
+        "id": "sports_club",
+        "labelEn": "Sports club",
+        "labelFr": "Club sportif",
+        "path": "sports_fitness › sports_club"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": [],
+    "keywords": ["hamacs"],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

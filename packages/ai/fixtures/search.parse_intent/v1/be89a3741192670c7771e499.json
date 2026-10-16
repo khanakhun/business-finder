@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "kinés à 3511 Utrecht",
+    "language": "fr",
+    "defaultCountry": "NL",
+    "candidates": [
+      {
+        "id": "podiatrist",
+        "labelEn": "Podiatrist",
+        "labelFr": "Pédicure-podologue",
+        "path": "health_medical › paramedical › podiatrist"
+      },
+      {
+        "id": "physiotherapist",
+        "labelEn": "Physiotherapist",
+        "labelFr": "Masseur-kinésithérapeute",
+        "path": "health_medical › paramedical › physiotherapist"
+      },
+      {
+        "id": "cinema",
+        "labelEn": "Cinema",
+        "labelFr": "Cinéma",
+        "path": "tourism_leisure › attractions_entertainment › cinema"
+      },
+      {
+        "id": "nurse",
+        "labelEn": "Home nurse",
+        "labelFr": "Infirmier libéral",
+        "path": "health_medical › paramedical › nurse"
+      },
+      {
+        "id": "osteopath",
+        "labelEn": "Osteopath",
+        "labelFr": "Ostéopathe",
+        "path": "health_medical › paramedical › osteopath"
+      },
+      {
+        "id": "paramedical",
+        "labelEn": "Allied health",
+        "labelFr": "Paramédical",
+        "path": "health_medical › paramedical"
+      },
+      {
+        "id": "electronics",
+        "labelEn": "Electronics",
+        "labelFr": "High-tech",
+        "path": "retail_shopping › electronics"
+      },
+      {
+        "id": "condominium_manager",
+        "labelEn": "Condominium manager",
+        "labelFr": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "midwife",
+        "labelEn": "Midwife",
+        "labelFr": "Sage-femme",
+        "path": "health_medical › paramedical › midwife"
+      },
+      {
+        "id": "escape_game",
+        "labelEn": "Escape game",
+        "labelFr": "Escape game",
+        "path": "tourism_leisure › attractions_entertainment › escape_game"
+      },
+      {
+        "id": "vegetarian_restaurant",
+        "labelEn": "Vegetarian restaurant",
+        "labelFr": "Restaurant végétarien",
+        "path": "food_drink › restaurant › vegetarian_restaurant"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["physiotherapist"],
+    "keywords": [],
+    "locationText": "3511 Utrecht",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

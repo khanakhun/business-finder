@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "dentists and orthodontists in Austin, TX with fewer than 10 reviews",
+    "language": "en",
+    "defaultCountry": "US",
+    "candidates": [
+      {
+        "id": "photo_video",
+        "labelEn": "Photo & video",
+        "labelFr": "Photo et vidéo",
+        "path": "events_creative › photo_video"
+      },
+      {
+        "id": "dentist",
+        "labelEn": "Dentist",
+        "labelFr": "Chirurgien-dentiste",
+        "path": "health_medical › dental › dentist"
+      },
+      {
+        "id": "orthodontist",
+        "labelEn": "Orthodontist",
+        "labelFr": "Orthodontiste",
+        "path": "health_medical › dental › orthodontist"
+      },
+      {
+        "id": "paddle_kayak_rental",
+        "labelEn": "Paddle & kayak rental",
+        "labelFr": "Location de paddle et kayak",
+        "path": "marine_nautical › water_sports › paddle_kayak_rental"
+      },
+      {
+        "id": "nonprofit_association",
+        "labelEn": "Nonprofit",
+        "labelFr": "Association",
+        "path": "public_community › nonprofit_association"
+      },
+      {
+        "id": "place_of_worship",
+        "labelEn": "Place of worship",
+        "labelFr": "Lieu de culte",
+        "path": "public_community › place_of_worship"
+      },
+      {
+        "id": "dance_school",
+        "labelEn": "Dance school",
+        "labelFr": "École de danse",
+        "path": "sports_fitness › dance_school"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "museum",
+        "labelEn": "Museum",
+        "labelFr": "Musée",
+        "path": "tourism_leisure › attractions_entertainment › museum"
+      },
+      {
+        "id": "dental",
+        "labelEn": "Dental care",
+        "labelFr": "Soins dentaires",
+        "path": "health_medical › dental"
+      },
+      {
+        "id": "notary",
+        "labelEn": "Notary",
+        "labelFr": "Notaire",
+        "path": "professional_services › legal_services › notary"
+      },
+      {
+        "id": "concierge",
+        "labelEn": "Concierge service",
+        "labelFr": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["dentist", "orthodontist"],
+    "keywords": [],
+    "locationText": "Austin, TX",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": 9,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "our real estate agencies contacted, added this week",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "courier",
+        "labelEn": "Courier & delivery",
+        "labelFr": "Coursier et livraison",
+        "path": "automotive_transport › logistics › courier"
+      },
+      {
+        "id": "real_estate_agency",
+        "labelEn": "Real estate agency",
+        "labelFr": "Agence immobilière",
+        "path": "real_estate › real_estate_agency"
+      },
+      {
+        "id": "real_estate_appraiser",
+        "labelEn": "Real estate appraiser",
+        "labelFr": "Expert immobilier",
+        "path": "real_estate › real_estate_appraiser"
+      },
+      {
+        "id": "property_management",
+        "labelEn": "Property management",
+        "labelFr": "Gestion locative",
+        "path": "real_estate › property_management"
+      },
+      {
+        "id": "property_developer",
+        "labelEn": "Property developer",
+        "labelFr": "Promoteur immobilier",
+        "path": "real_estate › property_developer"
+      },
+      {
+        "id": "real_estate",
+        "labelEn": "Real estate",
+        "labelFr": "Immobilier",
+        "path": "real_estate"
+      },
+      {
+        "id": "fitness_studio",
+        "labelEn": "Fitness studio",
+        "labelFr": "Studio de fitness",
+        "path": "sports_fitness › fitness_studio"
+      },
+      {
+        "id": "jewelry_store",
+        "labelEn": "Jewelry store",
+        "labelFr": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "beauty_services",
+        "labelEn": "Beauty care",
+        "labelFr": "Esthétique",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "crossfit_box",
+        "labelEn": "CrossFit box",
+        "labelFr": "Salle de CrossFit",
+        "path": "sports_fitness › crossfit_box"
+      },
+      {
+        "id": "second_hand_store",
+        "labelEn": "Second-hand store",
+        "labelFr": "Dépôt-vente",
+        "path": "retail_shopping › second_hand_store"
+      },
+      {
+        "id": "wholesaler",
+        "labelEn": "Wholesaler",
+        "labelFr": "Grossiste",
+        "path": "industry_trade › wholesaler"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["real_estate_agency"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": ["contacted"],
+      "tags": [],
+      "addedWithinDays": 7
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "dentists in Saint-Barthélemy with a verified email",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "photographer",
+        "labelEn": "Photographer",
+        "labelFr": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "dentist",
+        "labelEn": "Dentist",
+        "labelFr": "Chirurgien-dentiste",
+        "path": "health_medical › dental › dentist"
+      },
+      {
+        "id": "preschool",
+        "labelEn": "Preschool",
+        "labelFr": "École maternelle",
+        "path": "education › school › preschool"
+      },
+      {
+        "id": "auto_body",
+        "labelEn": "Body shop",
+        "labelFr": "Carrosserie",
+        "path": "automotive_transport › automotive_services › auto_body"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "leather_goods_store",
+        "labelEn": "Leather goods & bags",
+        "labelFr": "Maroquinerie",
+        "path": "retail_shopping › fashion › leather_goods_store"
+      },
+      {
+        "id": "dental",
+        "labelEn": "Dental care",
+        "labelFr": "Soins dentaires",
+        "path": "health_medical › dental"
+      },
+      {
+        "id": "farmers_market",
+        "labelEn": "Farmers market",
+        "labelFr": "Marché",
+        "path": "retail_shopping › food_retail › farmers_market"
+      },
+      {
+        "id": "wealth_management",
+        "labelEn": "Wealth management",
+        "labelFr": "Gestion de patrimoine",
+        "path": "finance_insurance › wealth_management"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "seafood_restaurant",
+        "labelEn": "Seafood restaurant",
+        "labelFr": "Restaurant de fruits de mer",
+        "path": "food_drink › restaurant › seafood_restaurant"
+      },
+      {
+        "id": "orthodontist",
+        "labelEn": "Orthodontist",
+        "labelFr": "Orthodontiste",
+        "path": "health_medical › dental › orthodontist"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["dentist"],
+    "keywords": [],
+    "locationText": "Saint-Barthélemy",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": true,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

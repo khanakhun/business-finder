@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "boutiques de mode haut de gamme à Gustavia",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "jewelry_store",
+        "labelEn": "Jewelry store",
+        "labelFr": "Bijouterie",
+        "path": "retail_shopping › fashion › jewelry_store"
+      },
+      {
+        "id": "fashion_boutique",
+        "labelEn": "Fashion boutique",
+        "labelFr": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "metalwork",
+        "labelEn": "Metalwork",
+        "labelFr": "Ferronnerie et métallerie",
+        "path": "home_construction › structural_work › metalwork"
+      },
+      {
+        "id": "furniture_store",
+        "labelEn": "Furniture store",
+        "labelFr": "Magasin de meubles",
+        "path": "retail_shopping › home_retail › furniture_store"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "fashion",
+        "labelEn": "Fashion & accessories",
+        "labelFr": "Mode et accessoires",
+        "path": "retail_shopping › fashion"
+      },
+      {
+        "id": "shoe_store",
+        "labelEn": "Shoe store",
+        "labelFr": "Magasin de chaussures",
+        "path": "retail_shopping › fashion › shoe_store"
+      },
+      {
+        "id": "radiology_center",
+        "labelEn": "Radiology center",
+        "labelFr": "Cabinet de radiologie",
+        "path": "health_medical › medical_specialists › radiology_center"
+      },
+      {
+        "id": "currency_exchange",
+        "labelEn": "Currency exchange & money transfer",
+        "labelFr": "Bureau de change et transfert d'argent",
+        "path": "finance_insurance › currency_exchange"
+      },
+      {
+        "id": "pool_maintenance",
+        "labelEn": "Pool maintenance",
+        "labelFr": "Entretien de piscines",
+        "path": "home_services › pool_services › pool_maintenance"
+      },
+      {
+        "id": "solar_installer",
+        "labelEn": "Solar installer",
+        "labelFr": "Installateur solaire",
+        "path": "home_construction › finishing_trades › solar_installer"
+      },
+      {
+        "id": "plumber",
+        "labelEn": "Plumber",
+        "labelFr": "Plombier",
+        "path": "home_construction › finishing_trades › plumber"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["fashion_boutique"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [4],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

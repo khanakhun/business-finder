@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "boat charters and sea excursions in Gustavia with at least 4.5 stars",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "sport_fishing",
+        "labelEn": "Sport fishing",
+        "labelFr": "Pêche au gros",
+        "path": "marine_nautical › sport_fishing"
+      },
+      {
+        "id": "boat_charter",
+        "labelEn": "Boat & yacht charter",
+        "labelFr": "Location de bateaux",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "boat_excursion",
+        "labelEn": "Boat trips & excursions",
+        "labelFr": "Excursions en mer",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "optician",
+        "labelEn": "Optician",
+        "labelFr": "Opticien",
+        "path": "health_medical › optician"
+      },
+      {
+        "id": "water_taxi",
+        "labelEn": "Water taxi",
+        "labelFr": "Taxi-boat",
+        "path": "marine_nautical › water_taxi"
+      },
+      {
+        "id": "shoe_repair",
+        "labelEn": "Shoe repair & key cutting",
+        "labelFr": "Cordonnerie",
+        "path": "home_services › personal_services › shoe_repair"
+      },
+      {
+        "id": "accountant",
+        "labelEn": "Accountant",
+        "labelFr": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "pest_control",
+        "labelEn": "Pest control",
+        "labelFr": "Dératisation et désinsectisation",
+        "path": "home_services › repairs_maintenance › pest_control"
+      },
+      {
+        "id": "psychologist",
+        "labelEn": "Psychologist",
+        "labelFr": "Psychologue",
+        "path": "health_medical › paramedical › psychologist"
+      },
+      {
+        "id": "building_supplies",
+        "labelEn": "Building supplies",
+        "labelFr": "Négoce de matériaux",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "marine_nautical",
+        "labelEn": "Marine & nautical",
+        "labelFr": "Nautisme",
+        "path": "marine_nautical"
+      },
+      {
+        "id": "legal_services",
+        "labelEn": "Legal services",
+        "labelFr": "Services juridiques",
+        "path": "professional_services › legal_services"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["boat_charter", "boat_excursion"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": 4.5,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

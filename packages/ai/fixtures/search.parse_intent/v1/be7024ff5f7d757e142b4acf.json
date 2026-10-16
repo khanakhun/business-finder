@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "mes fleuristes tagués vip",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "toy_store",
+        "labelEn": "Toy store",
+        "labelFr": "Magasin de jouets",
+        "path": "retail_shopping › leisure_gifts › toy_store"
+      },
+      {
+        "id": "florist",
+        "labelEn": "Florist",
+        "labelFr": "Fleuriste",
+        "path": "retail_shopping › leisure_gifts › florist"
+      },
+      {
+        "id": "passenger_transport",
+        "labelEn": "Passenger transport",
+        "labelFr": "Transport de personnes",
+        "path": "automotive_transport › passenger_transport"
+      },
+      {
+        "id": "party_rental",
+        "labelEn": "Event rental",
+        "labelFr": "Location de matériel événementiel",
+        "path": "events_creative › events › party_rental"
+      },
+      {
+        "id": "leisure_gifts",
+        "labelEn": "Gifts & leisure",
+        "labelFr": "Loisirs et cadeaux",
+        "path": "retail_shopping › leisure_gifts"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "bookstore",
+        "labelEn": "Bookstore",
+        "labelFr": "Librairie",
+        "path": "retail_shopping › leisure_gifts › bookstore"
+      },
+      {
+        "id": "hurricane_shutters",
+        "labelEn": "Hurricane shutters & closures",
+        "labelFr": "Volets anticycloniques et fermetures",
+        "path": "home_construction › finishing_trades › hurricane_shutters"
+      },
+      {
+        "id": "computer_repair",
+        "labelEn": "Computer & phone repair",
+        "labelFr": "Réparation informatique et téléphonie",
+        "path": "technology_media › computer_repair"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "vegetarian_restaurant",
+        "labelEn": "Vegetarian restaurant",
+        "labelFr": "Restaurant végétarien",
+        "path": "food_drink › restaurant › vegetarian_restaurant"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["florist"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": ["vip"],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -13,6 +13,7 @@ export interface CategoryCandidate {
   readonly slug: string;
   readonly path: string;
   readonly labels: { readonly en: string; readonly fr: string };
+  readonly synonyms: { readonly en: readonly string[]; readonly fr: readonly string[] };
   /** Reciprocal-rank-fusion score; comparable within one call only. */
   readonly score: number;
 }
@@ -59,7 +60,7 @@ export class CategoryCandidateSearch {
     const pieces = (typeof texts === 'string' ? [texts] : texts)
       .map((t) => t.trim().slice(0, 120))
       .filter(Boolean)
-      .slice(0, 8);
+      .slice(0, 12);
     if (pieces.length === 0) return [];
     const [trigrams, vector] = await Promise.all([
       Promise.all(pieces.map((piece) => this.repository.trigramSearch(piece, k * 2))),
@@ -75,6 +76,7 @@ export class CategoryCandidateSearch {
         slug: hit.slug,
         path: category?.path as string,
         labels: category?.labels as CategoryCandidate['labels'],
+        synonyms: category?.synonyms as CategoryCandidate['synonyms'],
         score: hit.score,
       }));
   }

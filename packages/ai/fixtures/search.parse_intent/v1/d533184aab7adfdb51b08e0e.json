@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "barbers in 1017 AB Amsterdam with no website",
+    "language": "en",
+    "defaultCountry": "NL",
+    "candidates": [
+      {
+        "id": "insurance_agency",
+        "labelEn": "Insurance agency",
+        "labelFr": "Agence d'assurances",
+        "path": "finance_insurance › insurance_agency"
+      },
+      {
+        "id": "barber",
+        "labelEn": "Barber",
+        "labelFr": "Barbier",
+        "path": "beauty_wellness › hair_services › barber"
+      },
+      {
+        "id": "travel_services",
+        "labelEn": "Travel services",
+        "labelFr": "Services touristiques",
+        "path": "tourism_leisure › travel_services"
+      },
+      {
+        "id": "tutoring",
+        "labelEn": "Tutoring",
+        "labelFr": "Soutien scolaire",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "condominium_manager",
+        "labelEn": "Condominium manager",
+        "labelFr": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "school",
+        "labelEn": "Schools",
+        "labelFr": "Établissements scolaires",
+        "path": "education › school"
+      },
+      {
+        "id": "braiding_salon",
+        "labelEn": "Braiding & natural hair salon",
+        "labelFr": "Salon de tresses et coiffure afro",
+        "path": "beauty_wellness › hair_services › braiding_salon"
+      },
+      {
+        "id": "architect",
+        "labelEn": "Architect",
+        "labelFr": "Architecte",
+        "path": "home_construction › design_engineering › architect"
+      },
+      {
+        "id": "hair_salon",
+        "labelEn": "Hair salon",
+        "labelFr": "Salon de coiffure",
+        "path": "beauty_wellness › hair_services › hair_salon"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "labelEn": "Mobile hairdresser",
+        "labelFr": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["barber"],
+    "keywords": [],
+    "locationText": "1017 AB Amsterdam",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "spas à Lorient avec moins de 20 avis",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "asian_restaurant",
+        "labelEn": "Asian restaurant",
+        "labelFr": "Restaurant asiatique",
+        "path": "food_drink › restaurant › asian_restaurant"
+      },
+      {
+        "id": "tattoo_studio",
+        "labelEn": "Tattoo & piercing studio",
+        "labelFr": "Salon de tatouage",
+        "path": "beauty_wellness › tattoo_studio"
+      },
+      {
+        "id": "medical_clinic",
+        "labelEn": "Medical clinic",
+        "labelFr": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "wellness",
+        "labelEn": "Wellness",
+        "labelFr": "Bien-être",
+        "path": "beauty_wellness › wellness"
+      },
+      {
+        "id": "art_school",
+        "labelEn": "Art & craft classes",
+        "labelFr": "Cours d'art et ateliers créatifs",
+        "path": "education › art_school"
+      },
+      {
+        "id": "cigar_shop",
+        "labelEn": "Cigar shop",
+        "labelFr": "Cave à cigares",
+        "path": "retail_shopping › leisure_gifts › cigar_shop"
+      },
+      {
+        "id": "aesthetic_medicine",
+        "labelEn": "Aesthetic medicine",
+        "labelFr": "Médecine esthétique",
+        "path": "health_medical › medical_specialists › aesthetic_medicine"
+      },
+      {
+        "id": "reflexology",
+        "labelEn": "Reflexology & energy healing",
+        "labelFr": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "bank",
+        "labelEn": "Bank",
+        "labelFr": "Banque",
+        "path": "finance_insurance › bank"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["spa"],
+    "keywords": [],
+    "locationText": "Lorient",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": 19,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

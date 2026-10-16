@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "bars rooftop à Gustavia",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "wine_bar",
+        "labelEn": "Wine bar",
+        "labelFr": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "midwife",
+        "labelEn": "Midwife",
+        "labelFr": "Sage-femme",
+        "path": "health_medical › paramedical › midwife"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "pharmacy",
+        "labelEn": "Pharmacy",
+        "labelFr": "Pharmacie",
+        "path": "health_medical › pharmacy"
+      },
+      {
+        "id": "marine_nautical",
+        "labelEn": "Marine & nautical",
+        "labelFr": "Nautisme",
+        "path": "marine_nautical"
+      },
+      {
+        "id": "wedding_planner",
+        "labelEn": "Wedding planner",
+        "labelFr": "Wedding planner",
+        "path": "events_creative › events › wedding_planner"
+      },
+      {
+        "id": "photographer",
+        "labelEn": "Photographer",
+        "labelFr": "Photographe",
+        "path": "events_creative › photo_video › photographer"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "tiling",
+        "labelEn": "Tiling & flooring",
+        "labelFr": "Carrelage et revêtements de sol",
+        "path": "home_construction › finishing_trades › tiling"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bar"],
+    "keywords": ["rooftop"],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "my qualified spas",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "engineering_firm",
+        "labelEn": "Engineering firm",
+        "labelFr": "Bureau d'études",
+        "path": "home_construction › design_engineering › engineering_firm"
+      },
+      {
+        "id": "spa",
+        "labelEn": "Spa",
+        "labelFr": "Spa",
+        "path": "beauty_wellness › wellness › spa"
+      },
+      {
+        "id": "land_surveyor",
+        "labelEn": "Land surveyor",
+        "labelFr": "Géomètre-expert",
+        "path": "home_construction › design_engineering › land_surveyor"
+      },
+      {
+        "id": "tailor",
+        "labelEn": "Tailor & alterations",
+        "labelFr": "Retouches et couture",
+        "path": "home_services › personal_services › tailor"
+      },
+      {
+        "id": "massage",
+        "labelEn": "Massage",
+        "labelFr": "Massage",
+        "path": "beauty_wellness › wellness › massage"
+      },
+      {
+        "id": "taxi",
+        "labelEn": "Taxi",
+        "labelFr": "Taxi",
+        "path": "automotive_transport › passenger_transport › taxi"
+      },
+      {
+        "id": "reflexology",
+        "labelEn": "Reflexology & energy healing",
+        "labelFr": "Réflexologie et soins énergétiques",
+        "path": "beauty_wellness › wellness › reflexology"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      },
+      {
+        "id": "italian_restaurant",
+        "labelEn": "Italian restaurant",
+        "labelFr": "Restaurant italien",
+        "path": "food_drink › restaurant › italian_restaurant"
+      },
+      {
+        "id": "lawyer",
+        "labelEn": "Lawyer",
+        "labelFr": "Avocat",
+        "path": "professional_services › legal_services › lawyer"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "wellness",
+        "labelEn": "Wellness",
+        "labelFr": "Bien-être",
+        "path": "beauty_wellness › wellness"
+      }
+    ]
+  },
+  "output": {
+    "mode": "listings",
+    "categoryIds": ["spa"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": ["qualified"],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "location de bateaux et excursions en mer à Gustavia avec au moins 4,5 étoiles",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "optician",
+        "labelEn": "Optician",
+        "labelFr": "Opticien",
+        "path": "health_medical › optician"
+      },
+      {
+        "id": "boat_excursion",
+        "labelEn": "Boat trips & excursions",
+        "labelFr": "Excursions en mer",
+        "path": "marine_nautical › boat_excursion"
+      },
+      {
+        "id": "boat_charter",
+        "labelEn": "Boat & yacht charter",
+        "labelFr": "Location de bateaux",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "home_retail",
+        "labelEn": "Home & garden",
+        "labelFr": "Maison et jardin",
+        "path": "retail_shopping › home_retail"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "airline",
+        "labelEn": "Airline",
+        "labelFr": "Compagnie aérienne",
+        "path": "automotive_transport › passenger_transport › airline"
+      },
+      {
+        "id": "security_services",
+        "labelEn": "Security & alarm systems",
+        "labelFr": "Sécurité et surveillance",
+        "path": "home_services › security_services"
+      },
+      {
+        "id": "marine_nautical",
+        "labelEn": "Marine & nautical",
+        "labelFr": "Nautisme",
+        "path": "marine_nautical"
+      },
+      {
+        "id": "water_taxi",
+        "labelEn": "Water taxi",
+        "labelFr": "Taxi-boat",
+        "path": "marine_nautical › water_taxi"
+      },
+      {
+        "id": "music_school",
+        "labelEn": "Music school",
+        "labelFr": "École de musique",
+        "path": "education › music_school"
+      },
+      {
+        "id": "sport_fishing",
+        "labelEn": "Sport fishing",
+        "labelFr": "Pêche au gros",
+        "path": "marine_nautical › sport_fishing"
+      },
+      {
+        "id": "dj_entertainment",
+        "labelEn": "DJ & entertainment",
+        "labelFr": "DJ et animation",
+        "path": "events_creative › events › dj_entertainment"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["boat_charter", "boat_excursion"],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": 4.5,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

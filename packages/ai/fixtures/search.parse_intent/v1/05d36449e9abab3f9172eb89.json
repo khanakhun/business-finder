@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "tous les restaurants de Saint-Barth",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "swimwear_store",
+        "labelEn": "Swimwear store",
+        "labelFr": "Boutique de maillots de bain",
+        "path": "retail_shopping › fashion › swimwear_store"
+      },
+      {
+        "id": "daycare",
+        "labelEn": "Daycare",
+        "labelFr": "Crèche",
+        "path": "education › daycare"
+      },
+      {
+        "id": "medical_clinic",
+        "labelEn": "Medical clinic",
+        "labelFr": "Centre médical",
+        "path": "health_medical › medical_clinic"
+      },
+      {
+        "id": "pizzeria",
+        "labelEn": "Pizzeria",
+        "labelFr": "Pizzeria",
+        "path": "food_drink › restaurant › pizzeria"
+      },
+      {
+        "id": "motorcycle_shop",
+        "labelEn": "Motorcycle & scooter shop",
+        "labelFr": "Concession moto et scooter",
+        "path": "automotive_transport › automotive_services › motorcycle_shop"
+      },
+      {
+        "id": "bookstore",
+        "labelEn": "Bookstore",
+        "labelFr": "Librairie",
+        "path": "retail_shopping › leisure_gifts › bookstore"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["restaurant"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

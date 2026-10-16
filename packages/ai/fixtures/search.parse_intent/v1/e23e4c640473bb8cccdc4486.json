@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "new nail salons I don't have yet in Saint-Barth",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "landscaping",
+        "labelEn": "Landscaping",
+        "labelFr": "Paysagiste",
+        "path": "home_services › garden_services › landscaping"
+      },
+      {
+        "id": "nail_salon",
+        "labelEn": "Nail salon",
+        "labelFr": "Onglerie",
+        "path": "beauty_wellness › beauty_services › nail_salon"
+      },
+      {
+        "id": "lash_brow_bar",
+        "labelEn": "Lash & brow bar",
+        "labelFr": "Bar à cils et sourcils",
+        "path": "beauty_wellness › beauty_services › lash_brow_bar"
+      },
+      {
+        "id": "beauty_salon",
+        "labelEn": "Beauty salon",
+        "labelFr": "Institut de beauté",
+        "path": "beauty_wellness › beauty_services › beauty_salon"
+      },
+      {
+        "id": "asian_restaurant",
+        "labelEn": "Asian restaurant",
+        "labelFr": "Restaurant asiatique",
+        "path": "food_drink › restaurant › asian_restaurant"
+      },
+      {
+        "id": "pool_construction",
+        "labelEn": "Pool builder",
+        "labelFr": "Construction de piscines",
+        "path": "home_services › pool_services › pool_construction"
+      },
+      {
+        "id": "gift_shop",
+        "labelEn": "Gift & souvenir shop",
+        "labelFr": "Boutique de souvenirs",
+        "path": "retail_shopping › leisure_gifts › gift_shop"
+      },
+      {
+        "id": "recruitment_agency",
+        "labelEn": "Recruitment & staffing agency",
+        "labelFr": "Agence de recrutement et d'intérim",
+        "path": "professional_services › business_services › recruitment_agency"
+      },
+      {
+        "id": "beauty_services",
+        "labelEn": "Beauty care",
+        "labelFr": "Esthétique",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "waxing_salon",
+        "labelEn": "Hair removal",
+        "labelFr": "Épilation",
+        "path": "beauty_wellness › beauty_services › waxing_salon"
+      },
+      {
+        "id": "painter",
+        "labelEn": "Painter & decorator",
+        "labelFr": "Peintre en bâtiment",
+        "path": "home_construction › finishing_trades › painter"
+      }
+    ]
+  },
+  "output": {
+    "mode": "discover",
+    "categoryIds": ["nail_salon"],
+    "keywords": [],
+    "locationText": "Saint-Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

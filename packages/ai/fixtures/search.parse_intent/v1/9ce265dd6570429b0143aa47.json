@@ -1,0 +1,118 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "rental companies in St Barth",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "amusement_park",
+        "labelEn": "Amusement park",
+        "labelFr": "Parc de loisirs",
+        "path": "tourism_leisure › attractions_entertainment › amusement_park"
+      },
+      {
+        "id": "villa_rental_agency",
+        "labelEn": "Villa rental agency",
+        "labelFr": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "boat_charter",
+        "labelEn": "Boat & yacht charter",
+        "labelFr": "Location de bateaux",
+        "path": "marine_nautical › boat_charter"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "building_supplies",
+        "labelEn": "Building supplies",
+        "labelFr": "Négoce de matériaux",
+        "path": "home_construction › construction_supplies › building_supplies"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "farm",
+        "labelEn": "Farm",
+        "labelFr": "Exploitation agricole",
+        "path": "industry_trade › farm"
+      },
+      {
+        "id": "steakhouse",
+        "labelEn": "Steakhouse & grill",
+        "labelFr": "Grill et steakhouse",
+        "path": "food_drink › restaurant › steakhouse"
+      },
+      {
+        "id": "greengrocer",
+        "labelEn": "Greengrocer",
+        "labelFr": "Primeur",
+        "path": "retail_shopping › food_retail › greengrocer"
+      },
+      {
+        "id": "japanese_restaurant",
+        "labelEn": "Japanese restaurant",
+        "labelFr": "Restaurant japonais",
+        "path": "food_drink › restaurant › japanese_restaurant"
+      },
+      {
+        "id": "painter",
+        "labelEn": "Painter & decorator",
+        "labelFr": "Peintre en bâtiment",
+        "path": "home_construction › finishing_trades › painter"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": [],
+    "keywords": [],
+    "locationText": "St Barth",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": {
+      "question": "Which kind do you mean?",
+      "options": ["Car rental", "Scooter rental", "Boat charter", "Villa rental"]
+    },
+    "confidence": 0.4,
+    "warnings": []
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "villa rental agencies in St Barth with a slow website and an email",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "lodging",
+        "labelEn": "Lodging",
+        "labelFr": "Hébergement",
+        "path": "lodging"
+      },
+      {
+        "id": "villa_rental_agency",
+        "labelEn": "Villa rental agency",
+        "labelFr": "Agence de location de villas",
+        "path": "lodging › villa_rental_agency"
+      },
+      {
+        "id": "craft_artisan",
+        "labelEn": "Artisan crafts",
+        "labelFr": "Artisan d'art",
+        "path": "events_creative › arts_crafts › craft_artisan"
+      },
+      {
+        "id": "construction_supplies",
+        "labelEn": "Building supplies & hardware",
+        "labelFr": "Matériaux et quincaillerie",
+        "path": "home_construction › construction_supplies"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      },
+      {
+        "id": "hotel",
+        "labelEn": "Hotel",
+        "labelFr": "Hôtel",
+        "path": "lodging › hotel"
+      },
+      {
+        "id": "resort",
+        "labelEn": "Resort",
+        "labelFr": "Complexe hôtelier",
+        "path": "lodging › resort"
+      },
+      {
+        "id": "marine_nautical",
+        "labelEn": "Marine & nautical",
+        "labelFr": "Nautisme",
+        "path": "marine_nautical"
+      },
+      {
+        "id": "concierge",
+        "labelEn": "Concierge service",
+        "labelFr": "Conciergerie",
+        "path": "tourism_leisure › travel_services › concierge"
+      },
+      {
+        "id": "sporting_goods_store",
+        "labelEn": "Sporting goods store",
+        "labelFr": "Magasin de sport",
+        "path": "retail_shopping › leisure_gifts › sporting_goods_store"
+      },
+      {
+        "id": "tiling",
+        "labelEn": "Tiling & flooring",
+        "labelFr": "Carrelage et revêtements de sol",
+        "path": "home_construction › finishing_trades › tiling"
+      },
+      {
+        "id": "boutique_hotel",
+        "labelEn": "Boutique hotel",
+        "labelFr": "Hôtel de charme",
+        "path": "lodging › boutique_hotel"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["villa_rental_agency"],
+    "keywords": [],
+    "locationText": "St Barth",
+    "filters": {
+      "website": "weak",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": true,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

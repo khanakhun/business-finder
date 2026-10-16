@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "find 50 cafés in Saint-Martin",
+    "language": "en",
+    "defaultCountry": "MF",
+    "candidates": [
+      {
+        "id": "auto_repair",
+        "labelEn": "Auto repair",
+        "labelFr": "Garage automobile",
+        "path": "automotive_transport › automotive_services › auto_repair"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "guided_tours",
+        "labelEn": "Guided tours",
+        "labelFr": "Visites guidées",
+        "path": "tourism_leisure › travel_services › guided_tours"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "swimming_pool",
+        "labelEn": "Swimming pool",
+        "labelFr": "Piscine",
+        "path": "sports_fitness › swimming_pool"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "event_planner",
+        "labelEn": "Event planner",
+        "labelFr": "Organisateur d'événements",
+        "path": "events_creative › events › event_planner"
+      },
+      {
+        "id": "tree_care",
+        "labelEn": "Tree care",
+        "labelFr": "Élagage",
+        "path": "home_services › garden_services › tree_care"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "hair_services",
+        "labelEn": "Hair",
+        "labelFr": "Coiffure",
+        "path": "beauty_wellness › hair_services"
+      },
+      {
+        "id": "art_school",
+        "labelEn": "Art & craft classes",
+        "labelFr": "Cours d'art et ateliers créatifs",
+        "path": "education › art_school"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["cafe"],
+    "keywords": [],
+    "locationText": "Saint-Martin",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": 50,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

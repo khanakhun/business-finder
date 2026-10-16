@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "écoles de kite et de surf à Grand Cul-de-Sac",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "condominium_manager",
+        "labelEn": "Condominium manager",
+        "labelFr": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "surf_school",
+        "labelEn": "Surf school",
+        "labelFr": "École de surf",
+        "path": "marine_nautical › water_sports › surf_school"
+      },
+      {
+        "id": "kitesurfing",
+        "labelEn": "Kitesurfing & windsurfing",
+        "labelFr": "Kitesurf et planche à voile",
+        "path": "marine_nautical › water_sports › kitesurfing"
+      },
+      {
+        "id": "dance_school",
+        "labelEn": "Dance school",
+        "labelFr": "École de danse",
+        "path": "sports_fitness › dance_school"
+      },
+      {
+        "id": "party_rental",
+        "labelEn": "Event rental",
+        "labelFr": "Location de matériel événementiel",
+        "path": "events_creative › events › party_rental"
+      },
+      {
+        "id": "scuba_diving",
+        "labelEn": "Scuba diving",
+        "labelFr": "Plongée sous-marine",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      },
+      {
+        "id": "water_sports",
+        "labelEn": "Water sports",
+        "labelFr": "Sports nautiques",
+        "path": "marine_nautical › water_sports"
+      },
+      {
+        "id": "furniture_store",
+        "labelEn": "Furniture store",
+        "labelFr": "Magasin de meubles",
+        "path": "retail_shopping › home_retail › furniture_store"
+      },
+      {
+        "id": "speech_therapist",
+        "labelEn": "Speech therapist",
+        "labelFr": "Orthophoniste",
+        "path": "health_medical › paramedical › speech_therapist"
+      },
+      {
+        "id": "travel_agency",
+        "labelEn": "Travel agency",
+        "labelFr": "Agence de voyages",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "jet_ski_rental",
+        "labelEn": "Jet ski rental",
+        "labelFr": "Location de jet-ski",
+        "path": "marine_nautical › water_sports › jet_ski_rental"
+      },
+      {
+        "id": "photo_video",
+        "labelEn": "Photo & video",
+        "labelFr": "Photo et vidéo",
+        "path": "events_creative › photo_video"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["kitesurfing", "surf_school"],
+    "keywords": [],
+    "locationText": "Grand Cul-de-Sac",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

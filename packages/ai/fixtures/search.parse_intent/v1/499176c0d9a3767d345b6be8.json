@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "scooter rentals that never answer the phone",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "cleaning_services",
+        "labelEn": "Cleaning services",
+        "labelFr": "Nettoyage",
+        "path": "home_services › cleaning_services"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "pets_animals",
+        "labelEn": "Pets & animals",
+        "labelFr": "Animaux",
+        "path": "pets_animals"
+      },
+      {
+        "id": "travel_agency",
+        "labelEn": "Travel agency",
+        "labelFr": "Agence de voyages",
+        "path": "tourism_leisure › travel_services › travel_agency"
+      },
+      {
+        "id": "perfume_cosmetics_store",
+        "labelEn": "Perfume & cosmetics store",
+        "labelFr": "Parfumerie",
+        "path": "retail_shopping › perfume_cosmetics_store"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "bike_rental",
+        "labelEn": "Bike rental",
+        "labelFr": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      },
+      {
+        "id": "coworking_space",
+        "labelEn": "Coworking space",
+        "labelFr": "Espace de coworking",
+        "path": "professional_services › business_services › coworking_space"
+      },
+      {
+        "id": "yoga_studio",
+        "labelEn": "Yoga studio",
+        "labelFr": "Studio de yoga",
+        "path": "sports_fitness › yoga_studio"
+      },
+      {
+        "id": "recruitment_agency",
+        "labelEn": "Recruitment & staffing agency",
+        "labelFr": "Agence de recrutement et d'intérim",
+        "path": "professional_services › business_services › recruitment_agency"
+      },
+      {
+        "id": "vehicle_rental",
+        "labelEn": "Vehicle rental",
+        "labelFr": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "events_creative",
+        "labelEn": "Events & creative",
+        "labelFr": "Événementiel et création",
+        "path": "events_creative"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["scooter_rental"],
+    "keywords": [],
+    "locationText": null,
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": ["unreachable_by_phone"],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

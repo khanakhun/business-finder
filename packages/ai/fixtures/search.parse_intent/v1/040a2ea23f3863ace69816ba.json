@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "trouve 50 cafés à Saint-Martin",
+    "language": "fr",
+    "defaultCountry": "MF",
+    "candidates": [
+      {
+        "id": "surf_shop",
+        "labelEn": "Surf shop",
+        "labelFr": "Surf shop",
+        "path": "retail_shopping › fashion › surf_shop"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "accountant",
+        "labelEn": "Accountant",
+        "labelFr": "Expert-comptable",
+        "path": "professional_services › accountant"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      },
+      {
+        "id": "hostel",
+        "labelEn": "Hostel",
+        "labelFr": "Auberge de jeunesse",
+        "path": "lodging › hostel"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "picture_framing",
+        "labelEn": "Picture framing",
+        "labelFr": "Encadrement",
+        "path": "events_creative › arts_crafts › picture_framing"
+      },
+      {
+        "id": "cinema",
+        "labelEn": "Cinema",
+        "labelFr": "Cinéma",
+        "path": "tourism_leisure › attractions_entertainment › cinema"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "art_school",
+        "labelEn": "Art & craft classes",
+        "labelFr": "Cours d'art et ateliers créatifs",
+        "path": "education › art_school"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["cafe"],
+    "keywords": [],
+    "locationText": "Saint-Martin",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": 50,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

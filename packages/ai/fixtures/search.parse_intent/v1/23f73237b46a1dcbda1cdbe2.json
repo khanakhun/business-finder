@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "car and scooter rentals near Saint-Jean airport",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "professional_services",
+        "labelEn": "Professional services",
+        "labelFr": "Services professionnels",
+        "path": "professional_services"
+      },
+      {
+        "id": "car_rental",
+        "labelEn": "Car rental",
+        "labelFr": "Location de voitures",
+        "path": "automotive_transport › vehicle_rental › car_rental"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "mobile_hairdresser",
+        "labelEn": "Mobile hairdresser",
+        "labelFr": "Coiffure à domicile",
+        "path": "beauty_wellness › hair_services › mobile_hairdresser"
+      },
+      {
+        "id": "hurricane_shutters",
+        "labelEn": "Hurricane shutters & closures",
+        "labelFr": "Volets anticycloniques et fermetures",
+        "path": "home_construction › finishing_trades › hurricane_shutters"
+      },
+      {
+        "id": "health_medical",
+        "labelEn": "Health & medical",
+        "labelFr": "Santé",
+        "path": "health_medical"
+      },
+      {
+        "id": "sports_fitness",
+        "labelEn": "Sports & fitness",
+        "labelFr": "Sport et fitness",
+        "path": "sports_fitness"
+      },
+      {
+        "id": "manufacturer",
+        "labelEn": "Manufacturer",
+        "labelFr": "Fabricant",
+        "path": "industry_trade › manufacturer"
+      },
+      {
+        "id": "bike_rental",
+        "labelEn": "Bike rental",
+        "labelFr": "Location de vélos",
+        "path": "automotive_transport › vehicle_rental › bike_rental"
+      },
+      {
+        "id": "cinema",
+        "labelEn": "Cinema",
+        "labelFr": "Cinéma",
+        "path": "tourism_leisure › attractions_entertainment › cinema"
+      },
+      {
+        "id": "vehicle_rental",
+        "labelEn": "Vehicle rental",
+        "labelFr": "Location de véhicules",
+        "path": "automotive_transport › vehicle_rental"
+      },
+      {
+        "id": "arts_crafts",
+        "labelEn": "Arts & crafts",
+        "labelFr": "Arts et artisanat",
+        "path": "events_creative › arts_crafts"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["car_rental", "scooter_rental"],
+    "keywords": [],
+    "locationText": "Saint-Jean airport",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

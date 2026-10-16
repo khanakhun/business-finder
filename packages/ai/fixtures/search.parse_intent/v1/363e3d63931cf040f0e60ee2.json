@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "boulangerie a gustavia sans site web",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "beauty_services",
+        "labelEn": "Beauty care",
+        "labelFr": "Esthétique",
+        "path": "beauty_wellness › beauty_services"
+      },
+      {
+        "id": "bakery",
+        "labelEn": "Bakery",
+        "labelFr": "Boulangerie-pâtisserie",
+        "path": "food_drink › bakery"
+      },
+      {
+        "id": "marketing_agency",
+        "labelEn": "Marketing agency",
+        "labelFr": "Agence de communication",
+        "path": "technology_media › marketing_agency"
+      },
+      {
+        "id": "speech_therapist",
+        "labelEn": "Speech therapist",
+        "labelFr": "Orthophoniste",
+        "path": "health_medical › paramedical › speech_therapist"
+      },
+      {
+        "id": "auto_body",
+        "labelEn": "Body shop",
+        "labelFr": "Carrosserie",
+        "path": "automotive_transport › automotive_services › auto_body"
+      },
+      {
+        "id": "electronics",
+        "labelEn": "Electronics",
+        "labelFr": "High-tech",
+        "path": "retail_shopping › electronics"
+      },
+      {
+        "id": "restaurant",
+        "labelEn": "Restaurant",
+        "labelFr": "Restaurant",
+        "path": "food_drink › restaurant"
+      },
+      {
+        "id": "condominium_manager",
+        "labelEn": "Condominium manager",
+        "labelFr": "Syndic de copropriété",
+        "path": "real_estate › condominium_manager"
+      },
+      {
+        "id": "septic_service",
+        "labelEn": "Septic & drainage service",
+        "labelFr": "Assainissement",
+        "path": "home_services › repairs_maintenance › septic_service"
+      },
+      {
+        "id": "cafe",
+        "labelEn": "Café",
+        "labelFr": "Café",
+        "path": "food_drink › cafe"
+      },
+      {
+        "id": "food_drink",
+        "labelEn": "Food & drink",
+        "labelFr": "Restauration",
+        "path": "food_drink"
+      },
+      {
+        "id": "quick_service",
+        "labelEn": "Quick service",
+        "labelFr": "Restauration rapide",
+        "path": "food_drink › quick_service"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bakery"],
+    "keywords": [],
+    "locationText": "gustavia",
+    "filters": {
+      "website": "none",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

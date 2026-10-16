@@ -1,0 +1,118 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "cours pour enfants à Gustavia",
+    "language": "fr",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "finishing_trades",
+        "labelEn": "Finishing trades",
+        "labelFr": "Second œuvre",
+        "path": "home_construction › finishing_trades"
+      },
+      {
+        "id": "language_school",
+        "labelEn": "Language school",
+        "labelFr": "École de langues",
+        "path": "education › language_school"
+      },
+      {
+        "id": "tutoring",
+        "labelEn": "Tutoring",
+        "labelFr": "Soutien scolaire",
+        "path": "education › tutoring"
+      },
+      {
+        "id": "music_school",
+        "labelEn": "Music school",
+        "labelFr": "École de musique",
+        "path": "education › music_school"
+      },
+      {
+        "id": "sailing_school",
+        "labelEn": "Sailing school",
+        "labelFr": "École de voile",
+        "path": "marine_nautical › water_sports › sailing_school"
+      },
+      {
+        "id": "education",
+        "labelEn": "Education & training",
+        "labelFr": "Enseignement et formation",
+        "path": "education"
+      },
+      {
+        "id": "fashion_boutique",
+        "labelEn": "Fashion boutique",
+        "labelFr": "Boutique de prêt-à-porter",
+        "path": "retail_shopping › fashion › fashion_boutique"
+      },
+      {
+        "id": "computer_repair",
+        "labelEn": "Computer & phone repair",
+        "labelFr": "Réparation informatique et téléphonie",
+        "path": "technology_media › computer_repair"
+      },
+      {
+        "id": "design_engineering",
+        "labelEn": "Design & engineering",
+        "labelFr": "Conception et ingénierie",
+        "path": "home_construction › design_engineering"
+      },
+      {
+        "id": "farm",
+        "labelEn": "Farm",
+        "labelFr": "Exploitation agricole",
+        "path": "industry_trade › farm"
+      },
+      {
+        "id": "currency_exchange",
+        "labelEn": "Currency exchange & money transfer",
+        "labelFr": "Bureau de change et transfert d'argent",
+        "path": "finance_insurance › currency_exchange"
+      },
+      {
+        "id": "scuba_diving",
+        "labelEn": "Scuba diving",
+        "labelFr": "Plongée sous-marine",
+        "path": "marine_nautical › water_sports › scuba_diving"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": [],
+    "keywords": [],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": {
+      "question": "Quel type voulez-vous dire ?",
+      "options": ["Écoles de musique", "Écoles de langues", "Écoles de voile", "Soutien scolaire"]
+    },
+    "confidence": 0.4,
+    "warnings": []
+  }
+}

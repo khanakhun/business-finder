@@ -1,0 +1,115 @@
+{
+  "task": "search.parse_intent",
+  "promptVersion": 1,
+  "input": {
+    "prompt": "rooftop bars in Gustavia",
+    "language": "en",
+    "defaultCountry": "BL",
+    "candidates": [
+      {
+        "id": "boating_services",
+        "labelEn": "Boating services",
+        "labelFr": "Services nautiques",
+        "path": "marine_nautical › boating_services"
+      },
+      {
+        "id": "bar",
+        "labelEn": "Bar",
+        "labelFr": "Bar",
+        "path": "food_drink › bars_nightlife › bar"
+      },
+      {
+        "id": "bars_nightlife",
+        "labelEn": "Bars & nightlife",
+        "labelFr": "Bars et vie nocturne",
+        "path": "food_drink › bars_nightlife"
+      },
+      {
+        "id": "scooter_rental",
+        "labelEn": "Scooter rental",
+        "labelFr": "Location de scooters",
+        "path": "automotive_transport › vehicle_rental › scooter_rental"
+      },
+      {
+        "id": "kids_activities",
+        "labelEn": "Kids activities",
+        "labelFr": "Activités pour enfants",
+        "path": "tourism_leisure › attractions_entertainment › kids_activities"
+      },
+      {
+        "id": "beach_club",
+        "labelEn": "Beach club",
+        "labelFr": "Beach club",
+        "path": "food_drink › bars_nightlife › beach_club"
+      },
+      {
+        "id": "ophthalmologist",
+        "labelEn": "Ophthalmologist",
+        "labelFr": "Ophtalmologue",
+        "path": "health_medical › medical_specialists › ophthalmologist"
+      },
+      {
+        "id": "wellness_center",
+        "labelEn": "Wellness center",
+        "labelFr": "Centre de bien-être",
+        "path": "beauty_wellness › wellness › wellness_center"
+      },
+      {
+        "id": "shoe_repair",
+        "labelEn": "Shoe repair & key cutting",
+        "labelFr": "Cordonnerie",
+        "path": "home_services › personal_services › shoe_repair"
+      },
+      {
+        "id": "wine_bar",
+        "labelEn": "Wine bar",
+        "labelFr": "Bar à vins",
+        "path": "food_drink › bars_nightlife › wine_bar"
+      },
+      {
+        "id": "nightclub",
+        "labelEn": "Nightclub",
+        "labelFr": "Discothèque",
+        "path": "food_drink › bars_nightlife › nightclub"
+      },
+      {
+        "id": "appliance_store",
+        "labelEn": "Appliance store",
+        "labelFr": "Magasin d'électroménager",
+        "path": "retail_shopping › home_retail › appliance_store"
+      }
+    ]
+  },
+  "output": {
+    "mode": "both",
+    "categoryIds": ["bar"],
+    "keywords": ["rooftop"],
+    "locationText": "Gustavia",
+    "filters": {
+      "website": "any",
+      "minRating": null,
+      "maxRating": null,
+      "minReviews": null,
+      "maxReviews": null,
+      "hasEmail": null,
+      "hasPhone": null,
+      "emailVerified": null,
+      "languages": [],
+      "priceLevels": [],
+      "painSignals": [],
+      "minScore": null,
+      "tiers": [],
+      "pipelineStatuses": [],
+      "tags": [],
+      "addedWithinDays": null
+    },
+    "sort": {
+      "field": "relevance",
+      "direction": "desc"
+    },
+    "limit": null,
+    "needsClarification": null,
+    "confidence": 0.9,
+    "warnings": []
+  }
+}

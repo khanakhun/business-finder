@@ -1239,7 +1239,8 @@
       "title": "Historique",
       "empty": "Rien ne s’est encore passé.",
       "more": "Afficher plus ancien",
-      "updated": "{count, plural, one {# information mise} other {# informations mises}} à jour sur l’entreprise"
+      "updated": "{count, plural, one {# information mise} other {# informations mises}} à jour sur l’entreprise",
+      "scoreUpdated": "Niveau passé de {from} à {to}"
     },
     "duplicates": {
       "label": "Doublons possibles",

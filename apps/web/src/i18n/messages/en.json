@@ -1239,7 +1239,8 @@
       "title": "Timeline",
       "empty": "Nothing has happened yet.",
       "more": "Show older",
-      "updated": "Updated {count, plural, one {# detail} other {# details}} of the business"
+      "updated": "Updated {count, plural, one {# detail} other {# details}} of the business",
+      "scoreUpdated": "Tier moved from {from} to {to}"
     },
     "duplicates": {
       "label": "Possible duplicates",

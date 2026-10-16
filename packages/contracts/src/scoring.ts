@@ -946,6 +946,15 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
           message: `${value} is not a value of ${key}`,
         });
       }
+      for (const locale of ['en', 'fr'] as const) {
+        const unknown = unknownPlaceholders(texts[value]?.[locale] ?? '');
+        if (unknown.length > 0) {
+          problems.push({
+            path: ['reasonTemplates', key, value, locale],
+            message: `Unknown placeholder ${unknown.join(', ')} (only {value})`,
+          });
+        }
+      }
     }
   }
   const ids = new Set<string>([DO_NOT_CONTACT_GATE_ID]);
@@ -957,6 +966,15 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     conditionProblems(gate.when, ['gates', i, 'when'], problems);
   }
   return problems;
+}
+
+/** The placeholders a reason template may use. */
+export const REASON_PLACEHOLDERS = ['{value}'] as const;
+
+/** Placeholders of a reason template other than `{value}` (a typo would be shown to the user as is). */
+export function unknownPlaceholders(template: string): string[] {
+  const found = template.match(/\{[^{}]*\}/g) ?? [];
+  return [...new Set(found.filter((token) => !(REASON_PLACEHOLDERS as readonly string[]).includes(token)))];
 }
 
 /** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path). */

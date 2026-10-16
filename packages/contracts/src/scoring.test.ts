@@ -10,6 +10,7 @@ import {
   SCORED_PAIN_TAGS,
   ScoreResultSchema,
   ScoringProfileConfigSchema,
+  unknownPlaceholders,
 } from './scoring.ts';
 
 /** Every key ever released (append-only: a stored snapshot or profile version may name any of them). */
@@ -236,6 +237,25 @@ describe('profile problems', () => {
     ).toEqual([['missing', 'has_phone']]);
     // A zero weight needs nothing.
     expect(profileProblems(config({ weights: { has_website: 10, rating_avg: 0 } }))).toEqual([]);
+  });
+
+  it('accepts only the {value} placeholder in reason templates', () => {
+    expect(unknownPlaceholders('{value} reviews')).toEqual([]);
+    expect(unknownPlaceholders('{valeur} avis, {value}, {valeur}')).toEqual(['{valeur}']);
+    expect(unknownPlaceholders('no placeholder {} here')).toEqual(['{}']);
+    const problems = profileProblems(
+      config({
+        weights: { review_count_log: 10 },
+        transforms: { review_count_log: { kind: 'linear', min: 0, max: 4 } },
+        reasonTemplates: { review_count_log: { value: { en: '{value} reviews', fr: '{nombre} avis' } } },
+      }),
+    );
+    expect(problems).toEqual([
+      {
+        path: ['reasonTemplates', 'review_count_log', 'value', 'fr'],
+        message: 'Unknown placeholder {nombre} (only {value})',
+      },
+    ]);
   });
 
   it('turns problems into schema issues at their paths', () => {

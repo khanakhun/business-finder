@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/turbo/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      // Tests assert these generated root files match the schemas, so editing them must bust the cache.
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/ENVIRONMENT.md", "$TURBO_ROOT$/.env.example"]
+    }
+  }
+}

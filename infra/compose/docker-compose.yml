@@ -1,0 +1,145 @@
+# Local development stack. Start it with `pnpm infra:up` (scripts/infra.mjs), which sets the project name and
+# the BF_*_PORT variables from BF_PORT_OFFSET so several checkouts can run side by side.
+# Credentials below are local-only defaults; override them in .env.
+#
+# Ports bind to 127.0.0.1 so the dev databases are never reachable from the network.
+
+name: ${COMPOSE_PROJECT_NAME:-bf}
+
+services:
+  postgres:
+    build: ../docker/postgres
+    image: bf-postgres:17-3.5-pgvector-0.8.7
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bf_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-bf}
+      BF_SITES_RO_PASSWORD: ${BF_SITES_RO_PASSWORD:-bf_sites_ro_local_only}
+    ports:
+      - 127.0.0.1:${BF_PG_PORT:-5432}:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Healthcheck (pg_isready) is defined in the image.
+
+  valkey:
+    image: valkey/valkey:8.1.10-alpine
+    # AOF so queued BullMQ jobs survive a restart.
+    command: [valkey-server, --appendonly, 'yes']
+    ports:
+      - 127.0.0.1:${BF_VALKEY_PORT:-6379}:6379
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: [CMD, valkey-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # S3-compatible object storage.
+  # DECISION(BF-002): RustFS instead of MinIO — MinIO no longer publishes community container images
+  # (minio/minio and quay.io/minio/minio are gone). Production uses a managed S3-compatible service.
+  s3:
+    image: rustfs/rustfs:1.0.1
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID:-bf_local_only}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY:-bf_local_only_secret}
+      RUSTFS_CONSOLE_ENABLE: 'true'
+    ports:
+      - 127.0.0.1:${BF_S3_PORT:-9000}:9000
+      - 127.0.0.1:${BF_S3_CONSOLE_PORT:-9001}:9001
+    volumes:
+      - s3-data:/data
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:9000/health]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot: creates the buckets (idempotent) and enables versioning on bf-assets.
+  s3-init:
+    image: amazon/aws-cli:2.38.1
+    depends_on:
+      s3:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-bf_local_only}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-bf_local_only_secret}
+      AWS_DEFAULT_REGION: ${S3_REGION:-us-east-1}
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        s3="aws --endpoint-url http://s3:9000 s3api"
+        for bucket in bf-assets bf-artifacts bf-sites; do
+          $$s3 head-bucket --bucket "$$bucket" 2>/dev/null || $$s3 create-bucket --bucket "$$bucket" >/dev/null
+          echo "bucket $$bucket ready"
+        done
+        $$s3 put-bucket-versioning --bucket bf-assets --versioning-configuration Status=Enabled
+        echo "versioning enabled on bf-assets"
+    restart: 'no'
+
+  mailpit:
+    image: axllent/mailpit:v1.31.5
+    ports:
+      - 127.0.0.1:${BF_SMTP_PORT:-1025}:1025
+      - 127.0.0.1:${BF_MAILPIT_UI_PORT:-8025}:8025
+    volumes:
+      - mailpit-data:/data
+    environment:
+      MP_DATABASE: /data/mailpit.db
+    # Healthcheck (`mailpit readyz`) is defined in the image.
+
+  # --- profile: scraper (FEATURE_MAPS_SCRAPER) ---------------------------------------------------------
+  # No healthcheck: the image has no HTTP client; infra.mjs waits for it to be running.
+  gmaps-scraper:
+    image: gosom/google-maps-scraper:v1.18.1
+    profiles: [scraper]
+    command: [-web, -addr, ':8080', -data-folder, /gmapsdata]
+    ports:
+      - 127.0.0.1:${BF_SCRAPER_PORT:-8080}:8080
+    volumes:
+      - gmaps-data:/gmapsdata
+
+  # --- profile: verify (email verification, BF-028; needs outbound port 25) -----------------------------
+  reacher:
+    image: reacherhq/backend:v0.11.9
+    profiles: [verify]
+    ports:
+      - 127.0.0.1:${BF_REACHER_PORT:-8081}:8080
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/version]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # --- profile: observability (BF-005) -----------------------------------------------------------------
+  # No healthcheck: distroless image without a shell; infra.mjs waits for it to be running.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    profiles: [observability]
+    command: [--config, /etc/otelcol/config.yaml]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - 127.0.0.1:${BF_OTLP_GRPC_PORT:-4317}:4317
+      - 127.0.0.1:${BF_OTLP_HTTP_PORT:-4318}:4318
+    depends_on:
+      jaeger:
+        condition: service_healthy
+
+  jaeger:
+    image: jaegertracing/jaeger:2.22.0
+    profiles: [observability]
+    ports:
+      - 127.0.0.1:${BF_JAEGER_UI_PORT:-16686}:16686
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:13133/status]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
+  valkey-data:
+  s3-data:
+  mailpit-data:
+  gmaps-data:

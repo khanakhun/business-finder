@@ -14,11 +14,20 @@
     "lint:root": "biome check ./*.json ./*.jsonc ./*.mjs ./.vscode ./scripts",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:root": "node --test 'scripts/**/*.test.mjs'",
     "test:int": "turbo run test:int",
     "e2e": "turbo run e2e",
     "verify": "turbo run lint typecheck test",
     "format": "biome check --write .",
-    "clean": "turbo run clean && rm -rf .turbo node_modules"
+    "clean": "turbo run clean && rm -rf .turbo node_modules",
+    "infra:up": "node scripts/infra.mjs up",
+    "infra:down": "node scripts/infra.mjs down",
+    "infra:reset": "node scripts/infra.mjs reset",
+    "infra:logs": "node scripts/infra.mjs logs",
+    "infra:status": "node scripts/infra.mjs status",
+    "env:check": "node packages/config/src/cli/check.ts",
+    "env:doc": "node packages/config/src/cli/generate.ts doc",
+    "env:example": "node packages/config/src/cli/generate.ts example"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

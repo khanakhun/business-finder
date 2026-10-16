@@ -80,12 +80,12 @@ docs/ENVIRONMENT.md          # generated table: name, app(s), required, default,
 - Manual (documented in PR): `pnpm infra:up` healthy; `docker compose ps`; extension availability query; MinIO buckets listed; Mailpit UI reachable; second stack with `BF_PORT_OFFSET=10` up concurrently.
 
 ## Acceptance criteria
-- [ ] `pnpm infra:up` → postgres, valkey, minio, mailpit healthy; `minio-init` exits 0 and buckets exist.
-- [ ] `SELECT name FROM pg_available_extensions WHERE name IN ('postgis','vector','pg_trgm','unaccent','ltree','citext')` returns all six.
-- [ ] `bf_sites_ro` role exists and cannot write.
-- [ ] Profiles `scraper`, `verify`, `observability` start their services when requested.
-- [ ] Parallel stacks with different offsets work.
-- [ ] `pnpm env:check api` prints a clear report; `.env.example` and `docs/ENVIRONMENT.md` are generated and committed.
+- [x] `pnpm infra:up` → postgres, valkey, minio, mailpit healthy; `minio-init` exits 0 and buckets exist.
+- [x] `SELECT name FROM pg_available_extensions WHERE name IN ('postgis','vector','pg_trgm','unaccent','ltree','citext')` returns all six.
+- [x] `bf_sites_ro` role exists and cannot write.
+- [x] Profiles `scraper`, `verify`, `observability` start their services when requested.
+- [x] Parallel stacks with different offsets work.
+- [x] `pnpm env:check api` prints a clear report; `.env.example` and `docs/ENVIRONMENT.md` are generated and committed.
 
 ## Agent prompt
 ```text
@@ -112,3 +112,26 @@ different COMPOSE_PROJECT_NAME; paste the outputs in the PR.
 - docs/ARCHITECTURE.md §3, §15, §17 · ADR-0003 · ADR-0014
 - PostGIS Docker: https://hub.docker.com/r/postgis/postgis · pgvector install: https://github.com/pgvector/pgvector#installation
 - gosom scraper: https://github.com/gosom/google-maps-scraper · Reacher: https://github.com/reacherhq/check-if-email-exists
+
+## Implementation notes
+- **Images** (all pinned): `postgis/postgis:17-3.5-alpine` + pgvector **0.8.7** built from a SHA-256-checked
+  source tarball (`OPTFLAGS=""` for portable binaries) · `valkey/valkey:8.1.10-alpine` (AOF) ·
+  `rustfs/rustfs:1.0.1` · `amazon/aws-cli:2.38.1` (bucket init) · `axllent/mailpit:v1.31.5` ·
+  `gosom/google-maps-scraper:v1.18.1` · `reacherhq/backend:v0.11.9` · `otel/opentelemetry-collector-contrib:0.162.0`
+  · `jaegertracing/jaeger:2.22.0`.
+- **MinIO → RustFS.** MinIO no longer publishes community images (`minio/minio`, `quay.io/minio/minio` are gone).
+  RustFS is S3-compatible (Apache-2.0), same ports, supports bucket versioning. Services are named `s3` / `s3-init`.
+- **Alpine + source-built pgvector.** The Debian `17-3.5` tag is still on bullseye whose PGDG apt repo was retired.
+- **`00-roles.sh`, not `.sql`**: the read-only password comes from the environment. `bf_sites_ro` has
+  `default_transaction_read_only=on`, CONNECT and schema USAGE only — no table privileges: per ADR-0004 it reads
+  only publication/version tables, which BF-035's migration grants explicitly.
+- **No dotenv dependency**: Node 24's `util.parseEnv` parses `.env` files in both `infra.mjs` and `@bf/config`.
+- **Ports bind to 127.0.0.1.** `infra:up` pre-checks ports and suggests a `BF_PORT_OFFSET` on conflict; it waits
+  for healthchecks (`--wait`) and for `s3-init` to exit 0. Scraper and OTel collector images have no HTTP client,
+  so they have no healthcheck (waited on as "running").
+- **`OTEL_EXPORTER_OTLP_ENDPOINT`** is written only when the `observability` profile is started.
+- **`intel` app schema** added so the Python service's variables (e.g. `INTEL_PORT`) are declared too (BF-008 mirrors it).
+- Generated-file freshness is enforced by `@bf/config` tests (with a package `turbo.json` adding the root files as
+  inputs), so `pnpm verify` fails when `docs/ENVIRONMENT.md` / `.env.example` are stale; `--check` flags exist for CI.
+- Biome boundary rule tightened: `../../apps/**`-style patterns instead of `**/apps/**`, which matched
+  `@bf/config`'s own `src/apps/` folder.

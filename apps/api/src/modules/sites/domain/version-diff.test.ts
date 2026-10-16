@@ -59,11 +59,8 @@ describe('diffSpecs', () => {
       before: hero.props.title.fr,
       after: 'Nouveau titre',
     });
-    expect(
-      diff.texts.some(
-        (text) => text.path[0] === 'pages' && text.path[1] === 'services' && text.after === null,
-      ),
-    ).toBe(true);
+    // The removed page's texts belong to its removal, not to the edits.
+    expect(diff.texts.some((text) => text.path[1] === 'services')).toBe(false);
     expect(diff.sections).toContain('navigation');
     expect(diff.summary).toMatch(/^1 page removed, .*1 block changed, \d+ texts edited, navigation updated$/);
   });
@@ -81,5 +78,56 @@ describe('diffSpecs', () => {
     const [edit] = diffSpecs(before, long).texts;
     expect(edit?.after).toHaveLength(120);
     expect(edit?.after?.endsWith('…')).toBe(true);
+  });
+
+  it('ignores key order (stored specs come back from jsonb with their keys reordered)', () => {
+    const sortKeys = (value: unknown): unknown =>
+      Array.isArray(value)
+        ? value.map(sortKeys)
+        : value && typeof value === 'object'
+          ? Object.fromEntries(
+              Object.entries(value)
+                .sort(([a], [b]) => a.length - b.length || (a < b ? -1 : 1))
+                .map(([key, item]) => [key, sortKeys(item)]),
+            )
+          : value;
+    const reordered = sortKeys(salon()) as SiteSpec;
+    const diff = diffSpecs(reordered, salon());
+    expect(diff.summary).toBe('No change');
+    expect(diff.sections).toEqual([]);
+  });
+
+  it('lists added pages and blocks, and a block moved to another page', () => {
+    const before = salon();
+    const services = before.pages[1];
+    const hero = services?.blocks[0];
+    if (!services || !hero) throw new Error('no page');
+    let after = apply(before, {
+      op: 'addPage',
+      page: {
+        ...structuredClone(services),
+        id: 'offers',
+        slug: 'offres',
+        blocks: [{ ...structuredClone(hero), id: 'hero-offers1' }],
+      },
+    }).spec;
+    const cta = before.pages[0]?.blocks.at(-1);
+    if (!cta) throw new Error('no block');
+    after = apply(after, {
+      op: 'moveBlock',
+      pageId: 'home',
+      blockId: cta.id,
+      toPageId: 'contact',
+      index: 1,
+    }).spec;
+    const diff = diffSpecs(before, after);
+    expect(diff.pages.added).toEqual(['offers']);
+    expect(diff.blocks.added).toEqual([{ pageId: 'offers', blockId: 'hero-offers1', type: 'hero' }]);
+    expect(diff.blocks.moved).toEqual([
+      expect.objectContaining({ blockId: cta.id, pageId: 'contact', fromPageId: 'home', toIndex: 1 }),
+    ]);
+    // The new page's texts are part of the addition, not edits.
+    expect(diff.texts).toEqual([]);
+    expect(diff.summary).toBe('1 page added, 1 block added, 1 block moved');
   });
 });

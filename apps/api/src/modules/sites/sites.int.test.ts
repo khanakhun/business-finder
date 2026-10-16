@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { encodeCursor, newId } from '@bf/contracts';
 import { closeDb, createDb, type DbClient } from '@bf/db';
 import {
   businesses,
@@ -10,9 +11,12 @@ import {
   sites,
   siteVersions,
 } from '@bf/db/schema';
+import { QUEUES } from '@bf/queue';
 import { aBusiness } from '@bf/testing';
+import { getQueueToken } from '@nestjs/bullmq';
 import type { INestApplicationContext } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import type { Queue } from 'bullmq';
+import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, createTestWorker, type TestApp } from '../../../test/create-test-app.ts';
 import { FakeMailer } from '../../../test/fake-mailer.ts';
@@ -23,10 +27,10 @@ import {
   signUpVerified,
 } from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
-import { SiteCommands } from './index.ts';
+import { SITES_EXPIRY_AUTOSTART, SitesExpiryScheduler } from './infrastructure/bullmq-site-jobs.ts';
 
 // Sites (BF-035) end to end: roles and workspaces, versions with optimistic concurrency and immutability in the
-// database, publications, the renderer's read-only view, expiry, rollback, archive and diffs.
+// database, publications, the renderer's read-only views, expiry through the worker, rollback, archive and diffs.
 
 const fixtures = join(
   dirname(createRequire(import.meta.url).resolve('@bf/site-schema/package.json')),
@@ -34,6 +38,10 @@ const fixtures = join(
 );
 const salonSpec = (): Record<string, unknown> =>
   JSON.parse(readFileSync(join(fixtures, 'salon-gustavia.json'), 'utf8'));
+const theme = (radius: string) => ({ ...(salonSpec().theme as object), radius });
+const NOW = '2026-10-14T12:00:00.000Z';
+const ENV = { SITES_BASE_DOMAIN: 'sites.test', SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test' };
+const SLUG = /^[a-z0-9-]+-[a-z2-9]{6}$/;
 
 const mailer = new FakeMailer();
 let t: TestApp;
@@ -54,6 +62,12 @@ async function track(overrides: Parameters<typeof aBusiness>[0] = {}, workspace 
   return business.id;
 }
 
+async function newSite(name: string): Promise<{ id: string; v1: string }> {
+  const businessId = await track({ displayName: name });
+  const { body } = await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201);
+  return { id: body.id, v1: body.currentVersion.id };
+}
+
 /** The database's own error message (Drizzle wraps it: "Failed query: …", the cause is Postgres's). */
 async function dbError(query: PromiseLike<unknown>): Promise<string> {
   try {
@@ -65,25 +79,34 @@ async function dbError(query: PromiseLike<unknown>): Promise<string> {
   return 'no error';
 }
 
-/** A connection as the renderer's read-only role, to the test database. */
-function rendererDb(): DbClient {
+/** A connection as the renderer's role, to the test database (read-only by default, like the renderer's). */
+function rendererDb(readOnly = true): DbClient {
   const url = new URL(t.env.DATABASE_URL);
   url.username = 'bf_sites_ro';
   url.password = 'bf_sites_ro_test_only';
-  return createDb({ url: url.href, readOnly: true });
+  return createDb({ url: url.href, max: 1, readOnly });
 }
 
+const eventsOf = async (siteId: string) =>
+  (
+    await db
+      .select({ type: outboxEvents.type })
+      .from(outboxEvents)
+      .where(sql`${outboxEvents.payload}->>'siteId' = ${siteId}`)
+  ).map((event) => event.type);
+
 beforeAll(async () => {
-  t = await createTestApp({
-    mailer,
-    valkeyDb: 20,
-    env: { SITES_BASE_DOMAIN: 'sites.test', SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test' },
-  });
+  t = await createTestApp({ mailer, valkeyDb: 20, env: ENV });
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, {
     mailer,
-    env: { SITES_BASE_DOMAIN: 'sites.test', SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test' },
+    env: ENV,
+    // The system clock: the outbox relay delivers events once their time has come (a fixed past clock never does).
+    // The test asks for the hourly expiry itself.
+    overrides: [{ token: SITES_EXPIRY_AUTOSTART, value: false }],
   });
+  for (const queue of [QUEUES.sitesExpire.name, QUEUES.sitesRevalidate.name])
+    await worker.get<Queue>(getQueueToken(queue)).obliterate({ force: true });
   owner = await signUpVerified(t, mailer, 'owner@sites.test', 'Olga Owner');
   org = await createWorkspace(owner, 'Agence Sites');
   member = (await inviteAndJoin(t, mailer, owner, 'member@sites.test', 'member')).client;
@@ -98,34 +121,25 @@ afterAll(async () => {
 });
 
 describe('sites and versions', () => {
-  it('creates a business’s site once (idempotent), with a slug from its name and locality', async () => {
+  it('creates a business’s site once, with an unguessable slug, and refuses a spec for an existing site', async () => {
     const businessId = await track();
     const created = await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201);
     expect(created.body).toMatchObject({
       businessId,
       businessName: 'Salon Lumière',
-      slug: 'salon-lumiere-gustavia',
       status: 'draft',
       currentVersion: { versionNumber: 1 },
       currentVersionSummary: { authorType: 'user', changeSummary: 'First version' },
       publications: [],
     });
+    expect(created.body.slug).toMatch(/^salon-lumiere-gustavia-[a-z2-9]{6}$/);
     const again = await member.post('/v1/sites', { businessId }).expect(200);
     expect(again.body.id).toBe(created.body.id);
+    const conflict = await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(409);
+    expect(conflict.body).toMatchObject({ code: 'CONFLICT', reason: 'SITE_EXISTS' });
     const other = await member.post('/v1/sites', { businessId, forceNew: true }).expect(201);
-    expect(other.body).toMatchObject({ slug: 'salon-lumiere-gustavia-2', currentVersion: null });
-  });
-
-  it('checks roles and workspaces: a viewer reads, an outsider sees nothing', async () => {
-    const businessId = await track({ displayName: 'Viewer Test' });
-    await viewer.post('/v1/sites', { businessId }).expect(403);
-    const { body } = await member.post('/v1/sites', { businessId }).expect(201);
-    await viewer.get(`/v1/sites/${body.id}`).expect(200);
-    await viewer.post(`/v1/sites/${body.id}/archive`, {}).expect(403);
-    await outsider.get(`/v1/sites/${body.id}`).expect(404);
-    await outsider.post('/v1/sites', { businessId }).expect(404);
-    const listed = await outsider.get('/v1/sites').expect(200);
-    expect(listed.body.items).toEqual([]);
+    expect(other.body.slug).toMatch(SLUG);
+    expect(other.body.slug).not.toBe(created.body.slug);
   });
 
   it('refuses an invalid spec with each error at its path and code, and creates no site', async () => {
@@ -140,28 +154,21 @@ describe('sites and versions', () => {
     expect((await member.get(`/v1/sites?businessId=${businessId}`).expect(200)).body.items).toEqual([]);
   });
 
-  it('saves versions only from the current one (409 with the current id), and applies operations atomically', async () => {
-    const businessId = await track({ displayName: 'Concurrency' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
-    const v1 = site.currentVersion.id as string;
+  it('saves versions only from the current one (409 with its id) and applies operations atomically', async () => {
+    const site = await newSite('Concurrency');
+    // The same spec again: jsonb reorders keys, the summary still says nothing changed.
     const v2 = await member
-      .post(`/v1/sites/${site.id}/versions`, {
-        spec: salonSpec(),
-        baseVersionId: v1,
-        changeSummary: 'Same again',
-      })
+      .post(`/v1/sites/${site.id}/versions`, { spec: salonSpec(), baseVersionId: site.v1 })
       .expect(201);
-    expect(v2.body).toMatchObject({ versionNumber: 2, parentVersionId: v1, changeSummary: 'Same again' });
-    // An edit started from v1 loses the race: a conflict with the current version, nothing written.
+    expect(v2.body).toMatchObject({ versionNumber: 2, parentVersionId: site.v1, changeSummary: 'No change' });
     const stale = await member
-      .post(`/v1/sites/${site.id}/versions`, { spec: salonSpec(), baseVersionId: v1 })
+      .post(`/v1/sites/${site.id}/versions`, { spec: salonSpec(), baseVersionId: site.v1 })
       .expect(409);
     expect(stale.body).toMatchObject({ code: 'SITE_VERSION_CONFLICT', currentVersionId: v2.body.id });
-    // Operations: a new version with an automatic summary; a refused operation writes nothing.
     const v3 = await member
       .post(`/v1/sites/${site.id}/operations`, {
         baseVersionId: v2.body.id,
-        operations: [{ op: 'setTheme', theme: { ...(salonSpec().theme as object), radius: 'full' } }],
+        operations: [{ op: 'setTheme', theme: theme('full') }],
       })
       .expect(201);
     expect(v3.body).toMatchObject({ versionNumber: 3, changeSummary: 'theme updated' });
@@ -184,19 +191,51 @@ describe('sites and versions', () => {
     expect(diff.body).toMatchObject({ summary: 'theme updated', sections: ['theme'] });
   });
 
-  it('keeps versions immutable in the database (only the quality report is set, once)', async () => {
-    const businessId = await track({ displayName: 'Immutable' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
-    const id = site.currentVersion.id as string;
+  it('serializes concurrent edits and creates: one wins, the others conflict or find it', async () => {
+    const site = await newSite('Race');
+    const saves = await Promise.all(
+      Array.from({ length: 6 }, () =>
+        member.post(`/v1/sites/${site.id}/versions`, { spec: salonSpec(), baseVersionId: site.v1 }),
+      ),
+    );
+    expect(saves.map((response) => response.status).sort()).toEqual([201, 409, 409, 409, 409, 409]);
+    const winner = saves.find((response) => response.status === 201)?.body.id;
+    for (const lost of saves.filter((response) => response.status === 409))
+      expect(lost.body.currentVersionId).toBe(winner);
+    const businessId = await track({ displayName: 'Create Race' });
+    const creates = await Promise.all(
+      Array.from({ length: 6 }, () => member.post('/v1/sites', { businessId })),
+    );
+    expect(creates.map((response) => response.status).sort()).toEqual([200, 200, 200, 200, 200, 201]);
+    expect(new Set(creates.map((response) => response.body.id)).size).toBe(1);
+  });
+
+  it('keeps versions immutable in the database: no rewrite, no delete but with the site, quality once', async () => {
+    const site = await newSite('Immutable');
+    const id = site.v1;
+    const changes = [
+      { changeSummary: 'rewritten' },
+      { spec: { schemaVersion: 1 } },
+      { specHash: 'a'.repeat(64) },
+    ];
+    for (const change of changes)
+      expect(await dbError(db.update(siteVersions).set(change).where(eq(siteVersions.id, id)))).toMatch(
+        /immutable/,
+      );
     expect(
       await dbError(
-        db.update(siteVersions).set({ changeSummary: 'rewritten' }).where(eq(siteVersions.id, id)),
+        db.update(siteVersions).set({ quality: sql`'null'::jsonb` }).where(eq(siteVersions.id, id)),
       ),
     ).toMatch(/immutable/);
     await db
       .update(siteVersions)
       .set({ quality: { score: 91 } })
       .where(eq(siteVersions.id, id));
+    const [stored] = await db
+      .select({ quality: siteVersions.quality })
+      .from(siteVersions)
+      .where(eq(siteVersions.id, id));
+    expect(stored?.quality).toEqual({ score: 91 });
     expect(
       await dbError(
         db
@@ -205,190 +244,298 @@ describe('sites and versions', () => {
           .where(eq(siteVersions.id, id)),
       ),
     ).toMatch(/immutable/);
-    expect(
-      await dbError(
-        db.update(siteVersions).set({ quality: null, changeSummary: 'x' }).where(eq(siteVersions.id, id)),
-      ),
-    ).toMatch(/immutable/);
+    expect(await dbError(db.delete(siteVersions).where(eq(siteVersions.id, id)))).toMatch(
+      /deleted only with their site/,
+    );
+    // Deleting the site removes everything at once (published too).
+    await member.post(`/v1/sites/${site.id}/preview`, { versionId: id }).expect(201);
+    await db.delete(sites).where(eq(sites.id, site.id));
+    expect(await db.select().from(siteVersions).where(eq(siteVersions.siteId, site.id))).toEqual([]);
+    expect(await db.select().from(sitePublications).where(eq(sitePublications.siteId, site.id))).toEqual([]);
+  });
+
+  it('pages sites created in the same millisecond exactly once, and refuses a tampered cursor', async () => {
+    const ids: string[] = [];
+    for (const [i, name] of ['Page A', 'Page B', 'Page C'].entries()) {
+      const businessId = await track({ displayName: name });
+      const id = (await member.post('/v1/sites', { businessId }).expect(201)).body.id as string;
+      ids.push(id);
+      await db.execute(
+        sql`UPDATE sites SET created_at = '2030-01-01T00:00:00.1231Z'::timestamptz + make_interval(secs => ${i * 0.0002}) WHERE id = ${id}`,
+      );
+    }
+    const seen: string[] = [];
+    let cursor: string | null = null;
+    do {
+      const page: { body: { items: { id: string }[]; nextCursor: string | null } } = await viewer
+        .get(`/v1/sites?limit=1${cursor ? `&cursor=${cursor}` : ''}`)
+        .expect(200);
+      seen.push(...page.body.items.map((site) => site.id));
+      cursor = page.body.nextCursor;
+    } while (cursor && seen.length < 100);
+    for (const id of ids) expect(seen.filter((seenId) => seenId === id)).toHaveLength(1);
+    const forged = await encodeCursor({ sort: ['2026-10-15T08:00:00.000000Z'], id: "x' OR 1=1" });
+    await viewer.get(`/v1/sites?cursor=${forged}`).expect(422);
+  });
+});
+
+describe('authorization', () => {
+  it('requires the permission on every write, and hides another workspace’s sites and versions', async () => {
+    const site = await newSite('Authorization');
+    const other = await newSite('Other Site');
+    const writes: [string, Record<string, unknown>][] = [
+      ['versions', { spec: salonSpec(), baseVersionId: site.v1 }],
+      ['operations', { baseVersionId: site.v1, operations: [{ op: 'setTheme', theme: theme('sm') }] }],
+      ['rollback', { versionId: site.v1, baseVersionId: site.v1 }],
+      ['preview', { versionId: site.v1 }],
+      ['preview/extend', { days: 1 }],
+      ['unpublish', { environment: 'preview' }],
+      ['archive', {}],
+    ];
+    for (const [path, body] of writes) {
+      await viewer.post(`/v1/sites/${site.id}/${path}`, body).expect(403);
+      await outsider.post(`/v1/sites/${site.id}/${path}`, body).expect(404);
+    }
+    for (const path of ['', '/versions', `/versions/${site.v1}`, `/diff?from=${site.v1}&to=${site.v1}`])
+      await outsider.get(`/v1/sites/${site.id}${path}`).expect(404);
+    expect((await outsider.get('/v1/sites').expect(200)).body.items).toEqual([]);
+    // A version of another site is not this site's.
+    await member.post(`/v1/sites/${site.id}/preview`, { versionId: other.v1 }).expect(404);
+    await member
+      .post(`/v1/sites/${site.id}/rollback`, { versionId: other.v1, baseVersionId: site.v1 })
+      .expect(404);
+    await viewer.get(`/v1/sites/${site.id}/versions/${other.v1}`).expect(404);
+    await viewer.get(`/v1/sites/${site.id}/diff?from=${site.v1}&to=${other.v1}`).expect(404);
   });
 });
 
 describe('publications', () => {
-  it('publishes a preview the renderer reads (read-only), extends it, replaces it and takes it offline', async () => {
-    const businessId = await track({ displayName: 'Publish Test', locality: 'Lorient' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
-    const v1 = site.currentVersion.id as string;
-    await viewer.post(`/v1/sites/${site.id}/preview`, { versionId: v1 }).expect(403);
+  it('publishes a preview the renderer reads, extends it, replaces it and takes it offline (410 data)', async () => {
+    const site = await newSite('Publish Test');
     const published = await member
-      .post(`/v1/sites/${site.id}/preview`, { versionId: v1, expiresInDays: 10 })
+      .post(`/v1/sites/${site.id}/preview`, { versionId: site.v1, expiresInDays: 10 })
       .expect(201);
     expect(published.body).toMatchObject({
       environment: 'preview',
-      hostname: 'publish-test-lorient.sites.test',
-      url: 'https://publish-test-lorient.sites.test/',
       status: 'active',
-      publishedAt: '2026-10-14T12:00:00.000Z',
+      publishedAt: NOW,
       expiresAt: '2026-10-24T12:00:00.000Z',
     });
+    const hostname = published.body.hostname as string;
+    expect(hostname).toMatch(/^publish-test-gustavia-[a-z2-9]{6}\.sites\.test$/);
+    expect(published.body.url).toBe(`https://${hostname}/`);
     expect((await viewer.get(`/v1/sites/${site.id}`).expect(200)).body).toMatchObject({
       status: 'preview',
-      preview: { url: 'https://publish-test-lorient.sites.test/', expiresAt: '2026-10-24T12:00:00.000Z' },
+      preview: { url: `https://${hostname}/`, expiresAt: '2026-10-24T12:00:00.000Z' },
     });
 
     const renderer = rendererDb();
-    try {
-      const rows = await renderer.execute(
-        sql`SELECT hostname, site_id, business_name, agency_name, environment, version_id, noindex, spec->>'schemaVersion' AS v FROM renderer_published_sites WHERE hostname = 'publish-test-lorient.sites.test'`,
+    const view = () =>
+      renderer.execute(
+        sql`SELECT hostname, site_id, status, business_name, agency_name, environment, version_id, noindex, preview_banner, spec->>'schemaVersion' AS v FROM renderer_published_sites WHERE hostname = ${hostname}`,
       );
-      expect(rows).toEqual([
+    try {
+      expect(await view()).toEqual([
         {
-          hostname: 'publish-test-lorient.sites.test',
+          hostname,
           site_id: site.id,
+          status: 'active',
           business_name: 'Publish Test',
           agency_name: 'Agence Sites',
           environment: 'preview',
-          version_id: v1,
+          version_id: site.v1,
           noindex: true,
+          preview_banner: true,
           v: '1',
         },
       ]);
-      // The renderer reads only its view: no table, no write.
-      expect(await dbError(renderer.execute(sql`SELECT count(*) FROM sites`))).toMatch(/permission denied/);
-      expect(
-        await dbError(renderer.execute(sql`UPDATE site_publications SET status = 'unpublished'`)),
-      ).toMatch(/read-only|permission denied/);
+      await member.post(`/v1/sites/${site.id}/preview/extend`, { days: 5 }).expect(200);
+      const v2 = await member
+        .post(`/v1/sites/${site.id}/operations`, {
+          baseVersionId: site.v1,
+          operations: [{ op: 'setTheme', theme: theme('lg') }],
+        })
+        .expect(201);
+      const replaced = await member
+        .post(`/v1/sites/${site.id}/preview`, { versionId: v2.body.id })
+        .expect(201);
+      expect(replaced.body.hostname).toBe(hostname);
+      const rows = await db.select().from(sitePublications).where(eq(sitePublications.siteId, site.id));
+      expect(rows.map((row) => `${row.versionId}:${row.status}`).sort()).toEqual(
+        [`${site.v1}:unpublished`, `${v2.body.id}:active`].sort(),
+      );
+      await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(204);
+      await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(409);
+      // The host is still known (a 410 page with the agency), without its spec.
+      expect(await view()).toEqual([expect.objectContaining({ hostname, status: 'unpublished', v: null })]);
     } finally {
       await closeDb(renderer);
     }
-
-    const extended = await member.post(`/v1/sites/${site.id}/preview/extend`, { days: 5 }).expect(200);
-    expect(extended.body.expiresAt).toBe('2026-10-29T12:00:00.000Z');
-    // A new preview replaces the active one (one active per environment, the hostname moves to the new row).
-    const v2 = await member
-      .post(`/v1/sites/${site.id}/operations`, {
-        baseVersionId: v1,
-        operations: [{ op: 'setTheme', theme: { ...(salonSpec().theme as object), radius: 'lg' } }],
-      })
-      .expect(201);
-    const replaced = await member.post(`/v1/sites/${site.id}/preview`, { versionId: v2.body.id }).expect(201);
-    const rows = await db.select().from(sitePublications).where(eq(sitePublications.siteId, site.id));
-    expect(rows.map((row) => [row.versionId, row.status])).toEqual(
-      expect.arrayContaining([
-        [v1, 'unpublished'],
-        [v2.body.id, 'active'],
-      ]),
-    );
-    expect(replaced.body.expiresAt).toBe('2026-11-13T12:00:00.000Z');
-
-    await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(204);
-    await member.post(`/v1/sites/${site.id}/unpublish`, { environment: 'preview' }).expect(409);
     expect((await viewer.get(`/v1/sites/${site.id}`).expect(200)).body).toMatchObject({
       status: 'draft',
       preview: null,
     });
-    const events = await db
-      .select({ type: outboxEvents.type })
-      .from(outboxEvents)
-      .where(sql`${outboxEvents.payload}->>'siteId' = ${site.id}`);
-    expect(events.map((event) => event.type)).toEqual(
-      expect.arrayContaining(['site.created', 'site.version.created', 'site.published', 'site.unpublished']),
+    expect(await eventsOf(site.id)).toEqual(
+      expect.arrayContaining([
+        'site.created',
+        'site.version.created',
+        'site.published',
+        'site.preview.extended',
+        'site.unpublished',
+      ]),
     );
   });
 
-  it('refuses a second active publication or hostname in the database', async () => {
-    const businessId = await track({ displayName: 'Unique Host' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
-    const pub = (
-      await member.post(`/v1/sites/${site.id}/preview`, { versionId: site.currentVersion.id }).expect(201)
-    ).body;
-    expect(
-      await dbError(
-        db.insert(sitePublications).values({
-          id: crypto.randomUUID(),
-          siteId: site.id,
-          versionId: site.currentVersion.id,
-          environment: 'preview',
-          hostname: 'another.sites.test',
-        }),
-      ),
-    ).toMatch(/uq_site_publications__active_environment/);
-    expect(
-      await dbError(
-        db.insert(sitePublications).values({
-          id: crypto.randomUUID(),
-          siteId: site.id,
-          versionId: site.currentVersion.id,
-          environment: 'live',
-          hostname: pub.hostname,
-        }),
-      ),
-    ).toMatch(/uq_site_publications__active_hostname/);
+  it('lets the renderer role read its views only: no table, no write even with read-write on', async () => {
+    const renderer = rendererDb(false);
+    try {
+      for (const table of ['sites', 'site_versions', 'site_publications', 'site_assets', 'site_view_daily']) {
+        expect(await dbError(renderer.execute(sql.raw(`SELECT 1 FROM ${table} LIMIT 1`)))).toMatch(
+          /permission denied/,
+        );
+      }
+      expect(
+        await dbError(
+          renderer.transaction(async (tx) => {
+            await tx.execute(sql`SET TRANSACTION READ WRITE`);
+            await tx.execute(sql`UPDATE site_publications SET status = 'unpublished'`);
+          }),
+        ),
+      ).toMatch(/permission denied/);
+      const [privileges] = await db.execute(
+        sql`SELECT bool_or(has_table_privilege('bf_sites_ro', t, 'INSERT,UPDATE,DELETE')) AS writes
+            FROM unnest(ARRAY['renderer_published_sites', 'renderer_site_assets', 'sites', 'site_versions', 'site_publications', 'site_assets']) AS t`,
+      );
+      expect(privileges).toEqual({ writes: false });
+      await renderer.execute(sql`SELECT id, public_url FROM renderer_site_assets LIMIT 1`);
+    } finally {
+      await closeDb(renderer);
+    }
   });
 
-  it('expires previews past their date (the hourly job), and the renderer no longer serves them', async () => {
-    const businessId = await track({ displayName: 'Expiring' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
+  it('refuses to publish a stored version the validators now refuse', async () => {
+    const site = await newSite('Stale Version');
+    const spec = salonSpec();
+    (spec.seo as { title: Record<string, string> }).title.en = 'Visit www.evil.example today';
+    const bad = newId();
+    await db.insert(siteVersions).values({
+      id: bad,
+      siteId: site.id,
+      versionNumber: 2,
+      spec,
+      specHash: 'b'.repeat(64),
+      schemaVersion: 1,
+      authorType: 'import',
+      validation: { issues: [] },
+    });
+    const refused = await member.post(`/v1/sites/${site.id}/preview`, { versionId: bad }).expect(422);
+    expect(refused.body).toMatchObject({ reason: 'SITE_SPEC_INVALID' });
+    expect(await db.select().from(sitePublications).where(eq(sitePublications.siteId, site.id))).toEqual([]);
+    expect(await eventsOf(site.id)).not.toContain('site.published');
+  });
+
+  it('refuses a second active publication or hostname in the database', async () => {
+    const site = await newSite('Unique Host');
+    const pub = (await member.post(`/v1/sites/${site.id}/preview`, { versionId: site.v1 }).expect(201)).body;
+    const insert = (environment: 'preview' | 'live', hostname: string) =>
+      db
+        .insert(sitePublications)
+        .values({ id: newId(), siteId: site.id, versionId: site.v1, environment, hostname });
+    expect(await dbError(insert('preview', 'another.sites.test'))).toMatch(
+      /uq_site_publications__active_environment/,
+    );
+    expect(await dbError(insert('live', pub.hostname))).toMatch(/uq_site_publications__active_hostname/);
+  });
+
+  it('expires previews through the hourly job in the worker, once, and the renderer shows them expired', async () => {
+    const site = await newSite('Expiring');
     const pub = (
-      await member
-        .post(`/v1/sites/${site.id}/preview`, { versionId: site.currentVersion.id, expiresInDays: 1 })
-        .expect(201)
+      await member.post(`/v1/sites/${site.id}/preview`, { versionId: site.v1, expiresInDays: 1 }).expect(201)
     ).body;
     await db
       .update(sitePublications)
       .set({ expiresAt: new Date('2026-10-13T00:00:00.000Z') })
       .where(eq(sitePublications.id, pub.id));
-    expect(await t.app.get(SiteCommands).expireDuePreviews()).toBeGreaterThanOrEqual(1);
-    const [row] = await db.select().from(sitePublications).where(eq(sitePublications.id, pub.id));
-    expect(row).toMatchObject({ status: 'expired', endedAt: new Date('2026-10-14T12:00:00.000Z') });
-    expect((await viewer.get(`/v1/sites/${site.id}`).expect(200)).body.status).toBe('draft');
-    const [view] = await db.execute(
-      sql`SELECT count(*)::int AS n FROM renderer_published_sites WHERE site_id = ${site.id}`,
+    // Past its expiry, the renderer already treats it as expired, before the job runs.
+    const [before] = await db.execute(
+      sql`SELECT status, spec FROM renderer_published_sites WHERE hostname = ${pub.hostname}`,
     );
-    expect(view).toEqual({ n: 0 });
-    const [event] = await db
-      .select({ type: outboxEvents.type })
-      .from(outboxEvents)
-      .where(
-        and(eq(outboxEvents.type, 'site.expired'), sql`${outboxEvents.payload}->>'siteId' = ${site.id}`),
-      );
-    expect(event).toBeDefined();
+    expect(before).toEqual({ status: 'expired', spec: null });
+    const scheduler = worker.get(SitesExpiryScheduler);
+    await scheduler.tick();
+    await scheduler.tick();
+    await expect
+      .poll(
+        async () =>
+          (await db.select().from(sitePublications).where(eq(sitePublications.id, pub.id)))[0]?.status,
+        { timeout: 20_000, interval: 100 },
+      )
+      .toBe('expired');
+    const expireQueue = worker.get<Queue>(getQueueToken(QUEUES.sitesExpire.name));
+    expect(await expireQueue.getJobs(['completed', 'active', 'waiting', 'delayed'])).toHaveLength(1);
+    const [row] = await db.select().from(sitePublications).where(eq(sitePublications.id, pub.id));
+    expect(row?.endedAt).toBeInstanceOf(Date);
+    expect((await viewer.get(`/v1/sites/${site.id}`).expect(200)).body.status).toBe('draft');
+    expect((await eventsOf(site.id)).filter((type) => type === 'site.expired')).toHaveLength(1);
+    // The outbox subscriber asks the renderer to refresh that host.
+    const revalidate = worker.get<Queue>(getQueueToken(QUEUES.sitesRevalidate.name));
+    await expect
+      .poll(
+        async () =>
+          (await revalidate.getJobs(['completed', 'active', 'waiting', 'delayed', 'failed'])).some((job) =>
+            (job.data.tags as string[] | undefined)?.includes(`host:${pub.hostname}`),
+          ),
+        { timeout: 20_000, interval: 100 },
+      )
+      .toBe(true);
   });
 
   it('rolls back as a new version and archives (offline, no further change)', async () => {
     const businessId = await track({ displayName: 'Rollback' });
-    const site = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
-    const v1 = site.currentVersion.id as string;
+    const created = (await member.post('/v1/sites', { businessId, spec: salonSpec() }).expect(201)).body;
+    const site = { id: created.id as string, v1: created.currentVersion.id as string };
     const v2 = (
       await member
         .post(`/v1/sites/${site.id}/operations`, {
-          baseVersionId: v1,
-          operations: [{ op: 'setTheme', theme: { ...(salonSpec().theme as object), radius: 'none' } }],
+          baseVersionId: site.v1,
+          operations: [{ op: 'setTheme', theme: theme('none') }],
         })
         .expect(201)
     ).body;
     const back = await member
-      .post(`/v1/sites/${site.id}/rollback`, { versionId: v1, baseVersionId: v2.id })
+      .post(`/v1/sites/${site.id}/rollback`, { versionId: site.v1, baseVersionId: v2.id })
       .expect(201);
     expect(back.body).toMatchObject({
       versionNumber: 3,
       authorType: 'rollback',
       changeSummary: 'Rollback to version 1',
     });
-    const [first, third] = await Promise.all(
-      [v1, back.body.id].map(
-        async (id) => (await db.select().from(siteVersions).where(eq(siteVersions.id, id)))[0],
-      ),
-    );
-    expect(third?.specHash).toBe(first?.specHash);
+    const hashes = await db
+      .select({ id: siteVersions.id, hash: siteVersions.specHash })
+      .from(siteVersions)
+      .where(eq(siteVersions.siteId, site.id));
+    const hashOf = (id: string) => hashes.find((row) => row.id === id)?.hash;
+    expect(hashOf(back.body.id)).toBe(hashOf(site.v1));
 
-    await member.post(`/v1/sites/${site.id}/preview`, { versionId: back.body.id }).expect(201);
+    const pub = (await member.post(`/v1/sites/${site.id}/preview`, { versionId: back.body.id }).expect(201))
+      .body;
     await member.post(`/v1/sites/${site.id}/archive`, {}).expect(204);
-    const archived = (await viewer.get(`/v1/sites/${site.id}`).expect(200)).body;
-    expect(archived).toMatchObject({ status: 'archived', publications: [] });
-    await member.post(`/v1/sites/${site.id}/preview`, { versionId: back.body.id }).expect(409);
+    expect((await viewer.get(`/v1/sites/${site.id}`).expect(200)).body).toMatchObject({
+      status: 'archived',
+      publications: [],
+    });
+    const [shown] = await db.execute(
+      sql`SELECT status FROM renderer_published_sites WHERE hostname = ${pub.hostname}`,
+    );
+    expect(shown).toEqual({ status: 'unpublished' });
+    const archivedPublish = await member
+      .post(`/v1/sites/${site.id}/preview`, { versionId: back.body.id })
+      .expect(409);
+    expect(archivedPublish.body).toMatchObject({ reason: 'SITE_ARCHIVED' });
     await member
       .post(`/v1/sites/${site.id}/versions`, { spec: salonSpec(), baseVersionId: back.body.id })
       .expect(409);
+    expect((await eventsOf(site.id)).filter((type) => type === 'site.archived')).toHaveLength(1);
     // An archived site no longer counts as the business's site: a new one can be made.
     const fresh = await member.post('/v1/sites', { businessId }).expect(201);
     expect(fresh.body.id).not.toBe(site.id);

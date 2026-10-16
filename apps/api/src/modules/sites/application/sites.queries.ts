@@ -16,6 +16,10 @@ import { diffSpecs } from '../domain/version-diff.ts';
 import { toSiteDetail, toSiteSummary, toVersion, toVersionSummary } from './mappers.ts';
 import { SITES_REPOSITORY, type SitesRepository, type StoredSite } from './ports.ts';
 
+/** A cursor's position: a microsecond UTC timestamp and a UUID (anything else is a tampered cursor). */
+const CREATED_AT_KEY = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const invalidCursor = () =>
   new ValidationError('Invalid cursor.', [{ path: ['cursor'], message: 'Invalid cursor' }]);
 
@@ -25,12 +29,13 @@ export class SiteQueries {
   constructor(@Inject(SITES_REPOSITORY) private readonly repository: SitesRepository) {}
 
   async list(organizationId: string, query: SiteListQuery): Promise<SitePage> {
-    let after: { createdAt: Date; id: string } | undefined;
+    let after: { createdAtKey: string; id: string } | undefined;
     if (query.cursor) {
       const data = await decodeCursor(query.cursor);
-      const [createdAt] = data.sort;
-      if (typeof createdAt !== 'string' || Number.isNaN(Date.parse(createdAt))) throw invalidCursor();
-      after = { createdAt: new Date(createdAt), id: data.id };
+      const [createdAtKey] = data.sort;
+      if (typeof createdAtKey !== 'string' || !CREATED_AT_KEY.test(createdAtKey) || !UUID.test(data.id))
+        throw invalidCursor();
+      after = { createdAtKey, id: data.id };
     }
     const rows = await this.repository.sites(organizationId, {
       status: query.status,
@@ -43,7 +48,7 @@ export class SiteQueries {
     const last = rows.length > query.limit ? items.at(-1) : undefined;
     return {
       items: items.map(toSiteSummary),
-      nextCursor: last ? await encodeCursor({ sort: [last.createdAt.toISOString()], id: last.id }) : null,
+      nextCursor: last ? await encodeCursor({ sort: [last.createdAtKey], id: last.id }) : null,
     };
   }
 
@@ -65,7 +70,8 @@ export class SiteQueries {
     if (page.cursor) {
       const data = await decodeCursor(page.cursor);
       const [number] = data.sort;
-      if (typeof number !== 'number' || !Number.isInteger(number) || number < 1) throw invalidCursor();
+      if (typeof number !== 'number' || !Number.isInteger(number) || number < 1 || !UUID.test(data.id))
+        throw invalidCursor();
       beforeNumber = number;
     }
     const rows = await this.repository.versions(site.id, { beforeNumber, limit: page.limit + 1 });

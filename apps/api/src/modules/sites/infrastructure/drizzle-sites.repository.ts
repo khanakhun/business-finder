@@ -3,9 +3,27 @@ import { newId, type SiteIssue } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { businesses, orgBusinesses, sitePublications, sites, siteVersions } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, getTableColumns, lt, lte, max, ne, or, type SQL, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  isNull,
+  lt,
+  lte,
+  max,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
+
+// DECISION(BF-035): the business name and locality are read from the business graph's tables (as the scoring and crm
+// repositories do): a site is about a tracked business, and a port to another module for two columns would add
+// nothing but a second round trip.
 import type {
   NewVersion,
   SiteListFilter,
@@ -31,6 +49,8 @@ function canonical(value: unknown): string {
 export const specHash = (spec: unknown) => createHash('sha256').update(canonical(spec)).digest('hex');
 
 const current = alias(siteVersions, 'current_version');
+/** `created_at` to the microsecond, as text (the keyset cursor). */
+const createdAtKey = sql<string>`to_char(${sites.createdAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 const preview = alias(sitePublications, 'active_preview');
 
 type PublicationRow = typeof sitePublications.$inferSelect;
@@ -84,16 +104,15 @@ export class DrizzleSitesRepository implements SitesRepository {
     );
   }
 
-  async siteOfBusiness(organizationId: string, businessId: string) {
-    const [site] = await this.querySites(
+  sitesOfBusiness(organizationId: string, businessId: string) {
+    return this.querySites(
       and(
         eq(sites.organizationId, organizationId),
         eq(sites.businessId, businessId),
         ne(sites.status, 'archived'),
       ),
-      { order: 'oldest', limit: 1 },
+      { order: 'oldest', limit: 50 },
     );
-    return site;
   }
 
   async insertSite(site: Parameters<SitesRepository['insertSite']>[0]): Promise<boolean> {
@@ -121,7 +140,8 @@ export class DrizzleSitesRepository implements SitesRepository {
       .select({ id: sites.id })
       .from(sites)
       .where(and(eq(sites.organizationId, organizationId), eq(sites.id, siteId)))
-      .for('update');
+      // NO KEY UPDATE: serializes the site's commands without blocking inserts that reference the site.
+      .for('no key update');
     return locked ? this.site(organizationId, siteId) : undefined;
   }
 
@@ -131,11 +151,9 @@ export class DrizzleSitesRepository implements SitesRepository {
     if (filter.businessId) conditions.push(eq(sites.businessId, filter.businessId));
     if (filter.authorType) conditions.push(eq(current.authorType, filter.authorType));
     if (filter.after) {
+      const at = sql`${filter.after.createdAtKey}::timestamptz`;
       conditions.push(
-        or(
-          lt(sites.createdAt, filter.after.createdAt),
-          and(eq(sites.createdAt, filter.after.createdAt), lt(sites.id, filter.after.id)),
-        ),
+        or(lt(sites.createdAt, at), and(eq(sites.createdAt, at), lt(sites.id, filter.after.id))),
       );
     }
     return this.querySites(and(...conditions), { order: 'newest', limit: filter.limit });
@@ -172,11 +190,18 @@ export class DrizzleSitesRepository implements SitesRepository {
     return { ...toVersionSummary(row), spec: row.spec };
   }
 
-  async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string): Promise<void> {
-    await getExecutor(this.db)
+  async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string, expected: string | null) {
+    const moved = await getExecutor(this.db)
       .update(sites)
       .set({ currentVersionId: versionId, defaultLocale })
-      .where(eq(sites.id, siteId));
+      .where(
+        and(
+          eq(sites.id, siteId),
+          expected === null ? isNull(sites.currentVersionId) : eq(sites.currentVersionId, expected),
+        ),
+      )
+      .returning({ id: sites.id });
+    return moved.length > 0;
   }
 
   async version(siteId: string, versionId: string): Promise<StoredVersion | undefined> {
@@ -283,6 +308,7 @@ export class DrizzleSitesRepository implements SitesRepository {
         createdBy: sites.createdBy,
         createdAt: sites.createdAt,
         updatedAt: sites.updatedAt,
+        createdAtKey,
       })
       .from(sites)
       .innerJoin(businesses, eq(businesses.id, sites.businessId))

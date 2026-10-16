@@ -6,6 +6,7 @@ import type { DbClient } from '@bf/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setTransactionalDb } from '../../platform/db/transactional.ts';
 import type { EventRecorder } from '../../platform/events/event-recorder.ts';
+import type { Logger } from '../../platform/logging/logger.ts';
 import {
   NoActivePublicationError,
   SiteArchivedError,
@@ -13,8 +14,9 @@ import {
   SiteVersionConflictError,
 } from '../domain/errors.ts';
 import type { SiteRevalidation } from './ports.ts';
-import { SiteCommands } from './sites.commands.ts';
+import { MAX_SITES_PER_BUSINESS, SiteCommands } from './sites.commands.ts';
 import { SiteQueries } from './sites.queries.ts';
+import { SiteRenderSubscriber } from './sites.subscribers.ts';
 import { checkSpec } from './spec-check.ts';
 import { InMemorySitesRepository } from './testing.ts';
 
@@ -29,6 +31,7 @@ const ORG = '0199e0a0-0000-7000-8000-000000000001';
 const OTHER = '0199e0a0-0000-7000-8000-000000000002';
 const USER = '0199e0a0-0000-7000-8000-0000000000aa';
 const actor = { organizationId: ORG, userId: USER };
+const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as unknown as Logger;
 
 const fakeDb = { transaction: (fn: (tx: unknown) => Promise<unknown>) => fn({}) } as unknown as DbClient;
 beforeAll(() => setTransactionalDb(fakeDb));
@@ -46,14 +49,7 @@ beforeEach(() => {
   events = { record: vi.fn(async () => ({})) };
   revalidation = { revalidate: vi.fn(async () => undefined) };
   clock = fixedClock('2026-10-14T12:00:00.000Z');
-  commands = new SiteCommands(
-    repository,
-    revalidation as unknown as SiteRevalidation,
-    hosting,
-    clock,
-    fakeDb,
-    events as unknown as EventRecorder,
-  );
+  commands = new SiteCommands(repository, hosting, clock, logger, events as unknown as EventRecorder);
   queries = new SiteQueries(repository);
 });
 
@@ -75,6 +71,7 @@ describe('checkSpec', () => {
   });
 
   it('refuses errors with their codes, an unknown version and a non-spec', () => {
+    expect.assertions(4);
     const bad = salon();
     (bad.seo as { title: Record<string, string> }).title.en = 'www.evil.example';
     expect(() => checkSpec(bad, hosting)).toThrow(SiteSpecInvalidError);
@@ -95,19 +92,34 @@ describe('SiteCommands', () => {
     const { siteId, businessId, v1 } = await siteWithVersion();
     expect(eventTypes()).toEqual(['site.created', 'site.version.created']);
     expect(await commands.create(actor, { businessId })).toEqual({ siteId, created: false });
+    // A spec for a business that has a site is a conflict, not dropped silently.
+    await expect(commands.create(actor, { businessId, spec: salon() })).rejects.toMatchObject({
+      details: { reason: 'SITE_EXISTS', siteId },
+    });
     const forced = await commands.create(actor, { businessId, forceNew: true });
     expect(forced.created).toBe(true);
-    expect((await queries.get(ORG, forced.siteId)).slug).toBe('salon-lumiere-gustavia-2');
-    expect(v1).toBeTruthy();
+    const slugs = [siteId, forced.siteId].map((id) => repository.siteRows.get(id)?.slug);
+    expect(slugs[0]).toMatch(/^salon-lumiere-gustavia-[a-z2-9]{6}$/);
+    expect(slugs[1]).toMatch(/^salon-lumiere-gustavia-[a-z2-9]{6}$/);
+    expect(slugs[0]).not.toBe(slugs[1]);
     await expect(commands.create({ ...actor, organizationId: OTHER }, { businessId })).rejects.toThrow(
       /not found/,
     );
   });
 
-  it('gives up when every slug candidate is taken', async () => {
+  it('gives up when every random slug is taken, and caps sites per business', async () => {
     const businessId = repository.addBusiness(ORG, 'Taken', null);
-    vi.spyOn(repository, 'insertSite').mockResolvedValue(false);
-    await expect(commands.create(actor, { businessId })).rejects.toThrow(ValidationError);
+    const insert = vi.spyOn(repository, 'insertSite').mockResolvedValue(false);
+    await expect(commands.create(actor, { businessId })).rejects.toMatchObject({
+      details: { reason: 'SITE_SLUG' },
+    });
+    expect(insert).toHaveBeenCalledTimes(5);
+    insert.mockRestore();
+    for (let n = 0; n < MAX_SITES_PER_BUSINESS; n += 1)
+      await commands.create(actor, { businessId, forceNew: true });
+    await expect(commands.create(actor, { businessId, forceNew: true })).rejects.toMatchObject({
+      details: { reason: 'SITE_LIMIT' },
+    });
   });
 
   it('saves versions from the current one only, with a summary of the changes', async () => {
@@ -163,14 +175,10 @@ describe('SiteCommands', () => {
   it('publishes, extends, replaces, unpublishes and asks the renderer to refresh after each', async () => {
     const { siteId, v1 } = await siteWithVersion();
     const preview = await commands.publishPreview(actor, siteId, { versionId: v1, expiresInDays: 30 });
-    expect(preview).toMatchObject({
-      hostname: 'salon-lumiere-gustavia.sites.test',
-      expiresAt: new Date('2026-11-13T12:00:00.000Z'),
-    });
+    expect(preview.hostname).toMatch(/^salon-lumiere-gustavia-[a-z2-9]{6}\.sites\.test$/);
+    expect(preview.expiresAt).toEqual(new Date('2026-11-13T12:00:00.000Z'));
     expect((await queries.get(ORG, siteId)).status).toBe('preview');
-    expect(revalidation.revalidate).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: [`site:${siteId}`, 'host:salon-lumiere-gustavia.sites.test'] }),
-    );
+    expect(eventTypes()).toContain('site.published');
     const extended = await commands.extendPreview(actor, siteId, 10);
     expect(extended.expiresAt).toEqual(new Date('2026-11-23T12:00:00.000Z'));
     const again = await commands.publishPreview(actor, siteId, { versionId: v1, expiresInDays: 1 });
@@ -185,7 +193,9 @@ describe('SiteCommands', () => {
     await expect(
       commands.publishPreview(actor, siteId, { versionId: siteId, expiresInDays: 1 }),
     ).rejects.toThrow(/not found/);
-    expect(eventTypes()).toEqual(expect.arrayContaining(['site.published', 'site.unpublished']));
+    expect(eventTypes()).toEqual(
+      expect.arrayContaining(['site.published', 'site.preview.extended', 'site.unpublished']),
+    );
   });
 
   it('expires due previews only (an extended one is kept)', async () => {
@@ -196,6 +206,64 @@ describe('SiteCommands', () => {
     expect(await commands.expireDuePreviews()).toBe(1);
     expect(repository.publications.get(preview.id)).toMatchObject({ status: 'expired' });
     expect(eventTypes()).toContain('site.expired');
+  });
+
+  it('expires each due preview once, and keeps going past a preview that fails', async () => {
+    const { siteId, v1 } = await siteWithVersion();
+    const preview = await commands.publishPreview(actor, siteId, { versionId: v1, expiresInDays: 1 });
+    await repository.setPublicationExpiry(preview.id, new Date('2026-10-14T00:00:00.000Z'));
+    events.record.mockClear();
+    expect(await commands.expireDuePreviews()).toBe(1);
+    expect(await commands.expireDuePreviews()).toBe(0);
+    expect((await queries.get(ORG, siteId)).status).toBe('draft');
+    expect(eventTypes()).toEqual(['site.expired']);
+    // A failing preview is logged and skipped.
+    const other = await siteWithVersion();
+    const failing = await commands.publishPreview(actor, other.siteId, {
+      versionId: other.v1,
+      expiresInDays: 1,
+    });
+    await repository.setPublicationExpiry(failing.id, new Date('2026-10-14T00:00:00.000Z'));
+    events.record.mockRejectedValueOnce(new Error('outbox down'));
+    expect(await commands.expireDuePreviews()).toBe(0);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ publicationId: failing.id }),
+      'preview expiry failed',
+    );
+  });
+
+  it('refreshes the renderer from the publication events (subscriber)', async () => {
+    const subscriber = new SiteRenderSubscriber(revalidation as unknown as SiteRevalidation);
+    const event = {
+      id: 'evt-1',
+      type: 'site.unpublished',
+      orgId: ORG,
+      payload: { siteId: 'site-1', hostname: 'salon-k3x9p2.sites.test' },
+    } as unknown as Parameters<SiteRenderSubscriber['revalidate']>[0];
+    await subscriber.revalidate(event, {} as never);
+    expect(revalidation.revalidate).toHaveBeenCalledWith({
+      organizationId: ORG,
+      siteId: 'site-1',
+      tags: ['site:site-1', 'host:salon-k3x9p2.sites.test'],
+      idempotencyKey: 'revalidate:evt-1',
+    });
+    revalidation.revalidate.mockClear();
+    await subscriber.revalidate({ ...event, orgId: null } as never, {} as never);
+    expect(revalidation.revalidate).not.toHaveBeenCalled();
+  });
+
+  it('reports a conflict with the current version id', async () => {
+    const { siteId, v1 } = await siteWithVersion();
+    await commands.createVersion(actor, siteId, { spec: salon(), baseVersionId: v1 });
+    const error = await commands
+      .createVersion(actor, siteId, { spec: salon(), baseVersionId: v1 })
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SiteVersionConflictError);
+    expect((error as SiteVersionConflictError).toProblem()).toMatchObject({
+      status: 409,
+      code: 'SITE_VERSION_CONFLICT',
+      currentVersionId: (await queries.get(ORG, siteId)).currentVersion?.id,
+    });
   });
 
   it('rolls back to an earlier version and archives (no further change)', async () => {

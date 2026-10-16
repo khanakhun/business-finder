@@ -22,8 +22,16 @@ const toIssue = (issue: Issue): SiteIssue => ({
   message: issue.message,
 });
 
+/** The largest spec a version may hold (a full 8-page site is well under 300 kB). */
+export const MAX_SPEC_BYTES = 750_000;
+
 /** A spec as the current schema version, valid, with its warnings; else `SiteSpecInvalidError`. */
 export function checkSpec(input: unknown, hosting: SiteHosting): { spec: SiteSpec; warnings: SiteIssue[] } {
+  if (JSON.stringify(input ?? null).length > MAX_SPEC_BYTES) {
+    throw new SiteSpecInvalidError([
+      { path: [], message: `The site is larger than ${MAX_SPEC_BYTES} bytes.`, code: 'too_large' },
+    ]);
+  }
   let candidate = input;
   const version =
     typeof input === 'object' && input !== null
@@ -33,12 +41,19 @@ export function checkSpec(input: unknown, hosting: SiteHosting): { spec: SiteSpe
     try {
       candidate = migrateSpec(input);
     } catch (error) {
-      // An invalid migrated spec is reported issue by issue below; anything else cannot be read at all.
-      if (!(error instanceof MigrationError) || error.code !== 'invalid') {
-        const message = error instanceof Error ? error.message : 'The spec cannot be read.';
-        const code = error instanceof MigrationError ? error.code : 'unreadable';
-        throw new SiteSpecInvalidError([{ path: ['schemaVersion'], message, code }]);
+      // The migrated spec's own problems are reported at their paths; anything else cannot be read at all.
+      if (error instanceof MigrationError && error.code === 'invalid') {
+        throw new SiteSpecInvalidError(
+          error.issues.map((issue) => ({
+            path: issue.path.map((part) => (typeof part === 'symbol' ? String(part) : part)),
+            message: issue.message,
+            code: issue.code,
+          })),
+        );
       }
+      const message = error instanceof Error ? error.message : 'The spec cannot be read.';
+      const code = error instanceof MigrationError ? error.code : 'unreadable';
+      throw new SiteSpecInvalidError([{ path: ['schemaVersion'], message, code }]);
     }
   }
   // Versions serve previews and live sites alike: the renderer enforces the preview's robots and banner (BF-036).

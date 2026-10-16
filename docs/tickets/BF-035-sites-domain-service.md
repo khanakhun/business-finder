@@ -108,28 +108,36 @@ Verify: pnpm verify && pnpm test:int.
 ## Implementation notes
 
 **Part 1 (sites, versions, publications):**
-- Migration 0026: `sites`, `site_versions`, `site_publications`, `site_assets`, `site_view_daily`; versions are
-  immutable in the database (a trigger allows only setting `quality` once); one active publication per site and
-  environment and per hostname (partial unique indexes); the renderer's read model `renderer_published_sites`
-  (active publications of non-archived sites, with business and agency names, the spec and `noindex`) granted to
-  `bf_sites_ro` with the public columns of `site_assets` — the role reads nothing else and writes nothing (tested).
-  Foreign keys among versions and publications are `NO ACTION` so deleting a site removes everything at once.
-- Domain: slugs (name + locality, French accents transliterated, ≤ 40 characters, reserved and offensive words
-  avoided, numbered on collision), the structural version diff (pages, blocks added/removed/moved/changed by id,
-  text edits per locale with excerpts, site-wide sections), the publication policy (status from active
-  publications, expiry and extension capped at 90 days).
-- Commands (`sites:generate` to create and edit, `sites:publish` to publish, extend, unpublish and archive):
-  create (idempotent per business unless `forceNew`), versions from a whole spec or from BF-033 operations
-  (atomic), rollback, preview publish/extend/unpublish, archive; every edit locks the site row and checks the base
-  version (`SITE_VERSION_CONFLICT`, 409, with `currentVersionId`); specs are upcast and validated (errors → 422 with
-  each issue's path and code, warnings stored with the version); publishing re-validates the version. Events:
-  `site.created`, `site.version.created`, `site.published`, `site.unpublished`, `site.expired`, `site.archived`.
-- Renderer revalidation: a `sites-revalidate` job POSTs `{ tags: ["site:<id>", "host:<hostname>"] }` to
-  `SITES_INTERNAL_URL/api/revalidate`, signed like internal calls (`SITES_REVALIDATE_SECRET`; skipped when unset,
-  required in production). Expiry: the worker enqueues `sites-expire` once per UTC hour.
+- Migration 0026: `sites`, `site_versions`, `site_publications`, `site_assets`, `site_view_daily`. Versions are
+  immutable in the database: a trigger refuses every UPDATE except setting `quality` (an object) once, and every
+  DELETE except a site's cascade. One active publication per site and environment and per hostname (partial unique
+  indexes). Foreign keys among versions and publications are `NO ACTION`, so deleting a site removes everything at once.
+- Renderer read model, granted to `bf_sites_ro` (it reads nothing else and writes nothing, tested with read-write
+  switched on): `renderer_published_sites` gives per hostname its latest publication with an effective status —
+  `active`, `expired` (also once `expires_at` has passed, before the hourly job) or `unpublished` (also for an archived
+  site) — with the spec only when active, so BF-036 can serve the page, a 410 page with the agency, or a 404; it carries
+  `noindex` and `preview_banner` (forced on previews) and the agency URL only when it is http(s).
+  `renderer_site_assets` gives the ready assets of sites with an active publication.
+- Domain: slugs (name + locality, accents transliterated, offensive words also inside words and phishing words dropped,
+  then a random 6-character suffix: preview addresses cannot be guessed or squatted and never reveal another
+  workspace's site), the structural version diff (key-order insensitive; pages and blocks added/removed/moved/changed
+  by id; text edits per locale, not counting texts of added or removed blocks), the publication policy.
+- Commands (`sites:generate` to create and edit, `sites:publish` to publish, extend, unpublish and archive; writes
+  throttled at 60/min): create (idempotent per business; a spec for a business that has a site is a 409
+  `SITE_EXISTS`; at most 5 non-archived sites per business), versions from a spec or from BF-033 operations (atomic),
+  rollback, preview publish/extend/unpublish, archive. Every edit locks the site row (`FOR NO KEY UPDATE`) and checks
+  the base version; the database moves the current version only from that base (compare-and-set). Specs are upcast and
+  validated (errors → 422 with each issue's path and code, warnings stored; at most 750 kB; at most 5,000 versions per
+  site); publishing re-validates the version.
+- Events: `site.created`, `site.version.created`, `site.published`, `site.preview.extended`, `site.unpublished`,
+  `site.expired`, `site.archived`. The renderer is refreshed by an outbox subscriber of the publication events: a
+  `sites-revalidate` job POSTs `{ tags: ["site:<id>", "host:<hostname>"] }` to `SITES_INTERNAL_URL/api/revalidate`,
+  signed like internal calls (`SITES_REVALIDATE_SECRET`; skipped when unset, required in production; no redirect).
+- Expiry: the worker enqueues `sites-expire` once per UTC hour; each due preview expires in its own transaction (a
+  failing one is logged and skipped).
 - Decisions: versions are validated in `published` mode (the same version may later go live); the renderer forces
-  `noindex` and the banner on previews (the view's `noindex`). Facts validation (strict mode) waits for the fact
-  registry (BF-040). Preview URLs are `https://<slug>.<SITES_BASE_DOMAIN>/`.
+  `noindex` and the banner on previews. Facts validation (strict mode) waits for the fact registry (BF-040). Preview URLs
+  are `https://<slug>.<SITES_BASE_DOMAIN>/` (a lowercase hostname, validated).
 
 **Part 2 (planned):** asset upload/finalize/processing, screenshot thumbnails, view analytics and hourly
 `site.viewed` events.

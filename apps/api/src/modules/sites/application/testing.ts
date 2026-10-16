@@ -16,7 +16,7 @@ export class InMemorySitesRepository implements SitesRepository {
   >();
   readonly siteRows = new Map<
     string,
-    Omit<StoredSite, 'businessName' | 'currentVersionNumber' | 'preview'>
+    Omit<StoredSite, 'businessName' | 'currentVersionNumber' | 'preview' | 'createdAtKey'>
   >();
   readonly versionRows = new Map<string, StoredVersion>();
   readonly publications = new Map<string, StoredPublication>();
@@ -37,14 +37,16 @@ export class InMemorySitesRepository implements SitesRepository {
 
   async lockBusiness(): Promise<void> {}
 
-  async siteOfBusiness(organizationId: string, businessId: string) {
-    const row = [...this.siteRows.values()].find(
-      (site) =>
-        site.organizationId === organizationId &&
-        site.businessId === businessId &&
-        site.status !== 'archived',
-    );
-    return row ? this.view(row.id) : undefined;
+  async sitesOfBusiness(organizationId: string, businessId: string) {
+    return [...this.siteRows.values()]
+      .filter(
+        (site) =>
+          site.organizationId === organizationId &&
+          site.businessId === businessId &&
+          site.status !== 'archived',
+      )
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .map((row) => this.view(row.id) as StoredSite);
   }
 
   async insertSite(site: Parameters<SitesRepository['insertSite']>[0]): Promise<boolean> {
@@ -84,8 +86,9 @@ export class InMemorySitesRepository implements SitesRepository {
       .filter(
         (row) =>
           !filter.after ||
-          row.createdAt < filter.after.createdAt ||
-          (row.createdAt.getTime() === filter.after.createdAt.getTime() && row.id < filter.after.id),
+          row.createdAt < new Date(filter.after.createdAtKey) ||
+          (row.createdAt.getTime() === new Date(filter.after.createdAtKey).getTime() &&
+            row.id < filter.after.id),
       )
       .slice(0, filter.limit)
       .map((row) => this.view(row.id) as StoredSite);
@@ -108,7 +111,7 @@ export class InMemorySitesRepository implements SitesRepository {
       id: newId(),
       siteId: version.siteId,
       versionNumber: number,
-      spec: version.spec,
+      spec: structuredClone(version.spec),
       specHash: 'f'.repeat(64),
       schemaVersion: version.schemaVersion,
       authorType: version.authorType,
@@ -123,9 +126,11 @@ export class InMemorySitesRepository implements SitesRepository {
     return stored;
   }
 
-  async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string) {
+  async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string, expected: string | null) {
     const row = this.siteRows.get(siteId);
-    if (row) this.siteRows.set(siteId, { ...row, currentVersionId: versionId, defaultLocale });
+    if (!row || row.currentVersionId !== expected) return false;
+    this.siteRows.set(siteId, { ...row, currentVersionId: versionId, defaultLocale });
+    return true;
   }
 
   async version(siteId: string, versionId: string) {
@@ -192,6 +197,7 @@ export class InMemorySitesRepository implements SitesRepository {
         ? (this.versionRows.get(row.currentVersionId)?.versionNumber ?? null)
         : null,
       preview: preview ? { hostname: preview.hostname, expiresAt: preview.expiresAt } : null,
+      createdAtKey: row.createdAt.toISOString().replace('Z', '000Z'),
     };
   }
 }

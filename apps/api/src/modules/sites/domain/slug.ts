@@ -1,8 +1,11 @@
 // Site slugs (BF-035): the preview subdomain `<slug>.<SITES_BASE_DOMAIN>`, made from the business name and locality.
 // ASCII only (French and other accents transliterated), at most 40 characters, never one of our hostnames, never an
-// offensive word; uniqueness across all sites comes from a numeric suffix the caller tries in turn.
+// offensive or phishing word, and with a random suffix: preview addresses cannot be guessed or squatted, and two
+// workspaces' sites of one business never learn about each other.
 
 export const SITE_SLUG_MAX = 40;
+/** The random part's length: preview addresses cannot be guessed from a business's name. */
+export const SUFFIX_LENGTH = 6;
 
 /** Subdomains that name our own services. */
 export const RESERVED_SITE_SLUGS: ReadonlySet<string> = new Set([
@@ -19,7 +22,7 @@ export const RESERVED_SITE_SLUGS: ReadonlySet<string> = new Set([
   'preview',
 ]);
 
-/** Words a slug never shows (as a whole word); kept short and generic, EN and FR. */
+/** Words a slug never shows (also inside a word: `fuckin`); kept short and generic, EN and FR. */
 const BLOCKED_WORDS: ReadonlySet<string> = new Set([
   'fuck',
   'shit',
@@ -38,6 +41,32 @@ const BLOCKED_WORDS: ReadonlySet<string> = new Set([
   'pute',
   'bite',
 ]);
+
+/** Words of phishing pages and brands a preview address never carries (`paypal-login-secure`). */
+const PHISHING_WORDS: ReadonlySet<string> = new Set([
+  'login',
+  'signin',
+  'verify',
+  'verification',
+  'secure',
+  'account',
+  'password',
+  'wallet',
+  'bank',
+  'paypal',
+  'apple',
+  'google',
+  'microsoft',
+  'amazon',
+  'facebook',
+  'instagram',
+  'netflix',
+  'support',
+  'update',
+]);
+
+const blocked = (word: string) =>
+  PHISHING_WORDS.has(word) || [...BLOCKED_WORDS].some((bad) => word.includes(bad));
 
 /** Letters NFKD does not decompose into ASCII. */
 const LETTERS: Readonly<Record<string, string>> = {
@@ -71,26 +100,28 @@ function cut(slug: string, max: number): string {
   return (at > 0 ? head.slice(0, at) : slug.slice(0, max)).replace(/-+$/, '');
 }
 
-/** The slug a business gets first: its name and locality, transliterated, clean and at most 40 characters. */
+/**
+ * The readable part of a business's slug: its name and locality, transliterated, offensive and phishing words
+ * dropped, at most 33 characters (the random suffix completes it to 40). A name with nothing left is `site`.
+ */
 export function baseSlug(name: string, locality?: string | null): string {
   const words = transliterate(name)
     .split('-')
-    .filter((word) => word !== '' && !BLOCKED_WORDS.has(word));
-  const place = locality ? transliterate(locality) : '';
-  // The locality is added unless the name already says it.
-  const withPlace = place && !words.join('-').includes(place) ? [...words, place] : words;
-  let slug = cut(withPlace.join('-'), SITE_SLUG_MAX);
-  if (slug === '') slug = 'site';
-  if (RESERVED_SITE_SLUGS.has(slug)) slug = `${slug}-site`;
-  return slug;
+    .filter((word) => word !== '' && !blocked(word));
+  const place = transliterate(locality ?? '')
+    .split('-')
+    .filter((word) => word !== '' && !blocked(word));
+  // The locality is added unless the name already ends with it (whole words).
+  const named = words.join('-');
+  const where = place.join('-');
+  const withPlace = where && !`-${named}-`.includes(`-${where}-`) ? [...words, ...place] : words;
+  if (words.length === 0) withPlace.unshift('site');
+  return cut(withPlace.join('-') || 'site', SITE_SLUG_MAX - SUFFIX_LENGTH - 1);
 }
 
-/** The n-th candidate (1 is the base itself): `salon-gustavia`, `salon-gustavia-2`, … always ≤ 40 characters. */
-export function slugCandidate(base: string, n: number): string {
-  if (n <= 1) return base;
-  const suffix = `-${n}`;
-  return `${cut(base, SITE_SLUG_MAX - suffix.length)}${suffix}`;
-}
+/** A preview slug: the readable base and a random suffix (`salon-lumiere-gustavia-k3x9p2`), ≤ 40 characters. */
+export const previewSlug = (base: string, suffix: string) =>
+  `${cut(base, SITE_SLUG_MAX - suffix.length - 1)}-${suffix}`;
 
 /** A slug the API accepts (the database checks the same shape). */
 export const isValidSlug = (slug: string) =>

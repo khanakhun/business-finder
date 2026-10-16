@@ -1,5 +1,6 @@
 import {
   type Clock,
+  ConflictError,
   NotFoundError,
   newId,
   SiteArchived,
@@ -7,29 +8,27 @@ import {
   type SiteEnvironment,
   SiteExpired,
   type SiteIssue,
+  SitePreviewExtended,
   SitePublished,
   SiteUnpublished,
   type SiteVersionAuthor,
   SiteVersionCreated,
   ValidationError,
 } from '@bf/contracts';
-import { afterCommit, type DbClient } from '@bf/db';
 import { apply, migrateSpec, OperationError, OperationSchema, type SiteSpec } from '@bf/site-schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
-import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
+import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
 import { NoActivePublicationError, SiteArchivedError, SiteVersionConflictError } from '../domain/errors.ts';
 import { extendedExpiry, previewExpiry, previewHostname, siteStatus } from '../domain/publication-policy.ts';
-import { baseSlug, slugCandidate } from '../domain/slug.ts';
+import { baseSlug, previewSlug } from '../domain/slug.ts';
 import { diffSpecs } from '../domain/version-diff.ts';
 import {
   SITE_HOSTING,
-  SITE_REVALIDATION,
   SITES_REPOSITORY,
   type SiteHosting,
-  type SiteRevalidation,
   type SitesRepository,
   type StoredPublication,
   type StoredSite,
@@ -49,27 +48,41 @@ export interface VersionAuthor {
   readonly id: string | null;
 }
 
-/** How many slug candidates are tried before giving up (`salon-gustavia`, `-2`, … `-50`). */
-const SLUG_ATTEMPTS = 50;
+/** Random slug suffixes tried before giving up (a collision of 6 random characters is already improbable). */
+const SLUG_ATTEMPTS = 5;
+/** Sites a workspace may keep for one business (not archived): alternatives, not a flood. */
+export const MAX_SITES_PER_BUSINESS = 5;
+/** Versions a site may have (history is never rewritten; past this, archive and start a new site). */
+export const MAX_VERSIONS_PER_SITE = 5_000;
+
+/** Six random lowercase letters and digits (the unguessable part of a preview address). */
+function randomSuffix(): string {
+  const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
+  return Array.from(
+    crypto.getRandomValues(new Uint8Array(6)),
+    (byte) => alphabet[byte % alphabet.length],
+  ).join('');
+}
 
 /**
  * The site edits and publications (BF-035). Every change of a site happens with its row locked, so two edits are
- * serialized, and an edit from a stale version is a conflict (optimistic concurrency on the current version).
+ * serialized, and an edit from a stale version is a conflict (optimistic concurrency on the current version, checked
+ * again by the database when the current version moves). Publication changes are events: the renderer is refreshed
+ * by their subscriber (`SiteRenderSubscriber`), never lost with a failed commit hook.
  */
 @Injectable()
 export class SiteCommands {
   constructor(
     @Inject(SITES_REPOSITORY) private readonly repository: SitesRepository,
-    @Inject(SITE_REVALIDATION) private readonly revalidation: SiteRevalidation,
     @Inject(SITE_HOSTING) private readonly hosting: SiteHosting,
     @Inject(CLOCK) private readonly clock: Clock,
-    @Inject(DB_CLIENT) private readonly db: DbClient,
+    @Inject(LOGGER) private readonly logger: Logger,
     private readonly events: EventRecorder,
   ) {}
 
   /**
    * The business's site in the workspace: created (with a first version when a spec is given), or the existing one
-   * unless `forceNew`. Returns whether it was created.
+   * unless `forceNew`. A spec for a business that already has a site is a conflict (it is not dropped silently).
    */
   @Transactional()
   async create(
@@ -81,15 +94,25 @@ export class SiteCommands {
     // Checked before anything is written: an invalid first version creates no site.
     const first = input.spec ? checkSpec(input.spec, this.hosting) : undefined;
     await this.repository.lockBusiness(actor.organizationId, business.id);
-    if (!input.forceNew) {
-      const existing = await this.repository.siteOfBusiness(actor.organizationId, business.id);
-      if (existing) return { siteId: existing.id, created: false };
+    const sites = await this.repository.sitesOfBusiness(actor.organizationId, business.id);
+    if (!input.forceNew && sites[0]) {
+      if (first) {
+        throw new ConflictError('The business already has a site: save the spec as a new version of it.', {
+          details: { reason: 'SITE_EXISTS', siteId: sites[0].id },
+        });
+      }
+      return { siteId: sites[0].id, created: false };
+    }
+    if (sites.length >= MAX_SITES_PER_BUSINESS) {
+      throw new ConflictError(`A business has at most ${MAX_SITES_PER_BUSINESS} sites: archive one first.`, {
+        details: { reason: 'SITE_LIMIT' },
+      });
     }
     const base = baseSlug(business.name, business.locality);
     const siteId = newId();
     let slug: string | undefined;
-    for (let n = 1; n <= SLUG_ATTEMPTS && !slug; n += 1) {
-      const candidate = slugCandidate(base, n);
+    for (let attempt = 0; attempt < SLUG_ATTEMPTS && !slug; attempt += 1) {
+      const candidate = previewSlug(base, randomSuffix());
       const inserted = await this.repository.insertSite({
         id: siteId,
         organizationId: actor.organizationId,
@@ -101,14 +124,17 @@ export class SiteCommands {
       });
       if (inserted) slug = candidate;
     }
-    if (!slug) throw new ValidationError('No free address for this site: rename the business and try again.');
+    if (!slug)
+      throw new ConflictError('No free address for this site: try again.', {
+        details: { reason: 'SITE_SLUG' },
+      });
     await this.events.record(SiteCreated, {
       orgId: actor.organizationId,
       payload: { siteId, businessId: business.id, slug },
     });
     if (first) {
       const site = await this.lock(actor, siteId);
-      await this.saveVersion(actor, site, first, { type: 'user', id: actor.userId }, null, 'First version');
+      await this.saveVersion(actor, site, first, { type: 'user', id: actor.userId }, 'First version');
     }
     return { siteId, created: true };
   }
@@ -133,14 +159,7 @@ export class SiteCommands {
     const summary =
       input.changeSummary ??
       (current ? diffSpecs(migrateSpec(current.spec), checked.spec).summary : 'First version');
-    return this.saveVersion(
-      actor,
-      site,
-      checked,
-      author ?? { type: 'user', id: actor.userId },
-      current?.id ?? null,
-      summary,
-    );
+    return this.saveVersion(actor, site, checked, author ?? { type: 'user', id: actor.userId }, summary);
   }
 
   /** A new version made by SiteSpec operations (atomic: all or none), if the site is still at `baseVersionId`. */
@@ -181,14 +200,7 @@ export class SiteCommands {
     }
     const checked = checkSpec(after, this.hosting);
     const summary = input.changeSummary ?? diffSpecs(before, checked.spec).summary;
-    return this.saveVersion(
-      actor,
-      site,
-      checked,
-      author ?? { type: 'user', id: actor.userId },
-      current.id,
-      summary,
-    );
+    return this.saveVersion(actor, site, checked, author ?? { type: 'user', id: actor.userId }, summary);
   }
 
   /** The content of an earlier version as a new version (history is never rewritten). */
@@ -203,7 +215,6 @@ export class SiteCommands {
       site,
       checked,
       { type: 'rollback', id: actor.userId },
-      site.currentVersionId,
       `Rollback to version ${target.versionNumber}`,
     );
   }
@@ -242,7 +253,6 @@ export class SiteCommands {
         expiresAt: publication.expiresAt?.toISOString() ?? null,
       },
     });
-    await this.refresh(actor.organizationId, site, publication, `publish:${publication.id}`);
     return publication;
   }
 
@@ -257,12 +267,10 @@ export class SiteCommands {
     if (!preview) throw new NoActivePublicationError('preview');
     const expiresAt = extendedExpiry(this.clock.now(), preview.expiresAt, days);
     await this.repository.setPublicationExpiry(preview.id, expiresAt);
-    await this.refresh(
-      actor.organizationId,
-      site,
-      preview,
-      `extend:${preview.id}:${expiresAt.toISOString()}`,
-    );
+    await this.events.record(SitePreviewExtended, {
+      orgId: actor.organizationId,
+      payload: { ...this.publicationPayload(site, preview), expiresAt: expiresAt.toISOString() },
+    });
     return { ...preview, expiresAt };
   }
 
@@ -273,7 +281,11 @@ export class SiteCommands {
     const active = await this.repository.activePublications(site.id);
     const publication = active.find((p) => p.environment === environment);
     if (!publication) throw new NoActivePublicationError(environment);
-    await this.end(actor.organizationId, site, publication, 'unpublished', active);
+    await this.end(actor.organizationId, site, publication, 'unpublished');
+    await this.setStatus(
+      site,
+      active.filter((p) => p.id !== publication.id),
+    );
   }
 
   /** Archives the site: its publications go offline and it no longer changes. */
@@ -281,9 +293,8 @@ export class SiteCommands {
   async archive(actor: SiteActor, siteId: string): Promise<void> {
     const site = await this.lock(actor, siteId);
     if (site.status === 'archived') return;
-    const active = await this.repository.activePublications(site.id);
-    for (const publication of active)
-      await this.end(actor.organizationId, site, publication, 'unpublished', []);
+    for (const publication of await this.repository.activePublications(site.id))
+      await this.end(actor.organizationId, site, publication, 'unpublished');
     await this.repository.setSiteStatus(site.id, 'archived');
     await this.events.record(SiteArchived, {
       orgId: actor.organizationId,
@@ -291,21 +302,36 @@ export class SiteCommands {
     });
   }
 
-  /** Ends the previews whose expiry has passed (the hourly job); returns how many. */
-  @Transactional()
+  /**
+   * Ends the previews whose expiry has passed (the hourly job), one transaction each: a failing one is logged and
+   * skipped, the others still expire. Returns how many it ended.
+   */
   async expireDuePreviews(limit = 500): Promise<number> {
-    const due = await this.repository.duePreviews(this.clock.now(), limit);
-    for (const publication of due) {
-      const actor = { organizationId: publication.organizationId, userId: null };
-      const site = await this.repository.lockSite(publication.organizationId, publication.siteId);
-      if (!site) continue;
-      const active = await this.repository.activePublications(site.id);
-      // Re-checked under the lock: an extension or an unpublish may have come first.
-      const still = active.find((p) => p.id === publication.id);
-      if (!still?.expiresAt || still.expiresAt > this.clock.now()) continue;
-      await this.end(actor.organizationId, site, still, 'expired', active);
+    let expired = 0;
+    for (const publication of await this.repository.duePreviews(this.clock.now(), limit)) {
+      try {
+        if (await this.expire(publication.organizationId, publication.siteId, publication.id)) expired += 1;
+      } catch (error) {
+        this.logger.error({ err: error, publicationId: publication.id }, 'preview expiry failed');
+      }
     }
-    return due.length;
+    return expired;
+  }
+
+  @Transactional()
+  private async expire(organizationId: string, siteId: string, publicationId: string): Promise<boolean> {
+    const site = await this.repository.lockSite(organizationId, siteId);
+    if (!site) return false;
+    const active = await this.repository.activePublications(site.id);
+    // Re-checked under the lock: an extension, an unpublish or another run may have come first.
+    const publication = active.find((p) => p.id === publicationId);
+    if (!publication?.expiresAt || publication.expiresAt > this.clock.now()) return false;
+    await this.end(organizationId, site, publication, 'expired');
+    await this.setStatus(
+      site,
+      active.filter((p) => p.id !== publication.id),
+    );
+    return true;
   }
 
   private async end(
@@ -313,18 +339,12 @@ export class SiteCommands {
     site: StoredSite,
     publication: StoredPublication,
     status: 'expired' | 'unpublished',
-    active: readonly StoredPublication[],
   ): Promise<void> {
     await this.repository.endPublication(publication.id, status, this.clock.now());
-    await this.setStatus(
-      site,
-      active.filter((p) => p.id !== publication.id),
-    );
     await this.events.record(status === 'expired' ? SiteExpired : SiteUnpublished, {
       orgId: organizationId,
       payload: this.publicationPayload(site, publication),
     });
-    await this.refresh(organizationId, site, publication, `${status}:${publication.id}`);
   }
 
   private async setStatus(site: StoredSite, active: readonly StoredPublication[]): Promise<void> {
@@ -344,23 +364,6 @@ export class SiteCommands {
       environment: publication.environment,
       hostname: publication.hostname,
     };
-  }
-
-  /** Asks the renderer to refresh the site's pages once the change is committed. */
-  private async refresh(
-    organizationId: string,
-    site: StoredSite,
-    publication: StoredPublication,
-    key: string,
-  ): Promise<void> {
-    await afterCommit(this.db, async () => {
-      await this.revalidation.revalidate({
-        organizationId,
-        siteId: site.id,
-        tags: [`site:${site.id}`, `host:${publication.hostname}`],
-        idempotencyKey: `revalidate:${key}`,
-      });
-    });
   }
 
   private async lock(actor: SiteActor, siteId: string): Promise<StoredSite> {
@@ -394,20 +397,31 @@ export class SiteCommands {
     site: StoredSite,
     checked: { spec: SiteSpec; warnings: SiteIssue[] },
     author: VersionAuthor,
-    parentVersionId: string | null,
     changeSummary: string,
   ): Promise<StoredVersion> {
+    if ((site.currentVersionNumber ?? 0) >= MAX_VERSIONS_PER_SITE) {
+      throw new ConflictError(`A site keeps at most ${MAX_VERSIONS_PER_SITE} versions: start a new site.`, {
+        details: { reason: 'SITE_VERSION_LIMIT' },
+      });
+    }
     const version = await this.repository.insertVersion({
       siteId: site.id,
       spec: checked.spec as unknown as Record<string, unknown>,
       schemaVersion: checked.spec.schemaVersion,
       authorType: author.type,
       authorId: author.id,
-      parentVersionId,
+      parentVersionId: site.currentVersionId,
       changeSummary,
       issues: checked.warnings,
     });
-    await this.repository.setCurrentVersion(site.id, version.id, checked.spec.defaultLocale);
+    // The database moves the current version only from the one this edit started from (compare-and-set).
+    const moved = await this.repository.setCurrentVersion(
+      site.id,
+      version.id,
+      checked.spec.defaultLocale,
+      site.currentVersionId,
+    );
+    if (!moved) throw new SiteVersionConflictError(null);
     await this.events.record(SiteVersionCreated, {
       orgId: actor.organizationId,
       payload: {
@@ -416,7 +430,7 @@ export class SiteCommands {
         versionId: version.id,
         versionNumber: version.versionNumber,
         authorType: version.authorType,
-        parentVersionId,
+        parentVersionId: site.currentVersionId,
       },
     });
     return version;

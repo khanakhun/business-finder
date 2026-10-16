@@ -47,7 +47,10 @@ export class RendererRevalidator {
         headers: { 'Content-Type': 'application/json', Authorization: authorization },
         body,
         signal: attempt,
+        // An internal call: never followed elsewhere.
+        redirect: 'error',
       });
+      await response.body?.cancel();
       if (!response.ok)
         throw new ExternalServiceError('sites-renderer', `Revalidation answered ${response.status}`);
     });

@@ -24,6 +24,7 @@ import {
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, Query, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
@@ -76,6 +77,8 @@ export class SitesController {
   }
 
   @Post()
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:generate')
   @ApiRoute({
     summary:
@@ -126,6 +129,8 @@ export class SitesController {
   }
 
   @Post(':id/versions')
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:generate')
   @ApiRoute({
     summary: 'Save a new version from a whole spec (validated; 409 when the site has a newer version)',
@@ -159,6 +164,8 @@ export class SitesController {
   }
 
   @Post(':id/operations')
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:generate')
   @ApiRoute({
     summary: 'Apply SiteSpec operations atomically as a new version (409 when the site has a newer version)',
@@ -193,6 +200,8 @@ export class SitesController {
   }
 
   @Post(':id/rollback')
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:generate')
   @ApiRoute({
     summary: 'Make an earlier version’s content current again, as a new version',
@@ -210,6 +219,8 @@ export class SitesController {
   }
 
   @Post(':id/preview')
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:publish')
   @ApiRoute({
     summary: 'Publish a version as the site’s preview (replaces the active one; expires after expiresInDays)',
@@ -228,6 +239,8 @@ export class SitesController {
 
   @Post(':id/preview/extend')
   @HttpCode(200)
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:publish')
   @ApiRoute({
     summary: 'Extend the active preview (from its expiry, at most 90 days ahead)',
@@ -246,6 +259,8 @@ export class SitesController {
 
   @Post(':id/unpublish')
   @HttpCode(204)
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:publish')
   @ApiRoute({
     summary: 'Take the site’s publication in an environment offline',
@@ -264,6 +279,8 @@ export class SitesController {
 
   @Post(':id/archive')
   @HttpCode(204)
+  // Every write stores a version or a publication row: bounded per user.
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @RequirePermission('sites:publish')
   @ApiRoute({
     summary: 'Archive the site: its publications go offline and it no longer changes',

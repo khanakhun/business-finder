@@ -4,6 +4,7 @@ import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.t
 import { SITE_HOSTING, SITE_REVALIDATION, SITES_REPOSITORY, type SiteHosting } from './application/ports.ts';
 import { SiteCommands } from './application/sites.commands.ts';
 import { SiteQueries } from './application/sites.queries.ts';
+import { SiteRenderSubscriber } from './application/sites.subscribers.ts';
 import {
   BullmqSiteRevalidation,
   OPENAPI_SITE_REVALIDATION,
@@ -54,6 +55,7 @@ export class SitesModule {
         },
         SiteCommands,
         SiteQueries,
+        SiteRenderSubscriber,
         // The worker refreshes the renderer and expires previews; the HTTP process only produces jobs.
         ...(mode === 'worker'
           ? [

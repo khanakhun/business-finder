@@ -45,7 +45,17 @@ const LOCALES: ReadonlySet<string> = new Set(SITE_LOCALES);
 const excerpt = (text: string | undefined) =>
   text === undefined ? null : text.length > EXCERPT ? `${text.slice(0, EXCERPT - 1)}…` : text;
 
-const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+/** JSON with sorted keys: stored specs come back from jsonb with their keys reordered. */
+function canonical(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
+  if (value && typeof value === 'object') {
+    const keys = Object.keys(value).sort();
+    return `{${keys.map((key) => `${JSON.stringify(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
+
+const same = (a: unknown, b: unknown) => canonical(a) === canonical(b);
 
 const isLocalized = (value: unknown): value is Record<string, string> =>
   typeof value === 'object' &&
@@ -166,10 +176,19 @@ export function diffSpecs(from: SiteSpec, to: SiteSpec): SpecDiff {
 
   const textsBefore = siteTexts(from);
   const textsAfter = siteTexts(to);
+  // Texts of a block or page added or removed belong to that change, not to the edits.
+  const whole = new Set([
+    ...added.map((block) => `blocks:${block.blockId}`),
+    ...removed.map((block) => `blocks:${block.blockId}`),
+    ...pages.added.map((id) => `pages:${id}`),
+    ...pages.removed.map((id) => `pages:${id}`),
+  ]);
   const edits: SpecDiff['texts'] = [];
   for (const key of new Set([...textsBefore.keys(), ...textsAfter.keys()])) {
     const a = textsBefore.get(key);
     const b = textsAfter.get(key);
+    const [kind, id] = (a ?? b)?.path ?? [];
+    if (whole.has(`${String(kind)}:${String(id)}`)) continue;
     const path = (b ?? a)?.path ?? [];
     for (const locale of new Set([...Object.keys(a?.text ?? {}), ...Object.keys(b?.text ?? {})])) {
       const textA = a?.text[locale];

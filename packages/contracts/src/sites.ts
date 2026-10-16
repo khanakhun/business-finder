@@ -264,6 +264,14 @@ export const SitePublished = defineEvent(
 export const SiteUnpublished = defineEvent('site.unpublished', 1, publicationPayload);
 export const SiteExpired = defineEvent('site.expired', 1, publicationPayload);
 export const SiteArchived = defineEvent('site.archived', 1, z.object(sitePayload));
+export const SitePreviewExtended = defineEvent(
+  'site.preview.extended',
+  1,
+  publicationPayload.extend({ expiresAt: z.iso.datetime() }),
+);
+
+/** The events after which the renderer must refresh a site's pages (BF-036 revalidation). */
+export const SITE_RENDER_EVENTS = [SitePublished, SiteUnpublished, SiteExpired, SitePreviewExtended] as const;
 
 /** Asks the renderer to refresh a site's pages (after a publication changed). */
 export const SitesRevalidateJob = defineJob('sites-revalidate', 'revalidate', {

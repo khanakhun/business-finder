@@ -1,7 +1,6 @@
 import {
   ConflictError,
   DomainError,
-  InvalidStateTransitionError,
   type ProblemDetails,
   type ProblemFieldError,
   ValidationError,
@@ -35,9 +34,11 @@ export class SiteSpecInvalidError extends ValidationError {
 }
 
 /** An archived site cannot change or publish. */
-export class SiteArchivedError extends InvalidStateTransitionError {
+export class SiteArchivedError extends DomainError {
+  readonly code = 'INVALID_STATE_TRANSITION';
+
   constructor(siteId: string, action: string) {
-    super('Site', 'archived', action, { details: { siteId, reason: 'SITE_ARCHIVED' } });
+    super(`An archived site cannot ${action}.`, { details: { siteId, reason: 'SITE_ARCHIVED' } });
   }
 }
 

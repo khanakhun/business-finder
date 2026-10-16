@@ -24,6 +24,8 @@ export interface StoredSite {
   readonly createdBy: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  /** `created_at` to the microsecond (ISO, UTC): the list's keyset position (a Date keeps only milliseconds). */
+  readonly createdAtKey: string;
 }
 
 export interface StoredVersion {
@@ -72,8 +74,8 @@ export interface SiteListFilter {
   readonly status?: SiteStatus | undefined;
   readonly businessId?: string | undefined;
   readonly authorType?: SiteVersionAuthor | undefined;
-  /** Keyset: sites created before this one (created_at, id). */
-  readonly after?: { readonly createdAt: Date; readonly id: string } | undefined;
+  /** Keyset: sites created before this one (`createdAtKey`, id). */
+  readonly after?: { readonly createdAtKey: string; readonly id: string } | undefined;
   readonly limit: number;
 }
 
@@ -85,8 +87,8 @@ export interface SitesRepository {
   ): Promise<{ id: string; name: string; locality: string | null } | undefined>;
   /** Serializes the creation of a business's site in a workspace (a transaction-scoped advisory lock). */
   lockBusiness(organizationId: string, businessId: string): Promise<void>;
-  /** The workspace's (non-archived) site of a business, the oldest first. */
-  siteOfBusiness(organizationId: string, businessId: string): Promise<StoredSite | undefined>;
+  /** The workspace's sites of a business that are not archived, the oldest first. */
+  sitesOfBusiness(organizationId: string, businessId: string): Promise<StoredSite[]>;
   /** Inserts a site unless its slug is taken (then returns false). */
   insertSite(site: {
     id: string;
@@ -98,13 +100,19 @@ export interface SitesRepository {
     createdBy: string | null;
   }): Promise<boolean>;
   site(organizationId: string, siteId: string): Promise<StoredSite | undefined>;
-  /** The site, locked for update (edits and publications of a site are serialized). */
+  /** The site, locked (`FOR NO KEY UPDATE`: edits and publications of a site are serialized). */
   lockSite(organizationId: string, siteId: string): Promise<StoredSite | undefined>;
   sites(organizationId: string, filter: SiteListFilter): Promise<StoredSite[]>;
   setSiteStatus(siteId: string, status: SiteStatus): Promise<void>;
   /** Inserts the next version (number = the site's highest + 1), its hash computed from the spec. */
   insertVersion(version: NewVersion): Promise<StoredVersion>;
-  setCurrentVersion(siteId: string, versionId: string, defaultLocale: string): Promise<void>;
+  /** Moves the current version if it is still `expected` (compare-and-set); false when it moved meanwhile. */
+  setCurrentVersion(
+    siteId: string,
+    versionId: string,
+    defaultLocale: string,
+    expected: string | null,
+  ): Promise<boolean>;
   version(siteId: string, versionId: string): Promise<StoredVersion | undefined>;
   versions(
     siteId: string,

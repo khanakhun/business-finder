@@ -213,19 +213,36 @@ export const siteViewDaily = pgTable(
 );
 
 /**
- * The site renderer's read model (migration 0026, BF-036): one row per active publication of a site that is not
- * archived. Read-only, as `bf_sites_ro`; declared `.existing()` so drizzle-kit leaves the SQL view to the migration.
+ * The site renderer's read model (migration 0026, BF-036): per hostname, its latest publication with an effective
+ * status (`active`, `expired`, `unpublished`) — the spec only when active. Read-only, as `bf_sites_ro`; declared
+ * `.existing()` so drizzle-kit leaves the SQL view to the migration.
  */
 export const rendererPublishedSites = pgView('renderer_published_sites', {
   hostname: text().notNull(),
   siteId: uuid().notNull(),
-  organizationId: uuid().notNull(),
+  status: text().$type<SitePublicationStatus>().notNull(),
   businessName: text().notNull(),
   agencyName: text().notNull(),
+  /** The agency's website, only when it is an http(s) URL. */
   agencyUrl: text(),
   environment: text().$type<SiteEnvironment>().notNull(),
   versionId: uuid().notNull(),
-  spec: jsonb().$type<Record<string, unknown>>().notNull(),
+  spec: jsonb().$type<Record<string, unknown>>(),
   expiresAt: timestamp({ withTimezone: true }),
   noindex: boolean().notNull(),
+  previewBanner: boolean().notNull(),
+}).existing();
+
+/** The images the renderer may serve: ready assets of sites with an active publication. */
+export const rendererSiteAssets = pgView('renderer_site_assets', {
+  id: uuid().notNull(),
+  siteId: uuid(),
+  publicUrl: text(),
+  mime: text().notNull(),
+  width: integer(),
+  height: integer(),
+  variants: jsonb().$type<{ width: number; format: string; key: string; url: string; bytes: number }[]>(),
+  alt: jsonb().$type<Record<string, string>>(),
+  focalPoint: jsonb().$type<{ x: number; y: number }>(),
+  dominantColors: jsonb().$type<string[]>(),
 }).existing();

@@ -116,42 +116,71 @@ CREATE TRIGGER sites_set_updated_at BEFORE UPDATE ON "sites" FOR EACH ROW EXECUT
 CREATE OR REPLACE FUNCTION site_versions_immutable() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-  IF OLD.quality IS NULL AND NEW.quality IS NOT NULL AND (to_jsonb(NEW) - 'quality') = (to_jsonb(OLD) - 'quality') THEN
+  IF TG_OP = 'DELETE' THEN
+    -- Only a site's deletion removes its versions (a cascade runs this trigger one level deeper).
+    IF pg_trigger_depth() > 1 THEN
+      RETURN OLD;
+    END IF;
+    RAISE EXCEPTION 'site_versions rows are deleted only with their site' USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  IF OLD.quality IS NULL AND jsonb_typeof(NEW.quality) = 'object'
+     AND (to_jsonb(NEW) - 'quality') = (to_jsonb(OLD) - 'quality') THEN
     RETURN NEW;
   END IF;
   RAISE EXCEPTION 'site_versions rows are immutable (only quality may be set, once)' USING ERRCODE = 'insufficient_privilege';
 END;
 $$;--> statement-breakpoint
-CREATE TRIGGER site_versions_immutable BEFORE UPDATE ON "site_versions" FOR EACH ROW EXECUTE FUNCTION site_versions_immutable();--> statement-breakpoint
--- The site renderer's read model (BF-036, ADR-0004): one row per active publication of a site that is not archived,
--- with the version's spec and what the preview banner and robots need. The renderer connects as bf_sites_ro and can
--- read only this view and the public columns of site_assets (the view runs with its owner's rights).
+CREATE TRIGGER site_versions_immutable BEFORE UPDATE OR DELETE ON "site_versions" FOR EACH ROW EXECUTE FUNCTION site_versions_immutable();--> statement-breakpoint
+-- The site renderer's read model (BF-036, ADR-0004): per hostname, its latest publication with an effective status —
+-- `active`, or `expired` (also once expires_at has passed, before the hourly job runs) or `unpublished` (also when
+-- the site is archived) — so the renderer can tell a page to serve (the spec), a 410 page (the agency, no spec) and an
+-- unknown host (no row). The renderer connects as bf_sites_ro and reads only these views (they run with their
+-- owner's rights; security_barrier keeps its filters from leaking rows).
 CREATE VIEW renderer_published_sites WITH (security_barrier) AS
 SELECT
-  p.hostname,
-  s.id AS site_id,
-  s.organization_id,
+  latest.hostname,
+  latest.site_id,
+  latest.status,
   b.display_name AS business_name,
   coalesce(nullif(btrim(os.agency_name), ''), o.name) AS agency_name,
-  os.website_url AS agency_url,
-  p.environment,
-  p.version_id,
-  v.spec,
-  p.expires_at,
-  (p.environment = 'preview' OR coalesce((v.spec -> 'settings' ->> 'noindex')::boolean, true)) AS noindex
-FROM site_publications p
-JOIN sites s ON s.id = p.site_id
-JOIN site_versions v ON v.id = p.version_id
+  CASE WHEN os.website_url ~* '^https?://[^\s"<>]+$' THEN os.website_url END AS agency_url,
+  latest.environment,
+  latest.version_id,
+  CASE WHEN latest.status = 'active' THEN v.spec END AS spec,
+  latest.expires_at,
+  (latest.environment = 'preview' OR coalesce((v.spec -> 'settings' ->> 'noindex')::boolean, true)) AS noindex,
+  (latest.environment = 'preview' OR coalesce((v.spec -> 'settings' ->> 'previewBanner')::boolean, false)) AS preview_banner
+FROM (
+  SELECT DISTINCT ON (p.hostname)
+    p.hostname,
+    p.site_id,
+    p.environment,
+    p.version_id,
+    p.expires_at,
+    CASE
+      WHEN s.status = 'archived' THEN 'unpublished'
+      WHEN p.status = 'active' AND p.expires_at IS NOT NULL AND p.expires_at <= now() THEN 'expired'
+      ELSE p.status
+    END AS status
+  FROM site_publications p
+  JOIN sites s ON s.id = p.site_id
+  ORDER BY p.hostname, (p.status = 'active') DESC, p.ended_at DESC NULLS FIRST, p.published_at DESC
+) latest
+JOIN sites s ON s.id = latest.site_id
+JOIN site_versions v ON v.id = latest.version_id
 JOIN businesses b ON b.id = s.business_id
 JOIN organizations o ON o.id = s.organization_id
-LEFT JOIN org_settings os ON os.organization_id = s.organization_id
-WHERE p.status = 'active' AND s.status <> 'archived';--> statement-breakpoint
+LEFT JOIN org_settings os ON os.organization_id = s.organization_id;--> statement-breakpoint
+-- The images the renderer may serve: ready assets of sites with an active publication.
+CREATE VIEW renderer_site_assets WITH (security_barrier) AS
+SELECT a.id, a.site_id, a.public_url, a.mime, a.width, a.height, a.variants, a.alt, a.focal_point, a.dominant_colors
+FROM site_assets a
+WHERE a.status = 'ready'
+  AND a.site_id IN (SELECT site_id FROM renderer_published_sites WHERE status = 'active');--> statement-breakpoint
 DO $$
 BEGIN
   IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'bf_sites_ro') THEN
-    GRANT SELECT ON renderer_published_sites TO bf_sites_ro;
-    GRANT SELECT (id, site_id, public_url, mime, width, height, variants, alt, focal_point, dominant_colors)
-      ON site_assets TO bf_sites_ro;
+    GRANT SELECT ON renderer_published_sites, renderer_site_assets TO bf_sites_ro;
   END IF;
 END
 $$;

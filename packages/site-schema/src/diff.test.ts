@@ -1,14 +1,11 @@
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
-import { apply, type SiteSpec, SiteSpecSchema } from '@bf/site-schema';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { diffSpecs } from './version-diff.ts';
+import { diffSpecs } from './diff.ts';
+import { apply, type SiteSpec, SiteSpecSchema } from './index.ts';
 
-const fixtures = join(
-  dirname(createRequire(import.meta.url).resolve('@bf/site-schema/package.json')),
-  'fixtures',
-);
+const fixtures = fileURLToPath(new URL('../fixtures/', import.meta.url));
 const salon = (): SiteSpec =>
   SiteSpecSchema.parse(JSON.parse(readFileSync(join(fixtures, 'salon-gustavia.json'), 'utf8')));
 

@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "locales": ["fr", "en"],
+  "defaultLocale": "fr",
+  "brand": {
+    "name": "Café Saint-Jean",
+    "factId": "business.name"
+  },
+  "theme": {
+    "style": "warm",
+    "palette": {
+      "primary": "#9a3f1c",
+      "secondary": "#af8d22",
+      "accent": "#7c5a12",
+      "background": "#fff9f0",
+      "surface": "#ffffff",
+      "text": "#2a1d14",
+      "mutedText": "#6a574a"
+    },
+    "typography": {
+      "pairId": "fraunces-worksans"
+    },
+    "radius": "md",
+    "density": "comfortable",
+    "imageTreatment": "rounded"
+  },
+  "contact": {
+    "phone": {
+      "value": "+590590000202",
+      "factId": "phone.main"
+    },
+    "address": {
+      "locality": "Saint-Jean",
+      "country": "BL",
+      "formatted": "Baie de Saint-Jean, 97133 Saint-Barthélemy",
+      "factId": "address.main"
+    },
+    "hours": {
+      "weekly": {
+        "mon": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "tue": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "wed": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "thu": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "fri": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "sat": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ],
+        "sun": [
+          {
+            "open": "07:30",
+            "close": "15:00"
+          }
+        ]
+      },
+      "note": {
+        "fr": "Fermé en septembre",
+        "en": "Closed in September"
+      },
+      "factId": "hours.main"
+    }
+  },
+  "layout": {
+    "header": {
+      "variant": "simple",
+      "showCta": true,
+      "cta": {
+        "kind": "call",
+        "label": {
+          "fr": "Appeler",
+          "en": "Call"
+        }
+      }
+    },
+    "footer": {
+      "variant": "simple",
+      "showSocials": false,
+      "showHours": true
+    }
+  },
+  "navigation": {
+    "items": [
+      {
+        "pageId": "home",
+        "label": {
+          "fr": "Accueil",
+          "en": "Home"
+        }
+      },
+      {
+        "pageId": "menu",
+        "label": {
+          "fr": "Carte",
+          "en": "Menu"
+        }
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "home",
+      "slug": "",
+      "title": {
+        "fr": "Accueil",
+        "en": "Home"
+      },
+      "seo": {
+        "title": {
+          "fr": "Café Saint-Jean – Petit-déjeuner face à la baie",
+          "en": "Café Saint-Jean – Breakfast on the bay"
+        },
+        "description": {
+          "fr": "Petits-déjeuners, cafés et déjeuners légers face à la baie de Saint-Jean. Ouvert tous les jours dès 7 h 30 sauf en septembre.",
+          "en": "Breakfast, coffee and light lunches facing Saint-Jean bay. Open every day from 7:30 am, except in September. Come by any day."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-cafe1",
+          "type": "hero",
+          "variant": "image_full",
+          "props": {
+            "title": {
+              "fr": "Le café face à la baie",
+              "en": "The café on the bay"
+            },
+            "primaryCta": {
+              "kind": "page",
+              "label": {
+                "fr": "Voir la carte",
+                "en": "See the menu"
+              },
+              "pageId": "menu"
+            },
+            "imageAssetId": "img-cafe-1"
+          }
+        },
+        {
+          "id": "gall-cafe1",
+          "type": "gallery",
+          "variant": "grid",
+          "props": {
+            "assetIds": ["img-cafe-1", "img-cafe-2", "img-cafe-3"]
+          }
+        },
+        {
+          "id": "hour-cafe1",
+          "type": "hours",
+          "variant": "compact",
+          "props": {}
+        },
+        {
+          "id": "loca-cafe1",
+          "type": "location",
+          "variant": "address_only",
+          "props": {
+            "showDirections": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "menu",
+      "slug": "carte",
+      "title": {
+        "fr": "Carte",
+        "en": "Menu"
+      },
+      "seo": {
+        "title": {
+          "fr": "La carte – Café Saint-Jean, Saint-Barth",
+          "en": "Menu – Café Saint-Jean, St Barth"
+        },
+        "description": {
+          "fr": "Viennoiseries, bols de fruits, cafés et jus pressés : la carte du Café Saint-Jean, servie toute la matinée face à la baie.",
+          "en": "Pastries, fruit bowls, coffee and fresh juice: the Café Saint-Jean menu, served all morning facing the bay of Saint-Jean."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-menu1",
+          "type": "hero",
+          "variant": "centered",
+          "props": {
+            "title": {
+              "fr": "Notre carte",
+              "en": "Our menu"
+            }
+          }
+        },
+        {
+          "id": "menu-menu1",
+          "type": "menu",
+          "variant": "columns",
+          "props": {
+            "heading": {
+              "fr": "Le matin",
+              "en": "Mornings"
+            },
+            "sections": [
+              {
+                "title": {
+                  "fr": "Boissons",
+                  "en": "Drinks"
+                },
+                "items": [
+                  {
+                    "name": {
+                      "fr": "Expresso",
+                      "en": "Espresso"
+                    },
+                    "price": {
+                      "amount": 3,
+                      "currency": "EUR",
+                      "factId": "price.espresso"
+                    }
+                  },
+                  {
+                    "name": {
+                      "fr": "Jus pressé",
+                      "en": "Fresh juice"
+                    },
+                    "price": {
+                      "amount": 7,
+                      "currency": "EUR",
+                      "factId": "price.juice"
+                    },
+                    "tags": ["local"]
+                  }
+                ]
+              },
+              {
+                "title": {
+                  "fr": "À manger",
+                  "en": "To eat"
+                },
+                "items": [
+                  {
+                    "name": {
+                      "fr": "Bol de fruits",
+                      "en": "Fruit bowl"
+                    },
+                    "tags": ["vegan", "gluten_free"],
+                    "price": {
+                      "amount": 12,
+                      "currency": "EUR",
+                      "factId": "price.bowl"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "cont-menu1",
+          "type": "contact",
+          "variant": "centered",
+          "props": {
+            "heading": {
+              "fr": "Une question ?",
+              "en": "A question?"
+            },
+            "showForm": false,
+            "channels": {
+              "phone": true,
+              "email": false,
+              "whatsapp": false
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "img-cafe-1",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/terrace.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "La terrasse face à la baie",
+        "en": "The terrace facing the bay"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-cafe-2",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/coffee.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Un café crème sur le comptoir",
+        "en": "A white coffee on the counter"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-cafe-3",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/bowl.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Un bol de fruits frais",
+        "en": "A bowl of fresh fruit"
+      },
+      "license": "owner_site"
+    }
+  ],
+  "seo": {
+    "title": {
+      "fr": "Café Saint-Jean – Saint-Barth",
+      "en": "Café Saint-Jean – St Barth"
+    },
+    "description": {
+      "fr": "Café face à la baie de Saint-Jean à Saint-Barthélemy : petits-déjeuners, cafés et jus pressés, tous les jours dès 7 h 30.",
+      "en": "Café facing Saint-Jean bay in Saint-Barthélemy: breakfast, coffee and fresh juice, served every day from 7:30 in the morning."
+    }
+  },
+  "settings": {
+    "noindex": true,
+    "previewBanner": true,
+    "analytics": "cookieless",
+    "contactForm": {
+      "enabled": false
+    }
+  }
+}

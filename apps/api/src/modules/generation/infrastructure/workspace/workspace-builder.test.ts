@@ -116,6 +116,7 @@ function preparer(options: { pages?: CrawledPage[]; extractionFails?: boolean; b
     },
     repository: { batchById: async () => ({ settings: { offer: 'website_redesign' } }) as never },
     artifacts: { put: async (key: string, body: Buffer) => void stored.set(key, body) },
+    hosts: { assetHosts: ['assets.bf-sites.test'], hotlinkHosts: ['images.unsplash.com'] },
   });
   return { instance, stored, builds };
 }
@@ -190,6 +191,10 @@ describe('BundleWorkspacePreparer', () => {
     expect(files.get('context/current-site/01-home.md')?.toString()).toMatch(/^> UNTRUSTED DATA/);
     expect(files.get('context/review-themes.md')?.toString()).toContain('| booking_friction | 4 |');
     expect(JSON.parse(files.get('brief.json')?.toString() ?? '{}').offer.id).toBe('website_redesign');
+    expect(JSON.parse(files.get('.sitekit.json')?.toString() ?? '{}')).toMatchObject({
+      assetHosts: ['assets.bf-sites.test'],
+      strictFacts: true,
+    });
   });
 
   it('applies the job’s brief overrides and survives a failed extraction', async () => {

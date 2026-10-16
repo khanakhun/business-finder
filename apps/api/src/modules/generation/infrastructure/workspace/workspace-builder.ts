@@ -59,6 +59,8 @@ export class BundleWorkspacePreparer implements WorkspacePreparer {
       readonly images: SiteImageSource;
       readonly repository: Pick<GenerationRepository, 'batchById'>;
       readonly artifacts: Pick<ArtifactStore, 'put'>;
+      /** Hosts the site's images may come from (sitekit validates against them). */
+      readonly hosts?: { readonly assetHosts: readonly string[]; readonly hotlinkHosts: readonly string[] };
     },
   ) {}
 
@@ -149,6 +151,8 @@ export class BundleWorkspacePreparer implements WorkspacePreparer {
         defaultLocale: brief.locales.default,
         strictFacts: true,
         limits: { pages: 8, blocksPerPage: 20, specBytes: 1_000_000 },
+        assetHosts: [...(this.deps.hosts?.assetHosts ?? [])],
+        hotlinkHosts: [...(this.deps.hosts?.hotlinkHosts ?? [])],
         warnings,
       }),
     );

@@ -196,6 +196,7 @@ export class GenerationModule {
             SiteAssetCommands,
             GENERATION_REPOSITORY,
             GENERATION_ARTIFACTS,
+            APP_ENV,
           ],
           useFactory: (
             extraction: SiteFactExtraction,
@@ -205,6 +206,7 @@ export class GenerationModule {
             library: SiteAssetCommands,
             repository: GenerationRepository,
             artifacts: ArtifactStore,
+            env: AppEnv,
           ) =>
             new BundleWorkspacePreparer({
               extraction,
@@ -214,6 +216,10 @@ export class GenerationModule {
               images: new LibrarySiteImages(library),
               repository,
               artifacts,
+              hosts: {
+                assetHosts: [new URL((env as ApiEnv).SITES_ASSETS_BASE_URL).hostname],
+                hotlinkHosts: HOTLINK_HOSTS,
+              },
             }),
         },
         {

@@ -16,6 +16,7 @@ import {
   ValidationError,
 } from '@bf/contracts';
 import { apply, migrateSpec, OperationError, OperationSchema, type SiteSpec } from '@bf/site-schema';
+import { diffSpecs } from '@bf/site-schema/diff';
 import { Inject, Injectable } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
@@ -24,7 +25,6 @@ import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
 import { NoActivePublicationError, SiteArchivedError, SiteVersionConflictError } from '../domain/errors.ts';
 import { extendedExpiry, previewExpiry, previewHostname, siteStatus } from '../domain/publication-policy.ts';
 import { baseSlug, previewSlug, suffixSpellsWord } from '../domain/slug.ts';
-import { diffSpecs } from '../domain/version-diff.ts';
 import {
   SITE_HOSTING,
   SITES_REPOSITORY,

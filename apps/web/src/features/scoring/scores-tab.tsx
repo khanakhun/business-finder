@@ -13,13 +13,14 @@ import { EmptyState } from '@bf/ui/components/empty-state';
 import { ErrorState } from '@bf/ui/components/error-state';
 import { Skeleton } from '@bf/ui/components/skeleton';
 import { GaugeIcon, MinusCircleIcon, PlusCircleIcon, RefreshCwIcon } from 'lucide-react';
-import { useFormatter, useLocale, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useNow, useTranslations } from 'next-intl';
+import { useErrorMessage } from '@/components/auth/fields.tsx';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import type { BusinessTabProps } from '@/features/business/tabs/registry.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useBusinessScores, useRecomputeBusinessScores, useScoringProfiles } from './api.ts';
-import { OFFER_ICON, type OfferId, ScoreBadge, type Tier } from './score-badge.tsx';
+import { OFFER_ICON, ScoreBadge } from './score-badge.tsx';
 import { Waterfall, waterfallSteps } from './waterfall.tsx';
 
 // The business's Scores tab (BF-032): one card per profile of the workspace, primary first — score, tier, why
@@ -30,8 +31,27 @@ type Locale = 'en' | 'fr';
 const label = (feature: ScoreContribution['feature'], locale: Locale) =>
   FEATURE_DEFINITIONS[feature].label[locale];
 
-const value = (raw: ScoreContribution['rawValue'], t: (key: 'yes' | 'no' | 'missing') => string) =>
-  raw === null ? t('missing') : raw === true ? t('yes') : raw === false ? t('no') : String(raw);
+/** Where the dashboard already names an enum feature's values. */
+const ENUM_MESSAGES: Partial<Record<ScoreContribution['feature'], string>> = {
+  website_status: 'enrichment.audit.statuses',
+  operating_status: 'business.operating',
+  pipeline_status: 'search.status',
+};
+
+/** A feature's raw value, readable: yes/no, a localized number, an enum value's label. */
+function useValueText() {
+  const t = useTranslations('scoring.tab');
+  const all = useTranslations();
+  const format = useFormatter();
+  return (feature: ScoreContribution['feature'], raw: ScoreContribution['rawValue']): string => {
+    if (raw === null) return t('missing');
+    if (typeof raw === 'boolean') return t(raw ? 'yes' : 'no');
+    if (typeof raw === 'number') return format.number(raw, { maximumFractionDigits: 2 });
+    // Keys built at runtime: checked with `has` (an unknown value reads as is).
+    const key = `${ENUM_MESSAGES[feature]}.${raw}` as Parameters<typeof all>[0];
+    return ENUM_MESSAGES[feature] && all.has(key) ? all(key) : raw;
+  };
+}
 
 function ScoreCard({
   score,
@@ -45,8 +65,15 @@ function ScoreCard({
   const t = useTranslations('scoring.tab');
   const offers = useTranslations('scoring.offers');
   const format = useFormatter();
-  const Icon = OFFER_ICON[score.offer as OfferId];
-  const steps = waterfallSteps(score.contributions, score.score, (f) => label(f, locale), t('total'));
+  const now = useNow({ updateInterval: 60_000 });
+  const valueText = useValueText();
+  const Icon = OFFER_ICON[score.offer];
+  const steps = waterfallSteps(score.contributions, score.score, (f) => label(f, locale), {
+    total: t('total'),
+    adjustment: score.gated?.applied
+      ? t(score.gated.effect === 'exclude' ? 'adjustExcluded' : 'adjustCapped')
+      : t('adjustBounds'),
+  });
   const positive = score.reasons.filter((reason) => reason.direction === 'positive');
   const negative = score.reasons.filter((reason) => reason.direction === 'negative');
   const shown = score.contributions.filter((c) => c.contribution !== 0 || c.rawValue !== null);
@@ -62,16 +89,11 @@ function ScoreCard({
           <p className="text-sm text-muted-foreground">
             {t('meta', {
               version: score.profileVersion,
-              when: format.relativeTime(new Date(score.computedAt)),
+              when: format.relativeTime(new Date(score.computedAt), now),
             })}
           </p>
         </div>
-        <ScoreBadge
-          score={score.score}
-          tier={score.tier as Tier}
-          offer={score.offer as OfferId}
-          className="text-base"
-        />
+        <ScoreBadge score={score.score} tier={score.tier} offer={score.offer} className="text-base" />
       </CardHeader>
       <CardContent className="space-y-5">
         {score.gated ? (
@@ -153,7 +175,7 @@ function ScoreCard({
                     {label(contribution.feature, locale)}
                   </th>
                   <td className="py-1">
-                    {value(contribution.rawValue, (key) => t(key))}
+                    {valueText(contribution.feature, contribution.rawValue)}
                     {contribution.imputed ? (
                       <span className="text-muted-foreground"> ({t(`imputed.${contribution.imputed}`)})</span>
                     ) : null}
@@ -176,6 +198,7 @@ function ScoreCard({
 export function ScoresTab({ business }: BusinessTabProps) {
   const t = useTranslations('scoring.tab');
   const labels = useErrorLabels();
+  const errorMessage = useErrorMessage();
   const locale = (useLocale() === 'fr' ? 'fr' : 'en') as Locale;
   const canRecompute = usePermission('business:write');
   const scores = useBusinessScores(business.id);
@@ -192,8 +215,8 @@ export function ScoresTab({ business }: BusinessTabProps) {
         try {
           await recompute.mutateAsync();
           (await getToast()).success(t('recomputed'));
-        } catch {
-          (await getToast()).error(t('recomputeFailed'));
+        } catch (error) {
+          (await getToast()).error(t('recomputeFailed', { reason: errorMessage(error) }));
         }
       }}
     >

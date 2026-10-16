@@ -40,7 +40,9 @@ export function useRecomputeBusinessScores(businessId: string) {
       ).data as BusinessScoreList,
     onSuccess: (data) => {
       client.setQueryData(queryKeys.business.scores(businessId), data);
-      void client.invalidateQueries({ queryKey: ['search', 'listing'] });
+      // The listing and the pipeline board show the primary profile's tier.
+      void client.invalidateQueries({ queryKey: queryKeys.search.all });
+      void client.invalidateQueries({ queryKey: queryKeys.crm.all });
     },
   });
 }

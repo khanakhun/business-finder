@@ -4,23 +4,27 @@ import type { ScoreContribution } from '@bf/contracts';
 import { useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-// How a score is built (BF-032): each contribution as a step from the previous total, then the score. The chart is
-// decorative for assistive technology (`aria-hidden`); the contributions table next to it carries the same data.
+// How a score is built (BF-032): each contribution as a step from the previous total, the adjustment that brings the
+// total to the score (clamped to 0–100, capped or excluded by a gate), then the score. The chart is decorative for
+// assistive technology (`aria-hidden`); the contributions table next to it carries the same data.
 
 export interface WaterfallStep {
   readonly label: string;
   /** Where the bar starts and its signed size (score points). */
   readonly base: number;
   readonly delta: number;
-  readonly kind: 'positive' | 'negative' | 'total';
+  readonly kind: 'positive' | 'negative' | 'adjustment' | 'total';
 }
 
-/** Non-zero contributions, strongest first, as running steps; then the (clamped, gated) score. */
+/**
+ * Non-zero contributions, strongest first, as running steps; when they do not add up to the score, the adjustment
+ * (`adjustLabel`: the 0–100 bounds or the gate); then the score. The steps always end on the score.
+ */
 export function waterfallSteps(
   contributions: readonly ScoreContribution[],
   score: number,
   labelOf: (feature: ScoreContribution['feature']) => string,
-  totalLabel: string,
+  labels: { readonly total: string; readonly adjustment: string },
 ): WaterfallStep[] {
   const steps: WaterfallStep[] = [];
   let running = 0;
@@ -35,15 +39,31 @@ export function waterfallSteps(
       delta: Math.abs(delta),
       kind: delta >= 0 ? 'positive' : 'negative',
     });
-    running += delta;
+    running = Math.round((running + delta) * 10) / 10;
   }
-  steps.push({ label: totalLabel, base: 0, delta: score, kind: 'total' });
+  if (running !== score) {
+    steps.push({
+      label: labels.adjustment,
+      base: Math.min(running, score),
+      delta: Math.abs(running - score),
+      kind: 'adjustment',
+    });
+  }
+  steps.push({ label: labels.total, base: 0, delta: score, kind: 'total' });
   return steps;
+}
+
+/** The axis: 0–100, widened to every step (contributions may run below 0 or above 100 before the bounds). */
+export function waterfallDomain(steps: readonly WaterfallStep[]): [number, number] {
+  const low = Math.min(0, ...steps.map((step) => step.base));
+  const high = Math.max(100, ...steps.map((step) => step.base + step.delta));
+  return [Math.floor(low / 10) * 10, Math.ceil(high / 10) * 10];
 }
 
 const COLOR: Record<WaterfallStep['kind'], string> = {
   positive: 'var(--color-emerald-600, #059669)',
   negative: 'var(--color-red-600, #dc2626)',
+  adjustment: 'var(--color-amber-500, #f59e0b)',
   total: 'var(--color-sky-600, #0284c7)',
 };
 
@@ -59,16 +79,14 @@ export function Waterfall({ steps }: { readonly steps: readonly WaterfallStep[] 
           margin={{ left: 8, right: 16 }}
         >
           <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-          <XAxis type="number" domain={[0, 100]} tickCount={6} />
+          <XAxis type="number" domain={waterfallDomain(steps)} tickCount={6} />
           <YAxis type="category" dataKey="label" width={170} tick={{ fontSize: 12 }} />
-          <Tooltip
-            formatter={(value, name) => (name === 'delta' ? [value, t('points')] : [])}
-            cursor={{ fillOpacity: 0.1 }}
-          />
-          <Bar dataKey="base" stackId="w" fill="transparent" isAnimationActive={false} />
+          <Tooltip formatter={(value) => [value, t('points')]} cursor={{ fillOpacity: 0.1 }} />
+          <Bar dataKey="base" stackId="w" fill="transparent" tooltipType="none" isAnimationActive={false} />
           <Bar dataKey="delta" stackId="w" isAnimationActive={false}>
-            {steps.map((step) => (
-              <Cell key={step.label} fill={COLOR[step.kind]} />
+            {steps.map((step, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: steps are positional (two features may share a label)
+              <Cell key={`${step.kind}-${i}`} fill={COLOR[step.kind]} />
             ))}
           </Bar>
         </BarChart>

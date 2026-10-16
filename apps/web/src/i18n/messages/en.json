@@ -1633,10 +1633,13 @@
       },
       "recompute": "Recompute",
       "recomputed": "Scores recomputed.",
-      "recomputeFailed": "The scores could not be recomputed.",
+      "recomputeFailed": "The scores could not be recomputed: {reason}",
       "loadFailed": "The scores could not be loaded.",
       "emptyTitle": "Not scored yet",
-      "emptyDescription": "Scores appear once the business is tracked and enriched. Recompute to score it now."
+      "emptyDescription": "Scores appear once the business is tracked and enriched. Recompute to score it now.",
+      "adjustBounds": "Limited to 0–100",
+      "adjustCapped": "Capped by a rule",
+      "adjustExcluded": "Excluded by a rule"
     }
   }
 }

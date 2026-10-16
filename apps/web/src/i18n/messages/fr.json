@@ -1633,10 +1633,13 @@
       },
       "recompute": "Recalculer",
       "recomputed": "Scores recalculés.",
-      "recomputeFailed": "Les scores n’ont pas pu être recalculés.",
+      "recomputeFailed": "Les scores n’ont pas pu être recalculés : {reason}",
       "loadFailed": "Les scores n’ont pas pu être chargés.",
       "emptyTitle": "Pas encore de score",
-      "emptyDescription": "Les scores apparaissent une fois l’entreprise suivie et enrichie. Recalculez pour la noter maintenant."
+      "emptyDescription": "Les scores apparaissent une fois l’entreprise suivie et enrichie. Recalculez pour la noter maintenant.",
+      "adjustBounds": "Ramené entre 0 et 100",
+      "adjustCapped": "Plafonné par une règle",
+      "adjustExcluded": "Exclu par une règle"
     }
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import type { Offer, ScoreTier } from '@bf/contracts';
 import { Badge } from '@bf/ui/components/badge';
 import { cn } from '@bf/ui/lib/utils';
 import {
@@ -12,11 +13,11 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-// Score badges (BF-032): tier colour, score, and the offer of the profile behind it. Shell-safe: no value import
-// from the contracts barrel (BF-007 budget), so tiers and offers are mirrored here.
+// Score badges (BF-032): tier colour, score, and the offer of the profile behind it. Shell-safe: type imports only
+// from the contracts barrel (BF-007 budget).
 
-export type Tier = 'A' | 'B' | 'C' | 'X';
-export type OfferId = 'new_website' | 'website_redesign' | 'ai_receptionist' | 'booking_system' | 'local_seo';
+export type Tier = ScoreTier;
+export type OfferId = Offer;
 
 export const TIER_STYLE: Record<Tier, string> = {
   A: 'border-emerald-600/40 bg-emerald-600/15 text-emerald-900 dark:text-emerald-100',
@@ -52,7 +53,7 @@ export function ScoreBadge({
     ? t('labelOffer', { tier, score: score ?? 0, offer: offers(offer) })
     : t('label', { tier, score: score ?? 0 });
   return (
-    <Badge variant="outline" className={cn('gap-1 tabular-nums', TIER_STYLE[tier], className)} title={label}>
+    <Badge variant="outline" className={cn('gap-1 tabular-nums', TIER_STYLE[tier], className)}>
       {Icon ? <Icon aria-hidden className="size-3" /> : null}
       <span className="sr-only">{label}</span>
       <span aria-hidden>

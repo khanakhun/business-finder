@@ -1,11 +1,6 @@
 import type { VerificationStatus } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  BUSINESS_REPOSITORY,
-  type BusinessRepository,
-  CONTACT_REPOSITORY,
-  type ContactRepository,
-} from '../ports.ts';
+import { CONTACT_REPOSITORY, type ContactRepository } from '../ports.ts';
 
 /** A business's e-mail contact as verification sees it (BF-028). */
 export interface EmailContactView {
@@ -23,10 +18,7 @@ export interface EmailContactView {
  */
 @Injectable()
 export class EmailContactsQuery {
-  constructor(
-    @Inject(CONTACT_REPOSITORY) private readonly contacts: ContactRepository,
-    @Inject(BUSINESS_REPOSITORY) private readonly businesses: BusinessRepository,
-  ) {}
+  constructor(@Inject(CONTACT_REPOSITORY) private readonly contacts: ContactRepository) {}
 
   /** Never-verified addresses first, then the longest-unverified ones. */
   async listForBusiness(businessId: string): Promise<EmailContactView[]> {
@@ -43,7 +35,7 @@ export class EmailContactsQuery {
       .sort((a, b) => (a.verifiedAt?.getTime() ?? 0) - (b.verifiedAt?.getTime() ?? 0));
   }
 
-  /** Any contact by id, with its business's website host (pattern guessing needs the domain). */
+  /** Any contact by id (its type says whether it can be verified). */
   async find(
     contactId: string,
   ): Promise<{ readonly id: string; readonly businessId: string; readonly type: string } | undefined> {
@@ -54,10 +46,5 @@ export class EmailContactsQuery {
   /** Names of people the business's contacts mention (pattern guessing). */
   personNames(businessId: string, limit = 5): Promise<string[]> {
     return this.contacts.personNames(businessId, limit);
-  }
-
-  /** The business's website host, if it has one. */
-  async websiteHost(businessId: string): Promise<string | null> {
-    return (await this.businesses.getById(businessId))?.snapshot().websiteHost ?? null;
   }
 }

@@ -113,13 +113,38 @@ describe('EmailVerificationService', () => {
     });
   });
 
-  it('a verifier that is down never turns into "unknown": the error propagates and nothing is cached', async () => {
-    const { verify, store } = harness([verifier('reacher', transient), verifier('dns', DNS_UNKNOWN)]);
-    await expect(verify()).rejects.toBe(transient);
+  it('a verifier that is down gives only a provisional, uncached answer (circuit open, DNS says unknown)', async () => {
+    const circuitOpen = new ExternalServiceError('reacher', 'unavailable', {
+      details: { reason: 'circuit_open', retryable: true },
+    });
+    const { verify, store } = harness([verifier('reacher', circuitOpen), verifier('dns', DNS_UNKNOWN)]);
+    expect(await verify()).toMatchObject({
+      kind: 'verdict',
+      provisional: true,
+      cached: false,
+      check: { status: 'unknown', details: { checkedVia: 'dns' } },
+    });
+    // Nobody inherits an outage's "unknown".
     expect(store.size).toBe(0);
-    // A conclusive answer after the failure is fine.
+    // A conclusive answer after the failure is a normal verdict.
     const recovered = harness([verifier('reacher', transient), verifier('zerobounce', ZB_VALID)]);
-    expect(await recovered.verify()).toMatchObject({ check: { status: 'valid' } });
+    const outcome = await recovered.verify();
+    expect(outcome).toMatchObject({ check: { status: 'valid' } });
+    expect(outcome.kind === 'verdict' && outcome.provisional).toBeFalsy();
+  });
+
+  it('lets paid verifiers check the budget with what the step already spent', async () => {
+    const seen: unknown[] = [];
+    const zerobounce: EmailVerifier = {
+      ...verifier('zerobounce', ZB_VALID),
+      available: async (_org, context) => {
+        seen.push(context);
+        return true;
+      },
+    };
+    const { service } = harness([zerobounce], { chain: ['zerobounce'] });
+    await service.verify(ORG, ADDRESS, new AbortController().signal, { pendingUsd: 0.024 });
+    expect(seen).toEqual([{ pendingUsd: 0.024 }]);
   });
 
   it('skips verifiers this workspace cannot use and follows its order', async () => {

@@ -90,8 +90,9 @@ describe('EmailVerifyStep', () => {
 
   it('budgets for what a crawl can still add when the business has a website', () => {
     const { step } = harness([], {});
-    // A site: up to 20 addresses (website source cap), whatever is known yet.
+    // A site: what is known plus up to 20 a crawl can add (website source cap).
     expect(step.estimateCost({ ...subject, emails: [] })).toBeCloseTo(20 * 0.008);
+    expect(step.estimateCost(subject)).toBeCloseTo(21 * 0.008);
     // No site: only the known addresses.
     expect(
       step.estimateCost({ ...subject, websiteUrl: null, emails: ['a@x.example', 'b@x.example'] }),
@@ -141,17 +142,53 @@ describe('EmailVerifyStep', () => {
     expect(record).toHaveBeenCalledTimes(1);
   });
 
-  it('a transient failure stops the step with what it already spent (booked by the engine)', async () => {
-    const { run } = harness(['a@one.example.com', 'b@two.example.com'], {
-      'a@one.example.com': verdict('safe', 0.008),
-      'b@two.example.com': transient,
+  it('a verifier outage never stops the step: other addresses go on, the failed one is due within the hour', async () => {
+    const { run, record } = harness(['a@one.example.com', 'b@two.example.com', 'c@three.example.com'], {
+      'a@one.example.com': transient,
+      'c@three.example.com': { ...verdict('unknown'), provisional: true } as VerificationOutcome,
     });
-    const error = await run().catch((e: unknown) => e);
+    expect(await run()).toMatchObject({
+      outcome: 'done',
+      outputRef: { retryLater: 2, checked: 2, recheckAt: new Date(NOW.getTime() + 3_600_000).toISOString() },
+    });
+    // The verified one and the provisional one are recorded (a provisional "unknown" never downgrades).
+    expect(record).toHaveBeenCalledTimes(2);
+  });
+
+  it('a stop (cancel, shutdown) interrupts with what was already spent (booked by the engine)', async () => {
+    const controller = new AbortController();
+    const step = harness(['a@one.example.com', 'b@two.example.com'], {
+      'a@one.example.com': verdict('safe', 0.008),
+    });
+    step.verify.mockImplementation(async (_org, email) => {
+      if (email === 'b@two.example.com') {
+        controller.abort(new Error('cancelled'));
+        throw new Error('aborted');
+      }
+      return verdict('safe', 0.008);
+    });
+    const error = await step.step
+      .execute({
+        runId: 'run-1',
+        stepRowId: 'step-1',
+        organizationId: ORG,
+        subject,
+        inputHash: 'h',
+        dependencies: new Map(),
+        signal: controller.signal,
+        deferrals: 0,
+      })
+      .catch((e: unknown) => e);
     expect(error).toBeInstanceOf(StepInterruptedError);
-    expect(error).toMatchObject({ cause: transient, costUsd: 0.008, changedFields: ['contacts'] });
-    // Nothing spent yet: the error itself.
-    const fresh = harness(['b@two.example.com'], { 'b@two.example.com': transient });
-    await expect(fresh.run()).rejects.toBe(transient);
+    expect(error).toMatchObject({ costUsd: 0.008, changedFields: ['contacts'] });
+  });
+
+  it('passes what it already spent to the budget check of the next address', async () => {
+    const { run, verify } = harness(['a@one.example.com', 'b@two.example.com'], {
+      'a@one.example.com': verdict('safe', 0.008),
+    });
+    await run();
+    expect(verify.mock.calls.map((c) => c[3])).toEqual([{ pendingUsd: 0 }, { pendingUsd: 0.008 }]);
   });
 
   it('checks the other addresses first, then defers once for the busy mail servers', async () => {
@@ -228,9 +265,9 @@ describe('EmailVerifyStep', () => {
       );
       const result = await run();
       expect(verify.mock.calls.map((c) => [c[1], c[3]])).toEqual([
-        [published, undefined],
-        ['marie.curie@example.com', { cache: false }],
-        ['m.curie@example.com', { cache: false }],
+        [published, { pendingUsd: 0 }],
+        ['marie.curie@example.com', { cache: false, pendingUsd: 0 }],
+        ['m.curie@example.com', { cache: false, pendingUsd: 0 }],
       ]);
       expect(result).toMatchObject({ outputRef: { guessed: 2, guessedValid: 1 } });
       expect(JSON.stringify(result)).not.toContain('curie');

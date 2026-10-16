@@ -51,6 +51,11 @@ export type VerificationOutcome =
       readonly expiresAt: Date;
       readonly cached: boolean;
       readonly costUsd: number;
+      /**
+       * Inconclusive only because a verifier that could have answered failed transiently (down, timed out): not
+       * cached, to be asked again soon. Recording it is safe — a conclusive verdict is never downgraded.
+       */
+      readonly provisional?: boolean;
     }
   /** On a suppression list: not checked (BF-049). */
   | { readonly kind: 'suppressed' }
@@ -62,6 +67,8 @@ export type VerificationOutcome =
 export interface VerifyOptions {
   /** Keep the verdict in the shared cache (default). Name-pattern guesses are never cached. */
   readonly cache?: boolean;
+  /** What the calling step already spent and has not booked yet (paid verifiers check the budget with it). */
+  readonly pendingUsd?: number;
 }
 
 /**
@@ -69,8 +76,8 @@ export interface VerifyOptions {
  * (a disposable domain needs no check), and the workspace's verifier chain (Chain of Responsibility: the first
  * conclusive verdict wins). Verifiers that talk to recipients' mail servers are wrapped in a politeness decorator
  * (per mail server, with a per-workspace share). Conclusive verdicts are cached for the TTL, inconclusive ones with
- * backoff. When a verifier failed transiently and nothing conclusive came, the error propagates (the engine retries)
- * and nothing is cached or recorded: an outage never turns a known verdict into `unknown`.
+ * backoff. When a verifier failed transiently and nothing conclusive came, the inconclusive answer is returned as
+ * `provisional` and not cached (nobody inherits an outage's `unknown`); contacts never downgrade a known verdict.
  */
 @Injectable()
 export class EmailVerificationService {
@@ -100,6 +107,7 @@ export class EmailVerificationService {
         email.trim().toLowerCase(),
         signal,
         options.cache ?? true,
+        options.pendingUsd ?? 0,
       );
       span.setAttribute('bf.email_verify.outcome', outcome.kind);
       if (outcome.kind === 'verdict') {
@@ -118,11 +126,12 @@ export class EmailVerificationService {
     address: string,
     signal: AbortSignal,
     useCache: boolean,
+    pendingUsd: number,
   ): Promise<VerificationOutcome> {
     const domain = address.slice(address.lastIndexOf('@') + 1);
     if (await this.suppression.isSuppressed(organizationId, address)) return { kind: 'suppressed' };
     const now = this.clock.now();
-    const chain = await this.usableChain(organizationId);
+    const chain = await this.usableChain(organizationId, pendingUsd);
     const cached = useCache ? await this.cache.get(address) : undefined;
     if (cached && cached.expiresAt > now && this.reusable(cached, chain)) {
       return {
@@ -164,8 +173,8 @@ export class EmailVerificationService {
       }
     }
     if (best && !isConclusive(best) && transientFailure) {
-      // A verifier that could have answered is down: retry later instead of recording "unknown".
-      throw transientFailure;
+      // A verifier that could have answered is down: not cached (nobody else inherits it), asked again soon.
+      return { ...(await this.store(address, best, cached, spent, false)), provisional: true };
     }
     if (!best) {
       if (lastError) throw lastError;
@@ -175,12 +184,12 @@ export class EmailVerificationService {
   }
 
   /** The workspace's chain: verifiers this deployment has and the workspace can use, in its order. */
-  private async usableChain(organizationId: string): Promise<EmailVerifier[]> {
+  private async usableChain(organizationId: string, pendingUsd: number): Promise<EmailVerifier[]> {
     const settings = await this.defaults.enrichmentSettings(organizationId);
     const chain: EmailVerifier[] = [];
     for (const id of chainOrder(settings.emailVerifiers, new Set(this.verifiers.keys()))) {
       const verifier = this.verifiers.get(id);
-      if (verifier && (await verifier.available(organizationId))) chain.push(verifier);
+      if (verifier && (await verifier.available(organizationId, { pendingUsd }))) chain.push(verifier);
     }
     return chain;
   }
@@ -200,7 +209,7 @@ export class EmailVerificationService {
     previous: CachedVerdict | undefined,
     costUsd: number,
     useCache: boolean,
-  ): Promise<VerificationOutcome> {
+  ): Promise<Extract<VerificationOutcome, { kind: 'verdict' }>> {
     const checkedAt = this.clock.now();
     const streak = isConclusive(check)
       ? 0

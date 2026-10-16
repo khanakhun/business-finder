@@ -298,7 +298,7 @@ export type SmtpProbeError = (typeof SMTP_PROBE_ERRORS)[number];
 export interface EmailVerifier {
   readonly id: EmailVerifierId;
   /** Whether this deployment (and workspace: its key) can use it at all. */
-  available(organizationId: string): Promise<boolean>;
+  available(organizationId: string, context?: { readonly pendingUsd?: number }): Promise<boolean>;
   /** Checks one normalized address. Throws on failure (transient errors are typed `ExternalServiceError`). */
   verify(
     email: string,

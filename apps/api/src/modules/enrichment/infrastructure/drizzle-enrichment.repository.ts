@@ -366,19 +366,14 @@ export class DrizzleEnrichmentRepository implements EnrichmentRepository {
 
   async addSpend(stepRowId: string, costUsd: number, changedFields: readonly string[]): Promise<void> {
     const spent = Math.max(0, costUsd);
-    const [row] = await this.x
-      .update(enrichmentSteps)
-      .set({ costUsd: sql`${enrichmentSteps.costUsd} + ${spent}` })
-      .where(eq(enrichmentSteps.id, stepRowId))
-      .returning({ runId: enrichmentSteps.runId });
-    if (!row) return;
-    await this.x
-      .update(enrichmentRuns)
-      .set({
-        costUsd: sql`${enrichmentRuns.costUsd} + ${spent}`,
-        changedFields: sql`ARRAY(SELECT DISTINCT f FROM unnest(${enrichmentRuns.changedFields} || ${textArray([...changedFields])}) AS f ORDER BY f)`,
-      })
-      .where(eq(enrichmentRuns.id, row.runId));
+    // One statement: the step's and the run's costs never disagree.
+    await this.x.execute(sql`WITH s AS (
+        UPDATE ${enrichmentSteps} SET cost_usd = cost_usd + ${spent}
+        WHERE id = ${stepRowId} RETURNING run_id)
+      UPDATE ${enrichmentRuns} r SET cost_usd = r.cost_usd + ${spent},
+        changed_fields = ARRAY(SELECT DISTINCT f FROM unnest(r.changed_fields || ${textArray([...changedFields])}) AS f
+          ORDER BY f)
+      FROM s WHERE r.id = s.run_id`);
   }
 
   async completeStep(stepRowId: string, completion: StepCompletion, at: Date): Promise<boolean> {

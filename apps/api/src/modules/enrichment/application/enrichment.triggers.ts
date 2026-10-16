@@ -98,8 +98,10 @@ export class NightlyRefresh {
 
   async run(day: string): Promise<{ readonly started: number }> {
     const now = this.clock.now().getTime();
-    // Retention: e-mail verdicts nobody may reuse any more (BF-028).
-    const purged = await this.verdicts.purgeExpired(new Date(now));
+    // Retention: e-mail verdicts expired for a full TTL (BF-028). Recently expired ones are kept: their inconclusive
+    // streak drives the re-check backoff (1, 2, 4… days).
+    const verdictTtlDays = this.registry.get('email_verify')?.ttlDays ?? 60;
+    const purged = await this.verdicts.purgeExpired(new Date(now - verdictTtlDays * DAY_MS));
     if (purged > 0) this.logger.info({ purged }, 'expired e-mail verdicts purged');
     // Every registered step, with its own freshness: later steps are refreshed without changing this code.
     const steps = [...this.registry.all().values()].map((step) => ({

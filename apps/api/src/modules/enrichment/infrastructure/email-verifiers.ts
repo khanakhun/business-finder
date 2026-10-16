@@ -217,8 +217,8 @@ export class PoliteMailServerVerifier implements EmailVerifier {
     this.id = inner.id;
   }
 
-  available(organizationId: string): Promise<boolean> {
-    return this.inner.available(organizationId);
+  available(organizationId: string, context?: { readonly pendingUsd?: number }): Promise<boolean> {
+    return this.inner.available(organizationId, context);
   }
 
   async verify(
@@ -276,9 +276,10 @@ export class ZeroBounceVerifier implements EmailVerifier {
     private readonly baseUrl: string = ZEROBOUNCE_BASE_URL,
   ) {}
 
-  async available(organizationId: string): Promise<boolean> {
+  /** With a key, and while the budget can pay one more check on top of what the step already spent. */
+  async available(organizationId: string, context: { readonly pendingUsd?: number } = {}): Promise<boolean> {
     if ((await this.key(organizationId)) === undefined) return false;
-    return this.canSpend(organizationId, this.unitCostUsd);
+    return this.canSpend(organizationId, this.unitCostUsd + (context.pendingUsd ?? 0));
   }
 
   async verify(

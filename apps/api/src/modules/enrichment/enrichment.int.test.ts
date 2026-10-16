@@ -804,6 +804,17 @@ describe('e-mail verification (BF-028)', () => {
 
     const cache = t.app.get<EmailVerdictCache>(EMAIL_VERDICT_CACHE);
     expect(await cache.get('unknown@recheck-verify-enrich.com')).toBeDefined();
+    // The nightly purge keeps recently expired verdicts (their streak drives the backoff)… (no refresh runs here)
+    await owner
+      .patch('/v1/workspace/settings')
+      .send({ enrichment: { nightlyRefreshLimit: 0 } })
+      .expect(200);
+    await worker.get(NightlyRefresh).run('2026-10-16');
+    await owner
+      .patch('/v1/workspace/settings')
+      .send({ enrichment: { nightlyRefreshLimit: 100 } })
+      .expect(200);
+    expect(await cache.get('unknown@recheck-verify-enrich.com')).toBeDefined();
     expect(await cache.purgeExpired(new Date(recheckAt + 1_000))).toBeGreaterThan(0);
     expect(await cache.get('unknown@recheck-verify-enrich.com')).toBeUndefined();
   });

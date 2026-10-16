@@ -53,13 +53,20 @@ export const MAX_DEFERRALS = 6;
 
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
-type Counts = Record<'checked' | 'cached' | 'suppressed' | 'unavailable' | 'rateLimited' | 'failed', number>;
+type Counts = Record<
+  'checked' | 'cached' | 'suppressed' | 'unavailable' | 'rateLimited' | 'failed' | 'retryLater',
+  number
+>;
+/** When an address whose verifier was down (or only answered provisionally) is due again. */
+const RETRY_LATER_MS = 3_600_000;
 
 /**
  * `email_verify` (BF-028): checks every e-mail contact of the business (after `site_intel`, which finds them — an
  * optional dependency) with the workspace's verifier chain, and records the verdicts on the contacts. Re-running is
- * safe: verdicts come back from the cache. One address's permanent failure never stops the others; a transient one
- * stops the step (the engine retries) after booking what was already spent. Addresses whose mail server is busy are
+ * safe: verdicts come back from the cache. No address stops the others: a permanent failure is counted, one whose
+ * verifier is down (or answered only provisionally) is due again within the hour (`recheckAt`) — a verifier outage
+ * never leaves a run waiting. Only a stop (cancel, shutdown) interrupts the step, after booking what it spent.
+ * Addresses whose mail server is busy are
  * left for last: the step defers itself once for all of them (up to `MAX_DEFERRALS` times), then finishes and asks
  * for a re-check. Name-pattern guessing (flag `emailPatternGuessing`) only runs where personal addresses may be
  * contacted; guesses are never cached or stored — only counted.
@@ -87,13 +94,12 @@ export class EmailVerifyStep implements EnrichmentStep {
   }
 
   /**
-   * Upper bound: every address checked by the commercial verifier — the known ones, or as many as a crawl can add
-   * when the business has a website (Reacher and DNS cost nothing).
+   * Upper bound: every address checked by the commercial verifier — the known ones plus as many as a crawl can add
+   * when the business has a website (Reacher and DNS cost nothing). Name-pattern guesses are not budgeted: they are
+   * off until BF-049 allows personal addresses (and then guarded at call time by the budget check).
    */
   estimateCost(subject: EnrichmentSubject): number {
-    const addresses = subject.websiteUrl
-      ? Math.max(subject.emails.length, SITE_EMAILS)
-      : subject.emails.length;
+    const addresses = subject.emails.length + (subject.websiteUrl ? SITE_EMAILS : 0);
     return Math.min(addresses, MAX_EMAILS) * this.options.unitCostUsd;
   }
 
@@ -119,6 +125,7 @@ export class EmailVerifyStep implements EnrichmentStep {
       unavailable: 0,
       rateLimited: 0,
       failed: 0,
+      retryLater: 0,
     };
     const statuses: Partial<Record<VerificationStatus, number>> = {};
     const waits: number[] = [];
@@ -136,11 +143,19 @@ export class EmailVerifyStep implements EnrichmentStep {
       signal.throwIfAborted();
       let outcome: VerificationOutcome;
       try {
-        outcome = await this.options.verification.verify(organizationId, contact.email, signal);
+        outcome = await this.options.verification.verify(organizationId, contact.email, signal, {
+          pendingUsd: costUsd,
+        });
       } catch (error) {
-        // Transient: the engine retries (or the run stops) — money already spent is booked first.
-        if (signal.aborted || isTransient(error)) throw interrupted(error);
-        counts.failed += 1;
+        // Stopped (cancel, shutdown): money already spent is booked first.
+        if (signal.aborted) throw interrupted(error);
+        // A verifier is down for this address: the others go on; it is due again soon (never a stuck run).
+        if (isTransient(error)) {
+          counts.retryLater += 1;
+          earliest(now.getTime() + RETRY_LATER_MS);
+        } else {
+          counts.failed += 1;
+        }
         continue;
       }
       if (outcome.kind === 'rate_limited') {
@@ -155,7 +170,12 @@ export class EmailVerifyStep implements EnrichmentStep {
       costUsd += outcome.costUsd;
       counts[outcome.cached ? 'cached' : 'checked'] += 1;
       statuses[outcome.check.status] = (statuses[outcome.check.status] ?? 0) + 1;
-      if (!isConclusive(outcome.check)) earliest(outcome.expiresAt.getTime());
+      if (outcome.provisional) {
+        counts.retryLater += 1;
+        earliest(now.getTime() + RETRY_LATER_MS);
+      } else if (!isConclusive(outcome.check)) {
+        earliest(outcome.expiresAt.getTime());
+      }
       const recorded = await this.options.record.execute(subject.businessId, contact.email, {
         status: outcome.check.status,
         details: outcome.check.details,
@@ -178,9 +198,12 @@ export class EmailVerifyStep implements EnrichmentStep {
       signal.throwIfAborted();
       let outcome: VerificationOutcome;
       try {
-        outcome = await this.options.verification.verify(organizationId, email, signal, { cache: false });
+        outcome = await this.options.verification.verify(organizationId, email, signal, {
+          cache: false,
+          pendingUsd: costUsd,
+        });
       } catch (error) {
-        if (signal.aborted || isTransient(error)) throw interrupted(error);
+        if (signal.aborted) throw interrupted(error);
         continue;
       }
       if (outcome.kind !== 'verdict') continue;

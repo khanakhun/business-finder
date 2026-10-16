@@ -87,6 +87,11 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `ANTHROPIC_API_KEY` | AI providers | api, worker | no |  | yes | Anthropic API key (LLM gateway, agents). |
 | `OPENAI_API_KEY` | AI providers | api, worker | no |  | yes | OpenAI API key (LLM gateway, Codex engine). |
 | `AI_MODEL_OVERRIDES` | AI providers | api, worker | no |  |  | JSON map overriding the prompt registry model per task, e.g. {"classify":"<model-id>"}. |
+| `GOOGLE_PLACES_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Google Places API key (discovery). |
+| `PAGESPEED_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | PageSpeed Insights API key (audits). |
+| `FOURSQUARE_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Foursquare Places API key (discovery). |
+| `HF_TOKEN` | Provider keys (workspace fallback) | api, worker | no |  | yes | Hugging Face access token. |
+| `UNSPLASH_ACCESS_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Unsplash access key (stock photos). |
 | `BETTER_AUTH_SECRET` | Auth & secrets | api, worker | yes |  | yes | Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32 |
 | `SIGNUP_MODE` | Auth & secrets | api, worker | no |  |  | Who may create an account. Default: invite_only in production, open otherwise. |
 | `SIGNUP_ALLOWED_EMAIL_DOMAINS` | Auth & secrets | api, worker | no |  |  | Comma-separated email domains that may self-register when SIGNUP_MODE=allowlist. |
@@ -97,6 +102,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `GOOGLE_CLIENT_ID` | Auth & secrets | api, worker | no |  |  | Google OAuth client id; Google sign-in is off when unset. |
 | `GOOGLE_CLIENT_SECRET` | Auth & secrets | api, worker | no |  | yes | Google OAuth client secret. |
 | `SECRETS_MASTER_KEY` | Auth & secrets | api, worker | yes |  | yes | Master key wrapping workspace secret data keys (AES-256-GCM). Generate: openssl rand -base64 32 |
+| `SECRETS_MASTER_KEY_VERSION` | Auth & secrets | api, worker | no | `1` |  | Version number of SECRETS_MASTER_KEY; bump it when rotating (docs/runbooks/secrets-rotation.md). |
+| `SECRETS_MASTER_KEY_PREVIOUS` | Auth & secrets | api, worker | no |  | yes | Previous master key (version SECRETS_MASTER_KEY_VERSION − 1), kept only while rotating. |
 | `SMTP_URL` | System mail | api, worker | yes (infra:up) |  | yes | System mail transport (verification, invites). Mailpit locally. May embed credentials. |
 | `MAIL_FROM` | System mail | api, worker | no | `Business Finder <no-reply@localhost>` |  | From header for system emails. Never used for prospect outreach. |
 | `INTEL_URL` | Intel service | api, worker | no | `http://127.0.0.1:8000` |  | Internal URL of services/intel. |
@@ -104,6 +111,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_MAPS_SCRAPER` | Feature flags | api, worker | no | `false` |  | Enable the self-hosted Google Maps scraper provider. |
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
+| `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

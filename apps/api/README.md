@@ -87,6 +87,20 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 | `GET /v1/identity/config` | Which sign-in/sign-up options the auth pages may show (sign-up mode, Google) |
 | `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
+## Workspace settings, secrets and audit log (BF-011)
+
+- `modules/workspace`: settings (`org_settings`), the secrets vault (`secrets`, envelope-encrypted with
+  `platform/crypto/envelope.ts`), feature flags and the append-only audit log (`audit_logs`, enforced by a trigger).
+  Other modules use only `workspace/index.ts`: `AuditLogger.record()`, `SecretResolver.resolve()` (workspace value,
+  then the deployment env fallback), `ConnectionTesterRegistry.register()`, `FeatureFlagService.isEnabled()`,
+  `WorkspaceReadiness.forOutreach()`.
+- Secret values are write-only through the API (metadata and `last4` only) and never logged or audited
+  (integration tests search responses, audit rows and logs for a sentinel value).
+- Identity events (invitations, role changes, removals, API keys) are recorded in the audit log.
+- Master key rotation: `pnpm secrets:rotate-master` — see [docs/runbooks/secrets-rotation.md](../../docs/runbooks/secrets-rotation.md).
+- `FAKE_CONNECTION_TESTS=true` (development/E2E only, refused in production) registers testers that pass without
+  calling providers.
+
 ## Adding things
 
 **A module.** `pnpm gen:module lead-capture` writes contracts, all four layers, a Drizzle repository stub, a

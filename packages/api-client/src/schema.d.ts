@@ -36,6 +36,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit log of the active workspace, newest first */
+        get: operations["listAuditLogs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/identity/config": {
         parameters: {
             query?: never;
@@ -207,6 +224,95 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspace/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace logo image */
+        get: operations["getWorkspaceLogo"];
+        /** Upload the workspace logo (raw PNG, JPEG or WebP body, ≤ 512 KiB) */
+        put: operations["uploadWorkspaceLogo"];
+        post?: never;
+        /** Remove the workspace logo */
+        delete: operations["deleteWorkspaceLogo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspace/secrets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every known secret and whether it is set (never the values) */
+        get: operations["listWorkspaceSecrets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspace/secrets/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Store or replace a secret */
+        put: operations["putWorkspaceSecret"];
+        post?: never;
+        /** Delete a workspace secret (the global fallback, if any, applies again) */
+        delete: operations["deleteWorkspaceSecret"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspace/secrets/{name}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check the secret against its provider */
+        post: operations["testWorkspaceSecret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspace/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings of the active workspace */
+        get: operations["getWorkspaceSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change workspace settings (only the fields sent) */
+        patch: operations["updateWorkspaceSettings"];
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -227,6 +333,28 @@ export type components = {
             revokedAt: string | null;
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
+        };
+        AuditLogEntry: {
+            action: string;
+            actorId: string | null;
+            /** @enum {string} */
+            actorType: "user" | "api_key" | "system";
+            entityId: string | null;
+            entityType: string | null;
+            /** Format: uuid */
+            id: string;
+            ip: string | null;
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            occurredAt: string;
+            userAgent: string | null;
+        };
+        AuditLogPage: {
+            items: components["schemas"]["AuditLogEntry"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
         };
         ChangeMemberRoleRequest: {
             /** @enum {string} */
@@ -254,6 +382,17 @@ export type components = {
             revokedAt: string | null;
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
+        };
+        FeatureFlags: {
+            [key: string]: boolean;
+        };
+        FeatureFlagState: {
+            /** @description False when the deployment disabled this feature. */
+            available: boolean;
+            /** @description Effective value: the workspace choice (or default) and the deployment switch. */
+            enabled: boolean;
+            /** @description The workspace's own choice, or the default when it never chose. */
+            workspaceValue: boolean;
         };
         IdentityConfig: {
             googleEnabled: boolean;
@@ -338,6 +477,29 @@ export type components = {
             role: "owner" | "admin" | "member" | "viewer";
             slug: string;
         };
+        OrgSettings: {
+            agencyName: string | null;
+            features: {
+                [key: string]: components["schemas"]["FeatureFlagState"];
+            };
+            /** @description Fetch it from GET /v1/workspace/logo. */
+            hasLogo: boolean;
+            legalName: string | null;
+            locales: ("fr" | "en")[];
+            outreachReadiness: components["schemas"]["OutreachReadiness"];
+            postalAddress: components["schemas"]["PostalAddress"] | null;
+            /** @enum {string} */
+            primaryLocale: "fr" | "en";
+            senderDefaults: components["schemas"]["SenderDefaults"];
+            timezone: string;
+            /** @description Null until the settings are first saved. */
+            updatedAt: string | null;
+            websiteUrl: string | null;
+        };
+        OutreachReadiness: {
+            missing: ("agency_name" | "postal_address")[];
+            ready: boolean;
+        };
         /** @description Ids of the enqueued jobs. */
         PingJobsAccepted: {
             jobIds: string[];
@@ -351,6 +513,15 @@ export type components = {
             count: number;
             /** @description Re-sending the same key enqueues nothing new. */
             idempotencyKey?: string;
+        };
+        PostalAddress: {
+            city: string;
+            /** @description ISO 3166-1 alpha-2, e.g. BL (Saint-Barthélemy), MF (Saint-Martin), FR. */
+            countryCode: string;
+            line1: string;
+            line2?: string;
+            postalCode: string;
+            region?: string;
         };
         /** @description RFC 9457 problem details (application/problem+json). */
         ProblemDetails: {
@@ -369,6 +540,40 @@ export type components = {
             /** Format: uri */
             type: string;
         };
+        PutSecretRequest: {
+            value: string;
+        };
+        SecretList: {
+            items: components["schemas"]["SecretSummary"][];
+        };
+        SecretSummary: {
+            allowGlobalFallback: boolean;
+            description: string;
+            /** @description Last four characters of the workspace value (long values only). */
+            last4: string | null;
+            lastUsedAt: string | null;
+            /** @enum {string} */
+            name: "google_places" | "pagespeed" | "anthropic" | "openai" | "foursquare" | "huggingface" | "unsplash";
+            provider: string;
+            /** @description Where the value would come from: the workspace vault, the deployment env, or nowhere (null). */
+            source: ("workspace" | "global") | null;
+            /** @description Whether POST /v1/workspace/secrets/{name}/test is available. */
+            testable: boolean;
+            updatedAt: string | null;
+        };
+        SecretTestResult: {
+            /** @description Short provider answer; never contains the secret. */
+            message?: string;
+            ok: boolean;
+            /** @enum {string} */
+            source: "workspace" | "global";
+            /** Format: date-time */
+            testedAt: string;
+        };
+        SenderDefaults: {
+            fromName?: string;
+            signatureMarkdown?: string;
+        };
         /** @description Build and runtime information about the API process. */
         SystemInfo: {
             commit: string | null;
@@ -385,6 +590,19 @@ export type components = {
              * @description Membership that becomes owner; the current owner becomes admin.
              */
             memberId: string;
+        };
+        UpdateOrgSettingsRequest: {
+            agencyName?: string | null;
+            features?: components["schemas"]["FeatureFlags"];
+            legalName?: string | null;
+            locales?: ("fr" | "en")[];
+            postalAddress?: components["schemas"]["PostalAddress"] | null;
+            /** @enum {string} */
+            primaryLocale?: "fr" | "en";
+            senderDefaults?: components["schemas"]["SenderDefaults"];
+            /** @description IANA time zone, e.g. America/St_Barthelemy. */
+            timezone?: string;
+            websiteUrl?: string | null;
         };
     };
     responses: never;
@@ -540,6 +758,71 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listAuditLogs: {
+        parameters: {
+            query?: {
+                action?: string;
+                actorId?: string;
+                cursor?: string;
+                entityId?: string;
+                entityType?: string;
+                from?: string;
+                limit?: number;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1134,6 +1417,528 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PingJobsAccepted"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getWorkspaceLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    uploadWorkspaceLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    deleteWorkspaceLogo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listWorkspaceSecrets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecretList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    putWorkspaceSecret: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Registry key, e.g. google_places. */
+                name: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutSecretRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecretSummary"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    deleteWorkspaceSecret: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Registry key, e.g. google_places. */
+                name: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    testWorkspaceSecret: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Registry key, e.g. google_places. */
+                name: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecretTestResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getWorkspaceSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgSettings"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateWorkspaceSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrgSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgSettings"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Problem details (RFC 9457) */

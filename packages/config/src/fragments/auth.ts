@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { booleanFlag, secret } from '../schema.ts';
 
+const masterKey = z
+  .base64()
+  .refine((value) => Buffer.from(value, 'base64').length === 32, 'Expected 32 bytes, base64-encoded');
+
 export const authEnv = z.object({
   BETTER_AUTH_SECRET: secret(
     z.string().min(32).describe('Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32'),
@@ -58,11 +62,21 @@ export const authEnv = z.object({
     .describe('Google OAuth client id; Google sign-in is off when unset.'),
   GOOGLE_CLIENT_SECRET: secret(z.string().min(1).optional().describe('Google OAuth client secret.')),
   SECRETS_MASTER_KEY: secret(
-    z
-      .base64()
-      .refine((value) => Buffer.from(value, 'base64').length === 32, 'Expected 32 bytes, base64-encoded')
-      .describe(
-        'Master key wrapping workspace secret data keys (AES-256-GCM). Generate: openssl rand -base64 32',
-      ),
+    masterKey.describe(
+      'Master key wrapping workspace secret data keys (AES-256-GCM). Generate: openssl rand -base64 32',
+    ),
+  ),
+  SECRETS_MASTER_KEY_VERSION: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .default(1)
+    .describe(
+      'Version number of SECRETS_MASTER_KEY; bump it when rotating (docs/runbooks/secrets-rotation.md).',
+    ),
+  SECRETS_MASTER_KEY_PREVIOUS: secret(
+    masterKey
+      .optional()
+      .describe('Previous master key (version SECRETS_MASTER_KEY_VERSION − 1), kept only while rotating.'),
   ),
 });

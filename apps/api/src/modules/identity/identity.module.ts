@@ -28,12 +28,12 @@ import {
   MEMBERSHIP_REPOSITORY,
   SYSTEM_MAILER,
 } from './application/ports.ts';
+import { AuditingIdentityEvents } from './infrastructure/auditing-identity-events.ts';
 import { BETTER_AUTH, betterAuthProvider } from './infrastructure/better-auth.provider.ts';
 import { BetterAuthApiKeyIssuer } from './infrastructure/better-auth-api-key-issuer.ts';
 import { BetterAuthResolver } from './infrastructure/better-auth-resolver.ts';
 import { DrizzleApiKeyRepository } from './infrastructure/drizzle-api-key.repository.ts';
 import { DrizzleMembershipRepository } from './infrastructure/drizzle-membership.repository.ts';
-import { LoggingIdentityEvents } from './infrastructure/logging-identity-events.ts';
 import { SmtpSystemMailer } from './infrastructure/smtp-system-mailer.ts';
 import { ApiKeysController } from './interface/http/api-keys.controller.ts';
 import { IdentityConfigController } from './interface/http/identity-config.controller.ts';
@@ -58,7 +58,7 @@ export class IdentityModule {
         { provide: API_KEY_REPOSITORY, useClass: DrizzleApiKeyRepository },
         { provide: API_KEY_ISSUER, useClass: BetterAuthApiKeyIssuer },
         { provide: SYSTEM_MAILER, useClass: SmtpSystemMailer },
-        { provide: IDENTITY_EVENTS, useClass: LoggingIdentityEvents },
+        { provide: IDENTITY_EVENTS, useClass: AuditingIdentityEvents },
         { provide: APP_URL, inject: [APP_ENV], useFactory: (env: AppEnv) => (env as ApiEnv).APP_URL },
         GetMeQuery,
         ListMembersQuery,

@@ -67,11 +67,11 @@ Owners/admins manage workspace identity, locales, timezone, feature flags and pr
 - E2E: set Google key in integrations page → status "set (workspace)" with last4; Test button shows result (fake tester in E2E).
 
 ## Acceptance criteria
-- [ ] Workspace identity, postal address, locales, timezone, logo, feature flags editable by owner/admin.
-- [ ] Secrets stored with envelope encryption; API never returns plaintext; rotation CLI works.
-- [ ] `SecretResolver` workspace → global fallback per registry policy.
-- [ ] Audit log append-only, populated for settings/secrets/member/API-key actions, viewable with filters.
-- [ ] `WorkspaceReadiness.forOutreach` reports missing postal address/agency name.
+- [x] Workspace identity, postal address, locales, timezone, logo, feature flags editable by owner/admin.
+- [x] Secrets stored with envelope encryption; API never returns plaintext; rotation CLI works.
+- [x] `SecretResolver` workspace → global fallback per registry policy.
+- [x] Audit log append-only, populated for settings/secrets/member/API-key actions, viewable with filters.
+- [x] `WorkspaceReadiness.forOutreach` reports missing postal address/agency name.
 
 ## Agent prompt
 ```text
@@ -92,3 +92,42 @@ Verify: pnpm verify && pnpm test:int && pnpm e2e; demonstrate master-key rotatio
 ## References
 - docs/conventions/security.md §2 · docs/compliance/outreach-compliance.md §2 · docs/ARCHITECTURE.md §13
 - NIST SP 800-38D (GCM) · Envelope encryption overview: https://cloud.google.com/kms/docs/envelope-encryption
+
+## Implementation notes
+- **Versions**: Node `crypto` (AES-256-GCM, 96-bit random nonces, 16-byte tags) — no crypto library;
+  @aws-sdk/client-s3 3.1148.0 for the assets bucket.
+- **Split**: part 1/2 API (contracts, crypto, vault, tables, use cases, audit, rotation CLI); security-review fixes;
+  part 2/2 web pages and E2E.
+- **Envelope format**: value = AES-256-GCM(DEK, AAD `bf.secret.v1|orgId|name`); DEK wrapped by master key
+  `key_version` with AAD `bf.dek.v1|orgId|name|keyVersion`. DECISION: the value's AAD omits `keyVersion` (the ticket
+  bound it to both) so rotation re-wraps DEKs only and never decrypts values. NIST GCM test case 16 is the
+  known-answer test; tamper tests cover ciphertext, tags, nonces, wrapped DEK and every AAD component.
+- **Master keys**: `EnvMasterKeyProvider` (`SECRETS_MASTER_KEY` + `SECRETS_MASTER_KEY_VERSION`, and
+  `SECRETS_MASTER_KEY_PREVIOUS` = version − 1 while rotating). `pnpm secrets:rotate-master` re-wraps in batches
+  (each its own transaction, advisory lock, compare-and-set on version + DEK nonce, audit row per batch); idempotent
+  and resumable. Runbook: `docs/runbooks/secrets-rotation.md`.
+- **Vault**: values cached ≤ 60 s per process (other instances may serve a replaced value for up to 60 s);
+  `last_used_at` written at most once a minute, outside the caller's transaction; `last4` only for values of 16+
+  characters. Registry: `SECRET_DEFINITIONS` in @bf/contracts (google_places, pagespeed, anthropic, openai,
+  foursquare, huggingface, unsplash) with loose format patterns; provider fallback keys added to `@bf/config`.
+- **Audit log**: append-only via BEFORE UPDATE/DELETE/TRUNCATE triggers set to ENABLE ALWAYS; metadata redacted by
+  key name and bounded in size; entries join the use case's transaction. Identity events (invitations incl.
+  resend/revoke, role changes, removals, API keys) are audited through the identity events port. Request context
+  now carries the client IP (first untrusted X-Forwarded-For hop behind `AUTH_TRUSTED_PROXIES`) and user agent.
+  `@Audited()` interceptor (also records failures when asked) for actions without a transaction (connection tests).
+- **Logo**: DECISION — uploaded through the API (`PUT /v1/workspace/logo`, raw PNG/JPEG/WebP ≤ 512 KiB, magic-byte
+  check, no SVG) and served by `GET /v1/workspace/logo` (`nosniff`, sandbox CSP) instead of a presigned S3 PUT: no
+  bucket CORS, no CSP widening for the dashboard, and the content is validated before it is stored. No sharp
+  re-encoding (validated on upload, as the ticket allowed).
+- **Feature flags**: registry in contracts (`autoSend`, `codingEngines`, `mapsScraper` gated by `FEATURE_*` env;
+  `semanticSearch` always available); enabling a deployment-disabled flag is a 409 `FEATURE_UNAVAILABLE`.
+- **Connection tests**: `ConnectionTesterRegistry` (providers register in their tickets); tester messages are
+  stripped of the secret and bounded; `FAKE_CONNECTION_TESTS=true` (refused in production) for development/E2E.
+- **Access**: settings read by any member (`@AnyMember()`), changed with `settings:manage`; secrets, audit log and
+  logo changes need `settings:manage` (API keys holding it included).
+- **OpenAPI fix**: query parameters are listed even when the query schema has a component id.
+- **Tests**: API 183 unit / 71 integration (responses, audit rows and trace-level logs searched for a sentinel
+  secret; append-only trigger; cross-workspace isolation; rotation incl. compare-and-set), web 58 unit, E2E 33
+  (set a Google key → status + last four + test; workspace address → outreach ready; feature flags; axe on the new
+  pages), green three consecutive runs. Rotation demonstrated on the local database (3 re-wrapped, re-run 0).
+

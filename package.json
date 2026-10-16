@@ -36,6 +36,7 @@
     "db:studio": "node packages/db/src/cli/kit.ts studio",
     "db:reset": "node packages/db/src/cli/reset.ts",
     "admin:bootstrap": "pnpm --filter @bf/api admin:bootstrap --",
+    "secrets:rotate-master": "pnpm --filter @bf/api secrets:rotate-master",
     "contracts:jsonschema": "node packages/contracts/src/cli/jsonschema.ts",
     "contracts:py": "pnpm contracts:jsonschema && pnpm --filter @bf/intel contracts",
     "contracts:check": "node packages/contracts/src/cli/jsonschema.ts --check && pnpm --filter @bf/intel contracts --check",

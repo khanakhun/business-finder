@@ -438,4 +438,18 @@ describe('truncateAll', () => {
     const [srs] = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM spatial_ref_sys`);
     expect(srs?.n).toBeGreaterThan(1000);
   });
+
+  it('empties append-only tables and puts their guard back exactly as it was', async () => {
+    await db.execute(
+      sql`INSERT INTO audit_logs (id, actor_type, action) VALUES (gen_random_uuid(), 'system', 'test.ran')`,
+    );
+    await truncateAll(database.url);
+    const [rows] = await db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM audit_logs`);
+    expect(rows?.n).toBe(0);
+    const modes = await db.execute<{ mode: string }>(
+      sql`SELECT tgenabled AS mode FROM pg_trigger WHERE tgname LIKE 'audit_logs_no_%' ORDER BY tgname`,
+    );
+    expect(modes.map((row) => row.mode)).toEqual(['A', 'A']);
+    await expect(db.execute(sql`TRUNCATE audit_logs`)).rejects.toThrow();
+  });
 });

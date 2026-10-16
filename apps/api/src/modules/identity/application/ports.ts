@@ -131,10 +131,18 @@ export type IdentityEvent =
       readonly memberId: string;
       readonly userId: string;
     }
+  | {
+      readonly type: 'identity.invitation_resent' | 'identity.invitation_revoked';
+      readonly organizationId: string;
+      readonly invitationId: string;
+    }
   | { readonly type: 'identity.api_key_created'; readonly organizationId: string; readonly apiKeyId: string }
   | { readonly type: 'identity.api_key_revoked'; readonly organizationId: string; readonly apiKeyId: string };
 
-/** Port: domain events. TODO(BF-012): record through the transactional outbox; until then they are logged. */
+/**
+ * Port: domain events. Recorded in the audit log (BF-011). TODO(BF-012): also publish through the transactional
+ * outbox; until then they are logged.
+ */
 export interface IdentityEvents {
   publish(event: IdentityEvent, actor: { readonly userId: string | null }): Promise<void>;
 }

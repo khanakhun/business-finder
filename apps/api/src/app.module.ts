@@ -4,6 +4,7 @@ import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
 import { QueueModule } from './modules/platform/queue/queue.module.ts';
 import { SystemModule } from './modules/system/system.module.ts';
+import { WorkspaceModule } from './modules/workspace/workspace.module.ts';
 
 /** Composition root. Each process type gets the same domain modules wired for its role (ADR-0005). */
 @Module({})
@@ -28,6 +29,7 @@ export class AppModule {
         PlatformModule.forRoot(env, mode),
         // Creating queues connects to Valkey, which OpenAPI generation must never do.
         ...(mode === 'openapi' ? [] : [QueueModule.forRoot(mode)]),
+        WorkspaceModule.forRoot(mode),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
       ],

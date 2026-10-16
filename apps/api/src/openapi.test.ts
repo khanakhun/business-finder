@@ -32,6 +32,13 @@ describe('OpenAPI document', async () => {
     ).toEqual([]);
   });
 
+  it('lists query parameters even when the query schema is a named component', () => {
+    const names = (document.paths['/v1/audit-logs'].get.parameters as Array<{ name: string; in: string }>)
+      .filter((p) => p.in === 'query')
+      .map((p) => p.name);
+    expect(names).toEqual(expect.arrayContaining(['limit', 'cursor', 'action', 'from', 'to']));
+  });
+
   it('matches the committed packages/api-client/openapi.json (run `pnpm api:openapi`)', () => {
     expect(readFileSync(OPENAPI_FILE, 'utf8')).toBe(json);
   });

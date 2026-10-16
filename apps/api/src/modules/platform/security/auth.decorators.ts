@@ -22,6 +22,10 @@ export const AllowAnonymous = () => SetMetadata(ACCESS_POLICY, { kind: 'anonymou
 export const RequirePermission = (...permissions: [Permission, ...Permission[]]) =>
   SetMetadata(ACCESS_POLICY, { kind: 'permissions', permissions } satisfies AccessPolicy);
 
+/** Any caller in an active workspace, whatever their role (e.g. reading workspace settings). */
+export const AnyMember = () =>
+  SetMetadata(ACCESS_POLICY, { kind: 'authenticated', orgRequired: true } satisfies AccessPolicy);
+
 /**
  * Any signed-in caller, even without an active workspace (e.g. `GET /v1/me`, switching workspace). Use only for
  * routes that act on the caller themselves.

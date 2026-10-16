@@ -193,11 +193,31 @@ describe('RequestContextMiddleware', () => {
   it('sets the request id header and makes the context available downstream', () => {
     const res = fakeResponse();
     let seen: string | undefined;
-    new RequestContextMiddleware().use({ headers: { 'x-request-id': 'abc' } } as never, res as never, () => {
-      seen = getRequestContext()?.requestId;
-    });
+    new RequestContextMiddleware({} as never).use(
+      { headers: { 'x-request-id': 'abc' }, socket: {} } as never,
+      res as never,
+      () => {
+        seen = getRequestContext()?.requestId;
+      },
+    );
     expect(res.headers['x-request-id']).toBe('abc');
     expect(seen).toBe('abc');
     expect(getRequestContext()).toBeUndefined();
+  });
+
+  it('records the client address behind trusted proxies and the user agent', () => {
+    let seen: { ip?: string; userAgent?: string } | undefined;
+    const req = {
+      headers: { 'x-forwarded-for': '203.0.113.7', 'user-agent': 'Vitest' },
+      socket: { remoteAddress: '::ffff:10.0.0.2' },
+    };
+    new RequestContextMiddleware({ AUTH_TRUSTED_PROXIES: ['10.0.0.0/8'] } as never).use(
+      req as never,
+      fakeResponse() as never,
+      () => {
+        seen = getRequestContext();
+      },
+    );
+    expect(seen).toMatchObject({ ip: '203.0.113.7', userAgent: 'Vitest' });
   });
 });

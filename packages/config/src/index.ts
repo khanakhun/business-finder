@@ -9,6 +9,7 @@ export { dbEnv, sitesDbEnv } from './fragments/db.ts';
 export { featureFlagsEnv } from './fragments/features.ts';
 export { intelEnv } from './fragments/intel.ts';
 export { mailEnv } from './fragments/mail.ts';
+export { providersEnv } from './fragments/providers.ts';
 export { s3Env } from './fragments/s3.ts';
 export { valkeyEnv } from './fragments/valkey.ts';
 export {

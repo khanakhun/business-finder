@@ -6,6 +6,7 @@ import { dbEnv, sitesDbEnv } from '../fragments/db.ts';
 import { featureFlagsEnv } from '../fragments/features.ts';
 import { intelEnv } from '../fragments/intel.ts';
 import { mailEnv } from '../fragments/mail.ts';
+import { providersEnv } from '../fragments/providers.ts';
 import { s3Env } from '../fragments/s3.ts';
 import { valkeyEnv } from '../fragments/valkey.ts';
 import { APP_SCHEMAS, type AppName } from '../registry.ts';
@@ -39,6 +40,7 @@ const GROUPS: ReadonlyArray<readonly [string, EnvSchema]> = [
   ['Valkey', valkeyEnv],
   ['Object storage (S3)', s3Env],
   ['AI providers', aiEnv],
+  ['Provider keys (workspace fallback)', providersEnv],
   ['Auth & secrets', authEnv],
   ['System mail', mailEnv],
   ['Intel service', intelEnv],

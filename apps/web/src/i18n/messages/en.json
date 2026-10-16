@@ -223,7 +223,11 @@
     "general": "General",
     "account": "Account",
     "members": "Members",
-    "apiKeys": "API keys"
+    "apiKeys": "API keys",
+    "workspace": "Workspace",
+    "integrations": "Integrations",
+    "features": "Features",
+    "audit": "Audit log"
   },
   "account": {
     "title": "Account",
@@ -316,5 +320,158 @@
   "forbidden": {
     "title": "Not available",
     "body": "Your role in this workspace does not allow this. Ask an owner or admin."
+  },
+  "workspaceSettings": {
+    "title": "Workspace",
+    "description": "Your agency's identity and address (shown in outreach footers), languages and time zone.",
+    "readinessTitle": "Outreach is not ready yet",
+    "readinessBody": "Every outreach email must include: {missing}.",
+    "missing": {
+      "agency_name": "your agency name",
+      "postal_address": "your postal address"
+    },
+    "identity": "Identity",
+    "agencyName": "Agency name",
+    "legalName": "Legal name",
+    "legalNameHint": "If different from the agency name.",
+    "websiteUrl": "Website",
+    "address": "Postal address",
+    "addressHint": "Shown in the footer of every outreach email.",
+    "line1": "Address",
+    "line2": "Address line 2 (optional)",
+    "city": "City",
+    "postalCode": "Postal code",
+    "region": "Region (optional)",
+    "country": "Country",
+    "countryPlaceholder": "Choose a country",
+    "countrySearch": "Search countries…",
+    "noCountry": "No country found.",
+    "addressIncomplete": "Fill in address, city, postal code and country — or leave them all empty.",
+    "languages": "Languages and time zone",
+    "locales": "Workspace languages",
+    "primaryLocale": "Primary language",
+    "timezone": "Time zone",
+    "timezonePlaceholder": "Choose a time zone",
+    "timezoneSearch": "Search time zones…",
+    "noTimezone": "No time zone found.",
+    "save": "Save changes",
+    "saved": "Workspace settings saved.",
+    "logo": "Logo",
+    "logoHint": "PNG, JPEG or WebP, up to 512 KB.",
+    "uploadLogo": "Upload logo",
+    "replaceLogo": "Replace logo",
+    "removeLogo": "Remove",
+    "logoAlt": "Workspace logo",
+    "noLogo": "No logo yet.",
+    "logoUpdated": "Logo updated.",
+    "logoRemoved": "Logo removed.",
+    "logoTooLarge": "This image is larger than 512 KB."
+  },
+  "integrations": {
+    "title": "Integrations",
+    "description": "Provider keys this workspace uses. Keys are encrypted and never shown again once saved.",
+    "providers": {
+      "google": "Google",
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "foursquare": "Foursquare",
+      "huggingface": "Hugging Face",
+      "unsplash": "Unsplash"
+    },
+    "secrets": {
+      "google_places": "Google Places API key",
+      "pagespeed": "PageSpeed Insights API key",
+      "anthropic": "Anthropic API key",
+      "openai": "OpenAI API key",
+      "foursquare": "Foursquare API key",
+      "huggingface": "Hugging Face token",
+      "unsplash": "Unsplash access key"
+    },
+    "statusWorkspace": "Set for this workspace",
+    "statusGlobal": "Using the platform key",
+    "statusNone": "Not set",
+    "endingIn": "ending in {last4}",
+    "lastUsed": "Last used {date}",
+    "neverUsed": "Not used yet",
+    "add": "Add key",
+    "replace": "Replace",
+    "delete": "Delete",
+    "test": "Test",
+    "valueLabel": "Key",
+    "valueHint": "Paste the key from the provider's console. It is encrypted and cannot be displayed again.",
+    "save": "Save key",
+    "saved": "{name} saved.",
+    "deleted": "{name} deleted.",
+    "deleteConfirm": "Delete the {name}?",
+    "deleteBody": "Features that need it use the platform key instead, if there is one.",
+    "testOk": "{name}: connection works.",
+    "testFailed": "{name}: connection failed.",
+    "cancel": "Cancel"
+  },
+  "features": {
+    "title": "Features",
+    "description": "Turn product features on or off for this workspace.",
+    "unavailable": "Disabled for this deployment",
+    "saved": "Feature updated.",
+    "flags": {
+      "autoSend": {
+        "label": "Automatic sending",
+        "description": "Let sequences send without approving each message."
+      },
+      "codingEngines": {
+        "label": "AI site generation",
+        "description": "Generate preview websites with coding agents."
+      },
+      "mapsScraper": {
+        "label": "Maps scraper",
+        "description": "Discover businesses with the self-hosted maps scraper."
+      },
+      "semanticSearch": {
+        "label": "Semantic search",
+        "description": "Search businesses by meaning, not only by keywords."
+      }
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "description": "Security-relevant actions in this workspace. Entries cannot be changed or deleted.",
+    "filterAction": "Action",
+    "all": "All actions",
+    "groups": {
+      "settings": "Settings",
+      "secrets": "Integrations",
+      "identity": "Members and API keys"
+    },
+    "from": "From",
+    "to": "To",
+    "clear": "Clear filters",
+    "columns": {
+      "when": "When",
+      "actor": "Who",
+      "action": "Action",
+      "entity": "Target",
+      "ip": "IP address"
+    },
+    "actorSystem": "System",
+    "actorApiKey": "API key “{name}”",
+    "removedActor": "Removed ({id})",
+    "empty": "No entries match these filters.",
+    "loadMore": "Load more",
+    "actions": {
+      "settings_updated": "Settings changed",
+      "settings_logo_updated": "Logo uploaded",
+      "settings_logo_removed": "Logo removed",
+      "secrets_created": "Key added",
+      "secrets_updated": "Key replaced",
+      "secrets_deleted": "Key deleted",
+      "secrets_tested": "Key tested",
+      "identity_member_invited": "Member invited",
+      "identity_invitation_resent": "Invitation resent",
+      "identity_invitation_revoked": "Invitation revoked",
+      "identity_member_role_changed": "Role changed",
+      "identity_member_removed": "Member removed",
+      "identity_api_key_created": "API key created",
+      "identity_api_key_revoked": "API key revoked"
+    }
   }
 }

@@ -1,0 +1,40 @@
+{
+  "assets": [
+    {
+      "id": "img-cafe-1",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/terrace.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "La terrasse face à la baie",
+        "en": "The terrace facing the bay"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-cafe-2",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/coffee.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Un café crème sur le comptoir",
+        "en": "A white coffee on the counter"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-cafe-3",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/cafe-saint-jean/bowl.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Un bol de fruits frais",
+        "en": "A bowl of fresh fruit"
+      },
+      "license": "owner_site"
+    }
+  ]
+}

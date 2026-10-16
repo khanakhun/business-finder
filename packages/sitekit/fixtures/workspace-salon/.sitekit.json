@@ -1,0 +1,7 @@
+{
+  "locales": ["fr", "en"],
+  "defaultLocale": "fr",
+  "strictFacts": true,
+  "assetHosts": ["assets.bf-sites.test"],
+  "ownDomains": ["island-villas.example"]
+}

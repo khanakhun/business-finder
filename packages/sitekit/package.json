@@ -1,0 +1,30 @@
+{
+  "name": "@bf/sitekit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The site toolbelt for generation agents: validate, lint copy, apply operations, render, screenshot, check.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@bf/site-schema": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

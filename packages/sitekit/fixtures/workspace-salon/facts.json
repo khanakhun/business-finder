@@ -1,0 +1,120 @@
+{
+  "facts": [
+    {
+      "id": "business.name",
+      "kind": "business_name",
+      "value": "Salon Lumière",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "phone.main",
+      "kind": "phone",
+      "value": "+590 590 00 01 01",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "email.main",
+      "kind": "email",
+      "value": "bonjour@salon-lumiere.example",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "address.main",
+      "kind": "address",
+      "value": "12 rue du Port, 97133 Gustavia",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "geo.main",
+      "kind": "geo",
+      "value": {
+        "lat": 17.8962,
+        "lng": -62.8498
+      },
+      "source": "google_places",
+      "confidence": 0.95
+    },
+    {
+      "id": "hours.main",
+      "kind": "hours",
+      "value": "Tue–Sat 09:00–18:00",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "social.instagram",
+      "kind": "social",
+      "value": "https://www.instagram.com/salonlumiere.example",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "booking.url",
+      "kind": "booking_url",
+      "value": "https://www.planity.com/salon-lumiere-gustavia",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "service.cut_women",
+      "kind": "service",
+      "value": "Coupe femme",
+      "source": "website",
+      "confidence": 0.95,
+      "locale": "fr"
+    },
+    {
+      "id": "price.cut_women",
+      "kind": "price",
+      "value": {
+        "amount": 65,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "price.cut_men",
+      "kind": "price",
+      "value": {
+        "amount": 40,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "price.colour",
+      "kind": "price",
+      "value": {
+        "amount": 90,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "review.1",
+      "kind": "testimonial",
+      "value": {
+        "quote": "Accueil chaleureux et coupe parfaite.",
+        "author": "Claire D.",
+        "rating": 5
+      },
+      "source": "google_places",
+      "confidence": 0.95,
+      "locale": "fr"
+    },
+    {
+      "id": "year.founded",
+      "kind": "year",
+      "value": 2015,
+      "source": "owner",
+      "confidence": 0.95
+    }
+  ]
+}

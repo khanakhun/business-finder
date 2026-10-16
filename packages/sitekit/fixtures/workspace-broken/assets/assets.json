@@ -1,0 +1,28 @@
+{
+  "assets": [
+    {
+      "id": "logo-lumiere",
+      "kind": "logo",
+      "url": "https://assets.bf-sites.test/salon-lumiere/logo.svg",
+      "width": 400,
+      "height": 120,
+      "alt": {
+        "fr": "Logo du Salon Lumière",
+        "en": "Salon Lumière logo"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-salon-1",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/salon-lumiere/salon.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Le salon, lumineux, face au port",
+        "en": "The bright salon facing the harbour"
+      },
+      "license": "owner_site"
+    }
+  ]
+}

@@ -1,4 +1,6 @@
-import { type Block, SITE_LOCALES, type SiteSpec } from '@bf/site-schema';
+import type { Block } from './spec/blocks/index.ts';
+import { SITE_LOCALES } from './spec/localized.ts';
+import type { SiteSpec } from './spec/site.ts';
 
 // What changed between two versions of a site (BF-035), for people: pages and blocks added, removed, moved and
 // changed, the texts edited (per locale, with short excerpts) and the site-wide sections touched. Blocks are matched

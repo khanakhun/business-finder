@@ -11,8 +11,8 @@ import {
   ValidationError,
 } from '@bf/contracts';
 import { migrateSpec } from '@bf/site-schema';
+import { diffSpecs } from '@bf/site-schema/diff';
 import { Inject, Injectable } from '@nestjs/common';
-import { diffSpecs } from '../domain/version-diff.ts';
 import { toSiteDetail, toSiteSummary, toVersion, toVersionSummary } from './mappers.ts';
 import {
   SITE_INSIGHTS,

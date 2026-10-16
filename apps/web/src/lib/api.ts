@@ -55,6 +55,7 @@ export const queryKeys = {
     duplicates: (id: string) => ['business', id, 'duplicates'] as const,
     enrichment: (id: string) => ['business', id, 'enrichment'] as const,
     website: (id: string) => ['business', id, 'website'] as const,
+    websiteAudit: (id: string) => ['business', id, 'website-audit'] as const,
     reviews: (id: string) => ['business', id, 'reviews'] as const,
   }),
   crm: defineQueryKeys('crm', {

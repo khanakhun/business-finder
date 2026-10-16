@@ -1422,7 +1422,6 @@
       "desktop": "Desktop screenshot of the website",
       "mobile": "Mobile screenshot of the website"
     },
-    "auditComing": "Performance scores and design findings arrive with the website audit.",
     "emptyTitle": "Website not analysed yet",
     "empty": "Enrich the business to read its website: contacts, tools, languages and screenshots.",
     "noWebsite": "This business has no known website.",
@@ -1455,6 +1454,85 @@
       "done": "Enriched",
       "partial": "Partly enriched",
       "failed": "Enrichment failed"
+    },
+    "audit": {
+      "title": "Website audit",
+      "empty": "No audit yet: run one to measure speed, design and conversion.",
+      "noWebsite": "No website to audit.",
+      "run": "Run audit",
+      "rerun": "Re-run audit",
+      "started": "Audit started.",
+      "failed": "The audit could not start.",
+      "loadFailed": "The audit could not be loaded.",
+      "qualityLabel": "Quality score {value} out of 100",
+      "qualityUnknown": "Quality score not measured",
+      "auditedAt": "Audited {when}",
+      "statuses": {
+        "none": "No website",
+        "parked": "Parked domain",
+        "social_only": "Social profile only",
+        "broken": "Broken",
+        "weak": "Weak",
+        "ok": "OK",
+        "strong": "Strong"
+      },
+      "psi": {
+        "mobile": "PageSpeed — mobile",
+        "desktop": "PageSpeed — desktop",
+        "notMeasured": "Not measured (the page could not be analysed).",
+        "categories": {
+          "performance": "Performance",
+          "accessibility": "Accessibility",
+          "bestPractices": "Best practices",
+          "seo": "SEO"
+        },
+        "metrics": {
+          "lcpMs": "Largest contentful paint",
+          "cls": "Cumulative layout shift",
+          "inpMs": "Interaction to next paint (real users)",
+          "tbtMs": "Total blocking time",
+          "fcpMs": "First contentful paint",
+          "speedIndexMs": "Speed index",
+          "ttfbMs": "Server response time"
+        },
+        "ratings": {
+          "good": "good",
+          "needs_improvement": "needs improvement",
+          "poor": "poor"
+        },
+        "seconds": "{value} s",
+        "milliseconds": "{value} ms",
+        "opportunities": "Top opportunities",
+        "savings": "−{value} s"
+      },
+      "vision": {
+        "title": "Visual grade",
+        "notGraded": "Not graded (no screenshot of the page).",
+        "overall": "Overall {value}/10",
+        "criteriaLabel": "Rubric criteria",
+        "criteria": {
+          "modernity": "Modernity",
+          "visual_hierarchy": "Visual hierarchy",
+          "mobile_usability": "Mobile usability",
+          "readability": "Readability",
+          "imagery_quality": "Imagery",
+          "trust_signals": "Trust signals",
+          "cta_clarity": "Call to action",
+          "brand_consistency": "Brand consistency"
+        }
+      },
+      "findings": {
+        "title": "Findings ({count})",
+        "none": "Nothing to report.",
+        "severities": {
+          "critical": "Critical",
+          "major": "Major",
+          "minor": "Minor",
+          "info": "Information"
+        },
+        "evidence": "Seen:",
+        "recommendation": "What to do:"
+      }
     }
   },
   "reviews": {

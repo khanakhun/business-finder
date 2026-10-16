@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Dentist",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Dentiste compétent et doux. Mais 1h15 d’attente en salle malgré un rdv à 9h.",
+        "rating": 3
+      },
+      {
+        "id": "r2",
+        "text": "Impossible d'avoir le cabinet au téléphone, ça sonne dans le vide. Pas de Doctolib non plus.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "RAS",
+        "rating": 4
+      },
+      {
+        "id": "r4",
+        "text": "Le secrétariat m'a donné une mauvaise date, je suis venu pour rien depuis Lorient.",
+        "rating": 2
+      },
+      {
+        "id": "r5",
+        "text": "Docteur [person] au top, je recommande vivement à toutes les familles !",
+        "rating": 5
+      },
+      {
+        "id": "r6",
+        "text": "Les horaires sur le site datent du Covid, rien n’est à jour.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["long_wait_times"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Praticien compétent, mais plus d'une heure passée avant d'être reçu."
+      },
+      {
+        "id": "r2",
+        "tags": ["unreachable_by_phone", "booking_friction"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Le cabinet ne décroche jamais et aucun outil de prise de rendez-vous en ligne."
+      },
+      {
+        "id": "r3",
+        "tags": [],
+        "sentiment": 0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r4",
+        "tags": ["poor_communication"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Erreur de date communiquée par l'accueil, déplacement inutile."
+      },
+      {
+        "id": "r5",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Praticien très apprécié, chaudement conseillé aux familles."
+      },
+      {
+        "id": "r6",
+        "tags": ["website_broken_or_outdated", "inconsistent_hours"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Informations d'ouverture du site obsolètes depuis plusieurs années."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Boat charter",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Captain was great, snorkeling spot amazing. Booking it was a nightmare though – their form errors out at the payment step every time.",
+        "rating": 4
+      },
+      {
+        "id": "r2",
+        "text": "Ah yes, the famous 'island time' – boat left 1h20 late and nobody told us why. Loved standing on the dock in the sun.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Called the number on their site three days in a row. Voicemail full.",
+        "rating": 1
+      },
+      {
+        "id": "r4",
+        "text": "Best day of our honeymoon. [person] and the crew made it unforgettable. Book them!!",
+        "rating": 5
+      },
+      {
+        "id": "r5",
+        "text": "Fine trip, nothing special.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Instructions said meet at 'the marina' – there are two. Ended up at the wrong one, no pin, no address on the confirmation.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["booking_friction", "payment_friction", "website_broken_or_outdated"],
+        "sentiment": 0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Great trip, but the online reservation form crashes during checkout."
+      },
+      {
+        "id": "r2",
+        "tags": ["long_wait_times", "poor_communication"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Departure delayed well over an hour without any explanation to guests."
+      },
+      {
+        "id": "r3",
+        "tags": ["unreachable_by_phone"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Phone line unanswered for days and the mailbox could not take messages."
+      },
+      {
+        "id": "r4",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Crew made the honeymoon outing exceptional; strong recommendation."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["hard_to_find_info", "poor_communication"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Meeting point was ambiguous; confirmation lacked exact location details."
+      }
+    ],
+    "warnings": []
+  }
+}

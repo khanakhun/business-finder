@@ -1,0 +1,100 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Boat charter",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Magnifique sortie à Colombier, tortues au rendez-vous. Équipage génial ([person] et [person]), foncez !",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Génial, le bateau est parti avec 1h de retard, on a eu le temps de bronzer sur le ponton. Merci !",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Impossible de savoir le prix d’une demi-journée sans écrire. Mettez vos tarifs en ligne !",
+        "rating": 3
+      },
+      {
+        "id": "r4",
+        "text": "Le capitaine ne parle pas un mot d'anglais, nos amis américains étaient un peu perdus.",
+        "rating": 3,
+        "language": "fr"
+      },
+      {
+        "id": "r5",
+        "text": "Bien mais cher.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Changement d'horaire de départ envoyé à 23h la veille. Évidemment on l'a vu trop tard.",
+        "rating": 2
+      },
+      {
+        "id": "r7",
+        "text": "Tout était parfait, merci.",
+        "rating": 5
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Excursion superbe avec faune marine et équipage formidable, fortement conseillée."
+      },
+      {
+        "id": "r2",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Départ retardé d'une heure, attente au quai."
+      },
+      {
+        "id": "r3",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Coût des sorties non affiché sur internet, il faut demander."
+      },
+      {
+        "id": "r4",
+        "tags": ["language_barrier"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Skipper uniquement francophone, les invités anglophones ont eu du mal."
+      },
+      {
+        "id": "r5",
+        "tags": ["other"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Prestation correcte jugée onéreuse."
+      },
+      {
+        "id": "r6",
+        "tags": ["poor_communication"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Modification de l'heure communiquée tard le soir, découverte après coup."
+      },
+      {
+        "id": "r7",
+        "tags": [],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

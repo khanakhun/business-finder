@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Restaurant",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Cuisine excellente, poisson grillé parfait. Par contre impossible de réserver en ligne, j'ai dû appeler trois fois avant que quelqu'un décroche.",
+        "rating": 4
+      },
+      {
+        "id": "r2",
+        "text": "Top !",
+        "rating": 5
+      },
+      {
+        "id": "r3",
+        "text": "Nous avions réservé pour 8 personnes, à notre arrivée aucune trace de la réservation. On nous a installés au bar. Le propriétaire a répondu à mon avis en s'excusant, c'est déjà ça.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "La carte n'est nulle part sur internet, on découvre les prix (salés) une fois assis.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Service un peu lent mais vue magnifique sur la baie.",
+        "rating": 4
+      },
+      {
+        "id": "r6",
+        "text": "Correct, sans plus.",
+        "rating": 3
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["booking_friction", "unreachable_by_phone"],
+        "sentiment": 0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Plats très bons mais réservation seulement par téléphone, avec plusieurs appels sans réponse."
+      },
+      {
+        "id": "r2",
+        "tags": [],
+        "sentiment": 0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r3",
+        "tags": ["booking_friction"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": true,
+        "evidence": "Réservation de groupe introuvable à l'arrivée, placés au comptoir faute de table."
+      },
+      {
+        "id": "r4",
+        "tags": ["no_online_menu_or_prices", "other"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Menu et tarifs introuvables en ligne, prix élevés découverts seulement à table."
+      },
+      {
+        "id": "r5",
+        "tags": ["long_wait_times"],
+        "sentiment": 0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Le service traîne un peu, compensé par le panorama."
+      },
+      {
+        "id": "r6",
+        "tags": [],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

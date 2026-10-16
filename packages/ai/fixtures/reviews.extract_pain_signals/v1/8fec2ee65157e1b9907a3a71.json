@@ -1,0 +1,100 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Yoga studio",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Class schedule on the website is wrong half the time. Showed up for 7am sunrise flow, no class.",
+        "rating": 2
+      },
+      {
+        "id": "r2",
+        "text": "Gorgeous deck, inspiring teacher. Best yoga I've done anywhere in the Caribbean, hands down.",
+        "rating": 5
+      },
+      {
+        "id": "r3",
+        "text": "Nice.",
+        "rating": 4
+      },
+      {
+        "id": "r4",
+        "text": "No way to pay online for drop-ins, they only take exact cash at the door.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "The owner replied to my message the same day and moved my private session. Easy.",
+        "rating": 5
+      },
+      {
+        "id": "r6",
+        "text": "Couldn't figure out where the studio actually is. Address on Insta ([handle]) just says 'Lorient hill'. Drove around for 20 min.",
+        "rating": 2
+      },
+      {
+        "id": "r7",
+        "text": "Teacher only explains in French, I missed half the cues. Pretty but frustrating.",
+        "rating": 3,
+        "language": "en"
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["website_broken_or_outdated", "hard_to_find_info"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Online timetable unreliable; an early session listed there did not happen."
+      },
+      {
+        "id": "r2",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Inspiring instructor and setting, rated the finest in the region."
+      },
+      {
+        "id": "r3",
+        "tags": [],
+        "sentiment": 0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r4",
+        "tags": ["payment_friction"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Single classes cannot be paid digitally; exact change needed on site."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["hard_to_find_info"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Location given online is vague; reviewer spent a long time searching."
+      },
+      {
+        "id": "r7",
+        "tags": ["language_barrier"],
+        "sentiment": -0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Instructions given in one language only, hard for a non-speaker to follow."
+      }
+    ],
+    "warnings": []
+  }
+}

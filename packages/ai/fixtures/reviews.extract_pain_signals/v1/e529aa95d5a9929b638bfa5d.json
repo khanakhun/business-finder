@@ -1,0 +1,88 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Restaurant",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Excellent accueil, poisson du jour sublime, carte des vins top. Une adresse incontournable !",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Merci pour les 50 minutes entre l'entrée et le plat, on a pu admirer le coucher de soleil deux fois.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Moyen.",
+        "rating": 3
+      },
+      {
+        "id": "r4",
+        "text": "Personne ne décroche jamais, et la réservation en ligne renvoie vers une page d’erreur.",
+        "rating": 1
+      },
+      {
+        "id": "r5",
+        "text": "L'adresse sur Google Maps envoie de l'autre côté de la colline.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "Nos amis anglophones n'ont pas pu commander, aucun serveur ne parlait anglais.",
+        "rating": 3,
+        "language": "fr"
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Accueil, plats et vins remarquables, lieu jugé immanquable."
+      },
+      {
+        "id": "r2",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Délai très long entre les deux services."
+      },
+      {
+        "id": "r3",
+        "tags": [],
+        "sentiment": -0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r4",
+        "tags": ["unreachable_by_phone", "booking_friction", "website_broken_or_outdated"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Téléphone sans réponse et module de réservation web en panne."
+      },
+      {
+        "id": "r5",
+        "tags": ["hard_to_find_info"],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Localisation en ligne erronée, mauvais côté du relief."
+      },
+      {
+        "id": "r6",
+        "tags": ["language_barrier"],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Clients étrangers incapables de commander faute de personnel bilingue."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Dentist",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Emergency appointment the same day, gentle and professional. Highly recommend Dr [person]!",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Their website has no address, no hours, nothing. Just a logo.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Payment only by French cheque or cash. As a visitor I had neither.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Office manager replied to my message and fixed the billing mistake quickly.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Good dentist.",
+        "rating": 4
+      },
+      {
+        "id": "r6",
+        "text": "They cancelled my cleaning and never told me. Found out at the door.",
+        "rating": 1
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Same-day urgent care delivered gently; dentist strongly recommended."
+      },
+      {
+        "id": "r2",
+        "tags": ["website_broken_or_outdated", "hard_to_find_info"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Site is essentially empty, lacking location and opening times."
+      },
+      {
+        "id": "r3",
+        "tags": ["payment_friction"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Accepted payment methods excluded cards, awkward for a tourist."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["poor_communication"],
+        "sentiment": -0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Appointment was dropped without informing the patient beforehand."
+      }
+    ],
+    "warnings": []
+  }
+}

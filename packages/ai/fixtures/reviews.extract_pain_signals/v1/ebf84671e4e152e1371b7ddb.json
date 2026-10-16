@@ -1,0 +1,100 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Spa",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Massage divin, cadre zen, accueil adorable. Le meilleur spa de l'île sans hésiter.",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "J'ai envoyé un mail via le formulaire du site, jamais eu de réponse. J'ai fini par aller ailleurs.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Les tarifs des soins ne sont pas sur le site, il faut demander par mail à [email].",
+        "rating": 3
+      },
+      {
+        "id": "r4",
+        "text": "Réponse du propriétaire très pro après ma remarque sur la température de la salle. Merci.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Parfait",
+        "rating": 5
+      },
+      {
+        "id": "r6",
+        "text": "La réceptionniste ne parlait qu'anglais, ma mère n'a rien compris aux contre-indications.",
+        "rating": 2,
+        "language": "fr"
+      },
+      {
+        "id": "r7",
+        "text": "Terminal CB en panne, on a dû aller chercher des espèces à Gustavia.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Soin et ambiance remarquables, présenté comme le meilleur établissement local."
+      },
+      {
+        "id": "r2",
+        "tags": ["slow_or_no_reply"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Demande par formulaire restée sans suite, cliente partie chez un concurrent."
+      },
+      {
+        "id": "r3",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": "Prix des prestations absents du site, à demander par courriel."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["language_barrier"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Accueil uniquement en anglais, une cliente francophone n’a pas saisi les consignes."
+      },
+      {
+        "id": "r7",
+        "tags": ["payment_friction"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Paiement par carte impossible ce jour-là, retrait de liquide obligatoire."
+      }
+    ],
+    "warnings": []
+  }
+}

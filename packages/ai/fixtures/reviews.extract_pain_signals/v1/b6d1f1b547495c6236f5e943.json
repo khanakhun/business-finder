@@ -1,0 +1,99 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Bakery",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Les meilleurs flans coco du monde, je fais le détour tous les matins !",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Ouvert 'du mardi au dimanche'... sauf quand ça ne leur dit pas. Trois fois fermé cette semaine. Bravo.",
+        "rating": 1
+      },
+      {
+        "id": "r3",
+        "text": "Bof.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Vendeuse très désagréable, elle soupire dès qu'on demande quelque chose.",
+        "rating": 2
+      },
+      {
+        "id": "r5",
+        "text": "Super pain.",
+        "rating": 5
+      },
+      {
+        "id": "r6",
+        "text": "Pas de CB en dessous de 15€, pratique pour une baguette...",
+        "rating": 2
+      },
+      {
+        "id": "r7",
+        "text": "File d’attente jusque sur le trottoir à 7h, compter 20 bonnes minutes.",
+        "rating": 3
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Pâtisserie phare adorée, la cliente vient chaque jour exprès."
+      },
+      {
+        "id": "r2",
+        "tags": ["inconsistent_hours"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Boutique souvent close malgré les jours d’ouverture annoncés."
+      },
+      {
+        "id": "r3",
+        "tags": [],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r4",
+        "tags": ["other"],
+        "sentiment": -0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Employée au comptoir peu aimable et visiblement agacée."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["payment_friction"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Paiement carte refusé pour les petits montants."
+      },
+      {
+        "id": "r7",
+        "tags": ["long_wait_times"],
+        "sentiment": -0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Longue queue matinale, une vingtaine de minutes avant d’être servi."
+      }
+    ],
+    "warnings": []
+  }
+}

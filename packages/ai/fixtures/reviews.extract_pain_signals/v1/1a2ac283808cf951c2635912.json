@@ -1,0 +1,99 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Villa rental agency",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Wonderful villa, and I especially loved emailing the agency four times before getting a reply. Very relaxing.",
+        "rating": 2
+      },
+      {
+        "id": "r2",
+        "text": "Their website still shows villas they stopped renting two years ago. Half the photos don't load on my phone.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "[person] at the front desk was a star, sorted out our airport transfer in minutes. Can't recommend them enough!",
+        "rating": 5
+      },
+      {
+        "id": "r4",
+        "text": "Wanted to see prices before contacting them but there are no rates anywhere online. Everything is 'on request'.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Deposit had to be sent by international wire, no card option. Took a week and bank fees.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "The owner replied to my review within a day and refunded the cleaning fee. Fair play.",
+        "rating": 4
+      },
+      {
+        "id": "r7",
+        "text": "Good.",
+        "rating": 4
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["slow_or_no_reply"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Agency needed several emails before responding at all."
+      },
+      {
+        "id": "r2",
+        "tags": ["website_broken_or_outdated"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Site lists properties no longer offered and images fail on mobile."
+      },
+      {
+        "id": "r3",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Staff member arranged the transfer quickly; reviewer strongly recommends the agency."
+      },
+      {
+        "id": "r4",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Rental pricing is not published on the web; only given after asking."
+      },
+      {
+        "id": "r5",
+        "tags": ["payment_friction"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Security deposit required a bank transfer without card payment, slow and costly."
+      },
+      {
+        "id": "r6",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r7",
+        "tags": [],
+        "sentiment": 0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

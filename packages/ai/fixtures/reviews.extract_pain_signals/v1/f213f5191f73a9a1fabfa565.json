@@ -1,0 +1,99 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Hotel",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Chambre superbe mais impossible de joindre la réception depuis l'extérieur, le standard ne répond pas.",
+        "rating": 3
+      },
+      {
+        "id": "r2",
+        "text": "Séjour de rêve, personnel aux petits soins, petit-déjeuner incroyable. Notre adresse préférée à Saint-Barth.",
+        "rating": 5
+      },
+      {
+        "id": "r3",
+        "text": "Demande de facture envoyée trois fois par mail à [email], toujours rien après un mois.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "La direction a répondu à mon commentaire et proposé un geste commercial. Bonne réaction.",
+        "rating": 4
+      },
+      {
+        "id": "r5",
+        "text": "Clim bruyante, nuit difficile.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "On nous a dit que la piscine serait ouverte, elle était en travaux toute la semaine.",
+        "rating": 2
+      },
+      {
+        "id": "r7",
+        "text": "Bien situé.",
+        "rating": 4
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["unreachable_by_phone"],
+        "sentiment": 0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Belle chambre, mais l'accueil injoignable par téléphone depuis dehors."
+      },
+      {
+        "id": "r2",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Séjour idéal et équipe attentionnée, établissement favori sur l’île."
+      },
+      {
+        "id": "r3",
+        "tags": ["slow_or_no_reply"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Plusieurs relances écrites pour une facture sans réponse depuis des semaines."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["other"],
+        "sentiment": -0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Climatisation trop sonore qui a gêné le sommeil."
+      },
+      {
+        "id": "r6",
+        "tags": ["poor_communication", "other"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Information inexacte sur la disponibilité du bassin, fermé pour chantier."
+      },
+      {
+        "id": "r7",
+        "tags": [],
+        "sentiment": 0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

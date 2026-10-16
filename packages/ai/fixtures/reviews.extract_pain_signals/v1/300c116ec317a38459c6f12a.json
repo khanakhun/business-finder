@@ -1,0 +1,86 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "en",
+    "businessCategory": "Villa rental agency",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Villa incroyable, staff super nice, but the check-in instructions were only in French and super vague.",
+        "rating": 3
+      },
+      {
+        "id": "r2",
+        "text": "Merci pour le wifi qui marche une heure par jour, really premium experience.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Contacted via [link] form, réponse reçue 10 jours après. Trop tard.",
+        "rating": 2
+      },
+      {
+        "id": "r4",
+        "text": "Parfait, thank you [person] !",
+        "rating": 5
+      },
+      {
+        "id": "r5",
+        "text": "Pricing nowhere on the site, everything 'contact us'. Pas sérieux.",
+        "rating": 2
+      },
+      {
+        "id": "r6",
+        "text": "Good"
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["poor_communication"],
+        "sentiment": -0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": "Great property and team, yet arrival guidance was unclear and single-language."
+      },
+      {
+        "id": "r2",
+        "tags": ["other"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Internet connection works only briefly each day."
+      },
+      {
+        "id": "r3",
+        "tags": ["slow_or_no_reply"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Enquiry got an answer only after more than a week, too late."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": ["no_online_menu_or_prices"],
+        "sentiment": -0.3,
+        "mentionsOwnerResponse": false,
+        "evidence": "Rental rates are hidden behind a contact request."
+      },
+      {
+        "id": "r6",
+        "tags": [],
+        "sentiment": 0,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      }
+    ],
+    "warnings": []
+  }
+}

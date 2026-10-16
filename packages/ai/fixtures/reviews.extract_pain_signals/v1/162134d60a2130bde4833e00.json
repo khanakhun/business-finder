@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Yoga studio",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Cours génial, prof bienveillante, le plus beau studio de l'île. Foncez !",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Planning du site jamais à jour, cours annulé sans prévenir.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "Aucun moyen de réserver en ligne, il faut écrire sur WhatsApp au [phone] et espérer une réponse.",
+        "rating": 3
+      },
+      {
+        "id": "r4",
+        "text": "Studio un peu dur à trouver, pas d’indication pour se garer.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Cours agréable.",
+        "rating": 4
+      },
+      {
+        "id": "r6",
+        "text": "Le studio ouvre quand il veut, porte close deux samedis de suite à l’heure du cours.",
+        "rating": 2
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.8,
+        "mentionsOwnerResponse": false,
+        "evidence": "Enseignante attentionnée et lieu splendide, vivement conseillé."
+      },
+      {
+        "id": "r2",
+        "tags": ["website_broken_or_outdated", "inconsistent_hours"],
+        "sentiment": -0.4,
+        "mentionsOwnerResponse": false,
+        "evidence": "Calendrier en ligne obsolète et annulation non communiquée."
+      },
+      {
+        "id": "r3",
+        "tags": ["booking_friction", "slow_or_no_reply"],
+        "sentiment": -0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": "Pas d’inscription sur internet, uniquement par message avec réponse incertaine."
+      },
+      {
+        "id": "r4",
+        "tags": ["hard_to_find_info"],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Lieu peu signalé et aucune information sur le stationnement."
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0.6,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["inconsistent_hours"],
+        "sentiment": -0.5,
+        "mentionsOwnerResponse": false,
+        "evidence": "Fermé au moment prévu deux week-ends consécutifs."
+      }
+    ],
+    "warnings": []
+  }
+}

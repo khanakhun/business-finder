@@ -1,0 +1,87 @@
+{
+  "task": "reviews.extract_pain_signals",
+  "promptVersion": 1,
+  "input": {
+    "locale": "fr",
+    "businessCategory": "Villa rental agency",
+    "reviews": [
+      {
+        "id": "r1",
+        "text": "Agence très réactive, villa conforme aux photos, [person] aux petits soins. Je recommande chaudement.",
+        "rating": 5
+      },
+      {
+        "id": "r2",
+        "text": "Site internet inutilisable sur mobile, les filtres ne marchent pas.",
+        "rating": 2
+      },
+      {
+        "id": "r3",
+        "text": "On nous a annoncé l'annulation de notre villa 3 jours avant l'arrivée, par un simple mail. Aucune solution proposée.",
+        "rating": 1
+      },
+      {
+        "id": "r4",
+        "text": "Correct.",
+        "rating": 3
+      },
+      {
+        "id": "r5",
+        "text": "Réponse du propriétaire à mon avis : courtoise mais rien n'a changé.",
+        "rating": 3
+      },
+      {
+        "id": "r6",
+        "text": "Caution de 5000€ en chèque uniquement, pas pratique pour des étrangers.",
+        "rating": 3
+      }
+    ]
+  },
+  "output": {
+    "reviews": [
+      {
+        "id": "r1",
+        "tags": ["positive_strong_reputation"],
+        "sentiment": 0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Équipe disponible et logement fidèle à l’annonce, vivement conseillée."
+      },
+      {
+        "id": "r2",
+        "tags": ["website_broken_or_outdated"],
+        "sentiment": -0.2,
+        "mentionsOwnerResponse": false,
+        "evidence": "Plateforme web impraticable sur téléphone, recherche par critères défaillante."
+      },
+      {
+        "id": "r3",
+        "tags": ["poor_communication", "slow_or_no_reply"],
+        "sentiment": -0.9,
+        "mentionsOwnerResponse": false,
+        "evidence": "Location annulée à la dernière minute par courriel, sans alternative."
+      },
+      {
+        "id": "r4",
+        "tags": [],
+        "sentiment": 0.1,
+        "mentionsOwnerResponse": false,
+        "evidence": null
+      },
+      {
+        "id": "r5",
+        "tags": [],
+        "sentiment": 0,
+        "mentionsOwnerResponse": true,
+        "evidence": null
+      },
+      {
+        "id": "r6",
+        "tags": ["payment_friction"],
+        "sentiment": -0.7,
+        "mentionsOwnerResponse": false,
+        "evidence": "Dépôt de garantie exigé par chèque seulement, compliqué pour les non-résidents."
+      }
+    ],
+    "warnings": []
+  }
+}

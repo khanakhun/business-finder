@@ -1,6 +1,9 @@
 // Lighthouse CI budgets (BF-034): static renders of the fixture sites (`pnpm prepare:suites`), mobile emulation,
 // with the Chromium Playwright installs. Each fixture in its own style, plus the page with the most blocks. It runs
 // from .lighthouseci/ (git-ignored): under WSL chrome-launcher writes its profile to a Windows-style relative path.
+// DECISION(BF-034): Lighthouse CI runs through `pnpm dlx @lhci/cli@<pinned>` (package.json), out of the lockfile: its
+// dependency tree is resolved at run time, unscanned. Accepted: it audits our local static pages only, in a job with
+// read-only contents and no secrets.
 const { chromium } = require('@playwright/test');
 
 const port = 4412;

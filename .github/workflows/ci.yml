@@ -68,14 +68,10 @@ jobs:
             e2e:
               - '{apps/web,apps/api,packages,infra}/**'
               - '!**/*.md'
+            # One pattern: with `every`, each positive pattern must match (dependency, Node and job changes move
+            # pixels too: Tailwind, React, Playwright, fonts).
             sites:
-              - 'packages/{site-blocks,site-schema}/**'
-              # Dependency, Node and job changes move pixels too (Tailwind, React, Playwright, fonts).
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - '.nvmrc'
-              - '.github/workflows/ci.yml'
-              - '.github/actions/setup/**'
+              - '{packages/site-blocks/**,packages/site-schema/**,pnpm-lock.yaml,pnpm-workspace.yaml,.nvmrc,.github/workflows/ci.yml,.github/actions/setup/**}'
               - '!**/*.md'
 
   quality:

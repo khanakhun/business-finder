@@ -87,7 +87,15 @@ describe('renderStaticPage', () => {
       ...salon,
       brand: { ...salon.brand, name: '"><img src=x onerror=alert(1)>' },
     });
+    // Only a Latin letter or digit is drawn (the `i` of `img`), never the markup.
+    expect(decodeURIComponent(hostile)).toContain('>I</text>');
     expect(decodeURIComponent(hostile)).not.toContain('<img');
+    // A colour that is not hex never reaches the icon: the neutral one is used.
+    const odd = faviconHref({
+      ...salon,
+      theme: { ...salon.theme, palette: { ...salon.theme.palette, primary: 'red;background:url(x)' } },
+    });
+    expect(decodeURIComponent(odd)).toContain("fill='#1f2937'");
   });
 
   it('throws for a page the site does not have, and for a spec the schema refuses', () => {

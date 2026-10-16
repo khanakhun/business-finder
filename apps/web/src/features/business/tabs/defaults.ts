@@ -30,6 +30,15 @@ export function registerDefaultTabs(): void {
     }),
   });
   businessTabs.register({
+    // BF-029.
+    id: 'reviews',
+    labelKey: 'business.tabs.reviews',
+    order: 27,
+    component: dynamic(() => import('@/features/reviews/reviews-tab.tsx').then((m) => m.ReviewsTab), {
+      loading: TabSkeleton,
+    }),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

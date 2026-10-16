@@ -35,6 +35,9 @@ export const queryKeys = {
     scraper: () => ['discovery', 'scraper'] as const,
     run: (id: string) => ['discovery', 'run', id] as const,
   }),
+  reviews: defineQueryKeys('reviews', {
+    sources: () => ['reviews', 'sources'] as const,
+  }),
   search: defineQueryKeys('search', {
     listing: (query: Readonly<Record<string, string | string[]>>) => ['search', 'listing', query] as const,
     facets: (query: Readonly<Record<string, string | string[]>>) => ['search', 'facets', query] as const,
@@ -52,6 +55,7 @@ export const queryKeys = {
     duplicates: (id: string) => ['business', id, 'duplicates'] as const,
     enrichment: (id: string) => ['business', id, 'enrichment'] as const,
     website: (id: string) => ['business', id, 'website'] as const,
+    reviews: (id: string) => ['business', id, 'reviews'] as const,
   }),
   crm: defineQueryKeys('crm', {
     board: (filters: Readonly<Record<string, string>>) => ['crm', 'board', filters] as const,

@@ -487,6 +487,41 @@
         "other": "échec de connexion"
       },
       "reacherMissing": "Aucun service Reacher n’est configuré sur ce déploiement : Reacher est ignoré."
+    },
+    "reviews": {
+      "title": "Sources d’avis",
+      "description": "Quels avis peuvent alimenter l’analyse des avis. Le texte des avis est un contenu sous licence : il est analysé à la volée et jamais conservé.",
+      "active": "Active",
+      "blockedBy": {
+        "not_enabled": "Désactivée",
+        "acknowledgement": "Accord d’un propriétaire requis",
+        "not_configured": "Clé Google Places requise",
+        "scraper_gates": "Scraper non autorisé"
+      },
+      "saved": "Sources d’avis enregistrées.",
+      "cancel": "Annuler",
+      "google": {
+        "title": "Avis Google",
+        "summary": "Jusqu’à 5 avis par établissement via l’API Place Details (facturé sur votre clé Google). Les analyses sont conservées 30 jours.",
+        "acknowledged": "Accepté le {date}.",
+        "notAcknowledged": "Désactivée : un propriétaire doit d’abord lire et accepter les conditions de Google.",
+        "revoke": "Ne plus utiliser les avis Google",
+        "enable": "Analyser les avis Google…",
+        "ownerOnly": "Seul un propriétaire de l’espace peut l’activer.",
+        "dialogTitle": "Analyser les avis Google",
+        "termsLink": "Conditions de Google Maps Platform (modifiées le {date})",
+        "accept": "J’ai lu l’avertissement et les conditions de Google, et j’accepte la responsabilité de cet usage.",
+        "confirm": "Activer"
+      },
+      "scraper": {
+        "title": "Avis collectés (scraper)",
+        "summary": "Avis lus à la demande par le scraper Google Maps, seulement là où le scraper est lui-même autorisé. Les analyses sont conservées 30 jours. Le désactiver les supprime."
+      },
+      "manual": {
+        "title": "Avis collés",
+        "summary": "Les membres peuvent coller des avis sur la fiche d’un établissement. Le texte est anonymisé, analysé puis supprimé."
+      },
+      "loadFailed": "Les sources d’avis n’ont pas pu être chargées."
     }
   },
   "features": {
@@ -981,7 +1016,8 @@
       "overview": "Aperçu",
       "contacts": "Contacts",
       "activity": "Activité",
-      "website": "Site web"
+      "website": "Site web",
+      "reviews": "Avis"
     },
     "actions": {
       "label": "Actions rapides",
@@ -1334,7 +1370,8 @@
       "dependency_skipped": "une étape requise n’a pas tourné",
       "budget": "budget mensuel atteint",
       "cancelled": "arrêtée",
-      "not_registered": "pas encore disponible"
+      "not_registered": "pas encore disponible",
+      "licensing_disabled": "aucune source d’avis activée"
     },
     "noSolicitation": {
       "title": "Cette entreprise refuse le démarchage",
@@ -1419,5 +1456,64 @@
       "partial": "Enrichie en partie",
       "failed": "Enrichissement échoué"
     }
+  },
+  "reviews": {
+    "title": "Analyse des avis",
+    "subtitle": "Agrégée et anonyme : les problèmes que citent les clients, jamais leurs mots ni leurs noms.",
+    "analyse": "Analyser les avis",
+    "pasteButton": "Coller des avis",
+    "analysisStarted": "Analyse des avis lancée.",
+    "analysisFailed": "L’analyse des avis n’a pas pu démarrer.",
+    "sampleSize": "Avis analysés",
+    "reviewCount": "{count, plural, one {# avis} other {# avis}}",
+    "sourcesLabel": "Sources",
+    "sources": {
+      "google_places": "Avis Google",
+      "gmaps_scraper": "Avis collectés (scraper)",
+      "manual": "Avis collés"
+    },
+    "sentiment": "Tonalité",
+    "sentiments": {
+      "negative": "Négative ({value})",
+      "mixed": "Mitigée ({value})",
+      "positive": "Positive ({value})"
+    },
+    "ownerResponseRate": "Réponses du propriétaire",
+    "rating": "Note",
+    "ratingValue": "{avg} ★ ({count, plural, one {# note} other {# notes}})",
+    "ratingTrend": "Évolution de la note",
+    "trends": {
+      "up": "En hausse",
+      "flat": "Stable",
+      "down": "En baisse",
+      "unknown": "Historique insuffisant"
+    },
+    "computedAt": "Analysé",
+    "expiresAt": "Conservé jusqu’au",
+    "unknown": "Inconnu",
+    "signalsTitle": "Points de friction",
+    "signalValue": "{count, plural, one {# avis} other {# avis}} · {share}",
+    "noSignals": "Aucun point de friction dans les avis analysés.",
+    "evidenceTitle": "Éléments",
+    "evidenceHint": "De courtes reformulations écrites par le modèle — pas des citations. Elles sont supprimées quand la licence de leur source l’exige.",
+    "noEvidence": "Aucun élément conservé.",
+    "keptUntil": "Conservé jusqu’au {date}",
+    "googleAttribution": "Comprend des analyses issues des avis Google Maps.",
+    "usagePolicy": "La prospection n’évoque ces thèmes qu’en termes généraux et ne cite jamais un avis ni son auteur.",
+    "emptyTitle": "Pas encore d’analyse des avis",
+    "emptyFetch": "Analysez les avis fournis par vos sources activées, ou collez des avis pour les analyser.",
+    "emptyNoSources": "Les avis Google et collectés sont désactivés pour cet espace. Collez des avis pour les analyser, ou demandez à un propriétaire d’activer une source.",
+    "settingsLink": "Sources d’avis",
+    "paste": {
+      "title": "Coller des avis",
+      "description": "Un avis par paragraphe (laissez une ligne vide entre deux avis), jusqu’à {max}. Noms, e-mails, numéros de téléphone et liens sont retirés avant l’analyse, et le texte n’est pas conservé. Un nouveau collage remplace le précédent.",
+      "label": "Avis",
+      "count": "{count, plural, =0 {Aucun avis pour l’instant} one {# avis à analyser} other {# avis à analyser}}",
+      "cancel": "Annuler",
+      "analyse": "Analyser",
+      "analysing": "Analyse…",
+      "done": "Avis analysés."
+    },
+    "loadFailed": "L’analyse des avis n’a pas pu être chargée."
   }
 }

@@ -9,7 +9,7 @@ import { scoreBusiness } from './engine.ts';
 // order (new_website, website_redesign, ai_receptionist, booking_system, local_seo). A weight change that moves a
 // tier must update this table, the PR's golden table and docs/scoring/profiles.md together.
 const EXPECTED: [string, string, (string | null)[]][] = [
-  ['Beach bistro, no website, busy', 'ACCBB', [null, null, null, null, null]],
+  ['Beach bistro, no website, busy', 'ACCBB', [null, 'no_website_to_redesign', null, null, null]],
   ['Salon, Facebook page only, phone pains', 'ACAAC', [null, 'no_website_to_redesign', null, null, null]],
   ['Villa rental, dated slow site', 'BABAA', [null, null, null, null, null]],
   [
@@ -18,7 +18,7 @@ const EXPECTED: [string, string, (string | null)[]][] = [
     ['has_working_website', null, null, 'already_books_online', null],
   ],
   ['Dentist, ok site, no booking', 'CCBAC', ['has_working_website', null, null, null, null]],
-  ['Gift shop, parked domain', 'BCCCC', [null, null, null, 'offer_rarely_fits', null]],
+  ['Gift shop, parked domain', 'BCCCC', [null, 'no_website_to_redesign', null, 'offer_rarely_fits', null]],
   [
     'Permanently closed café',
     'XXXXX',
@@ -35,13 +35,23 @@ const EXPECTED: [string, string, (string | null)[]][] = [
     'XXXXX',
     ['do_not_contact', 'do_not_contact', 'do_not_contact', 'do_not_contact', 'do_not_contact'],
   ],
-  ['Garage, unreachable', 'CCCCC', ['unreachable', null, null, null, null]],
+  [
+    'Garage, unreachable',
+    'CCCCC',
+    ['unreachable', 'no_website_to_redesign', 'unreachable', 'offer_rarely_fits', 'unreachable'],
+  ],
   ['Spa, broken site, many complaints', 'BCACC', [null, null, null, 'booking_not_checked', null]],
-  ['Chain boutique, shared website', 'CCCCC', [null, null, null, 'offer_rarely_fits', null]],
+  ['Chain boutique, shared website', 'CCCCC', ['has_working_website', null, null, 'offer_rarely_fits', null]],
   [
     'Won customer, no website',
     'CCCCC',
-    ['already_customer', null, null, 'already_customer', 'already_customer'],
+    [
+      'already_customer',
+      'no_website_to_redesign',
+      'already_customer',
+      'already_customer',
+      'already_customer',
+    ],
   ],
 ];
 

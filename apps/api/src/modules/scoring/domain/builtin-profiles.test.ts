@@ -26,8 +26,8 @@ const digest = (value: unknown): string => {
 // The digest of every released version of each built-in, in order (index + 1 = version). Released = merged to main
 // (then seeded somewhere): from then on an edit appends the new digest and bumps the version, never edits an entry.
 const RELEASED: Record<string, readonly string[]> = {
-  new_website: ['09305d7e5127ef07'],
-  website_redesign: ['5b0b5d3cc7201d9d'],
+  new_website: ['405fb2065b1da0a5'],
+  website_redesign: ['efa2848249582362'],
   ai_receptionist: ['bbd3f46a7d1fe94b'],
   booking_system: ['b933f0fc4b3194d0'],
   local_seo: ['61745a2709b3106e'],
@@ -109,5 +109,11 @@ describe('blocked crawls', () => {
     expect(
       redesign.reasons.map((reason) => reason.feature).filter((feature) => presence.includes(feature)),
     ).toEqual([]);
+    // Its status is `ok` by convention (never measured): the text claims no assessment.
+    expect(
+      redesign.reasons
+        .filter((reason) => reason.feature === 'website_status')
+        .map((reason) => reason.text.en),
+    ).toEqual(['The audit flagged no major problem.']);
   });
 });

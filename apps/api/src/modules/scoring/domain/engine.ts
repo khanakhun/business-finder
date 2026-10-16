@@ -18,7 +18,7 @@ import { applyTransform } from './transforms.ts';
 //
 // score = clamp(Σ contribution, 0, 100), contribution = 100 × weight × transformed ÷ Σ positive weights. A missing
 // feature takes its registry default, else the profile's `missing` value (which can raise a score: the built-ins use
-// it for booking only, with a cap), else contributes nothing while its weight still counts. Then gates: an exclusion
+// it for booking only, capped while a crawl could still tell), else contributes nothing while its weight still counts. Then gates: an exclusion
 // gives tier X and 0, a cap lowers the score; `do_not_contact` always excludes, whatever the profile says. Tiers: A
 // from `tiers.A`, B from `tiers.B`, else C.
 
@@ -64,18 +64,18 @@ export function scoreVector(config: ScoringProfileConfig, stored: FeatureVector)
   });
   const total = contributions.reduce((sum, { contribution }) => sum + contribution, 0);
   const computed = Math.round(Math.min(100, Math.max(0, total)));
-  const matched = decidingGate([DO_NOT_CONTACT_GATE, ...config.gates], vector);
-  // A cap that does not lower the score decides nothing (and is not reported).
-  const gate = matched?.effect.type === 'cap' && matched.effect.max >= computed ? null : matched;
+  const gate = decidingGate([DO_NOT_CONTACT_GATE, ...config.gates], vector);
+  // A cap that does not lower the score still explains it, marked as not applied.
+  const applied = gate !== null && (gate.effect.type === 'exclude' || gate.effect.max < computed);
   const excluded = gate?.effect.type === 'exclude';
-  const score = excluded ? 0 : gate?.effect.type === 'cap' ? gate.effect.max : computed;
+  const score = excluded ? 0 : applied && gate?.effect.type === 'cap' ? gate.effect.max : computed;
   return {
     score,
     tier: excluded ? 'X' : score >= config.tiers.A ? 'A' : score >= config.tiers.B ? 'B' : 'C',
     // Kept for the snapshot either way; an excluded business is explained by its gate alone.
     contributions,
     reasons: excluded ? [] : selectReasons(config, contributions),
-    gated: gate ? { gate: gate.id, effect: gate.effect.type, reason: gate.reason } : null,
+    gated: gate ? { gate: gate.id, effect: gate.effect.type, applied, reason: gate.reason } : null,
   };
 }
 

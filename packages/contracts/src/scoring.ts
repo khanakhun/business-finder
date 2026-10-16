@@ -128,7 +128,7 @@ const DEFINITIONS = {
     description: { en: 'The business has a website.', fr: 'L’entreprise a un site web.' },
     source: 'business record',
     reasons: yesNo(
-      { en: 'Has a website.', fr: 'A un site web.' },
+      { en: 'Has a website address.', fr: 'A une adresse de site web.' },
       {
         en: 'No website: customers cannot find it online.',
         fr: 'Pas de site web : les clients ne la trouvent pas en ligne.',
@@ -154,7 +154,7 @@ const DEFINITIONS = {
       },
       broken: { en: 'The website is broken.', fr: 'Le site web est cassé.' },
       weak: { en: 'The website is weak.', fr: 'Le site web est faible.' },
-      ok: { en: 'The website is acceptable.', fr: 'Le site web est correct.' },
+      ok: { en: 'The audit flagged no major problem.', fr: 'L’audit n’a relevé aucun problème majeur.' },
       strong: { en: 'The website is already strong.', fr: 'Le site web est déjà solide.' },
     },
   },
@@ -696,8 +696,8 @@ const ProfileConfigObjectSchema = z.object({
   weights: z.partialRecord(FeatureKeySchema, z.number().min(-100).max(100)),
   transforms: z.partialRecord(FeatureKeySchema, TransformSchema).default({}),
   /**
-   * The transformed value (0–1) of a feature when it is missing, for this profile (e.g. an unauditable site counts
-   * as a poor one for a redesign). Without it, a missing feature contributes nothing.
+   * The transformed value (0–1) of a feature when it is missing, for this profile (e.g. booking counts an unknown
+   * booking tool as none). Without it, a missing feature contributes nothing.
    */
   missing: z.partialRecord(FeatureKeySchema, unit).default({}),
   gates: z.array(GateSchema).max(30).default([]),
@@ -902,7 +902,18 @@ export const ScoreResultSchema = z
     contributions: z.array(ScoreContributionSchema),
     /** Top 3 reasons each way, strongest first. */
     reasons: z.array(ScoreReasonSchema),
-    gated: z.object({ gate: z.string(), effect: z.enum(['exclude', 'cap']), reason: TextSchema }).nullable(),
+    /**
+     * The gate that decides (exclusion, or the lowest matching cap). `applied: false`: a cap matched but did not
+     * lower the score — its reason still explains it (e.g. "no real website to redesign").
+     */
+    gated: z
+      .object({
+        gate: z.string(),
+        effect: z.enum(['exclude', 'cap']),
+        applied: z.boolean(),
+        reason: TextSchema,
+      })
+      .nullable(),
   })
   .meta({ id: 'ScoreResult' });
 export type ScoreResult = z.infer<typeof ScoreResultSchema>;

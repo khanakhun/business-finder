@@ -121,13 +121,15 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
         when: { feature: 'website_status', in: ['ok', 'strong'] },
         effect: { type: 'cap', max: 30 },
         reason: {
-          en: 'Already has a working website: see the redesign offer.',
-          fr: 'A déjà un site qui fonctionne : voir l’offre de refonte.',
+          en: 'Already has a website that is neither weak nor broken: see the redesign offer.',
+          fr: 'A déjà un site ni faible ni cassé : voir l’offre de refonte.',
         },
       },
     ],
     tiers: { A: 70, B: 50 },
   },
+  // DECISION(BF-031): missing measurements are not filled in (no invented audit): a broken site, with nothing to
+  // measure, leads with the new website offer and ranks lower here.
   website_redesign: {
     offer: 'website_redesign',
     weights: {
@@ -151,7 +153,8 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
     transforms: {
       website_status: {
         kind: 'enumMap',
-        map: { none: 0, parked: 0.2, social_only: 0.3, broken: 1, weak: 0.9, ok: 0.4, strong: 0 },
+        // No real site (none, parked, social page) is the new website offer's (capped below).
+        map: { none: 0, parked: 0, social_only: 0, broken: 1, weak: 0.9, ok: 0.4, strong: 0 },
         default: 0,
       },
       website_quality_score: { kind: 'inverse', min: 20, max: 90 },

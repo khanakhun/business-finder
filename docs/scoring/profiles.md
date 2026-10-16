@@ -23,8 +23,9 @@ duplicates one to customize it (BF-032). Change a weight here and in code togeth
    `missing` value).
 4. **Gates** (conditions on the features, defaults applied; a comparison with a missing value is false, so
    `not: { eq }` matches a missing value while `neq` does not): an *exclusion* gives tier **X**, score 0 and no
-   reasons but its own; a *cap* limits the score (the lowest cap wins; an exclusion wins over caps; a cap that does
-   not lower the score is not reported). Do-not-contact always excludes, whatever the profile says.
+   reasons but its own; a *cap* limits the score (the lowest cap wins; an exclusion wins over caps). A cap that does
+   not lower the score is reported as not applied: its reason still explains the score. Do-not-contact always
+   excludes, whatever the profile says.
 5. **Tiers**: A from the profile's `A` threshold, B from `B`, else C.
 6. **Reasons**: the three strongest contributions each way, in EN/FR: the profile's `reasonTemplates` first, then
    the registry's texts — by value (`true`, `false`, an enum value), by side of the feature's pivot (`below`,
@@ -72,7 +73,7 @@ Extra gate: `has_working_website` (status ok/strong) caps at 30 — that busines
 
 | Feature | Weight | Transform | Rationale |
 |---|---:|---|---|
-| `website_status` | 25 | broken 1, weak 0.9, ok 0.4, social only 0.3, parked 0.2, none/strong 0 | The need: a site that serves the business poorly. |
+| `website_status` | 25 | broken 1, weak 0.9, ok 0.4, none/parked/social only/strong 0 | The need: a site that serves the business poorly (no real site is the new website offer's). |
 | `website_quality_score` | 15 | inverse 20–90 | The audit's composite of design, speed and findings. |
 | `vision_overall` | 10 | inverse 2–9 | A dated look is what owners see and feel first. |
 | `psi_mobile_performance` | 8 | inverse 20–90 | Slow on phones loses visitors (most traffic is mobile). |

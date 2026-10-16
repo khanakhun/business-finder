@@ -240,14 +240,14 @@ describe('scoring engine', () => {
       );
     });
 
-    it('does not report a cap that does not lower the score; a cap at a tier threshold keeps the tier', () => {
+    it('marks a cap that does not lower the score as not applied; a cap at a tier threshold keeps the tier', () => {
       const config = profile({
         weights: { has_phone: 20, has_whatsapp: 80 },
         gates: [gate('loose', { type: 'cap', max: 30 })],
       });
       expect(scoreVector(config, { has_phone: true, has_whatsapp: false })).toMatchObject({
         score: 20,
-        gated: null,
+        gated: { gate: 'loose', applied: false },
       });
       const atA = profile({ weights: { has_phone: 100 }, gates: [gate('at_a', { type: 'cap', max: 70 })] });
       expect(scoreVector(atA, { has_phone: true })).toMatchObject({

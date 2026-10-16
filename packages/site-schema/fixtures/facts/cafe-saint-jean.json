@@ -1,0 +1,62 @@
+{
+  "facts": [
+    {
+      "id": "business.name",
+      "kind": "business_name",
+      "value": "Café Saint-Jean",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "phone.main",
+      "kind": "phone",
+      "value": "+590 590 00 02 02",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "address.main",
+      "kind": "address",
+      "value": "Baie de Saint-Jean, 97133 Saint-Barthélemy",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "hours.main",
+      "kind": "hours",
+      "value": "Every day 07:30–15:00, closed in September",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "price.espresso",
+      "kind": "price",
+      "value": {
+        "amount": 3,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "price.juice",
+      "kind": "price",
+      "value": {
+        "amount": 7,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "price.bowl",
+      "kind": "price",
+      "value": {
+        "amount": 12,
+        "currency": "EUR"
+      },
+      "source": "website",
+      "confidence": 0.95
+    }
+  ]
+}

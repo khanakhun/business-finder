@@ -19,6 +19,11 @@ Who the business is, in two or three short factual paragraphs.
 | `centered` | Centred text only. | `thumbnails/about/centered.png` |
 | `story` | Wider text with a large photo, for businesses with a story the facts tell. | `thumbnails/about/story.png` |
 
+## Shape
+
+A block is `{ "id", "type": "about", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -32,3 +37,23 @@ Who the business is, in two or three short factual paragraphs.
 
 - Good: On the quai des Indes, we advise homeowners and tradespeople. / Sur le quai des Indes, nous conseillons particuliers et artisans.
 - Bad: Founded in 1970 by a passionate family… / Fondée en 1970 par une famille passionnée…
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "abou-abou1",
+  "type": "about",
+  "variant": "centered",
+  "props": {
+    "heading": {
+      "fr": "Une quincaillerie de quartier",
+      "en": "A neighbourhood hardware store"
+    },
+    "body": {
+      "fr": "Sur le quai des Indes, nous conseillons particuliers et artisans.\n\nOutillage, visserie et découpe de clés.",
+      "en": "On the quai des Indes, we advise homeowners and tradespeople.\n\nTools, fixings and key cutting."
+    }
+  }
+}
+```

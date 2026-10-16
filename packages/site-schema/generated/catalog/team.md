@@ -17,6 +17,11 @@ People the business presents publicly.
 | `grid` | A grid of portraits. | `thumbnails/team/grid.png` |
 | `list` | A list with roles. | `thumbnails/team/list.png` |
 
+## Shape
+
+A block is `{ "id", "type": "team", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -32,3 +37,29 @@ People the business presents publicly.
 
 - Good: Léa M. — Manager / Léa M. — Gérante
 - Bad: Our expert team of 20 / Notre équipe de 20 experts
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "team-vill1",
+  "type": "team",
+  "variant": "grid",
+  "props": {
+    "heading": {
+      "fr": "L’équipe",
+      "en": "The team"
+    },
+    "members": [
+      {
+        "factId": "team.1",
+        "name": "Léa M.",
+        "role": {
+          "fr": "Gérante",
+          "en": "Manager"
+        }
+      }
+    ]
+  }
+}
+```

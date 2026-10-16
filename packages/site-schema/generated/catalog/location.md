@@ -18,6 +18,11 @@ Where the business is, with a map and directions.
 | `map_full` | A full-width map. | `thumbnails/location/map_full.png` |
 | `address_only` | The address and a directions button, no map. | `thumbnails/location/address_only.png` |
 
+## Shape
+
+A block is `{ "id", "type": "location", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -30,3 +35,16 @@ Where the business is, with a map and directions.
 
 - Good: Find us: 12 rue du Port, Gustavia / Nous trouver : 12 rue du Port, Gustavia
 - Bad: Near the beach / Près de la plage
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "loca-cont1",
+  "type": "location",
+  "variant": "map_split",
+  "props": {
+    "showDirections": true
+  }
+}
+```

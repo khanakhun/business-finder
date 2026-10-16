@@ -17,6 +17,11 @@ How to reach the business: the channels it publishes and, optionally, the form.
 | `split` | Channels beside the form. | `thumbnails/contact/split.png` |
 | `centered` | Channels centred, form below. | `thumbnails/contact/centered.png` |
 
+## Shape
+
+A block is `{ "id", "type": "contact", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -33,3 +38,25 @@ How to reach the business: the channels it publishes and, optionally, the form.
 
 - Good: Contact us / Nous contacter
 - Bad: Call us 24/7! / Appelez-nous 24 h/24 !
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "cont-cont1",
+  "type": "contact",
+  "variant": "split",
+  "props": {
+    "heading": {
+      "fr": "Nous contacter",
+      "en": "Contact us"
+    },
+    "showForm": true,
+    "channels": {
+      "phone": true,
+      "email": true,
+      "whatsapp": false
+    }
+  }
+}
+```

@@ -17,6 +17,11 @@ Longer text such as legal notices, in a small markdown subset.
 | `narrow` | A reading column. | `thumbnails/rich_text/narrow.png` |
 | `wide` | The full content width. | `thumbnails/rich_text/wide.png` |
 
+## Shape
+
+A block is `{ "id", "type": "rich_text", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -28,3 +33,19 @@ Longer text such as legal notices, in a small markdown subset.
 
 - Good: See the [home](page:home) page. / Voir la page d’[accueil](page:home).
 - Bad: See <a href="https://…">here</a> / Voir <a href="https://…">ici</a>
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "rich-abou1",
+  "type": "rich_text",
+  "variant": "narrow",
+  "props": {
+    "body": {
+      "fr": "**Horaires** : voir la page [d’accueil](page:home).",
+      "en": "**Hours**: see the [home](page:home) page."
+    }
+  }
+}
+```

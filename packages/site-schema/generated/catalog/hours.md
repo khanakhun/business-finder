@@ -17,6 +17,11 @@ Opening hours from the contact facts.
 | `table` | A table of the week. | `thumbnails/hours/table.png` |
 | `compact` | Days grouped on a few lines. | `thumbnails/hours/compact.png` |
 
+## Shape
+
+A block is `{ "id", "type": "hours", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -28,3 +33,14 @@ Opening hours from the contact facts.
 
 - Good: Tue–Sat 09:00–18:00 / Mar.–sam. 9 h–18 h
 - Bad: Usually open in the morning / En général ouvert le matin
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "hour-cont1",
+  "type": "hours",
+  "variant": "table",
+  "props": {}
+}
+```

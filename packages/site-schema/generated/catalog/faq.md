@@ -17,6 +17,11 @@ Questions customers ask, answered from the facts.
 | `accordion` | Questions that open. | `thumbnails/faq/accordion.png` |
 | `two_column` | Questions and answers side by side. | `thumbnails/faq/two_column.png` |
 
+## Shape
+
+A block is `{ "id", "type": "faq", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -31,3 +36,30 @@ Questions customers ask, answered from the facts.
 
 - Good: Do you cut keys? — Yes, on site, during opening hours. / Faites-vous les clés ? — Oui, sur place, aux heures d’ouverture.
 - Bad: Is parking free? — Yes, always. / Le parking est-il gratuit ? — Oui, toujours.
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "faqs-hard1",
+  "type": "faq",
+  "variant": "accordion",
+  "props": {
+    "items": [
+      {
+        "question": {
+          "fr": "Faites-vous les clés ?",
+          "en": "Do you cut keys?"
+        },
+        "answer": {
+          "fr": "Oui, sur place, pendant les heures d’ouverture.",
+          "en": "Yes, on site, during opening hours."
+        },
+        "factIds": [
+          "service.keys"
+        ]
+      }
+    ]
+  }
+}
+```

@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { BLOCK_SCHEMAS, BLOCK_TYPES, type BlockType } from '../spec/blocks/index.ts';
+import { BLOCK_SCHEMAS, BLOCK_TYPES, type Block, type BlockType } from '../spec/blocks/index.ts';
+import type { SiteSpec } from '../spec/site.ts';
 import { CATALOG, thumbnailPath } from './catalog.ts';
 
 // The catalog as markdown (BF-033): one file per block and an index, written to the agents' workspaces (BF-040,
@@ -17,6 +18,8 @@ type JsonSchema = {
   maxItems?: number;
   additionalProperties?: JsonSchema | boolean;
   anyOf?: JsonSchema[];
+  oneOf?: JsonSchema[];
+  const?: unknown;
   $ref?: string;
 };
 
@@ -52,7 +55,18 @@ function describe(raw: JsonSchema, defs: Defs): string {
   }
   if (schema.type === 'object') return 'object';
   if (schema.type === 'string' && schema.maxLength) return `text (≤ ${schema.maxLength})`;
-  return schema.type ?? (schema.anyOf ? 'one of several shapes' : 'value');
+  const shapes = schema.oneOf ?? schema.anyOf;
+  if (shapes) {
+    // An action: its kinds, by the discriminator.
+    const kinds = shapes.flatMap((shape) => {
+      const kind = resolve(shape, defs).properties?.kind;
+      return kind?.enum ?? (kind?.const !== undefined ? [kind.const] : []);
+    });
+    if (kinds.length > 0)
+      return `action, one of ${kinds.map((k) => `\`${String(k)}\``).join(', ')} (see actions.md)`;
+    return 'one of several shapes';
+  }
+  return schema.type ?? 'value';
 }
 
 function propRows(schema: JsonSchema, defs: Defs, prefix = ''): string[] {
@@ -70,7 +84,10 @@ function propRows(schema: JsonSchema, defs: Defs, prefix = ''): string[] {
   return rows;
 }
 
-export function blockMarkdown(type: BlockType): string {
+/** A block as JSON, indented for markdown. */
+const json = (value: unknown) => ['```json', JSON.stringify(value, null, 2), '```'];
+
+export function blockMarkdown(type: BlockType, example?: Block): string {
   const entry = CATALOG[type];
   const props = z.toJSONSchema(BLOCK_SCHEMAS[type].shape.props, {
     io: 'input',
@@ -98,6 +115,11 @@ export function blockMarkdown(type: BlockType): string {
       ([variant, text]) => `| \`${variant}\` | ${cell(text)} | \`${thumbnailPath(type, variant)}\` |`,
     ),
     '',
+    '## Shape',
+    '',
+    `A block is \`{ "id", "type": "${type}", "variant", "props" }\`: \`id\` is 6–32 URL-safe characters, unique in the site; every`,
+    'localized text has an entry for every site locale.',
+    '',
     '## Props',
     '',
     '| Prop | Type | Required | What to write |',
@@ -109,11 +131,31 @@ export function blockMarkdown(type: BlockType): string {
     `- Good: ${entry.good.en} / ${entry.good.fr}`,
     `- Bad: ${entry.bad.en} / ${entry.bad.fr}`,
     '',
+    ...(example ? ['A valid block (from a fixture site):', '', ...json(example), ''] : []),
   ].join('\n');
 }
 
-/** File name (under generated/catalog/) → content. */
-export function catalogFiles(): Map<string, string> {
+const ACTIONS = [
+  '# Actions',
+  '',
+  'Buttons and links (`primaryCta`, `cta`, `layout.header.cta`…). Each kind carries only what it uses.',
+  '',
+  '| Kind | Fields | Opens |',
+  '|---|---|---|',
+  '| `call` | `label` | the phone number in `contact.phone` |',
+  '| `email` | `label` | the address in `contact.email` |',
+  '| `whatsapp` | `label` | the number in `contact.whatsapp` |',
+  '| `booking` | `label` | the booking page in `contact.bookingUrl` (fact-backed) |',
+  '| `directions` | `label` | a map to `contact.address` or `contact.geo` |',
+  '| `page` | `label`, `pageId` | a page of the site |',
+  "| `url` | `label`, `url` | the business's own domain only (no redirect); booking pages use `booking` |",
+  '',
+  'Example: `{ "kind": "booking", "label": { "fr": "Réserver", "en": "Book" } }`.',
+  '',
+].join('\n');
+
+/** File name (under generated/catalog/) → content; `examples` are valid blocks to show (one per type). */
+export function catalogFiles(examples: Partial<Record<BlockType, Block>> = {}): Map<string, string> {
   const files = new Map<string, string>();
   const index = [
     '# Block catalog',
@@ -126,6 +168,16 @@ export function catalogFiles(): Map<string, string> {
     '',
   ].join('\n');
   files.set('README.md', index);
-  for (const type of BLOCK_TYPES) files.set(`${type}.md`, blockMarkdown(type));
+  files.set('actions.md', ACTIONS);
+  for (const type of BLOCK_TYPES) files.set(`${type}.md`, blockMarkdown(type, examples[type]));
   return files;
+}
+
+/** The first block of each type in these sites (the catalog's examples). */
+export function examplesFrom(sites: readonly SiteSpec[]): Partial<Record<BlockType, Block>> {
+  const examples: Partial<Record<BlockType, Block>> = {};
+  for (const site of sites) {
+    for (const page of site.pages) for (const block of page.blocks) examples[block.type] ??= block;
+  }
+  return examples;
 }

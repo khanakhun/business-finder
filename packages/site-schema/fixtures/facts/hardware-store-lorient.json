@@ -1,0 +1,47 @@
+{
+  "facts": [
+    {
+      "id": "business.name",
+      "kind": "business_name",
+      "value": "Quincaillerie du Port",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "phone.main",
+      "kind": "phone",
+      "value": "02 61 91 03 03",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "email.main",
+      "kind": "email",
+      "value": "contact@quincaillerie-du-port.example",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "address.main",
+      "kind": "address",
+      "value": "4 quai des Indes, 56100 Lorient",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "hours.main",
+      "kind": "hours",
+      "value": "Mon–Sat 08:30–12:30, 14:00–18:30",
+      "source": "website",
+      "confidence": 0.95
+    },
+    {
+      "id": "service.keys",
+      "kind": "service",
+      "value": "Découpe de clés",
+      "source": "website",
+      "confidence": 0.95,
+      "locale": "fr"
+    }
+  ]
+}

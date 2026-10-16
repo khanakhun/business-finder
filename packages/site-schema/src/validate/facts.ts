@@ -25,6 +25,7 @@ export const FACT_KINDS = [
   'team_member',
   'year',
   'award',
+  'legal_id',
   'other',
 ] as const;
 export type FactKind = (typeof FACT_KINDS)[number];
@@ -75,6 +76,7 @@ export const FactSchema = z.discriminatedUnion('kind', [
       'service',
       'menu_item',
       'award',
+      'legal_id',
       'other',
     ]),
     value: text,
@@ -84,36 +86,139 @@ export type Fact = z.infer<typeof FactSchema>;
 type FactOf<K extends Fact['kind']> =
   Extract<Fact, { kind: K }> extends never ? Fact & { kind: K; value: string } : Extract<Fact, { kind: K }>;
 
-export const FactRegistrySchema = z.object({ facts: z.array(FactSchema).max(2000) }).strict();
+export const FactRegistrySchema = z
+  .object({ facts: z.array(FactSchema).max(2000) })
+  .strict()
+  .refine((registry) => new Set(registry.facts.map((fact) => fact.id)).size === registry.facts.length, {
+    message: 'Fact ids are unique',
+  });
 export type FactRegistry = z.infer<typeof FactRegistrySchema>;
 
-const digits = (value: string) => value.replace(/\D/g, '');
-const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+const digits = (value: string) => value.normalize('NFKC').replace(/\D/g, '');
+/** For comparing texts: compatibility forms, case, spacing and punctuation folded. */
+const norm = (value: string) =>
+  value
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[\p{P}\p{S}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+/** The national number: the last 9 digits (country code and trunk 0 dropped; FR, BL and most of Europe). */
+const national = (value: string) => digits(value).slice(-9);
 
-/** Phone-like runs of 8+ digits (spaces, dots and dashes allowed), e-mail addresses, prices and years in a text. */
-export function literals(textValue: string): {
-  phones: string[];
-  emails: string[];
-  prices: number[];
-  years: number[];
-} {
-  const phones = [...textValue.matchAll(/\+?\d[\d .-]{6,}\d/g)]
-    .map((m) => m[0])
-    .filter((m) => digits(m).length >= 8);
-  const emails = [...textValue.matchAll(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g)].map((m) => m[0]);
-  const prices = [
-    ...textValue.matchAll(
-      /(?:€|\$|£|EUR|USD|GBP)\s?(\d+(?:[.,]\d{1,2})?)|(\d+(?:[.,]\d{1,2})?)\s?(?:€|\$|£|EUR|USD|GBP)/g,
-    ),
-  ].map((m) => Number((m[1] ?? m[2] ?? '').replace(',', '.')));
-  const years = [...textValue.matchAll(/\b(1[89]\d{2}|20\d{2})\b/g)].map((m) => Number(m[1]));
+const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\beuros?\b|\bdollars?\b|\blivres?\b`;
+const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?`;
+const PRICE = new RegExp(`(?:(${CURRENCY})\\s?(${AMOUNT}))|(?:(${AMOUNT})\\s?(${CURRENCY}))`, 'giu');
+const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
+const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,}\d/g;
+const EMAIL_LITERAL = /[\p{L}\p{N}._%+-]{1,64}@[\p{L}\p{N}-]{1,63}(?:\.[\p{L}\p{N}-]{1,63}){1,10}/gu;
+const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
+
+const currencyOf = (mark: string) => {
+  const m = mark.toLowerCase();
+  if (m === '€' || m.startsWith('eur')) return 'EUR';
+  if (m === '$' || m === 'usd' || m.startsWith('dollar')) return 'USD';
+  return 'GBP';
+};
+
+/** "1 250,00", "1.250", "1,250", "12,50" → a number (a separator before 3 digits groups, before 1–2 is decimal). */
+function amountOf(text: string): number {
+  const match = /^(.*?)(?:[.,](\d{1,2}))?$/.exec(text.replace(/[   ]/g, ''));
+  const whole = (match?.[1] ?? text).replace(/[.,]/g, '');
+  return Number(`${whole}.${match?.[2] ?? '0'}`);
+}
+
+export interface Literals {
+  readonly phones: string[];
+  readonly emails: string[];
+  readonly prices: { readonly amount: number; readonly currency: string; readonly text: string }[];
+  readonly years: number[];
+}
+
+/**
+ * Phone numbers (8+ digits; spaces, dots, dashes, slashes and brackets allowed), e-mail addresses, prices (a currency
+ * mark or word; thousands separators of FR and EN) and years in a text. A span counts once: prices first, then year
+ * ranges, phones, years.
+ */
+export function literals(input: string): Literals {
+  let text = input.normalize('NFKC');
+  const blank = (match: string) => ' '.repeat(match.length);
+  const prices: Literals['prices'] = [];
+  text = text.replace(
+    PRICE,
+    (
+      match,
+      mark1: string | undefined,
+      amount1: string | undefined,
+      amount2: string | undefined,
+      mark2: string | undefined,
+    ) => {
+      prices.push({
+        amount: amountOf(amount1 ?? amount2 ?? ''),
+        currency: currencyOf(mark1 ?? mark2 ?? ''),
+        text: match.trim(),
+      });
+      return blank(match);
+    },
+  );
+  const years: number[] = [];
+  text = text.replace(YEAR_RANGE, (match, from: string, to: string) => {
+    years.push(Number(from), Number(to));
+    return blank(match);
+  });
+  const emails: string[] = [];
+  text = text.replace(EMAIL_LITERAL, (match) => {
+    emails.push(match);
+    return blank(match);
+  });
+  const phones: string[] = [];
+  text = text.replace(PHONE, (match) => {
+    if (digits(match).length < 8) return match;
+    phones.push(match.trim());
+    return blank(match);
+  });
+  for (const match of text.matchAll(YEAR)) years.push(Number(match[1]));
   return { phones, emails, prices, years };
+}
+
+/** Strings of the spec that are text (not ids, URLs, colours or references), outside the fact-checked contact. */
+const NOT_TEXT_KEYS = new Set([
+  'id',
+  'pageId',
+  'factId',
+  'url',
+  'type',
+  'variant',
+  'kind',
+  'network',
+  'country',
+  'currency',
+]);
+const NOT_TEXT_ROOTS = new Set([
+  'contact',
+  'brand',
+  'theme',
+  'settings',
+  'schemaVersion',
+  'locales',
+  'defaultLocale',
+]);
+
+function* texts(spec: SiteSpec): Generator<{ text: string; path: Path }> {
+  for (const { value, path, key } of walk(spec)) {
+    if (typeof value !== 'string' || NOT_TEXT_ROOTS.has(String(path[0]))) continue;
+    if (NOT_TEXT_KEYS.has(String(key)) || String(key).endsWith('AssetId')) continue;
+    const parent = String(path.at(-2));
+    if (parent === 'factIds' || parent === 'assetIds') continue;
+    yield { text: value, path };
+  }
 }
 
 export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const issues: Issue[] = [];
   const facts = new Map(registry.facts.map((fact) => [fact.id, fact]));
-  const of = (kind: FactKind) => registry.facts.filter((fact) => fact.kind === kind);
+  const of = <K extends FactKind>(kind: K) =>
+    registry.facts.filter((fact) => fact.kind === kind) as FactOf<K>[];
 
   // Every named fact exists.
   for (const { value, path, key } of walk(spec)) {
@@ -157,7 +262,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
     ['brand'],
     brand.factId,
     ['business_name'],
-    (f) => sameText(f.value, brand.name),
+    (f) => norm(f.value) === norm(brand.name),
     'the business name',
   );
   if (contact.phone)
@@ -165,7 +270,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'phone'],
       contact.phone.factId,
       ['phone'],
-      (f) => digits(f.value) === digits(contact.phone?.value ?? ''),
+      (f) => national(f.value) === national(contact.phone?.value ?? ''),
       'the phone number',
     );
   if (contact.whatsapp)
@@ -173,7 +278,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'whatsapp'],
       contact.whatsapp.factId,
       ['whatsapp', 'phone'],
-      (f) => digits(f.value) === digits(contact.whatsapp?.value ?? ''),
+      (f) => national(f.value) === national(contact.whatsapp?.value ?? ''),
       'the WhatsApp number',
     );
   if (contact.email)
@@ -181,7 +286,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       ['contact', 'email'],
       contact.email.factId,
       ['email'],
-      (f) => sameText(f.value, contact.email?.value ?? ''),
+      (f) => norm(f.value) === norm(contact.email?.value ?? ''),
       'the e-mail address',
     );
   if (contact.bookingUrl)
@@ -193,7 +298,14 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
       'the booking page',
     );
   if (contact.address)
-    check(['contact', 'address'], contact.address.factId, ['address'], () => true, 'the address');
+    check(
+      ['contact', 'address'],
+      contact.address.factId,
+      ['address'],
+      (f) => norm(f.value) === norm(contact.address?.formatted ?? ''),
+      'the address',
+    );
+  // DECISION(BF-033): hours facts are free text in the registry's first version (BF-040): checked by kind only.
   if (contact.hours)
     check(['contact', 'hours'], contact.hours.factId, ['hours'], () => true, 'the opening hours');
   if (contact.geo)
@@ -216,86 +328,101 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
     );
   }
 
-  // Prices, testimonials and team members state their facts' values.
+  // Testimonials and team members by their place in the blocks (an item without an author is still checked).
+  for (const [i, page] of spec.pages.entries()) {
+    for (const [j, block] of page.blocks.entries()) {
+      const at = (...rest: (string | number)[]) => ['pages', i, 'blocks', j, 'props', ...rest];
+      if (block.type === 'testimonials') {
+        for (const [n, item] of block.props.items.entries()) {
+          check(
+            at('items', n),
+            item.factId,
+            ['testimonial'],
+            (f) => {
+              const quote = f.locale
+                ? item.quote[f.locale]
+                : Object.values(item.quote).find((text) => norm(text ?? '') === norm(f.value.quote));
+              return (
+                norm(quote ?? '') === norm(f.value.quote) &&
+                (item.author === undefined || norm(item.author) === norm(f.value.author)) &&
+                (item.rating === undefined || item.rating === f.value.rating)
+              );
+            },
+            'the testimonial (its quote in its language, its author and rating)',
+          );
+        }
+      }
+      if (block.type === 'team') {
+        for (const [n, member] of block.props.members.entries()) {
+          check(
+            at('members', n),
+            member.factId,
+            ['team_member'],
+            (f) => norm(f.value.name) === norm(member.name),
+            'the team member',
+          );
+        }
+      }
+    }
+  }
+
+  // Prices state their facts' amounts and currencies.
   for (const { value, path } of walk(spec.pages)) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
     const record = value as Record<string, unknown>;
-    const at = ['pages', ...path];
     if (
       typeof record.amount === 'number' &&
       typeof record.currency === 'string' &&
       typeof record.factId === 'string'
     ) {
       check(
-        at,
+        ['pages', ...path],
         record.factId,
         ['price'],
         (f) => f.value.amount === record.amount && f.value.currency === record.currency,
         'the price',
       );
     }
-    if (
-      typeof record.quote === 'object' &&
-      typeof record.author === 'string' &&
-      typeof record.factId === 'string'
-    ) {
-      check(
-        at,
-        record.factId,
-        ['testimonial'],
-        (f) =>
-          sameText(f.value.author, record.author as string) &&
-          (record.rating === undefined || f.value.rating === record.rating),
-        'the testimonial',
-      );
-    }
-    if (typeof record.name === 'string' && typeof record.factId === 'string' && !('quote' in record)) {
-      check(
-        at,
-        record.factId,
-        ['team_member'],
-        (f) => sameText(f.value.name, record.name as string),
-        'the team member',
-      );
-    }
   }
 
-  // Literal values in free text must be facts.
-  const phones = [...of('phone'), ...of('whatsapp')].map((f) => digits(String(f.value)));
-  const emails = of('email').map((f) => String(f.value).toLowerCase());
-  const prices = of('price').map((f) => (f as FactOf<'price'>).value.amount);
-  const years = of('year').map((f) => (f as FactOf<'year'>).value);
-  for (const { value, path } of walk(spec.pages)) {
-    if (!isLocalized(value)) continue;
-    for (const [locale, textValue] of Object.entries(value)) {
-      const found = literals(textValue ?? '');
-      const at = ['pages', ...path, locale];
-      for (const phone of found.phones) {
-        if (!phones.some((known) => known.endsWith(digits(phone)) || digits(phone).endsWith(known)))
-          issues.push(
-            error(at, 'unsupported_literal', `Remove the phone number "${phone}" or use the contact facts.`),
-          );
-      }
-      for (const email of found.emails) {
-        if (!emails.includes(email.toLowerCase()))
-          issues.push(
-            error(at, 'unsupported_literal', `Remove the e-mail address "${email}": it is not a fact.`),
-          );
-      }
-      for (const price of found.prices) {
-        if (!prices.includes(price))
-          issues.push(
-            error(
-              at,
-              'unsupported_literal',
-              `Remove the price ${price}: only published prices (facts) may appear.`,
-            ),
-          );
-      }
-      for (const year of found.years) {
-        if (!years.includes(year))
-          issues.push(error(at, 'unsupported_literal', `Remove the year ${year}: it is not a fact.`));
-      }
+  // Literal values in any text must be facts (or appear in a fact's own text: a legal id, a share capital).
+  const phones = [...of('phone'), ...of('whatsapp')].map((f) => national(f.value));
+  const emails = of('email').map((f) => norm(f.value));
+  const prices = of('price').map((f) => f.value);
+  const years = of('year').map((f) => f.value);
+  const factText = registry.facts
+    .filter((fact) => typeof fact.value === 'string')
+    .map((fact) => digits(String(fact.value)))
+    .join(' ');
+  const inFactText = (number: string) => number.length > 0 && factText.includes(number);
+  for (const { text, path } of texts(spec)) {
+    const found = literals(text);
+    for (const phone of found.phones) {
+      if (!phones.includes(national(phone)) && !inFactText(digits(phone)))
+        issues.push(
+          error(path, 'unsupported_literal', `Remove the phone number "${phone}" or use the contact facts.`),
+        );
+    }
+    for (const email of found.emails) {
+      if (!emails.includes(norm(email)))
+        issues.push(
+          error(path, 'unsupported_literal', `Remove the e-mail address "${email}": it is not a fact.`),
+        );
+    }
+    for (const price of found.prices) {
+      const known = prices.some((p) => p.amount === price.amount && p.currency === price.currency);
+      if (!known && !inFactText(digits(String(price.amount))))
+        issues.push(
+          error(
+            path,
+            'unsupported_literal',
+            `Remove the price "${price.text}": only published prices (facts) may appear.`,
+          ),
+        );
+    }
+    for (const year of found.years) {
+      if (!years.includes(year) && !inFactText(String(year)))
+        issues.push(error(path, 'unsupported_literal', `Remove the year ${year}: it is not a fact.`));
     }
   }
   return issues;

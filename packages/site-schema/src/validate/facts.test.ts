@@ -6,7 +6,8 @@ import { type FactRegistry, FactRegistrySchema, literals, validateFacts } from '
 const read = (path: string) =>
   JSON.parse(readFileSync(new URL(`../../fixtures/${path}`, import.meta.url), 'utf8'));
 const salon = (): SiteSpec => read('salon-gustavia.json');
-const registry = (): FactRegistry => FactRegistrySchema.parse(read('facts/salon-gustavia.json'));
+const registry = (name = 'salon-gustavia'): FactRegistry =>
+  FactRegistrySchema.parse(read(`facts/${name}.json`));
 const found = (spec: SiteSpec, facts = registry()) =>
   validateFacts(spec, facts).map((issue) => `${issue.code}@${issue.path.join('.')}`);
 const hero = (spec: SiteSpec) => {
@@ -14,11 +15,22 @@ const hero = (spec: SiteSpec) => {
   if (block?.type !== 'hero') throw new Error('no hero');
   return block.props;
 };
+const testimonial = (spec: SiteSpec) => {
+  const block = spec.pages[0]?.blocks[3];
+  if (block?.type !== 'testimonials' || !block.props.items[0]) throw new Error('no testimonial');
+  return block.props.items[0];
+};
+const withFacts = (extra: FactRegistry['facts']) => ({ facts: [...registry().facts, ...extra] });
+const fact = (id: string, kind: string, value: unknown) =>
+  ({ id, kind, value, source: 'website', confidence: 1 }) as FactRegistry['facts'][number];
 
 describe('validateFacts', () => {
-  it('accepts a site that states only its facts', () => {
-    expect(found(salon())).toEqual([]);
-  });
+  it.each(['salon-gustavia', 'cafe-saint-jean', 'hardware-store-lorient', 'villa-agency'])(
+    '%s states only its facts',
+    (name) => {
+      expect(validateFacts(read(`${name}.json`), registry(name))).toEqual([]);
+    },
+  );
 
   it('refuses unknown fact ids, in a value and in a list', () => {
     const spec = salon();
@@ -31,26 +43,42 @@ describe('validateFacts', () => {
     ]);
   });
 
-  it('checks the kind and the value of contact facts', () => {
+  it('checks the kind and the value of contact facts, the address included', () => {
     const spec = salon();
     if (spec.contact.phone) spec.contact.phone.value = '+590590999999';
     if (spec.contact.email) spec.contact.email.factId = 'phone.main';
+    if (spec.contact.address) spec.contact.address.formatted = '1 rue Inventée, Gustavia';
     spec.brand.name = 'Salon Soleil';
     expect(found(spec)).toEqual([
       'fact_mismatch@brand',
       'fact_mismatch@contact.phone',
       'fact_kind@contact.email.factId',
+      'fact_mismatch@contact.address',
     ]);
   });
 
-  it('checks prices, testimonials and team members against their facts', () => {
+  it('checks a testimonial by its place: kind, quote in its language, author, rating', () => {
+    const quote = salon();
+    testimonial(quote).quote.fr = 'Le meilleur salon du monde !';
+    expect(found(quote)).toEqual(['fact_mismatch@pages.0.blocks.3.props.items.0']);
+    const noAuthor = salon();
+    delete testimonial(noAuthor).author;
+    testimonial(noAuthor).factId = 'phone.main';
+    expect(found(noAuthor)).toEqual(['fact_kind@pages.0.blocks.3.props.items.0.factId']);
+    const rating = salon();
+    testimonial(rating).rating = 4;
+    expect(found(rating)).toEqual(['fact_mismatch@pages.0.blocks.3.props.items.0']);
+    // A translation of the quote in another locale is the writer's.
+    const translated = salon();
+    testimonial(translated).quote.en = 'Lovely welcome and a perfect haircut.';
+    expect(found(translated)).toEqual([]);
+  });
+
+  it('checks prices and team members against their facts', () => {
     const spec = salon();
     const services = spec.pages[0]?.blocks[2];
     if (services?.type === 'services' && services.props.items[0]?.price)
       services.props.items[0].price.amount = 55;
-    const testimonials = spec.pages[0]?.blocks[3];
-    if (testimonials?.type === 'testimonials' && testimonials.props.items[0])
-      testimonials.props.items[0].author = 'Anne B.';
     spec.pages[0]?.blocks.push({
       id: 'team-home9',
       type: 'team',
@@ -58,33 +86,102 @@ describe('validateFacts', () => {
       props: { members: [{ factId: 'review.1', name: 'Claire D.' }] },
     });
     expect(found(spec)).toEqual([
-      'fact_mismatch@pages.0.blocks.2.props.items.0.price',
-      'fact_mismatch@pages.0.blocks.3.props.items.0',
       'fact_kind@pages.0.blocks.5.props.members.0.factId',
+      'fact_mismatch@pages.0.blocks.2.props.items.0.price',
     ]);
   });
 
-  it('refuses phone numbers, e-mails, prices and years in text that no fact holds', () => {
+  it('refuses invented literals anywhere in the site, not only on pages', () => {
     const spec = salon();
     hero(spec).subtitle = {
       fr: 'Depuis 2015, appelez le 0590 00 01 01, une coupe dès 65 €.',
-      en: 'Since 1998, call +590 590 12 34 56 or write to hello@elsewhere.example, cuts from €35.',
+      en: 'Since 1998, call +590 590 12 34 56, cuts from €35.',
     };
-    expect(validateFacts(spec, registry()).map((issue) => issue.message)).toEqual([
-      'Remove the phone number "+590 590 12 34 56" or use the contact facts.',
-      'Remove the e-mail address "hello@elsewhere.example": it is not a fact.',
-      'Remove the price 35: only published prices (facts) may appear.',
-      'Remove the year 1998: it is not a fact.',
+    spec.seo.description.en =
+      'Write to hello@elsewhere.example — salon in Gustavia, Saint-Barthélemy, open since 1987 for cuts and colour.';
+    spec.layout.footer.tagline = { fr: 'Coupe à 15 euros', en: 'Cuts for 15 euros' };
+    expect(
+      validateFacts(spec, registry()).map((issue) => `${issue.path.join('.')}: ${issue.message}`),
+    ).toEqual([
+      'layout.footer.tagline.fr: Remove the price "15 euros": only published prices (facts) may appear.',
+      'layout.footer.tagline.en: Remove the price "15 euros": only published prices (facts) may appear.',
+      'pages.0.blocks.0.props.subtitle.en: Remove the phone number "+590 590 12 34 56" or use the contact facts.',
+      'pages.0.blocks.0.props.subtitle.en: Remove the price "€35": only published prices (facts) may appear.',
+      'pages.0.blocks.0.props.subtitle.en: Remove the year 1998: it is not a fact.',
+      'seo.description.en: Remove the e-mail address "hello@elsewhere.example": it is not a fact.',
+      'seo.description.en: Remove the year 1987: it is not a fact.',
     ]);
   });
 
-  it('finds literals in text', () => {
-    expect(literals('Call 05 90 27 00 00 or +33 2 97 00 03 03, €12,50, 7 € and 2024')).toEqual({
-      phones: ['05 90 27 00 00', '+33 2 97 00 03 03'],
+  it('compares phone numbers by their national number and prices with their currency', () => {
+    const spec = salon();
+    hero(spec).subtitle = {
+      fr: 'Appelez le (0590) 00-01-01 ou le 0590/000101 — 65 €.',
+      en: 'Call +590 590 00 01 01, $65.',
+    };
+    expect(validateFacts(spec, registry()).map((issue) => issue.message)).toEqual([
+      'Remove the price "$65": only published prices (facts) may appear.',
+    ]);
+  });
+
+  it('accepts numbers a fact states (a legal id, a share capital)', () => {
+    const spec = salon();
+    hero(spec).subtitle = {
+      fr: 'SIRET 123 456 789 00012, capital 10 000 €.',
+      en: 'SIRET 123 456 789 00012, capital €10,000.',
+    };
+    expect(found(spec)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
+    const legal = withFacts([
+      fact('legal.siret', 'legal_id', 'SIRET 123 456 789 00012'),
+      fact('legal.capital', 'legal_id', 'Capital 10000 EUR'),
+    ]);
+    expect(found(spec, legal)).toEqual([]);
+  });
+
+  it('refuses a registry with two facts of the same id', () => {
+    const facts = registry().facts;
+    expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);
+  });
+});
+
+describe('literals', () => {
+  it.each([
+    ['1 250 €', [{ amount: 1250, currency: 'EUR' }]],
+    ['1 250 €', [{ amount: 1250, currency: 'EUR' }]],
+    ['1 250 €', [{ amount: 1250, currency: 'EUR' }]],
+    ['1.250,00 €', [{ amount: 1250, currency: 'EUR' }]],
+    ['€1,250', [{ amount: 1250, currency: 'EUR' }]],
+    ['12,50 €', [{ amount: 12.5, currency: 'EUR' }]],
+    ['Prix: 1 200€', [{ amount: 1200, currency: 'EUR' }]],
+    ['1 250 000 €', [{ amount: 1250000, currency: 'EUR' }]],
+    ['65 euros', [{ amount: 65, currency: 'EUR' }]],
+    ['$65', [{ amount: 65, currency: 'USD' }]],
+  ])('reads the price in %j', (text, expected) => {
+    expect(literals(text).prices.map(({ amount, currency }) => ({ amount, currency }))).toEqual(expected);
+    expect(literals(text).phones).toEqual([]);
+  });
+
+  it.each([
+    ['(0590) 27 00 00', ['(0590) 27 00 00']],
+    ['05/90/27/00/00', ['05/90/27/00/00']],
+    ['０５９０２７００００', ['0590270000']],
+    ['0690 12 34 56', ['0690 12 34 56']],
+  ])('finds the phone number in %j', (text, expected) => {
+    expect(literals(text).phones.map((phone) => phone.normalize('NFKC').replace(/\s/g, ' '))).toEqual(
+      expected,
+    );
+  });
+
+  it('reads years, year ranges and areas apart', () => {
+    expect(literals('Ouvert de 2015-2024, terrain de 2000 m², depuis 1987')).toEqual({
+      phones: [],
       emails: [],
-      prices: [12.5, 7],
-      years: [2024],
+      prices: [],
+      years: [2015, 2024, 1987],
     });
-    expect(literals('Open 9 to 18, 3 rooms')).toEqual({ phones: [], emails: [], prices: [], years: [] });
+  });
+
+  it('finds unicode and full-width e-mail addresses', () => {
+    expect(literals('faux@salón.fr ou faux＠salon.fr').emails).toEqual(['faux@salón.fr', 'faux@salon.fr']);
   });
 });

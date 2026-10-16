@@ -20,6 +20,11 @@ What the business offers, with published prices only.
 | `list` | A list with descriptions and prices on the right. | `thumbnails/services/list.png` |
 | `cards` | Cards with an optional photo and action each. | `thumbnails/services/cards.png` |
 
+## Shape
+
+A block is `{ "id", "type": "services", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -36,9 +41,61 @@ What the business offers, with published prices only.
 | `items[].price.from` | boolean |  | A starting price ("from €90"). |
 | `items[].price.factId` | string | yes | The price fact (required: never estimate a price). |
 | `items[].imageAssetId` | string |  | The id of an asset in `assets`. |
-| `items[].cta` | value |  | A button or link. Prefer `call`, `booking` or `page` over `url`. |
+| `items[].cta` | action, one of `call`, `email`, `whatsapp`, `booking`, `directions`, `page`, `url` (see actions.md) |  | A button or link. Prefer `call`, `booking` or `page` over `url`. |
 
 ## Examples
 
 - Good: Women's cut — €65 / Coupe femme — 65 €
 - Bad: Women's cut — from around €50 / Coupe femme — environ 50 €
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "serv-home1",
+  "type": "services",
+  "variant": "cards",
+  "props": {
+    "heading": {
+      "fr": "Nos prestations",
+      "en": "Our services"
+    },
+    "items": [
+      {
+        "title": {
+          "fr": "Coupe femme",
+          "en": "Women's cut"
+        },
+        "price": {
+          "amount": 65,
+          "currency": "EUR",
+          "factId": "price.cut_women"
+        }
+      },
+      {
+        "title": {
+          "fr": "Coupe homme",
+          "en": "Men's cut"
+        },
+        "price": {
+          "amount": 40,
+          "currency": "EUR",
+          "factId": "price.cut_men"
+        }
+      },
+      {
+        "title": {
+          "fr": "Couleur",
+          "en": "Colour"
+        },
+        "price": {
+          "amount": 90,
+          "currency": "EUR",
+          "from": true,
+          "factId": "price.colour"
+        }
+      }
+    ]
+  }
+}
+```

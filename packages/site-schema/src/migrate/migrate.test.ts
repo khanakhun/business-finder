@@ -58,4 +58,24 @@ describe('createMigrator (the harness future versions use)', () => {
     const gap = createMigrator(V3, 3, [{ from: 2, up: (spec) => ({ ...spec, tags: [] }) }]);
     expect(code(() => gap({ schemaVersion: 1, title: 'Café' }))).toBe('missing_upcaster');
   });
+
+  it('refuses upcasters out of range or twice for a version, and reports one that throws', () => {
+    expect(() => createMigrator(V3, 3, [{ from: 3, up: (spec) => spec }])).toThrow(/from 1 to 2/);
+    expect(() =>
+      createMigrator(V3, 3, [
+        { from: 1, up: (spec) => spec },
+        { from: 1, up: (spec) => spec },
+      ]),
+    ).toThrow(/same version/);
+    const broken = createMigrator(V3, 3, [
+      {
+        from: 1,
+        up: () => {
+          throw new Error('boom');
+        },
+      },
+      { from: 2, up: (spec) => ({ ...spec, tags: [] }) },
+    ]);
+    expect(code(() => broken({ schemaVersion: 1, title: 'Café' }))).toBe('upcaster_failed');
+  });
 });

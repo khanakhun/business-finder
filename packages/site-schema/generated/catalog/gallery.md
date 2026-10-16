@@ -19,6 +19,11 @@ Three to twelve photos of the place, the work or the products.
 | `masonry` | Photos of mixed shapes. | `thumbnails/gallery/masonry.png` |
 | `carousel` | One photo at a time, for many similar photos. | `thumbnails/gallery/carousel.png` |
 
+## Shape
+
+A block is `{ "id", "type": "gallery", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -30,3 +35,20 @@ Three to twelve photos of the place, the work or the products.
 
 - Good: Alt: The terrace facing the bay / Alt : La terrasse face à la baie
 - Bad: Alt: image1.jpg / Alt : photo
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "gall-cafe1",
+  "type": "gallery",
+  "variant": "grid",
+  "props": {
+    "assetIds": [
+      "img-cafe-1",
+      "img-cafe-2",
+      "img-cafe-3"
+    ]
+  }
+}
+```

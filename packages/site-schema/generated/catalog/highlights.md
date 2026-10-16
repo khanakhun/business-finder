@@ -19,6 +19,11 @@ Three or four strengths at a glance, each backed by a fact.
 | `cards` | Items as cards with a sentence each. | `thumbnails/highlights/cards.png` |
 | `inline` | A single line of short items, for compact pages. | `thumbnails/highlights/inline.png` |
 
+## Shape
+
+A block is `{ "id", "type": "highlights", "variant", "props" }`: `id` is 6–32 URL-safe characters, unique in the site; every
+localized text has an entry for every site locale.
+
 ## Props
 
 | Prop | Type | Required | What to write |
@@ -34,3 +39,47 @@ Three or four strengths at a glance, each backed by a fact.
 
 - Good: Open 7 days / Ouvert 7 jours sur 7
 - Bad: Best salon on the island / Le meilleur salon de l’île
+
+A valid block (from a fixture site):
+
+```json
+{
+  "id": "high-home1",
+  "type": "highlights",
+  "variant": "icons",
+  "props": {
+    "items": [
+      {
+        "icon": "scissors",
+        "title": {
+          "fr": "Coupe et couleur",
+          "en": "Cut and colour"
+        },
+        "factIds": [
+          "service.cut_women"
+        ]
+      },
+      {
+        "icon": "calendar",
+        "title": {
+          "fr": "Réservation en ligne",
+          "en": "Online booking"
+        },
+        "factIds": [
+          "booking.url"
+        ]
+      },
+      {
+        "icon": "map_pin",
+        "title": {
+          "fr": "Sur le port de Gustavia",
+          "en": "On Gustavia harbour"
+        },
+        "factIds": [
+          "address.main"
+        ]
+      }
+    ]
+  }
+}
+```

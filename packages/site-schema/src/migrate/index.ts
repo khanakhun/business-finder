@@ -12,7 +12,13 @@ export interface Upcaster {
 
 export class MigrationError extends Error {
   constructor(
-    readonly code: 'not_a_spec' | 'unknown_version' | 'future_version' | 'missing_upcaster' | 'invalid',
+    readonly code:
+      | 'not_a_spec'
+      | 'unknown_version'
+      | 'future_version'
+      | 'missing_upcaster'
+      | 'upcaster_failed'
+      | 'invalid',
     message: string,
     readonly issues: readonly z.core.$ZodIssue[] = [],
   ) {
@@ -23,7 +29,13 @@ export class MigrationError extends Error {
 
 /** A migrator for a schema at version `latest` (exported for future versions' tests). */
 export function createMigrator<T>(schema: z.ZodType<T>, latest: number, upcasters: readonly Upcaster[]) {
+  for (const upcaster of upcasters) {
+    if (!Number.isInteger(upcaster.from) || upcaster.from < 1 || upcaster.from >= latest) {
+      throw new Error(`An upcaster reads a version from 1 to ${latest - 1}, not ${upcaster.from}.`);
+    }
+  }
   const byVersion = new Map(upcasters.map((upcaster) => [upcaster.from, upcaster]));
+  if (byVersion.size !== upcasters.length) throw new Error('Two upcasters read the same version.');
   return (input: unknown): T => {
     if (!input || typeof input !== 'object' || Array.isArray(input))
       throw new MigrationError('not_a_spec', 'A spec is an object.');
@@ -37,7 +49,14 @@ export function createMigrator<T>(schema: z.ZodType<T>, latest: number, upcaster
     for (let from = version; from < latest; from += 1) {
       const upcaster = byVersion.get(from);
       if (!upcaster) throw new MigrationError('missing_upcaster', `No upcaster from version ${from}.`);
-      spec = { ...upcaster.up(spec), schemaVersion: from + 1 };
+      try {
+        spec = { ...upcaster.up(spec), schemaVersion: from + 1 };
+      } catch (caught) {
+        throw new MigrationError(
+          'upcaster_failed',
+          `Upcasting from version ${from} failed: ${caught instanceof Error ? caught.message : String(caught)}`,
+        );
+      }
     }
     const parsed = schema.safeParse(spec);
     if (!parsed.success)

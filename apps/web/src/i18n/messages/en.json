@@ -637,6 +637,10 @@
       "system_test": {
         "title": "Test notification",
         "body": "Notifications work."
+      },
+      "site_needs_review": {
+        "title": "A generated site needs review",
+        "body": "{business}: the site was kept unpublished ({reason})."
       }
     },
     "preferences": {
@@ -653,7 +657,8 @@
         "discovery_completed": "Discovery finished",
         "mailbox_paused": "Mailbox paused",
         "member_joined": "New members",
-        "system_test": "Test notifications"
+        "system_test": "Test notifications",
+        "site_needs_review": "Sites to review"
       }
     }
   },

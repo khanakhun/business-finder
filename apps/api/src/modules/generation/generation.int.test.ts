@@ -322,6 +322,69 @@ describe('generation batches', () => {
     );
   }, 60_000);
 
+  it('streams a job’s events live then ends, and replays after Last-Event-ID without gaps or duplicates', async () => {
+    const id = await business('Flux [slow]');
+    const { body } = await member
+      .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'fake' }] })
+      .expect(201);
+    const jobId = (body.jobs as { id: string }[])[0]?.id as string;
+    // Connected while it runs: the response ends when the job settles.
+    const live = await member
+      .get(`/v1/generation-jobs/${jobId}/events`)
+      .buffer(true)
+      .parse((res, done) => {
+        let text = '';
+        res.on('data', (chunk: Buffer) => {
+          text += chunk.toString();
+        });
+        res.on('end', () => done(null, text));
+      });
+    const text = live.body as string;
+    const ids = [...text.matchAll(/^id: (\d+)$/gm)].map((match) => Number(match[1]));
+    expect(ids.length).toBeGreaterThan(5);
+    expect(ids).toEqual(ids.map((_, index) => index + 1));
+    expect(text).toContain('event: done');
+    expect(text).toMatch(/event: job\ndata: \{"status":"succeeded"\}/);
+
+    // Reconnecting after the fourth event: only the rest, then the end.
+    const replay = await member
+      .get(`/v1/generation-jobs/${jobId}/events`)
+      .set('Last-Event-ID', '4')
+      .buffer(true)
+      .parse((res, done) => {
+        let chunks = '';
+        res.on('data', (chunk: Buffer) => {
+          chunks += chunk.toString();
+        });
+        res.on('end', () => done(null, chunks));
+      });
+    const rest = [...(replay.body as string).matchAll(/^id: (\d+)$/gm)].map((match) => Number(match[1]));
+    expect(rest).toEqual(ids.slice(4));
+    await outsider.get(`/v1/generation-jobs/${jobId}/events`).expect(404);
+  }, 60_000);
+
+  it('regenerates an existing site as a new version, and notifies the batch’s creator', async () => {
+    const id = await business('Régénéré');
+    const first = await member
+      .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'fake' }] })
+      .expect(201);
+    const done = await batchDone(first.body.id);
+    const siteId = done.jobs[0].siteId as string;
+    const { body: again } = await member
+      .post(`/v1/sites/${siteId}/regenerate`, { engine: 'fake' })
+      .expect(201);
+    expect(again.jobs[0]).toMatchObject({ siteId });
+    const second = await batchDone(again.id);
+    expect(second.jobs[0]).toMatchObject({ status: 'succeeded', siteId });
+    expect(second.jobs[0].resultVersionId).not.toBe(done.jobs[0].resultVersionId);
+    const notified = await eventually(async () => {
+      const { body: page } = await member.get('/v1/notifications').expect(200);
+      const items = (page.items ?? []) as { type: string; entityId: string | null }[];
+      return items.find((item) => item.type === 'batch_completed' && item.entityId === again.id);
+    });
+    expect(notified).toBeTruthy();
+  }, 90_000);
+
   it('hides batches from other workspaces and keeps viewers from generating', async () => {
     const id = await business('Privé');
     const { body } = await member

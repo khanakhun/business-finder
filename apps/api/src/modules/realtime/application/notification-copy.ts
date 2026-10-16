@@ -13,6 +13,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Site generation finished',
       body: '{count} preview sites are ready to review.',
     },
+    site_needs_review: {
+      title: 'A generated site needs review',
+      body: '{business}: the site was kept unpublished ({reason}).',
+    },
     discovery_completed: { title: 'Discovery finished', body: '{count} businesses found.' },
     mailbox_paused: {
       title: 'Mailbox paused: {mailbox}',
@@ -31,6 +35,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       body: 'Quelqu’un a laissé ses coordonnées sur un site d’aperçu.',
     },
     batch_completed: { title: 'Génération de sites terminée', body: '{count} sites d’aperçu sont prêts.' },
+    site_needs_review: {
+      title: 'Un site généré est à revoir',
+      body: '{business} : le site n’a pas été publié ({reason}).',
+    },
     discovery_completed: { title: 'Découverte terminée', body: '{count} entreprises trouvées.' },
     mailbox_paused: {
       title: 'Boîte d’envoi en pause : {mailbox}',

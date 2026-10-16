@@ -1,10 +1,11 @@
 import {
   type Clock,
+  GenerationBatchCompleted,
   type GenerationJobStatus,
   GenerationJobStatusChanged,
   NotFoundError,
 } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
@@ -13,17 +14,24 @@ import { assertTransition } from '../domain/job-state-machine.ts';
 import {
   ENGINE_REGISTRY,
   type EngineRegistry,
+  EVENT_STREAM,
+  type EventStream,
   GENERATION_QUEUES,
   GENERATION_REPOSITORY,
   type GenerationQueues,
   type GenerationRepository,
   type JobChanges,
+  LIVE_UPDATES,
+  type LiveUpdates,
   type StoredJob,
 } from './ports.ts';
 
 // Job transitions (BF-039): every status change is checked against the state machine on the locked row, recorded
 // as `generation.job.status_changed` (outbox) and folded into the batch's counts. The dispatcher hands a batch's
 // jobs to their engine queues in priority order, at most `maxParallel` at a time when the batch sets it.
+
+/** A hook run when a job settles (the module counts outcomes and costs there). */
+export const SETTLED_HOOK = Symbol('GenerationSettledHook');
 
 const SETTLED: readonly GenerationJobStatus[] = ['succeeded', 'needs_review', 'failed', 'cancelled'];
 
@@ -35,6 +43,11 @@ export class JobTransitions {
     @Inject(ENGINE_REGISTRY) private readonly engines: EngineRegistry,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly events: EventRecorder,
+    @Optional() @Inject(EVENT_STREAM) private readonly stream?: EventStream | null,
+    @Optional() @Inject(LIVE_UPDATES) private readonly live?: LiveUpdates | null,
+    @Optional()
+    @Inject(SETTLED_HOOK)
+    private readonly onSettled?: ((job: StoredJob, to: GenerationJobStatus) => void) | null,
   ) {}
 
   /** Moves the job to `to` (refused when the machine forbids it), with other changes; returns the job before. */
@@ -64,7 +77,28 @@ export class JobTransitions {
         publishedUrl: changes.publishedUrl ?? job.publishedUrl,
       },
     });
-    await this.repository.refreshBatch(job.batchId, now);
+    const before = await this.repository.batchById(job.batchId);
+    const batch = await this.repository.refreshBatch(job.batchId, now);
+    const ended = (status: string | undefined) =>
+      status === 'completed' || status === 'completed_with_issues' || status === 'cancelled';
+    if (batch && ended(batch.status) && !ended(before?.status)) {
+      await this.events.record(GenerationBatchCompleted, {
+        orgId: job.organizationId,
+        payload: {
+          batchId: batch.id,
+          createdBy: batch.createdBy,
+          status: batch.status,
+          succeeded: batch.counts.succeeded ?? 0,
+          total: Object.values(batch.counts).reduce((sum, n) => sum + (n ?? 0), 0),
+        },
+      });
+    }
+    // Live views follow (best effort: the dashboard refetches on reconnect).
+    const after = await this.repository.jobById(jobId);
+    await this.stream?.status(jobId, to).catch(() => undefined);
+    if (after) await this.live?.job(after).catch(() => undefined);
+    if (batch) await this.live?.batch(batch).catch(() => undefined);
+    if (SETTLED.includes(to) && after) this.onSettled?.(after, to);
     return job;
   }
 

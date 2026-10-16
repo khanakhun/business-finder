@@ -196,13 +196,13 @@ Two PRs recommended: (1) contracts, tables, domain, API, FakeEngine and the happ
 - **Load:** 50-job batch with FakeEngine at realistic durations; orchestration overhead and event-write throughput recorded in the PR.
 
 ## Acceptance criteria
-- [ ] Contracts for engines, events, jobs, settings and APIs in `@bf/contracts`.
-- [ ] Batches/jobs/attempts/events/artifacts persisted; the DOMAIN §3.3 state machine is enforced.
-- [ ] Per-engine queues with priority and live reprioritization; four-layer concurrency including the sandbox pool and sequential/parallel batches.
-- [ ] Auto engine selection (explained), retries with failover, budgets (job/batch/workspace), cancellation within 10 s.
-- [ ] Ports for preparer/quality/engines with working defaults (fixture preparer, schema-only quality, FakeEngine).
-- [ ] SSE event stream with replay; realtime updates; notifications; metrics and traces.
-- [ ] Integration, crash-recovery and load tests pass.
+- [x] Contracts for engines, events, jobs, settings and APIs in `@bf/contracts`.
+- [x] Batches/jobs/attempts/events/artifacts persisted; the DOMAIN §3.3 state machine is enforced.
+- [x] Per-engine queues with priority and live reprioritization; four-layer concurrency including the sandbox pool and sequential/parallel batches.
+- [x] Auto engine selection (explained), retries with failover, budgets (job/batch/workspace), cancellation within 10 s.
+- [x] Ports for preparer/quality/engines with working defaults (fixture preparer, schema-only quality, FakeEngine).
+- [x] SSE event stream with replay; realtime updates; notifications; metrics and traces.
+- [x] Integration, crash-recovery and load tests pass.
 
 ## Agent prompt
 ```text
@@ -253,5 +253,16 @@ Verify: pnpm verify && pnpm test:int; attach the load-test summary (overhead per
     every minute: attempts without a heartbeat for 2 minutes fail as `HEARTBEAT_LOST`; events older than 90 days go.
   - API: create (idempotent), list, get batch, cancel batch; get, update (priority/engine while waiting), reorder,
     cancel, retry jobs; list engines. Fake engine with `GENERATION_FAKE_ENGINE` (scripted failures for tests).
-- **Planned (part 2)**: the SSE event stream with replay, throttled realtime updates, notifications, metrics and
-  traces, `POST /v1/sites/:id/regenerate`, the load test.
+- **Part 2 (PR 2/2)**:
+  - `GET /v1/generation-jobs/:id/events` (SSE): the persisted log after `Last-Event-ID` (or `?after=`), then the
+    job's Valkey stream (a blocking reader per client); the stream ends once the job settles; heartbeats every 15 s.
+  - Realtime `generation.job.updated` / `generation.batch.updated` on the workspace channel (≤ 2/s per job or batch;
+    settled states always sent), progress included.
+  - Domain event `generation.batch.completed`; notifications `batch_completed` (to the batch's creator) and
+    `site_needs_review` (new type, EN/FR).
+  - Metrics: `bf_generation_jobs_total{engine,outcome}`, `bf_generation_phase_seconds{engine,phase}`,
+    `bf_generation_queue_wait_seconds`, `bf_generation_job_cost_usd`, `bf_generation_active_sandboxes`,
+    `bf_generation_lease_waits_total`; a span per attempt (`generation.attempt`, prepare as a child).
+  - `POST /v1/sites/:id/regenerate` (a batch of one bound to the site).
+  - Load (`GENERATION_LOAD=1`, 50 jobs, fake engine 2 s, 4 parallel): 28.9 s for an ideal 26 s; attempt overhead
+    p50 73 ms, p95 743 ms; 649 events at 22 writes/s.

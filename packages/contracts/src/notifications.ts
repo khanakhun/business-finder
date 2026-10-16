@@ -10,6 +10,8 @@ export const NOTIFICATION_TYPES = {
   reply_received: { inApp: true, email: true },
   lead_captured: { inApp: true, email: true },
   batch_completed: { inApp: true, email: false },
+  /** A generated site needs a person's review (BF-039). */
+  site_needs_review: { inApp: true, email: false },
   discovery_completed: { inApp: true, email: false },
   mailbox_paused: { inApp: true, email: true },
   member_joined: { inApp: true, email: false },

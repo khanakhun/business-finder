@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { type Clock, type EngineEvent, EngineEventSchema, type EngineId, newId } from '@bf/contracts';
-import type { Logger } from '@bf/observability';
-import { Inject, Injectable } from '@nestjs/common';
+import { type Logger, startSpan } from '@bf/observability';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { queuePriority } from '../domain/batch.ts';
 import { canStart, overBudget } from '../domain/budget-policy.ts';
@@ -20,12 +20,16 @@ import {
   GENERATION_QUEUES,
   GENERATION_REPOSITORY,
   GENERATION_SETTINGS,
+  GENERATION_TELEMETRY,
   type GenerationLimits,
   type GenerationQueues,
   type GenerationRepository,
   type GenerationSettingsReader,
+  type GenerationTelemetry,
   LEASE_SEMAPHORE,
   type LeaseSemaphore,
+  LIVE_UPDATES,
+  type LiveUpdates,
   type StoredAttempt,
   type StoredJob,
   WORKSPACE_BUDGET,
@@ -72,6 +76,8 @@ export class GenerationRunner {
     @Inject(GENERATION_LIMITS) private readonly limits: GenerationLimits,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly transitions: JobTransitions,
+    @Optional() @Inject(GENERATION_TELEMETRY) private readonly telemetry?: GenerationTelemetry | null,
+    @Optional() @Inject(LIVE_UPDATES) private readonly live?: LiveUpdates | null,
   ) {}
 
   async run(jobId: string, attemptNo: number, logger: Logger, wait = 0): Promise<RunOutcome> {
@@ -123,13 +129,36 @@ export class GenerationRunner {
         delayMs,
         wait: wait + 1,
       });
+      this.telemetry?.leaseWait(job.engineCurrent);
       return 'deferred';
     }
+    if (job.dispatchedAt)
+      this.telemetry?.queueWait(
+        job.engineCurrent,
+        Math.max(0, this.clock.now().getTime() - job.dispatchedAt.getTime()) / 1000,
+      );
+    await this.countSandboxes();
     try {
-      return await this.attempt(job, engine, attemptNo, mode, logger, held);
+      // One trace per attempt; its phases are child spans of the job's (the attempt id in the attributes).
+      return await startSpan(
+        'generation.attempt',
+        {
+          'generation.job_id': job.id,
+          'generation.attempt': attemptNo,
+          'generation.engine': engine.id,
+          'generation.mode': mode,
+        },
+        () => this.attempt(job, engine, attemptNo, mode, logger, held),
+      );
     } finally {
       for (const lease of held) await this.leases.release(lease.key, lease.token).catch(() => undefined);
+      await this.countSandboxes();
     }
+  }
+
+  private async countSandboxes() {
+    if (!this.telemetry) return;
+    this.telemetry.sandboxes(await this.leases.held('gen:slots:sandboxes').catch(() => 0));
   }
 
   /** The workspace's slot for the engine, then a sandbox from the deployment's pool; all or none. */
@@ -221,7 +250,11 @@ export class GenerationRunner {
     try {
       if (mode === 'create') await this.transitions.move(job.id, 'preparing');
       buffer.push({ type: 'status', phase: 'preparing' });
-      const prepared = await this.preparer.prepare(job);
+      const preparing = this.clock.now().getTime();
+      const prepared = await startSpan('generation.prepare', { 'generation.job_id': job.id }, () =>
+        this.preparer.prepare(job),
+      );
+      this.telemetry?.phase(engine.id, 'prepare', (this.clock.now().getTime() - preparing) / 1000);
       await this.repository.insertArtifact({
         jobId: job.id,
         attemptId,
@@ -232,6 +265,7 @@ export class GenerationRunner {
       });
       if (mode === 'create') await this.transitions.move(job.id, 'running');
       const settings = await this.settings.resolve(job.organizationId);
+      const running = this.clock.now().getTime();
       const stream = engine.run(
         {
           jobId: job.id,
@@ -271,6 +305,14 @@ export class GenerationRunner {
         const event = parsed.data;
         buffer.push(event);
         if (buffer.length >= FLUSH_EVENTS) await flush();
+        if (event.type === 'progress')
+          await this.live
+            ?.job({
+              ...job,
+              status: mode === 'repair' ? 'repairing' : 'running',
+              costUsd: job.costUsd + cost,
+            })
+            .catch(() => undefined);
         if (event.type === 'usage') {
           cost += event.costUsd;
           await this.repository.addCost(job.id, job.batchId, attemptId, event.costUsd, {
@@ -287,6 +329,7 @@ export class GenerationRunner {
           break;
         }
       }
+      this.telemetry?.phase(engine.id, 'run', (this.clock.now().getTime() - running) / 1000);
       if (controller.signal.aborted) {
         const reason = controller.signal.reason;
         failure =

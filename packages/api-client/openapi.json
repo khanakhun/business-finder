@@ -6964,6 +6964,7 @@
               "reply_received",
               "lead_captured",
               "batch_completed",
+              "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
               "member_joined",
@@ -7033,6 +7034,7 @@
               "reply_received",
               "lead_captured",
               "batch_completed",
+              "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
               "member_joined",
@@ -8469,6 +8471,38 @@
         },
         "required": [
           "value"
+        ],
+        "type": "object"
+      },
+      "RegenerateSiteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "engine": {
+            "anyOf": [
+              {
+                "const": "auto",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "blocks",
+                  "claude-agent-sdk",
+                  "claude-code",
+                  "codex",
+                  "fake"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": "auto"
+          },
+          "instructions": {
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "engine"
         ],
         "type": "object"
       },
@@ -13803,7 +13837,7 @@
             "items": {
               "$ref": "#/components/schemas/NotificationPreference"
             },
-            "maxItems": 7,
+            "maxItems": 8,
             "minItems": 1,
             "type": "array"
           }
@@ -22864,6 +22898,70 @@
         ]
       }
     },
+    "/v1/generation-jobs/{id}/events": {
+      "get": {
+        "operationId": "streamGenerationJobEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A job’s events as server-sent events: replayed after `Last-Event-ID` (or `?after=`), then live",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
     "/v1/generation-jobs/{id}/retry": {
       "post": {
         "operationId": "retryGenerationJob",
@@ -29294,6 +29392,107 @@
         "summary": "Extend the active preview (from its expiry, at most 90 days ahead)",
         "tags": [
           "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/regenerate": {
+      "post": {
+        "operationId": "regenerateSite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegenerateSiteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationBatchDetail"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Generate a new version of a site (a batch of one, bound to the site)",
+        "tags": [
+          "generation"
         ]
       }
     },

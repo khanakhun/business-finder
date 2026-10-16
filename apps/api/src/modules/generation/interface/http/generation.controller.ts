@@ -11,6 +11,7 @@ import {
   type GenerationJobDetail,
   GenerationJobDetailSchema,
   GenerationJobSchema,
+  RegenerateSiteRequestSchema,
   ReorderGenerationJobsRequestSchema,
   RetryGenerationJobRequestSchema,
   UpdateGenerationJobRequestSchema,
@@ -27,23 +28,30 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
+import { serveSse } from '../../../realtime/index.ts';
+import { SiteQueries } from '../../../sites/index.ts';
 import { type GenerationActor, GenerationCommands } from '../../application/generation.commands.ts';
 import { GenerationQueries, toJob } from '../../application/generation.queries.ts';
+import { JobEventTail } from '../../infrastructure/job-event-tail.ts';
 
 class CreateBody extends zodDto(CreateGenerationBatchRequestSchema) {}
 class ListQuery extends zodDto(GenerationBatchListQuerySchema) {}
 class UpdateBody extends zodDto(UpdateGenerationJobRequestSchema) {}
 class ReorderBody extends zodDto(ReorderGenerationJobsRequestSchema) {}
 class RetryBody extends zodDto(RetryGenerationJobRequestSchema) {}
+class RegenerateBody extends zodDto(RegenerateSiteRequestSchema) {}
+
+const SETTLED = new Set(['succeeded', 'needs_review', 'failed', 'cancelled']);
 
 const IDEMPOTENCY_KEY = /^[A-Za-z0-9_.:-]{8,200}$/;
 
@@ -59,7 +67,91 @@ export class GenerationController {
   constructor(
     private readonly commands: GenerationCommands,
     private readonly queries: GenerationQueries,
+    private readonly tail: JobEventTail,
+    private readonly sites: SiteQueries,
   ) {}
+
+  @Get('generation-jobs/:id/events')
+  @RequirePermission('sites:read')
+  @ApiProduces('text/event-stream')
+  @ApiRoute({
+    summary: 'A job’s events as server-sent events: replayed after `Last-Event-ID` (or `?after=`), then live',
+    operationId: 'streamGenerationJobEvents',
+    response: { status: 200, schema: null },
+    errors: [401, 403, 404],
+  })
+  async events(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('after') after: string | undefined,
+    @Headers('last-event-id') lastEventId: string | undefined,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { organizationId } = actorOf(auth);
+    const job = await this.queries.job(organizationId, id);
+    const from = [lastEventId, after].find((value) => value !== undefined && /^\d{1,10}$/.test(value));
+    let stop: (() => void) | undefined;
+    await serveSse(req, res, {
+      lastEventId: from,
+      compareIds: (a, b) => Number(a) - Number(b),
+      maxDurationMs: 30 * 60_000,
+      subscribe: async (push) => {
+        stop = await this.tail.follow(job.id, (entry) => {
+          if (entry.kind === 'event')
+            push({ id: String(entry.seq), event: entry.event.type, data: entry.event });
+          else {
+            push({ event: 'job', data: { status: entry.status } });
+            // A settled job has nothing more to say: the stream ends (the client stops reconnecting).
+            if (SETTLED.has(entry.status)) setImmediate(() => res.end());
+          }
+        });
+        return () => stop?.();
+      },
+      replay: async (lastId) => {
+        const events = await this.queries.events(organizationId, job.id, Number(lastId ?? '0'));
+        const replayed = events.map((event) => ({
+          id: String(event.seq),
+          event: event.type,
+          data: event.payload,
+        }));
+        // Already settled: the replay is the whole story.
+        if (SETTLED.has(job.status)) {
+          replayed.push({ id: '', event: 'job', data: { status: job.status } } as never);
+          setImmediate(() => res.end());
+        }
+        return replayed;
+      },
+    });
+  }
+
+  @Post('sites/:id/regenerate')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary: 'Generate a new version of a site (a batch of one, bound to the site)',
+    operationId: 'regenerateSite',
+    body: RegenerateBody,
+    response: { status: 201, schema: GenerationBatchDetailSchema },
+    errors: [400, 401, 403, 404, 422],
+  })
+  async regenerate(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) siteId: string,
+    @Body() body: RegenerateBody,
+  ): Promise<GenerationBatchDetail> {
+    const actor = actorOf(auth);
+    const site = await this.sites.get(actor.organizationId, siteId);
+    const { batch } = await this.commands.createBatch(
+      actor,
+      {
+        name: `Regenerate ${site.name}`.slice(0, 120),
+        items: [{ businessId: site.businessId, siteId: site.id, engine: body.engine }],
+      },
+      null,
+    );
+    return this.queries.batch(actor.organizationId, batch.id);
+  }
 
   @Post('generation-batches')
   @Throttle({ default: { limit: 20, ttl: 60_000 } })

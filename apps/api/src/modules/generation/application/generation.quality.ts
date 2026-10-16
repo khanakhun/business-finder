@@ -1,6 +1,6 @@
 import type { Clock } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { queuePriority } from '../domain/batch.ts';
 import { GenerationRunner } from './generation.runner.ts';
@@ -8,6 +8,8 @@ import {
   type ArtifactStore,
   ENGINE_REGISTRY,
   type EngineRegistry,
+  EVENT_STREAM,
+  type EventStream,
   GENERATION_ARTIFACTS,
   GENERATION_LIMITS,
   GENERATION_QUEUES,
@@ -45,6 +47,7 @@ export class GenerationQuality {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly transitions: JobTransitions,
     private readonly runner: GenerationRunner,
+    @Optional() @Inject(EVENT_STREAM) private readonly stream?: EventStream | null,
   ) {}
 
   async evaluate(
@@ -80,13 +83,15 @@ export class GenerationQuality {
       repairsLeft: MAX_REPAIRS - repairs,
       supportsRepair: engine?.capabilities.supportsRepair ?? false,
     });
-    await this.repository.appendEvents(job.id, attemptId, [
-      {
-        type: 'log',
-        level: result.outcome === 'pass' ? 'info' : 'warn',
-        message: `Quality ${result.outcome} (score ${result.score})`,
-      },
-    ]);
+    const verdict = {
+      type: 'log' as const,
+      level: result.outcome === 'pass' ? ('info' as const) : ('warn' as const),
+      message: `Quality ${result.outcome} (score ${result.score})`,
+    };
+    const [seq] = await this.repository.appendEvents(job.id, attemptId, [verdict]);
+    // Live clients see it before the status that follows.
+    if (seq !== undefined)
+      await this.stream?.publish(job.id, [{ seq, event: verdict }]).catch(() => undefined);
 
     if (result.outcome === 'repair') {
       await this.transitions.move(job.id, 'repairing', { qualityScore: result.score });

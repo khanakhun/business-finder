@@ -94,4 +94,10 @@ export class ValkeyEventStream implements EventStream {
       );
     await this.valkey.expire(key, 86_400);
   }
+
+  async status(jobId: string, status: string): Promise<void> {
+    const key = `gen:job:${jobId}`;
+    await this.valkey.xadd(key, 'MAXLEN', '~', '2000', '*', 'status', status);
+    await this.valkey.expire(key, 86_400);
+  }
 }

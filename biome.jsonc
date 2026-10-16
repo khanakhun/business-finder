@@ -23,6 +23,7 @@
       "!packages/api-client/openapi.json",
       "!packages/api-client/src/schema.d.ts",
       "!packages/contracts/generated",
+      "!packages/site-schema/generated",
       // Third-party data written by their update scripts (BF-026): kept byte-for-byte as generated.
       "!services/intel/app/vendor",
       "!infra/compose/seccomp-chromium.json",

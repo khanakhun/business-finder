@@ -96,6 +96,21 @@ describe('check-boundaries', () => {
     assert.deepEqual(rulesHit(root), ['apps/web/src/x.ts:1 web-no-server-packages']);
   });
 
+  it('keeps @bf/site-schema browser-safe, its generators and tests aside', () => {
+    const root = fixture({
+      'packages/site-schema/src/spec/a.ts': "import { readFileSync } from 'node:fs';\n",
+      'packages/site-schema/src/cli/gen.ts': "import { writeFileSync } from 'node:fs';\n",
+      'packages/site-schema/src/spec/a.test.ts': "import { readFileSync } from 'node:fs';\n",
+      'packages/site-schema/src/spec/b.ts':
+        "import { newId } from '@bf/contracts';\nimport { db } from '@bf/db';\n",
+      'packages/site-schema/package.json': JSON.stringify({ name: '@bf/site-schema' }),
+    });
+    assert.deepEqual(rulesHit(root), [
+      'packages/site-schema/src/spec/a.ts:1 site-schema-browser-safe',
+      'packages/site-schema/src/spec/b.ts:2 site-schema-browser-safe',
+    ]);
+  });
+
   it('ignores comments, strings and build output', () => {
     const root = fixture({
       'apps/web/src/ok.ts': "// import { x } from '@bf/api';\nconst s = \"import '@bf/api'\";\n",

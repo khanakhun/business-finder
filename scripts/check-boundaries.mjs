@@ -43,9 +43,10 @@ const INFRASTRUCTURE_MODULES = [
 ];
 
 /**
- * The rule table. `from` selects importing files (repo-relative globs); each `disallow` entry matches the import:
+ * The rule table. `from` selects importing files (repo-relative globs), `except` leaves some of them out; each
+ * `disallow` entry matches the import:
  * - `workspace`: a glob over the target workspace directory (`apps/web`), reached by package name or relative path;
- *   `exceptSelf` allows the importing file's own workspace.
+ *   `exceptSelf` allows the importing file's own workspace, `exceptWorkspaces` the listed ones.
  * - `modules`: globs over bare module specifiers (`@nestjs/*`, `drizzle-orm`).
  * - `relativeInto`: directory names a relative import must not resolve into, relative to the importing layer's
  *   parent (e.g. a `domain/` file reaching `../infrastructure/`).
@@ -87,6 +88,36 @@ export const RULES = [
       { modules: ['@bf/db', '@bf/db/*', '@bf/queue', '@bf/queue/*', '@bf/ai', '@bf/ai/*', '@bf/auth'] },
     ],
     message: 'The dashboard is a client of the API: no database, queue, LLM or server auth packages.',
+  },
+  {
+    id: 'site-schema-browser-safe',
+    from: ['packages/site-schema/src/**'],
+    // Generators and tests run on Node; the schema, validators and operations run in the editor and the runner.
+    except: ['packages/site-schema/src/cli/**', 'packages/site-schema/src/**/*.test.ts'],
+    disallow: [
+      {
+        modules: [
+          'node:*',
+          ...[
+            'fs',
+            'fs/*',
+            'path',
+            'os',
+            'crypto',
+            'url',
+            'child_process',
+            'buffer',
+            'stream',
+            'util',
+            'events',
+          ],
+          ...['http', 'https', 'net', 'zlib', 'worker_threads'],
+        ],
+      },
+      // Only @bf/contracts (zod-only, browser-safe): other internal packages may be Node-bound (@bf/config).
+      { workspace: 'packages/*', exceptSelf: true, exceptWorkspaces: ['packages/contracts'] },
+    ],
+    message: '@bf/site-schema is browser-safe: no Node API, and no internal package but @bf/contracts.',
   },
 ];
 
@@ -130,6 +161,7 @@ export function importsOf(root, file, source, workspaces) {
 function violates(entry, file, imp) {
   if (entry.workspace) {
     if (!imp.workspace || !matchesGlob(imp.workspace, entry.workspace)) return false;
+    if ((entry.exceptWorkspaces ?? []).includes(imp.workspace)) return false;
     return !(entry.exceptSelf && imp.workspace === workspaceOf(file));
   }
   if (entry.modules) {
@@ -156,7 +188,11 @@ export function checkBoundaries(root, rules = RULES) {
     .sort();
   const violations = [];
   for (const file of files) {
-    const applicable = rules.filter((rule) => rule.from.some((glob) => matchesGlob(file, glob)));
+    const applicable = rules.filter(
+      (rule) =>
+        rule.from.some((glob) => matchesGlob(file, glob)) &&
+        !(rule.except ?? []).some((glob) => matchesGlob(file, glob)),
+    );
     if (applicable.length === 0) continue;
     const imports = importsOf(root, file, readFileSync(join(root, file), 'utf8'), workspaces);
     for (const imp of imports) {

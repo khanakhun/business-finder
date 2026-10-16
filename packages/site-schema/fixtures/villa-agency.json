@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "locales": ["en", "fr"],
+  "defaultLocale": "en",
+  "brand": {
+    "name": "Island Villas",
+    "factId": "business.name"
+  },
+  "theme": {
+    "style": "coastal",
+    "palette": {
+      "primary": "#0f5e6e",
+      "accent": "#1e6f5c",
+      "background": "#f4fafb",
+      "surface": "#ffffff",
+      "text": "#10272c",
+      "mutedText": "#4a6066"
+    },
+    "typography": {
+      "pairId": "playfair-inter"
+    },
+    "radius": "lg",
+    "density": "airy",
+    "imageTreatment": "rounded"
+  },
+  "contact": {
+    "email": {
+      "value": "stay@island-villas.example",
+      "factId": "email.main"
+    },
+    "whatsapp": {
+      "value": "+590690000404",
+      "factId": "whatsapp.main"
+    },
+    "address": {
+      "locality": "Lorient",
+      "region": "Saint-Barthélemy",
+      "country": "BL",
+      "formatted": "Lorient, 97133 Saint-Barthélemy",
+      "factId": "address.main"
+    },
+    "bookingUrl": {
+      "value": "https://book.island-villas.example/stays",
+      "factId": "booking.url"
+    }
+  },
+  "layout": {
+    "header": {
+      "variant": "transparent",
+      "showCta": true,
+      "cta": {
+        "kind": "booking",
+        "label": {
+          "fr": "Book a stay",
+          "en": "Réserver"
+        }
+      }
+    },
+    "footer": {
+      "variant": "simple",
+      "showSocials": false,
+      "showHours": false,
+      "tagline": {
+        "fr": "Villas à Saint-Barth",
+        "en": "Villas in St Barth"
+      }
+    }
+  },
+  "navigation": {
+    "items": [
+      {
+        "pageId": "home",
+        "label": {
+          "fr": "Accueil",
+          "en": "Home"
+        }
+      },
+      {
+        "pageId": "villas",
+        "label": {
+          "fr": "Villas",
+          "en": "Villas"
+        }
+      },
+      {
+        "pageId": "legal",
+        "label": {
+          "fr": "Mentions",
+          "en": "Legal"
+        }
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "home",
+      "slug": "",
+      "title": {
+        "fr": "Accueil",
+        "en": "Home"
+      },
+      "seo": {
+        "title": {
+          "fr": "Island Villas – Location de villas à Saint-Barth",
+          "en": "Island Villas – Villa rentals in St Barth"
+        },
+        "description": {
+          "fr": "Villas avec vue mer à louer à Saint-Barthélemy, sélectionnées par notre agence. Réservez en ligne ou écrivez-nous sur WhatsApp.",
+          "en": "Sea-view villas to rent in Saint-Barthélemy, chosen by our agency. Book your stay online or write to us on WhatsApp any time."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-vill1",
+          "type": "hero",
+          "variant": "image_full",
+          "props": {
+            "title": {
+              "fr": "Villas avec vue sur la mer",
+              "en": "Villas with a sea view"
+            },
+            "primaryCta": {
+              "kind": "booking",
+              "label": {
+                "fr": "Réserver un séjour",
+                "en": "Book a stay"
+              }
+            },
+            "secondaryCta": {
+              "kind": "whatsapp",
+              "label": {
+                "fr": "WhatsApp",
+                "en": "WhatsApp"
+              }
+            },
+            "imageAssetId": "img-villa-1"
+          }
+        },
+        {
+          "id": "gall-vill1",
+          "type": "gallery",
+          "variant": "masonry",
+          "props": {
+            "heading": {
+              "fr": "Les villas",
+              "en": "The villas"
+            },
+            "assetIds": ["img-villa-1", "img-villa-2", "img-villa-3", "img-villa-4"]
+          }
+        },
+        {
+          "id": "team-vill1",
+          "type": "team",
+          "variant": "grid",
+          "props": {
+            "heading": {
+              "fr": "L’équipe",
+              "en": "The team"
+            },
+            "members": [
+              {
+                "factId": "team.1",
+                "name": "Léa M.",
+                "role": {
+                  "fr": "Gérante",
+                  "en": "Manager"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "book-vill1",
+          "type": "booking",
+          "variant": "embed",
+          "props": {
+            "heading": {
+              "fr": "Disponibilités",
+              "en": "Availability"
+            },
+            "label": {
+              "fr": "Voir les disponibilités",
+              "en": "See availability"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "villas",
+      "slug": "villas",
+      "title": {
+        "fr": "Villas",
+        "en": "Villas"
+      },
+      "seo": {
+        "title": {
+          "fr": "Nos villas – Island Villas, Saint-Barth",
+          "en": "Our villas – Island Villas, St Barth"
+        },
+        "description": {
+          "fr": "Découvrez les villas proposées par Island Villas à Saint-Barthélemy : vues mer, piscines et services, réservation en ligne.",
+          "en": "Discover the villas offered by Island Villas in Saint-Barthélemy: sea views, pools and services, all bookable online today."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-vill2",
+          "type": "hero",
+          "variant": "centered",
+          "props": {
+            "title": {
+              "fr": "Nos villas",
+              "en": "Our villas"
+            }
+          }
+        },
+        {
+          "id": "cta-vill2",
+          "type": "cta_banner",
+          "variant": "image",
+          "props": {
+            "title": {
+              "fr": "Prêts pour Saint-Barth ?",
+              "en": "Ready for St Barth?"
+            },
+            "cta": {
+              "kind": "booking",
+              "label": {
+                "fr": "Réserver",
+                "en": "Book"
+              }
+            },
+            "imageAssetId": "img-villa-2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "legal",
+      "slug": "mentions-legales",
+      "title": {
+        "fr": "Mentions légales",
+        "en": "Legal notice"
+      },
+      "seo": {
+        "title": {
+          "fr": "Mentions légales – Island Villas",
+          "en": "Legal notice – Island Villas"
+        },
+        "description": {
+          "fr": "Mentions légales du site Island Villas : éditeur, hébergement et contact de l’agence de location de villas à Saint-Barthélemy.",
+          "en": "Legal notice of the Island Villas website: publisher, hosting and contact of the villa rental agency in Saint-Barthélemy."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-lega1",
+          "type": "hero",
+          "variant": "minimal",
+          "props": {
+            "title": {
+              "fr": "Mentions légales",
+              "en": "Legal notice"
+            }
+          }
+        },
+        {
+          "id": "rich-lega1",
+          "type": "rich_text",
+          "variant": "narrow",
+          "props": {
+            "body": {
+              "fr": "Site édité par *Island Villas*.\n\n- Contact : voir l’[accueil](page:home)",
+              "en": "Website published by *Island Villas*.\n\n- Contact: see the [home](page:home) page"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "img-villa-1",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/island-villas/villa-1.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Villa 1, vue sur la mer",
+        "en": "Villa 1 with a sea view"
+      },
+      "license": "uploaded"
+    },
+    {
+      "id": "img-villa-2",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/island-villas/villa-2.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Villa 2, vue sur la mer",
+        "en": "Villa 2 with a sea view"
+      },
+      "license": "uploaded"
+    },
+    {
+      "id": "img-villa-3",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/island-villas/villa-3.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Villa 3, vue sur la mer",
+        "en": "Villa 3 with a sea view"
+      },
+      "license": "uploaded"
+    },
+    {
+      "id": "img-villa-4",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/island-villas/villa-4.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Villa 4, vue sur la mer",
+        "en": "Villa 4 with a sea view"
+      },
+      "license": "uploaded"
+    }
+  ],
+  "seo": {
+    "title": {
+      "fr": "Island Villas – Saint-Barth",
+      "en": "Island Villas – St Barth"
+    },
+    "description": {
+      "fr": "Agence de location de villas à Saint-Barthélemy : villas avec vue mer et piscine, réservation en ligne et contact sur WhatsApp.",
+      "en": "Villa rental agency in Saint-Barthélemy: sea-view villas with pools, online booking and a quick reply on WhatsApp every day."
+    }
+  },
+  "settings": {
+    "noindex": true,
+    "previewBanner": true,
+    "analytics": "cookieless",
+    "contactForm": {
+      "enabled": false
+    }
+  }
+}

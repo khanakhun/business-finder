@@ -411,8 +411,14 @@ feature-set and profile versions and a vector hash — an unchanged vector is no
 (→ the CRM timeline). Recomputes are jobs (`scoring` queue): `org_business.tracked`, `org_business.status.changed` and
 `crm.do_not_contact.set` recompute that workspace; `business.enriched` and `business.updated` every workspace tracking
 the business. A bulk recompute (`scoring-recompute` queue) pages through a workspace with throttled realtime progress
-(10,000 businesses ≈ 3.5 s in the integration suite). `POST /v1/scoring/explain` scores a draft config without
-storing anything (BF-032 preview).
+(10,000 businesses ≈ 3.8 s in the integration suite); at most one waiting and one running recompute per workspace
+and profile (BullMQ deduplication). Writes take per-business advisory locks: concurrent jobs for a business write
+one after the other, older facts never overwrite newer ones, and history gets a row only for a new fingerprint
+(profile version, feature-set version, vector). A new built-in version activated at boot recomputes every workspace.
+Merges rescore the survivor; contacts are global facts (ADR-0008), as the business page shows them. Score rows are
+scoped by workspace and business, so a workspace or business purge removes them (cascade); a profile version with
+history cannot be deleted (archive instead). `POST /v1/scoring/explain` scores a draft config without storing
+anything (BF-032 preview).
 
 ### F4 — Batch site generation
 

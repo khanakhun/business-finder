@@ -327,9 +327,14 @@ describe('activity timeline', () => {
     const rest = await viewer.get(
       `/v1/businesses/${id}/activities?limit=10&cursor=${encodeURIComponent(page.body.nextCursor)}`,
     );
-    const total = (await viewer.get(`/v1/businesses/${id}/activities?limit=50`).expect(200)).body.items
-      .length;
-    expect(rest.body.items).toHaveLength(total - 3);
+    const all = (await viewer.get(`/v1/businesses/${id}/activities?limit=50`).expect(200)).body.items as {
+      type: string;
+    }[];
+    // Seven CRM entries, plus at most one tier move (do-not-contact → X) once the business had a score.
+    const scoreEntries = all.filter((a) => a.type === 'score.updated').length;
+    expect(scoreEntries).toBeLessThanOrEqual(1);
+    expect(all).toHaveLength(7 + scoreEntries);
+    expect(rest.body.items).toHaveLength(4 + scoreEntries);
     expect(rest.body.nextCursor).toBeNull();
     await outsider.get(`/v1/businesses/${id}/activities`).expect(404);
     const rows = await db

@@ -19,15 +19,27 @@ import {
   type FactsAssembler,
   SCORING_REPOSITORY,
   type ScoreWrite,
+  type ScoreWriteRequest,
   type ScoringRepository,
 } from './ports.ts';
+
+/** Above this many businesses in a batch, pages hear one workspace-wide refresh instead of one per business. */
+const NOTIFY_EACH_UP_TO = 20;
+
+const profileOffer = (offers: ReadonlyMap<string, ActiveProfile['offer']>, profileId: string) => {
+  const offer = offers.get(profileId);
+  if (!offer) throw new Error(`Scored profile ${profileId} is not among the active profiles`);
+  return offer;
+};
 
 /** Businesses assembled and written per batch (≤ 3 fact queries and one write transaction each). */
 export const SCORING_BATCH = 500;
 
 /** Stable digest of a feature vector (keys sorted): an unchanged vector is not written again. */
 export function vectorHash(features: FeatureVector): string {
-  const sorted = Object.fromEntries(Object.entries(features).sort(([a], [b]) => a.localeCompare(b)));
+  const sorted = Object.fromEntries(
+    Object.entries(features).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+  );
   return createHash('sha256').update(JSON.stringify(sorted)).digest('hex');
 }
 
@@ -75,10 +87,12 @@ export class ScoringService {
       : all;
     const primary = await this.primaryProfileId(organizationId);
     let outcome: ComputeOutcome = { scored: 0, written: 0, unchanged: 0 };
-    for (let start = 0; start < businessIds.length; start += SCORING_BATCH) {
+    // Sorted: every job takes the businesses' locks in the same order.
+    const ids = [...new Set(businessIds)].sort();
+    for (let start = 0; start < ids.length; start += SCORING_BATCH) {
       const batch = await this.batch(
         organizationId,
-        businessIds.slice(start, start + SCORING_BATCH),
+        ids.slice(start, start + SCORING_BATCH),
         profiles,
         primary,
         options,
@@ -99,65 +113,99 @@ export class ScoringService {
     primary: string,
     options: { readonly force?: boolean; readonly notify?: boolean },
   ): Promise<ComputeOutcome> {
-    const force = options.force ?? false;
     const now = this.clock.now();
     const facts = await this.assembler.assemble(organizationId, businessIds, now);
-    const current = await this.repository.currentScores(organizationId, businessIds);
-    const writes: ScoreWrite[] = [];
-    const previous = new Map<string, { score: number; tier: ScoreWrite['tier'] }>();
-    let unchanged = 0;
-    for (const business of facts) {
-      for (const profile of profiles) {
+    // The engine is pure: score everything first, then decide and write under the businesses' locks.
+    const scored = facts.flatMap((business) =>
+      profiles.map((profile) => {
         const result = scoreBusiness(profile.config, business);
-        const factsHash = vectorHash(result.features);
-        const stored = current.get(business.businessId)?.find((score) => score.profileId === profile.id);
-        if (
-          !force &&
-          stored?.profileVersion === profile.activeVersion &&
-          stored.featureSetVersion === FEATURE_SET_VERSION &&
-          stored.factsHash === factsHash
-        ) {
-          unchanged += 1;
-          continue;
-        }
-        if (stored)
-          previous.set(`${business.businessId}:${profile.id}`, { score: stored.score, tier: stored.tier });
-        writes.push({
-          ...result,
-          organizationId,
-          businessId: business.businessId,
-          profileId: profile.id,
-          profileVersion: profile.activeVersion,
-          featureSetVersion: FEATURE_SET_VERSION,
-          factsHash,
-          computedAt: now,
-        });
-      }
-    }
-    await this.write(writes, previous, profiles, primary);
-    // After the commit: pages showing these businesses refetch their scores (best effort, like all realtime).
-    if (options.notify !== false) {
-      for (const businessId of new Set(writes.map((write) => write.businessId))) {
+        return {
+          profile,
+          write: {
+            ...result,
+            organizationId,
+            businessId: business.businessId,
+            profileId: profile.id,
+            profileVersion: profile.activeVersion,
+            featureSetVersion: FEATURE_SET_VERSION,
+            factsHash: vectorHash(result.features),
+            computedAt: now,
+          } satisfies ScoreWrite,
+        };
+      }),
+    );
+    const outcome = await this.commit(
+      organizationId,
+      facts.map((f) => f.businessId),
+      scored,
+      primary,
+      options.force ?? false,
+      now,
+    );
+    // After the commit (`compute` is never called inside an outer transaction): pages showing these businesses
+    // refetch their scores (best effort, like all realtime).
+    if (options.notify !== false && outcome.businesses.size > 0) {
+      if (outcome.businesses.size > NOTIFY_EACH_UP_TO) {
         await this.realtime.publish(organizationId, {
           type: SCORING_SCORES_UPDATED,
-          entity: 'business',
-          entityId: businessId,
+          entity: 'workspace',
+          entityId: organizationId,
         });
+      } else {
+        for (const businessId of outcome.businesses) {
+          await this.realtime.publish(organizationId, {
+            type: SCORING_SCORES_UPDATED,
+            entity: 'business',
+            entityId: businessId,
+          });
+        }
       }
     }
-    return { scored: facts.length * profiles.length, written: writes.length, unchanged };
+    return { scored: scored.length, written: outcome.written, unchanged: outcome.unchanged };
   }
 
+  /**
+   * Writes the scores that changed, in one transaction under per-business locks (concurrent jobs for a business
+   * write one after the other; facts older than the stored score never overwrite it). History is appended only for
+   * a new fingerprint (profile version, feature-set version, vector): a forced recompute of unchanged facts rewrites
+   * the current row (listing columns) without duplicating history.
+   */
   @Transactional()
-  private async write(
-    writes: readonly ScoreWrite[],
-    previous: ReadonlyMap<string, { score: number; tier: ScoreWrite['tier'] }>,
-    profiles: readonly ActiveProfile[],
+  private async commit(
+    organizationId: string,
+    businessIds: readonly string[],
+    scored: readonly { readonly profile: ActiveProfile; readonly write: ScoreWrite }[],
     primary: string,
-  ): Promise<void> {
-    if (writes.length === 0) return;
-    await this.repository.writeScores(writes, primary);
-    const offerOf = new Map(profiles.map((profile) => [profile.id, profile.offer]));
+    force: boolean,
+    now: Date,
+  ): Promise<{
+    readonly written: number;
+    readonly unchanged: number;
+    readonly businesses: ReadonlySet<string>;
+  }> {
+    if (scored.length === 0) return { written: 0, unchanged: 0, businesses: new Set() };
+    await this.repository.lockBusinesses(organizationId, businessIds);
+    const current = await this.repository.currentScores(organizationId, businessIds);
+    const writes: ScoreWriteRequest[] = [];
+    const previous = new Map<string, { score: number; tier: ScoreWrite['tier'] }>();
+    let unchanged = 0;
+    for (const { profile, write } of scored) {
+      const stored = current.get(write.businessId)?.find((score) => score.profileId === profile.id);
+      const same =
+        stored?.profileVersion === write.profileVersion &&
+        stored.featureSetVersion === write.featureSetVersion &&
+        stored.factsHash === write.factsHash;
+      // Another job wrote newer facts meanwhile, or nothing changed (unless forced): leave the stored score.
+      if ((stored && stored.computedAt.getTime() > now.getTime()) || (same && !force)) {
+        unchanged += 1;
+        continue;
+      }
+      if (stored)
+        previous.set(`${write.businessId}:${write.profileId}`, { score: stored.score, tier: stored.tier });
+      writes.push({ ...write, history: !same });
+    }
+    if (writes.length > 0) await this.repository.writeScores(writes, primary);
+    const offerOf = new Map(scored.map(({ profile }) => [profile.id, profile.offer]));
     for (const write of writes) {
       if (write.profileId !== primary) continue;
       const before = previous.get(`${write.businessId}:${write.profileId}`) ?? null;
@@ -170,14 +218,19 @@ export class ScoringService {
           businessId: write.businessId,
           profileId: write.profileId,
           profileVersion: write.profileVersion,
-          offer: offerOf.get(write.profileId) ?? 'new_website',
+          offer: profileOffer(offerOf, write.profileId),
           score: write.score,
           tier: write.tier,
-          previousScore: before?.score ?? null,
-          previousTier: before?.tier ?? null,
-          primary: write.profileId === primary,
+          previousScore: before.score,
+          previousTier: before.tier,
+          primary: true,
         },
       });
     }
+    return {
+      written: writes.length,
+      unchanged,
+      businesses: new Set(writes.map((write) => write.businessId)),
+    };
   }
 }

@@ -31,13 +31,20 @@ export class BullmqScoringQueue implements ScoringQueue {
   }
 
   async recompute(input: Parameters<ScoringQueue['recompute']>[0]): Promise<void> {
-    await this.recomputeJobs.add({
-      orgId: input.organizationId,
-      idempotencyKey: input.idempotencyKey,
-      profileId: input.profileId,
-      version: input.version,
-      ...(input.requestedBy ? { requestedBy: input.requestedBy } : {}),
-    });
+    await this.recomputeJobs.add(
+      {
+        orgId: input.organizationId,
+        idempotencyKey: input.idempotencyKey,
+        profileId: input.profileId,
+        version: input.version,
+        ...(input.requestedBy ? { requestedBy: input.requestedBy } : {}),
+      },
+      // At most one waiting and one running recompute per workspace and profile, whatever the number of requests
+      // (a request during a run queues one more, which sees everything the run could not).
+      {
+        deduplication: { id: `recompute:${input.organizationId}:${input.profileId}`, keepLastIfActive: true },
+      },
+    );
   }
 }
 

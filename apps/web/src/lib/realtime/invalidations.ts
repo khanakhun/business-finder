@@ -35,11 +35,15 @@ export const realtimeInvalidations: Readonly<Record<string, (event: RealtimeEven
           ]
         : [['business', event.entityId]];
     },
-    // A business's scores were written (BF-031): its page, and the listing's score and tier.
-    [REALTIME_EVENTS.scoringScoresUpdated]: (event) => [
-      ['business', event.entityId],
-      ['search', 'listing'],
-    ],
+    // A business's scores were written (BF-031): its page, and the listing's score and tier; a large batch sends one
+    // workspace-wide event instead.
+    [REALTIME_EVENTS.scoringScoresUpdated]: (event) =>
+      event.entity === 'workspace'
+        ? [['business'], ['search', 'listing']]
+        : [
+            ['business', event.entityId],
+            ['search', 'listing'],
+          ],
     // A bulk recompute ended: every score may have moved.
     [REALTIME_EVENTS.scoringRecomputeProgressed]: (event) =>
       (event.payload as { finished?: boolean } | null)?.finished

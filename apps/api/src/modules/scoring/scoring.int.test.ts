@@ -1,6 +1,16 @@
 import { OFFERS } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
-import { activities, businesses, businessScoreHistory, businessScores, orgBusinesses } from '@bf/db/schema';
+import {
+  activities,
+  businesses,
+  businessScoreHistory,
+  businessScores,
+  categories,
+  orgBusinesses,
+  outboxEvents,
+  scoringProfiles,
+  scoringProfileVersions,
+} from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
 import { and, count, eq, sql } from 'drizzle-orm';
@@ -14,7 +24,17 @@ import {
   signUpVerified,
 } from '../../../test/identity-helpers.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
-import { BUILTIN_PRIMARY_PROFILE_ID, BUILTIN_PROFILE_IDS } from './application/builtin-profiles.seeder.ts';
+import {
+  BUILTIN_PRIMARY_PROFILE_ID,
+  BUILTIN_PROFILE_IDS,
+  BuiltinProfilesSeeder,
+} from './application/builtin-profiles.seeder.ts';
+import {
+  FACTS_ASSEMBLER,
+  type FactsAssembler,
+  SCORING_REPOSITORY,
+  type ScoringRepository,
+} from './application/ports.ts';
 import { ScoringService } from './application/scoring.service.ts';
 import { RecomputeRunner } from './application/scoring.use-cases.ts';
 
@@ -31,9 +51,13 @@ let owner: Browser;
 let member: Browser;
 let outsider: Browser;
 let org: string;
+let outsiderOrg: string;
 
 /** A business in the graph (no website: the new-website profile likes it), tracked through the API. */
-async function trackNew(overrides: Parameters<typeof aBusiness>[0] = {}): Promise<string> {
+async function trackNew(
+  overrides: Parameters<typeof aBusiness>[0] = {},
+  client: Browser = owner,
+): Promise<string> {
   const business = aBusiness({
     websiteUrl: null,
     websiteHost: null,
@@ -41,7 +65,7 @@ async function trackNew(overrides: Parameters<typeof aBusiness>[0] = {}): Promis
     ...overrides,
   });
   await db.insert(businesses).values(business);
-  await owner.post(`/v1/businesses/${business.id}/track`).send({ addedVia: 'search' }).expect(201);
+  await client.post(`/v1/businesses/${business.id}/track`).send({ addedVia: 'search' }).expect(201);
   return business.id;
 }
 
@@ -54,6 +78,34 @@ const scoresOf = async (businessId: string) =>
     contributions: { feature: string; imputed: string | null }[];
     features: Record<string, unknown>;
   }[];
+
+/** A crawl snapshot and its audit (only the parts scoring reads are meaningful). */
+async function audited(
+  businessId: string,
+  audit: { status: string; quality: number | null; latest: boolean },
+) {
+  const snapshotId = crypto.randomUUID();
+  await db.execute(sql`
+    INSERT INTO website_snapshots (id, business_id, url, fetched_at, reachability, tls, security, languages, pages,
+      contacts, socials, booking, ordering, chat, analytics, tech, freshness, mobile, performance_hints, links,
+      no_solicitation, logo_candidates, image_candidates, warnings, content_hash)
+    VALUES (${snapshotId}, ${businessId}, 'https://example.test/', now(), 'ok', '{}',
+      '{"https": false, "hsts": false, "mixedContent": false}',
+      '{"declared": [], "detected": [], "hreflang": [], "hasLanguageSwitcher": false}',
+      '[{"kind": "booking", "url": "https://example.test/book"}]',
+      '{"emails": [{"email": "x@example.test"}], "phones": [], "whatsappLinks": [], "contactForms": []}', '[]',
+      '{"providers": []}', '{"providers": []}', '{"providers": []}',
+      '{"ga4": false, "gtm": false, "metaPixel": true, "tiktokPixel": false, "others": []}', '[]',
+      '{"copyrightYear": 2020, "httpLastModified": null, "sitemapLastmod": null, "latestDatedContent": null}',
+      '{}', '{}', '{}', '{"checked": true, "detected": false, "phrases": [], "pageUrl": null, "snippet": null}',
+      '[]', '[]', '[]', ${snapshotId})`);
+  await db.execute(sql`
+    INSERT INTO website_audits (id, business_id, snapshot_id, psi, vision, findings, quality_score, website_status,
+      is_latest)
+    VALUES (${crypto.randomUUID()}, ${businessId}, ${snapshotId},
+      '{"mobile": {"scores": {"performance": 31}, "metrics": {"lcpMs": 5200}}, "desktop": null}', '{"overall": 4}',
+      '[{"code": "no_https"}, {"code": "missing_english"}]', ${audit.quality}, ${audit.status}, ${audit.latest})`);
+}
 
 /** Scores stored for a business (polled from the database: the HTTP API is rate-limited). */
 const storedScores = async (businessId: string) =>
@@ -80,7 +132,7 @@ beforeAll(async () => {
   org = await createWorkspace(owner, 'Agence Score');
   ({ client: member } = await inviteAndJoin(t, mailer, owner, 'member@scoring.test', 'member'));
   outsider = await signUpVerified(t, mailer, 'outsider@scoring.test', 'Oscar Outsider');
-  await createWorkspace(outsider, 'Ailleurs');
+  outsiderOrg = await createWorkspace(outsider, 'Ailleurs');
 }, 60_000);
 
 afterAll(async () => {
@@ -185,7 +237,7 @@ describe('scoring', () => {
       .poll(async () => (await featuresOf(otherOrg)).has_phone, { timeout: 20_000, interval: 200 })
       .toBe(false);
     // A shared fact changes (the golden record's reviews), then a contact is added (`business.updated`): every
-    // tracking workspace recomputes; the hand-added phone is the adding workspace's own (ADR-0008).
+    // tracking workspace recomputes; contacts are global facts (ADR-0008), the hand-added phone counts for both.
     await db.update(businesses).set({ ratingCount: 999 }).where(eq(businesses.id, id));
     await owner
       .post(`/v1/businesses/${id}/contacts`)
@@ -197,7 +249,7 @@ describe('scoring', () => {
     await expect
       .poll(async () => (await featuresOf(otherOrg)).review_count_log, { timeout: 20_000, interval: 200 })
       .toBe(3);
-    expect((await featuresOf(otherOrg)).has_phone).toBe(false);
+    expect((await featuresOf(otherOrg)).has_phone).toBe(true);
     // A pipeline move is the workspace's own.
     await owner
       .post(`/v1/businesses/${id}/status`)
@@ -258,32 +310,256 @@ describe('scoring', () => {
   });
 
   it('switches the primary profile: the listing follows it at once, then a recompute fills the rest', async () => {
-    const id = await trackNew({ ratingCount: 50 });
-    await expect.poll(() => storedScores(id), { timeout: 20_000, interval: 200 }).toBe(5);
-    const localSeo = (await scoresOf(id)).find((score) => score.profileId === BUILTIN_PROFILE_IDS.local_seo);
-    const { body } = await owner
+    // Its own workspace: the switch recomputes the whole workspace.
+    const switcher = await signUpVerified(t, mailer, 'switch@scoring.test', 'Sam Switch');
+    const switchOrg = await createWorkspace(switcher, 'Agence Switch');
+    const id = await trackNew({ ratingCount: 50 }, switcher);
+    // Another business with no scores yet (tracked without an event).
+    const unscored = aBusiness({ websiteUrl: null, websiteHost: null, websiteRegistrableDomain: null });
+    await db.insert(businesses).values(unscored);
+    await db
+      .insert(orgBusinesses)
+      .values({ organizationId: switchOrg, businessId: unscored.id, addedVia: 'import' });
+    const listed = async (businessId: string) =>
+      (
+        await db
+          .select({
+            score: orgBusinesses.score,
+            tier: orgBusinesses.tier,
+            profileId: orgBusinesses.scoreProfileId,
+          })
+          .from(orgBusinesses)
+          .where(and(eq(orgBusinesses.organizationId, switchOrg), eq(orgBusinesses.businessId, businessId)))
+      )[0];
+    await expect
+      .poll(async () => (await listed(id))?.profileId, { timeout: 20_000, interval: 200 })
+      .toBe(BUILTIN_PRIMARY_PROFILE_ID);
+    const [localSeo] = await db
+      .select({ score: businessScores.score, tier: businessScores.tier })
+      .from(businessScores)
+      .where(
+        and(
+          eq(businessScores.organizationId, switchOrg),
+          eq(businessScores.businessId, id),
+          eq(businessScores.profileId, BUILTIN_PROFILE_IDS.local_seo),
+        ),
+      );
+    const { body } = await switcher
       .put('/v1/scoring/primary-profile')
       .send({ profileId: BUILTIN_PROFILE_IDS.local_seo })
       .expect(202);
-    expect(body).toMatchObject({ profileId: BUILTIN_PROFILE_IDS.local_seo, version: 1 });
-    expect(await listing(id)).toEqual({
-      score: localSeo?.score,
-      tier: localSeo?.tier,
-      profileId: BUILTIN_PROFILE_IDS.local_seo,
-    });
-    expect(
-      (await owner.get('/v1/scoring/profiles').expect(200)).body.items.find(
-        (p: { primary: boolean }) => p.primary,
-      ).id,
-    ).toBe(BUILTIN_PROFILE_IDS.local_seo);
-    await owner
-      .put('/v1/scoring/primary-profile')
-      .send({ profileId: BUILTIN_PRIMARY_PROFILE_ID })
-      .expect(202);
-    await owner
+    expect(body).toMatchObject({ profileId: BUILTIN_PROFILE_IDS.local_seo, version: 1, total: 2 });
+    // At once: the scores already there; nothing for the business without one.
+    expect(await listed(id)).toEqual({ ...localSeo, profileId: BUILTIN_PROFILE_IDS.local_seo });
+    expect(await listed(unscored.id)).toEqual({ score: null, tier: null, profileId: null });
+    // Then the recompute (enqueued after the commit) fills it in.
+    await expect
+      .poll(async () => (await listed(unscored.id))?.profileId, { timeout: 20_000, interval: 200 })
+      .toBe(BUILTIN_PROFILE_IDS.local_seo);
+    const profiles = (await switcher.get('/v1/scoring/profiles').expect(200)).body.items;
+    expect(profiles.find((p: { primary: boolean }) => p.primary).id).toBe(BUILTIN_PROFILE_IDS.local_seo);
+    await switcher
       .put('/v1/scoring/primary-profile')
       .send({ profileId: '01990000-0000-7000-8000-0000000000aa' })
       .expect(404);
+  });
+
+  it('recomputes over HTTP through the queue: 202 with the total, then every tracked business scored', async () => {
+    const owner2 = await signUpVerified(t, mailer, 'recompute@scoring.test', 'Rita Recompute');
+    const org2 = await createWorkspace(owner2, 'Agence Recompute');
+    const made = [
+      aBusiness({ websiteUrl: null }),
+      aBusiness({ websiteUrl: null }),
+      aBusiness({ websiteUrl: null }),
+    ];
+    await db.insert(businesses).values(made);
+    await db
+      .insert(orgBusinesses)
+      .values(made.map((b) => ({ organizationId: org2, businessId: b.id, addedVia: 'import' as const })));
+    const profileId = BUILTIN_PROFILE_IDS.ai_receptionist;
+    const { body } = await owner2.post(`/v1/scoring/profiles/${profileId}/recompute`).expect(202);
+    expect(body).toEqual({ profileId, version: 1, total: 3 });
+    const scoredFor = async () =>
+      (
+        await db
+          .select({ n: count() })
+          .from(businessScores)
+          .where(and(eq(businessScores.organizationId, org2), eq(businessScores.profileId, profileId)))
+      )[0]?.n;
+    await expect.poll(scoredFor, { timeout: 20_000, interval: 200 }).toBe(3);
+    // A version out of int4 range names no version.
+    await owner2.get(`/v1/scoring/profiles/${profileId}/versions/99999999999`).expect(404);
+  });
+
+  it('keeps another workspace’s own profile out of reach, and never scores with it', async () => {
+    const custom = crypto.randomUUID();
+    const config = (
+      await owner.get(`/v1/scoring/profiles/${BUILTIN_PROFILE_IDS.local_seo}/versions/1`).expect(200)
+    ).body.config;
+    const outsiderOrg = (await outsider.get('/v1/me').expect(200)).body.activeOrganization?.id as
+      | string
+      | undefined;
+    const [anyOther] = await db
+      .select({ organizationId: orgBusinesses.organizationId })
+      .from(orgBusinesses)
+      .where(sql`${orgBusinesses.organizationId} <> ${org}`)
+      .limit(1);
+    const theirOrg = outsiderOrg ?? anyOther?.organizationId ?? '';
+    await db
+      .insert(scoringProfiles)
+      .values({ id: custom, organizationId: theirOrg, offer: 'local_seo', name: 'Theirs' });
+    await db.insert(scoringProfileVersions).values({ profileId: custom, version: 1, config });
+    await db.update(scoringProfiles).set({ activeVersion: 1 }).where(eq(scoringProfiles.id, custom));
+    await owner.get(`/v1/scoring/profiles/${custom}/versions/1`).expect(404);
+    await owner.post(`/v1/scoring/profiles/${custom}/recompute`).expect(404);
+    await owner.put('/v1/scoring/primary-profile').send({ profileId: custom }).expect(404);
+    const listed = (await owner.get('/v1/scoring/profiles').expect(200)).body.items.map(
+      (p: { id: string }) => p.id,
+    );
+    expect(listed).not.toContain(custom);
+    const id = await trackNew();
+    const outcome = await t.app.get(ScoringService).compute(org, [id], { force: true, notify: false });
+    expect(outcome.scored).toBe(5);
+    // Versions are immutable.
+    await expect(
+      db.execute(sql`UPDATE scoring_profile_versions SET config = '{}' WHERE profile_id = ${custom}`),
+    ).rejects.toThrow();
+  });
+
+  it('assembles the facts in bulk: inherited category, latest audit and crawl, shared domain, own insights', async () => {
+    const root = crypto.randomUUID();
+    const leaf = crypto.randomUUID();
+    const slug = `t${Date.now()}`;
+    await db.insert(categories).values([
+      {
+        id: root,
+        slug,
+        path: slug,
+        labels: { en: 'Root', fr: 'Racine' },
+        attributes: { tourismFacing: true, appointmentBased: false },
+        offerRelevance: { booking_system: 0.2, local_seo: 0.7 },
+      },
+      {
+        id: leaf,
+        slug: `${slug}_leaf`,
+        parentId: root,
+        path: `${slug}.${slug}_leaf`,
+        labels: { en: 'Leaf', fr: 'Feuille' },
+        attributes: { appointmentBased: true },
+        offerRelevance: { booking_system: 0.9 },
+      },
+    ]);
+    const domain = `shared-${slug}.example`;
+    const id = await trackNew({
+      websiteUrl: `https://${domain}/`,
+      websiteHost: domain,
+      websiteRegistrableDomain: domain,
+    });
+    await db.update(businesses).set({ primaryCategoryId: leaf }).where(eq(businesses.id, id));
+    const sibling = aBusiness({
+      websiteUrl: `https://${domain}/b`,
+      websiteHost: domain,
+      websiteRegistrableDomain: domain,
+    });
+    await db.insert(businesses).values(sibling);
+    await audited(id, { status: 'ok', quality: 80, latest: false });
+    await audited(id, { status: 'weak', quality: 41, latest: true });
+    await db.execute(sql`
+      INSERT INTO review_insights (organization_id, business_id, computed_at, sources, sample_size, pain_counts,
+        pain_share, sentiment_avg, owner_response_rate, evidence, source_stats, model, prompt_version)
+      VALUES (${org}, ${id}, now(), ARRAY['pasted'], 12, '{}', '{"booking_friction": 0.25}', -0.2, 0.1, '{}', '{}',
+        'fake', 1)`);
+    await owner.post(`/v1/businesses/${id}/status`).send({ status: 'qualified' }).expect(200);
+    await owner.post(`/v1/businesses/${id}/status`).send({ status: 'contacted' }).expect(200);
+    const assembler = t.app.get<FactsAssembler>(FACTS_ASSEMBLER);
+    const [facts, ...rest] = await assembler.assemble(org, [id, crypto.randomUUID()], new Date());
+    // A business the workspace does not track is left out.
+    expect(rest).toEqual([]);
+    expect(facts).toMatchObject({
+      businessId: id,
+      business: { sharedWebsiteCount: 2, websiteUrl: `https://${domain}/` },
+      // Root first, the leaf overriding it.
+      category: {
+        attributes: { tourismFacing: true, appointmentBased: true },
+        offerRelevance: { booking_system: 0.9, local_seo: 0.7 },
+      },
+      // The latest audit only, and its crawl (crawled e-mails are never part of the facts).
+      audit: {
+        status: 'weak',
+        qualityScore: 41,
+        psiMobilePerformance: 31,
+        lcpMobileMs: 5200,
+        visionOverall: 4,
+        findingCodes: ['no_https', 'missing_english'],
+      },
+      site: { reachability: 'ok', analytics: { metaPixel: true }, contacts: { emails: [] } },
+      reviews: {
+        sampleSize: 12,
+        painShare: { booking_friction: 0.25 },
+        sentimentAvg: -0.2,
+        ownerResponseRate: 0.1,
+      },
+      workspace: { pipelineStatus: 'contacted', lastContactedAt: expect.any(String) },
+    });
+    // Another workspace reads its own insights and pipeline (none here).
+    const theirOrg = outsiderOrg;
+    await db
+      .insert(orgBusinesses)
+      .values({ organizationId: theirOrg, businessId: id, addedVia: 'import' })
+      .onConflictDoNothing();
+    const [theirs] = await assembler.assemble(theirOrg, [id], new Date());
+    expect(theirs?.reviews).toBeNull();
+    expect(theirs?.workspace.lastContactedAt).toBeNull();
+  });
+
+  it('emits org_business.tracked once, however often a business is tracked', async () => {
+    const id = await trackNew();
+    await owner.post(`/v1/businesses/${id}/track`).send({ addedVia: 'search' }).expect(200);
+    const [tracked] = await db
+      .select({ n: count() })
+      .from(outboxEvents)
+      .where(
+        and(
+          eq(outboxEvents.type, 'org_business.tracked'),
+          sql`${outboxEvents.payload}->>'businessId' = ${id}`,
+        ),
+      );
+    expect(tracked?.n).toBe(1);
+  });
+
+  it('seeds the built-in profiles idempotently; a newer version activates and is never rolled back', async () => {
+    const seeder = t.app.get(BuiltinProfilesSeeder);
+    await seeder.seed();
+    await seeder.seed();
+    const [builtins] = await db
+      .select({ n: count() })
+      .from(scoringProfiles)
+      .where(eq(scoringProfiles.builtin, true));
+    expect(builtins?.n).toBe(5);
+    const repository = t.app.get<ScoringRepository>(SCORING_REPOSITORY);
+    const config = (
+      await owner.get(`/v1/scoring/profiles/${BUILTIN_PROFILE_IDS.local_seo}/versions/1`).expect(200)
+    ).body.config;
+    const base = {
+      id: BUILTIN_PROFILE_IDS.local_seo,
+      offer: 'local_seo' as const,
+      name: 'Local SEO',
+      config,
+    };
+    try {
+      expect(await repository.ensureBuiltins([{ ...base, version: 2 }])).toEqual([
+        { profileId: base.id, version: 2 },
+      ]);
+      expect(await repository.ensureBuiltins([{ ...base, version: 1 }])).toEqual([]);
+      const [row] = await db
+        .select({ version: scoringProfiles.activeVersion })
+        .from(scoringProfiles)
+        .where(eq(scoringProfiles.id, base.id));
+      expect(row?.version).toBe(2);
+    } finally {
+      // Back to v1 for the other tests (the v2 row stays: versions are never rewritten).
+      await db.update(scoringProfiles).set({ activeVersion: 1 }).where(eq(scoringProfiles.id, base.id));
+    }
   });
 
   it('recomputes a workspace in bulk: 10,000 businesses in under a minute', async () => {

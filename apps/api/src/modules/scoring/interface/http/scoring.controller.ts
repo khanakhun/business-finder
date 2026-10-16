@@ -1,6 +1,7 @@
 import {
   type BusinessScoreList,
   BusinessScoreListSchema,
+  NotFoundError,
   ScoringExplainRequestSchema,
   type ScoringExplainResponse,
   ScoringExplainResponseSchema,
@@ -34,6 +35,8 @@ import {
   ScoringQueries,
   SetPrimaryProfileCommand,
 } from '../../application/scoring.use-cases.ts';
+
+const MAX_VERSION = 2_147_483_647;
 
 class ExplainBody extends zodDto(ScoringExplainRequestSchema) {}
 class PrimaryBody extends zodDto(SetPrimaryScoringProfileRequestSchema) {}
@@ -101,6 +104,9 @@ export class ScoringController {
     @Param('id', ParseUUIDPipe) profileId: string,
     @Param('version', ParseIntPipe) version: number,
   ): Promise<ScoringProfileVersion> {
+    // Versions are positive int4: anything else names no version (and must not reach the database).
+    if (version < 1 || version > MAX_VERSION)
+      throw new NotFoundError('ScoringProfileVersion', `${profileId}@${version}`);
     return this.queries.version(workspaceOf(auth), profileId, version);
   }
 
@@ -124,6 +130,7 @@ export class ScoringController {
 
   @Put('primary-profile')
   @HttpCode(202)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @RequirePermission('scoring:manage')
   @ApiRoute({
     summary: "Choose the workspace's primary profile: the listing's score and tier follow it (recomputed)",

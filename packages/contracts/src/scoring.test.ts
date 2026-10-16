@@ -5,6 +5,7 @@ import {
   FEATURE_KEYS,
   FeatureVectorSchema,
   GateConditionSchema,
+  GateSchema,
   profileProblems,
   SCORED_PAIN_TAGS,
   ScoreResultSchema,
@@ -126,6 +127,26 @@ describe('scoring contracts', () => {
       ScoreResultSchema.safeParse({ score: 101, tier: 'A', contributions: [], reasons: [], gated: null })
         .success,
     ).toBe(false);
+  });
+});
+
+describe('gate condition limits', () => {
+  const gate = (when: unknown) =>
+    GateSchema.safeParse({ id: 'deep', when, effect: { type: 'exclude' }, reason: { en: 'x', fr: 'x' } });
+  const nested = (depth: number): unknown =>
+    depth <= 1 ? { feature: 'has_phone', eq: true } : { not: nested(depth - 1) };
+
+  it('refuses deeply nested or huge conditions without overflowing the stack', () => {
+    expect(gate(nested(6)).success).toBe(true);
+    expect(gate(nested(7)).success).toBe(false);
+    // Far beyond what the recursive schema could parse: a clean failure, no RangeError.
+    expect(gate(nested(5_000)).success).toBe(false);
+    const wide = {
+      any: Array.from({ length: 20 }, () => ({
+        all: Array.from({ length: 6 }, () => ({ feature: 'has_phone', eq: true })),
+      })),
+    };
+    expect(gate(wide).success).toBe(false);
   });
 });
 

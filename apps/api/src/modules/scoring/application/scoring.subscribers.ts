@@ -1,5 +1,7 @@
 import {
+  BusinessCreated,
   BusinessEnriched,
+  BusinessMerged,
   BusinessUpdated,
   DiscoveryRunCompleted,
   type DomainEvent,
@@ -24,11 +26,23 @@ export class ScoringSubscribers {
     @Inject(SCORING_QUEUE) private readonly queue: ScoringQueue,
   ) {}
 
-  @OnDomainEvent([BusinessEnriched, BusinessUpdated], { id: 'scoring.recompute-shared-facts' })
+  /**
+   * Shared facts changed: every workspace tracking the business recomputes. A merge recomputes the survivor (it
+   * takes over the merged business's workspace rows); a split's new business arrives as `business.created` with the
+   * workspace rows copied from the original.
+   */
+  @OnDomainEvent([BusinessEnriched, BusinessUpdated, BusinessCreated, BusinessMerged], {
+    id: 'scoring.recompute-shared-facts',
+  })
   async onSharedFacts(
-    event: DomainEvent<typeof BusinessEnriched> | DomainEvent<typeof BusinessUpdated>,
+    event:
+      | DomainEvent<typeof BusinessEnriched>
+      | DomainEvent<typeof BusinessUpdated>
+      | DomainEvent<typeof BusinessCreated>
+      | DomainEvent<typeof BusinessMerged>,
   ): Promise<void> {
-    const tracking = await this.repository.workspacesTracking([event.payload.businessId]);
+    const businessId = 'intoId' in event.payload ? event.payload.intoId : event.payload.businessId;
+    const tracking = await this.repository.workspacesTracking([businessId]);
     for (const [organizationId, businessIds] of tracking) {
       await this.queue.compute({
         organizationId,

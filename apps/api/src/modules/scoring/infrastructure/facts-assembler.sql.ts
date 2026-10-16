@@ -111,14 +111,18 @@ export class SqlFactsAssembler implements FactsAssembler {
           FROM categories leaf JOIN categories anc ON anc.path @> leaf.path
           WHERE leaf.id = b.primary_category_id
         ) cat ON true
-        LEFT JOIN website_audits wa ON wa.business_id = b.id AND wa.is_latest
+        -- One audit at most, whatever the flags say (two latest rows would give the business two fact rows).
+        LEFT JOIN LATERAL (
+          SELECT a.* FROM website_audits a WHERE a.business_id = b.id AND a.is_latest
+          ORDER BY a.updated_at DESC LIMIT 1
+        ) wa ON true
         LEFT JOIN website_snapshots ws ON ws.id = wa.snapshot_id
         WHERE b.id = ANY(${ids})`),
-      // Contacts the workspace may use: shared ones and its own manual entries (ADR-0008).
+      // Contacts are global facts (ADR-0008: a manual addition corrects the record for everyone; only who added it
+      // stays private), as the business page shows them.
       x.execute<ContactRow>(sql`
         SELECT business_id, type, subtype, verification_status FROM business_contacts
-        WHERE business_id = ANY(${ids})
-          AND (submitted_by_org_id IS NULL OR submitted_by_org_id = ${organizationId})`),
+        WHERE business_id = ANY(${ids})`),
       x.execute<InsightsRow>(sql`
         SELECT business_id, sample_size, pain_share, sentiment_avg, owner_response_rate FROM review_insights
         WHERE organization_id = ${organizationId} AND business_id = ANY(${ids})`),

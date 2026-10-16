@@ -3,7 +3,7 @@ import type { Logger } from '@bf/observability';
 import { Inject, Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { LOGGER } from '../../platform/logging/logger.ts';
 import { BUILTIN_PROFILE_VERSIONS, BUILTIN_PROFILES } from '../domain/builtin-profiles.ts';
-import { SCORING_REPOSITORY, type ScoringRepository } from './ports.ts';
+import { SCORING_QUEUE, SCORING_REPOSITORY, type ScoringQueue, type ScoringRepository } from './ports.ts';
 
 // The built-in profiles live in code (domain) and in the database (scores reference their rows): every process
 // makes sure their rows and current versions exist at boot (idempotent, safe when several start at once).
@@ -32,6 +32,7 @@ const NAMES: Record<Offer, string> = {
 export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
   constructor(
     @Inject(SCORING_REPOSITORY) private readonly repository: ScoringRepository,
+    @Inject(SCORING_QUEUE) private readonly queue: ScoringQueue,
     @Inject(LOGGER) private readonly logger: Logger,
   ) {}
 
@@ -41,7 +42,7 @@ export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
 
   async seed(): Promise<void> {
     const offers = Object.keys(BUILTIN_PROFILES) as Offer[];
-    await this.repository.ensureBuiltins(
+    const activated = await this.repository.ensureBuiltins(
       offers.map((offer) => ({
         id: BUILTIN_PROFILE_IDS[offer],
         offer,
@@ -50,6 +51,22 @@ export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
         config: BUILTIN_PROFILES[offer],
       })),
     );
-    this.logger.debug({ profiles: offers.length }, 'built-in scoring profiles ensured');
+    // A new built-in version rescores every workspace (the first boot activates v1 with nothing to rescore yet).
+    // Keyed per version and workspace: processes booting together enqueue it once.
+    const workspaces = activated.length > 0 ? await this.repository.workspacesWithBusinesses() : [];
+    for (const { profileId, version } of activated) {
+      for (const organizationId of workspaces) {
+        await this.queue.recompute({
+          organizationId,
+          profileId,
+          version,
+          idempotencyKey: `builtin:${profileId}:${version}:${organizationId}`,
+        });
+      }
+    }
+    this.logger.debug(
+      { profiles: offers.length, activated: activated.length },
+      'built-in scoring profiles ensured',
+    );
   }
 }

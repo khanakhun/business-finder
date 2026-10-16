@@ -36,6 +36,11 @@ export interface ScoreWrite extends ScoreResult {
   readonly computedAt: Date;
 }
 
+/** A write and whether it is new history (a forced recompute of an unchanged vector rewrites only the current row). */
+export interface ScoreWriteRequest extends ScoreWrite {
+  readonly history: boolean;
+}
+
 export interface StoredScore extends ScoreWrite {}
 
 /** What a batch write changed: the scores that moved (for `score.updated`). */
@@ -51,7 +56,7 @@ export interface ScoringRepository {
   /** A profile the workspace may see (built-in or its own). */
   profile(organizationId: string, profileId: string): Promise<ProfileRecord | undefined>;
   version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined>;
-  /** Creates the built-in profiles and versions that do not exist yet (idempotent). */
+  /** Creates the built-in profiles and versions that do not exist yet (idempotent); returns the ones it activated. */
   ensureBuiltins(
     profiles: readonly {
       id: string;
@@ -60,10 +65,14 @@ export interface ScoringRepository {
       version: number;
       config: ScoringProfileConfig;
     }[],
-  ): Promise<void>;
+  ): Promise<{ readonly profileId: string; readonly version: number }[]>;
+  /** Workspaces tracking at least one business (a new built-in version recomputes them). */
+  workspacesWithBusinesses(): Promise<string[]>;
   /** The workspace's primary profile id (null: the default built-in). */
   primaryProfileId(organizationId: string): Promise<string | null>;
   setPrimaryProfile(organizationId: string, profileId: string, userId: string | null): Promise<void>;
+  /** Serializes score writes per business of the workspace (transaction-scoped advisory locks, in id order). */
+  lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void>;
   /** The current scores of these businesses (fingerprints to skip unchanged writes). */
   currentScores(
     organizationId: string,
@@ -78,6 +87,7 @@ export interface ScoringRepository {
         factsHash: string;
         score: number;
         tier: ScoreTier;
+        computedAt: Date;
       }[]
     >
   >;
@@ -85,7 +95,7 @@ export interface ScoringRepository {
    * Upserts current scores, appends history and, for the primary profile, refreshes `org_businesses.score/tier`
    * (one transaction per batch).
    */
-  writeScores(writes: readonly ScoreWrite[], primaryProfileId: string): Promise<void>;
+  writeScores(writes: readonly ScoreWriteRequest[], primaryProfileId: string): Promise<void>;
   /** Copies the primary profile's current scores into `org_businesses` (null where it has none). */
   denormalizePrimary(organizationId: string, primaryProfileId: string): Promise<void>;
   businessScores(organizationId: string, businessId: string): Promise<StoredScore[]>;

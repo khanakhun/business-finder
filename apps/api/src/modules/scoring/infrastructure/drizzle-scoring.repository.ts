@@ -22,11 +22,15 @@ import type {
   ProfileRecord,
   ProfileVersionRecord,
   ScoreWrite,
+  ScoreWriteRequest,
   ScoringRepository,
   StoredScore,
 } from '../application/ports.ts';
 
 type ProfileRow = typeof scoringProfiles.$inferSelect;
+
+/** Rows per insert statement. */
+const WRITE_CHUNK = 2_000;
 type ScoreRow = typeof businessScores.$inferSelect;
 
 const toProfile = (row: ProfileRow): ProfileRecord => ({
@@ -141,8 +145,9 @@ export class DrizzleScoringRepository implements ScoringRepository {
       version: number;
       config: ScoringProfileConfig;
     }[],
-  ): Promise<void> {
+  ): Promise<{ readonly profileId: string; readonly version: number }[]> {
     const x = getExecutor(this.db);
+    const activated: { profileId: string; version: number }[] = [];
     for (const profile of profiles) {
       await x
         .insert(scoringProfiles)
@@ -159,7 +164,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
         .values({ profileId: profile.id, version: profile.version, config: profile.config })
         .onConflictDoNothing();
       // A newer built-in version becomes active; an older process never moves it back.
-      await x
+      const moved = await x
         .update(scoringProfiles)
         .set({ activeVersion: profile.version })
         .where(
@@ -170,8 +175,18 @@ export class DrizzleScoringRepository implements ScoringRepository {
               sql`${scoringProfiles.activeVersion} < ${profile.version}`,
             ),
           ),
-        );
+        )
+        .returning({ id: scoringProfiles.id });
+      if (moved.length > 0) activated.push({ profileId: profile.id, version: profile.version });
     }
+    return activated;
+  }
+
+  async workspacesWithBusinesses(): Promise<string[]> {
+    const rows = await getExecutor(this.db)
+      .selectDistinct({ organizationId: orgBusinesses.organizationId })
+      .from(orgBusinesses);
+    return rows.map((row) => row.organizationId);
   }
 
   async primaryProfileId(organizationId: string): Promise<string | null> {
@@ -192,6 +207,18 @@ export class DrizzleScoringRepository implements ScoringRepository {
       });
   }
 
+  async lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void> {
+    if (businessIds.length === 0) return;
+    const keys = [...new Set(businessIds)].sort().map((id) => `scoring:${organizationId}:${id}`);
+    // One round trip, in key order: two batches sharing businesses never wait on each other in a cycle.
+    await getExecutor(this.db).execute(sql`
+      SELECT pg_advisory_xact_lock(hashtextextended(k, 0))
+      FROM unnest(ARRAY[${sql.join(
+        keys.map((key) => sql`${key}`),
+        sql`, `,
+      )}]::text[]) WITH ORDINALITY AS t(k, n) ORDER BY n`);
+  }
+
   async currentScores(organizationId: string, businessIds: readonly string[]) {
     const current = new Map<
       string,
@@ -202,6 +229,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
         factsHash: string;
         score: number;
         tier: ScoreTier;
+        computedAt: Date;
       }[]
     >();
     if (businessIds.length === 0) return current;
@@ -214,6 +242,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
         factsHash: businessScores.factsHash,
         score: businessScores.score,
         tier: businessScores.tier,
+        computedAt: businessScores.computedAt,
       })
       .from(businessScores)
       .where(
@@ -227,31 +256,38 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return current;
   }
 
-  async writeScores(writes: readonly ScoreWrite[], primaryProfileId: string): Promise<void> {
+  async writeScores(writes: readonly ScoreWriteRequest[], primaryProfileId: string): Promise<void> {
     if (writes.length === 0) return;
     const x = getExecutor(this.db);
-    const values = writes.map(scoreValues);
-    await x
-      .insert(businessScores)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [businessScores.organizationId, businessScores.businessId, businessScores.profileId],
-        set: {
-          profileVersion: sql`excluded.profile_version`,
-          score: sql`excluded.score`,
-          tier: sql`excluded.tier`,
-          contributions: sql`excluded.contributions`,
-          reasons: sql`excluded.reasons`,
-          gated: sql`excluded.gated`,
-          features: sql`excluded.features`,
-          featureSetVersion: sql`excluded.feature_set_version`,
-          factsHash: sql`excluded.facts_hash`,
-          computedAt: sql`excluded.computed_at`,
-        },
-      });
-    await x.insert(businessScoreHistory).values(values.map((value) => ({ id: newId(), ...value })));
+    // Chunks stay under Postgres's 65,535 bind parameters (14 columns a row).
+    for (let start = 0; start < writes.length; start += WRITE_CHUNK) {
+      const chunk = writes.slice(start, start + WRITE_CHUNK);
+      await x
+        .insert(businessScores)
+        .values(chunk.map(scoreValues))
+        .onConflictDoUpdate({
+          target: [businessScores.organizationId, businessScores.businessId, businessScores.profileId],
+          set: {
+            profileVersion: sql`excluded.profile_version`,
+            score: sql`excluded.score`,
+            tier: sql`excluded.tier`,
+            contributions: sql`excluded.contributions`,
+            reasons: sql`excluded.reasons`,
+            gated: sql`excluded.gated`,
+            features: sql`excluded.features`,
+            featureSetVersion: sql`excluded.feature_set_version`,
+            factsHash: sql`excluded.facts_hash`,
+            computedAt: sql`excluded.computed_at`,
+          },
+        });
+      const history = chunk.filter((write) => write.history).map(scoreValues);
+      if (history.length > 0) {
+        await x.insert(businessScoreHistory).values(history.map((value) => ({ id: newId(), ...value })));
+      }
+    }
     const primary = writes.filter((write) => write.profileId === primaryProfileId);
     if (primary.length === 0) return;
+    // DECISION(BF-031): scoring keeps the CRM's denormalized listing columns (BF-022) for the primary profile.
     const rows = sql.join(
       primary.map(
         (write) =>

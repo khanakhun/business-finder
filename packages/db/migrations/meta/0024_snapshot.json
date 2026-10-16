@@ -1,5 +1,5 @@
 {
-  "id": "8ac02d45-ecbd-4bd8-a58d-ce82f57c52bb",
+  "id": "1d166c1b-8c59-4c99-b5cd-a98e5aa9edb6",
   "prevId": "4d493444-80e3-4f92-837d-47b987318721",
   "version": "7",
   "dialect": "postgresql",
@@ -7055,7 +7055,7 @@
           "tableTo": "scoring_profile_versions",
           "columnsFrom": ["profile_id", "profile_version"],
           "columnsTo": ["profile_id", "version"],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -7241,7 +7241,7 @@
           "tableTo": "scoring_profile_versions",
           "columnsFrom": ["profile_id", "profile_version"],
           "columnsTo": ["profile_id", "version"],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },

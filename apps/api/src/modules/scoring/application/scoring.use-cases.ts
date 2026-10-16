@@ -185,17 +185,22 @@ export class SetPrimaryProfileCommand {
     private readonly recompute: RecomputeProfileCommand,
   ) {}
 
-  @Transactional()
   async execute(
     organizationId: string,
     profileId: string,
     userId: string | null,
   ): Promise<ScoringRecomputeResponse> {
+    await this.switch(organizationId, profileId, userId);
+    // Enqueued after the commit: the recompute must see the new primary profile.
+    return this.recompute.execute(organizationId, profileId, userId);
+  }
+
+  @Transactional()
+  private async switch(organizationId: string, profileId: string, userId: string | null): Promise<void> {
     const profile = await this.repository.profile(organizationId, profileId);
     if (!profile?.activeVersion) throw new NotFoundError('ScoringProfile', profileId);
     await this.repository.setPrimaryProfile(organizationId, profileId, userId);
     // The scores already there fill the listing now; the recompute fills in the rest.
     await this.repository.denormalizePrimary(organizationId, profileId);
-    return this.recompute.execute(organizationId, profileId, userId);
   }
 }

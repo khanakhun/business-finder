@@ -609,7 +609,13 @@ export const TransformSchema = z
     /** log(1 + x) / log(1 + max), clamped (DECISION: no `base` — the ratio is the same in every base). */
     z.object({ kind: z.literal('log'), max: z.number().positive() }),
     z.object({ kind: z.literal('boolean'), true: unit, false: unit }),
-    z.object({ kind: z.literal('enumMap'), map: z.record(z.string(), unit), default: unit.default(0) }),
+    z.object({
+      kind: z.literal('enumMap'),
+      map: z
+        .record(z.string().max(60), unit)
+        .refine((map) => Object.keys(map).length <= 50, { message: 'At most 50 values' }),
+      default: unit.default(0),
+    }),
   ])
   .superRefine((transform, ctx) => {
     if ((transform.kind === 'linear' || transform.kind === 'inverse') && transform.max <= transform.min) {
@@ -678,10 +684,47 @@ export const GateConditionSchema: z.ZodType<GateCondition> = z
 
 const TextSchema = z.object({ en: z.string().min(1).max(300), fr: z.string().min(1).max(300) });
 
+/** Bounds of a gate condition (the recursive schema would overflow the stack on a deeply nested input). */
+export const GATE_CONDITION_LIMITS = { depth: 6, nodes: 100 } as const;
+
+/** Depth and size of a raw condition, measured without recursion; null when within the limits. */
+function conditionTooLarge(raw: unknown): string | null {
+  const stack: [unknown, number][] = [[raw, 1]];
+  let nodes = 0;
+  while (stack.length > 0) {
+    const [node, depth] = stack.pop() as [unknown, number];
+    nodes += 1;
+    if (depth > GATE_CONDITION_LIMITS.depth)
+      return `Conditions nest at most ${GATE_CONDITION_LIMITS.depth} levels`;
+    if (nodes > GATE_CONDITION_LIMITS.nodes)
+      return `A gate has at most ${GATE_CONDITION_LIMITS.nodes} conditions`;
+    if (!node || typeof node !== 'object') continue;
+    const record = node as Record<string, unknown>;
+    for (const key of ['all', 'any'] as const) {
+      const parts = record[key];
+      if (Array.isArray(parts)) for (const part of parts) stack.push([part, depth + 1]);
+    }
+    if ('not' in record) stack.push([record.not, depth + 1]);
+  }
+  return null;
+}
+
+/** A gate condition from a request: size-checked before the recursive schema reads it. */
+const BoundedGateConditionSchema = z
+  .unknown()
+  .superRefine((raw, ctx) => {
+    const problem = conditionTooLarge(raw);
+    if (problem) ctx.addIssue({ code: 'custom', message: problem, abort: true });
+  })
+  .pipe(GateConditionSchema)
+  .meta({
+    description: `A ScoringGateCondition (leaf, all, any, not): at most ${GATE_CONDITION_LIMITS.depth} levels and ${GATE_CONDITION_LIMITS.nodes} conditions.`,
+  });
+
 export const GateSchema = z
   .object({
     id: z.string().regex(/^[a-z][a-z0-9_]{1,40}$/),
-    when: GateConditionSchema,
+    when: BoundedGateConditionSchema,
     /** `exclude`: tier X, score 0; `cap`: the score is at most `max`. An exclusion wins over caps. */
     effect: z.discriminatedUnion('type', [
       z.object({ type: z.literal('exclude') }),

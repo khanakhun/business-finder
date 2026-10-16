@@ -121,12 +121,16 @@ export const businessScores = pgTable('business_scores', scoreColumns(), (table)
     name: 'fk_business_scores__profile_version',
     columns: [table.profileId, table.profileVersion],
     foreignColumns: [scoringProfileVersions.profileId, scoringProfileVersions.version],
-  }).onDelete('cascade'),
+  }).onDelete('no action'),
   check('ck_business_scores__score', sql`${table.score} BETWEEN 0 AND 100`),
   check('ck_business_scores__tier', sql`${table.tier} IN (${inList(SCORE_TIERS)})`),
 ]);
 
-/** Every score ever written (append-only: an UPDATE is refused by a trigger). */
+/**
+ * Every score ever written (append-only: an UPDATE is refused by a trigger). A profile version with history cannot
+ * be deleted (`no action`): BF-059 trains on it; archive profiles instead. Deleting a workspace or a business still
+ * removes its rows (retention).
+ */
 export const businessScoreHistory = pgTable(
   'business_score_history',
   { id: id(), ...scoreColumns() },
@@ -148,7 +152,7 @@ export const businessScoreHistory = pgTable(
       name: 'fk_business_score_history__profile_version',
       columns: [table.profileId, table.profileVersion],
       foreignColumns: [scoringProfileVersions.profileId, scoringProfileVersions.version],
-    }).onDelete('cascade'),
+    }).onDelete('no action'),
     check('ck_business_score_history__score', sql`${table.score} BETWEEN 0 AND 100`),
     check('ck_business_score_history__tier', sql`${table.tier} IN (${inList(SCORE_TIERS)})`),
   ],

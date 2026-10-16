@@ -71,10 +71,10 @@ CREATE TABLE "scoring_workspace_settings" (
 --> statement-breakpoint
 ALTER TABLE "business_score_history" ADD CONSTRAINT "business_score_history_business_id_businesses_id_fk" FOREIGN KEY ("business_id") REFERENCES "public"."businesses"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "business_score_history" ADD CONSTRAINT "fk_business_score_history__organization_id" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "business_score_history" ADD CONSTRAINT "fk_business_score_history__profile_version" FOREIGN KEY ("profile_id","profile_version") REFERENCES "public"."scoring_profile_versions"("profile_id","version") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "business_score_history" ADD CONSTRAINT "fk_business_score_history__profile_version" FOREIGN KEY ("profile_id","profile_version") REFERENCES "public"."scoring_profile_versions"("profile_id","version") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "business_scores" ADD CONSTRAINT "business_scores_business_id_businesses_id_fk" FOREIGN KEY ("business_id") REFERENCES "public"."businesses"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "business_scores" ADD CONSTRAINT "fk_business_scores__organization_id" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "business_scores" ADD CONSTRAINT "fk_business_scores__profile_version" FOREIGN KEY ("profile_id","profile_version") REFERENCES "public"."scoring_profile_versions"("profile_id","version") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "business_scores" ADD CONSTRAINT "fk_business_scores__profile_version" FOREIGN KEY ("profile_id","profile_version") REFERENCES "public"."scoring_profile_versions"("profile_id","version") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "scoring_profile_versions" ADD CONSTRAINT "scoring_profile_versions_profile_id_scoring_profiles_id_fk" FOREIGN KEY ("profile_id") REFERENCES "public"."scoring_profiles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "scoring_profile_versions" ADD CONSTRAINT "scoring_profile_versions_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "scoring_profiles" ADD CONSTRAINT "scoring_profiles_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -89,7 +89,8 @@ CREATE INDEX "idx_business_scores__organization_id_profile_id_score" ON "busines
 CREATE INDEX "idx_business_scores__business_id" ON "business_scores" USING btree ("business_id");--> statement-breakpoint
 CREATE INDEX "idx_business_scores__profile_id" ON "business_scores" USING btree ("profile_id");--> statement-breakpoint
 CREATE INDEX "idx_scoring_profiles__organization_id" ON "scoring_profiles" USING btree ("organization_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "uq_scoring_profiles__builtin_offer" ON "scoring_profiles" USING btree ("offer") WHERE "scoring_profiles"."builtin";--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_scoring_profiles__builtin_offer" ON "scoring_profiles" USING btree ("offer") WHERE "scoring_profiles"."builtin";
+--> statement-breakpoint
 CREATE TRIGGER scoring_profiles_set_updated_at BEFORE UPDATE ON "scoring_profiles" FOR EACH ROW EXECUTE FUNCTION set_updated_at();--> statement-breakpoint
 CREATE TRIGGER scoring_workspace_settings_set_updated_at BEFORE UPDATE ON "scoring_workspace_settings" FOR EACH ROW EXECUTE FUNCTION set_updated_at();--> statement-breakpoint
 -- Profile versions and score history are never rewritten (BF-031): scores name the version they used, and the

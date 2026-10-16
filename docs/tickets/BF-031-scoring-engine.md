@@ -111,7 +111,12 @@ Two stacked PRs: part 1 (#93) the pure core, part 2 the persistence, recompute a
   `org_business.status.changed`, `crm.do_not_contact.set` for the workspace; `business.enriched`, `business.updated`
   for every tracking workspace). Bulk: `POST /v1/scoring/profiles/:id/recompute` (202, `scoring:manage`) pages through
   the workspace with throttled realtime progress (`scoring.recompute.progressed`); 10,000 synthetic businesses in
-  ≈ 3.5 s (integration suite, target < 60 s). Unchanged vectors are skipped.
+  ≈ 3.8 s (integration suite, target < 60 s). Unchanged vectors are skipped (a forced recompute rewrites the current
+  row without a history row); at most one waiting and one running recompute per workspace and profile; writes are
+  serialized per business (advisory locks; older facts never overwrite newer ones). Merges rescore the survivor; a
+  new built-in version recomputes every workspace.
+- **DECISION — contacts are global facts** in scoring (ADR-0008), as on the business page.
+- **DECISION — history is kept**: profile versions with scores cannot be deleted (`no action`), archive instead.
 - **`score.updated`**: only when the primary profile's tier moves (a first score is no change; a bulk first scoring
   would flood the outbox) → CRM timeline (`Tier moved from B to X`). Pages refresh on `scoring.scores.updated`
   (realtime, sent after small compute batches).

@@ -3335,6 +3335,7 @@ export type components = {
                 en: string;
                 fr: string;
             };
+            /** @description A ScoringGateCondition (leaf, all, any, not): at most 6 levels and 100 conditions. */
             when: components["schemas"]["ScoringGateCondition"];
         };
         ScoringGateCondition: {

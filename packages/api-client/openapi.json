@@ -8412,7 +8412,8 @@
             "type": "object"
           },
           "when": {
-            "$ref": "#/components/schemas/ScoringGateCondition"
+            "$ref": "#/components/schemas/ScoringGateCondition",
+            "description": "A ScoringGateCondition (leaf, all, any, not): at most 6 levels and 100 conditions."
           }
         },
         "required": [
@@ -9172,6 +9173,7 @@
                   "type": "number"
                 },
                 "propertyNames": {
+                  "maxLength": 60,
                   "type": "string"
                 },
                 "type": "object"

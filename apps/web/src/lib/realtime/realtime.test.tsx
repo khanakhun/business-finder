@@ -170,6 +170,11 @@ describe('realtime event names', () => {
       ['business', 'b1'],
       ['search', 'listing'],
     ]);
+    const batch = { type: SCORING_SCORES_UPDATED, entity: 'workspace', entityId: 'o1' } as never;
+    expect(realtimeInvalidations[SCORING_SCORES_UPDATED]?.(batch)).toEqual([
+      ['business'],
+      ['search', 'listing'],
+    ]);
     const recompute = (finished: boolean) =>
       ({
         type: SCORING_RECOMPUTE_PROGRESSED,

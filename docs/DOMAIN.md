@@ -35,9 +35,10 @@
 | **Contact** | An email, phone, WhatsApp, social profile or contact form of a business, with role (`generic` like info@ vs `personal`), verification status and provenance. E-mails also carry where the business's own site publishes them (page kind: contact, home, footer, legal, other; found as mailto, text, JSON-LD…), whether the domain is free webmail, and what the verifier saw (BF-028). |
 | **Verification status** | A verifier's verdict on an e-mail: `valid` (mailbox exists), `invalid` (does not, or the domain takes no mail — also spam traps), `catch_all` (the domain accepts anything), `risky` (role accounts, uncertain answers), `disposable` (throw-away domain), `unknown` (not checked, or the server would not say). Verdicts are shared by address across workspaces (keyed by a hash, never the address) and reused for 60 days; an inconclusive one never replaces a conclusive one. |
 | **Offer** | What we sell: `new_website`, `website_redesign`, `ai_receptionist`, `booking_system`, `local_seo`. Scoring profiles are per offer. |
-| **Feature vector** | Typed, versioned set of features computed for a business at a point in time (e.g. `has_website`, `psi_mobile_perf`, `review_count_log`). |
+| **Feature vector** | Typed set of features computed for a business at a point in time (44 in `FEATURE_DEFINITIONS`, e.g. `has_website`, `psi_mobile_performance`, `review_count_log`); stored with each score, missing values kept missing; `FEATURE_SET_VERSION` names their semantics and keys are append-only (BF-031). |
 | **Scoring profile** | Versioned configuration that turns a feature vector into a score: weights, transforms, gates, tier thresholds. Rule-based or model-based. |
-| **Score / Tier** | 0–100 opportunity score with explanation; tier `A` (act now), `B` (good), `C` (later), or `X` (gated out). |
+| **Score / Tier** | 0–100 opportunity score with explanation (contributions, top reasons each way in EN/FR, the deciding gate); tier `A` (act now), `B` (good), `C` (later), or `X` (gated out). Per workspace × business × profile; the workspace's **primary profile** (default: new website) is the listing's score and tier. |
+| **Gate** | A condition on the feature vector that excludes a business from an offer (tier X: closed, disqualified, no-solicitation notice, do-not-contact) or caps its score (temporarily closed, already a customer, unreachable, offer rarely fits…). |
 | **Site** | A website we host for a business (preview first). Owned by a workspace. |
 | **SiteSpec** | The JSON document describing a site: locales, theme, navigation, pages, blocks, assets, settings. Validated by `@bf/site-schema`. |
 | **Block** | A typed section of a page (hero, services, gallery, contact…) rendered by `@bf/site-blocks`. |
@@ -238,7 +239,8 @@ Envelope (in `@bf/contracts/events`): `{ id, type, version, occurredAt, orgId | 
 | `business.merged` | business-graph | crm (re-point org businesses), sites, outreach (re-point references) |
 | `discovery.run.progressed` / `.completed` | discovery | realtime, notifications |
 | `business.enriched` | enrichment | scoring, realtime |
-| `score.updated` | scoring | crm (cached score/tier), realtime, analytics |
+| `score.updated` | scoring (primary profile's tier moved) | crm (timeline; the cached score/tier is written by scoring itself), analytics |
+| `org_business.tracked` | business-graph, discovery | scoring (first scores) |
 | `org_business.status_changed` | crm | outreach (stop sequences on lost/disqualified), analytics |
 | `generation.job.status_changed` | generation | realtime, notifications (batch complete), analytics |
 | `site.version.created` | sites | generation (quality gates), realtime |

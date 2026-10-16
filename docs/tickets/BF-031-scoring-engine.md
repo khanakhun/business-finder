@@ -76,11 +76,48 @@ docs/scoring/profiles.md
 - Integration: event → recompute → `business_scores` + history + denormalized columns + `score.updated`; bulk recompute performance (10k synthetic businesses) reported.
 
 ## Acceptance criteria
-- [ ] Feature registry (≥ 25 features), transforms, gates, explainable engine with EN/FR reasons.
-- [ ] Built-in offer profiles seeded with documented rationale.
-- [ ] Scores, history and feature snapshots persisted; denormalized score/tier for listing.
-- [ ] Event-driven and bulk recompute; performance target met.
-- [ ] Explain endpoint for drafts.
+- [x] Feature registry (≥ 25 features), transforms, gates, explainable engine with EN/FR reasons.
+- [x] Built-in offer profiles seeded with documented rationale.
+- [x] Scores, history and feature snapshots persisted; denormalized score/tier for listing.
+- [x] Event-driven and bulk recompute; performance target met.
+- [x] Explain endpoint for drafts.
+
+## Implementation notes
+
+Two stacked PRs: part 1 (#93) the pure core, part 2 the persistence, recompute and APIs.
+
+- **Contracts** (`scoring.ts`): 44 features (`FEATURE_DEFINITIONS`: group, type, unit, range, pivot, EN/FR description
+  and reason texts, source, missing default; keys append-only, `FEATURE_SET_VERSION`), transforms (linear, inverse,
+  non-decreasing piecewise, log without `base` — DECISION: the normalized ratio is the same in every base, boolean,
+  enumMap), gate DSL (one operator per leaf, all/any/not), profile config (`kind: 'rules'`, per-profile `missing`
+  values, reason templates) validated by `profileProblems` (shared with BF-032; array paths), score DTOs (each
+  contribution says what stood in: `imputed`; `gated.applied`), events `score.updated` and `org_business.tracked`,
+  jobs `scoring/compute` and `scoring-recompute/recompute`.
+- **Engine** (`scoring/domain`, pure): weighted sum ÷ positive weights, clamped; registry defaults, then profile
+  `missing` values; gates (exclusion beats caps, lowest cap wins, do-not-contact always X); tiers; reasons (three each
+  way, profile texts first, a filled-in value reads only a `missing` text). Property tests (seeded): determinism,
+  monotonicity, do-not-contact. Golden table: 12 fictional businesses × 5 profiles (docs/scoring/profiles.md).
+- **Built-in profiles**: `new_website`, `website_redesign`, `ai_receptionist`, `booking_system`, `local_seo`, each v1
+  (digest-pinned), seeded at boot with stable ids (`BUILTIN_PROFILE_IDS`).
+- **Storage** (migration `0024_scoring`): `scoring_profiles`, `scoring_profile_versions` (immutable: UPDATE refused by
+  a trigger), `business_scores` (PK org × business × profile; features, feature-set version, vector hash),
+  `business_score_history` (append-only), `scoring_workspace_settings` (primary profile).
+- **DECISION — primary profile** lives in the scoring module's own table (`PUT /v1/scoring/primary-profile`), not in
+  `org_settings`: validating a profile id from the workspace module would read another module's table. Default: the
+  built-in new-website profile.
+- **Facts assembler**: three queries per batch of 500 (cross-module read model, DECISION comment). Last contact =
+  last pipeline move of a contacted business until outreach records sends (DECISION).
+- **Recompute**: subscribers enqueue `scoring/compute` jobs keyed by the event (`org_business.tracked` — a new event,
+  `org_business.status.changed`, `crm.do_not_contact.set` for the workspace; `business.enriched`, `business.updated`
+  for every tracking workspace). Bulk: `POST /v1/scoring/profiles/:id/recompute` (202, `scoring:manage`) pages through
+  the workspace with throttled realtime progress (`scoring.recompute.progressed`); 10,000 synthetic businesses in
+  ≈ 3.5 s (integration suite, target < 60 s). Unchanged vectors are skipped.
+- **`score.updated`**: only when the primary profile's tier moves (a first score is no change; a bulk first scoring
+  would flood the outbox) → CRM timeline (`Tier moved from B to X`). Pages refresh on `scoring.scores.updated`
+  (realtime, sent after small compute batches).
+- **APIs**: `GET /v1/businesses/:id/scores`, `GET /v1/scoring/profiles`, `GET /v1/scoring/profiles/:id/versions/:v`
+  (business:read), `POST /v1/scoring/profiles/:id/recompute`, `PUT /v1/scoring/primary-profile`,
+  `POST /v1/scoring/explain` (scoring:manage).
 
 ## Agent prompt
 ```text

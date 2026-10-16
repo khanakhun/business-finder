@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "locales": ["fr", "en"],
+  "defaultLocale": "fr",
+  "brand": {
+    "name": "Quincaillerie du Port",
+    "factId": "business.name"
+  },
+  "theme": {
+    "style": "modern",
+    "palette": {
+      "primary": "#1f4e8c",
+      "accent": "#b3541e",
+      "background": "#f7f8fa",
+      "surface": "#ffffff",
+      "text": "#1b1f24",
+      "mutedText": "#55606b"
+    },
+    "typography": {
+      "pairId": "spacegrotesk-inter"
+    },
+    "radius": "md",
+    "density": "compact",
+    "imageTreatment": "plain"
+  },
+  "contact": {
+    "phone": {
+      "value": "+33297000303",
+      "factId": "phone.main"
+    },
+    "email": {
+      "value": "contact@quincaillerie-du-port.example",
+      "factId": "email.main"
+    },
+    "address": {
+      "street": "4 quai des Indes",
+      "postalCode": "56100",
+      "locality": "Lorient",
+      "country": "FR",
+      "formatted": "4 quai des Indes, 56100 Lorient",
+      "factId": "address.main"
+    },
+    "hours": {
+      "weekly": {
+        "mon": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "tue": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "wed": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "thu": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "fri": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "sat": [
+          {
+            "open": "08:30",
+            "close": "12:30"
+          },
+          {
+            "open": "14:00",
+            "close": "18:30"
+          }
+        ],
+        "sun": []
+      },
+      "factId": "hours.main"
+    }
+  },
+  "layout": {
+    "header": {
+      "variant": "simple",
+      "showCta": false
+    },
+    "footer": {
+      "variant": "columns",
+      "showSocials": false,
+      "showHours": true
+    }
+  },
+  "navigation": {
+    "items": [
+      {
+        "pageId": "home",
+        "label": {
+          "fr": "Accueil",
+          "en": "Home"
+        }
+      },
+      {
+        "pageId": "about",
+        "label": {
+          "fr": "Le magasin",
+          "en": "The shop"
+        }
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "home",
+      "slug": "",
+      "title": {
+        "fr": "Accueil",
+        "en": "Home"
+      },
+      "seo": {
+        "title": {
+          "fr": "Quincaillerie du Port – Lorient",
+          "en": "Quincaillerie du Port – Lorient hardware"
+        },
+        "description": {
+          "fr": "Outillage, visserie, peinture et conseils sur le quai des Indes à Lorient. Ouvert du lundi au samedi, découpe de clés sur place.",
+          "en": "Tools, fixings, paint and advice on the quai des Indes in Lorient. Open Monday to Saturday, with key cutting on site for you."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-hard1",
+          "type": "hero",
+          "variant": "centered",
+          "props": {
+            "title": {
+              "fr": "Votre quincaillerie à Lorient",
+              "en": "Your hardware store in Lorient"
+            },
+            "primaryCta": {
+              "kind": "directions",
+              "label": {
+                "fr": "Itinéraire",
+                "en": "Directions"
+              }
+            }
+          }
+        },
+        {
+          "id": "serv-hard1",
+          "type": "services",
+          "variant": "grid",
+          "props": {
+            "heading": {
+              "fr": "Au magasin",
+              "en": "In store"
+            },
+            "items": [
+              {
+                "title": {
+                  "fr": "Outillage",
+                  "en": "Tools"
+                }
+              },
+              {
+                "title": {
+                  "fr": "Visserie",
+                  "en": "Fixings"
+                }
+              },
+              {
+                "title": {
+                  "fr": "Découpe de clés",
+                  "en": "Key cutting"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "faqs-hard1",
+          "type": "faq",
+          "variant": "accordion",
+          "props": {
+            "items": [
+              {
+                "question": {
+                  "fr": "Faites-vous les clés ?",
+                  "en": "Do you cut keys?"
+                },
+                "answer": {
+                  "fr": "Oui, sur place, pendant les heures d’ouverture.",
+                  "en": "Yes, on site, during opening hours."
+                },
+                "factIds": ["service.keys"]
+              }
+            ]
+          }
+        },
+        {
+          "id": "cont-hard1",
+          "type": "contact",
+          "variant": "split",
+          "props": {
+            "heading": {
+              "fr": "Nous joindre",
+              "en": "Reach us"
+            },
+            "showForm": false,
+            "channels": {
+              "phone": true,
+              "email": true,
+              "whatsapp": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "slug": "le-magasin",
+      "title": {
+        "fr": "Le magasin",
+        "en": "The shop"
+      },
+      "seo": {
+        "title": {
+          "fr": "Le magasin – Quincaillerie du Port, Lorient",
+          "en": "The shop – Quincaillerie du Port, Lorient"
+        },
+        "description": {
+          "fr": "Une quincaillerie de quartier sur le quai des Indes à Lorient : outillage, visserie et conseils pour vos travaux de la maison.",
+          "en": "A neighbourhood hardware store on the quai des Indes in Lorient: tools, fixings and advice for every job around the house."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-abou1",
+          "type": "hero",
+          "variant": "minimal",
+          "props": {
+            "title": {
+              "fr": "Le magasin",
+              "en": "The shop"
+            }
+          }
+        },
+        {
+          "id": "abou-abou1",
+          "type": "about",
+          "variant": "centered",
+          "props": {
+            "heading": {
+              "fr": "Une quincaillerie de quartier",
+              "en": "A neighbourhood hardware store"
+            },
+            "body": {
+              "fr": "Sur le quai des Indes, nous conseillons particuliers et artisans.\n\nOutillage, visserie et découpe de clés.",
+              "en": "On the quai des Indes, we advise homeowners and tradespeople.\n\nTools, fixings and key cutting."
+            }
+          }
+        },
+        {
+          "id": "rich-abou1",
+          "type": "rich_text",
+          "variant": "narrow",
+          "props": {
+            "body": {
+              "fr": "**Horaires** : voir la page [d’accueil](page:home).",
+              "en": "**Hours**: see the [home](page:home) page."
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "seo": {
+    "title": {
+      "fr": "Quincaillerie du Port – Lorient",
+      "en": "Quincaillerie du Port – Lorient"
+    },
+    "description": {
+      "fr": "Quincaillerie à Lorient, quai des Indes : outillage, visserie, peinture et découpe de clés, du lundi au samedi avec des conseils.",
+      "en": "Hardware store in Lorient on the quai des Indes: tools, fixings, paint and key cutting, open Monday to Saturday with advice."
+    }
+  },
+  "settings": {
+    "noindex": true,
+    "previewBanner": true,
+    "analytics": "cookieless",
+    "contactForm": {
+      "enabled": false
+    }
+  }
+}

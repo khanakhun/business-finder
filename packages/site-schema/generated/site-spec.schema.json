@@ -1,0 +1,3128 @@
+{
+  "$defs": {
+    "SiteSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "assets": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "alt": {
+                "additionalProperties": {
+                  "maxLength": 150,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "description": "What the image shows, for screen readers, e.g. \"Terrace facing the bay at sunset\". One entry per site locale, at most 150 characters each.",
+                "propertyNames": {
+                  "description": "A site language (ISO 639-1).",
+                  "enum": [
+                    "fr",
+                    "en",
+                    "nl",
+                    "es",
+                    "de"
+                  ],
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "attribution": {
+                "description": "Credit line when the license requires one.",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "dominantColors": {
+                "items": {
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              "focalPoint": {
+                "additionalProperties": false,
+                "description": "Point to keep in view when cropping (0–1 from the top left).",
+                "properties": {
+                  "x": {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "y": {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "type": "object"
+              },
+              "height": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "id": {
+                "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "image",
+                  "logo",
+                  "icon"
+                ],
+                "type": "string"
+              },
+              "license": {
+                "enum": [
+                  "owner_site",
+                  "stock",
+                  "ai_generated",
+                  "uploaded"
+                ],
+                "type": "string"
+              },
+              "url": {
+                "description": "The copy on our storage/CDN host (never a third-party URL).",
+                "maxLength": 500,
+                "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                "type": "string"
+              },
+              "width": {
+                "maximum": 10000,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "url",
+              "width",
+              "height",
+              "alt",
+              "license"
+            ],
+            "type": "object"
+          },
+          "maxItems": 120,
+          "type": "array"
+        },
+        "brand": {
+          "additionalProperties": false,
+          "properties": {
+            "factId": {
+              "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+              "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+              "type": "string"
+            },
+            "name": {
+              "description": "The business name exactly as it is known.",
+              "maxLength": 60,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "type": "object"
+        },
+        "contact": {
+          "additionalProperties": false,
+          "description": "Contact facts. Leave a channel out when the business does not publish it; never invent one.",
+          "properties": {
+            "address": {
+              "additionalProperties": false,
+              "properties": {
+                "country": {
+                  "description": "ISO 3166-1 alpha-2 country code, e.g. \"BL\".",
+                  "pattern": "^[A-Z]{2}$",
+                  "type": "string"
+                },
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "formatted": {
+                  "description": "The address on one or two lines, as the business writes it.",
+                  "maxLength": 300,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "locality": {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "postalCode": {
+                  "maxLength": 20,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "region": {
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "street": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "locality",
+                "country",
+                "formatted"
+              ],
+              "type": "object"
+            },
+            "bookingUrl": {
+              "additionalProperties": false,
+              "description": "The business's existing online booking page (a known booking provider or its own domain).",
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "value": {
+                  "description": "An absolute https URL.",
+                  "maxLength": 500,
+                  "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            },
+            "email": {
+              "additionalProperties": false,
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "value": {
+                  "format": "email",
+                  "maxLength": 254,
+                  "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            },
+            "geo": {
+              "additionalProperties": false,
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "lat": {
+                  "maximum": 90,
+                  "minimum": -90,
+                  "type": "number"
+                },
+                "lng": {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "lat",
+                "lng"
+              ],
+              "type": "object"
+            },
+            "hours": {
+              "additionalProperties": false,
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "note": {
+                  "additionalProperties": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": "Exceptions in plain words (holidays, season), e.g. \"Closed in September\". One entry per site locale, at most 200 characters each.",
+                  "propertyNames": {
+                    "description": "A site language (ISO 639-1).",
+                    "enum": [
+                      "fr",
+                      "en",
+                      "nl",
+                      "es",
+                      "de"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "weekly": {
+                  "additionalProperties": false,
+                  "description": "Opening spans per weekday; an empty list means closed that day.",
+                  "properties": {
+                    "fri": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "mon": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "sat": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "sun": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "thu": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "tue": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    },
+                    "wed": {
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One opening span, e.g. { \"open\": \"09:00\", \"close\": \"12:30\" }. A close before the open ends after midnight.",
+                        "properties": {
+                          "close": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          },
+                          "open": {
+                            "description": "A time as HH:MM (24 h).",
+                            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "open",
+                          "close"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 3,
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "mon",
+                    "tue",
+                    "wed",
+                    "thu",
+                    "fri",
+                    "sat",
+                    "sun"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "weekly"
+              ],
+              "type": "object"
+            },
+            "phone": {
+              "additionalProperties": false,
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "value": {
+                  "description": "E.164 phone number, e.g. \"+590590270000\".",
+                  "pattern": "^\\+[1-9]\\d{6,14}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            },
+            "socials": {
+              "description": "The business's own social profiles (the URL's host must match the network).",
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "factId": {
+                    "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                    "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                    "type": "string"
+                  },
+                  "network": {
+                    "enum": [
+                      "instagram",
+                      "facebook",
+                      "tiktok",
+                      "linkedin",
+                      "youtube",
+                      "x",
+                      "tripadvisor",
+                      "google"
+                    ],
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "An absolute https URL.",
+                    "maxLength": 500,
+                    "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "network",
+                  "url"
+                ],
+                "type": "object"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "whatsapp": {
+              "additionalProperties": false,
+              "properties": {
+                "factId": {
+                  "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                  "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                  "type": "string"
+                },
+                "value": {
+                  "description": "E.164 WhatsApp number.",
+                  "pattern": "^\\+[1-9]\\d{6,14}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "defaultLocale": {
+          "description": "One of `locales`: served at the site root.",
+          "enum": [
+            "fr",
+            "en",
+            "nl",
+            "es",
+            "de"
+          ],
+          "type": "string"
+        },
+        "layout": {
+          "additionalProperties": false,
+          "properties": {
+            "footer": {
+              "additionalProperties": false,
+              "properties": {
+                "showHours": {
+                  "type": "boolean"
+                },
+                "showSocials": {
+                  "type": "boolean"
+                },
+                "tagline": {
+                  "additionalProperties": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "description": "A line under the brand name. One entry per site locale, at most 120 characters each.",
+                  "propertyNames": {
+                    "description": "A site language (ISO 639-1).",
+                    "enum": [
+                      "fr",
+                      "en",
+                      "nl",
+                      "es",
+                      "de"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "variant": {
+                  "enum": [
+                    "simple",
+                    "columns"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "variant",
+                "showSocials",
+                "showHours"
+              ],
+              "type": "object"
+            },
+            "header": {
+              "additionalProperties": false,
+              "properties": {
+                "cta": {
+                  "additionalProperties": false,
+                  "description": "The header button (when `showCta`).",
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "call",
+                        "email",
+                        "whatsapp",
+                        "page",
+                        "booking",
+                        "directions",
+                        "url"
+                      ],
+                      "type": "string"
+                    },
+                    "label": {
+                      "additionalProperties": {
+                        "maxLength": 30,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
+                      "propertyNames": {
+                        "description": "A site language (ISO 639-1).",
+                        "enum": [
+                          "fr",
+                          "en",
+                          "nl",
+                          "es",
+                          "de"
+                        ],
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "pageId": {
+                      "description": "The page a `page` action opens.",
+                      "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "Only for `url` actions.",
+                      "maxLength": 500,
+                      "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "label"
+                  ],
+                  "type": "object"
+                },
+                "logoAssetId": {
+                  "description": "A `logo` asset; without one the brand name is shown.",
+                  "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                  "type": "string"
+                },
+                "showCta": {
+                  "type": "boolean"
+                },
+                "variant": {
+                  "description": "`transparent` sits over the first hero image.",
+                  "enum": [
+                    "simple",
+                    "centered",
+                    "transparent"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "variant",
+                "showCta"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "header",
+            "footer"
+          ],
+          "type": "object"
+        },
+        "locales": {
+          "description": "The site languages, the default one first by convention.",
+          "items": {
+            "description": "A site language (ISO 639-1).",
+            "enum": [
+              "fr",
+              "en",
+              "nl",
+              "es",
+              "de"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+        },
+        "navigation": {
+          "additionalProperties": false,
+          "description": "The main menu: up to 7 pages, in order.",
+          "properties": {
+            "items": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "label": {
+                    "additionalProperties": {
+                      "maxLength": 24,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "description": "A one- or two-word menu label, e.g. \"Services\". One entry per site locale, at most 24 characters each.",
+                    "propertyNames": {
+                      "description": "A site language (ISO 639-1).",
+                      "enum": [
+                        "fr",
+                        "en",
+                        "nl",
+                        "es",
+                        "de"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "pageId": {
+                    "description": "A page id: lowercase letters, digits and dashes, starting with a letter (e.g. \"home\", \"services\").",
+                    "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "pageId",
+                  "label"
+                ],
+                "type": "object"
+              },
+              "maxItems": 7,
+              "type": "array"
+            }
+          },
+          "required": [
+            "items"
+          ],
+          "type": "object"
+        },
+        "pages": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "blocks": {
+                "items": {
+                  "description": "A section of a page, discriminated by `type`.",
+                  "oneOf": [
+                    {
+                      "additionalProperties": false,
+                      "description": "The first section of a page: headline, a sentence and the main action. Exactly one per page, first.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "eyebrow": {
+                              "additionalProperties": {
+                                "maxLength": 40,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "A short line above the title, e.g. the place: \"Gustavia · St Barth\". One entry per site locale, at most 40 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "imageAssetId": {
+                              "description": "The main photo (required by the `split` and `image_full` variants).",
+                              "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                              "type": "string"
+                            },
+                            "primaryCta": {
+                              "additionalProperties": false,
+                              "description": "A button or link. Prefer `call`, `booking` or `page` over `url`.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "call",
+                                    "email",
+                                    "whatsapp",
+                                    "page",
+                                    "booking",
+                                    "directions",
+                                    "url"
+                                  ],
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "additionalProperties": {
+                                    "maxLength": 30,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
+                                  "propertyNames": {
+                                    "description": "A site language (ISO 639-1).",
+                                    "enum": [
+                                      "fr",
+                                      "en",
+                                      "nl",
+                                      "es",
+                                      "de"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "type": "object"
+                                },
+                                "pageId": {
+                                  "description": "The page a `page` action opens.",
+                                  "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "description": "Only for `url` actions.",
+                                  "maxLength": 500,
+                                  "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "label"
+                              ],
+                              "type": "object"
+                            },
+                            "secondaryCta": {
+                              "additionalProperties": false,
+                              "description": "A button or link. Prefer `call`, `booking` or `page` over `url`.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "call",
+                                    "email",
+                                    "whatsapp",
+                                    "page",
+                                    "booking",
+                                    "directions",
+                                    "url"
+                                  ],
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "additionalProperties": {
+                                    "maxLength": 30,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
+                                  "propertyNames": {
+                                    "description": "A site language (ISO 639-1).",
+                                    "enum": [
+                                      "fr",
+                                      "en",
+                                      "nl",
+                                      "es",
+                                      "de"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "type": "object"
+                                },
+                                "pageId": {
+                                  "description": "The page a `page` action opens.",
+                                  "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "description": "Only for `url` actions.",
+                                  "maxLength": 500,
+                                  "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "label"
+                              ],
+                              "type": "object"
+                            },
+                            "subtitle": {
+                              "additionalProperties": {
+                                "maxLength": 160,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One sentence on why customers come (40–160 characters). One entry per site locale, at most 160 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "title": {
+                              "additionalProperties": {
+                                "maxLength": 60,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "The page headline: what the business is, in its own terms. Up to 60 characters. One entry per site locale, at most 60 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "title"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "hero",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "split",
+                            "centered",
+                            "image_full",
+                            "minimal"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Three or four strengths of the business at a glance. Only true, fact-backed claims.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "items": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "factIds": {
+                                    "description": "The facts this highlight states.",
+                                    "items": {
+                                      "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                                      "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                      "type": "string"
+                                    },
+                                    "maxItems": 5,
+                                    "type": "array"
+                                  },
+                                  "icon": {
+                                    "enum": [
+                                      "star",
+                                      "leaf",
+                                      "clock",
+                                      "map_pin",
+                                      "phone",
+                                      "sparkles",
+                                      "heart",
+                                      "shield",
+                                      "sun",
+                                      "waves",
+                                      "utensils",
+                                      "coffee",
+                                      "scissors",
+                                      "wrench",
+                                      "hammer",
+                                      "home",
+                                      "key",
+                                      "calendar",
+                                      "award",
+                                      "users",
+                                      "wifi",
+                                      "car",
+                                      "truck",
+                                      "gift"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "text": {
+                                    "additionalProperties": {
+                                      "maxLength": 240,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "One sentence backing it. One entry per site locale, at most 240 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "title": {
+                                    "additionalProperties": {
+                                      "maxLength": 60,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "A short strength, e.g. \"Open 7 days\". One entry per site locale, at most 60 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "icon",
+                                  "title"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 6,
+                              "minItems": 2,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "items"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "highlights",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "icons",
+                            "cards",
+                            "inline"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "What the business offers. Prices only when the business publishes them (price facts).",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "intro": {
+                              "additionalProperties": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "items": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "cta": {
+                                    "additionalProperties": false,
+                                    "description": "A button or link. Prefer `call`, `booking` or `page` over `url`.",
+                                    "properties": {
+                                      "kind": {
+                                        "enum": [
+                                          "call",
+                                          "email",
+                                          "whatsapp",
+                                          "page",
+                                          "booking",
+                                          "directions",
+                                          "url"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "label": {
+                                        "additionalProperties": {
+                                          "maxLength": 30,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
+                                        "propertyNames": {
+                                          "description": "A site language (ISO 639-1).",
+                                          "enum": [
+                                            "fr",
+                                            "en",
+                                            "nl",
+                                            "es",
+                                            "de"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
+                                      "pageId": {
+                                        "description": "The page a `page` action opens.",
+                                        "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "description": "Only for `url` actions.",
+                                        "maxLength": 500,
+                                        "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "kind",
+                                      "label"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "description": {
+                                    "additionalProperties": {
+                                      "maxLength": 240,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "What it includes, in one or two sentences. One entry per site locale, at most 240 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "imageAssetId": {
+                                    "description": "The id of an asset in `assets`.",
+                                    "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                                    "type": "string"
+                                  },
+                                  "price": {
+                                    "additionalProperties": false,
+                                    "description": "A published price; `factId` must name a price fact with the same amount.",
+                                    "properties": {
+                                      "amount": {
+                                        "maximum": 1000000,
+                                        "minimum": 0,
+                                        "type": "number"
+                                      },
+                                      "currency": {
+                                        "description": "ISO 4217, e.g. \"EUR\".",
+                                        "pattern": "^[A-Z]{3}$",
+                                        "type": "string"
+                                      },
+                                      "factId": {
+                                        "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                                        "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                        "type": "string"
+                                      },
+                                      "unit": {
+                                        "enum": [
+                                          "each",
+                                          "per_person",
+                                          "per_hour",
+                                          "per_night",
+                                          "from"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "amount",
+                                      "currency",
+                                      "factId"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "title": {
+                                    "additionalProperties": {
+                                      "maxLength": 60,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "The service as the business names it. One entry per site locale, at most 60 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "title"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 12,
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "heading",
+                            "items"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "services",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "grid",
+                            "list",
+                            "cards"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "A food or drinks menu from the business’s published menu (prices are price facts).",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "intro": {
+                              "additionalProperties": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "note": {
+                              "additionalProperties": {
+                                "maxLength": 200,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Menu changes with the season\". One entry per site locale, at most 200 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "sections": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "items": {
+                                    "items": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "description": {
+                                          "additionalProperties": {
+                                            "maxLength": 240,
+                                            "minLength": 1,
+                                            "type": "string"
+                                          },
+                                          "description": "Its ingredients or style. One entry per site locale, at most 240 characters each.",
+                                          "propertyNames": {
+                                            "description": "A site language (ISO 639-1).",
+                                            "enum": [
+                                              "fr",
+                                              "en",
+                                              "nl",
+                                              "es",
+                                              "de"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "type": "object"
+                                        },
+                                        "name": {
+                                          "additionalProperties": {
+                                            "maxLength": 60,
+                                            "minLength": 1,
+                                            "type": "string"
+                                          },
+                                          "description": "The dish as the menu names it. One entry per site locale, at most 60 characters each.",
+                                          "propertyNames": {
+                                            "description": "A site language (ISO 639-1).",
+                                            "enum": [
+                                              "fr",
+                                              "en",
+                                              "nl",
+                                              "es",
+                                              "de"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "type": "object"
+                                        },
+                                        "price": {
+                                          "additionalProperties": false,
+                                          "description": "A published price; `factId` must name a price fact with the same amount.",
+                                          "properties": {
+                                            "amount": {
+                                              "maximum": 1000000,
+                                              "minimum": 0,
+                                              "type": "number"
+                                            },
+                                            "currency": {
+                                              "description": "ISO 4217, e.g. \"EUR\".",
+                                              "pattern": "^[A-Z]{3}$",
+                                              "type": "string"
+                                            },
+                                            "factId": {
+                                              "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                                              "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                              "type": "string"
+                                            },
+                                            "unit": {
+                                              "enum": [
+                                                "each",
+                                                "per_person",
+                                                "per_hour",
+                                                "per_night",
+                                                "from"
+                                              ],
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "amount",
+                                            "currency",
+                                            "factId"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "tags": {
+                                          "items": {
+                                            "enum": [
+                                              "vegetarian",
+                                              "vegan",
+                                              "gluten_free",
+                                              "spicy",
+                                              "house_special",
+                                              "local"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "maxItems": 4,
+                                          "type": "array"
+                                        }
+                                      },
+                                      "required": [
+                                        "name"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "maxItems": 30,
+                                    "minItems": 1,
+                                    "type": "array"
+                                  },
+                                  "title": {
+                                    "additionalProperties": {
+                                      "maxLength": 60,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "A menu section, e.g. \"Starters\". One entry per site locale, at most 60 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "title",
+                                  "items"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 10,
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "heading",
+                            "sections"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "menu",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "columns",
+                            "list",
+                            "cards"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Who the business is. Neutral and factual; no invented history.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "body": {
+                              "additionalProperties": {
+                                "maxLength": 1500,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Two or three short paragraphs (blank line between) on the business. Facts only. One entry per site locale, at most 1500 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "factIds": {
+                              "description": "The facts the text states (years, origins…).",
+                              "items": {
+                                "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                                "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                "type": "string"
+                              },
+                              "maxItems": 20,
+                              "type": "array"
+                            },
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"About us\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "imageAssetId": {
+                              "description": "The id of an asset in `assets`.",
+                              "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "heading",
+                            "body"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "about",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "split",
+                            "centered",
+                            "story"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Three to twelve photos of the place, the work or the products.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "assetIds": {
+                              "items": {
+                                "description": "The id of an asset in `assets`.",
+                                "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                                "type": "string"
+                              },
+                              "maxItems": 12,
+                              "minItems": 3,
+                              "type": "array"
+                            },
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "assetIds"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "gallery",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "grid",
+                            "masonry",
+                            "carousel"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Real customer quotes from the fact registry only. Never fabricate a testimonial.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "items": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "author": {
+                                    "description": "As published, e.g. \"Marie L.\".",
+                                    "maxLength": 60,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "factId": {
+                                    "description": "The testimonial fact quoted. Required: never write a testimonial.",
+                                    "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                    "type": "string"
+                                  },
+                                  "quote": {
+                                    "additionalProperties": {
+                                      "maxLength": 400,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "The quote as published (translated faithfully for other locales). One entry per site locale, at most 400 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "rating": {
+                                    "maximum": 5,
+                                    "minimum": 1,
+                                    "type": "integer"
+                                  },
+                                  "source": {
+                                    "enum": [
+                                      "google",
+                                      "tripadvisor",
+                                      "facebook",
+                                      "direct"
+                                    ],
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "factId",
+                                  "quote",
+                                  "author"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 6,
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "items"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "testimonials",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "cards",
+                            "quotes",
+                            "carousel"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Opening hours from `contact.hours`. Requires hours.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Opening hours\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "note": {
+                              "additionalProperties": {
+                                "maxLength": 200,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "An extra line. One entry per site locale, at most 200 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "hours",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "table",
+                            "compact"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Where the business is, from `contact.address` and `contact.geo`.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Find us\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "note": {
+                              "additionalProperties": {
+                                "maxLength": 200,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Parking behind the shop\". One entry per site locale, at most 200 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "showDirections": {
+                              "description": "Show a directions button (needs an address or coordinates).",
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "showDirections"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "location",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "map_split",
+                            "map_full",
+                            "address_only"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "How to reach the business. Needs at least one channel or the form.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "channels": {
+                              "additionalProperties": false,
+                              "description": "Which contact channels to list (only those present in `contact`).",
+                              "properties": {
+                                "email": {
+                                  "type": "boolean"
+                                },
+                                "phone": {
+                                  "type": "boolean"
+                                },
+                                "whatsapp": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "phone",
+                                "email",
+                                "whatsapp"
+                              ],
+                              "type": "object"
+                            },
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Contact us\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "intro": {
+                              "additionalProperties": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "showForm": {
+                              "description": "Show the contact form (needs `settings.contactForm.enabled`).",
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "heading",
+                            "showForm",
+                            "channels"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "contact",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "split",
+                            "centered"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "A band that asks for one action; typically near the end of a page.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "cta": {
+                              "additionalProperties": false,
+                              "description": "A button or link. Prefer `call`, `booking` or `page` over `url`.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "call",
+                                    "email",
+                                    "whatsapp",
+                                    "page",
+                                    "booking",
+                                    "directions",
+                                    "url"
+                                  ],
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "additionalProperties": {
+                                    "maxLength": 30,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "description": "A short verb phrase, e.g. \"Book a table\", \"Réserver\". One entry per site locale, at most 30 characters each.",
+                                  "propertyNames": {
+                                    "description": "A site language (ISO 639-1).",
+                                    "enum": [
+                                      "fr",
+                                      "en",
+                                      "nl",
+                                      "es",
+                                      "de"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "type": "object"
+                                },
+                                "pageId": {
+                                  "description": "The page a `page` action opens.",
+                                  "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "description": "Only for `url` actions.",
+                                  "maxLength": 500,
+                                  "pattern": "^https:\\/\\/[^\\s/$.?#][^\\s]*$",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "label"
+                              ],
+                              "type": "object"
+                            },
+                            "imageAssetId": {
+                              "description": "Background photo for the `image` variant.",
+                              "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                              "type": "string"
+                            },
+                            "text": {
+                              "additionalProperties": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One supporting sentence. One entry per site locale, at most 300 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "title": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "An invitation, e.g. \"Ready for your next cut?\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "cta"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "cta_banner",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "solid",
+                            "image",
+                            "outline"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Common questions. Answers may not state anything the facts do not support.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Questions\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "items": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "answer": {
+                                    "additionalProperties": {
+                                      "maxLength": 600,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "The answer, from facts only; otherwise invite them to ask. One entry per site locale, at most 600 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  },
+                                  "factIds": {
+                                    "items": {
+                                      "description": "The id of the fact this value comes from in the fact registry (e.g. \"phone.main\", \"price.cut_women\").",
+                                      "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                      "type": "string"
+                                    },
+                                    "maxItems": 10,
+                                    "type": "array"
+                                  },
+                                  "question": {
+                                    "additionalProperties": {
+                                      "maxLength": 120,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "A question customers ask. One entry per site locale, at most 120 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "question",
+                                  "answer"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 12,
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "items"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "faq",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "accordion",
+                            "two_column"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "People the business presents publicly (team facts only).",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"The team\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "members": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "factId": {
+                                    "description": "The team-member fact. Required.",
+                                    "pattern": "^[a-z][a-z0-9_.:-]{1,79}$",
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "maxLength": 60,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "photoAssetId": {
+                                    "description": "The id of an asset in `assets`.",
+                                    "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                                    "type": "string"
+                                  },
+                                  "role": {
+                                    "additionalProperties": {
+                                      "maxLength": 60,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "description": "E.g. \"Head chef\". One entry per site locale, at most 60 characters each.",
+                                    "propertyNames": {
+                                      "description": "A site language (ISO 639-1).",
+                                      "enum": [
+                                        "fr",
+                                        "en",
+                                        "nl",
+                                        "es",
+                                        "de"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "factId",
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 12,
+                              "minItems": 1,
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "members"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "team",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "grid",
+                            "list"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Sends visitors to the business's existing booking page (`contact.bookingUrl`). Requires a booking URL.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Book your appointment\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "intro": {
+                              "additionalProperties": {
+                                "maxLength": 300,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "One or two sentences introducing the section. One entry per site locale, at most 300 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "label": {
+                              "additionalProperties": {
+                                "maxLength": 30,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "The button, e.g. \"Book online\". One entry per site locale, at most 30 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "heading",
+                            "label"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "booking",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "link",
+                            "embed"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Links to the business’s profiles from `contact.socials`. Requires socials.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "E.g. \"Follow us\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "social_links",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "icons",
+                            "buttons"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "description": "Free text for legal notices or longer content.",
+                      "properties": {
+                        "id": {
+                          "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                          "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                          "type": "string"
+                        },
+                        "props": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "body": {
+                              "additionalProperties": {
+                                "maxLength": 5000,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Limited markdown: paragraphs, **bold**, *italic*, \"- \" lists and links to the site's own pages as [label](page:<pageId>). No HTML, no other links. One entry per site locale, at most 5000 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            },
+                            "heading": {
+                              "additionalProperties": {
+                                "maxLength": 80,
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "description": "Section heading, e.g. \"Our services\". One entry per site locale, at most 80 characters each.",
+                              "propertyNames": {
+                                "description": "A site language (ISO 639-1).",
+                                "enum": [
+                                  "fr",
+                                  "en",
+                                  "nl",
+                                  "es",
+                                  "de"
+                                ],
+                                "type": "string"
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "body"
+                          ],
+                          "type": "object"
+                        },
+                        "type": {
+                          "const": "rich_text",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "description": "The block layout; see the block catalog for when to use each.",
+                          "enum": [
+                            "narrow",
+                            "wide"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "variant",
+                        "props"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                },
+                "maxItems": 20,
+                "minItems": 1,
+                "type": "array"
+              },
+              "id": {
+                "description": "A page id: lowercase letters, digits and dashes, starting with a letter (e.g. \"home\", \"services\").",
+                "pattern": "^[a-z][a-z0-9-]{1,31}$",
+                "type": "string"
+              },
+              "seo": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "additionalProperties": {
+                      "maxLength": 200,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "description": "The search snippet (120–160 characters). One entry per site locale, at most 200 characters each.",
+                    "propertyNames": {
+                      "description": "A site language (ISO 639-1).",
+                      "enum": [
+                        "fr",
+                        "en",
+                        "nl",
+                        "es",
+                        "de"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "ogImageAssetId": {
+                    "description": "A unique id of 6–32 URL-safe characters (e.g. \"hero-1a2b\", \"img_cafe_terrace\").",
+                    "pattern": "^[A-Za-z0-9_-]{6,32}$",
+                    "type": "string"
+                  },
+                  "title": {
+                    "additionalProperties": {
+                      "maxLength": 70,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "description": "The browser/search title (20–60 characters), e.g. \"Salon Lumière – Hair salon in Gustavia\". One entry per site locale, at most 70 characters each.",
+                    "propertyNames": {
+                      "description": "A site language (ISO 639-1).",
+                      "enum": [
+                        "fr",
+                        "en",
+                        "nl",
+                        "es",
+                        "de"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "title",
+                  "description"
+                ],
+                "type": "object"
+              },
+              "slug": {
+                "description": "The URL path segment: \"\" for the home page, else kebab-case (e.g. \"our-menu\"). Unique.",
+                "pattern": "^$|^[a-z0-9]+(-[a-z0-9]+)*$",
+                "type": "string"
+              },
+              "title": {
+                "additionalProperties": {
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "description": "The page name, e.g. \"Menu\". One entry per site locale, at most 60 characters each.",
+                "propertyNames": {
+                  "description": "A site language (ISO 639-1).",
+                  "enum": [
+                    "fr",
+                    "en",
+                    "nl",
+                    "es",
+                    "de"
+                  ],
+                  "type": "string"
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "slug",
+              "title",
+              "seo",
+              "blocks"
+            ],
+            "type": "object"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "number"
+        },
+        "seo": {
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "additionalProperties": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "description": "What the business is and where (120–160 characters). One entry per site locale, at most 200 characters each.",
+              "propertyNames": {
+                "description": "A site language (ISO 639-1).",
+                "enum": [
+                  "fr",
+                  "en",
+                  "nl",
+                  "es",
+                  "de"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": {
+              "additionalProperties": {
+                "maxLength": 70,
+                "minLength": 1,
+                "type": "string"
+              },
+              "description": "The site title, e.g. \"Café Saint-Jean\". One entry per site locale, at most 70 characters each.",
+              "propertyNames": {
+                "description": "A site language (ISO 639-1).",
+                "enum": [
+                  "fr",
+                  "en",
+                  "nl",
+                  "es",
+                  "de"
+                ],
+                "type": "string"
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "title",
+            "description"
+          ],
+          "type": "object"
+        },
+        "settings": {
+          "additionalProperties": false,
+          "properties": {
+            "analytics": {
+              "enum": [
+                "cookieless",
+                "none"
+              ],
+              "type": "string"
+            },
+            "contactForm": {
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "type": "object"
+            },
+            "noindex": {
+              "description": "Keep search engines out (true for previews).",
+              "type": "boolean"
+            },
+            "previewBanner": {
+              "description": "Show the \"concept preview\" banner (true for previews).",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "noindex",
+            "previewBanner",
+            "analytics",
+            "contactForm"
+          ],
+          "type": "object"
+        },
+        "theme": {
+          "additionalProperties": false,
+          "description": "Visual theme: one style family, a palette, a font pair and a few tokens.",
+          "properties": {
+            "density": {
+              "description": "Spacing between and inside sections.",
+              "enum": [
+                "compact",
+                "comfortable",
+                "airy"
+              ],
+              "type": "string"
+            },
+            "imageTreatment": {
+              "description": "How photos are shown.",
+              "enum": [
+                "plain",
+                "rounded",
+                "framed"
+              ],
+              "type": "string"
+            },
+            "palette": {
+              "additionalProperties": false,
+              "description": "The site palette. Pick colours from the business (logo, photos) and keep text readable.",
+              "properties": {
+                "accent": {
+                  "description": "Small accents: icons, rules, badges (#rrggbb). Needs 3:1 contrast on the background.",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "background": {
+                  "description": "Page background (#rrggbb). Usually very light (or very dark for a dark theme).",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "mutedText": {
+                  "description": "Secondary text such as captions (#rrggbb). Needs 4.5:1 contrast on the background.",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "primary": {
+                  "description": "Brand colour: buttons, links and highlights (#rrggbb). Needs 3:1 contrast on the background.",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "secondary": {
+                  "description": "Optional second brand colour for accents in large areas (#rrggbb).",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "surface": {
+                  "description": "Cards and panels on the background (#rrggbb).",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                },
+                "text": {
+                  "description": "Body text (#rrggbb). Needs 4.5:1 contrast on the background and on the surface.",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "primary",
+                "accent",
+                "background",
+                "surface",
+                "text",
+                "mutedText"
+              ],
+              "type": "object"
+            },
+            "radius": {
+              "description": "Corner rounding of buttons, cards and images.",
+              "enum": [
+                "none",
+                "sm",
+                "md",
+                "lg",
+                "full"
+              ],
+              "type": "string"
+            },
+            "style": {
+              "description": "Overall design family: luxe (refined, serif, generous space), modern (clean, geometric), warm (friendly, earthy), minimal (sparse, typographic), coastal (light, airy, sea tones).",
+              "enum": [
+                "luxe",
+                "modern",
+                "warm",
+                "minimal",
+                "coastal"
+              ],
+              "type": "string"
+            },
+            "typography": {
+              "additionalProperties": false,
+              "properties": {
+                "pairId": {
+                  "description": "A curated heading/body font pair. Prefer one that suits the theme style (see the block catalog).",
+                  "enum": [
+                    "playfair-inter",
+                    "cormorant-montserrat",
+                    "dmserif-dmsans",
+                    "fraunces-worksans",
+                    "spacegrotesk-inter",
+                    "manrope-manrope",
+                    "josefin-lato"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "pairId"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "style",
+            "palette",
+            "typography",
+            "radius",
+            "density",
+            "imageTreatment"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "locales",
+        "defaultLocale",
+        "brand",
+        "theme",
+        "contact",
+        "layout",
+        "navigation",
+        "pages",
+        "assets",
+        "seo",
+        "settings"
+      ],
+      "title": "SiteSpec v1",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.business-finder.dev/site-spec.schema.json",
+  "$ref": "#/$defs/SiteSpec",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

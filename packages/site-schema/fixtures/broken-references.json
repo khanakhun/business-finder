@@ -1,0 +1,481 @@
+{
+  "schemaVersion": 1,
+  "locales": ["fr", "en"],
+  "defaultLocale": "fr",
+  "brand": {
+    "name": "Salon Lumière",
+    "factId": "business.name"
+  },
+  "theme": {
+    "style": "luxe",
+    "palette": {
+      "primary": "#7a5c3e",
+      "accent": "#8a6a2f",
+      "background": "#fbf8f3",
+      "surface": "#ffffff",
+      "text": "#2b2420",
+      "mutedText": "#6b5f55"
+    },
+    "typography": {
+      "pairId": "cormorant-montserrat"
+    },
+    "radius": "sm",
+    "density": "airy",
+    "imageTreatment": "framed"
+  },
+  "contact": {
+    "phone": {
+      "value": "+590590000101",
+      "factId": "phone.main"
+    },
+    "email": {
+      "value": "bonjour@salon-lumiere.example",
+      "factId": "email.main"
+    },
+    "address": {
+      "street": "12 rue du Port",
+      "postalCode": "97133",
+      "locality": "Gustavia",
+      "country": "BL",
+      "formatted": "12 rue du Port, 97133 Gustavia",
+      "factId": "address.main"
+    },
+    "geo": {
+      "lat": 17.8962,
+      "lng": -62.8498,
+      "factId": "geo.main"
+    },
+    "hours": {
+      "weekly": {
+        "mon": [],
+        "tue": [
+          {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        ],
+        "wed": [
+          {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        ],
+        "thu": [
+          {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        ],
+        "fri": [
+          {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        ],
+        "sat": [
+          {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        ],
+        "sun": []
+      },
+      "factId": "hours.main"
+    },
+    "socials": [
+      {
+        "network": "instagram",
+        "url": "https://www.instagram.com/salonlumiere.example",
+        "factId": "social.instagram"
+      }
+    ],
+    "bookingUrl": {
+      "value": "https://www.planity.com/salon-lumiere-gustavia",
+      "factId": "booking.url"
+    }
+  },
+  "layout": {
+    "header": {
+      "variant": "centered",
+      "logoAssetId": "logo-lumiere",
+      "showCta": true,
+      "cta": {
+        "kind": "booking",
+        "label": {
+          "fr": "Réserver",
+          "en": "Book"
+        }
+      }
+    },
+    "footer": {
+      "variant": "columns",
+      "showSocials": true,
+      "showHours": true,
+      "tagline": {
+        "fr": "Coiffure et soins à Gustavia",
+        "en": "Hair and care in Gustavia"
+      }
+    }
+  },
+  "navigation": {
+    "items": [
+      {
+        "pageId": "home",
+        "label": {
+          "fr": "Accueil",
+          "en": "Home"
+        }
+      },
+      {
+        "pageId": "services",
+        "label": {
+          "fr": "Prestations",
+          "en": "Services"
+        }
+      },
+      {
+        "pageId": "contact",
+        "label": {
+          "fr": "Contact",
+          "en": "Contact"
+        }
+      },
+      {
+        "pageId": "gallery",
+        "label": {
+          "fr": "Galerie",
+          "en": "Gallery"
+        }
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": "home",
+      "slug": "",
+      "title": {
+        "fr": "Accueil",
+        "en": "Home"
+      },
+      "seo": {
+        "title": {
+          "fr": "Salon Lumière – Coiffure à Gustavia, Saint-Barth",
+          "en": "Salon Lumière – Hair salon in Gustavia, St Barth"
+        },
+        "description": {
+          "fr": "Coupes, couleurs et soins dans un salon lumineux au cœur de Gustavia, sur le port. Prenez rendez-vous en ligne ou appelez le salon.",
+          "en": "Cuts, colour and hair care in a bright salon in the heart of Gustavia. Book online or give us a call to plan your visit."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-home1",
+          "type": "hero",
+          "variant": "split",
+          "props": {
+            "eyebrow": {
+              "fr": "Gustavia · Saint-Barth",
+              "en": "Gustavia · St Barth"
+            },
+            "title": {
+              "fr": "Coiffure et soins à Gustavia",
+              "en": "Hair and care in Gustavia"
+            },
+            "subtitle": {
+              "fr": "Un salon lumineux sur le port, pour une coupe ou une couleur faite avec soin.",
+              "en": "A bright salon by the harbour, for a cut or colour done with care."
+            },
+            "primaryCta": {
+              "kind": "booking",
+              "label": {
+                "fr": "Réserver en ligne",
+                "en": "Book online"
+              }
+            },
+            "secondaryCta": {
+              "kind": "call",
+              "label": {
+                "fr": "Appeler",
+                "en": "Call us"
+              }
+            },
+            "imageAssetId": "img-missing"
+          }
+        },
+        {
+          "id": "high-home1",
+          "type": "highlights",
+          "variant": "icons",
+          "props": {
+            "items": [
+              {
+                "icon": "scissors",
+                "title": {
+                  "fr": "Coupe et couleur",
+                  "en": "Cut and colour"
+                },
+                "factIds": ["service.cut_women"]
+              },
+              {
+                "icon": "calendar",
+                "title": {
+                  "fr": "Réservation en ligne",
+                  "en": "Online booking"
+                },
+                "factIds": ["booking.url"]
+              },
+              {
+                "icon": "map_pin",
+                "title": {
+                  "fr": "Sur le port de Gustavia",
+                  "en": "On Gustavia harbour"
+                },
+                "factIds": ["address.main"]
+              }
+            ]
+          }
+        },
+        {
+          "id": "serv-home1",
+          "type": "services",
+          "variant": "cards",
+          "props": {
+            "heading": {
+              "fr": "Nos prestations",
+              "en": "Our services"
+            },
+            "items": [
+              {
+                "title": {
+                  "fr": "Coupe femme",
+                  "en": "Women's cut"
+                },
+                "price": {
+                  "amount": 65,
+                  "currency": "EUR",
+                  "factId": "price.cut_women"
+                }
+              },
+              {
+                "title": {
+                  "fr": "Coupe homme",
+                  "en": "Men's cut"
+                },
+                "price": {
+                  "amount": 40,
+                  "currency": "EUR",
+                  "factId": "price.cut_men"
+                }
+              },
+              {
+                "title": {
+                  "fr": "Couleur",
+                  "en": "Colour"
+                },
+                "price": {
+                  "amount": 90,
+                  "currency": "EUR",
+                  "unit": "from",
+                  "factId": "price.colour"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "test-home1",
+          "type": "testimonials",
+          "variant": "quotes",
+          "props": {
+            "heading": {
+              "fr": "Ils en parlent",
+              "en": "What clients say"
+            },
+            "items": [
+              {
+                "factId": "review.1",
+                "quote": {
+                  "fr": "Accueil chaleureux et coupe parfaite.",
+                  "en": "Warm welcome and a perfect cut."
+                },
+                "author": "Claire D.",
+                "source": "google",
+                "rating": 5
+              }
+            ]
+          }
+        },
+        {
+          "id": "cta-home1",
+          "type": "cta_banner",
+          "variant": "solid",
+          "props": {
+            "title": {
+              "fr": "Envie d’un nouveau style ?",
+              "en": "Ready for a new look?"
+            },
+            "cta": {
+              "kind": "booking",
+              "label": {
+                "fr": "Réserver",
+                "en": "Book now"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "slug": "prestations",
+      "title": {
+        "fr": "Prestations",
+        "en": "Services"
+      },
+      "seo": {
+        "title": {
+          "fr": "Prestations et tarifs – Salon Lumière Gustavia",
+          "en": "Services and prices – Salon Lumière Gustavia"
+        },
+        "description": {
+          "fr": "Coupes femme et homme, couleurs et soins : toutes les prestations et les tarifs du Salon Lumière à Gustavia, Saint-Barthélemy.",
+          "en": "Women's and men's cuts, colour and hair care: all the services and prices of Salon Lumière in Gustavia, Saint-Barthélemy."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-serv1",
+          "type": "hero",
+          "variant": "centered",
+          "props": {
+            "title": {
+              "fr": "Prestations et tarifs",
+              "en": "Services and prices"
+            }
+          }
+        },
+        {
+          "id": "book-serv1",
+          "type": "booking",
+          "variant": "link",
+          "props": {
+            "heading": {
+              "fr": "Prendre rendez-vous",
+              "en": "Book an appointment"
+            },
+            "label": {
+              "fr": "Réserver en ligne",
+              "en": "Book online"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "slug": "contact",
+      "title": {
+        "fr": "Contact",
+        "en": "Contact"
+      },
+      "seo": {
+        "title": {
+          "fr": "Contact et horaires – Salon Lumière Gustavia",
+          "en": "Contact and hours – Salon Lumière Gustavia"
+        },
+        "description": {
+          "fr": "Adresse, horaires et téléphone du Salon Lumière, rue du Port à Gustavia. Écrivez-nous ou passez nous voir au salon sur le port.",
+          "en": "Address, opening hours and phone number of Salon Lumière, rue du Port in Gustavia. Write to us or drop by the salon by the port."
+        }
+      },
+      "blocks": [
+        {
+          "id": "hero-cont1",
+          "type": "hero",
+          "variant": "minimal",
+          "props": {
+            "title": {
+              "fr": "Nous trouver",
+              "en": "Find us"
+            }
+          }
+        },
+        {
+          "id": "cont-cont1",
+          "type": "contact",
+          "variant": "split",
+          "props": {
+            "heading": {
+              "fr": "Nous contacter",
+              "en": "Contact us"
+            },
+            "showForm": true,
+            "channels": {
+              "phone": true,
+              "email": true,
+              "whatsapp": false
+            }
+          }
+        },
+        {
+          "id": "hour-cont1",
+          "type": "hours",
+          "variant": "table",
+          "props": {}
+        },
+        {
+          "id": "loca-cont1",
+          "type": "location",
+          "variant": "map_split",
+          "props": {
+            "showDirections": true
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "logo-lumiere",
+      "kind": "logo",
+      "url": "https://assets.bf-sites.test/salon-lumiere/logo.svg",
+      "width": 400,
+      "height": 120,
+      "alt": {
+        "fr": "Logo du Salon Lumière",
+        "en": "Salon Lumière logo"
+      },
+      "license": "owner_site"
+    },
+    {
+      "id": "img-salon-1",
+      "kind": "image",
+      "url": "https://assets.bf-sites.test/salon-lumiere/salon.jpg",
+      "width": 1600,
+      "height": 1067,
+      "alt": {
+        "fr": "Le salon, lumineux, face au port",
+        "en": "The bright salon facing the harbour"
+      },
+      "license": "owner_site"
+    }
+  ],
+  "seo": {
+    "title": {
+      "fr": "Salon Lumière – Gustavia",
+      "en": "Salon Lumière – Gustavia"
+    },
+    "description": {
+      "fr": "Salon de coiffure à Gustavia, Saint-Barthélemy : coupes, couleurs et soins, réservation en ligne et rendez-vous par téléphone.",
+      "en": "Hair salon in Gustavia, Saint-Barthélemy: cuts, colour and care, with online booking and appointments by phone every week."
+    }
+  },
+  "settings": {
+    "noindex": true,
+    "previewBanner": true,
+    "analytics": "cookieless",
+    "contactForm": {
+      "enabled": true
+    }
+  }
+}

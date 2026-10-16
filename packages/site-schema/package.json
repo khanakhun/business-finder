@@ -1,0 +1,29 @@
+{
+  "name": "@bf/site-schema",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SiteSpec v1: the website document every engine outputs, its validators, operations and block catalog.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "fast-check": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

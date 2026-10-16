@@ -128,6 +128,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FAKE_DISCOVERY_SYNTHETIC` | Feature flags | api, worker | no | `false` |  | The fixture discovery provider generates grid records instead of fixtures (benchmarks, tiling tests). |
 | `FAKE_SITE_INTEL` | Feature flags | api, worker | no | `false` |  | Website crawls answer from a built-in fake instead of services/intel (tests and E2E only; refused in production). |
 | `FAKE_EMAIL_VERIFIER` | Feature flags | api, worker | no | `false` |  | E-mail verification answers from a built-in fake (no SMTP or DNS; tests and E2E only; refused in production). |
+| `FAKE_REVIEWS` | Feature flags | api, worker | no | `false` |  | Review sources and the review classifier answer from built-in fakes (no Google, scraper or LLM call; tests and E2E only; refused in production). |
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
@@ -151,6 +152,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `ENRICHMENT_TTL_PSI_DAYS` | App-specific | api, worker | no | `30` |  | Days a PageSpeed result stays fresh. |
 | `ENRICHMENT_TTL_VISION_AUDIT_DAYS` | App-specific | api, worker | no | `30` |  | Days a visual audit result stays fresh. |
 | `ENRICHMENT_SITE_INTEL_COST_USD` | App-specific | api, worker | no | `0` |  | Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0). |
+| `ENRICHMENT_REVIEWS_LLM_COST_USD` | App-specific | api, worker | no | `0.002` |  | Estimated LLM cost of classifying one business’s reviews (fast tier), for budgets. |
+| `ENRICHMENT_REVIEWS_GOOGLE_COST_USD` | App-specific | api, worker | no | `0.025` |  | Cost of one Google Place Details call with reviews (Enterprise + Atmosphere SKU), for budgets. |
 | `REACHER_URL` | App-specific | api, worker | no |  |  | Self-hosted Reacher backend (compose profile `verify`; needs outbound port 25). Unset: skipped. |
 | `REACHER_HEADER_SECRET` | App-specific | api, worker | no |  | yes | Shared secret Reacher requires in `x-reacher-secret` (its `RCH__HEADER_SECRET`). |
 | `ENRICHMENT_EMAIL_VERIFY_COST_USD` | App-specific | api, worker | no | `0.008` |  | Estimated cost of one commercial e-mail verification (ZeroBounce), for budgets. |

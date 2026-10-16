@@ -67,10 +67,10 @@ areas: [contracts]
 - Snapshot: JSON Schema export deterministic across runs.
 
 ## Acceptance criteria
-- [ ] All modules listed exist with tests; coverage ≥ 90% lines.
-- [ ] `pnpm contracts:jsonschema` writes deterministic JSON Schema files for opted-in schemas.
-- [ ] Package works in browser builds (no Node APIs) — verified by a tiny Vitest `environment: 'happy-dom'` import test.
-- [ ] README documents conventions for adding schemas, events, jobs, errors and permissions.
+- [x] All modules listed exist with tests; coverage ≥ 90% lines.
+- [x] `pnpm contracts:jsonschema` writes deterministic JSON Schema files for opted-in schemas.
+- [x] Package works in browser builds (no Node APIs) — verified by a tiny Vitest `environment: 'happy-dom'` import test.
+- [x] README documents conventions for adding schemas, events, jobs, errors and permissions.
 
 ## Agent prompt
 ```text
@@ -92,3 +92,21 @@ Verify: pnpm verify (coverage report for @bf/contracts ≥ 90%); run pnpm contra
 - docs/ARCHITECTURE.md §1, §5.3 · docs/DOMAIN.md §4–§5 · docs/conventions/api.md
 - RFC 9457 Problem Details: https://www.rfc-editor.org/rfc/rfc9457 · RFC 9562 (UUIDv7): https://www.rfc-editor.org/rfc/rfc9562
 - Zod: https://zod.dev/
+
+## Implementation notes
+- **Zod 4.6.7 + uuid 14** are the only runtime dependencies. Biome override for `packages/contracts/src` (except
+  the CLI and tests): `noNodejsModules` + no `@bf/*` imports, so the leaf/browser rules are enforced by lint.
+- **Brand ordering bug caught by type tests**: `.describe()` after `.brand()` returned an unbranded `string`
+  type. `idSchema` now describes first; `.brand()` is type-only and must be the last call (README).
+- **Cursors are async** (`encodeCursor` / `decodeCursor` return promises): the optional HMAC uses Web Crypto,
+  which has no synchronous API. base64url via `TextEncoder` + `btoa`/`atob`; constant-time signature compare.
+- **JSON Schema export uses a dedicated registry** (`exportSchema(schema, { id, exportTo })`) instead of scanning
+  Zod's global registry: nothing is exported by accident, and a fresh per-target registry turns references between
+  exported schemas into `$ref`s. Output: `generated/jsonschema/<target>/<Id>.json` (target sub-folder so other
+  languages can be added). Seeded with `ProblemDetails` and `LatLng`.
+- **`BBox` uses named edges** (`west, south, east, north`) and allows antimeridian crossing (`west > east`).
+- **`Clock` implementations** (`systemClock`, `fixedClock`) live here too, so domain tests need nothing else.
+- **`ValidationError.fromZod()`** added for BF-006's validation pipe.
+- `@bf/db` now uses `newId()` (closes the `TODO(BF-004)` from BF-003).
+- Coverage: 100 % lines (CLI excluded; its `expectedFiles()` is tested). 95 tests incl. 10k-id monotonicity,
+  tamper cases, a JSON Schema snapshot and a happy-dom import test.

@@ -59,6 +59,28 @@
   },
   "overrides": [
     {
+      // AGENTS.md §3: @bf/contracts is the dependency leaf and must run in browsers/edge (BF-004).
+      "includes": ["packages/contracts/src/**", "!packages/contracts/src/cli/**", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "correctness": { "noNodejsModules": "error" },
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@bf/*"],
+                    "message": "@bf/contracts is the leaf: it imports no other @bf package."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       // Tools load these through a default export.
       "includes": ["**/*.config.{ts,mts,js,mjs,cjs}"],
       "linter": { "rules": { "style": { "noDefaultExport": "off" } } }

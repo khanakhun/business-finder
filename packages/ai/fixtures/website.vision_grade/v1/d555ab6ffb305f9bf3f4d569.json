@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Boulangerie du Quai (fictif)",
+      "category": "Bakery",
+      "url": "https://boulangerie-du-quai.example"
+    },
+    "images": [
+      "13a72bd14cf12c2a0f833a54c32ca8286e9c59ad6af68f6e82b77322c366f508",
+      "9dbab030ac9cc58da9920637b60a1e8696572a4fd2bd9d8c42f4c188c8b6345b"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 4,
+        "evidence": "Fixed-width centered box with a brown header bar and three floated columns; mid-2000s template look."
+      },
+      "visual_hierarchy": {
+        "score": 4,
+        "evidence": "Banner text \"Bienvenue sur notre site internet !\" is the focal point; no headline about the products."
+      },
+      "mobile_usability": {
+        "score": 3,
+        "evidence": "On mobile the fixed-width page overflows: the banner text and second product column are cut off at the right edge."
+      },
+      "readability": {
+        "score": 5,
+        "evidence": "Small Verdana body text in grey; legible on desktop but cramped inside bordered columns."
+      },
+      "imagery_quality": {
+        "score": 5,
+        "evidence": "Simple bread, croissant and cake drawings in beige boxes; tidy but generic."
+      },
+      "trust_signals": {
+        "score": 5,
+        "evidence": "Opening hours and phone in a tiny footer; no reviews or founding year visible."
+      },
+      "cta_clarity": {
+        "score": 3,
+        "evidence": "Only small \"En savoir plus »\" and \"Commander »\" text links; ordering is described as phone only."
+      },
+      "brand_consistency": {
+        "score": 6,
+        "evidence": "Brown palette is consistent across the header, menu and column headings."
+      }
+    },
+    "overall": 5,
+    "summary": {
+      "en": "Functional but dated bakery site: fixed-width layout that is cut off on mobile, small text and no clear call to action. The brown palette is consistent.",
+      "fr": "Site de boulangerie fonctionnel mais daté : largeur fixe coupée sur mobile, petits textes et aucun appel à l'action clair. La palette brune reste cohérente."
+    },
+    "warnings": []
+  }
+}

@@ -25,7 +25,9 @@
       "!packages/contracts/generated",
       // Third-party data written by their update scripts (BF-026): kept byte-for-byte as generated.
       "!services/intel/app/vendor",
-      "!infra/compose/seccomp-chromium.json"
+      "!infra/compose/seccomp-chromium.json",
+      // Eval fixture sites (BF-030): deliberately poor HTML for the vision grade, kept as rendered.
+      "!packages/ai/evals/*/sites"
     ]
   },
   "formatter": {

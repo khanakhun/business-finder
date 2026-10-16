@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Cabinet Dentaire des Flamboyants (fictif)",
+      "category": "Dentist",
+      "url": "https://cabinet-flamboyants.example"
+    },
+    "images": [
+      "5f6d16164abd9afcaded826dcc0d4e8ff64f94221c28b6d53024b643358ebb6f",
+      "a2335e63219779cdee7ac8ac6d7f62d85cf506e8b29b7ecb9355c90c9a652128"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 3,
+        "evidence": "Table-based page with a gradient header, left link sidebar and dotted separators; looks 2000s."
+      },
+      "visual_hierarchy": {
+        "score": 4,
+        "evidence": "Header and \"Bienvenue au cabinet\" heading are clear, but the content is a short block of text."
+      },
+      "mobile_usability": {
+        "score": 3,
+        "evidence": "The wide table is scaled down on the phone; text is tiny and most of the screen is empty blue-grey."
+      },
+      "readability": {
+        "score": 5,
+        "evidence": "Dark text on white is clear on desktop, but the font is small with tight line spacing."
+      },
+      "imagery_quality": {
+        "score": 4,
+        "evidence": "Only a small tooth drawing in a pale box; no photos of the practice or the team."
+      },
+      "trust_signals": {
+        "score": 6,
+        "evidence": "Practitioner names, hours, phone and address in a highlighted box, plus \"Conventionné secteur 1\"."
+      },
+      "cta_clarity": {
+        "score": 3,
+        "evidence": "No booking button; text says appointments are by phone only, with the number inside the info box."
+      },
+      "brand_consistency": {
+        "score": 5,
+        "evidence": "Blue gradient header and link colors are consistent but generic."
+      }
+    },
+    "overall": 4,
+    "summary": {
+      "en": "Informative but dated practice site: useful hours and contact details, yet a table layout that is tiny on mobile and no way to book online.",
+      "fr": "Site de cabinet informatif mais daté : horaires et coordonnées utiles, mais une mise en page en tableau minuscule sur mobile et aucune prise de rendez-vous en ligne."
+    },
+    "warnings": []
+  }
+}

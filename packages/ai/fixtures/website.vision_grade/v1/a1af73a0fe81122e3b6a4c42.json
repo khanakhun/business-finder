@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Hôtel Les Raisiniers (fictif)",
+      "category": "Hotel",
+      "url": "https://les-raisiniers.example"
+    },
+    "images": [
+      "9dc9f44a0c5b0349fcc2b671608795ae4e5d2b00da566b2aa29be180acaf1790",
+      "799cca6ceb3ad7b8bf30628cd4b99ebcb05330596b3e0105ff2d447424b186ee"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 5,
+        "evidence": "Slider-style hero with arrow glyphs and a caption box, then three bordered cards; common older template."
+      },
+      "visual_hierarchy": {
+        "score": 5,
+        "evidence": "Caption sits small in a dark box; the cards below have equal weight with no primary focus."
+      },
+      "mobile_usability": {
+        "score": 6,
+        "evidence": "Mobile hides the nav and stacks the cards; the slider shrinks and its caption stays readable."
+      },
+      "readability": {
+        "score": 7,
+        "evidence": "Clear sans-serif text with good contrast; card text sizes are adequate."
+      },
+      "imagery_quality": {
+        "score": 4,
+        "evidence": "Hero is a plain teal gradient and the three card images are empty pale green rectangles."
+      },
+      "trust_signals": {
+        "score": 5,
+        "evidence": "Phone, e-mail and address in the footer; no ratings, reviews or stars shown."
+      },
+      "cta_clarity": {
+        "score": 4,
+        "evidence": "No booking button; only small underlined links such as \"Voir les chambres\" and an e-mail in the footer."
+      },
+      "brand_consistency": {
+        "score": 6,
+        "evidence": "Gold rule and serif wordmark echo the brown headings; restrained, consistent palette."
+      }
+    },
+    "overall": 5,
+    "summary": {
+      "en": "Generic hotel template with readable text and a consistent palette, but empty image blocks and no booking button.",
+      "fr": "Modèle d'hôtel générique, avec un texte lisible et une palette cohérente, mais des emplacements d'images vides et aucun bouton de réservation."
+    },
+    "warnings": []
+  }
+}

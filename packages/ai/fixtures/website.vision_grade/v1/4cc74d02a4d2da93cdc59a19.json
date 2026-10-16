@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Alizé Charters (fictional)",
+      "category": "Boat charter",
+      "url": "https://alize-charters.example"
+    },
+    "images": [
+      "e931f70eec3dc7086d02d43ed7ddd66d0a543a221e6eefe02fb7205235166df5",
+      "d979de27587e8d2418aae768f2aca763e86f6d25af0e8b8a7d365c1c797fb534"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 9,
+        "evidence": "Dark theme with a rounded hero card, pill badge and bold sans-serif headline; current design."
+      },
+      "visual_hierarchy": {
+        "score": 9,
+        "evidence": "Headline with yellow accent words draws the eye, then primary and secondary buttons side by side."
+      },
+      "mobile_usability": {
+        "score": 9,
+        "evidence": "On mobile the hero stacks, buttons go full width and the trust line becomes a vertical list."
+      },
+      "readability": {
+        "score": 8,
+        "evidence": "Light text on navy is legible; the trust line under the hero is smaller and lower contrast."
+      },
+      "imagery_quality": {
+        "score": 8,
+        "evidence": "Sunset sea illustration with a sailboat silhouette; clean and on-theme, though not a photo."
+      },
+      "trust_signals": {
+        "score": 9,
+        "evidence": "Gold stars with 4.9 from 410 reviews, \"Licensed skipper · Since 2011\", departure times and phone."
+      },
+      "cta_clarity": {
+        "score": 10,
+        "evidence": "Yellow \"Book now\" in the header and a large \"Book a trip — from €95\" button in the hero."
+      },
+      "brand_consistency": {
+        "score": 9,
+        "evidence": "Navy and amber used consistently for the logo dot, accents, buttons and stars."
+      }
+    },
+    "overall": 9,
+    "summary": {
+      "en": "Polished dark-themed charter page with an obvious booking path, price anchor and strong social proof. Works well on mobile.",
+      "fr": "Page de location de bateau soignée, au thème sombre, avec un parcours de réservation évident, un prix d'appel et des avis bien mis en avant. Fonctionne bien sur mobile."
+    },
+    "warnings": []
+  }
+}

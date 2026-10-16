@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Plomberie Elec Services (fictif)",
+      "category": "Plumber",
+      "url": "https://plomberie-elec-services.example"
+    },
+    "images": [
+      "ef175eb02331dc43d15c48021e1b43d7f468e6f500e6418bdbab9491e41465a3",
+      "fdf900b5ed24497a4666aab0c8c12b33e9bb1cff91519080c3223f66de58c4d2"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 1,
+        "evidence": "Grey table grid with black cell borders and a navy title bar; looks like an unstyled 1990s page."
+      },
+      "visual_hierarchy": {
+        "score": 2,
+        "evidence": "Red all-caps service list shouts; the rest is one dense paragraph and bare text cells for navigation."
+      },
+      "mobile_usability": {
+        "score": 2,
+        "evidence": "Fixed-width table is scaled down to the phone width; the text is very small."
+      },
+      "readability": {
+        "score": 2,
+        "evidence": "Navy-on-navy title is almost unreadable; grey body text on grey cells is low contrast."
+      },
+      "imagery_quality": {
+        "score": 1,
+        "evidence": "Grey cells labelled \"[logo]\", \"[photo camion]\" and an empty box instead of images."
+      },
+      "trust_signals": {
+        "score": 3,
+        "evidence": "Phone and fax numbers in the footer and \"20 ans d'experience\" in the text, but \"page en construction\"."
+      },
+      "cta_clarity": {
+        "score": 2,
+        "evidence": "No button and no quote form; navigation is plain text in table cells."
+      },
+      "brand_consistency": {
+        "score": 1,
+        "evidence": "No logo, only a barely visible title and red shouting text on grey."
+      }
+    },
+    "overall": 2,
+    "summary": {
+      "en": "Bare, low-contrast table page with placeholder images and shouting text. Contact numbers are present but there is no clear action or brand.",
+      "fr": "Page en tableau brute et peu contrastée, avec des images factices et un texte en majuscules criardes. Les numéros sont présents mais sans action claire ni identité visuelle."
+    },
+    "warnings": []
+  }
+}

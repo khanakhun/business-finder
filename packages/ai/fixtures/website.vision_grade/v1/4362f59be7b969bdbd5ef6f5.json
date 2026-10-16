@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Souffle Studio (fictional)",
+      "category": "Yoga studio",
+      "url": "https://souffle-studio.example"
+    },
+    "images": [
+      "10e9f1f20dedc0a46b73183d220375d8539bae9ca871d2d4cfd68447f214aa2d",
+      "52f0bb3501605a7bb60470f456ce1aae334664c6fc608196638568291a6fe9f2"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 9,
+        "evidence": "Rounded green hero panel, soft cards and bold sans-serif type; clean contemporary style."
+      },
+      "visual_hierarchy": {
+        "score": 8,
+        "evidence": "Headline and yellow button lead the hero; class schedule cards follow in a clear row."
+      },
+      "mobile_usability": {
+        "score": 8,
+        "evidence": "Single-column hero with a full-width button and two-column class cards; menu links are hidden."
+      },
+      "readability": {
+        "score": 8,
+        "evidence": "White on deep green and dark text on pale green are both clear; schedule labels are small."
+      },
+      "imagery_quality": {
+        "score": 6,
+        "evidence": "Hero art is a simple figure drawing over circles; illustrative, with no studio photography."
+      },
+      "trust_signals": {
+        "score": 7,
+        "evidence": "Star rating with 180 reviews and \"Teaching since 2016\" appear only in a small line near the bottom."
+      },
+      "cta_clarity": {
+        "score": 9,
+        "evidence": "Yellow \"Book your first class — €15\" button stands out against the dark green panel."
+      },
+      "brand_consistency": {
+        "score": 9,
+        "evidence": "Green and yellow palette from the logo dot repeats across the hero, cards and stars."
+      }
+    },
+    "overall": 8,
+    "summary": {
+      "en": "Modern, friendly yoga studio page with a clear first-class offer and visible schedule. Trust signals are present but small.",
+      "fr": "Page de studio de yoga moderne et accueillante, avec une offre de premier cours claire et un planning visible. Les éléments de confiance sont présents mais discrets."
+    },
+    "warnings": []
+  }
+}

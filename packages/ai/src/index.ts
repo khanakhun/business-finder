@@ -76,6 +76,11 @@ export {
   NO_CATEGORY,
   TaxonomyClassifyBusiness,
 } from './tasks/taxonomy-classify-business.ts';
+export {
+  WebsiteVisionGrade,
+  WebsiteVisionGradeInput,
+  WebsiteVisionGradeOutput,
+} from './tasks/website-vision-grade.ts';
 export { registerAiTelemetry } from './telemetry.ts';
 export { sanitizeUntrusted, UNTRUSTED_DATA_RULES, type UntrustedOptions, untrusted } from './untrusted.ts';
 export { type AiImage, DEFAULT_MAX_IMAGE_DIMENSION } from './vision.ts';

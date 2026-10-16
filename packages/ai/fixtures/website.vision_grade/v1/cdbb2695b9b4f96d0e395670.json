@@ -1,0 +1,57 @@
+{
+  "task": "website.vision_grade",
+  "promptVersion": 1,
+  "input": {
+    "input": {
+      "businessName": "Chez Tonton Bébert (fictif)",
+      "category": "Restaurant",
+      "url": "https://chez-tonton-bebert.example"
+    },
+    "images": [
+      "c9f706624b9183250d4d5696b10bfc56a3cd5f20cbaf13dd40d2c19bc31a7c5e",
+      "fd2ed706c032a0d1562faacedfe70c6bb7b56f45d934fee7bdd19093f21ffcb1"
+    ]
+  },
+  "output": {
+    "criteria": {
+      "modernity": {
+        "score": 1,
+        "evidence": "Neon green, magenta, cyan and orange blocks with a fake ticker line and a visitor counter; 1990s look."
+      },
+      "visual_hierarchy": {
+        "score": 2,
+        "evidence": "A shouting \"BIENVENUE\" banner dominates; content is one long paragraph between colored side bars."
+      },
+      "mobile_usability": {
+        "score": 1,
+        "evidence": "Fixed wide layout with no mobile adaptation; on the phone everything is shrunk and tiny."
+      },
+      "readability": {
+        "score": 1,
+        "evidence": "Grey-olive text on pale yellow and orange on orange are very low contrast; no paragraph breaks."
+      },
+      "imagery_quality": {
+        "score": 1,
+        "evidence": "Two dashed grey boxes reading \"[ image introuvable ]\" instead of photos."
+      },
+      "trust_signals": {
+        "score": 2,
+        "evidence": "Only a phone number in the orange sidebar; \"site en construction\" and the visitor counter hurt trust."
+      },
+      "cta_clarity": {
+        "score": 1,
+        "evidence": "No button or booking action; menu items are plain dashed text."
+      },
+      "brand_consistency": {
+        "score": 1,
+        "evidence": "Clashing neon colors and mixed sans-serif, serif and monospace fonts with no coherent identity."
+      }
+    },
+    "overall": 1,
+    "summary": {
+      "en": "Very poor, cluttered page: clashing neon colors, unreadable text, broken image placeholders, an \"under construction\" notice and no way to book.",
+      "fr": "Page très faible et surchargée : couleurs fluo criardes, texte illisible, images manquantes, mention « en construction » et aucun moyen de réserver."
+    },
+    "warnings": []
+  }
+}

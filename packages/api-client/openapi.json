@@ -1903,6 +1903,25 @@
         ],
         "type": "object"
       },
+      "BusinessWebsiteAudit": {
+        "additionalProperties": false,
+        "properties": {
+          "audit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WebsiteAudit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "audit"
+        ],
+        "type": "object"
+      },
       "CategoryAttributes": {
         "additionalProperties": {
           "type": "boolean"
@@ -6630,6 +6649,263 @@
         ],
         "type": "object"
       },
+      "PsiResult": {
+        "additionalProperties": false,
+        "properties": {
+          "desktop": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PsiStrategyResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PsiStrategyResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "mobile",
+          "desktop"
+        ],
+        "type": "object"
+      },
+      "PsiStrategyResult": {
+        "additionalProperties": false,
+        "properties": {
+          "fetchedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "lighthouseVersion": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metrics": {
+            "additionalProperties": false,
+            "properties": {
+              "cls": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fcpMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "inpMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lcpMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "speedIndexMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "tbtMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ttfbMs": {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "lcpMs",
+              "cls",
+              "tbtMs",
+              "fcpMs",
+              "speedIndexMs",
+              "ttfbMs",
+              "inpMs"
+            ],
+            "type": "object"
+          },
+          "opportunities": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                "savingsBytes": {
+                  "anyOf": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "savingsMs": {
+                  "anyOf": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "title": {
+                  "maxLength": 200,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "savingsMs",
+                "savingsBytes"
+              ],
+              "type": "object"
+            },
+            "maxItems": 5,
+            "type": "array"
+          },
+          "scores": {
+            "additionalProperties": false,
+            "properties": {
+              "accessibility": {
+                "anyOf": [
+                  {
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "bestPractices": {
+                "anyOf": [
+                  {
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "performance": {
+                "anyOf": [
+                  {
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "seo": {
+                "anyOf": [
+                  {
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "performance",
+              "accessibility",
+              "bestPractices",
+              "seo"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "scores",
+          "metrics",
+          "opportunities",
+          "lighthouseVersion",
+          "fetchedAt"
+        ],
+        "type": "object"
+      },
       "PublishedContext": {
         "additionalProperties": false,
         "properties": {
@@ -8834,6 +9110,296 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "VisionGrade": {
+        "additionalProperties": false,
+        "properties": {
+          "criteria": {
+            "additionalProperties": {
+              "additionalProperties": false,
+              "properties": {
+                "evidence": {
+                  "description": "What is visible in the screenshots that justifies the score.",
+                  "maxLength": 300,
+                  "type": "string"
+                },
+                "score": {
+                  "maximum": 10,
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "score",
+                "evidence"
+              ],
+              "type": "object"
+            },
+            "propertyNames": {
+              "enum": [
+                "modernity",
+                "visual_hierarchy",
+                "mobile_usability",
+                "readability",
+                "imagery_quality",
+                "trust_signals",
+                "cta_clarity",
+                "brand_consistency"
+              ],
+              "type": "string"
+            },
+            "required": [
+              "modernity",
+              "visual_hierarchy",
+              "mobile_usability",
+              "readability",
+              "imagery_quality",
+              "trust_signals",
+              "cta_clarity",
+              "brand_consistency"
+            ],
+            "type": "object"
+          },
+          "gradedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "overall": {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "promptVersion": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "summary": {
+            "additionalProperties": false,
+            "properties": {
+              "en": {
+                "maxLength": 600,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 600,
+                "type": "string"
+              }
+            },
+            "required": [
+              "en",
+              "fr"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "criteria",
+          "overall",
+          "summary",
+          "model",
+          "promptVersion",
+          "gradedAt"
+        ],
+        "type": "object"
+      },
+      "WebsiteAudit": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/WebsiteFinding"
+            },
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "psi": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PsiResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "qualityScore": {
+            "anyOf": [
+              {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when neither PageSpeed nor the vision grade could measure the site."
+          },
+          "snapshotId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "vision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VisionGrade"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "websiteStatus": {
+            "enum": [
+              "none",
+              "parked",
+              "social_only",
+              "broken",
+              "weak",
+              "ok",
+              "strong"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "snapshotId",
+          "psi",
+          "vision",
+          "findings",
+          "qualityScore",
+          "websiteStatus",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "WebsiteFinding": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "parked_domain",
+              "social_only",
+              "site_broken",
+              "no_https",
+              "certificate_invalid",
+              "certificate_expiring",
+              "mixed_content",
+              "no_viewport_meta",
+              "poor_mobile_usability",
+              "slow_lcp_mobile",
+              "layout_shift",
+              "low_performance_score",
+              "heavy_page",
+              "no_contact_visible",
+              "no_contact_form",
+              "no_online_booking",
+              "no_online_menu",
+              "missing_english",
+              "missing_french",
+              "weak_call_to_action",
+              "stale_copyright",
+              "outdated_jquery",
+              "outdated_wordpress",
+              "dated_design",
+              "broken_links",
+              "low_seo_score",
+              "low_accessibility_score",
+              "no_solicitation_notice"
+            ],
+            "type": "string"
+          },
+          "evidence": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "metric": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "maxLength": 40,
+                    "type": "string"
+                  },
+                  "threshold": {
+                    "type": "number"
+                  },
+                  "value": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "name",
+                  "value",
+                  "threshold"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "offerRelevance": {
+            "items": {
+              "enum": [
+                "new_website",
+                "website_redesign",
+                "ai_receptionist",
+                "booking_system",
+                "local_seo"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "major",
+              "minor",
+              "info"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "evidence",
+          "metric",
+          "offerRelevance"
+        ],
         "type": "object"
       },
       "WebsiteSnapshot": {
@@ -14355,6 +14921,77 @@
           }
         },
         "summary": "What the business website showed at its latest crawl (404 until crawled)",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/website-audit": {
+      "get": {
+        "operationId": "getBusinessWebsiteAudit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessWebsiteAudit"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The audit of the business website at its latest crawl: PageSpeed, visual grade, findings, status",
         "tags": [
           "enrichment"
         ]

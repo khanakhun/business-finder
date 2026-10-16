@@ -1,12 +1,19 @@
 import type {
+  CategoryAttributes,
   EmailVerifierId,
   EnrichmentRunStatus,
   EnrichmentSkipReason,
   EnrichmentStepId,
   EnrichmentStepStatus,
   EnrichmentTrigger,
+  Finding,
+  PsiResult,
+  PsiStrategy,
+  PsiStrategyResult,
   SiteIntel,
   SMTP_PROBE_ERRORS,
+  VisionGrade,
+  WebsiteStatus,
 } from '@bf/contracts';
 import type { EmailCheck } from '../domain/email-verification.ts';
 import type { EnrichmentSubject, StepOutput } from '../domain/enrichment-step.ts';
@@ -260,6 +267,7 @@ export interface WebsiteSnapshotRepository {
     readonly intel: StoredSiteIntel & { readonly fetchedAt: string };
   }): Promise<WebsiteSnapshotRecord>;
   latest(businessId: string): Promise<WebsiteSnapshotRecord | undefined>;
+  byId(id: string): Promise<WebsiteSnapshotRecord | undefined>;
 }
 export const WEBSITE_SNAPSHOTS = Symbol('WebsiteSnapshotRepository');
 
@@ -356,3 +364,57 @@ export interface SmtpPortProbe {
   }>;
 }
 export const SMTP_PORT_PROBE = Symbol('SmtpPortProbe');
+
+// ---------------------------------------------------------------------------------------------------------------
+// Website audit (BF-030)
+
+/** One PageSpeed Insights run (`runPagespeed`, all four categories) for a strategy. */
+export interface PageSpeedPort {
+  run(
+    url: string,
+    strategy: PsiStrategy,
+    options: { readonly key: string | undefined; readonly signal: AbortSignal },
+  ): Promise<PsiStrategyResult>;
+}
+export const PAGESPEED = Symbol('PageSpeedPort');
+
+/** Grades a snapshot's screenshots (null when it has none to grade). */
+export interface VisionGrader {
+  grade(
+    organizationId: string,
+    snapshot: WebsiteSnapshotRecord,
+    subject: { readonly displayName: string; readonly categoryLabel: string | null },
+    signal: AbortSignal,
+  ): Promise<{ readonly grade: VisionGrade; readonly costUsd: number } | null>;
+}
+export const VISION_GRADER = Symbol('VisionGrader');
+
+/** What the audit rules need to know about the business (primary category, country). */
+export interface AuditBusinessFacts {
+  readonly countryCode: string | null;
+  readonly categoryAttributes: CategoryAttributes;
+  readonly servesFood: boolean;
+  readonly categoryLabel: string | null;
+}
+
+export interface WebsiteAuditRecord {
+  readonly id: string;
+  readonly businessId: string;
+  readonly snapshotId: string;
+  readonly psi: PsiResult | null;
+  readonly vision: VisionGrade | null;
+  readonly findings: Finding[];
+  readonly qualityScore: number | null;
+  readonly websiteStatus: WebsiteStatus;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface WebsiteAuditRepository {
+  /** The snapshot's audit, locked until the transaction ends (created empty first if missing). */
+  lockForSnapshot(businessId: string, snapshotId: string): Promise<WebsiteAuditRecord | undefined>;
+  save(audit: Omit<WebsiteAuditRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<WebsiteAuditRecord>;
+  latest(businessId: string): Promise<WebsiteAuditRecord | undefined>;
+  businessFacts(businessId: string): Promise<AuditBusinessFacts>;
+}
+export const WEBSITE_AUDITS = Symbol('WebsiteAuditRepository');

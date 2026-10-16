@@ -112,6 +112,18 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /**
+   * PageSpeed Insights (BF-030): a Lighthouse run takes 10–40 s (the adapter allows 90 s); 5xx retried once, quota
+   * answers (429) are left to the step (token bucket, re-check later).
+   */
+  pagespeed: {
+    timeoutMs: 95_000,
+    maxRetries: 1,
+    initialDelayMs: 2_000,
+    maxDelayMs: 10_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 120_000,
+  },
   /** Scraper job creation (BF-029): never retried (a POST that timed out may have created a job), but breaker-guarded. */
   'maps-scraper-create': {
     timeoutMs: 65_000,

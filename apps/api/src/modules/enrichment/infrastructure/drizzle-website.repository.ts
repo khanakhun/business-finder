@@ -123,6 +123,14 @@ export class DrizzleWebsiteSnapshotRepository implements WebsiteSnapshotReposito
     return toRecord(row);
   }
 
+  async byId(id: string): Promise<WebsiteSnapshotRecord | undefined> {
+    const [row] = await getExecutor(this.db)
+      .select()
+      .from(websiteSnapshots)
+      .where(eq(websiteSnapshots.id, id));
+    return row ? toRecord(row) : undefined;
+  }
+
   async latest(businessId: string): Promise<WebsiteSnapshotRecord | undefined> {
     const [row] = await getExecutor(this.db)
       .select()

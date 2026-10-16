@@ -1,3 +1,4 @@
+import type { AiGateway } from '@bf/ai';
 import type { ApiEnv } from '@bf/config';
 import type { Clock } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
@@ -9,6 +10,7 @@ import {
   RecordEmailVerificationCommand,
   ReplaceWebsiteMediaCommand,
 } from '../business-graph/index.ts';
+import { AI_GATEWAY } from '../platform/ai/ai.module.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
@@ -18,6 +20,7 @@ import {
   type RateLimiter,
   ValkeyRateLimiter,
 } from '../platform/rate-limit/valkey-rate-limiter.ts';
+import type { ObjectStorage } from '../platform/storage/object-storage.ts';
 import { ARTIFACT_STORAGE, InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { RealtimeModule } from '../realtime/index.ts';
@@ -46,6 +49,8 @@ import {
   type EnrichmentQueue,
   NO_SOLICITATION_MARKERS,
   type NoSolicitationMarkers,
+  PAGESPEED,
+  type PageSpeedPort,
   PERSONAL_ADDRESS_POLICY,
   type PersonalAddressPolicy,
   RUN_PROGRESS,
@@ -53,12 +58,16 @@ import {
   type SiteIntelPort,
   SMTP_PORT_PROBE,
   SUBJECT_READER,
+  VISION_GRADER,
+  type VisionGrader,
+  WEBSITE_AUDITS,
   WEBSITE_SNAPSHOTS,
   type WebsiteSnapshotRepository,
 } from './application/ports.ts';
 import { EnrichmentOrchestrator } from './application/run-orchestrator.ts';
 import { NightlyMaintenance, StepRegistry } from './application/step-registry.ts';
 import { VerifyContactCommand } from './application/verify-contact.command.ts';
+import { WebsiteAuditService } from './application/website-audit.service.ts';
 import { BullmqEnrichmentQueue } from './infrastructure/bullmq-enrichment-queue.ts';
 import {
   DrizzleEmailVerdictCache,
@@ -71,6 +80,7 @@ import {
   DrizzleNoSolicitationMarkers,
   DrizzleWebsiteSnapshotRepository,
 } from './infrastructure/drizzle-website.repository.ts';
+import { DrizzleWebsiteAuditRepository } from './infrastructure/drizzle-website-audits.ts';
 import {
   DnsMxVerifier,
   dnsResolver,
@@ -85,11 +95,14 @@ import {
   EnrichmentScheduler,
   MAINTENANCE_AUTOSTART,
 } from './infrastructure/enrichment-maintenance.ts';
+import { FakePageSpeed, PageSpeedClient } from './infrastructure/pagespeed.ts';
 import { RealtimeEnrichmentProgress } from './infrastructure/realtime-run-progress.ts';
 import { FakeSiteIntel, IntelSiteIntel } from './infrastructure/site-intel.adapters.ts';
 import { FakeSmtpPortProbe, TcpSmtpPortProbe } from './infrastructure/smtp-port-probe.ts';
 import { EmailVerifyStep } from './infrastructure/steps/email-verify.step.ts';
 import { SiteIntelStep } from './infrastructure/steps/site-intel.step.ts';
+import { PsiStep, VisionAuditStep } from './infrastructure/steps/website-audit.steps.ts';
+import { FakeVisionGrader, LlmVisionGrader } from './infrastructure/vision-graders.ts';
 import { EmailVerificationController } from './interface/http/email-verification.controller.ts';
 import {
   BusinessEnrichmentController,
@@ -105,6 +118,13 @@ import {
 function fakeSiteIntelEnabled(env: ApiEnv): boolean {
   if (!env.FAKE_SITE_INTEL) return false;
   if (env.NODE_ENV === 'production') throw new Error('FAKE_SITE_INTEL is refused in production');
+  return true;
+}
+
+/** The fake PageSpeed and vision grader exist only in tests and E2E (refused in production). */
+function fakeWebsiteAuditEnabled(env: ApiEnv): boolean {
+  if (!env.FAKE_WEBSITE_AUDIT) return false;
+  if (env.NODE_ENV === 'production') throw new Error('FAKE_WEBSITE_AUDIT is refused in production');
   return true;
 }
 
@@ -168,6 +188,11 @@ export class EnrichmentModule implements OnModuleInit {
     @Inject(EMAIL_SUPPRESSION) private readonly suppression: EmailSuppressionCheck,
     @Inject(LOGGER) private readonly logger: Logger,
     @Inject(PERSONAL_ADDRESS_POLICY) private readonly personalAddresses: PersonalAddressPolicy,
+    @Inject(PAGESPEED) private readonly pagespeed: PageSpeedPort,
+    @Inject(VISION_GRADER) private readonly visionGrader: VisionGrader,
+    private readonly websiteAudits: WebsiteAuditService,
+    private readonly secrets: SecretResolver,
+    @Inject(RATE_LIMITER) private readonly limiter: RateLimiter,
   ) {}
 
   private static readonly byMode = new Map<AppMode, DynamicModule>();
@@ -236,6 +261,27 @@ export class EnrichmentModule implements OnModuleInit {
         },
         EmailVerificationService,
         VerifyContactCommand,
+        { provide: WEBSITE_AUDITS, useClass: DrizzleWebsiteAuditRepository },
+        WebsiteAuditService,
+        {
+          provide: PAGESPEED,
+          inject: [APP_ENV, CLOCK],
+          useFactory: (env: AppEnv, clock: Clock): PageSpeedPort =>
+            fakeWebsiteAuditEnabled(env as ApiEnv) ? new FakePageSpeed(clock) : new PageSpeedClient(clock),
+        },
+        {
+          provide: VISION_GRADER,
+          inject: [APP_ENV, AI_GATEWAY, ARTIFACT_STORAGE, CLOCK],
+          useFactory: (
+            env: AppEnv,
+            gateway: AiGateway,
+            artifacts: ObjectStorage,
+            clock: Clock,
+          ): VisionGrader =>
+            fakeWebsiteAuditEnabled(env as ApiEnv)
+              ? new FakeVisionGrader(clock)
+              : new LlmVisionGrader(gateway, artifacts, clock),
+        },
         { provide: RATE_LIMITER, useClass: ValkeyRateLimiter },
         // The worker reconciles and schedules; the HTTP process only produces jobs.
         { provide: MAINTENANCE_AUTOSTART, useValue: mode === 'worker' },
@@ -291,6 +337,30 @@ export class EnrichmentModule implements OnModuleInit {
         clock: this.clock,
         ttlDays: env.ENRICHMENT_TTL_EMAIL_VERIFY_DAYS,
         unitCostUsd: env.ENRICHMENT_EMAIL_VERIFY_COST_USD,
+      }),
+    );
+    this.registry.register(
+      new PsiStep({
+        snapshots: this.snapshots,
+        pagespeed: this.pagespeed,
+        audits: this.websiteAudits,
+        key: async (organizationId) => (await this.secrets.resolve(organizationId, 'pagespeed'))?.value,
+        limiter: this.limiter,
+        quota: { perMinute: env.PAGESPEED_RATE_PER_MINUTE, perDay: env.PAGESPEED_DAILY_QUOTA },
+        clock: this.clock,
+        logger: this.logger,
+        ttlDays: env.ENRICHMENT_TTL_PSI_DAYS,
+      }),
+    );
+    this.registry.register(
+      new VisionAuditStep({
+        snapshots: this.snapshots,
+        grader: this.visionGrader,
+        audits: this.websiteAudits,
+        clock: this.clock,
+        logger: this.logger,
+        ttlDays: env.ENRICHMENT_TTL_VISION_AUDIT_DAYS,
+        costUsd: env.ENRICHMENT_VISION_AUDIT_COST_USD,
       }),
     );
     if (env.NODE_ENV === 'production' && this.suppression instanceof NoSuppression) {

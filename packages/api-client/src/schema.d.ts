@@ -1285,7 +1285,7 @@ export type paths = {
         put?: never;
         /** Acknowledge the Google terms warning and derive insights from Google reviews (workspace owner only; audited) */
         post: operations["acknowledgeGoogleReviewsTerms"];
-        /** Stop using Google reviews and forget the insights derived from them (workspace owner only) */
+        /** Stop using Google reviews and forget the insights derived from them */
         delete: operations["revokeGoogleReviewsTerms"];
         options?: never;
         head?: never;

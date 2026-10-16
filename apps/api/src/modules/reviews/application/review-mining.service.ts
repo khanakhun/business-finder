@@ -10,6 +10,7 @@ import {
   type Contributions,
   combineInsights,
   contributionOf,
+  liveContributions,
   type SourceContribution,
 } from '../domain/insights.ts';
 import { detectLanguage } from '../domain/language.ts';
@@ -28,6 +29,7 @@ import {
 
 /** Reviews analysed per source and analysis (Google returns at most 5; a paste at most 50). */
 export const MAX_REVIEWS_PER_SOURCE = 50;
+const MAX_PURGE_BATCHES = 100;
 const DAY_MS = 86_400_000;
 
 export interface AnalysisOutcome {
@@ -78,7 +80,14 @@ export class ReviewMiningService {
     organizationId: string,
     subject: ReviewSubject,
     batch: ReviewBatch,
-    options: { readonly signal?: AbortSignal } = {},
+    options: {
+      readonly signal?: AbortSignal;
+      /**
+       * Whether the source's gate is still open, asked again under the lock just before storing (a gate turned off
+       * while the reviews were being classified stores nothing).
+       */
+      readonly allowed?: () => Promise<boolean>;
+    } = {},
   ): Promise<AnalysisOutcome> {
     const prepared = this.prepare(batch);
     const expiresAt = expiryOf(batch.source, batch.fetchedAt);
@@ -98,6 +107,7 @@ export class ReviewMiningService {
       };
     }
     const result = await this.classifier.classify(organizationId, prepared, {
+      source: batch.source,
       categoryLabel: subject.categoryLabel,
       locale: subject.locale,
       ...(options.signal ? { signal: options.signal } : {}),
@@ -127,8 +137,18 @@ export class ReviewMiningService {
       model: result.model,
       promptVersion: result.promptVersion,
     });
-    const insights = await this.merge(organizationId, subject.businessId, batch.source, contribution);
-    return { analysed: classified.length, costUsd: result.costUsd, insights };
+    const merged = await this.merge(
+      organizationId,
+      subject.businessId,
+      batch.source,
+      contribution,
+      options.allowed,
+    );
+    return {
+      analysed: merged.stored ? classified.length : 0,
+      costUsd: result.costUsd,
+      insights: merged.insights,
+    };
   }
 
   /**
@@ -145,33 +165,67 @@ export class ReviewMiningService {
     );
   }
 
-  /** Drops a source's part of the workspace's insights (its gate was turned off). */
+  /**
+   * Drops a source's part of the workspace's insights (its gate was turned off). Holds the source's lock: a merge of
+   * that source either committed before (and is removed here) or waits and then finds the gate closed.
+   */
+  @Transactional()
   async forgetSource(organizationId: string, source: ReviewSource): Promise<number> {
+    await this.insights.lockSource(organizationId, source, 'exclusive');
+    await this.classifier.forget(organizationId, source);
     const businesses = await this.insights.withSource(organizationId, source);
-    for (const businessId of businesses) await this.merge(organizationId, businessId, source, null);
+    for (const businessId of businesses) await this.apply(organizationId, businessId, source, null);
     return businesses.length;
   }
 
   /** Retention (nightly): expired contributions and their evidence go, the rest is recombined. */
   async purgeExpired(now: Date, batchSize = 500): Promise<number> {
     let purged = 0;
-    for (const { organizationId, businessId } of await this.insights.expiring(now, batchSize)) {
-      await this.recombine(organizationId, businessId, now);
-      purged += 1;
+    // Batches until nothing expired is left (bounded: a stuck row cannot loop forever).
+    for (let batch = 0; batch < MAX_PURGE_BATCHES; batch++) {
+      const expiring = await this.insights.expiring(now, batchSize);
+      for (const { organizationId, businessId } of expiring) {
+        await this.recombine(organizationId, businessId, now);
+        purged += 1;
+      }
+      if (expiring.length < batchSize) break;
     }
     purged += await this.ratings.purgeExpired(now);
     return purged;
   }
 
-  /** Replaces (or, with null, removes) one source's contribution under a row lock, then recombines. */
+  /**
+   * Stores one source's contribution: under the source's shared lock (see `forgetSource`) the gate is asked again,
+   * then the business's lock serializes merges (a missing row cannot be locked by `FOR UPDATE`).
+   */
   @Transactional()
   private async merge(
     organizationId: string,
     businessId: string,
     source: ReviewSource,
+    contribution: SourceContribution,
+    allowed: (() => Promise<boolean>) | undefined,
+  ): Promise<{ readonly stored: boolean; readonly insights: CombinedInsights | null }> {
+    await this.insights.lockSource(organizationId, source, 'shared');
+    if (allowed && !(await allowed())) {
+      this.logger.info({ businessId, source }, 'review source turned off meanwhile: contribution dropped');
+      return {
+        stored: false,
+        insights: (await this.insights.find(organizationId, businessId))?.combined ?? null,
+      };
+    }
+    return { stored: true, insights: await this.apply(organizationId, businessId, source, contribution) };
+  }
+
+  /** Replaces (or, with null, removes) one source's contribution under the business's lock, then recombines. */
+  private async apply(
+    organizationId: string,
+    businessId: string,
+    source: ReviewSource,
     contribution: SourceContribution | null,
   ): Promise<CombinedInsights | null> {
-    const current = await this.insights.findForUpdate(organizationId, businessId);
+    await this.insights.lockBusiness(organizationId, businessId);
+    const current = await this.insights.find(organizationId, businessId);
     const contributions: Contributions = { ...current?.contributions };
     if (contribution) contributions[source] = contribution;
     else delete contributions[source];
@@ -184,7 +238,8 @@ export class ReviewMiningService {
     businessId: string,
     now: Date,
   ): Promise<CombinedInsights | null> {
-    const current = await this.insights.findForUpdate(organizationId, businessId);
+    await this.insights.lockBusiness(organizationId, businessId);
+    const current = await this.insights.find(organizationId, businessId);
     return this.store(organizationId, businessId, current?.contributions ?? {}, now);
   }
 
@@ -194,7 +249,12 @@ export class ReviewMiningService {
     contributions: Contributions,
     now: Date,
   ): Promise<CombinedInsights | null> {
-    const rating = ratingSummary(await this.ratings.list(businessId, now));
+    const used = new Set<string>(['golden_record', ...Object.keys(liveContributions(contributions, now))]);
+    // Only ratings from sources this workspace currently uses (another workspace's Google key, or a source turned
+    // off here, does not feed this workspace's trend).
+    const rating = ratingSummary(
+      (await this.ratings.list(businessId, now)).filter((o) => used.has(o.source)),
+    );
     const combined = combineInsights(contributions, rating, now);
     if (!combined) {
       await this.insights.delete(organizationId, businessId);

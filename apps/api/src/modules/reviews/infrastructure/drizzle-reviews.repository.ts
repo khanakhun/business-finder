@@ -11,7 +11,7 @@ import {
   reviewSourceSettings,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   InsightsRow,
@@ -50,26 +50,31 @@ const OBSERVATION_DEDUP_MS = 12 * 3_600_000;
 export class DrizzleReviewInsightsRepository implements ReviewInsightsRepository {
   constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
 
-  find(organizationId: string, businessId: string): Promise<InsightsRow | undefined> {
-    return this.load(organizationId, businessId, false);
+  async lockBusiness(organizationId: string, businessId: string): Promise<void> {
+    const key = `reviews:business:${organizationId}:${businessId}`;
+    await getExecutor(this.db).execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
   }
 
-  findForUpdate(organizationId: string, businessId: string): Promise<InsightsRow | undefined> {
-    return this.load(organizationId, businessId, true);
-  }
-
-  private async load(
+  async lockSource(
     organizationId: string,
-    businessId: string,
-    lock: boolean,
-  ): Promise<InsightsRow | undefined> {
-    const query = getExecutor(this.db)
+    source: ReviewSource,
+    mode: 'shared' | 'exclusive',
+  ): Promise<void> {
+    const key = `reviews:source:${organizationId}:${source}`;
+    await getExecutor(this.db).execute(
+      mode === 'shared'
+        ? sql`SELECT pg_advisory_xact_lock_shared(hashtextextended(${key}, 0))`
+        : sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`,
+    );
+  }
+
+  async find(organizationId: string, businessId: string): Promise<InsightsRow | undefined> {
+    const [row] = await getExecutor(this.db)
       .select()
       .from(reviewInsights)
       .where(
         and(eq(reviewInsights.organizationId, organizationId), eq(reviewInsights.businessId, businessId)),
       );
-    const [row] = lock ? await query.for('update') : await query;
     if (!row) return undefined;
     return {
       contributions: row.sourceStats as Contributions,
@@ -130,12 +135,15 @@ export class DrizzleReviewInsightsRepository implements ReviewInsightsRepository
   }
 
   async expiring(now: Date, limit: number): Promise<Array<{ organizationId: string; businessId: string }>> {
-    return getExecutor(this.db)
-      .select({ organizationId: reviewInsights.organizationId, businessId: reviewInsights.businessId })
-      .from(reviewInsights)
-      .where(lt(reviewInsights.expiresAt, now))
-      .orderBy(asc(reviewInsights.expiresAt))
-      .limit(limit);
+    return (
+      getExecutor(this.db)
+        .select({ organizationId: reviewInsights.organizationId, businessId: reviewInsights.businessId })
+        .from(reviewInsights)
+        // Expired at `now` itself too, like the domain (`liveContributions`).
+        .where(lte(reviewInsights.expiresAt, now))
+        .orderBy(asc(reviewInsights.expiresAt))
+        .limit(limit)
+    );
   }
 
   async withSource(organizationId: string, source: ReviewSource): Promise<string[]> {

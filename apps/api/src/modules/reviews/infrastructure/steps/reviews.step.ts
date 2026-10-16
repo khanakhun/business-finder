@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { Clock, ReviewSource } from '@bf/contracts';
+import { type Clock, RateLimitedError, type ReviewSource } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import {
   type EnrichmentStep,
@@ -9,9 +9,28 @@ import {
   StepInterruptedError,
   type StepResult,
 } from '../../../enrichment/index.ts';
+import { isTransient } from '../../../platform/resilience/resilience.ts';
+import { ClassificationInterruptedError } from '../../application/errors.ts';
 import type { ReviewSourceAdapter, ReviewSubjectReader } from '../../application/ports.ts';
 import type { ReviewGates } from '../../application/review-gates.ts';
 import type { ReviewMiningService } from '../../application/review-mining.service.ts';
+
+/** An outage, a quota or a transient failure: the source is re-checked within the hour. */
+function willRecover(error: unknown): boolean {
+  const cause = error instanceof ClassificationInterruptedError ? error.cause : error;
+  return cause instanceof RateLimitedError || isTransient(cause);
+}
+
+/** What a log line may say about an error: its class and code, never its message or payload. */
+function describe(error: unknown): Record<string, unknown> {
+  if (!(error instanceof Error)) return { name: typeof error };
+  const details = (error as { details?: { reason?: unknown } }).details;
+  return {
+    name: error.name,
+    ...('code' in error ? { code: (error as { code: unknown }).code } : {}),
+    ...(details?.reason ? { reason: details.reason } : {}),
+  };
+}
 
 /** Waits for an on-demand scraper job (30–60 s each) before the step gives up on that source for this run. */
 export const MAX_DEFERRALS = 20;
@@ -21,7 +40,7 @@ const RETRY_LATER_MS = 3_600_000;
 type SourceOutcome = 'analysed' | 'no_reviews' | 'budget' | 'failed' | 'timed_out';
 
 export interface ReviewsStepOptions {
-  readonly gates: Pick<ReviewGates, 'allowedSources'>;
+  readonly gates: Pick<ReviewGates, 'allowedSources' | 'isAllowed'>;
   readonly subjects: ReviewSubjectReader;
   readonly mining: Pick<ReviewMiningService, 'analyze' | 'observeGoldenRating'>;
   /** Fetchers per source; asynchronous ones (pending jobs) are asked first so a deferral repeats no paid call. */
@@ -99,12 +118,7 @@ export class ReviewsStep implements EnrichmentStep {
         continue;
       }
       try {
-        const fetched = await adapter.fetch({
-          organizationId,
-          subject,
-          signal,
-          attemptKey: execution.stepRowId,
-        });
+        const fetched = await adapter.fetch({ organizationId, subject, signal });
         if (fetched.kind === 'pending') {
           if (execution.deferrals < MAX_DEFERRALS) {
             throw new StepDeferredError(fetched.retryAfterMs, spent, analysed > 0 ? ['review_insights'] : []);
@@ -117,25 +131,32 @@ export class ReviewsStep implements EnrichmentStep {
           continue;
         }
         spent += fetched.batch.costUsd;
-        const outcome = await this.options.mining.analyze(organizationId, subject, fetched.batch, { signal });
+        const outcome = await this.options.mining.analyze(organizationId, subject, fetched.batch, {
+          signal,
+          // The gate is asked again just before storing: turned off meanwhile, nothing is kept.
+          allowed: () => this.options.gates.isAllowed(organizationId, adapter.source),
+        });
         spent += outcome.costUsd;
         analysed += outcome.analysed;
         outcomes[adapter.source] = outcome.analysed > 0 ? 'analysed' : 'no_reviews';
       } catch (error) {
         if (error instanceof StepDeferredError) throw error;
+        // Model batches paid before the failure are booked.
+        if (error instanceof ClassificationInterruptedError) spent += error.costUsd;
         // A stop (cancel, shutdown) ends the step after booking what it spent.
         if (signal.aborted)
           throw new StepInterruptedError(error, spent, analysed > 0 ? ['review_insights'] : []);
-        this.options.logger.warn({ err: error, source: adapter.source }, 'review source failed');
+        // Never the error itself: a model failure can carry the raw answer (review text).
+        this.options.logger.warn({ source: adapter.source, error: describe(error) }, 'review source failed');
         outcomes[adapter.source] = 'failed';
         errors.push(error);
       }
     }
-    const failed = Object.values(outcomes).filter((o) => o === 'failed').length;
-    // Every source failed: the engine retries (bounded attempts) or reports the error — nothing got through.
-    if (failed > 0 && failed === adapters.length) {
-      throw spent > 0 ? new StepInterruptedError(errors[0], spent) : errors[0];
-    }
+    // A configuration error (no model key, a refused Places key) with nothing spent and nothing analysed is shown as
+    // the step's error. Anything else — outages, quotas, an LLM failure after a paid fetch — is re-checked later:
+    // rethrowing would make the engine retry and pay the paid fetch again (BF-028 lesson).
+    const permanent = errors.find((error) => !willRecover(error));
+    if (permanent !== undefined && spent === 0 && analysed === 0) throw permanent;
     const retryLater = Object.values(outcomes).some((o) => o === 'failed' || o === 'timed_out');
     return {
       outcome: 'done',

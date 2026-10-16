@@ -90,18 +90,22 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
-  /** Google Place Details for reviews (BF-029): one paid call per business; a failed one is re-checked later. */
+  /**
+   * Google Place Details for reviews (BF-029): one paid call per business. Not retried (a call that timed out here
+   * may have been billed); the step re-checks a failed source within the hour.
+   */
   'google-places-reviews': {
     timeoutMs: 15_000,
-    maxRetries: 1,
+    maxRetries: 0,
     initialDelayMs: 500,
     maxDelayMs: 3_000,
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
-  /** The self-hosted scraper's job API (BF-029 review jobs): quick calls, the job itself is polled. */
+  /** The self-hosted scraper's job API (BF-029 review jobs), per request; job creation is never retried. */
   'maps-scraper': {
-    timeoutMs: 25_000,
+    // A result download (up to 5 MB) included.
+    timeoutMs: 90_000,
     maxRetries: 1,
     initialDelayMs: 1_000,
     maxDelayMs: 5_000,

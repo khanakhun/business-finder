@@ -9,7 +9,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import type { AuthContext } from '../../platform/security/auth-context.ts';
-import type { CombinedInsights } from '../domain/insights.ts';
+import { type CombinedInsights, combineInsights } from '../domain/insights.ts';
 import {
   REVIEW_INSIGHTS,
   REVIEW_SUBJECTS,
@@ -38,11 +38,21 @@ export class ReviewInsightsQuery {
     if (!(await this.subjects.tracks(organizationId, businessId)))
       throw new NotFoundError('Business', businessId);
     const row = await this.insights.find(organizationId, businessId);
-    // An expired row the nightly purge has not reached yet is not shown.
-    const expired =
-      row?.combined.expiresAt && Date.parse(row.combined.expiresAt) <= this.clock.now().getTime();
+    const now = this.clock.now();
+    // A contribution expired since the last write is left out at once (the nightly purge deletes it later); the
+    // other sources' part stays visible.
+    const expired = row?.combined.expiresAt && Date.parse(row.combined.expiresAt) <= now.getTime();
+    const combined = !row
+      ? null
+      : expired
+        ? combineInsights(
+            row.contributions,
+            { snapshot: row.combined.ratingSnapshot, trend: row.combined.ratingTrend },
+            now,
+          )
+        : row.combined;
     return {
-      insights: row && !expired ? toReviewInsights(businessId, row.combined) : null,
+      insights: combined ? toReviewInsights(businessId, combined) : null,
       sources: await this.gates.gatesFor(organizationId),
     };
   }
@@ -76,18 +86,23 @@ export class AnalyzePastedReviewsCommand {
         details: { reason: 'LICENSING_DISABLED' },
       });
     }
-    const outcome = await this.mining.analyze(organizationId, subject, {
-      source: 'manual',
-      reviews: body.reviews.map((review) => ({
-        text: review.text,
-        ...(review.rating !== undefined ? { rating: review.rating } : {}),
-        ownerResponded: null,
-        knownNames: [],
-      })),
-      rating: null,
-      fetchedAt: this.clock.now(),
-      costUsd: 0,
-    });
+    const outcome = await this.mining.analyze(
+      organizationId,
+      subject,
+      {
+        source: 'manual',
+        reviews: body.reviews.map((review) => ({
+          text: review.text,
+          ...(review.rating !== undefined ? { rating: review.rating } : {}),
+          ownerResponded: null,
+          knownNames: [],
+        })),
+        rating: null,
+        fetchedAt: this.clock.now(),
+        costUsd: 0,
+      },
+      { allowed: () => this.gates.isAllowed(organizationId, 'manual') },
+    );
     if (outcome.analysed === 0) {
       throw new ConflictError('None of the pasted reviews could be analysed.', {
         details: { reason: 'NOTHING_ANALYSED' },

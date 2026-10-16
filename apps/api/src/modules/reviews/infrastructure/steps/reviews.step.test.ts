@@ -1,7 +1,8 @@
-import { fixedClock, type ReviewSourceGate } from '@bf/contracts';
+import { ExternalServiceError, fixedClock, RateLimitedError, type ReviewSourceGate } from '@bf/contracts';
 import { createLogger } from '@bf/observability';
 import { describe, expect, it, vi } from 'vitest';
 import { StepDeferredError, type StepExecution, StepInterruptedError } from '../../../enrichment/index.ts';
+import { ClassificationInterruptedError } from '../../application/errors.ts';
 import type { ReviewFetch, ReviewSourceAdapter, ReviewSubject } from '../../application/ports.ts';
 import type { ReviewBatch } from '../../domain/review.ts';
 import { MAX_DEFERRALS, ReviewsStep } from './reviews.step.ts';
@@ -52,11 +53,18 @@ function setup(
   } = {},
 ) {
   const mining = {
-    analyze: vi.fn(async () => ({ analysed: options.analyzed ?? 1, costUsd: 0.002, insights: null })),
+    analyze: vi.fn(async (..._args: unknown[]) => ({
+      analysed: options.analyzed ?? 1,
+      costUsd: 0.002,
+      insights: null,
+    })),
     observeGoldenRating: vi.fn(async () => {}),
   };
   const step = new ReviewsStep({
-    gates: { allowedSources: async () => options.gates ?? [gate('manual')] },
+    gates: {
+      allowedSources: async () => options.gates ?? [gate('manual')],
+      isAllowed: async () => true,
+    },
     subjects: { find: async () => subject, tracks: async () => true },
     mining,
     adapters: options.adapters ?? [],
@@ -165,23 +173,79 @@ describe('ReviewsStep', () => {
     });
   });
 
-  it('reports the error when every source failed, booking what was spent', async () => {
+  it('never rethrows after a paid fetch: a model failure is booked and re-checked, not paid again', async () => {
     const google = adapter(
       'google_places',
       async () => ({ kind: 'reviews', batch: batch('google_places', 0.025) }),
       0.025,
     );
     const { step, mining } = setup({ gates: [gate('google_places')], adapters: [google] });
-    mining.analyze.mockRejectedValueOnce(new Error('model down'));
-    const error = await step.execute(execution()).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(StepInterruptedError);
-    expect((error as StepInterruptedError).costUsd).toBeCloseTo(0.025);
-
-    const free = adapter('google_places', async () => {
-      throw new Error('quota');
+    mining.analyze.mockRejectedValueOnce(new ClassificationInterruptedError(new Error('model down'), 0.001));
+    const result = await step.execute(execution());
+    expect(result).toMatchObject({
+      outcome: 'done',
+      outputRef: { analysed: 0, sources: { google_places: 'failed' }, recheckAt: expect.any(String) },
     });
-    const { step: unpaid } = setup({ gates: [gate('google_places')], adapters: [free] });
-    await expect(unpaid.execute(execution())).rejects.toThrow('quota');
+    // The paid fetch and the model batches paid before the failure.
+    expect(result.costUsd).toBeCloseTo(0.026);
+  });
+
+  it('re-checks outages and quotas later, and shows configuration errors as the step error', async () => {
+    const down = adapter('google_places', async () => {
+      throw new Error('socket hang up');
+    });
+    const { step: outage } = setup({ gates: [gate('google_places')], adapters: [down] });
+    expect(await outage.execute(execution())).toMatchObject({
+      outcome: 'done',
+      costUsd: 0,
+      outputRef: { sources: { google_places: 'failed' }, recheckAt: expect.any(String) },
+    });
+
+    const quota = adapter('google_places', async () => {
+      throw new RateLimitedError('quota', 7);
+    });
+    const { step: limited } = setup({ gates: [gate('google_places')], adapters: [quota] });
+    expect(await limited.execute(execution())).toMatchObject({
+      outcome: 'done',
+      outputRef: { recheckAt: expect.any(String) },
+    });
+
+    const refused = adapter('google_places', async () => {
+      throw new ExternalServiceError('google-places', 'answered 403', { details: { retryable: false } });
+    });
+    const { step: misconfigured } = setup({ gates: [gate('google_places')], adapters: [refused] });
+    await expect(misconfigured.execute(execution())).rejects.toThrow('answered 403');
+  });
+
+  it('checks the budget with what it already spent, and skips a business that is gone', async () => {
+    const google = adapter(
+      'google_places',
+      async () => ({ kind: 'reviews', batch: batch('google_places', 0.025) }),
+      0.025,
+    );
+    const canSpend = vi.fn(async () => true);
+    const { step } = setup({ gates: [gate('google_places')], adapters: [google] });
+    (step as unknown as { options: { canSpend: typeof canSpend } }).options.canSpend = canSpend;
+    await step.execute(execution());
+    expect(canSpend).toHaveBeenCalledWith('org', 0.025);
+
+    const { step: gone } = setup({ gates: [gate('google_places')], adapters: [google] });
+    (gone as unknown as { options: { subjects: { find: () => Promise<undefined> } } }).options.subjects = {
+      find: async () => undefined,
+    };
+    expect(await gone.execute(execution())).toEqual({
+      outcome: 'skipped',
+      reason: 'not_applicable',
+      costUsd: 0,
+    });
+  });
+
+  it('asks the gate again before storing', async () => {
+    const google = adapter('google_places', async () => ({ kind: 'reviews', batch: batch('google_places') }));
+    const { step, mining } = setup({ gates: [gate('google_places')], adapters: [google] });
+    await step.execute(execution());
+    const options = mining.analyze.mock.calls[0]?.[3] as { allowed?: () => Promise<boolean> } | undefined;
+    expect(await options?.allowed?.()).toBe(true);
   });
 
   it('skips a paid source the budget cannot pay, and stops at once on cancel', async () => {

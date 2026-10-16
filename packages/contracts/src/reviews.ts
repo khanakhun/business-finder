@@ -419,12 +419,12 @@ export function evidenceProblem(snippet: string, review: string): 'too_long' | '
   if (words.length === 0 || words.length > EVIDENCE_MAX_WORDS) return 'too_long';
   if (/\[(person|email|phone|handle|link)\]|@\w|https?:\/\/|\d{6,}/iu.test(snippet)) return 'personal';
   const source = reviewWords(review);
+  // Five words in a row copied make a quote — and so does a shorter snippet copied whole.
+  const run = Math.min(MAX_SHARED_RUN + 1, words.length);
   const runs = new Set<string>();
-  for (let i = 0; i + MAX_SHARED_RUN < source.length; i++) {
-    runs.add(source.slice(i, i + MAX_SHARED_RUN + 1).join(' '));
-  }
-  for (let i = 0; i + MAX_SHARED_RUN < words.length; i++) {
-    if (runs.has(words.slice(i, i + MAX_SHARED_RUN + 1).join(' '))) return 'quote';
+  for (let k = 0; k + run <= source.length; k++) runs.add(source.slice(k, k + run).join(' '));
+  for (let k = 0; k + run <= words.length; k++) {
+    if (runs.has(words.slice(k, k + run).join(' '))) return 'quote';
   }
   return null;
 }

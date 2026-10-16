@@ -55,6 +55,16 @@ describe('evidenceProblem', () => {
     expect(evidenceProblem('Nobody ever picked up; they went elsewhere.', review)).toBeNull();
   });
 
+  it('refuses a short snippet copied whole from a short review', () => {
+    expect(evidenceProblem('Impossible de réserver.', 'Impossible de réserver.')).toBe('quote');
+    expect(evidenceProblem('Top', 'Top !')).toBe('quote');
+    expect(evidenceProblem('Booking is hard', 'Impossible de réserver.')).toBeNull();
+  });
+
+  it('accepts exactly twenty words', () => {
+    expect(evidenceProblem(Array.from({ length: 20 }, (_, i) => `w${i}`).join(' '), review)).toBeNull();
+  });
+
   it('refuses snippets over twenty words or empty ones', () => {
     expect(evidenceProblem(Array.from({ length: 21 }, (_, i) => `w${i}`).join(' '), review)).toBe('too_long');
     expect(evidenceProblem(' … ', review)).toBe('too_long');

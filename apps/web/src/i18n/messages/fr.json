@@ -1478,7 +1478,7 @@
       "mixed": "Mitigée ({value})",
       "positive": "Positive ({value})"
     },
-    "ownerResponseRate": "Réponses du propriétaire",
+    "ownerResponseRate": "Réponses du propriétaire (au moins)",
     "rating": "Note",
     "ratingValue": "{avg} ★ ({count, plural, one {# note} other {# notes}})",
     "ratingTrend": "Évolution de la note",

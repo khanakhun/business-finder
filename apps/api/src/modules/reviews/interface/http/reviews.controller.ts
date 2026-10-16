@@ -120,7 +120,7 @@ export class ReviewSourcesController {
   @Delete('sources/google/acknowledgement')
   @RequirePermission('settings:manage')
   @ApiRoute({
-    summary: 'Stop using Google reviews and forget the insights derived from them (workspace owner only)',
+    summary: 'Stop using Google reviews and forget the insights derived from them',
     operationId: 'revokeGoogleReviewsTerms',
     response: { status: 200, schema: ReviewSourcesStatusSchema },
     errors: [401, 403],

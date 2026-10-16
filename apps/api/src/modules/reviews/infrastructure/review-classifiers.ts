@@ -5,8 +5,9 @@ import {
   REVIEWS_PER_CALL,
   ReviewsExtractPainSignals,
 } from '@bf/ai';
-import { evidenceProblem, PAIN_SIGNAL_TAGS, type PainSignalTag } from '@bf/contracts';
+import { evidenceProblem, PAIN_SIGNAL_TAGS, type PainSignalTag, type ReviewSource } from '@bf/contracts';
 import type { Redis } from 'ioredis';
+import { ClassificationInterruptedError } from '../application/errors.ts';
 import type {
   CachedVerdict,
   ClassificationResult,
@@ -47,12 +48,14 @@ export class LlmReviewClassifier implements ReviewClassifier {
     organizationId: string,
     reviews: readonly PreparedReview[],
     context: {
+      readonly source: ReviewSource;
       readonly categoryLabel: string | null;
       readonly locale: 'en' | 'fr';
       readonly signal?: AbortSignal;
     },
   ): Promise<ClassificationResult> {
-    const keys = reviews.map(reviewKey);
+    // Per source: a source turned off forgets its verdicts without touching the others'.
+    const keys = reviews.map((review) => `${context.source}:${reviewKey(review)}`);
     const cached = await this.cache.getMany(organizationId, keys);
     const verdicts = new Map<string, CachedVerdict>();
     for (const [key, verdict] of cached) verdicts.set(key, verdict);
@@ -62,23 +65,28 @@ export class LlmReviewClassifier implements ReviewClassifier {
     let costUsd = 0;
     let model = '';
     let promptVersion = 0;
-    const fresh = new Map<string, CachedVerdict>();
     for (let start = 0; start < missing.length; start += REVIEWS_PER_CALL) {
       const chunk = missing.slice(start, start + REVIEWS_PER_CALL);
-      const result = await this.gateway.run(
-        ReviewsExtractPainSignals,
-        {
-          locale: context.locale,
-          ...(context.categoryLabel ? { businessCategory: context.categoryLabel.slice(0, 100) } : {}),
-          reviews: chunk.map(({ review }, index) => ({
-            id: `r${index + 1}`,
-            text: review.text,
-            ...(review.rating !== undefined ? { rating: review.rating } : {}),
-            ...(review.language !== 'und' ? { language: review.language } : {}),
-          })),
-        },
-        { orgId: organizationId, ...(context.signal ? { signal: context.signal } : {}) },
-      );
+      const fresh = new Map<string, CachedVerdict>();
+      const result = await this.gateway
+        .run(
+          ReviewsExtractPainSignals,
+          {
+            locale: context.locale,
+            ...(context.categoryLabel ? { businessCategory: context.categoryLabel.slice(0, 100) } : {}),
+            reviews: chunk.map(({ review }, index) => ({
+              id: `r${index + 1}`,
+              text: review.text,
+              ...(review.rating !== undefined ? { rating: review.rating } : {}),
+              ...(review.language !== 'und' ? { language: review.language } : {}),
+            })),
+          },
+          { orgId: organizationId, ...(context.signal ? { signal: context.signal } : {}) },
+        )
+        .catch((error: unknown) => {
+          // Earlier batches are paid for and cached: the caller books their cost.
+          throw costUsd > 0 ? new ClassificationInterruptedError(error, costUsd) : error;
+        });
       costUsd += result.costUsd ?? 0;
       model = result.model;
       promptVersion = result.promptVersion;
@@ -100,8 +108,9 @@ export class LlmReviewClassifier implements ReviewClassifier {
         verdicts.set(key, verdict);
         fresh.set(key, verdict);
       });
+      // Cached batch by batch: a later failure does not make a retry pay for these again.
+      if (fresh.size > 0) await this.cache.setMany(organizationId, fresh, CACHE_TTL_SECONDS);
     }
-    if (fresh.size > 0) await this.cache.setMany(organizationId, fresh, CACHE_TTL_SECONDS);
     const first = verdicts.values().next().value as CachedVerdict | undefined;
     return {
       reviews: reviews.map((review, index) => {
@@ -122,9 +131,13 @@ export class LlmReviewClassifier implements ReviewClassifier {
       promptVersion: promptVersion || first?.promptVersion || 0,
     };
   }
+
+  forget(organizationId: string, source: ReviewSource): Promise<void> {
+    return this.cache.forget(organizationId, source);
+  }
 }
 
-/** Per-review verdicts in Valkey, per workspace (pasted reviews are workspace input). */
+/** Per-review verdicts in Valkey, per workspace and source (pasted reviews are workspace input). */
 export class ValkeyReviewClassificationCache implements ReviewClassificationCache {
   constructor(private readonly valkey: Redis) {}
 
@@ -158,6 +171,21 @@ export class ValkeyReviewClassificationCache implements ReviewClassificationCach
       pipeline.set(this.key(organizationId, hash), JSON.stringify(verdict), 'EX', ttlSeconds);
     }
     await pipeline.exec();
+  }
+
+  async forget(organizationId: string, source: ReviewSource): Promise<void> {
+    let cursor = '0';
+    do {
+      const [next, keys] = await this.valkey.scan(
+        cursor,
+        'MATCH',
+        this.key(organizationId, `${source}:*`),
+        'COUNT',
+        500,
+      );
+      if (keys.length > 0) await this.valkey.del(...keys);
+      cursor = next;
+    } while (cursor !== '0');
   }
 }
 
@@ -201,4 +229,6 @@ export class FakeReviewClassifier implements ReviewClassifier {
       promptVersion: 1,
     };
   }
+
+  async forget(): Promise<void> {}
 }

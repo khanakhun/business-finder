@@ -2,6 +2,7 @@ import type { AiGateway, ExtractPainSignalsInput, ExtractPainSignalsOutput } fro
 import { fixedClock } from '@bf/contracts';
 import { createLogger } from '@bf/observability';
 import { describe, expect, it, vi } from 'vitest';
+import { ClassificationInterruptedError } from '../application/errors.ts';
 import type {
   CachedVerdict,
   ReviewClassificationCache,
@@ -28,6 +29,9 @@ const memoryCache = (): ReviewClassificationCache & { store: Map<string, CachedV
       ),
     setMany: async (org, entries) => {
       for (const [k, v] of entries) store.set(`${org}:${k}`, v);
+    },
+    forget: async (org, source) => {
+      for (const key of [...store.keys()]) if (key.startsWith(`${org}:${source}:`)) store.delete(key);
     },
   };
 };
@@ -63,7 +67,7 @@ const tagAll: Answer = (input) => ({
   })),
   warnings: [],
 });
-const context = { categoryLabel: 'Restaurant', locale: 'en' as const };
+const context = { source: 'manual' as const, categoryLabel: 'Restaurant', locale: 'en' as const };
 
 describe('LlmReviewClassifier', () => {
   it('batches 20 reviews per call and caches each verdict per workspace', async () => {
@@ -85,6 +89,55 @@ describe('LlmReviewClassifier', () => {
     await classifier.classify('org-b', reviews.slice(0, 2), context);
     expect(run).toHaveBeenCalledTimes(4);
     expect(reviewKey(reviews[0] as PreparedReview)).not.toContain('Review number');
+  });
+
+  it('maps each answer to its own review, and calls the model only for uncached ones', async () => {
+    const { run, gateway } = gatewayAnswering((input) => ({
+      reviews: input.reviews.map((r) => ({
+        id: r.id,
+        tags: [],
+        sentiment: Number(r.text.split(' ')[1]) / 100,
+        mentionsOwnerResponse: false,
+        evidence: null,
+      })),
+      warnings: [],
+    }));
+    const classifier = new LlmReviewClassifier(gateway, memoryCache());
+    const reviews = Array.from({ length: 25 }, (_, i) => prepared(`Review ${i}`));
+    const result = await classifier.classify('org', reviews.slice(0, 10), context);
+    expect(result.reviews.map((r) => r?.sentiment)).toEqual(reviews.slice(0, 10).map((_, i) => i / 100));
+    const mixed = await classifier.classify('org', reviews, context);
+    expect(mixed.reviews[24]?.sentiment).toBe(0.24);
+    // The 15 uncached reviews only: one call of 15.
+    expect((run.mock.calls[1]?.[1] as ExtractPainSignalsInput | undefined)?.reviews).toHaveLength(15);
+  });
+
+  it('books and caches the batches paid before a later batch fails', async () => {
+    let calls = 0;
+    const run = vi.fn(async (_task: unknown, input: ExtractPainSignalsInput) => {
+      calls += 1;
+      if (calls === 2) throw new Error('model down');
+      return {
+        output: tagAll(input),
+        provider: 'anthropic' as const,
+        model: 'fast-model',
+        promptVersion: 1,
+        usage: { inputTokens: 0, outputTokens: 0, cachedTokens: 0 },
+        costUsd: 0.001,
+        cached: false,
+        latencyMs: 1,
+      };
+    });
+    const cache = memoryCache();
+    const classifier = new LlmReviewClassifier({ run } as unknown as AiGateway, cache);
+    const reviews = Array.from({ length: 30 }, (_, i) => prepared(`Review ${i}`));
+    const error = await classifier.classify('org', reviews, context).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ClassificationInterruptedError);
+    expect((error as ClassificationInterruptedError).costUsd).toBeCloseTo(0.001);
+    expect(cache.store.size).toBe(20);
+    // A source turned off forgets its verdicts only.
+    await classifier.forget('org', 'manual');
+    expect(cache.store.size).toBe(0);
   });
 
   it('drops answers for unknown or missing ids, unknown tags and bad evidence', async () => {
@@ -147,7 +200,8 @@ describe('ReviewMiningService', () => {
     const { run, gateway } = gatewayAnswering(tagAll);
     const insights: ReviewInsightsRepository = {
       find: async () => undefined,
-      findForUpdate: async () => undefined,
+      lockBusiness: async () => {},
+      lockSource: async () => {},
       save: vi.fn(async () => {}),
       delete: async () => {},
       expiring: async () => [],
@@ -179,7 +233,7 @@ describe('ReviewMiningService', () => {
         source: 'manual',
         reviews: [
           {
-            text: 'Merci Julie ! Booking impossible, wrote to resa@chez-test.com and @cheztest, call +590 590 12 34 56, see https://chez-test.com/menu — Marie Dupont',
+            text: 'Merci Julie ! Booking impossible, wrote to resa@chez-test.example and @cheztest, call +33 1 99 00 12 34, see https://chez-test.example/menu — Marie Dupont',
             ownerResponded: null,
             knownNames: ['Marie Dupont'],
           },
@@ -192,7 +246,7 @@ describe('ReviewMiningService', () => {
     );
     expect(run).toHaveBeenCalledTimes(1);
     const sent = JSON.stringify(run.mock.calls[0]?.[1]);
-    for (const leaked of ['Julie', 'resa@', '@cheztest', '590 12', 'https://', 'Marie', 'Dupont']) {
+    for (const leaked of ['Julie', 'resa@', '@cheztest', '99 00 12', 'https://', 'Marie', 'Dupont']) {
       expect(sent).not.toContain(leaked);
     }
     expect(sent).toContain('[person]');

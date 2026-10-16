@@ -14,7 +14,7 @@ describe('stripPersonalDetails', () => {
     expect(
       stripPersonalDetails(
         'Écrivez à resa.lavague@example.com ou sur www.la-vague.example/contact, insta @la_vague_sbh, ' +
-          'tél +590 590 12 34 56 ou 0690.12.34.56.',
+          'tél +33 1 99 00 12 34 ou 01.99.00.56.78.',
       ),
     ).toBe('Écrivez à [email] ou sur [link] insta [handle], tél [phone] ou [phone].');
     expect(stripPersonalDetails('See https://example.com/x?y=1 now')).toBe('See [link] now');
@@ -46,6 +46,22 @@ describe('stripPersonalDetails', () => {
     );
     // Lowercase words after "merci" are not names.
     expect(stripPersonalDetails('merci pour tout')).toBe('merci pour tout');
+  });
+});
+
+describe('stripPersonalDetails boundaries', () => {
+  it('treats eight digits or more as a phone, fewer as a number', () => {
+    expect(stripPersonalDetails('Code 1234567 at the door')).toBe('Code 1234567 at the door');
+    expect(stripPersonalDetails('Call 12345678')).toBe('Call [phone]');
+  });
+
+  it('documents its limits: capitalised words only, and attached names of three letters or more', () => {
+    // An all-caps or lowercase name after a thank-you is not recognised (the prompt forbids names in paraphrases,
+    // and paraphrases are checked again).
+    expect(stripPersonalDetails('Merci JULIE')).toBe('Merci JULIE');
+    expect(stripPersonalDetails('merci julie')).toBe('merci julie');
+    // Short attached names are removed whole only, never as fragments of other words.
+    expect(stripPersonalDetails('Jo was great, enjoy!', ['Jo'])).toBe('[person] was great, enjoy!');
   });
 });
 
@@ -145,6 +161,9 @@ describe('aggregation', () => {
     expect(both?.expiresAt).toBe(new Date(NOW.getTime() + 29 * DAY).toISOString());
     expect(both?.ratingTrend).toBe('flat');
 
+    // Expired at its expiry instant exactly.
+    const atExpiry = new Date(NOW.getTime() + 29 * DAY);
+    expect(Object.keys(liveContributions({ google_places: google, manual }, atExpiry))).toEqual(['manual']);
     const later = new Date(NOW.getTime() + 30 * DAY);
     expect(Object.keys(liveContributions({ google_places: google, manual }, later))).toEqual(['manual']);
     const afterExpiry = combineInsights(
@@ -182,6 +201,8 @@ describe('ratingSummary', () => {
     expect(ratingSummary([at(20, 4.2), at(0, 4.3)]).trend).toBe('up');
     expect(ratingSummary([at(20, 4.4), at(0, 4.3)]).trend).toBe('down');
     expect(ratingSummary([at(20, 4.3), at(0, 4.35)]).trend).toBe('flat');
+    expect(ratingSummary([at(14, 4.2), at(0, 4.6)]).trend).toBe('up'); // exactly 14 days
+    expect(ratingSummary([at(13.9, 4.2), at(0, 4.6)]).trend).toBe('unknown');
   });
 
   it('follows the most observed source and snapshots the latest observation', () => {

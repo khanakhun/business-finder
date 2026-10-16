@@ -59,6 +59,11 @@ pnpm eval --task demo.extract_business_facts --record   # runs live and writes f
 Review the recorded answers before committing them (they must not contain personal data). The demo task's current
 fixtures are hand-written (no keys were available when it was built).
 
+Without keys, `node scripts/write-replay-fixtures.ts <task>` writes replay fixtures from
+`evals/<task>/replay-outputs.jsonl` (one answer per dataset row, same order). `reviews.extract_pain_signals` uses it:
+its answers are simulated (realistic mistakes included), not recorded — record real ones before trusting the
+thresholds.
+
 ## Evals
 
 ```sh
@@ -67,7 +72,8 @@ pnpm eval --task <name> --replay                        # recorded fixtures (wha
 ```
 
 Reports go to `evals/reports/<task>-<timestamp>.{md,json}` (not versioned; attach them to the PR). The run fails
-below the thresholds. `.github/workflows/evals.yml` runs evals on real models nightly or on demand and skips when
+below the thresholds (`thresholds`, minimum means) or above `maxThresholds` (lower-is-better metrics). Besides
+per-row scorers, `aggregates` compute dataset-level metrics over every row at once (`macroF1`, `meanAbsoluteError`). `.github/workflows/evals.yml` runs evals on real models nightly or on demand and skips when
 no provider key secret is set; `pnpm verify` runs each eval on its fixtures.
 
 ## Configuration (apps/api)

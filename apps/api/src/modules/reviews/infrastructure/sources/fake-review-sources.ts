@@ -6,7 +6,7 @@ import type { ReviewFetch, ReviewFetchContext, ReviewSourceAdapter } from '../..
 
 const FAKE_REVIEWS = [
   {
-    text: 'Impossible to book online, we had to call three times. Thanks Jordan for sorting it out.',
+    text: 'Impossible to book online, we had to call three times. Thanks Jordan for sorting it out. Alex Fictif',
     rating: 2,
   },
   { text: 'Nobody ever answers the phone, we gave up and went next door.', rating: 1 },

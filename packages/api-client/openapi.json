@@ -19001,7 +19001,7 @@
             "description": "Problem details (RFC 9457)"
           }
         },
-        "summary": "Stop using Google reviews and forget the insights derived from them (workspace owner only)",
+        "summary": "Stop using Google reviews and forget the insights derived from them",
         "tags": [
           "reviews"
         ]

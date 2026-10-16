@@ -32,8 +32,6 @@ export interface ReviewFetchContext {
   readonly organizationId: string;
   readonly subject: ReviewSubject;
   readonly signal: AbortSignal;
-  /** Distinguishes one fetch from the next (a step attempt), for sources that work asynchronously. */
-  readonly attemptKey: string;
 }
 
 export type ReviewFetch =
@@ -66,11 +64,14 @@ export interface ReviewClassifier {
     organizationId: string,
     reviews: readonly PreparedReview[],
     context: {
+      readonly source: ReviewSource;
       readonly categoryLabel: string | null;
       readonly locale: 'en' | 'fr';
       readonly signal?: AbortSignal;
     },
   ): Promise<ClassificationResult>;
+  /** Forgets cached verdicts derived from `source` (its gate was turned off). */
+  forget(organizationId: string, source: ReviewSource): Promise<void>;
 }
 export const REVIEW_CLASSIFIER = Symbol('REVIEW_CLASSIFIER');
 
@@ -83,7 +84,10 @@ export type CachedVerdict = Pick<
   readonly promptVersion: number;
 };
 
-/** Per-review classification cache (keyed by a hash of the anonymized text; per workspace). */
+/**
+ * Per-review classification cache (keyed by a hash of the anonymized text; per workspace and source, so turning a
+ * source off can forget what was derived from it).
+ */
 export interface ReviewClassificationCache {
   getMany(organizationId: string, keys: readonly string[]): Promise<Map<string, CachedVerdict>>;
   setMany(
@@ -91,6 +95,8 @@ export interface ReviewClassificationCache {
     entries: ReadonlyMap<string, CachedVerdict>,
     ttlSeconds: number,
   ): Promise<void>;
+  /** Drops every verdict derived from `source` for the workspace. */
+  forget(organizationId: string, source: ReviewSource): Promise<void>;
 }
 export const REVIEW_CLASSIFICATION_CACHE = Symbol('REVIEW_CLASSIFICATION_CACHE');
 
@@ -102,8 +108,13 @@ export interface InsightsRow {
 /** Insights per workspace and business, with the per-source contributions they are rebuilt from. */
 export interface ReviewInsightsRepository {
   find(organizationId: string, businessId: string): Promise<InsightsRow | undefined>;
-  /** Same, locking the row until the transaction ends (concurrent analyses merge, never overwrite). */
-  findForUpdate(organizationId: string, businessId: string): Promise<InsightsRow | undefined>;
+  /**
+   * Transaction-scoped lock on the workspace's insights for the business (taken before reading, so concurrent
+   * analyses merge — even when no row exists yet).
+   */
+  lockBusiness(organizationId: string, businessId: string): Promise<void>;
+  /** Transaction-scoped lock on a workspace's source: merges share it, forgetting the source takes it alone. */
+  lockSource(organizationId: string, source: ReviewSource, mode: 'shared' | 'exclusive'): Promise<void>;
   save(organizationId: string, businessId: string, row: InsightsRow): Promise<void>;
   delete(organizationId: string, businessId: string): Promise<void>;
   /** Rows whose earliest contribution expired before `now`. */

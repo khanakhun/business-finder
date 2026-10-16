@@ -111,8 +111,8 @@ export class ReviewGates {
     return this.status(auth);
   }
 
+  /** Turning a risky source off only reduces exposure: any member who manages settings may do it. */
   async revokeGoogle(auth: AuthContext): Promise<ReviewSourcesStatus> {
-    ownerOnly(auth);
     await this.audit.record({
       auth,
       action: GOOGLE_TERMS_REVOKED,
@@ -151,6 +151,8 @@ function ownerOnly(auth: AuthContext): void {
 }
 
 export function workspaceOf(auth: AuthContext): string {
-  if (!auth.orgId) throw new Error('Reviews route reached without an active workspace');
+  if (!auth.orgId) {
+    throw new ForbiddenError('Select a workspace first.', { details: { reason: 'NO_ACTIVE_WORKSPACE' } });
+  }
   return auth.orgId;
 }

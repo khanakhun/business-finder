@@ -78,9 +78,8 @@ export const ReviewsExtractPainSignals = defineTask({
   temperature: 0,
   maxOutputTokens: 4_000,
   timeoutMs: 45_000,
-  cacheTtlSeconds: 30 * 24 * 3600,
-  // Pasted reviews are workspace input: never shared across workspaces (the default scope).
-  cacheScope: 'org',
+  // No gateway response cache: it would keep the raw answer (unchecked paraphrases, warnings that may repeat a
+  // review) for its whole TTL. Callers cache validated per-review verdicts instead (BF-029 security review).
   evalSet: 'reviews.extract_pain_signals',
   variables: (input) => ({
     taxonomy,

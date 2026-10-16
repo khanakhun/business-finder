@@ -58,7 +58,7 @@ function fakeReviewsEnabled(env: ApiEnv): boolean {
 }
 
 /** Sources this deployment can fetch from, asynchronous ones first (see `ReviewsStep`). */
-function reviewSources(
+export function reviewSources(
   env: ApiEnv,
   clock: Clock,
   secrets: SecretResolver,

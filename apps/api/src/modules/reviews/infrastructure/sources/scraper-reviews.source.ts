@@ -2,7 +2,7 @@ import { type Clock, ExternalServiceError } from '@bf/contracts';
 import type { Redis } from 'ioredis';
 import { z } from 'zod';
 import { csvObjects, readCapped } from '../../../discovery/index.ts';
-import { WithResilience } from '../../../platform/resilience/resilience.ts';
+import { policyFor } from '../../../platform/resilience/resilience.ts';
 import type { ReviewFetch, ReviewFetchContext, ReviewSourceAdapter } from '../../application/ports.ts';
 import type { SourceReview } from '../../domain/review.ts';
 
@@ -41,6 +41,24 @@ const normalizeName = (value: string) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
+/**
+ * The business's row: matched by place id / cid, else by name — only when exactly one row has that name (a namesake
+ * nearby must not lend its reviews).
+ */
+export function businessRow(
+  rows: ReadonlyArray<Record<string, string>>,
+  subject: { readonly displayName: string; readonly scraperRefs: readonly string[] },
+): Record<string, string> | undefined {
+  const refs = new Set(subject.scraperRefs);
+  const byRef = rows.find(
+    (r) => refs.has(r.place_id ?? '') || refs.has(r.cid ?? '') || refs.has(r.data_id ?? ''),
+  );
+  if (byRef) return byRef;
+  const name = normalizeName(subject.displayName);
+  const named = rows.filter((r) => normalizeName(r.title ?? '') === name);
+  return named.length === 1 ? named[0] : undefined;
+}
+
 /** The scraped place's reviews, as the CSV's `user_reviews` JSON column carries them. */
 export function scraperReviews(column: string | undefined): SourceReview[] {
   if (!column?.trim()) return [];
@@ -76,7 +94,6 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     return `bf:reviews:scraper-job:${organizationId}:${businessId}`;
   }
 
-  @WithResilience('maps-scraper')
   async fetch({ organizationId, subject, signal }: ReviewFetchContext): Promise<ReviewFetch> {
     if (!subject.location) return { kind: 'none' };
     const key = this.jobKey(organizationId, subject.businessId);
@@ -87,45 +104,60 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
       return { kind: 'pending', retryAfterMs: 60_000 };
     }
     const state = JobState.safeParse(
-      await (await this.request(`/api/v1/jobs/${encodeURIComponent(job)}`, signal))
-        .json()
-        .catch(() => undefined),
+      await this.call(`/api/v1/jobs/${encodeURIComponent(job)}`, signal, {}, (r) =>
+        r.json().catch(() => undefined),
+      ),
     );
     if (!state.success) throw new ExternalServiceError('maps-scraper', 'unexpected job state');
     const status = state.data.Status.toLowerCase();
     if (status !== 'ok' && status !== 'failed') return { kind: 'pending', retryAfterMs: 30_000 };
-    await this.options.valkey.del(key);
-    if (status === 'failed') {
-      throw new ExternalServiceError('maps-scraper', 'job failed', { details: { retryable: false } });
+    // Finished jobs are deleted from the scraper (it keeps review text and reviewer names on disk) and forgotten here;
+    // a transient download failure keeps both, so the next attempt reads the same job instead of scraping again.
+    let finished = status === 'failed';
+    try {
+      if (status === 'failed') {
+        throw new ExternalServiceError('maps-scraper', 'job failed', { details: { retryable: false } });
+      }
+      const rows = csvObjects(
+        await this.call(`/api/v1/jobs/${encodeURIComponent(job)}/download`, signal, {}, (r) =>
+          readCapped(r, MAX_CSV_BYTES),
+        ),
+        MAX_ROWS,
+      );
+      finished = true;
+      const row = businessRow(rows, subject);
+      if (!row) return { kind: 'none' };
+      const avg = Number(row.review_rating);
+      const count = Number(row.review_count);
+      return {
+        kind: 'reviews',
+        batch: {
+          source: 'gmaps_scraper',
+          reviews: scraperReviews(row.user_reviews),
+          rating:
+            row.review_rating && avg >= 0 && avg <= 5 && Number.isInteger(count) && count >= 0
+              ? { avg, count }
+              : null,
+          fetchedAt: this.options.clock.now(),
+          costUsd: 0,
+        },
+      };
+    } catch (error) {
+      // A response the scraper will never fix (4xx, too large, failed job) ends the job too.
+      if ((error as { details?: { retryable?: boolean } }).details?.retryable === false) finished = true;
+      throw error;
+    } finally {
+      if (finished) {
+        const deleted = await this.call(
+          `/api/v1/jobs/${encodeURIComponent(job)}`,
+          signal,
+          { method: 'DELETE' },
+          async () => true,
+        ).catch(() => false);
+        // A job the scraper could not delete stays known: the next attempt retries the delete.
+        if (deleted) await this.options.valkey.del(key);
+      }
     }
-    const rows = csvObjects(
-      await readCapped(
-        await this.request(`/api/v1/jobs/${encodeURIComponent(job)}/download`, signal),
-        MAX_CSV_BYTES,
-      ),
-      MAX_ROWS,
-    );
-    const refs = new Set(subject.scraperRefs);
-    const name = normalizeName(subject.displayName);
-    const row =
-      rows.find((r) => refs.has(r.place_id ?? '') || refs.has(r.cid ?? '') || refs.has(r.data_id ?? '')) ??
-      rows.find((r) => normalizeName(r.title ?? '') === name);
-    if (!row) return { kind: 'none' };
-    const avg = Number(row.review_rating);
-    const count = Number(row.review_count);
-    return {
-      kind: 'reviews',
-      batch: {
-        source: 'gmaps_scraper',
-        reviews: scraperReviews(row.user_reviews),
-        rating:
-          row.review_rating && avg >= 0 && avg <= 5 && Number.isInteger(count) && count >= 0
-            ? { avg, count }
-            : null,
-        fetchedAt: this.options.clock.now(),
-        costUsd: 0,
-      },
-    };
   }
 
   private async create(
@@ -134,38 +166,57 @@ export class ScraperReviewsSource implements ReviewSourceAdapter {
     locale: string,
     signal: AbortSignal,
   ): Promise<string> {
-    const response = await this.request('/api/v1/jobs', signal, {
-      method: 'POST',
-      body: JSON.stringify({
-        name: 'bf-reviews',
-        keywords: [name.slice(0, 120)],
-        lang: locale,
-        lat: String(location.lat),
-        lon: String(location.lng),
-        radius: SEARCH_RADIUS_M,
-        zoom: 17,
-        depth: 1,
-        email: false,
-        max_time: this.options.maxTimeSeconds,
-      }),
-    });
-    const created = JobCreated.safeParse(await response.json().catch(() => undefined));
+    // Not retried: a POST that timed out may still have created a job (duplicates scrape twice).
+    const created = await this.call(
+      '/api/v1/jobs',
+      signal,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          name: 'bf-reviews',
+          keywords: [name.slice(0, 120)],
+          lang: locale,
+          lat: String(location.lat),
+          lon: String(location.lng),
+          radius: SEARCH_RADIUS_M,
+          zoom: 17,
+          depth: 1,
+          email: false,
+          max_time: this.options.maxTimeSeconds,
+        }),
+      },
+      async (r) => JobCreated.safeParse(await r.json().catch(() => undefined)),
+      false,
+    );
     if (!created.success) throw new ExternalServiceError('maps-scraper', 'unexpected job answer');
     return created.data.id;
   }
 
-  private async request(path: string, signal: AbortSignal, init: RequestInit = {}): Promise<Response> {
-    const response = await fetch(new URL(path, this.options.baseUrl), {
-      ...init,
-      headers: { 'Content-Type': 'application/json' },
-      redirect: 'error',
-      signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]),
-    });
-    if (!response.ok) {
-      throw new ExternalServiceError('maps-scraper', `answered ${response.status}`, {
-        details: { retryable: response.status >= 500 },
+  /**
+   * One HTTP exchange, body read included, under the `maps-scraper` policy (timeout, retry with backoff, breaker
+   * shared by every call) unless `retry` is false; the step's signal and the attempt's both cancel it.
+   */
+  private call<T>(
+    path: string,
+    signal: AbortSignal,
+    init: RequestInit,
+    read: (response: Response) => Promise<T>,
+    retry = true,
+  ): Promise<T> {
+    const exchange = async (attempt?: AbortSignal): Promise<T> => {
+      const response = await fetch(new URL(path, this.options.baseUrl), {
+        ...init,
+        headers: { 'Content-Type': 'application/json' },
+        redirect: 'error',
+        signal: AbortSignal.any([signal, ...(attempt ? [attempt] : []), AbortSignal.timeout(60_000)]),
       });
-    }
-    return response;
+      if (!response.ok) {
+        throw new ExternalServiceError('maps-scraper', `answered ${response.status}`, {
+          details: { retryable: response.status >= 500 },
+        });
+      }
+      return read(response);
+    };
+    return retry ? policyFor('maps-scraper').execute(({ signal: attempt }) => exchange(attempt)) : exchange();
   }
 }

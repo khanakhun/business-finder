@@ -1478,7 +1478,7 @@
       "mixed": "Mixed ({value})",
       "positive": "Positive ({value})"
     },
-    "ownerResponseRate": "Owner replies",
+    "ownerResponseRate": "Owner replies (at least)",
     "rating": "Rating",
     "ratingValue": "{avg} ★ ({count, plural, one {# rating} other {# ratings}})",
     "ratingTrend": "Rating trend",

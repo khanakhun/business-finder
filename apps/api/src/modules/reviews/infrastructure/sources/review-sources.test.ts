@@ -5,7 +5,7 @@ import type { Redis } from 'ioredis';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ReviewFetchContext, ReviewSubject } from '../../application/ports.ts';
 import { GOOGLE_REVIEWS_FIELD_MASK, GooglePlacesReviewsSource } from './google-places-reviews.source.ts';
-import { ScraperReviewsSource, scraperReviews } from './scraper-reviews.source.ts';
+import { businessRow, ScraperReviewsSource, scraperReviews } from './scraper-reviews.source.ts';
 
 // Sources against a local HTTP server (port 0): what is asked, what is read, what is never read.
 
@@ -55,7 +55,6 @@ const context = (overrides: Partial<ReviewFetchContext> = {}): ReviewFetchContex
   organizationId: 'org',
   subject,
   signal: new AbortController().signal,
-  attemptKey: 'row',
   ...overrides,
 });
 
@@ -174,6 +173,7 @@ describe('ScraperReviewsSource', () => {
   it('starts a job and defers, polls it, then reads the business’s row and forgets the job', async () => {
     let status = 'pending';
     handler = (req, res) => {
+      if (req.method === 'DELETE') return json(res, 200, {});
       if (req.method === 'POST') return json(res, 201, { id: 'job-123' });
       if (req.url === '/api/v1/jobs/job-123') return json(res, 200, { Status: status });
       res.writeHead(200, { 'Content-Type': 'text/csv' });
@@ -210,21 +210,70 @@ describe('ScraperReviewsSource', () => {
     expect(store.size).toBe(0);
   });
 
+  it('deletes finished jobs from the scraper, keeps a job whose download failed, and never retries a create', async () => {
+    let download = 0;
+    handler = (req, res) => {
+      if (req.method === 'DELETE') return json(res, 200, {});
+      if (req.url === '/api/v1/jobs/job-7') return json(res, 200, { Status: 'ok' });
+      download += 1;
+      if (download === 1) return json(res, 503, {});
+      res.writeHead(200, { 'Content-Type': 'text/csv' });
+      res.end(CSV);
+    };
+    store.set('bf:reviews:scraper-job:org:b1', 'job-7');
+    // The first download answers 503 twice (one retry): the job and its key stay for the next attempt.
+    handler = ((inner) => (req: IncomingMessage, res: ServerResponse, body: string) => {
+      if (req.url === '/api/v1/jobs/job-7/download' && download < 2) {
+        download += 1;
+        return json(res, 503, {});
+      }
+      inner(req, res, body);
+    })(handler);
+    await expect(source().fetch(context())).rejects.toBeInstanceOf(ExternalServiceError);
+    expect(requests.filter((r) => r.method === 'DELETE')).toEqual([]);
+    expect(store.get('bf:reviews:scraper-job:org:b1')).toBe('job-7');
+    // Next attempt: same job, read, then deleted from the scraper and forgotten.
+    expect((await source().fetch(context())).kind).toBe('reviews');
+    expect(requests.filter((r) => r.method === 'DELETE').map((r) => r.url)).toEqual(['/api/v1/jobs/job-7']);
+    expect(store.size).toBe(0);
+    expect(requests.filter((r) => r.method === 'POST')).toEqual([]);
+
+    requests.length = 0;
+    handler = (_req, res) => json(res, 503, {});
+    await expect(source().fetch(context())).rejects.toBeInstanceOf(ExternalServiceError);
+    expect(requests.filter((r) => r.method === 'POST')).toHaveLength(1);
+  });
+
   it('fails a failed job, and has nothing for a business without location or row', async () => {
     store.set('bf:reviews:scraper-job:org:b1', 'job-9');
     handler = (_req, res) => json(res, 200, { Status: 'failed' });
     await expect(source().fetch(context())).rejects.toBeInstanceOf(ExternalServiceError);
+    // A failed job is deleted from the scraper too.
+    expect(requests.some((r) => r.method === 'DELETE' && r.url === '/api/v1/jobs/job-9')).toBe(true);
+    expect(store.has('bf:reviews:scraper-job:org:b1')).toBe(false);
     expect(await source().fetch(context({ subject: { ...subject, location: null } }))).toEqual({
       kind: 'none',
     });
 
     store.set('bf:reviews:scraper-job:org:b1', 'job-10');
     handler = (req, res) => {
+      if (req.method === 'DELETE') return json(res, 200, {});
       if (req.url === '/api/v1/jobs/job-10') return json(res, 200, { Status: 'ok' });
       res.writeHead(200);
       res.end('title,place_id\nVoisin,ChIJOther\n');
     };
     expect(await source().fetch(context())).toEqual({ kind: 'none' });
+  });
+
+  it('matches the business by reference, else by a name only one row has', () => {
+    const rows = [
+      { title: 'Chez Jo', place_id: 'A' },
+      { title: 'Chez Jo', place_id: 'B' },
+      { title: 'Le Port', place_id: 'C' },
+    ];
+    expect(businessRow(rows, { displayName: 'Chez Jo', scraperRefs: ['B'] })?.place_id).toBe('B');
+    expect(businessRow(rows, { displayName: 'Chez Jo', scraperRefs: [] })).toBeUndefined();
+    expect(businessRow(rows, { displayName: 'le port', scraperRefs: [] })?.place_id).toBe('C');
   });
 
   it('parses the user_reviews column defensively', () => {

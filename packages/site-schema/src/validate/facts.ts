@@ -115,50 +115,42 @@ const dialled = (raw: string) =>
   digits(raw.normalize('NFKC').replace(/^(\s*(?:\+|00)\s*\d{1,3}\s*)\(\s*0\s*\)/, '$1')).replace(/^00/, '');
 
 const FRENCH_PLAN = ['FR', 'GP', 'BL', 'MF', 'MQ', 'GF', 'RE', 'YT', 'PM'];
-/**
- * France and its overseas departments share one national plan (`0…`, ten digits): the territory is in the prefix, not
- * in the site's country (a mainland mobile on a BL site is French, a `0696` number is Martinique's). GP, BL and MF
- * share +590, RE and YT +262; anything else is mainland France.
- */
-const OVERSEAS_PREFIXES: readonly (readonly [string, CountryCode])[] = [
-  ['0590', 'GP'],
-  ['0690', 'GP'],
-  ['0691', 'GP'],
-  ['0596', 'MQ'],
-  ['0696', 'MQ'],
-  ['0697', 'MQ'],
-  ['0594', 'GF'],
-  ['0694', 'GF'],
-  ['0262', 'RE'],
-  ['0263', 'RE'],
-  ['0692', 'RE'],
-  ['0693', 'RE'],
-  ['0269', 'YT'],
-  ['0639', 'YT'],
-];
+/** Country codes of the French national plan (mainland, the Antilles, Guiana, Réunion and Mayotte, Saint-Pierre). */
+const FRENCH_CODES = new Set(['33', '590', '594', '596', '262', '508']);
 
 /** A number in E.164, read as the business's country writes it (national formats, `(0)`, `00`); else undefined. */
 function e164(raw: string, country: string | undefined): string | undefined {
-  const text = raw.normalize('NFKC');
-  if (country && FRENCH_PLAN.includes(country)) {
-    const national = dialled(text);
-    if (/^0\d{9}$/.test(national)) {
-      const territory = OVERSEAS_PREFIXES.find(([prefix]) => national.startsWith(prefix))?.[1] ?? 'FR';
-      const parsed = parsePhoneNumberFromString(national, territory);
-      if (parsed?.isValid()) return parsed.number;
-    }
-  }
-  const parsed = parsePhoneNumberFromString(text, country as CountryCode | undefined);
+  const parsed = parsePhoneNumberFromString(raw.normalize('NFKC'), country as CountryCode | undefined);
   if (parsed?.isValid()) return parsed.number;
   return parsed?.isPossible() ? parsed.number : undefined;
 }
 
 /**
- * Two phone numbers are the same line: the same E.164 number once read as the business's country writes numbers
- * (`0590 00 01 01` and `+590 590 00 01 01` in BL; `(212) 555-0100` and `+1 212 555 0100` in the US), else the same
- * digits. Nothing matches by its ending: `90 00 01 01` or a number under another country code is another line.
+ * A number of the French plan as dialled in France (`0` and nine digits), from its national or international form:
+ * the territory is in the number (0590 Guadeloupe and the islands, 0696 Martinique, 06 the mainland; some ranges are
+ * shared), so two forms are compared as dialled rather than through a territory guessed from the site's country.
+ */
+function frenchNational(raw: string): string | undefined {
+  const text = raw.normalize('NFKC');
+  const national = dialled(text);
+  if (!/^\s*(?:\+|00)/.test(text)) return /^0\d{9}$/.test(national) ? national : undefined;
+  // International: `+` or `00`, a `(0)` after the code dropped (as dialled).
+  const parsed = parsePhoneNumberFromString(`+${national}`);
+  if (!parsed || !FRENCH_CODES.has(parsed.countryCallingCode)) return undefined;
+  const local = `0${parsed.nationalNumber}`;
+  return /^0\d{9}$/.test(local) ? local : undefined;
+}
+
+/**
+ * Two phone numbers are the same line: on a French-plan site, the same number as dialled in France; else the same
+ * E.164 number once read as the business's country writes numbers (`(212) 555-0100` and `+1 212 555 0100` in the US),
+ * else the same digits. Nothing matches by its ending: `90 00 01 01` or a number under another code is another line.
  */
 function samePhone(a: string, b: string, country: string | undefined): boolean {
+  if (country && FRENCH_PLAN.includes(country)) {
+    const [fa, fb] = [frenchNational(a), frenchNational(b)];
+    if (fa !== undefined && fb !== undefined) return fa === fb;
+  }
   const [ea, eb] = [e164(a, country), e164(b, country)];
   if (ea !== undefined && eb !== undefined) return ea === eb;
   return dialled(a) === dialled(b);
@@ -169,9 +161,9 @@ const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]
 const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
 /** A phone-like run (bounded: a long run is read as several, each refused unless a fact). */
-const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./–-]{6,30}\d/g;
+const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./|_–-]{6,30}\d/g;
 /** The separator of two numbers side by side (`0590 27 00 00 / 0690 12 34 56`), kept by `split`. */
-const PAIR = /([ \u00A0\u202F]{1,3}[/–-][ \u00A0\u202F]{1,3})/;
+const PAIR = /([ \u00A0\u202F]{1,3}[/|_–-][ \u00A0\u202F]{1,3})/;
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
 
 const currencyOf = (mark: string) => {
@@ -201,7 +193,7 @@ export interface Literals {
  * mark or word; thousands separators of FR and EN) and years in a text. A span counts once: prices first, then year
  * ranges, phones, years.
  */
-export function literals(input: string): Literals {
+export function literals(input: string, country?: string): Literals {
   let text = input.normalize('NFKC');
   const blank = (match: string) => ' '.repeat(match.length);
   // E-mails first: a date, a year range or a price inside an address must not cut it apart.
@@ -210,6 +202,9 @@ export function literals(input: string): Literals {
     emails.push(match);
     return blank(match);
   });
+  // Every dash is a hyphen and every middle dot a full stop (`06 12 — 34 56 78`, `06·12·34·56·78`): a look-alike
+  // separator never hides a number.
+  text = text.replace(/[\p{Pd}\u2212]/gu, '-').replace(/[\u00B7\u2022\u2027\u2219\u30FB\uFF65]/g, '.');
   const prices: Literals['prices'] = [];
   text = text.replace(
     PRICE,
@@ -250,13 +245,19 @@ export function literals(input: string): Literals {
     let out = '';
     let group = '';
     let groupDigits = 0;
+    let groupHasSingle = false;
     const flush = () => {
-      if (groupDigits >= 8) {
+      // Short parts are one phone only when they read as one (`06 12 - 34 56 78`, `+590 – 690…`, `(212) 555 - 0100`),
+      // not ranges of prose (`Ouvert 10 - 12 / 14 - 19`, `Tailles 36 - 38 - 40`, `De 1 500 - 2 000 m²`).
+      const phoneLike =
+        !groupHasSingle && (/^\s*[+(0]/.test(group) || e164(group.trim(), country) !== undefined);
+      if (groupDigits >= 8 && phoneLike) {
         phones.push(group.trim());
         out += blank(group);
       } else out += group;
       group = '';
       groupDigits = 0;
+      groupHasSingle = false;
     };
     for (let k = 0; k < pieces.length; k += 2) {
       const part = pieces[k] ?? '';
@@ -270,10 +271,12 @@ export function literals(input: string): Literals {
       } else if (group) {
         group += separator + part;
         groupDigits += count;
+        groupHasSingle ||= count <= 1;
       } else {
         out += separator;
         group = part;
         groupDigits = count;
+        groupHasSingle = count <= 1;
       }
     }
     flush();
@@ -533,7 +536,10 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   // Numbers a fact states in its own text (a legal notice's SIRET, a share capital, an award's year): whole numbers
   // only, and only from the kinds that state numbers in prose — never a phone, address or hours fact's digits.
   const stating = registry.facts.filter((fact) => ['legal_id', 'award', 'other'].includes(fact.kind));
-  const stated = stating.map((fact) => ({ text: String(fact.value), found: literals(String(fact.value)) }));
+  const stated = stating.map((fact) => ({
+    text: String(fact.value),
+    found: literals(String(fact.value), country),
+  }));
   const statedNumbers = new Set(
     stated.flatMap(({ text, found }) => [
       ...[...text.normalize('NFKC').matchAll(/\d+(?:[ \u00A0\u202F.,]\d+)*/g)].map((m) => digits(m[0])),
@@ -545,7 +551,7 @@ export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const statedYears = new Set(stated.flatMap(({ found }) => found.years));
   const statedPrices = stated.flatMap(({ found }) => found.prices);
   for (const { text, path } of texts(spec)) {
-    const found = literals(text);
+    const found = literals(text, country);
     for (const phone of found.phones) {
       if (!phones.some((known) => samePhone(known, phone, country)) && !statedNumbers.has(digits(phone)))
         issues.push(

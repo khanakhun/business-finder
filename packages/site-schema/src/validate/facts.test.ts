@@ -320,13 +320,48 @@ describe('validateFacts', () => {
     'Appelez le 0690 - 99 88 77',
     'Appelez le 0590 27 / 00 00',
     'Tél. 0690 – 12 34 56',
+    'Appelez le 06 12 \u2014 34 56 78',
+    'Appelez le 06 12 \u2010 34 56 78',
+    'Appelez le 06 12 \u2011 34 56 78',
+    'Appelez le 06 12 \u2212 34 56 78',
+    'Appelez le 06\u00B712\u00B734\u00B756\u00B778',
+    'Appelez le 06 12 | 34 56 78',
+    'Appelez le 06 12 _ 34 56 78',
   ])('checks a number split by a separator as one number: %j', (subtitle) => {
     const spec = salon();
     hero(spec).subtitle = { fr: subtitle, en: 'Call us' };
     expect(found(spec)).toContain('unsupported_literal@pages.0.blocks.0.props.subtitle.fr');
   });
 
-  it('reads a French-plan number by its prefix, not by the site’s country', () => {
+  it.each([
+    'Ouvert 10 - 12 / 14 - 19',
+    'Tailles 36 - 38 - 40 - 42',
+    'Groupes de 10 - 15 / 20 - 30 personnes',
+    'Ages 3 - 6 / 7 - 12 / 13 - 17',
+    'Chambres 101 - 112 / 201 - 212',
+    'Villas de 1 500 - 2 000 m²',
+  ])('reads ranges of numbers in prose as prose, not phones: %j', (subtitle) => {
+    const spec = salon();
+    hero(spec).subtitle = { fr: subtitle, en: 'Welcome' };
+    expect(found(spec).filter((issue) => issue.includes('subtitle'))).toEqual([]);
+  });
+
+  it.each([
+    ['MQ', '+596 598 12 34 56', '0598 12 34 56'],
+    ['GF', '+594 598 12 34 56', '0598 12 34 56'],
+    ['MQ', '+596 709 12 34 56', '0709 12 34 56'],
+    ['BL', '+590 976 12 34 56', '0976 12 34 56'],
+    ['RE', '+262 268 12 34 56', '0268 12 34 56'],
+    ['YT', '+262 269 61 23 45', '0269 61 23 45'],
+  ])('reads a shared French-plan range on a %s site as dialled in France', (country, fact_, text) => {
+    const facts = withFacts([fact('phone.other', 'phone', fact_)]);
+    const spec = salon();
+    if (spec.contact.address) spec.contact.address.country = country;
+    hero(spec).subtitle = { fr: `Appelez le ${text}`, en: 'Call us' };
+    expect(found(spec, facts).filter((issue) => issue.includes('subtitle'))).toEqual([]);
+  });
+
+  it('reads a French-plan number as dialled in France, not by the site’s country', () => {
     // Martinique on a BL site, Guadeloupe on a mainland site: both are the facts they name.
     const martinique = withFacts([fact('phone.mq', 'phone', '+596 696 12 34 56')]);
     const bl = salon();

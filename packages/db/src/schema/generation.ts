@@ -147,6 +147,10 @@ export const generationAttempts = pgTable(
       inputTokens: 0,
       outputTokens: 0,
     }),
+    /** The fact registry snapshot the attempt's workspace was built from (BF-040). */
+    factSnapshotId: uuid(),
+    /** The workspace bundle's SHA-256 (the same inputs give the same bundle). */
+    bundleHash: text(),
     /** The spec the attempt produced (a `generation_artifacts` key), for the quality step. */
     specRef: text(),
     exitReason: text(),
@@ -203,6 +207,54 @@ export const generationArtifacts = pgTable(
     check(
       'ck_generation_artifacts__kind',
       sql`${table.kind} IN ('workspace_bundle', 'site_spec', 'screenshot', 'transcript', 'log_bundle')`,
+    ),
+  ],
+);
+
+/** A workspace's own facts about a business (BF-040): its overlay on the global registry, never shared. */
+export const orgBusinessFacts = pgTable(
+  'org_business_facts',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    kind: text().notNull(),
+    value: jsonb().$type<unknown>().notNull(),
+    locale: text(),
+    note: text(),
+    createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    createdAt: tz().notNull().defaultNow(),
+    updatedAt: tz().notNull().defaultNow(),
+    deletedAt: tz(),
+  },
+  (table) => [
+    index('idx_org_business_facts__organization_id_business_id')
+      .on(table.organizationId, table.businessId)
+      .where(sql`${table.deletedAt} IS NULL`),
+  ],
+);
+
+/** The registry a generation used (BF-040): deduplicated by content hash, referenced by attempts. */
+export const factRegistrySnapshots = pgTable(
+  'fact_registry_snapshots',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    businessId: uuid()
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
+    contentHash: text().notNull(),
+    facts: jsonb().$type<unknown[]>().notNull(),
+    stats: jsonb().$type<Record<string, unknown>>().notNull(),
+    createdAt: tz().notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('uq_fact_registry_snapshots__org_business_hash').on(
+      table.organizationId,
+      table.businessId,
+      table.contentHash,
     ),
   ],
 );

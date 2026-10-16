@@ -1568,6 +1568,96 @@
         ],
         "type": "object"
       },
+      "BusinessFacts": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/RegistryFact"
+            },
+            "type": "array"
+          },
+          "overlay": {
+            "items": {
+              "$ref": "#/components/schemas/OrgBusinessFact"
+            },
+            "type": "array"
+          },
+          "stats": {
+            "additionalProperties": false,
+            "properties": {
+              "byKind": {
+                "additionalProperties": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "propertyNames": {
+                  "enum": [
+                    "name",
+                    "tagline",
+                    "about_summary",
+                    "address",
+                    "geo",
+                    "phone",
+                    "email",
+                    "whatsapp",
+                    "website",
+                    "social",
+                    "hours",
+                    "service",
+                    "price",
+                    "menu_section",
+                    "menu_item",
+                    "testimonial",
+                    "team_member",
+                    "year_founded",
+                    "award",
+                    "language_spoken",
+                    "amenity",
+                    "payment_method",
+                    "booking_provider",
+                    "area_served",
+                    "category",
+                    "brand_color",
+                    "logo"
+                  ],
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "display": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "internal": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "display",
+              "internal",
+              "byKind"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "businessId",
+          "facts",
+          "overlay",
+          "stats"
+        ],
+        "type": "object"
+      },
       "BusinessList": {
         "additionalProperties": false,
         "properties": {
@@ -3028,6 +3118,57 @@
         "required": [
           "displayName",
           "countryCode"
+        ],
+        "type": "object"
+      },
+      "CreateOrgBusinessFactRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "name",
+              "tagline",
+              "about_summary",
+              "address",
+              "geo",
+              "phone",
+              "email",
+              "whatsapp",
+              "website",
+              "social",
+              "hours",
+              "service",
+              "price",
+              "menu_section",
+              "menu_item",
+              "testimonial",
+              "team_member",
+              "year_founded",
+              "award",
+              "language_spoken",
+              "amenity",
+              "payment_method",
+              "booking_provider",
+              "area_served",
+              "category",
+              "brand_color",
+              "logo"
+            ],
+            "type": "string"
+          },
+          "locale": {
+            "pattern": "^[a-z]{2}$",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "kind",
+          "value"
         ],
         "type": "object"
       },
@@ -7065,6 +7206,98 @@
         ],
         "type": "object"
       },
+      "OrgBusinessFact": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "name",
+              "tagline",
+              "about_summary",
+              "address",
+              "geo",
+              "phone",
+              "email",
+              "whatsapp",
+              "website",
+              "social",
+              "hours",
+              "service",
+              "price",
+              "menu_section",
+              "menu_item",
+              "testimonial",
+              "team_member",
+              "year_founded",
+              "award",
+              "language_spoken",
+              "amenity",
+              "payment_method",
+              "booking_provider",
+              "area_served",
+              "category",
+              "brand_color",
+              "logo"
+            ],
+            "type": "string"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "id",
+          "kind",
+          "value",
+          "locale",
+          "note",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
       "OrgBusinessState": {
         "additionalProperties": false,
         "properties": {
@@ -8505,6 +8738,1031 @@
           "engine"
         ],
         "type": "object"
+      },
+      "RegistryFact": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "geo",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "lat": {
+                    "maximum": 90,
+                    "minimum": -90,
+                    "type": "number"
+                  },
+                  "lng": {
+                    "maximum": 180,
+                    "minimum": -180,
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lng"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "hours",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "note": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "weekly": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "closes": {
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                          "type": "string"
+                        },
+                        "day": {
+                          "enum": [
+                            "mon",
+                            "tue",
+                            "wed",
+                            "thu",
+                            "fri",
+                            "sat",
+                            "sun"
+                          ],
+                          "type": "string"
+                        },
+                        "opens": {
+                          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "day",
+                        "opens",
+                        "closes"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 28,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "weekly"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "price",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "amount": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "currency": {
+                    "pattern": "^[A-Z]{3}$",
+                    "type": "string"
+                  },
+                  "label": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "serviceRef": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "unit": {
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "social",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "network": {
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "url": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "network",
+                  "url"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "testimonial",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "attribution": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "quote": {
+                    "maxLength": 600,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "sourcePage": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "quote",
+                  "attribution",
+                  "sourcePage"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "team_member",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "maxLength": 60,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "role": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "year_founded",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "maximum": 2100,
+                "minimum": 1800,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "booking_provider",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "provider": {
+                    "maxLength": 60,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "url": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url",
+                  "provider"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "menu_item",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "section": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "brand_color",
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "pattern": "^#[0-9a-f]{6}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "confidence": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "evidence": {
+                "maxLength": 400,
+                "type": "string"
+              },
+              "id": {
+                "pattern": "^fact_[a-z_]+_[0-9a-f]{12}$",
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "name",
+                  "tagline",
+                  "about_summary",
+                  "address",
+                  "phone",
+                  "email",
+                  "whatsapp",
+                  "website",
+                  "service",
+                  "menu_section",
+                  "award",
+                  "language_spoken",
+                  "amenity",
+                  "payment_method",
+                  "area_served",
+                  "category",
+                  "logo"
+                ],
+                "type": "string"
+              },
+              "locale": {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              "observedAt": {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              "source": {
+                "enum": [
+                  "owner_site",
+                  "jsonld",
+                  "open_data",
+                  "golden_record",
+                  "user",
+                  "provider_restricted"
+                ],
+                "type": "string"
+              },
+              "sourceRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage": {
+                "enum": [
+                  "display",
+                  "internal"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "source",
+              "sourceRef",
+              "confidence",
+              "observedAt",
+              "usage",
+              "kind",
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "ReorderGenerationJobsRequest": {
         "additionalProperties": false,
@@ -13847,6 +15105,35 @@
         ],
         "type": "object"
       },
+      "UpdateOrgBusinessFactRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "locale": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z]{2}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value": {}
+        },
+        "type": "object"
+      },
       "UpdateOrgSettingsRequest": {
         "additionalProperties": false,
         "properties": {
@@ -18621,6 +19908,375 @@
         "summary": "The business's latest enrichment run in this workspace and where each step stands",
         "tags": [
           "enrichment"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/facts": {
+      "get": {
+        "operationId": "getBusinessFacts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessFacts"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The fact registry of a business: global facts with their provenance and usage, plus the overlay",
+        "tags": [
+          "generation"
+        ]
+      },
+      "post": {
+        "operationId": "createBusinessFact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrgBusinessFactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgBusinessFact"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "State a fact about a business for this workspace (the global graph is unchanged)",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/facts/{factId}": {
+      "delete": {
+        "operationId": "deleteBusinessFact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "factId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Withdraw a fact the workspace stated",
+        "tags": [
+          "generation"
+        ]
+      },
+      "patch": {
+        "operationId": "updateBusinessFact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "factId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgBusinessFactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgBusinessFact"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Change a fact the workspace stated",
+        "tags": [
+          "generation"
         ]
       }
     },

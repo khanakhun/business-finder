@@ -1,4 +1,10 @@
-import { CRM_ACTIVITY_CREATED, ENRICHMENT_RUN_PROGRESSED, NOTIFICATION_CREATED } from '@bf/contracts';
+import {
+  CRM_ACTIVITY_CREATED,
+  ENRICHMENT_RUN_PROGRESSED,
+  NOTIFICATION_CREATED,
+  SCORING_RECOMPUTE_PROGRESSED,
+  SCORING_SCORES_UPDATED,
+} from '@bf/contracts';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REALTIME_EVENTS, realtimeInvalidations } from './invalidations.ts';
@@ -156,6 +162,34 @@ describe('RealtimeConnection', () => {
 });
 
 describe('realtime event names', () => {
+  it('refresh scores where they show (BF-031)', () => {
+    expect(REALTIME_EVENTS.scoringScoresUpdated).toBe(SCORING_SCORES_UPDATED);
+    expect(REALTIME_EVENTS.scoringRecomputeProgressed).toBe(SCORING_RECOMPUTE_PROGRESSED);
+    const scores = { type: SCORING_SCORES_UPDATED, entity: 'business', entityId: 'b1' } as never;
+    expect(realtimeInvalidations[SCORING_SCORES_UPDATED]?.(scores)).toEqual([
+      ['business', 'b1'],
+      ['search', 'listing'],
+    ]);
+    const batch = { type: SCORING_SCORES_UPDATED, entity: 'workspace', entityId: 'o1' } as never;
+    expect(realtimeInvalidations[SCORING_SCORES_UPDATED]?.(batch)).toEqual([
+      ['business'],
+      ['search', 'listing'],
+    ]);
+    const recompute = (finished: boolean) =>
+      ({
+        type: SCORING_RECOMPUTE_PROGRESSED,
+        entity: 'scoring_profile',
+        entityId: 'p1',
+        payload: { finished },
+      }) as never;
+    expect(realtimeInvalidations[SCORING_RECOMPUTE_PROGRESSED]?.(recompute(false))).toEqual([]);
+    expect(realtimeInvalidations[SCORING_RECOMPUTE_PROGRESSED]?.(recompute(true))).toEqual([
+      ['business'],
+      ['search', 'listing'],
+      ['scoring'],
+    ]);
+  });
+
   it('match the contracts', () => {
     expect(REALTIME_EVENTS.notificationCreated).toBe(NOTIFICATION_CREATED);
     expect(REALTIME_EVENTS.crmActivityCreated).toBe(CRM_ACTIVITY_CREATED);

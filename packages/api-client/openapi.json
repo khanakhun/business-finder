@@ -67,7 +67,7 @@
             "type": "string"
           },
           "type": {
-            "description": "Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated; later tickets add more.",
+            "description": "Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated, score.updated; later tickets add more.",
             "type": "string"
           }
         },
@@ -1873,6 +1873,215 @@
         "required": [
           "insights",
           "sources"
+        ],
+        "type": "object"
+      },
+      "BusinessScore": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "computedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreContribution"
+            },
+            "type": "array"
+          },
+          "featureSetVersion": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "features": {
+            "additionalProperties": {
+              "type": [
+                "number",
+                "boolean",
+                "string",
+                "null"
+              ]
+            },
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "gated": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "applied": {
+                    "type": "boolean"
+                  },
+                  "effect": {
+                    "enum": [
+                      "exclude",
+                      "cap"
+                    ],
+                    "type": "string"
+                  },
+                  "gate": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "en": {
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "fr": {
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "en",
+                      "fr"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "gate",
+                  "effect",
+                  "applied",
+                  "reason"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "profileVersion": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreReason"
+            },
+            "type": "array"
+          },
+          "score": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tier": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "X"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "tier",
+          "contributions",
+          "reasons",
+          "gated",
+          "businessId",
+          "profileId",
+          "profileVersion",
+          "featureSetVersion",
+          "offer",
+          "features",
+          "computedAt"
+        ],
+        "type": "object"
+      },
+      "BusinessScoreList": {
+        "additionalProperties": false,
+        "description": "The business's current score per profile of the workspace.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BusinessScore"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
         ],
         "type": "object"
       },
@@ -7769,6 +7978,1216 @@
         ],
         "type": "object"
       },
+      "ScoreContribution": {
+        "additionalProperties": false,
+        "properties": {
+          "contribution": {
+            "type": "number"
+          },
+          "feature": {
+            "enum": [
+              "has_website",
+              "website_status",
+              "website_quality_score",
+              "psi_mobile_performance",
+              "lcp_mobile_seconds",
+              "vision_overall",
+              "has_https",
+              "site_freshness_years",
+              "has_booking_tool",
+              "has_online_menu",
+              "has_contact_form",
+              "has_language_gap_for_market",
+              "no_solicitation_notice",
+              "category_offer_relevance",
+              "appointment_based",
+              "tourism_facing",
+              "price_level",
+              "rating_avg",
+              "review_count_log",
+              "owner_response_rate",
+              "multi_location",
+              "ad_pixels_present",
+              "operating_status",
+              "pain_share.booking_friction",
+              "pain_share.unreachable_by_phone",
+              "pain_share.slow_or_no_reply",
+              "pain_share.website_broken_or_outdated",
+              "pain_share.no_online_menu_or_prices",
+              "pain_share.hard_to_find_info",
+              "pain_share.language_barrier",
+              "pain_share.payment_friction",
+              "pain_share.long_wait_times",
+              "pain_share.inconsistent_hours",
+              "pain_share.poor_communication",
+              "pain_share.positive_strong_reputation",
+              "sentiment_avg",
+              "has_verified_email",
+              "has_usable_email",
+              "has_generic_email_only",
+              "has_phone",
+              "has_whatsapp",
+              "do_not_contact",
+              "pipeline_status",
+              "days_since_last_contact"
+            ],
+            "type": "string"
+          },
+          "imputed": {
+            "anyOf": [
+              {
+                "enum": [
+                  "default",
+                  "profile"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rawValue": {
+            "type": [
+              "number",
+              "boolean",
+              "string",
+              "null"
+            ]
+          },
+          "transformed": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "rawValue",
+          "transformed",
+          "imputed",
+          "weight",
+          "contribution"
+        ],
+        "type": "object"
+      },
+      "ScoreReason": {
+        "additionalProperties": false,
+        "properties": {
+          "contribution": {
+            "type": "number"
+          },
+          "direction": {
+            "enum": [
+              "positive",
+              "negative"
+            ],
+            "type": "string"
+          },
+          "feature": {
+            "enum": [
+              "has_website",
+              "website_status",
+              "website_quality_score",
+              "psi_mobile_performance",
+              "lcp_mobile_seconds",
+              "vision_overall",
+              "has_https",
+              "site_freshness_years",
+              "has_booking_tool",
+              "has_online_menu",
+              "has_contact_form",
+              "has_language_gap_for_market",
+              "no_solicitation_notice",
+              "category_offer_relevance",
+              "appointment_based",
+              "tourism_facing",
+              "price_level",
+              "rating_avg",
+              "review_count_log",
+              "owner_response_rate",
+              "multi_location",
+              "ad_pixels_present",
+              "operating_status",
+              "pain_share.booking_friction",
+              "pain_share.unreachable_by_phone",
+              "pain_share.slow_or_no_reply",
+              "pain_share.website_broken_or_outdated",
+              "pain_share.no_online_menu_or_prices",
+              "pain_share.hard_to_find_info",
+              "pain_share.language_barrier",
+              "pain_share.payment_friction",
+              "pain_share.long_wait_times",
+              "pain_share.inconsistent_hours",
+              "pain_share.poor_communication",
+              "pain_share.positive_strong_reputation",
+              "sentiment_avg",
+              "has_verified_email",
+              "has_usable_email",
+              "has_generic_email_only",
+              "has_phone",
+              "has_whatsapp",
+              "do_not_contact",
+              "pipeline_status",
+              "days_since_last_contact"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "additionalProperties": false,
+            "properties": {
+              "en": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "en",
+              "fr"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "feature",
+          "direction",
+          "contribution",
+          "text"
+        ],
+        "type": "object"
+      },
+      "ScoringExplainRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/ScoringProfileConfig"
+          }
+        },
+        "required": [
+          "businessId",
+          "config"
+        ],
+        "type": "object"
+      },
+      "ScoringExplainResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreContribution"
+            },
+            "type": "array"
+          },
+          "featureSetVersion": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "features": {
+            "additionalProperties": {
+              "type": [
+                "number",
+                "boolean",
+                "string",
+                "null"
+              ]
+            },
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "gated": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "applied": {
+                    "type": "boolean"
+                  },
+                  "effect": {
+                    "enum": [
+                      "exclude",
+                      "cap"
+                    ],
+                    "type": "string"
+                  },
+                  "gate": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "en": {
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "fr": {
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "en",
+                      "fr"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "gate",
+                  "effect",
+                  "applied",
+                  "reason"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreReason"
+            },
+            "type": "array"
+          },
+          "score": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "tier": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "X"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "tier",
+          "contributions",
+          "reasons",
+          "gated",
+          "features",
+          "featureSetVersion"
+        ],
+        "type": "object"
+      },
+      "ScoringGate": {
+        "additionalProperties": false,
+        "properties": {
+          "effect": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "const": "exclude",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "max": {
+                    "maximum": 100,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "type": {
+                    "const": "cap",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "max"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "id": {
+            "pattern": "^[a-z][a-z0-9_]{1,40}$",
+            "type": "string"
+          },
+          "reason": {
+            "additionalProperties": false,
+            "properties": {
+              "en": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "fr": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "en",
+              "fr"
+            ],
+            "type": "object"
+          },
+          "when": {
+            "$ref": "#/components/schemas/ScoringGateCondition",
+            "description": "A ScoringGateCondition (leaf, all, any, not): at most 6 levels and 100 conditions."
+          }
+        },
+        "required": [
+          "id",
+          "when",
+          "effect",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "ScoringGateCondition": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "eq": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "maxLength": 100,
+                    "type": "string"
+                  }
+                ]
+              },
+              "feature": {
+                "enum": [
+                  "has_website",
+                  "website_status",
+                  "website_quality_score",
+                  "psi_mobile_performance",
+                  "lcp_mobile_seconds",
+                  "vision_overall",
+                  "has_https",
+                  "site_freshness_years",
+                  "has_booking_tool",
+                  "has_online_menu",
+                  "has_contact_form",
+                  "has_language_gap_for_market",
+                  "no_solicitation_notice",
+                  "category_offer_relevance",
+                  "appointment_based",
+                  "tourism_facing",
+                  "price_level",
+                  "rating_avg",
+                  "review_count_log",
+                  "owner_response_rate",
+                  "multi_location",
+                  "ad_pixels_present",
+                  "operating_status",
+                  "pain_share.booking_friction",
+                  "pain_share.unreachable_by_phone",
+                  "pain_share.slow_or_no_reply",
+                  "pain_share.website_broken_or_outdated",
+                  "pain_share.no_online_menu_or_prices",
+                  "pain_share.hard_to_find_info",
+                  "pain_share.language_barrier",
+                  "pain_share.payment_friction",
+                  "pain_share.long_wait_times",
+                  "pain_share.inconsistent_hours",
+                  "pain_share.poor_communication",
+                  "pain_share.positive_strong_reputation",
+                  "sentiment_avg",
+                  "has_verified_email",
+                  "has_usable_email",
+                  "has_generic_email_only",
+                  "has_phone",
+                  "has_whatsapp",
+                  "do_not_contact",
+                  "pipeline_status",
+                  "days_since_last_contact"
+                ],
+                "type": "string"
+              },
+              "gt": {
+                "type": "number"
+              },
+              "gte": {
+                "type": "number"
+              },
+              "in": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "maxLength": 100,
+                      "type": "string"
+                    }
+                  ]
+                },
+                "maxItems": 50,
+                "minItems": 1,
+                "type": "array"
+              },
+              "isNull": {
+                "type": "boolean"
+              },
+              "lt": {
+                "type": "number"
+              },
+              "lte": {
+                "type": "number"
+              },
+              "neq": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "maxLength": 100,
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "feature"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "all": {
+                "items": {
+                  "$ref": "#/components/schemas/ScoringGateCondition"
+                },
+                "maxItems": 20,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "all"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "any": {
+                "items": {
+                  "$ref": "#/components/schemas/ScoringGateCondition"
+                },
+                "maxItems": 20,
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "any"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "not": {
+                "$ref": "#/components/schemas/ScoringGateCondition"
+              }
+            },
+            "required": [
+              "not"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ScoringProfileConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "gates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ScoringGate"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "kind": {
+            "const": "rules",
+            "default": "rules",
+            "type": "string"
+          },
+          "missing": {
+            "additionalProperties": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "normalization": {
+            "const": "weighted_sum",
+            "default": "weighted_sum",
+            "type": "string"
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "reasonTemplates": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "en": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "en",
+                  "fr"
+                ],
+                "type": "object"
+              },
+              "propertyNames": {
+                "maxLength": 40,
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "tiers": {
+            "additionalProperties": false,
+            "properties": {
+              "A": {
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "B": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "A",
+              "B"
+            ],
+            "type": "object"
+          },
+          "transforms": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ScoringTransform"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "weights": {
+            "additionalProperties": {
+              "maximum": 100,
+              "minimum": -100,
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind",
+          "offer",
+          "weights",
+          "transforms",
+          "missing",
+          "gates",
+          "tiers",
+          "normalization",
+          "reasonTemplates"
+        ],
+        "type": "object"
+      },
+      "ScoringProfileList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScoringProfileSummary"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "ScoringProfileSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "activeVersion": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "builtin": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "primary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "offer",
+          "name",
+          "builtin",
+          "activeVersion",
+          "primary"
+        ],
+        "type": "object"
+      },
+      "ScoringProfileVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/ScoringProfileConfig"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "version": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "profileId",
+          "version",
+          "config",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "ScoringRecomputeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "version": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "profileId",
+          "version",
+          "total"
+        ],
+        "type": "object"
+      },
+      "ScoringTransform": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "linear",
+                "type": "string"
+              },
+              "max": {
+                "type": "number"
+              },
+              "min": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "min",
+              "max"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "inverse",
+                "type": "string"
+              },
+              "max": {
+                "type": "number"
+              },
+              "min": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "min",
+              "max"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "piecewise",
+                "type": "string"
+              },
+              "points": {
+                "items": {
+                  "items": false,
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "maximum": 1,
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "maxItems": 20,
+                "minItems": 2,
+                "type": "array"
+              }
+            },
+            "required": [
+              "kind",
+              "points"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "log",
+                "type": "string"
+              },
+              "max": {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "max"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "false": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "kind": {
+                "const": "boolean",
+                "type": "string"
+              },
+              "true": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "true",
+              "false"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "default": {
+                "default": 0,
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              "kind": {
+                "const": "enumMap",
+                "type": "string"
+              },
+              "map": {
+                "additionalProperties": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "propertyNames": {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "kind",
+              "map",
+              "default"
+            ],
+            "type": "object"
+          }
+        ]
+      },
       "ScraperStatus": {
         "additionalProperties": false,
         "properties": {
@@ -8420,6 +9839,20 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "SetPrimaryScoringProfileRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profileId"
+        ],
         "type": "object"
       },
       "SmtpPortDiagnostic": {
@@ -14090,6 +15523,77 @@
         "summary": "Analyse pasted reviews (anonymized, classified, then discarded: only aggregated insights are kept)",
         "tags": [
           "reviews"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/scores": {
+      "get": {
+        "operationId": "getBusinessScores",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessScoreList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The business's current score per profile of the workspace, with contributions and reasons",
+        "tags": [
+          "scoring"
         ]
       }
     },
@@ -20227,6 +21731,422 @@
         "summary": "Mark a saved search as run: returns it (with new matches until now) and restarts the count",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/v1/scoring/explain": {
+      "post": {
+        "operationId": "explainScore",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoringExplainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringExplainResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Score a tracked business with a draft profile config, nothing stored (profile editor preview)",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
+    "/v1/scoring/primary-profile": {
+      "put": {
+        "operationId": "setPrimaryScoringProfile",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryScoringProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringRecomputeResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Choose the workspace's primary profile: the listing's score and tier follow it (recomputed)",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
+    "/v1/scoring/profiles": {
+      "get": {
+        "operationId": "listScoringProfiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringProfileList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The scoring profiles the workspace sees (built-in and its own), and which one is primary",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
+    "/v1/scoring/profiles/{id}/recompute": {
+      "post": {
+        "operationId": "recomputeScoringProfile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringRecomputeResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Recompute every tracked business's score with the profile's active version (progress in realtime)",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
+    "/v1/scoring/profiles/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getScoringProfileVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringProfileVersion"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "One version of a scoring profile (its config)",
+        "tags": [
+          "scoring"
         ]
       }
     },

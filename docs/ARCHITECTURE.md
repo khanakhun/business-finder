@@ -396,6 +396,30 @@ so a source can be refreshed, turned off (its part is forgotten) or expire (30 d
 own; a merge re-checks its source's gate under that source's lock, so a source turned off mid-run stores nothing. Ratings seen over time (`business_rating_observations`, within retention) give the trend. A nightly maintenance
 hook purges what expired. Outreach may only use aggregated themes, never quotes (BF-051).
 
+**Scoring (BF-031).** The `scoring` module turns a business's facts into an explainable score per **offer profile**.
+A `FactsAssembler` builds immutable `BusinessFacts` for a batch of tracked businesses of one workspace in three
+queries (business + workspace row + primary category with inherited attributes and offer relevance + latest audit and
+its crawl; contacts the workspace may use; its review insights). The pure engine (`scoring/domain`) computes the
+feature vector (44 typed features, registry in `@bf/contracts`), applies the profile's transforms and weights
+(weighted sum normalized by the positive weights), gates (exclusion → tier X, caps; do-not-contact always X) and
+tiers, and picks the three strongest reasons each way in EN/FR. Five built-in profiles live in code and are seeded at
+boot (stable ids, versions pinned to config digests); a workspace's primary profile (default: new website) fills the
+denormalized `org_businesses.score/tier/score_profile_id` the listing sorts, filters and facets on. Writes go per batch
+of 500 in one transaction: `business_scores` (current, per workspace × business × profile, with the feature snapshot,
+feature-set and profile versions and a vector hash — an unchanged vector is not written again), the append-only
+`business_score_history` (BF-059 trains on it), the listing columns, and `score.updated` when the primary tier moves
+(→ the CRM timeline). Recomputes are jobs (`scoring` queue): `org_business.tracked`, `org_business.status.changed` and
+`crm.do_not_contact.set` recompute that workspace; `business.enriched` and `business.updated` every workspace tracking
+the business. A bulk recompute (`scoring-recompute` queue) pages through a workspace with throttled realtime progress
+(10,000 businesses ≈ 3.8 s in the integration suite); at most one waiting and one running recompute per workspace
+and profile (BullMQ deduplication). Writes take per-business advisory locks: concurrent jobs for a business write
+one after the other, older facts never overwrite newer ones, and history gets a row only for a new fingerprint
+(profile version, feature-set version, vector). A new built-in version activated at boot recomputes every workspace.
+Merges rescore the survivor; contacts are global facts (ADR-0008), as the business page shows them. Score rows are
+scoped by workspace and business, so a workspace or business purge removes them (cascade); a profile version with
+history cannot be deleted (archive instead). `POST /v1/scoring/explain` scores a draft config without storing
+anything (BF-032 preview).
+
 ### F4 — Batch site generation
 
 ```mermaid

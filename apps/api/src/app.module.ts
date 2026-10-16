@@ -12,6 +12,7 @@ import { PlatformModule } from './modules/platform/platform.module.ts';
 import { QueueModule } from './modules/platform/queue/queue.module.ts';
 import { RealtimeModule } from './modules/realtime/realtime.module.ts';
 import { ReviewsModule } from './modules/reviews/index.ts';
+import { ScoringModule } from './modules/scoring/index.ts';
 import { SearchModule } from './modules/search/index.ts';
 import { SystemModule } from './modules/system/system.module.ts';
 import { WorkspaceModule } from './modules/workspace/workspace.module.ts';
@@ -55,6 +56,7 @@ export class AppModule {
         DiscoveryModule.forRoot(mode),
         EnrichmentModule.forRoot(mode),
         ReviewsModule.forRoot(mode),
+        ScoringModule.forRoot(mode),
       ],
     };
   }

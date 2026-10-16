@@ -6,6 +6,7 @@ import {
   BanIcon,
   CircleCheckIcon,
   CirclePlusIcon,
+  GaugeIcon,
   GitMergeIcon,
   ListTodoIcon,
   RefreshCwIcon,
@@ -81,6 +82,12 @@ function TaskLine({ activity }: ActivityRendererProps) {
   return <>{t(key, { title: text(activity.data.title) })}</>;
 }
 
+/** The primary profile's tier moved (BF-031). */
+function ScoreUpdated({ activity }: ActivityRendererProps) {
+  const t = useTranslations('business.activity');
+  return <>{t('scoreUpdated', { from: text(activity.data.from), to: text(activity.data.to) })}</>;
+}
+
 function Updated({ activity }: ActivityRendererProps) {
   const t = useTranslations('business.activity');
   return <>{t('updated', { count: list(activity.data.fields).length })}</>;
@@ -103,6 +110,7 @@ export function registerDefaultActivityRenderers(): void {
     { id: 'business.tracked', icon: CirclePlusIcon, component: Tracked },
     { id: 'business.merged', icon: GitMergeIcon, component: Merged },
     { id: 'business.updated', icon: RefreshCwIcon, component: Updated },
+    { id: 'score.updated', icon: GaugeIcon, component: ScoreUpdated },
   ];
   for (const [order, entry] of entries.entries()) activityRenderers.register({ ...entry, order });
 }

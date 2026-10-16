@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PipelineStatusSchema } from './business.ts';
+import { AddedViaSchema, PipelineStatusSchema } from './business.ts';
 import { ActorSchema, defineEvent } from './events.ts';
 import { BusinessId } from './ids.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
@@ -206,6 +206,7 @@ export const ACTIVITY_TYPES = [
   'task.completed',
   'business.merged',
   'business.updated',
+  'score.updated',
 ] as const;
 
 export const ActivitySchema = z
@@ -280,6 +281,12 @@ export const OrgBusinessTagsChanged = defineEvent(
   'org_business.tags.changed',
   1,
   z.object({ businessId: BusinessId, added: z.array(z.string()), removed: z.array(z.string()) }),
+);
+/** A workspace started tracking a business (scoring computes its first scores, BF-031). */
+export const OrgBusinessTracked = defineEvent(
+  'org_business.tracked',
+  1,
+  z.object({ businessId: BusinessId, addedVia: AddedViaSchema }),
 );
 /** Compliance (BF-049) subscribes: do-not-contact suppresses outreach to the business. */
 export const DoNotContactSet = defineEvent(

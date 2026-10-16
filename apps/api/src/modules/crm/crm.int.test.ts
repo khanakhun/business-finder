@@ -1,6 +1,6 @@
 import { PIPELINE_STATUSES } from '@bf/contracts';
 import type { DbClient } from '@bf/db';
-import { activities, businesses, orgBusinesses } from '@bf/db/schema';
+import { activities, businesses, businessScores, orgBusinesses } from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
@@ -289,6 +289,19 @@ describe('activity timeline', () => {
   it('turns CRM events into one activity each, newest first, for the workspace only', async () => {
     const id = await track();
     await owner.post(`/v1/businesses/${id}/status`, { status: 'qualified' }).expect(200);
+    // Scoring computes the first score on the pipeline move; do-not-contact then moves its tier (one entry).
+    await expect
+      .poll(
+        async () =>
+          (
+            await db
+              .select({ id: businessScores.businessId })
+              .from(businessScores)
+              .where(eq(businessScores.businessId, id))
+          ).length,
+        { timeout: 20_000, interval: 200 },
+      )
+      .toBeGreaterThan(0);
     await owner.put(`/v1/businesses/${id}/owner`, { ownerUserId: memberId }).expect(200);
     await owner.post(`/v1/businesses/${id}/tags`, { add: ['VIP'] }).expect(200);
     await owner
@@ -298,7 +311,11 @@ describe('activity timeline', () => {
     const task = await owner.post(`/v1/businesses/${id}/tasks`, { title: 'Call' }).expect(201);
     await owner.patch(`/v1/tasks/${task.body.id}`, { status: 'done' }).expect(200);
 
-    const items = await timeline(viewer, id, 7);
+    // Scoring adds a `score.updated` entry (do-not-contact moves the tier to X): CRM entries are checked here.
+    await expect
+      .poll(async () => (await timeline(viewer, id, 7)).length, { timeout: 20_000, interval: 200 })
+      .toBe(8);
+    const items = (await timeline(viewer, id, 7)).filter((a) => a.type !== 'score.updated');
     expect(new Set(items.map((a) => a.type))).toEqual(
       new Set([
         'status.changed',
@@ -320,7 +337,14 @@ describe('activity timeline', () => {
     const rest = await viewer.get(
       `/v1/businesses/${id}/activities?limit=10&cursor=${encodeURIComponent(page.body.nextCursor)}`,
     );
-    expect(rest.body.items).toHaveLength(4);
+    const all = (await viewer.get(`/v1/businesses/${id}/activities?limit=50`).expect(200)).body.items as {
+      type: string;
+    }[];
+    // Seven CRM entries, plus the tier move (do-not-contact → X).
+    const scoreEntries = all.filter((a) => a.type === 'score.updated').length;
+    expect(scoreEntries).toBe(1);
+    expect(all).toHaveLength(7 + scoreEntries);
+    expect(rest.body.items).toHaveLength(4 + scoreEntries);
     expect(rest.body.nextCursor).toBeNull();
     await outsider.get(`/v1/businesses/${id}/activities`).expect(404);
     const rows = await db

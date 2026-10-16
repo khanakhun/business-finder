@@ -13,6 +13,7 @@ import {
 } from '@bf/contracts';
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { Ctx, RequirePermission } from '../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../platform/security/auth-context.ts';
@@ -105,6 +106,8 @@ export class BusinessesController {
   }
 
   @Post(':id/contacts')
+  // Contacts are global facts: each one rescores every workspace tracking the business (BF-031).
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @RequirePermission('business:write')
   @ApiRoute({
     summary: 'Add a contact point by hand (provenance `manual`); an existing one is returned',

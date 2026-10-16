@@ -6,6 +6,7 @@ import {
   NotFoundError,
   newId,
   type OrgBusinessState,
+  OrgBusinessTracked,
   type TrackBusinessRequest,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
@@ -40,6 +41,7 @@ export class TrackBusinessCommand {
     @Inject(BUSINESS_REPOSITORY) private readonly businesses: BusinessRepository,
     @Inject(ORG_BUSINESS_REPOSITORY) private readonly orgBusinesses: OrgBusinessRepository,
     private readonly audit: AuditLogger,
+    private readonly events: EventRecorder,
   ) {}
 
   @Transactional()
@@ -59,6 +61,10 @@ export class TrackBusinessCommand {
       addedRef: request.addedRef ?? null,
     });
     if (created) {
+      await this.events.record(OrgBusinessTracked, {
+        orgId: record.organizationId,
+        payload: { businessId, addedVia: request.addedVia },
+      });
       await this.audit.record({
         action: 'business.tracked',
         entityType: 'business',
@@ -82,6 +88,7 @@ export class CreateManualBusinessCommand {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly ingest: IngestSourceRecordCommand,
     private readonly audit: AuditLogger,
+    private readonly events: EventRecorder,
   ) {}
 
   /** Returns the id of the business now tracked (new, or the existing one it matched). */
@@ -115,12 +122,18 @@ export class CreateManualBusinessCommand {
       },
       { orgId: organizationId, sourceId, defaultRegion: request.countryCode, classifyWithModel: false },
     );
-    await this.orgBusinesses.track({
+    const { created } = await this.orgBusinesses.track({
       organizationId,
       businessId: result.businessId,
       addedVia: 'manual',
       addedRef: null,
     });
+    if (created) {
+      await this.events.record(OrgBusinessTracked, {
+        orgId: organizationId,
+        payload: { businessId: result.businessId, addedVia: 'manual' },
+      });
+    }
     await this.audit.record({
       action: 'business.created',
       entityType: 'business',

@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { OPERATING_STATUSES, PIPELINE_STATUSES } from './business.ts';
+import { defineEvent } from './events.ts';
+import { BusinessId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import { PAIN_SIGNAL_TAGS, type PainSignalTag } from './reviews.ts';
 import { ScoreTierSchema } from './search-intent.ts';
 import { OfferSchema } from './taxonomy.ts';
@@ -606,7 +609,13 @@ export const TransformSchema = z
     /** log(1 + x) / log(1 + max), clamped (DECISION: no `base` — the ratio is the same in every base). */
     z.object({ kind: z.literal('log'), max: z.number().positive() }),
     z.object({ kind: z.literal('boolean'), true: unit, false: unit }),
-    z.object({ kind: z.literal('enumMap'), map: z.record(z.string(), unit), default: unit.default(0) }),
+    z.object({
+      kind: z.literal('enumMap'),
+      map: z
+        .record(z.string().max(60), unit)
+        .refine((map) => Object.keys(map).length <= 50, { message: 'At most 50 values' }),
+      default: unit.default(0),
+    }),
   ])
   .superRefine((transform, ctx) => {
     if ((transform.kind === 'linear' || transform.kind === 'inverse') && transform.max <= transform.min) {
@@ -675,10 +684,47 @@ export const GateConditionSchema: z.ZodType<GateCondition> = z
 
 const TextSchema = z.object({ en: z.string().min(1).max(300), fr: z.string().min(1).max(300) });
 
+/** Bounds of a gate condition (the recursive schema would overflow the stack on a deeply nested input). */
+export const GATE_CONDITION_LIMITS = { depth: 6, nodes: 100 } as const;
+
+/** Depth and size of a raw condition, measured without recursion; null when within the limits. */
+function conditionTooLarge(raw: unknown): string | null {
+  const stack: [unknown, number][] = [[raw, 1]];
+  let nodes = 0;
+  while (stack.length > 0) {
+    const [node, depth] = stack.pop() as [unknown, number];
+    nodes += 1;
+    if (depth > GATE_CONDITION_LIMITS.depth)
+      return `Conditions nest at most ${GATE_CONDITION_LIMITS.depth} levels`;
+    if (nodes > GATE_CONDITION_LIMITS.nodes)
+      return `A gate has at most ${GATE_CONDITION_LIMITS.nodes} conditions`;
+    if (!node || typeof node !== 'object') continue;
+    const record = node as Record<string, unknown>;
+    for (const key of ['all', 'any'] as const) {
+      const parts = record[key];
+      if (Array.isArray(parts)) for (const part of parts) stack.push([part, depth + 1]);
+    }
+    if ('not' in record) stack.push([record.not, depth + 1]);
+  }
+  return null;
+}
+
+/** A gate condition from a request: size-checked before the recursive schema reads it. */
+const BoundedGateConditionSchema = z
+  .unknown()
+  .superRefine((raw, ctx) => {
+    const problem = conditionTooLarge(raw);
+    if (problem) ctx.addIssue({ code: 'custom', message: problem });
+  })
+  .pipe(GateConditionSchema)
+  .meta({
+    description: `A ScoringGateCondition (leaf, all, any, not): at most ${GATE_CONDITION_LIMITS.depth} levels and ${GATE_CONDITION_LIMITS.nodes} conditions.`,
+  });
+
 export const GateSchema = z
   .object({
     id: z.string().regex(/^[a-z][a-z0-9_]{1,40}$/),
-    when: GateConditionSchema,
+    when: BoundedGateConditionSchema,
     /** `exclude`: tier X, score 0; `cap`: the score is at most `max`. An exclusion wins over caps. */
     effect: z.discriminatedUnion('type', [
       z.object({ type: z.literal('exclude') }),
@@ -935,3 +981,114 @@ export const BusinessScoreSchema = ScoreResultSchema.extend({
   computedAt: IsoDateTimeSchema,
 }).meta({ id: 'BusinessScore' });
 export type BusinessScore = z.infer<typeof BusinessScoreSchema>;
+
+// ---------------------------------------------------------------------------------------------------------------
+// API, events and jobs (BF-031 part 2)
+
+export const ScoringProfileSummarySchema = z
+  .object({
+    id: z.uuid(),
+    offer: OfferSchema,
+    name: z.string(),
+    builtin: z.boolean(),
+    activeVersion: z.number().int().positive().nullable(),
+    /** The workspace's primary profile (its score and tier fill the listing). */
+    primary: z.boolean(),
+  })
+  .meta({ id: 'ScoringProfileSummary' });
+export type ScoringProfileSummary = z.infer<typeof ScoringProfileSummarySchema>;
+export const ScoringProfileListSchema = z
+  .object({ items: z.array(ScoringProfileSummarySchema) })
+  .meta({ id: 'ScoringProfileList' });
+export type ScoringProfileList = z.infer<typeof ScoringProfileListSchema>;
+
+export const ScoringProfileVersionSchema = z
+  .object({
+    profileId: z.uuid(),
+    version: z.number().int().positive(),
+    config: ScoringProfileConfigSchema,
+    createdAt: IsoDateTimeSchema,
+  })
+  .meta({ id: 'ScoringProfileVersion' });
+export type ScoringProfileVersion = z.infer<typeof ScoringProfileVersionSchema>;
+
+export const BusinessScoreListSchema = z.object({ items: z.array(BusinessScoreSchema) }).meta({
+  id: 'BusinessScoreList',
+  description: "The business's current score per profile of the workspace.",
+});
+export type BusinessScoreList = z.infer<typeof BusinessScoreListSchema>;
+
+/** Score a business with a draft config, nothing stored (the profile editor's preview, BF-032). */
+export const ScoringExplainRequestSchema = z
+  .object({ businessId: z.uuid(), config: ScoringProfileConfigSchema })
+  .meta({ id: 'ScoringExplainRequest' });
+export type ScoringExplainRequest = z.infer<typeof ScoringExplainRequestSchema>;
+export const ScoringExplainResponseSchema = ScoreResultSchema.extend({
+  features: FeatureVectorSchema,
+  featureSetVersion: z.number().int().positive(),
+}).meta({ id: 'ScoringExplainResponse' });
+export type ScoringExplainResponse = z.infer<typeof ScoringExplainResponseSchema>;
+
+export const ScoringRecomputeResponseSchema = z
+  .object({
+    profileId: z.uuid(),
+    version: z.number().int().positive(),
+    /** Tracked businesses to score (progress arrives as `scoring.recompute.progressed`). */
+    total: z.number().int().nonnegative(),
+  })
+  .meta({ id: 'ScoringRecomputeResponse' });
+export type ScoringRecomputeResponse = z.infer<typeof ScoringRecomputeResponseSchema>;
+
+export const SetPrimaryScoringProfileRequestSchema = z
+  .object({ profileId: z.uuid() })
+  .meta({ id: 'SetPrimaryScoringProfileRequest' });
+export type SetPrimaryScoringProfileRequest = z.infer<typeof SetPrimaryScoringProfileRequestSchema>;
+
+/** A business's score changed for a workspace profile (realtime, activity timeline, analytics). */
+export const ScoreUpdated = defineEvent(
+  'score.updated',
+  1,
+  z.object({
+    businessId: BusinessId,
+    profileId: z.uuid(),
+    profileVersion: z.number().int().positive(),
+    offer: OfferSchema,
+    score: z.number().int().min(0).max(100),
+    tier: ScoreTierSchema,
+    previousScore: z.number().int().min(0).max(100).nullable(),
+    previousTier: ScoreTierSchema.nullable(),
+    /** The workspace's primary profile (its tier is the business's tier in the listing). */
+    primary: z.boolean(),
+  }),
+);
+
+/** A profile version became active (a new built-in version at boot): every workspace using it recomputes. */
+export const ScoringProfileVersionActivated = defineEvent(
+  'scoring.profile_version.activated',
+  1,
+  z.object({ profileId: z.uuid(), version: z.number().int().positive() }),
+);
+
+/** Realtime: a business's scores were written (its page and the listing refetch). Not sent during bulk recomputes. */
+export const SCORING_SCORES_UPDATED = 'scoring.scores.updated';
+/** Realtime: bulk recompute progress (≤ 1/s per profile, and once when it ends). */
+export const SCORING_RECOMPUTE_PROGRESSED = 'scoring.recompute.progressed';
+export const ScoringRecomputeProgressSchema = z.object({
+  profileId: z.uuid(),
+  version: z.number().int().positive(),
+  done: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+  finished: z.boolean(),
+});
+export type ScoringRecomputeProgress = z.infer<typeof ScoringRecomputeProgressSchema>;
+
+/** Scores businesses of a workspace with its active profiles (or the given ones). */
+export const ScoringComputeJob = defineJob('scoring', 'compute', {
+  businessIds: z.array(z.uuid()).min(1).max(1_000),
+  profileIds: z.array(z.uuid()).max(50).optional(),
+});
+/** Scores every tracked business of a workspace with one profile version, in pages, with progress. */
+export const ScoringRecomputeJob = defineJob('scoring-recompute', 'recompute', {
+  profileId: z.uuid(),
+  version: z.number().int().positive(),
+});

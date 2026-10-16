@@ -10,6 +10,7 @@ import {
   OrgBusinessOwnerChanged,
   OrgBusinessStatusChanged,
   OrgBusinessTagsChanged,
+  ScoreUpdated,
   TaskCompleted,
   TaskCreated,
 } from '@bf/contracts';
@@ -79,6 +80,20 @@ export class ActivitySubscriber {
     if (!map) return;
     const { type, data } = map(payload);
     await this.add(event.orgId, String(payload.businessId), type, data, event);
+  }
+
+  /** The primary profile's tier moved (BF-031); a first score is not news on the timeline. */
+  @OnDomainEvent(ScoreUpdated, { id: 'crm.score-timeline' })
+  async scored(event: DomainEvent<typeof ScoreUpdated>): Promise<void> {
+    const { businessId, previousTier, tier, score, offer, primary } = event.payload;
+    if (!event.orgId || !primary || previousTier === null || previousTier === tier) return;
+    await this.add(
+      event.orgId,
+      businessId,
+      'score.updated',
+      { from: previousTier, to: tier, score, offer },
+      event as AnyDomainEvent,
+    );
   }
 
   /** Facts of the business changed (enrichment, a provider refresh): global, so every tracking workspace sees it. */

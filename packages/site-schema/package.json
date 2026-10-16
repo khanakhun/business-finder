@@ -14,8 +14,8 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "tldts": "catalog:",
     "libphonenumber-js": "catalog:",
+    "tldts": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

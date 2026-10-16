@@ -315,6 +315,43 @@ describe('validateFacts', () => {
     expect(found(spec, facts)).toEqual([]);
   });
 
+  it('still checks a year or number written next to a phone number', () => {
+    const spec = salon();
+    hero(spec).subtitle = {
+      fr: 'Depuis 1987 - 0590 00 01 01',
+      en: '0590 00 01 01 / 99 et 0590 00 01 01 - 1987',
+    };
+    expect(validateFacts(spec, registry()).map((issue) => issue.message)).toEqual([
+      'Remove the year 1987: it is not a fact.',
+      'Remove the year 1987: it is not a fact.',
+    ]);
+  });
+
+  it('compares digits exactly without an address country', () => {
+    const spec = salon();
+    spec.contact.address = undefined;
+    if (spec.contact.phone) spec.contact.phone.value = '+33590000101';
+    const national = {
+      facts: registry().facts.map((f) => (f.kind === 'phone' ? { ...f, value: '05 90 00 01 01' } : f)),
+    };
+    expect(found(spec, national)).toContain('fact_mismatch@contact.phone');
+  });
+
+  it('reads a long run of spaces between digits quickly (no quadratic split)', () => {
+    const spec = salon();
+    const body = `1${' '.repeat(4998)}1`;
+    for (let n = 0; n < 20; n += 1)
+      spec.pages[1]?.blocks.push({
+        id: `rich-slow${n}`,
+        type: 'rich_text',
+        variant: 'narrow',
+        props: { body: { fr: body, en: body } },
+      });
+    const started = performance.now();
+    validateFacts(spec, registry());
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+
   it('refuses a registry with two facts of the same id', () => {
     const facts = registry().facts;
     expect(FactRegistrySchema.safeParse({ facts: [...facts, facts[0]] }).success).toBe(false);

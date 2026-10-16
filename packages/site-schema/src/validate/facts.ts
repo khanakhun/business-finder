@@ -144,7 +144,10 @@ const CURRENCY = String.raw`€|\$|£|\bEUR\b|\bUSD\b|\bGBP\b|\bCHF\b|\beuros?\b
 const AMOUNT = String.raw`\d{1,3}(?:[   .,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?`;
 const PRICE = new RegExp(`(?:(${CURRENCY})\\s{0,3}(${AMOUNT}))|(?:(${AMOUNT})\\s{0,3}(${CURRENCY}))`, 'giu');
 const YEAR_RANGE = /\b(1[89]\d{2}|20\d{2})\s*[-–]\s*(1[89]\d{2}|20\d{2})\b/g;
-const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,}\d/g;
+/** A phone-like run (bounded: a long run is read as several, each refused unless a fact). */
+const PHONE = /\(?\+?\d[\d\s\u00A0\u202F()./-]{6,30}\d/g;
+/** The separator of two numbers side by side (`0590 27 00 00 / 0690 12 34 56`), kept by `split`. */
+const PAIR = /([ \u00A0\u202F]{1,3}[/–-][ \u00A0\u202F]{1,3})/;
 const YEAR = /\b(1[89]\d{2}|20\d{2})\b(?!\s?(?:m²|m2|m\b|km|€|\$|%|h\b))/g;
 
 const currencyOf = (mark: string) => {
@@ -215,13 +218,18 @@ export function literals(input: string): Literals {
     },
   );
   const phones: string[] = [];
-  text = text.replace(PHONE, (match) => {
-    // Two numbers side by side (`0590 27 00 00 / 0690 12 34 56`) are two literals.
-    const parts = match.split(/\s+[/–-]\s+/).filter((part) => digits(part).length >= 8);
-    if (parts.length === 0) return match;
-    phones.push(...parts.map((part) => part.trim()));
-    return blank(match);
-  });
+  // Two numbers side by side are two literals; a shorter part (`Depuis 1987 - 0590…`) stays in the text, so its year
+  // or number is still checked.
+  text = text.replace(PHONE, (match) =>
+    match
+      .split(PAIR)
+      .map((part, i) => {
+        if (i % 2 === 1 || digits(part).length < 8) return part;
+        phones.push(part.trim());
+        return blank(part);
+      })
+      .join(''),
+  );
   for (const match of text.matchAll(YEAR)) years.push(Number(match[1]));
   return { phones, emails, prices, years };
 }
@@ -273,10 +281,11 @@ function* texts(spec: SiteSpec): Generator<{ text: string; path: Path }> {
 export function validateFacts(spec: SiteSpec, registry: FactRegistry): Issue[] {
   const issues: Issue[] = [];
   const facts = new Map(registry.facts.map((fact) => [fact.id, fact]));
-  // Numbers are read as the business's country writes them (its address, else its phone's country).
-  const country =
-    spec.contact.address?.country ??
-    (spec.contact.phone ? parsePhoneNumberFromString(spec.contact.phone.value)?.country : undefined);
+  // Numbers are read as the business's country writes them (its address); without one, digits must be equal.
+  // DECISION(BF-033): a phone fact written nationally (`05 90 00 01 01`) is read with the site's address country, which
+  // the spec states; a wrong country would only give another valid E.164. The registry builder (BF-040) stores phone
+  // facts in E.164 so the comparison never depends on the spec.
+  const country = spec.contact.address?.country;
   const of = <K extends FactKind>(kind: K) =>
     registry.facts.filter((fact) => fact.kind === kind) as FactOf<K>[];
 

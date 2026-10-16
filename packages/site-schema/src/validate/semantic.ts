@@ -403,7 +403,7 @@ const urlsRule: Rule = (spec, options) => {
     const rich = isRichText(path);
     // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
     // is not: folded first, then judged by `www.` or what is just before it (`/`, `\\`, a URL scheme).
-    const forms = rich ? [richTextWords(text), withoutPageLinks(text, ' ')] : [text];
+    const forms = rich ? [...new Set([richTextWords(text), withoutPageLinks(text, ' ')])] : [text];
     const found = forms.map((form) => words(form, comparedWhole(path))).find(hasWebAddress);
     if (found !== undefined) {
       const handle = /(?:^|[\s(])@[\p{L}\p{N}_.-]+\.[\p{L}\p{N}]/u.test(text.normalize('NFKC'));

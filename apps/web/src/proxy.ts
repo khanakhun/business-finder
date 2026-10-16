@@ -9,6 +9,9 @@ import { serverPublicEnv } from './lib/public-env.ts';
  * Radix positions popovers with style attributes; neither can carry our nonce, and the e2e CSP check showed both
  * blocked. Styles cannot execute code; scripts stay nonce + 'strict-dynamic' only.
  */
+/** Stock providers' image CDNs (picker previews; Unsplash images are hotlinked on the canvas too). */
+const STOCK_IMAGE_ORIGINS = ['https://images.unsplash.com', 'https://images.pexels.com'];
+
 export function buildCsp(
   nonce: string,
   options: {
@@ -28,7 +31,8 @@ export function buildCsp(
     // The search map (BF-023) loads its style, tiles, glyphs and sprites from the map origin; MapLibre's workers
     // are blob: URLs.
     // The site editor's canvas (BF-037) shows the sites' images from their CDN.
-    `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.sitesAssetsOrigin ? ` ${options.sitesAssetsOrigin}` : ''}`,
+    // Stock photos (BF-038): previews in the image picker, and Unsplash images hotlinked on the canvas.
+    `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.sitesAssetsOrigin ? ` ${options.sitesAssetsOrigin}` : ''} ${STOCK_IMAGE_ORIGINS.join(' ')}`,
     "worker-src 'self' blob:",
     "font-src 'self'",
     `connect-src 'self' ${options.apiOrigin}${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.uploadsOrigin ? ` ${options.uploadsOrigin}` : ''}${options.dev ? ' ws:' : ''}`,

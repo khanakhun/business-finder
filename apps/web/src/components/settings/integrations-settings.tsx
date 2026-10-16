@@ -36,6 +36,7 @@ const PROVIDERS = [
   'huggingface',
   'zerobounce',
   'unsplash',
+  'pexels',
 ] as const;
 type Provider = (typeof PROVIDERS)[number];
 

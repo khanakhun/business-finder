@@ -142,3 +142,38 @@ describe('ranking', () => {
     expect(ranked?.reasons).toContain('+10 colours close to the palette');
   });
 });
+
+describe('licensing profiles, the AI prompt policy and stock queries', () => {
+  it('hotlinks Unsplash only, credits stock photographers and keeps owner images preview-only', async () => {
+    const { attributionFor, HOTLINK_HOSTS, LICENSING_PROFILES } = await import('./licensing-profile.ts');
+    expect(HOTLINK_HOSTS).toEqual(['images.unsplash.com']);
+    expect(LICENSING_PROFILES.unsplash.downloadTrackingRequired).toBe(true);
+    expect(attributionFor(LICENSING_PROFILES.unsplash, 'Ana Ruiz')).toBe('Photo by Ana Ruiz on Unsplash');
+    expect(attributionFor(LICENSING_PROFILES.pexels, ' ')).toBe('Photo by unknown on Pexels');
+    expect(attributionFor(LICENSING_PROFILES.ai, 'x')).toBeUndefined();
+    expect(LICENSING_PROFILES.owner_site.restrictions).toEqual(['preview_only']);
+  });
+
+  it.each([
+    ['a smiling chef in the kitchen', false],
+    ['portrait of a woman', false],
+    ['une femme qui sourit', false],
+    ['the salon logo on a wall', false],
+    ['our salon interior', false],
+    ['texte « bienvenue » sur un mur', false],
+    ['see https://evil.example', false],
+    ['calm turquoise sea with palm shadows', true],
+    ['linen texture in warm beige', true],
+  ])('judges the prompt %s', async (prompt, ok) => {
+    const { judgeImagePrompt, violatesImagePolicy } = await import('./image-prompt-policy.ts');
+    expect(judgeImagePrompt(prompt).ok).toBe(ok);
+    expect(violatesImagePolicy({ containsPeople: false, containsText: true })).toBe(true);
+  });
+
+  it('builds scene queries per category with the style, falling back to generic scenes', async () => {
+    const { normalizeQuery, stockQueries } = await import('./stock-queries.ts');
+    expect(stockQueries('hair_salon', 'luxe')[0]).toBe('elegant hair salon interior');
+    expect(stockQueries('unknown_kind', undefined)).toContain('caribbean coastline');
+    expect(normalizeQuery('  Hair   SALON ')).toBe('hair salon');
+  });
+});

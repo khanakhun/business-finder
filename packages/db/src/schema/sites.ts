@@ -198,6 +198,8 @@ export const siteAssets = pgTable(
     focalPoint: jsonb().$type<{ x: number; y: number }>(),
     /** A photo (`image`) or the business's logo (`logo`, e.g. found on its site or our wordmark). */
     kind: text().$type<'image' | 'logo'>().notNull().default('image'),
+    /** `hotlink`: served from the stock provider's CDN when its terms require it (no copy on our storage). */
+    hosting: text().$type<'self' | 'hotlink'>().notNull().default('self'),
     /** How it reached the library (BF-038): an upload, the owner's site, stock, AI, our wordmark. */
     source: text().$type<SiteAssetSourceKind>().notNull().default('upload'),
     /** Where it was found (owner-site and stock images): with `sha256`/`dhash`, re-collecting skips it. */
@@ -228,6 +230,7 @@ export const siteAssets = pgTable(
     check('ck_site_assets__status', sql`${table.status} IN ('pending', 'processing', 'ready', 'failed')`),
     check('ck_site_assets__source', sql`${table.source} IN (${inList(SITE_ASSET_SOURCES)})`),
     check('ck_site_assets__kind', sql`${table.kind} IN ('image', 'logo')`),
+    check('ck_site_assets__hosting', sql`${table.hosting} IN ('self', 'hotlink')`),
     // One copy of a source image per site (re-collecting is idempotent).
     uniqueIndex('uq_site_assets__site_id_source_url')
       .on(table.siteId, table.sourceUrl)

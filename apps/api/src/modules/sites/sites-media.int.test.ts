@@ -136,6 +136,7 @@ beforeAll(async () => {
     QUEUES.sitesViews.name,
     QUEUES.sitesAssetCollect.name,
     QUEUES.sitesAssetAnalyze.name,
+    QUEUES.sitesAssetGenerate.name,
   ])
     await worker.get<Queue>(getQueueToken(queue)).obliterate({ force: true });
   member = await signUpVerified(t, mailer, 'member@media.test', 'Mia Member');
@@ -366,6 +367,65 @@ describe('image sourcing (BF-038)', () => {
       ['logo', 'wordmark', 'system_generated'],
       ['logo', 'wordmark', 'system_generated'],
     ]);
+  }, 120_000);
+});
+
+describe('stock and AI images (BF-038)', () => {
+  it('imports a hotlinked stock photo a version may use, and generates AI illustrations through the worker', async () => {
+    const site = await newSite('Salon Stock');
+    const { body: sources } = await member.get(`/v1/sites/${site.id}/asset-sources`).expect(200);
+    expect(sources).toMatchObject({ stock: ['unsplash'], ai: { enabled: true } });
+
+    const { body: found } = await member
+      .get(`/v1/sites/${site.id}/asset-suggestions?role=hero&source=stock&q=turquoise%20sea`)
+      .expect(200);
+    expect(found.items).toHaveLength(3);
+    const importResponse = await member.post(`/v1/sites/${site.id}/assets/import`, {
+      candidateId: found.items[0].id,
+    });
+    const imported = importResponse.body;
+    expect(importResponse.status).toBe(201);
+    expect(imported).toMatchObject({ status: 'ready', hosting: 'hotlink', license: 'stock' });
+
+    // A version may hotlink it (the validator knows Unsplash's CDN), credited with a link to the stock site.
+    const spec = salonSpec() as { assets: Record<string, unknown>[] };
+    spec.assets.push({
+      id: 'img_stock_sea',
+      kind: 'image',
+      url: imported.publicUrl,
+      width: imported.width,
+      height: imported.height,
+      alt: { fr: 'Mer turquoise', en: 'Turquoise sea' },
+      license: 'stock',
+      hosting: 'hotlink',
+      attribution: imported.licenseDetails.attributionText,
+      attributionUrl: imported.licenseDetails.authorUrl,
+    });
+    await member.post(`/v1/sites/${site.id}/versions`, { spec, baseVersionId: site.v1 }).expect(201);
+
+    await member
+      .post(`/v1/sites/${site.id}/assets/generate`, { prompt: 'a smiling chef', aspect: '16:9', count: 2 })
+      .expect(422);
+    await member
+      .post(`/v1/sites/${site.id}/assets/generate`, {
+        prompt: 'calm turquoise sea',
+        aspect: '16:9',
+        count: 2,
+      })
+      .expect(202);
+    const generated = await eventually(async () => {
+      const rows = (await db.select().from(siteAssets).where(eq(siteAssets.siteId, site.id))).filter(
+        (row) => row.source === 'ai',
+      );
+      return rows.length === 2 && rows.every((row) => row.status === 'ready' && row.analysis)
+        ? rows
+        : undefined;
+    }, 60_000);
+    for (const row of generated) expect(row).toMatchObject({ license: 'ai_generated', restrictions: [] });
+    await outsider.get(`/v1/sites/${site.id}/asset-sources`).expect(404);
+    await viewer
+      .post(`/v1/sites/${site.id}/assets/generate`, { prompt: 'sea', aspect: '1:1', count: 1 })
+      .expect(403);
   }, 120_000);
 });
 

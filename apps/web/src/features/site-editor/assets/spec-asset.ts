@@ -97,6 +97,11 @@ export function toSpecAsset(
     alt: options.alt ?? altFor(asset, spec.locales),
     license: asset.license,
     ...(attribution ? { attribution: attribution.slice(0, 200) } : {}),
+    // A stock credit links to the photographer's page (the validator allows the stock sites only).
+    ...(asset.license === 'stock' && asset.licenseDetails?.authorUrl
+      ? { attributionUrl: asset.licenseDetails.authorUrl }
+      : {}),
+    ...(asset.hosting === 'hotlink' ? { hosting: 'hotlink' as const } : {}),
     // An owner-site image whose ownership is not confirmed stays preview-only in the spec (refused on a live site).
     ...(asset.restrictions.length > 0 ? { restrictions: [...asset.restrictions] } : {}),
     ...(options.focalPoint

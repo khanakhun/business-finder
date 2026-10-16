@@ -22,6 +22,7 @@ import { LOGGER } from '../../platform/logging/logger.ts';
 import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
 import { isNearDuplicate } from '../domain/assets/dhash.ts';
 import { isProviderPhoto, judgeOwnerImage } from '../domain/assets/image-policy.ts';
+import { violatesImagePolicy } from '../domain/assets/image-prompt-policy.ts';
 import { type RankableAsset, rankCandidates } from '../domain/assets/ranking.ts';
 import { MAX_IMAGE_PIXELS, sniffImageType } from '../domain/image-type.ts';
 import {
@@ -379,6 +380,15 @@ export class AssetSourcing {
       focalPoint: asset.focalPoint ?? measured.focalPoint,
     });
     if (!changed) return 'skipped';
+    // AI images are illustrations: one showing people or text is discarded (image policy, BF-038).
+    if (asset.source === 'ai' && violatesImagePolicy(result)) {
+      await this.assets.transition(asset.id, ['ready'], { status: 'failed' });
+      this.logger?.warn(
+        { assetId: asset.id, containsPeople: result.containsPeople, containsText: result.containsText },
+        'AI image discarded by the image policy',
+      );
+      return 'skipped';
+    }
     await this.events.record(SiteAssetAnalyzed, {
       orgId: asset.organizationId,
       payload: { siteId: asset.siteId, assetId: asset.id },
@@ -493,6 +503,7 @@ function candidateOf(asset: StoredAsset, score: number, reasons: readonly string
     height: asset.height,
     license: asset.license,
     attribution: asset.licenseDetails?.attributionText ?? asset.licenseDetails?.author ?? null,
+    provider: asset.licenseDetails?.provider ?? null,
     restrictions: asset.restrictions,
     alt: asset.alt,
     score,

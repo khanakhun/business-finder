@@ -14,4 +14,10 @@ export const providersEnv = z.object({
     z.string().min(1).optional().describe('ZeroBounce API key (e-mail verification without SMTP port 25).'),
   ),
   UNSPLASH_ACCESS_KEY: secret(z.string().min(1).optional().describe('Unsplash access key (stock photos).')),
+  PEXELS_API_KEY: secret(z.string().min(1).optional().describe('Pexels API key (stock photos).')),
+  UNSPLASH_APP_NAME: z
+    .string()
+    .regex(/^[a-z0-9_]{2,40}$/)
+    .default('business_finder')
+    .describe('The app name in Unsplash attribution links (utm_source), as registered with Unsplash.'),
 });

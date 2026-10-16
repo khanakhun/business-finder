@@ -23,6 +23,7 @@ const columns = {
   dominantColors: siteAssets.dominantColors,
   sha256: siteAssets.sha256,
   kind: siteAssets.kind,
+  hosting: siteAssets.hosting,
   source: siteAssets.source,
   sourceUrl: siteAssets.sourceUrl,
   dhash: siteAssets.dhash,

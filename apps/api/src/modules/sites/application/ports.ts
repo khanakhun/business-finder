@@ -153,6 +153,8 @@ export const SITE_REVALIDATION = Symbol('SiteRevalidation');
 export interface SiteHosting {
   readonly baseDomain: string;
   readonly assetHosts: readonly string[];
+  /** Stock providers' CDNs images may be hotlinked from (their licensing profiles, BF-038). */
+  readonly hotlinkHosts?: readonly string[];
 }
 export const SITE_HOSTING = Symbol('SiteHosting');
 
@@ -234,6 +236,8 @@ export interface StoredAsset {
   readonly dominantColors: string[] | null;
   /** A photo or the business's logo (BF-038). */
   readonly kind: 'image' | 'logo';
+  /** `hotlink`: on the stock provider's CDN (its terms require it), no copy on our storage. */
+  readonly hosting: 'self' | 'hotlink';
   /** How it reached the library (BF-038). */
   readonly source: 'upload' | 'owner_site' | 'stock' | 'ai' | 'wordmark';
   /** Where it was found (owner-site and stock images). */
@@ -267,6 +271,7 @@ export interface SiteAssetsRepository {
       | 'processingStartedAt'
       | 'createdAt'
       | 'kind'
+      | 'hosting'
       | 'source'
       | 'sourceUrl'
       | 'dhash'
@@ -278,7 +283,7 @@ export interface SiteAssetsRepository {
       Partial<
         Pick<
           StoredAsset,
-          'kind' | 'source' | 'sourceUrl' | 'dhash' | 'restrictions' | 'sha256' | 'focalPoint'
+          'kind' | 'hosting' | 'source' | 'sourceUrl' | 'dhash' | 'restrictions' | 'sha256' | 'focalPoint'
         >
       > & {
         createdBy: string | null;

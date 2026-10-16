@@ -81,6 +81,7 @@ export const toAsset = (asset: StoredAsset): SiteAsset => ({
   alt: asset.alt,
   dominantColors: asset.dominantColors,
   kind: asset.kind,
+  hosting: asset.hosting,
   source: asset.source,
   restrictions: asset.restrictions,
   focalPoint: asset.focalPoint,

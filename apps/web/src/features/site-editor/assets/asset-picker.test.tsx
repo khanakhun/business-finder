@@ -1,4 +1,4 @@
-import type { SiteAsset } from '@bf/contracts';
+import type { SiteAsset, SiteAssetSources } from '@bf/contracts';
 import { type SiteSpec, SiteSpecSchema } from '@bf/site-schema';
 import salon from '@bf/site-schema/fixtures/salon-gustavia.json' with { type: 'json' };
 import { render, screen, waitFor } from '@testing-library/react';
@@ -9,7 +9,16 @@ import en from '../../../i18n/messages/en.json';
 import { type SiteEditorActions, SiteEditorActionsProvider, SiteEditorProvider } from '../context.tsx';
 import { AssetPicker } from './asset-picker.tsx';
 
-const api = vi.hoisted(() => ({ fetchAssets: vi.fn(), uploadAsset: vi.fn() }));
+const api = vi.hoisted(() => ({
+  fetchAssets: vi.fn(),
+  uploadAsset: vi.fn(),
+  fetchAssetSources: vi.fn(
+    async (): Promise<SiteAssetSources> => ({ stock: [], ai: { enabled: false, remainingToday: 0 } }),
+  ),
+  searchStock: vi.fn(),
+  importStock: vi.fn(),
+  generateImages: vi.fn(),
+}));
 vi.mock('../api.ts', () => api);
 
 const spec = SiteSpecSchema.parse(salon) as SiteSpec;
@@ -29,6 +38,7 @@ const library = (overrides: Partial<SiteAsset>): SiteAsset => ({
   alt: { fr: 'La terrasse', en: 'The terrace' },
   dominantColors: null,
   kind: 'image',
+  hosting: 'self',
   source: 'upload',
   restrictions: [],
   focalPoint: null,
@@ -52,7 +62,10 @@ function renderPicker(onPick = vi.fn(), addAsset = vi.fn()) {
   return { onPick, addAsset };
 }
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  api.fetchAssets.mockReset();
+  api.uploadAsset.mockReset();
+});
 
 describe('AssetPicker', () => {
   it('requires a licence and the default language’s alt text before an upload', async () => {
@@ -102,6 +115,62 @@ describe('AssetPicker', () => {
     expect(added.id).toMatch(/^img_[a-z0-9]{10}$/);
     expect(added.alt).toEqual({ fr: 'Le salon' });
     expect(onPick).toHaveBeenCalledWith(added.id);
+  });
+
+  it('offers stock photos when a provider is configured, and uses an imported one', async () => {
+    api.fetchAssetSources.mockResolvedValueOnce({
+      stock: ['unsplash'],
+      ai: { enabled: false, remainingToday: 0 },
+    });
+    api.searchStock.mockResolvedValueOnce([
+      {
+        id: 'stock:unsplash:abc123',
+        source: 'stock',
+        assetId: null,
+        previewUrl: 'https://images.unsplash.com/photo-abc?w=400',
+        width: 2400,
+        height: 1600,
+        license: 'stock',
+        attribution: 'Photo by Ana Ruiz on Unsplash',
+        provider: 'unsplash',
+        restrictions: [],
+        alt: { en: 'turquoise sea' },
+        score: 50,
+        reasons: [],
+      },
+    ]);
+    api.importStock.mockResolvedValueOnce(
+      library({
+        id: '0199a0b0-0000-7000-8000-0000000000cc',
+        license: 'stock',
+        source: 'stock',
+        hosting: 'hotlink',
+        publicUrl: 'https://images.unsplash.com/photo-abc?w=1200&ixid=x',
+        licenseDetails: {
+          attributionText: 'Photo by Ana Ruiz on Unsplash',
+          authorUrl: 'https://unsplash.com/@ana',
+        },
+        alt: { fr: 'Mer turquoise' },
+      }),
+    );
+    const user = userEvent.setup();
+    const { onPick, addAsset } = renderPicker();
+    await user.click(await screen.findByRole('tab', { name: 'Find more' }));
+    await user.type(screen.getByLabelText('Search stock photos'), 'turquoise sea');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+    await user.click(await screen.findByText('Photo by Ana Ruiz on Unsplash'));
+    await waitFor(() => expect(addAsset).toHaveBeenCalledTimes(1));
+    const added = addAsset.mock.calls[0]?.[0] as {
+      hosting?: string;
+      attributionUrl?: string;
+      license: string;
+    };
+    expect(added).toMatchObject({
+      license: 'stock',
+      hosting: 'hotlink',
+      attributionUrl: 'https://unsplash.com/@ana',
+    });
+    expect(onPick).toHaveBeenCalled();
   });
 
   it('picks one of the site’s own images directly', async () => {

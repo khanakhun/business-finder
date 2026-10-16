@@ -216,6 +216,12 @@ export const SECRET_DEFINITIONS = {
     allowGlobalFallback: true,
     globalEnv: 'UNSPLASH_ACCESS_KEY',
   },
+  pexels: {
+    provider: 'pexels',
+    description: 'Pexels API key (stock photos for preview sites).',
+    allowGlobalFallback: true,
+    globalEnv: 'PEXELS_API_KEY',
+  },
 } as const satisfies Record<string, SecretDefinition>;
 export type SecretName = keyof typeof SECRET_DEFINITIONS;
 export const SECRET_NAMES = Object.keys(SECRET_DEFINITIONS) as [SecretName, ...SecretName[]];

@@ -1655,6 +1655,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/asset-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The stock providers configured and the AI images left today (the editor’s "Find more images") */
+        get: operations["getSiteAssetSources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/asset-suggestions": {
         parameters: {
             query?: never;
@@ -1735,6 +1752,40 @@ export type paths = {
         put?: never;
         /** Check an uploaded image (type, size, dimensions) and queue its processing */
         post: operations["finalizeSiteAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/assets/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate illustrative AI images (no people, text or logos) into the site’s library */
+        post: operations["generateSiteAssets"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/assets/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bring a stock photo into the site’s library (credited; Unsplash hotlinked and its download tracked) */
+        post: operations["importSiteAsset"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3085,6 +3136,16 @@ export type components = {
             /** @description The workspace's own choice, or the default when it never chose. */
             workspaceValue: boolean;
         };
+        GenerateSiteAssetsRequest: {
+            /**
+             * @default 16:9
+             * @enum {string}
+             */
+            aspect: "16:9" | "4:3" | "1:1" | "3:4";
+            /** @default 2 */
+            count: number;
+            prompt: string;
+        };
         GeoAreaFeature: {
             geometry: {
                 coordinates: [
@@ -3158,6 +3219,9 @@ export type components = {
             minPasswordLength: number;
             /** @enum {string} */
             signupMode: "invite_only" | "allowlist" | "open";
+        };
+        ImportSiteAssetRequest: {
+            candidateId: string;
         };
         Invitation: {
             /** Format: date-time */
@@ -4110,7 +4174,7 @@ export type components = {
             last4: string | null;
             lastUsedAt: string | null;
             /** @enum {string} */
-            name: "google_places" | "pagespeed" | "anthropic" | "openai" | "foursquare" | "huggingface" | "zerobounce" | "unsplash";
+            name: "google_places" | "pagespeed" | "anthropic" | "openai" | "foursquare" | "huggingface" | "zerobounce" | "unsplash" | "pexels";
             provider: string;
             /** @description Where the value would come from: the workspace vault, the deployment env, or nowhere (null). */
             source: ("workspace" | "global") | null;
@@ -4149,6 +4213,8 @@ export type components = {
                 y: number;
             } | null;
             height: number | null;
+            /** @enum {string} */
+            hosting: "self" | "hotlink";
             /** Format: uuid */
             id: string;
             /** @enum {string} */
@@ -4204,6 +4270,7 @@ export type components = {
             /** @enum {string} */
             license: "owner_site" | "stock" | "ai_generated" | "uploaded" | "system_generated";
             previewUrl: string | null;
+            provider: string | null;
             reasons: string[];
             restrictions: "preview_only"[];
             score: number;
@@ -4211,8 +4278,20 @@ export type components = {
             source: "upload" | "owner_site" | "stock" | "ai" | "wordmark";
             width: number | null;
         };
+        SiteAssetGeneration: {
+            count: number;
+            /** Format: uuid */
+            generationId: string;
+        };
         SiteAssetList: {
             items: components["schemas"]["SiteAsset"][];
+        };
+        SiteAssetSources: {
+            ai: {
+                enabled: boolean;
+                remainingToday: number;
+            };
+            stock: string[];
         };
         SiteAssetSuggestions: {
             items: components["schemas"]["SiteAssetCandidate"][];
@@ -13070,6 +13149,64 @@ export interface operations {
             };
         };
     };
+    getSiteAssetSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteAssetSources"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     suggestSiteAssets: {
         parameters: {
             query?: {
@@ -13494,6 +13631,175 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    generateSiteAssets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateSiteAssetsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteAssetGeneration"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    importSiteAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportSiteAssetRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteAsset"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

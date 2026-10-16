@@ -82,6 +82,12 @@ export const QUEUES = {
   sitesAssetProcess: { name: 'sites-asset-process', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** A site's images collected from the business's website and the wordmark (BF-038; downloads through intel). */
   sitesAssetCollect: { name: 'sites-asset-collect', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** AI image generation (one provider call per job, a few images). */
+  sitesAssetGenerate: {
+    name: 'sites-asset-generate',
+    defaultJobOptions: DEFAULT_JOB_OPTIONS,
+    concurrency: 2,
+  },
   /** Vision analysis of a processed image (tags, alt texts; one model call each). */
   sitesAssetAnalyze: { name: 'sites-asset-analyze', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   /** Thumbnails of published sites (services/intel takes the pictures). */

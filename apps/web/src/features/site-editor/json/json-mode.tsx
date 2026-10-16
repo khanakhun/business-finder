@@ -1,6 +1,6 @@
 'use client';
 
-import { type Issue, parseSite, type SiteSpec, validateSite } from '@bf/site-schema';
+import { HOTLINK_HOSTS, type Issue, parseSite, type SiteSpec, validateSite } from '@bf/site-schema';
 import { Button } from '@bf/ui/components/button';
 import {
   Dialog,
@@ -41,7 +41,11 @@ export function checkJson(text: string, assetHosts: readonly string[]): Checked 
   return {
     state: 'valid',
     spec: parsed.spec,
-    issues: validateSite(parsed.spec, { assetHosts: [...assetHosts], mode: 'published' }),
+    issues: validateSite(parsed.spec, {
+      assetHosts: [...assetHosts],
+      hotlinkHosts: [...HOTLINK_HOSTS],
+      mode: 'published',
+    }),
   };
 }
 

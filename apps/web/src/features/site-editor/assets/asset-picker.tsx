@@ -7,6 +7,7 @@ import {
   SITE_ASSET_MIME_TYPES,
   SITE_UPLOAD_LICENSES,
   type SiteAsset,
+  type SiteAssetSources,
 } from '@bf/contracts';
 import { type Asset, LIMITS, type LocalizedText, type SiteLocale } from '@bf/site-schema';
 import { Badge } from '@bf/ui/components/badge';
@@ -23,8 +24,9 @@ import { Input } from '@bf/ui/components/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@bf/ui/components/tabs';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
-import { fetchAssets, uploadAsset } from '../api.ts';
+import { fetchAssetSources, fetchAssets, uploadAsset } from '../api.ts';
 import { useSiteEditor, useSiteEditorActions } from '../context.tsx';
+import { FindMore } from './find-more.tsx';
 import { type FocalPoint, FocalPointPicker } from './focal-point.tsx';
 import {
   altFor,
@@ -40,7 +42,7 @@ import {
 // site, later stock and AI images from BF-038, which adds a "Find more images" tab here), and uploads with a licence
 // declaration and alt texts. A library image becomes one of the site's images (a new element id) when picked.
 
-type Tab = 'site' | 'library' | 'upload';
+type Tab = 'site' | 'library' | 'upload' | 'more';
 const CENTER: FocalPoint = { x: 0.5, y: 0.5 };
 const POLL_MS = 1_500;
 const POLL_TRIES = 40;
@@ -133,6 +135,19 @@ export function AssetPicker({
   const [chosen, setChosen] = React.useState<SiteAsset | null>(null);
   const [alt, setAlt] = React.useState<LocalizedText>({});
   const [focal, setFocal] = React.useState<FocalPoint>(CENTER);
+  // Feature-detected: the tab shows when a stock provider or AI images are available (BF-038).
+  const [sources, setSources] = React.useState<SiteAssetSources | null>(null);
+  React.useEffect(() => {
+    if (!open) return;
+    let live = true;
+    fetchAssetSources(siteId)
+      .then((found) => live && setSources(found))
+      .catch(() => live && setSources(null));
+    return () => {
+      live = false;
+    };
+  }, [open, siteId]);
+  const more = sources !== null && (sources.stock.length > 0 || sources.ai.enabled);
 
   const load = React.useCallback(async () => {
     setLibrary('loading');
@@ -208,6 +223,7 @@ export function AssetPicker({
             <TabsTrigger value="site">{t('tabs.site')}</TabsTrigger>
             <TabsTrigger value="library">{t('tabs.library')}</TabsTrigger>
             <TabsTrigger value="upload">{t('tabs.upload')}</TabsTrigger>
+            {more ? <TabsTrigger value="more">{t('tabs.more')}</TabsTrigger> : null}
           </TabsList>
           <TabsContent value="site">
             {own.length === 0 ? (
@@ -367,6 +383,21 @@ export function AssetPicker({
               </>
             )}
           </TabsContent>
+          {more && sources ? (
+            <TabsContent value="more">
+              <FindMore
+                siteId={siteId}
+                sources={sources}
+                onImported={(asset) => {
+                  if (!use(asset, { alt: altFor(asset, spec.locales), focalPoint: CENTER })) {
+                    setTab('library');
+                    choose(asset);
+                  }
+                }}
+                onGenerated={() => setTab('library')}
+              />
+            </TabsContent>
+          ) : null}
           <TabsContent value="upload">
             <UploadForm
               siteId={siteId}

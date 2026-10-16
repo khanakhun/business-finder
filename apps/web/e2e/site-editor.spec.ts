@@ -440,6 +440,7 @@ test('swaps the hero image for another of the site’s, and uploads one with its
     alt: { fr: 'La nouvelle terrasse' },
     dominantColors: null,
     kind: 'image',
+    hosting: 'self',
     source: 'upload',
     restrictions: [],
     focalPoint: null,

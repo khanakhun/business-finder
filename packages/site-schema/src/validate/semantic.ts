@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { CREDIT_HOSTS } from '../spec/assets.ts';
 import type { BlockOf, BlockType } from '../spec/blocks/index.ts';
 import { LIMITS, type LimitKey } from '../spec/limits.ts';
 import { SITE_LOCALES, type SiteLocale } from '../spec/localized.ts';
@@ -300,6 +301,8 @@ const ctaRule: Rule = (spec, options) => {
 /** Strings that are not text: URLs (checked against their allowlists), the e-mail address, ids and references. */
 const NOT_TEXT_KEYS = new Set([
   'url',
+  // Checked by the URL rule (stock sites only).
+  'attributionUrl',
   'id',
   'pageId',
   'factId',
@@ -366,6 +369,14 @@ const urlsRule: Rule = (spec, options) => {
     } else if (!hostAllowed(asset.url, options.assetHosts, { subdomains: false }))
       issues.push(
         error(['assets', i, 'url'], 'asset_host', 'Upload the image to our storage and use that URL.'),
+      );
+    if (asset.attributionUrl && !hostAllowed(asset.attributionUrl, [...CREDIT_HOSTS], { subdomains: false }))
+      issues.push(
+        error(
+          ['assets', i, 'attributionUrl'],
+          'external_url',
+          "A credit links to the photographer's page on the stock site (Unsplash or Pexels) only.",
+        ),
       );
     if (options.environment === 'live' && asset.restrictions?.includes('preview_only'))
       issues.push(

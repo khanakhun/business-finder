@@ -111,7 +111,7 @@ export class AiModule {
           },
         },
       ],
-      exports: [AI_GATEWAY, LlmCallRepository],
+      exports: [AI_GATEWAY, AI_BUDGET_GUARD, LlmCallRepository],
     };
   }
 }

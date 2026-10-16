@@ -453,6 +453,15 @@ describe('validateSite', () => {
     );
   });
 
+  it('links credits to the stock sites only (BF-038)', () => {
+    const credited = (url: string) =>
+      with_((s) =>
+        Object.assign(s.assets[1] ?? {}, { attribution: 'Photo by A on Unsplash', attributionUrl: url }),
+      );
+    expect(found(credited('https://unsplash.com/@a?utm_source=bf&utm_medium=referral'))).toEqual([]);
+    expect(found(credited('https://evil.example/@a'))).toContain('external_url@assets.1.attributionUrl');
+  });
+
   it('allows preview-only images in previews, not on a live site (BF-038)', () => {
     const unconfirmed = with_((s) =>
       Object.assign(s.assets[1] ?? {}, { license: 'owner_site', restrictions: ['preview_only'] }),

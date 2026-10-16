@@ -395,6 +395,8 @@ export const SiteAssetSchema = z
     dominantColors: z.array(z.string().regex(/^#[0-9a-f]{6}$/)).nullable(),
     /** A photo, or the business's logo (found on its site, or our wordmark). */
     kind: z.enum(['image', 'logo']),
+    /** `hotlink`: served from the stock provider's CDN (its terms require it), not from ours. */
+    hosting: z.enum(['self', 'hotlink']),
     /** How it reached the library (BF-038). */
     source: SiteAssetSourceSchema,
     restrictions: z.array(z.enum(SITE_ASSET_RESTRICTIONS)),
@@ -527,6 +529,8 @@ export const SiteAssetCandidateSchema = z
     height: z.number().int().positive().nullable(),
     license: SiteAssetLicenseSchema,
     attribution: z.string().max(200).nullable(),
+    /** The stock provider (`unsplash`, `pexels`), for stock candidates. */
+    provider: z.string().max(40).nullable(),
     restrictions: z.array(z.enum(SITE_ASSET_RESTRICTIONS)),
     alt: localizedAlt.nullable(),
     /** 0–100 for the role asked, with the reasons (explainable ranking). */
@@ -586,3 +590,47 @@ export const SiteAssetAnalyzed = defineEvent(
   1,
   z.object({ siteId: SiteId, assetId: z.uuid() }),
 );
+
+// ── BF-038 part 2: stock and AI images ───────────────────────────────────────────────────────────────────────────
+
+/** What the workspace can source beyond its library: configured stock providers, AI images left today. */
+export const SiteAssetSourcesSchema = z
+  .object({
+    stock: z.array(z.string().max(40)),
+    ai: z.object({ enabled: z.boolean(), remainingToday: z.number().int().nonnegative() }),
+  })
+  .meta({ id: 'SiteAssetSources' });
+export type SiteAssetSources = z.infer<typeof SiteAssetSourcesSchema>;
+
+/** A stock candidate (`stock:<provider>:<id>`) brought into the site's library. */
+export const ImportSiteAssetRequestSchema = z
+  .object({ candidateId: z.string().regex(/^stock:[a-z]{2,20}:[A-Za-z0-9_-]{1,64}$/) })
+  .meta({ id: 'ImportSiteAssetRequest' });
+export type ImportSiteAssetRequest = z.infer<typeof ImportSiteAssetRequestSchema>;
+
+export const SITE_IMAGE_ASPECTS = ['16:9', '4:3', '1:1', '3:4'] as const;
+
+/** Illustrative AI images (ambience, textures, landscapes): never people, text, logos or the business's premises. */
+export const GenerateSiteAssetsRequestSchema = z
+  .object({
+    prompt: z.string().trim().min(3).max(400),
+    aspect: z.enum(SITE_IMAGE_ASPECTS).default('16:9'),
+    count: z.number().int().min(1).max(4).default(2),
+  })
+  .meta({ id: 'GenerateSiteAssetsRequest' });
+export type GenerateSiteAssetsRequest = z.infer<typeof GenerateSiteAssetsRequestSchema>;
+
+export const SiteAssetGenerationSchema = z
+  .object({ generationId: z.uuid(), count: z.number().int().min(1).max(4) })
+  .meta({ id: 'SiteAssetGeneration' });
+export type SiteAssetGeneration = z.infer<typeof SiteAssetGenerationSchema>;
+
+/** Generates AI images for a site's library (the prompt was checked against the image policy at the request). */
+export const SitesAssetGenerateJob = defineJob('sites-asset-generate', 'generate', {
+  organizationId: z.string(),
+  siteId: SiteId,
+  generationId: z.uuid(),
+  prompt: z.string().max(400),
+  aspect: z.enum(SITE_IMAGE_ASPECTS),
+  count: z.number().int().min(1).max(4),
+});

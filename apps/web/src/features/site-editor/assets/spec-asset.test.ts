@@ -29,6 +29,7 @@ const library = (overrides: Partial<SiteAsset> = {}): SiteAsset => ({
   alt: { fr: 'La terrasse au coucher du soleil', en: 'The terrace at sunset', de: 'Die Terrasse' },
   dominantColors: ['#112233', '#445566', '#778899', '#aabbcc', '#ddeeff', '#000000'],
   kind: 'image',
+  hosting: 'self',
   source: 'upload',
   restrictions: [],
   focalPoint: null,

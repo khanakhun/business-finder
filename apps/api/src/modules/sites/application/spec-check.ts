@@ -83,7 +83,11 @@ export function checkSpec(
     }
   }
   // Versions serve previews and live sites alike: the renderer enforces the preview's robots and banner (BF-036).
-  const issues = validateSite(candidate, { assetHosts: hosting.assetHosts, mode: 'published' });
+  const issues = validateSite(candidate, {
+    assetHosts: hosting.assetHosts,
+    hotlinkHosts: hosting.hotlinkHosts ?? [],
+    mode: 'published',
+  });
   const errors = issues.filter(
     (issue) => issue.severity === 'error' && !(purpose === 'draft' && DRAFT_ERRORS.has(issue.code)),
   );

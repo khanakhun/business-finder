@@ -1,10 +1,16 @@
 import {
   ConfirmAssetOwnershipRequestSchema,
   CreateSiteAssetUploadRequestSchema,
+  GenerateSiteAssetsRequestSchema,
+  ImportSiteAssetRequestSchema,
   type SiteAsset,
+  type SiteAssetGeneration,
+  SiteAssetGenerationSchema,
   type SiteAssetList,
   SiteAssetListSchema,
   SiteAssetSchema,
+  type SiteAssetSources,
+  SiteAssetSourcesSchema,
   type SiteAssetSuggestions,
   SiteAssetSuggestionsQuerySchema,
   SiteAssetSuggestionsSchema,
@@ -35,11 +41,14 @@ import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { AssetSourcing } from '../../application/asset-sourcing.ts';
 import { SiteAssetCommands } from '../../application/site-assets.ts';
 import { SiteThumbnailCommands } from '../../application/site-thumbnails.ts';
+import { StockAndAiImages } from '../../application/stock-and-ai.ts';
 import { actorOf } from './sites.controller.ts';
 
 class UploadBody extends zodDto(CreateSiteAssetUploadRequestSchema) {}
 class SuggestionsQuery extends zodDto(SiteAssetSuggestionsQuerySchema) {}
 class OwnershipBody extends zodDto(ConfirmAssetOwnershipRequestSchema) {}
+class ImportBody extends zodDto(ImportSiteAssetRequestSchema) {}
+class GenerateBody extends zodDto(GenerateSiteAssetsRequestSchema) {}
 
 const THUMBNAIL_KINDS = { desktop: 'desktop', mobile: 'mobile' } as const;
 
@@ -54,7 +63,58 @@ export class SiteAssetsController {
     private readonly assets: SiteAssetCommands,
     private readonly thumbnails: SiteThumbnailCommands,
     private readonly sourcing: AssetSourcing,
+    private readonly extra: StockAndAiImages,
   ) {}
+
+  @Get(':id/asset-sources')
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary: 'The stock providers configured and the AI images left today (the editor’s "Find more images")',
+    operationId: 'getSiteAssetSources',
+    response: { status: 200, schema: SiteAssetSourcesSchema },
+    errors: [401, 403, 404],
+  })
+  sources(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) siteId: string): Promise<SiteAssetSources> {
+    return this.extra.sources(actorOf(auth), siteId);
+  }
+
+  @Post(':id/assets/import')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary:
+      'Bring a stock photo into the site’s library (credited; Unsplash hotlinked and its download tracked)',
+    operationId: 'importSiteAsset',
+    body: ImportBody,
+    response: { status: 201, schema: SiteAssetSchema },
+    errors: [400, 401, 403, 404],
+  })
+  importStock(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) siteId: string,
+    @Body() body: ImportBody,
+  ): Promise<SiteAsset> {
+    return this.extra.importStock(actorOf(auth), siteId, body.candidateId);
+  }
+
+  @Post(':id/assets/generate')
+  @HttpCode(202)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @RequirePermission('sites:generate')
+  @ApiRoute({
+    summary: 'Generate illustrative AI images (no people, text or logos) into the site’s library',
+    operationId: 'generateSiteAssets',
+    body: GenerateBody,
+    response: { status: 202, schema: SiteAssetGenerationSchema },
+    errors: [400, 401, 403, 404, 429],
+  })
+  generate(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) siteId: string,
+    @Body() body: GenerateBody,
+  ): Promise<SiteAssetGeneration> {
+    return this.extra.generate(actorOf(auth), siteId, body);
+  }
 
   @Get(':id/asset-suggestions')
   @RequirePermission('sites:generate')
@@ -70,6 +130,14 @@ export class SiteAssetsController {
     @Param('id', ParseUUIDPipe) siteId: string,
     @Query() query: SuggestionsQuery,
   ): Promise<SiteAssetSuggestions> {
+    // Stock photos for a query come from the providers; everything else is the library, ranked.
+    if (query.source === 'stock' && query.q) {
+      const orientation = query.role === 'hero' || query.role === 'og' ? 'landscape' : undefined;
+      return {
+        role: query.role,
+        items: await this.extra.search(actorOf(auth), siteId, query.q, orientation),
+      };
+    }
     return this.sourcing.suggestions(actorOf(auth), siteId, query);
   }
 

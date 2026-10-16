@@ -99,3 +99,17 @@ Verify: pnpm verify && pnpm e2e (sites suite); Lighthouse CI + load test reports
 ## References
 - ADR-0009 · ADR-0014 · docs/ARCHITECTURE.md §10
 - Next.js multi-tenant guide: https://nextjs.org/docs/app/guides/multi-tenant · Next.js caching: https://nextjs.org/docs/app/deep-dive/caching · Vercel Platforms starter (reference): https://github.com/vercel/platforms
+
+## Notes from BF-035
+
+- Read `renderer_published_sites` by hostname: one row per hostname with an effective `status`. Serve the page only
+  when `status = 'active'` (the `spec` is null otherwise); `expired`/`unpublished` rows are the 410 page (business and
+  agency names, `agency_url` already restricted to http(s) — still escape it). No row is a 404.
+- Images come from `renderer_site_assets` (ready assets of sites with an active, unexpired publication).
+- Preview hostnames are `<slug>.<SITES_BASE_DOMAIN>` with a random 6-character suffix
+  (`salon-lumiere-gustavia-k3x9p2.sites.localhost`): seed slugs accordingly; nothing guessable.
+- Cache: a preview turns `expired` in the view as soon as `expires_at` passes, but the `site.expired` revalidation comes
+  with the hourly job: cap a page's cache lifetime at `expires_at`.
+- Pass `preview: true` to the site-blocks renderer for preview publications (banner, `noindex`, contact form off) and
+  send `X-Robots-Tag: noindex`. Let services/intel's user agent read previews (published-site pictures, BF-035 part 2).
+

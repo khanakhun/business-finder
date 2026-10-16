@@ -37,7 +37,8 @@ export class SitesExpireProcessor extends TypedProcessor<
 
   async handle(_payload: z.output<typeof SitesExpireJob.schema>, context: JobContext) {
     let expired = 0;
-    // In batches until none is due (each batch is one transaction), at most 20 per run (the next hour continues).
+    // In batches until none is due (each preview ends in its own transaction), at most 20 per run (the next hour
+    // continues; a preview that keeps failing is retried there and logged).
     for (let round = 0; round < 20 && !context.signal.aborted; round += 1) {
       const batch = await this.commands.expireDuePreviews();
       expired += batch;

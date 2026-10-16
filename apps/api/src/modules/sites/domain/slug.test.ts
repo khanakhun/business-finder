@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { baseSlug, isValidSlug, previewSlug, SITE_SLUG_MAX, SUFFIX_LENGTH, transliterate } from './slug.ts';
+import {
+  baseSlug,
+  isValidSlug,
+  previewSlug,
+  SITE_SLUG_MAX,
+  SUFFIX_LENGTH,
+  suffixSpellsWord,
+  transliterate,
+} from './slug.ts';
 
 describe('site slugs', () => {
   it('transliterates French accents and ligatures', () => {
@@ -31,6 +39,16 @@ describe('site slugs', () => {
     expect(baseSlug('Porn', 'Gustavia')).toBe('site-gustavia');
     expect(baseSlug('!!!', null)).toBe('site');
     expect(baseSlug('龍門', 'Gustavia')).toBe('site-gustavia');
+  });
+
+  it('keeps real words that contain a short blocked word, and refuses suffixes that spell one', () => {
+    expect(baseSlug('Pub de Sussex', 'Essex')).toBe('pub-de-sussex-essex');
+    expect(baseSlug('Computer Repair', 'Pornic')).toBe('computer-repair-pornic');
+    expect(baseSlug('Shiitake Sushi', 'Scunthorpe')).toBe('shiitake-sushi-scunthorpe');
+    expect(baseSlug('Sex Shop', 'Cul de Sac')).toBe('shop-de-sac');
+    expect(suffixSpellsWord('k2sexp')).toBe(true);
+    expect(suffixSpellsWord('cul7ab')).toBe(true);
+    expect(suffixSpellsWord('k3x9p2')).toBe(false);
   });
 
   it('never gives one of our hostnames', () => {

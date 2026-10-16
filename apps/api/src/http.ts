@@ -1,10 +1,10 @@
 import { AUTH_BASE_PATH } from '@bf/auth';
 import type { ApiEnv } from '@bf/config';
-import { LOGO_MAX_BYTES } from '@bf/contracts';
+import { LOGO_MAX_BYTES, SITE_SPEC_MAX_BYTES } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import type { INestApplication } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
-import { type NextFunction, type Request, type Response, raw } from 'express';
+import { json, type NextFunction, type Request, type Response, raw } from 'express';
 import helmet from 'helmet';
 import { type Auth, BETTER_AUTH } from './modules/identity/infrastructure/better-auth.provider.ts';
 import { betterAuthMiddleware } from './modules/identity/infrastructure/better-auth-http.ts';
@@ -75,6 +75,13 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   const logoBody = raw({ type: () => true, limit: LOGO_MAX_BYTES * 2 });
   app.use('/v1/workspace/logo', (req: Request, res: Response, next: NextFunction) => {
     if (req.method === 'PUT' && getRequestAuth(req).kind === 'authenticated') logoBody(req, res, next);
+    else next();
+  });
+  // Site specs are larger than Nest's 100 kB JSON default: the sites routes take a whole spec (the use case refuses
+  // one over the cap with a 422 at its path); an authenticated request only, parsed once (Nest's parser skips it).
+  const siteBody = json({ limit: SITE_SPEC_MAX_BYTES + 64 * 1024 });
+  app.use('/v1/sites', (req: Request, res: Response, next: NextFunction) => {
+    if (getRequestAuth(req).kind === 'authenticated') siteBody(req, res, next);
     else next();
   });
 }

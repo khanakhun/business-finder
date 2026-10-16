@@ -6,7 +6,9 @@ import { closeDb, createDb, type DbClient } from '@bf/db';
 import {
   businesses,
   orgBusinesses,
+  orgSettings,
   outboxEvents,
+  siteAssets,
   sitePublications,
   sites,
   siteVersions,
@@ -411,6 +413,72 @@ describe('publications', () => {
     } finally {
       await closeDb(renderer);
     }
+  });
+
+  it('shows the renderer only ready images of active publications, and only an http(s) agency URL', async () => {
+    const published = await newSite('Renderer Images');
+    const draft = await newSite('Renderer Draft');
+    const preview = await member
+      .post(`/v1/sites/${published.id}/preview`, { versionId: published.v1 })
+      .expect(201);
+    const asset = (siteId: string, status: 'ready' | 'pending') => ({
+      id: newId(),
+      organizationId: org,
+      siteId,
+      storageKey: `orgs/${org}/sites/${siteId}/assets/${newId()}/original`,
+      mime: 'image/jpeg',
+      license: 'uploaded' as const,
+      status,
+      publicUrl: status === 'ready' ? 'https://assets.bf-sites.test/x.webp' : null,
+    });
+    const ready = asset(published.id, 'ready');
+    await db.insert(siteAssets).values([ready, asset(published.id, 'pending'), asset(draft.id, 'ready')]);
+    const renderer = rendererDb();
+    try {
+      const visible = async () =>
+        (
+          await renderer.execute<{ id: string }>(
+            sql`SELECT id FROM renderer_site_assets WHERE site_id IN (${published.id}, ${draft.id})`,
+          )
+        ).map((row) => row.id);
+      expect(await visible()).toEqual([ready.id]);
+      const agencyUrl = async () =>
+        (
+          await renderer.execute<{ agency_url: string | null }>(
+            sql`SELECT agency_url FROM renderer_published_sites WHERE hostname = ${preview.body.hostname}`,
+          )
+        )[0]?.agency_url;
+      await db
+        .insert(orgSettings)
+        .values({ organizationId: org, websiteUrl: 'javascript:alert(1)' })
+        .onConflictDoUpdate({
+          target: orgSettings.organizationId,
+          set: { websiteUrl: 'javascript:alert(1)' },
+        });
+      expect(await agencyUrl()).toBeNull();
+      await db
+        .update(orgSettings)
+        .set({ websiteUrl: 'https://agency.example' })
+        .where(eq(orgSettings.organizationId, org));
+      expect(await agencyUrl()).toBe('https://agency.example');
+      // Its preview's expiry has passed (before the hourly job ends it): its images are no longer served.
+      await db
+        .update(sitePublications)
+        .set({ expiresAt: new Date(Date.now() - 60_000) })
+        .where(eq(sitePublications.id, preview.body.id));
+      expect(await visible()).toEqual([]);
+    } finally {
+      await closeDb(renderer);
+    }
+  });
+
+  it('reads a site request larger than the default JSON limit, and refuses one over the cap early', async () => {
+    const site = await newSite('Large Body');
+    const large = { spec: { ...salonSpec(), padding: 'x'.repeat(300_000) }, baseVersionId: site.v1 };
+    const refused = await member.post(`/v1/sites/${site.id}/versions`, large).expect(422);
+    expect(refused.body).toMatchObject({ reason: 'SITE_SPEC_INVALID' });
+    const huge = { spec: { ...salonSpec(), padding: 'x'.repeat(900_000) }, baseVersionId: site.v1 };
+    await member.post(`/v1/sites/${site.id}/versions`, huge).expect(413);
   });
 
   it('refuses to publish a stored version the validators now refuse', async () => {

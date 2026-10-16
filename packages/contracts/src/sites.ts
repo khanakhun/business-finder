@@ -8,6 +8,9 @@ import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
 // and its publications (a hostname serving a version, with an expiry). The spec itself is validated by
 // @bf/site-schema in the API; here it is an opaque JSON document (this package imports nothing internal).
 
+/** The largest spec a site version holds, in UTF-8 bytes of its JSON (a full 8-page site is under 300 kB). */
+export const SITE_SPEC_MAX_BYTES = 750_000;
+
 export const SITE_STATUSES = ['draft', 'preview', 'live', 'archived'] as const;
 export const SiteStatusSchema = z.enum(SITE_STATUSES);
 export type SiteStatus = z.infer<typeof SiteStatusSchema>;

@@ -85,9 +85,38 @@ describe('checkSpec', () => {
     expect(() => checkSpec('not a spec', hosting)).toThrow(SiteSpecInvalidError);
     expect(() => checkSpec(salon(), { ...hosting, assetHosts: ['other.cdn'] })).toThrow(SiteSpecInvalidError);
   });
+
+  it('measures the size cap in UTF-8 bytes, not characters', () => {
+    expect.assertions(2);
+    const big = salon();
+    // 400k characters of 2 bytes each: under the cap counted in characters, over it in bytes.
+    (big.seo as { description: Record<string, string> }).description.fr = 'é'.repeat(400_000);
+    try {
+      checkSpec(big, hosting);
+    } catch (error) {
+      expect(error).toBeInstanceOf(SiteSpecInvalidError);
+      expect((error as ValidationError).errors).toEqual([expect.objectContaining({ code: 'too_large' })]);
+    }
+  });
 });
 
 describe('SiteCommands', () => {
+  it('refuses a version when another edit moved the current one meanwhile, naming it, and records nothing', async () => {
+    const { siteId, v1 } = await siteWithVersion();
+    events.record.mockClear();
+    const other = '0199e0a0-0000-7000-8000-0000000000ff';
+    // The row lock let the edit through; the database's compare-and-set sees the current version moved.
+    repository.setCurrentVersion = async (id) => {
+      const row = repository.siteRows.get(id);
+      if (row) repository.siteRows.set(id, { ...row, currentVersionId: other });
+      return false;
+    };
+    await expect(
+      commands.createVersion(actor, siteId, { spec: salon(), baseVersionId: v1 }),
+    ).rejects.toMatchObject({ code: 'SITE_VERSION_CONFLICT', currentVersionId: other });
+    expect(eventTypes()).toEqual([]);
+  });
+
   it('creates a site with a first version, idempotently per business, and refuses an untracked business', async () => {
     const { siteId, businessId, v1 } = await siteWithVersion();
     expect(eventTypes()).toEqual(['site.created', 'site.version.created']);

@@ -1,4 +1,4 @@
-import type { SiteIssue } from '@bf/contracts';
+import { SITE_SPEC_MAX_BYTES, type SiteIssue } from '@bf/contracts';
 import {
   type Issue,
   MigrationError,
@@ -22,12 +22,12 @@ const toIssue = (issue: Issue): SiteIssue => ({
   message: issue.message,
 });
 
-/** The largest spec a version may hold (a full 8-page site is well under 300 kB). */
-export const MAX_SPEC_BYTES = 750_000;
+/** The largest spec a version may hold, in UTF-8 bytes (a full 8-page site is well under 300 kB). */
+export const MAX_SPEC_BYTES = SITE_SPEC_MAX_BYTES;
 
 /** A spec as the current schema version, valid, with its warnings; else `SiteSpecInvalidError`. */
 export function checkSpec(input: unknown, hosting: SiteHosting): { spec: SiteSpec; warnings: SiteIssue[] } {
-  if (JSON.stringify(input ?? null).length > MAX_SPEC_BYTES) {
+  if (Buffer.byteLength(JSON.stringify(input ?? null), 'utf8') > MAX_SPEC_BYTES) {
     throw new SiteSpecInvalidError([
       { path: [], message: `The site is larger than ${MAX_SPEC_BYTES} bytes.`, code: 'too_large' },
     ]);

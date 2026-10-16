@@ -149,6 +149,8 @@ export const sitePublications = pgTable(
       .on(table.expiresAt)
       .where(sql`${table.status} = 'active' AND ${table.expiresAt} IS NOT NULL`),
     index('idx_site_publications__version_id').on(table.versionId),
+    // The renderer looks a host up across all publications (an ended one answers 410): not only active ones.
+    index('idx_site_publications__hostname').on(table.hostname),
     check('ck_site_publications__environment', sql`${table.environment} IN (${inList(SITE_ENVIRONMENTS)})`),
     check('ck_site_publications__status', sql`${table.status} IN (${inList(SITE_PUBLICATION_STATUSES)})`),
     check('ck_site_publications__ended', sql`(${table.status} = 'active') = (${table.endedAt} IS NULL)`),

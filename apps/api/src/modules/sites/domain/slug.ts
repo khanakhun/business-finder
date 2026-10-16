@@ -22,15 +22,9 @@ export const RESERVED_SITE_SLUGS: ReadonlySet<string> = new Set([
   'preview',
 ]);
 
-/** Words a slug never shows (also inside a word: `fuckin`); kept short and generic, EN and FR. */
-const BLOCKED_WORDS: ReadonlySet<string> = new Set([
+/** Stems a slug never shows, even inside a word (`fuckin`): long and unambiguous, EN and FR. */
+const BLOCKED_STEMS: readonly string[] = [
   'fuck',
-  'shit',
-  'porn',
-  'sex',
-  'xxx',
-  'nazi',
-  'cunt',
   'bitch',
   'merde',
   'putain',
@@ -38,8 +32,24 @@ const BLOCKED_WORDS: ReadonlySet<string> = new Set([
   'connard',
   'connasse',
   'encule',
+  'nazi',
+];
+/**
+ * Short words a slug never shows as words only: inside a word they are innocent (Sussex, Essex, computer, réputé,
+ * habite, Pornic, shiitake, Scunthorpe).
+ */
+const BLOCKED_WORDS: ReadonlySet<string> = new Set([
+  'shit',
+  'porn',
+  'porno',
+  'sex',
+  'sexy',
+  'xxx',
+  'cunt',
   'pute',
+  'putes',
   'bite',
+  'cul',
 ]);
 
 /** Words of phishing pages and brands a preview address never carries (`paypal-login-secure`). */
@@ -65,8 +75,13 @@ const PHISHING_WORDS: ReadonlySet<string> = new Set([
   'update',
 ]);
 
-const blocked = (word: string) =>
-  PHISHING_WORDS.has(word) || [...BLOCKED_WORDS].some((bad) => word.includes(bad));
+/** A random suffix that spells a blocked word or stem somewhere in it (`sexk2p`): drawn again. */
+export const suffixSpellsWord = (suffix: string) =>
+  [...BLOCKED_WORDS, ...BLOCKED_STEMS].some((word) => suffix.includes(word));
+
+/** A word of a slug that is left out (a slug's words are its hyphen-separated parts). */
+export const blocked = (word: string) =>
+  PHISHING_WORDS.has(word) || BLOCKED_WORDS.has(word) || BLOCKED_STEMS.some((stem) => word.includes(stem));
 
 /** Letters NFKD does not decompose into ASCII. */
 const LETTERS: Readonly<Record<string, string>> = {

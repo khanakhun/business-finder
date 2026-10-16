@@ -118,8 +118,12 @@ Verify: pnpm verify && pnpm test:int.
   site) — with the spec only when active, so BF-036 can serve the page, a 410 page with the agency, or a 404; it carries
   `noindex` and `preview_banner` (forced on previews) and the agency URL only when it is http(s).
   `renderer_site_assets` gives the ready assets of sites with an active publication.
-- Domain: slugs (name + locality, accents transliterated, offensive words also inside words and phishing words dropped,
-  then a random 6-character suffix: preview addresses cannot be guessed or squatted and never reveal another
+- Lookups: the renderer finds a host among all publications (an index on `site_publications.hostname`, not only the
+  active one); `renderer_site_assets` checks the publication with `EXISTS` on the tables (not the whole view). Versions
+  are deleted only once their site row is gone (a site or workspace cascade).
+- Domain: slugs (name + locality, accents transliterated, long offensive stems dropped even inside words, short ones
+  and phishing words as whole words only — Sussex, Pornic and computer stay —, then a random 6-character suffix
+  redrawn when it spells a blocked word: preview addresses cannot be guessed or squatted and never reveal another
   workspace's site), the structural version diff (key-order insensitive; pages and blocks added/removed/moved/changed
   by id; text edits per locale, not counting texts of added or removed blocks), the publication policy.
 - Commands (`sites:generate` to create and edit, `sites:publish` to publish, extend, unpublish and archive; writes
@@ -128,7 +132,8 @@ Verify: pnpm verify && pnpm test:int.
   rollback, preview publish/extend/unpublish, archive. Every edit locks the site row (`FOR NO KEY UPDATE`) and checks
   the base version; the database moves the current version only from that base (compare-and-set). Specs are upcast and
   validated (errors → 422 with each issue's path and code, warnings stored; at most 750 kB; at most 5,000 versions per
-  site); publishing re-validates the version.
+  site; the sites routes read JSON bodies up to the cap, other routes keep the 100 kB default); publishing
+  re-validates the version. A compare-and-set that fails names the version that moved in its 409.
 - Events: `site.created`, `site.version.created`, `site.published`, `site.preview.extended`, `site.unpublished`,
   `site.expired`, `site.archived`. The renderer is refreshed by an outbox subscriber of the publication events: a
   `sites-revalidate` job POSTs `{ tags: ["site:<id>", "host:<hostname>"] }` to `SITES_INTERNAL_URL/api/revalidate`,

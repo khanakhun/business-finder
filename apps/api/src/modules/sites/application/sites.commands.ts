@@ -23,7 +23,7 @@ import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
 import { NoActivePublicationError, SiteArchivedError, SiteVersionConflictError } from '../domain/errors.ts';
 import { extendedExpiry, previewExpiry, previewHostname, siteStatus } from '../domain/publication-policy.ts';
-import { baseSlug, previewSlug } from '../domain/slug.ts';
+import { baseSlug, previewSlug, suffixSpellsWord } from '../domain/slug.ts';
 import { diffSpecs } from '../domain/version-diff.ts';
 import {
   SITE_HOSTING,
@@ -57,11 +57,15 @@ export const MAX_VERSIONS_PER_SITE = 5_000;
 
 /** Six random lowercase letters and digits (the unguessable part of a preview address). */
 function randomSuffix(): string {
+  // 32 symbols divide 256 evenly: no bias. A suffix spelling a blocked word is drawn again.
   const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
-  return Array.from(
-    crypto.getRandomValues(new Uint8Array(6)),
-    (byte) => alphabet[byte % alphabet.length],
-  ).join('');
+  for (;;) {
+    const suffix = Array.from(
+      crypto.getRandomValues(new Uint8Array(6)),
+      (byte) => alphabet[byte % alphabet.length],
+    ).join('');
+    if (!suffixSpellsWord(suffix)) return suffix;
+  }
 }
 
 /**
@@ -421,7 +425,11 @@ export class SiteCommands {
       checked.spec.defaultLocale,
       site.currentVersionId,
     );
-    if (!moved) throw new SiteVersionConflictError(null);
+    if (!moved) {
+      // Another edit moved it (the update matched no row: the transaction is still usable to read the new one).
+      const current = await this.repository.site(actor.organizationId, site.id);
+      throw new SiteVersionConflictError(current?.currentVersionId ?? null);
+    }
     await this.events.record(SiteVersionCreated, {
       orgId: actor.organizationId,
       payload: {

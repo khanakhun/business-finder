@@ -7,11 +7,16 @@ const GOOGLE_KEY = `AIza${'E'.repeat(31)}2e2e`;
 test('stores a provider key: status, last four characters and a connection test', async ({ page }) => {
   await page.goto('/settings/integrations');
   await expect(page.getByRole('heading', { level: 1, name: 'Integrations' })).toBeVisible();
-  await page
-    .getByRole('button', { name: /— Google Places API key$/ })
-    .first()
-    .click();
   const dialog = page.getByRole('dialog');
+  // Retried: under load the first click can land before the page has hydrated. The add or replace button (the
+  // reviews spec may have set a key already: then Test and Delete are there too).
+  await expect(async () => {
+    await page
+      .getByRole('button', { name: /^(?!Test|Delete).* — Google Places API key$/ })
+      .first()
+      .click();
+    await expect(dialog).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 15_000 });
   await dialog.getByLabel('Key', { exact: true }).fill(GOOGLE_KEY);
   await dialog.getByRole('button', { name: 'Save key' }).click();
   await expect(dialog).toBeHidden();

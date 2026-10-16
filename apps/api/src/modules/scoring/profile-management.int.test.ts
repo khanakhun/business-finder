@@ -19,6 +19,7 @@ import { ScoringService } from './application/scoring.service.ts';
 // Workspace scoring profiles (BF-032) end to end: duplicate a built-in, version, activate (the workspace recomputes
 // through the outbox), rename, archive; the editor's preview sample and batch explain. Caps are lowered (3 unarchived
 // profiles, 4 versions) so the tests reach them. The describes run in order and share the profile they create.
+// Throttle budget (per user per minute): the owner's profile creates are exactly at the route's 5; add none.
 
 const mailer = new FakeMailer();
 let t: TestApp;

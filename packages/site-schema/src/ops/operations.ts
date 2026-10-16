@@ -96,6 +96,12 @@ export const BaseOperationSchema = z.discriminatedUnion('op', [
   op('setLayout', { layout: LayoutSchema }, 'Replace the header and footer.'),
   op('setSettings', { settings: SiteSpecSchema.shape.settings }, 'Replace the site settings.'),
   op(
+    'setLocales',
+    { locales: SiteSpecSchema.shape.locales, defaultLocale: SiteLocaleSchema },
+    'Set the site languages and the default one. A language removed takes its texts with it; one added has none ' +
+      'yet (the validator lists what to translate).',
+  ),
+  op(
     'updateText',
     { path: PathSchema, locale: SiteLocaleSchema, value: z.string().max(5000).nullable() },
     'Set the text of one locale of a localized field (null removes it).',

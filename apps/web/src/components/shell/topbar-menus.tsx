@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { Field, FormError, useErrorMessage } from '@/components/auth/fields.tsx';
+import { clearAllDrafts } from '@/features/site-editor/state/clear-drafts.ts';
 import { authClient, unwrap } from '@/lib/auth-client.ts';
 import { useSession } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
@@ -209,6 +210,8 @@ export function AccountMenu({ defaultOpen }: { readonly defaultOpen: boolean }) 
   const signOut = async () => {
     try {
       await unwrap(authClient().signOut());
+      // Unsaved site-editor work stays with the session (a shared computer keeps nothing of it).
+      await clearAllDrafts();
       window.location.assign('/sign-in');
     } catch (error) {
       (await getToast()).error(errorMessage(error));

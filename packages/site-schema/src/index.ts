@@ -22,4 +22,10 @@ export * from './validate/facts.ts';
 export * from './validate/hosts.ts';
 export * from './validate/issues.ts';
 export * from './validate/rich-text.ts';
-export { onColor, parseSite, type ValidateOptions, validateSite } from './validate/semantic.ts';
+export {
+  CONTRAST_PAIRS,
+  onColor,
+  parseSite,
+  type ValidateOptions,
+  validateSite,
+} from './validate/semantic.ts';

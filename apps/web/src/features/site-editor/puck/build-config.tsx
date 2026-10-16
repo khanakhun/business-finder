@@ -10,11 +10,12 @@ import {
   type SiteSpec,
 } from '@bf/site-schema';
 import type { ComponentConfig, Config, CustomField, Field, Fields } from '@puckeditor/core';
+import { InfoIcon } from 'lucide-react';
 import type * as React from 'react';
 import type { BlockItemProps, PageRootProps } from '../adapters/spec-to-puck.ts';
 import { CanvasBlock, CanvasRoot } from './canvas.tsx';
 import {
-  defaultBlockProps,
+  defaultBlock,
   defaultItem,
   describeBlockFields,
   type FieldSpec,
@@ -38,6 +39,8 @@ export interface ConfigLabels {
   readonly field: (key: string) => string;
   readonly option: (key: string, option: string) => string;
   readonly variantField: string;
+  /** What to write in a field (undefined: no help). */
+  readonly help: (key: string) => string | undefined;
   /** The drawer's heading. */
   readonly blocks: string;
   readonly yes: string;
@@ -76,20 +79,24 @@ export function summaryOf(item: unknown, fields: readonly FieldSpec[], locale: s
 /** The Puck field of one schema field (a strategy per kind; `field-registry.ts` decides the kind). */
 export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpec): Field {
   const label = labels.field(spec.key);
+  const help = labels.help(spec.key);
+  // Puck's own fields carry the help as an icon beside their label (read by screen readers).
+  const labelIcon = help ? { labelIcon: <HelpIcon text={help} /> } : {};
   switch (spec.kind) {
     case 'localizedText':
     case 'richText':
       return custom<LocalizedText | undefined>(label, (props) => (
-        <LocalizedTextField spec={spec} label={label} {...props} />
+        <LocalizedTextField spec={spec} label={label} help={help} {...props} />
       ));
     case 'text':
       return custom<string | undefined>(label, (props) => (
-        <PlainTextField max={spec.max} label={label} {...props} />
+        <PlainTextField max={spec.max} label={label} help={help} {...props} />
       ));
     case 'number':
       return {
         type: 'number',
         label,
+        ...labelIcon,
         ...(spec.min !== undefined ? { min: spec.min } : {}),
         ...(spec.max !== undefined ? { max: spec.max } : {}),
         step: spec.integer ? 1 : 0.01,
@@ -98,6 +105,7 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
       return {
         type: 'radio',
         label,
+        ...labelIcon,
         options: [
           { label: labels.yes, value: true },
           { label: labels.no, value: false },
@@ -107,6 +115,7 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
       return {
         type: 'select',
         label,
+        ...labelIcon,
         options: [
           ...(spec.optional ? [{ label: '—', value: undefined }] : []),
           ...spec.options.map((option) => ({ label: labels.option(spec.key, option), value: option })),
@@ -114,25 +123,26 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
       };
     case 'asset':
       return custom<string | undefined>(label, (props) => (
-        <AssetField label={label} optional={spec.optional} {...props} />
+        <AssetField label={label} optional={spec.optional} help={help} {...props} />
       ));
     case 'assets':
       return custom<readonly string[] | undefined>(label, (props) => (
-        <AssetListField label={label} min={spec.min} max={spec.max} {...props} />
+        <AssetListField label={label} min={spec.min} max={spec.max} help={help} {...props} />
       ));
     case 'cta':
       return custom<CtaAction | undefined>(label, (props) => (
-        <CtaField label={label} optional={spec.optional} {...props} />
+        <CtaField label={label} optional={spec.optional} help={help} {...props} />
       ));
     case 'fact':
     case 'facts':
       return custom<string | readonly string[] | undefined>(label, (props) => (
-        <FactField label={label} {...props} />
+        <FactField label={label} help={help} {...props} />
       ));
     case 'object':
       return {
         type: 'object',
         label,
+        ...labelIcon,
         objectFields: Object.fromEntries(
           spec.fields.map((field) => [field.key, toPuckField(field, labels, site)]),
         ),
@@ -145,6 +155,7 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
             label={label}
             options={item.options}
             optionLabel={(option) => labels.option(item.key, option)}
+            help={help}
             {...props}
           />
         ));
@@ -155,6 +166,7 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
       return {
         type: 'array',
         label,
+        ...labelIcon,
         arrayFields: Object.fromEntries(
           item.fields.map((field) => [field.key, toPuckField(field, labels, site)]),
         ),
@@ -194,12 +206,12 @@ export function buildPuckConfig(site: SiteSpec, labels: ConfigLabels): Config {
       },
     };
     for (const field of describeBlockFields(type)) fields[field.key] = toPuckField(field, labels, site);
-    const defaults = defaultBlockProps(type, { spec: site, placeholder: labels.placeholder });
+    const defaults = defaultBlock(type, { spec: site, placeholder: labels.placeholder });
     if (defaults) offered.push(type);
     components[type] = {
       label: labels.block(type),
       fields,
-      defaultProps: { variant: blockVariants(type)[0], ...(defaults ?? {}) },
+      defaultProps: { ...(defaults?.props ?? {}), variant: defaults?.variant ?? blockVariants(type)[0] },
       render: (props) => <CanvasBlock type={type} props={props as unknown as BlockItemProps} />,
     };
   }
@@ -255,4 +267,14 @@ export function buildPuckConfig(site: SiteSpec, labels: ConfigLabels): Config {
       other: { visible: false },
     },
   };
+}
+
+/** A field's help beside its label: an icon, its text for pointers (title) and screen readers. */
+function HelpIcon({ text }: { readonly text: string }) {
+  return (
+    <span title={text} className="text-muted-foreground inline-flex">
+      <InfoIcon aria-hidden className="size-3" />
+      <span className="sr-only">{text}</span>
+    </span>
+  );
 }

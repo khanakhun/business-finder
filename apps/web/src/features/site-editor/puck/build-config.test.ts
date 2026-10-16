@@ -27,6 +27,7 @@ const labels: ConfigLabels = {
   yes: 'Yes',
   no: 'No',
   placeholder: () => 'New text',
+  help: () => undefined,
 };
 
 describe('buildPuckConfig', () => {

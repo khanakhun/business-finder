@@ -46,9 +46,9 @@ test('edits the hero title in French and English, and saves a new version with i
 
   await field(page, 'Title (FR)').fill('Coiffure, soins et couleur à Gustavia');
   await expect(hero).toHaveText('Coiffure, soins et couleur à Gustavia');
-  await expect(page.getByText('Unsaved changes')).toBeVisible();
+  await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
 
-  await page.getByLabel('Language').selectOption('en');
+  await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('en');
   await expect(hero).toHaveText('Hair and care in Gustavia');
   await field(page, 'Title (EN)').fill('Hair, care and colour in Gustavia');
   await expect(hero).toHaveText('Hair, care and colour in Gustavia');
@@ -176,7 +176,7 @@ test('keeps what is typed while a save runs, and sends one save at a time', asyn
   expect(saves).toBe(1);
   // What was typed during the save is still there, and still to save.
   await expect(title).toHaveValue('Coiffure et couleur à Gustavia ');
-  await expect(page.getByText('Unsaved changes')).toBeVisible();
+  await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
 
   await page.unroute(`**/v1/sites/${siteId}/operations`);
   await page.keyboard.press('ControlOrMeta+s');
@@ -184,4 +184,134 @@ test('keeps what is typed while a save runs, and sends one save at a time', asyn
   // Stored trimmed: nothing is left to save (no empty versions).
   await expect(page.getByText('All changes saved')).toBeVisible();
   expect((await currentVersion(page, siteId)).versionNumber).toBe(3);
+});
+
+/** Opens one of the editor's side panels (Puck's plugin tabs). */
+async function openPanel(page: Page, name: 'Site' | 'Pages' | 'Issues') {
+  await page.getByRole('navigation').getByText(name, { exact: true }).click();
+}
+
+async function savedSpec(page: Page, siteId: string) {
+  const version = await currentVersion(page, siteId);
+  const response = await page.request.get(`${apiUrl}/v1/sites/${siteId}/versions/${version.id}`, {
+    headers: { Origin: webUrl },
+  });
+  return {
+    version,
+    spec: ((await response.json()) as { spec: Record<string, unknown> }).spec as {
+      theme: { radius: string };
+      pages: { id: string; blocks: { props: Record<string, unknown> }[] }[];
+      navigation: { items: { pageId: string }[] };
+      seo: { title: Record<string, string> };
+    },
+  };
+}
+
+test('changes the theme and adds a page from a template, saved as one version', async ({ page }) => {
+  const siteId = await createSite(page, 'Salon réglages');
+  await page.goto(`/sites/${siteId}/edit`);
+  await expect(canvas(page).getByRole('heading', { level: 1 })).toBeVisible();
+
+  await openPanel(page, 'Site');
+  await page.getByLabel('Corners').selectOption('none');
+  await openPanel(page, 'Pages');
+  await page.getByLabel('Add a page…').selectOption('faq');
+  // The new page is open on the canvas.
+  await expect(page.getByRole('combobox', { name: 'Page', exact: true })).toHaveValue('faq');
+  await expect(canvas(page).getByRole('heading', { level: 1 })).toHaveText('FAQ');
+
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByText(/Saved as version 2/)).toBeVisible();
+  const { spec } = await savedSpec(page, siteId);
+  expect(spec.theme.radius).toBe('none');
+  expect(spec.pages.map((candidate) => candidate.id)).toContain('faq');
+  expect(spec.navigation.items.map((item) => item.pageId)).toContain('faq');
+});
+
+test('lists a missing translation as an issue and takes the person to its field', async ({ page }) => {
+  const siteId = await createSite(page, 'Salon problèmes');
+  await page.goto(`/sites/${siteId}/edit`);
+  await canvas(page).getByRole('heading', { level: 1 }).click();
+  await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('en');
+  await field(page, 'Title (EN)').fill('');
+  await expect(page.getByText('1 error', { exact: true })).toBeVisible();
+
+  await openPanel(page, 'Issues');
+  await page
+    .getByRole('button', { name: /Translation missing/ })
+    .first()
+    .click();
+  await expect(field(page, 'Title (EN)')).toBeFocused();
+
+  // A draft keeps its errors (publishing will refuse them).
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByText(/Saved as version 2, with 1 problem to fix before publishing/)).toBeVisible();
+});
+
+test('offers back unsaved changes after a reload', async ({ page }) => {
+  const siteId = await createSite(page, 'Salon brouillon');
+  await page.goto(`/sites/${siteId}/edit`);
+  await canvas(page).getByRole('heading', { level: 1 }).click();
+  await field(page, 'Title (FR)').fill('Un titre pas encore enregistré');
+  // Kept in the browser a moment after the change.
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (id) =>
+          new Promise<boolean>((resolve) => {
+            // Drafts are keyed by person, workspace and site: any key ending with this site's id.
+            const request = indexedDB.open('bf-site-editor');
+            request.onsuccess = () => {
+              const db = request.result;
+              if (!db.objectStoreNames.contains('drafts')) return resolve(false);
+              const keys = db.transaction('drafts').objectStore('drafts').getAllKeys();
+              keys.onsuccess = () => resolve(keys.result.some((key) => String(key).endsWith(`:${id}`)));
+              keys.onerror = () => resolve(false);
+            };
+            request.onerror = () => resolve(false);
+          }),
+        siteId,
+      ),
+    )
+    .toBe(true);
+  page.once('dialog', (dialog) => void dialog.accept());
+  await page.reload();
+  const offer = page.getByRole('dialog', { name: 'Unsaved changes found' });
+  await expect(offer).toBeVisible();
+  await offer.getByRole('button', { name: 'Restore' }).click();
+  await expect(canvas(page).getByRole('heading', { level: 1 })).toHaveText('Un titre pas encore enregistré');
+  await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
+});
+
+test('re-applies local changes on the version someone else saved', async ({ page }) => {
+  const siteId = await createSite(page, 'Salon rebase');
+  await page.goto(`/sites/${siteId}/edit`);
+  await canvas(page).getByRole('heading', { level: 1 }).click();
+  await field(page, 'Title (FR)').fill('Notre titre à nous');
+
+  const v1 = await currentVersion(page, siteId);
+  const other = await page.request.post(`${apiUrl}/v1/sites/${siteId}/operations`, {
+    data: {
+      baseVersionId: v1.id,
+      operations: [{ op: 'updateText', path: ['seo', 'title'], locale: 'fr', value: 'Leur titre de site' }],
+    },
+    headers: { Origin: webUrl },
+  });
+  expect(other.status(), await other.text()).toBe(201);
+
+  await page.keyboard.press('ControlOrMeta+s');
+  await page
+    .getByRole('dialog', { name: 'Someone else saved this site' })
+    .getByRole('button', {
+      name: 'Re-apply my changes on it',
+    })
+    .click();
+  const rebase = page.getByRole('dialog', { name: 'Re-apply your changes' });
+  await expect(rebase).toContainText('1 change applies on version 2');
+  await rebase.getByRole('button', { name: 'Keep the result' }).click();
+  await page.keyboard.press('ControlOrMeta+s');
+  await expect(page.getByText(/Saved as version 3/)).toBeVisible();
+  const { spec } = await savedSpec(page, siteId);
+  expect(spec.seo.title.fr).toBe('Leur titre de site');
+  expect(spec.pages[0]?.blocks[0]?.props.title).toMatchObject({ fr: 'Notre titre à nous' });
 });

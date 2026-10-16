@@ -30,6 +30,8 @@ export interface CustomFieldProps<Value> {
   readonly value: Value;
   readonly onChange: (value: Value) => void;
   readonly readOnly?: boolean | undefined;
+  /** What to write there (the editor's help for this field). */
+  readonly help?: string | undefined;
 }
 
 type TextSpec = Extract<FieldSpec, { kind: 'localizedText' | 'richText' }>;
@@ -51,6 +53,11 @@ function Counter({
   );
 }
 
+/** A field's help: what to write there. */
+function FieldHelp({ text }: { readonly text: string }) {
+  return <p className="text-muted-foreground mb-1 text-xs">{text}</p>;
+}
+
 /** A text in the site's languages: the language being written, or all of them; missing translations flagged. */
 export function LocalizedTextField({
   spec,
@@ -59,6 +66,7 @@ export function LocalizedTextField({
   value,
   onChange,
   readOnly,
+  help,
 }: CustomFieldProps<LocalizedText | undefined> & { readonly spec: TextSpec }) {
   const t = useTranslations('siteEditor.fields');
   const editor = useSiteEditor();
@@ -76,6 +84,7 @@ export function LocalizedTextField({
   const multiline = spec.kind === 'richText' || spec.multiline;
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-2">
         {shown.map((locale) => {
           const inputId = `${id}-${locale}`;
@@ -207,10 +216,12 @@ export function PlainTextField({
   value,
   onChange,
   readOnly,
+  help,
 }: CustomFieldProps<string | undefined> & { readonly max: number | undefined }) {
   const current = value ?? '';
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-1">
         <Input
           id={id}
@@ -233,6 +244,7 @@ export function AssetField({
   value,
   onChange,
   readOnly,
+  help,
   optional,
 }: CustomFieldProps<string | undefined> & { readonly optional: boolean }) {
   const t = useTranslations('siteEditor.fields');
@@ -241,6 +253,7 @@ export function AssetField({
   const selected = images.find((asset) => asset.id === value);
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-2">
         {selected ? (
           <img
@@ -278,6 +291,7 @@ export function AssetListField({
   value,
   onChange,
   readOnly,
+  help,
   min,
   max,
 }: CustomFieldProps<readonly string[] | undefined> & {
@@ -297,6 +311,7 @@ export function AssetListField({
   };
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-2">
         <ol className="flex flex-col gap-1">
           {ids.map((assetId, index) => {
@@ -377,6 +392,7 @@ export function CtaField({
   value,
   onChange,
   readOnly,
+  help,
   optional,
 }: CustomFieldProps<CtaAction | undefined> & { readonly optional: boolean }) {
   const t = useTranslations('siteEditor.fields');
@@ -394,6 +410,7 @@ export function CtaField({
   };
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-2 rounded-md border p-2">
         <select
           id={id}
@@ -473,7 +490,14 @@ export function CtaField({
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** A page's address: kebab-case, unique, not reserved; the home page's ("") never changes. */
-export function SlugField({ label, id, value, onChange, readOnly }: CustomFieldProps<string | undefined>) {
+export function SlugField({
+  label,
+  id,
+  value,
+  onChange,
+  readOnly,
+  help,
+}: CustomFieldProps<string | undefined>) {
   const t = useTranslations('siteEditor.fields');
   const { spec, pageId } = useSiteEditor();
   const home = spec.pages.find((page) => page.id === pageId)?.slug === '';
@@ -490,6 +514,7 @@ export function SlugField({ label, id, value, onChange, readOnly }: CustomFieldP
           : undefined;
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly || home}>
+      {help ? <FieldHelp text={help} /> : null}
       <div className="flex flex-col gap-1">
         <Input
           id={id}
@@ -512,11 +537,12 @@ export function SlugField({ label, id, value, onChange, readOnly }: CustomFieldP
 }
 
 /** A fact the item rests on: shown, not edited, until the fact registry exists (BF-040). */
-export function FactField({ label, value }: CustomFieldProps<string | readonly string[] | undefined>) {
+export function FactField({ label, value, help }: CustomFieldProps<string | readonly string[] | undefined>) {
   const t = useTranslations('siteEditor.fields');
   const ids = value === undefined ? [] : typeof value === 'string' ? [value] : value;
   return (
     <FieldLabel label={label} el="div" readOnly>
+      {help ? <FieldHelp text={help} /> : null}
       <Tooltip>
         <TooltipTrigger asChild>
           <button type="button" className="text-muted-foreground flex items-center gap-1 text-left text-xs">
@@ -537,6 +563,7 @@ export function EnumListField({
   value,
   onChange,
   readOnly,
+  help,
   options,
   optionLabel,
 }: CustomFieldProps<readonly string[] | undefined> & {
@@ -546,6 +573,7 @@ export function EnumListField({
   const chosen = new Set(value ?? []);
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
+      {help ? <FieldHelp text={help} /> : null}
       <fieldset className="flex flex-wrap gap-x-3 gap-y-1" id={id}>
         <legend className="sr-only">{label}</legend>
         {options.map((option) => (

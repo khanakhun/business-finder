@@ -577,7 +577,7 @@ const targetsRule: Rule = (spec) => {
  * (large text, UI). Button labels on primary use `onColor` (black or white always reaches 4.5:1). One suggestion per
  * colour, passing every pair it is in.
  */
-const PAIRS: readonly (readonly [keyof Palette, readonly (keyof Palette)[], number])[] = [
+export const CONTRAST_PAIRS: readonly (readonly [keyof Palette, readonly (keyof Palette)[], number])[] = [
   ['text', ['background', 'surface'], 4.5],
   ['mutedText', ['background', 'surface'], 4.5],
   ['primary', ['background'], 3],
@@ -593,7 +593,7 @@ export function onColor(background: string): '#000000' | '#ffffff' {
 const contrastRule: Rule = (spec) => {
   const { palette } = spec.theme;
   const issues: Issue[] = [];
-  for (const [fg, backgrounds, ratio] of PAIRS) {
+  for (const [fg, backgrounds, ratio] of CONTRAST_PAIRS) {
     const color = palette[fg];
     if (!color) continue;
     const failing = backgrounds.filter((bg) => contrastRatio(color, palette[bg] as string) < ratio);

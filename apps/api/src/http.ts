@@ -77,6 +77,13 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
     if (req.method === 'PUT' && getRequestAuth(req).kind === 'authenticated') logoBody(req, res, next);
     else next();
   });
+  // The sites' view beacon (BF-036) sends its JSON as text/plain: a simple cross-origin request, no preflight (the
+  // renderer never reads the answer). Only this anonymous route reads that type, and only a small body.
+  // (Wrapped: Nest skips its own JSON parser when it finds a middleware named `jsonParser` on the app.)
+  const beaconBody = json({ type: ['application/json', 'text/plain'], limit: '2kb' });
+  app.use('/v1/public/sites/views', (req: Request, res: Response, next: NextFunction) =>
+    beaconBody(req, res, next),
+  );
   // Site specs are larger than Nest's 100 kB JSON default: the sites routes take a whole spec (the use case refuses
   // one over the cap with a 422 at its path); an authenticated request only, parsed once (Nest's parser skips it).
   const siteBody = json({ limit: SITE_SPEC_MAX_BYTES + 64 * 1024 });

@@ -474,9 +474,11 @@ export {
   canonicalString,
   INTERNAL_AUTH_MAX_SKEW_SECONDS,
   INTERNAL_AUTH_NONCE_PATTERN,
+  type InternalAuthResult,
   type InternalRequest,
   type SignInternalRequestOptions,
   signInternalRequest,
+  verifyInternalRequest,
 } from './internal-auth.ts';
 export { defineJob, getJobDefinition, type JobDefinition, JobPayloadBase } from './jobs.ts';
 export {

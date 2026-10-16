@@ -1,5 +1,5 @@
 import { SiteViewBeaconSchema } from '@bf/contracts';
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Headers, HttpCode, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { getRequestContext } from '../../../platform/context/request-context.ts';
@@ -31,8 +31,8 @@ export class PublicSiteViewsController {
     response: { status: 204, schema: null },
     errors: [400, 429],
   })
-  async record(@Body() body: BeaconBody): Promise<void> {
+  async record(@Body() body: BeaconBody, @Headers('origin') origin: string | undefined): Promise<void> {
     const request = getRequestContext();
-    await this.recorder.record(body, { ip: request?.ip });
+    await this.recorder.record(body, { ip: request?.ip, origin });
   }
 }

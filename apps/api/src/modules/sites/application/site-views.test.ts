@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { networkOf } from './site-views.ts';
+import { networkOf, siteOrigin } from './site-views.ts';
 
 describe('networkOf', () => {
   it.each([
@@ -16,5 +16,23 @@ describe('networkOf', () => {
     [undefined, ''],
   ])('reads %s as %s', (ip, network) => {
     expect(networkOf(ip)).toBe(network);
+  });
+});
+
+describe('siteOrigin', () => {
+  it.each([
+    ['https://salon-k3x9p2.sites.example', true],
+    ['http://salon.sites.localhost:3110', true],
+    ['https://sites.example', false],
+    ['https://a.b.sites.example', false],
+    ['https://evilsites.example', false],
+    ['https://salon.sites.example.evil.com', false],
+    ['javascript://salon.sites.example', false],
+    ['null', false],
+    [undefined, false],
+  ])('%s → %s', (origin, allowed) => {
+    expect(siteOrigin(origin, origin?.includes('localhost') ? 'sites.localhost' : 'sites.example')).toBe(
+      allowed,
+    );
   });
 });

@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
-import { canonicalString, INTERNAL_AUTH_NONCE_PATTERN, signInternalRequest } from './internal-auth.ts';
+import {
+  canonicalString,
+  INTERNAL_AUTH_NONCE_PATTERN,
+  signInternalRequest,
+  verifyInternalRequest,
+} from './internal-auth.ts';
 
 interface Vector {
   readonly name: string;
@@ -58,5 +63,61 @@ describe('signInternalRequest', () => {
     ).rejects.toThrow(/nonce/);
     await expect(signInternalRequest(request, { secret: 's', nonce: 'short' })).rejects.toThrow(/nonce/);
     await expect(signInternalRequest(request, { secret: 's', timestamp: 1.5 })).rejects.toThrow(/timestamp/);
+  });
+});
+
+describe('verifyInternalRequest', () => {
+  const secret = 'renderer-secret-for-tests-only-0123456789';
+  const request = { method: 'POST', path: '/api/revalidate', body: '{"tags":["site:1"]}' };
+  const now = 1_790_000_000;
+
+  it('accepts a request signed with the secret, within the clock skew', async () => {
+    const header = await signInternalRequest(request, { secret, timestamp: now - 30 });
+    expect(await verifyInternalRequest(header, request, { secret, now })).toMatchObject({
+      ok: true,
+      timestamp: now - 30,
+    });
+  });
+
+  it('refuses a missing, malformed, stale, tampered or foreign signature', async () => {
+    const header = await signInternalRequest(request, { secret, timestamp: now });
+    expect(await verifyInternalRequest(undefined, request, { secret, now })).toEqual({
+      ok: false,
+      reason: 'missing',
+    });
+    expect(await verifyInternalRequest('Bearer nope', request, { secret, now })).toEqual({
+      ok: false,
+      reason: 'malformed',
+    });
+    expect(await verifyInternalRequest(header, request, { secret, now: now + 61 })).toEqual({
+      ok: false,
+      reason: 'expired',
+    });
+    for (const changed of [
+      { ...request, body: '{"tags":["site:2"]}' },
+      { ...request, path: '/api/revalidate?x=1' },
+      { ...request, method: 'PUT' },
+    ])
+      expect(await verifyInternalRequest(header, changed, { secret, now })).toEqual({
+        ok: false,
+        reason: 'bad_signature',
+      });
+    expect(await verifyInternalRequest(header, request, { secret: `${secret}x`, now })).toEqual({
+      ok: false,
+      reason: 'bad_signature',
+    });
+  });
+});
+
+describe('verifyInternalRequest with the shared vectors', () => {
+  it.each(fixture.vectors)('accepts the shared vector: $name', async (v) => {
+    const request = { method: v.method, path: v.path, ...(v.body === undefined ? {} : { body: v.body }) };
+    expect(
+      await verifyInternalRequest(v.authorization, request, { secret: fixture.secret, now: v.timestamp }),
+    ).toEqual({
+      ok: true,
+      timestamp: v.timestamp,
+      nonce: v.nonce,
+    });
   });
 });

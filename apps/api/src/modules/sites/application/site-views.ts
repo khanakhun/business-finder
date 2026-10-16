@@ -7,9 +7,11 @@ import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
 import { dayOf, firstDayOf, hourOf } from '../domain/views.ts';
 import {
+  SITE_HOSTING,
   SITE_VIEW_COUNTER,
   SITE_VIEW_SECRET,
   SITE_VIEWS_REPOSITORY,
+  type SiteHosting,
   type SiteViewCounter,
   type SiteViewsRepository,
 } from './ports.ts';
@@ -44,6 +46,22 @@ export function networkOf(ip: string | undefined): string {
     .join(':');
 }
 
+/** An Origin header of a published site's page: http(s), one label under the sites domain. */
+export function siteOrigin(origin: string | undefined, baseDomain: string): boolean {
+  if (!origin) return false;
+  try {
+    const url = new URL(origin);
+    const suffix = `.${baseDomain}`;
+    return (
+      (url.protocol === 'https:' || url.protocol === 'http:') &&
+      url.hostname.endsWith(suffix) &&
+      /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(url.hostname.slice(0, -suffix.length))
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The anonymous view beacon of published pages (BF-035): the token names the site (signed by the renderer), the
  * visitor is a hash of their network address with a random salt of the day (kept in Valkey two days, nowhere else):
@@ -58,11 +76,17 @@ export class SiteViewRecorder {
     @Inject(SITE_VIEW_COUNTER) private readonly counter: SiteViewCounter,
     @Inject(SITE_VIEW_SECRET) private readonly secret: string | undefined,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(SITE_HOSTING) private readonly hosting: SiteHosting,
   ) {}
 
   /** Counts a view; returns whether it was counted (an invalid token, no configuration or a capped visitor: not). */
-  async record(beacon: SiteViewBeacon, visitor: { ip: string | undefined }): Promise<boolean> {
+  async record(
+    beacon: SiteViewBeacon,
+    visitor: { ip: string | undefined; origin: string | undefined },
+  ): Promise<boolean> {
     if (!this.secret) return false;
+    // Only a page of one of our sites sends it (any other page could replay a site's public token).
+    if (!siteOrigin(visitor.origin, this.hosting.baseDomain)) return false;
     const siteId = await verifySiteViewToken(beacon.token, this.secret);
     if (!siteId) return false;
     const now = this.clock.now();

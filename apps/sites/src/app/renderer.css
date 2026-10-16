@@ -1,0 +1,25 @@
+/* The renderer's own pages (not found, error): plain and readable, independent of any site's theme. */
+.bf-status {
+  max-width: 34rem;
+  margin: 12vh auto;
+  padding: 0 1.5rem;
+  font:
+    16px / 1.6 system-ui,
+    sans-serif;
+  color: #1f2937;
+  text-align: center;
+}
+.bf-status h1 {
+  font-size: 1.6rem;
+  margin: 0 0 0.75rem;
+}
+.bf-status a {
+  color: #0f766e;
+  font-weight: 600;
+}
+.bf-status-brand {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@bf/sites",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Site renderer (Next.js App Router): serves published sites on <slug>.<SITES_BASE_DOMAIN>, read-only.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/next.mjs dev",
+    "build": "node scripts/next.mjs build",
+    "start": "node scripts/next.mjs start",
+    "lint": "biome check .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --coverage",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@bf/config": "workspace:*",
+    "@bf/contracts": "workspace:*",
+    "@bf/db": "workspace:*",
+    "@bf/site-blocks": "workspace:*",
+    "@bf/site-schema": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "server-only": "catalog:"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "catalog:",
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -9,6 +9,7 @@ export { UI_STRINGS, type UiStrings, uiStrings } from './i18n/strings.ts';
 export { BlockRenderer, blockTones, UnknownBlockError } from './renderer/block-renderer.tsx';
 export { PlainLink, ResponsiveImage } from './renderer/defaults.tsx';
 export { BOOKING_EMBED_HOSTS, embedOrigins } from './renderer/embeds.ts';
+export { faviconHref } from './renderer/favicon.ts';
 export { BLOCK_COMPONENTS } from './renderer/registry.ts';
 export {
   createRenderContext,

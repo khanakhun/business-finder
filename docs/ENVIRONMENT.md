@@ -76,14 +76,14 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `DB_POOL_MAX` | Database | api, worker | no | `10` |  | Max connections per process. |
 | `SITES_DATABASE_URL` | Database | sites | yes (infra:up) |  | yes | Read-only connection string (bf_sites_ro) used by apps/sites. Written by infra:up. |
 | `VALKEY_URL` | Valkey | api, worker | yes (infra:up) |  | yes | Valkey connection (BullMQ, cache, rate limits). May embed a password. Written by infra:up. |
-| `S3_ENDPOINT` | Object storage (S3) | api, worker, sites, intel | yes (infra:up) |  |  | S3-compatible endpoint (RustFS locally). Written by infra:up. |
-| `S3_REGION` | Object storage (S3) | api, worker, sites, intel | no | `us-east-1` |  | Bucket region. |
-| `S3_ACCESS_KEY_ID` | Object storage (S3) | api, worker, sites, intel | yes (infra:up) |  | yes | S3 access key id. |
-| `S3_SECRET_ACCESS_KEY` | Object storage (S3) | api, worker, sites, intel | yes (infra:up) |  | yes | S3 secret access key. |
-| `S3_FORCE_PATH_STYLE` | Object storage (S3) | api, worker, sites, intel | no | `true` |  | Path-style URLs (required by RustFS/MinIO; false for AWS). |
-| `S3_BUCKET_ASSETS` | Object storage (S3) | api, worker, sites, intel | no | `bf-assets` |  | Site assets (versioned). |
-| `S3_BUCKET_ARTIFACTS` | Object storage (S3) | api, worker, sites, intel | no | `bf-artifacts` |  | Crawl artifacts, screenshots, models. |
-| `S3_BUCKET_SITES` | Object storage (S3) | api, worker, sites, intel | no | `bf-sites` |  | Published static site exports. |
+| `S3_ENDPOINT` | Object storage (S3) | api, worker, intel | yes (infra:up) |  |  | S3-compatible endpoint (RustFS locally). Written by infra:up. |
+| `S3_REGION` | Object storage (S3) | api, worker, intel | no | `us-east-1` |  | Bucket region. |
+| `S3_ACCESS_KEY_ID` | Object storage (S3) | api, worker, intel | yes (infra:up) |  | yes | S3 access key id. |
+| `S3_SECRET_ACCESS_KEY` | Object storage (S3) | api, worker, intel | yes (infra:up) |  | yes | S3 secret access key. |
+| `S3_FORCE_PATH_STYLE` | Object storage (S3) | api, worker, intel | no | `true` |  | Path-style URLs (required by RustFS/MinIO; false for AWS). |
+| `S3_BUCKET_ASSETS` | Object storage (S3) | api, worker, intel | no | `bf-assets` |  | Site assets (versioned). |
+| `S3_BUCKET_ARTIFACTS` | Object storage (S3) | api, worker, intel | no | `bf-artifacts` |  | Crawl artifacts, screenshots, models. |
+| `S3_BUCKET_SITES` | Object storage (S3) | api, worker, intel | no | `bf-sites` |  | Published static site exports. |
 | `ANTHROPIC_API_KEY` | AI providers | api, worker | no |  | yes | Anthropic API key (LLM gateway, agents). |
 | `OPENAI_API_KEY` | AI providers | api, worker | no |  | yes | OpenAI API key (LLM gateway, Codex engine). |
 | `AI_MODEL_OVERRIDES` | AI providers | api, worker | no |  |  | JSON map overriding the prompt registry model per task, e.g. {"classify":"<model-id>"}. |
@@ -122,9 +122,9 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `INTEL_URL` | Intel service | api, worker | no | `http://127.0.0.1:8000` |  | Internal URL of services/intel. |
 | `INTEL_SHARED_SECRET` | Intel service | api, worker, intel | yes |  | yes | Shared secret authenticating calls to services/intel, ≥ 32 chars. |
 | `SITES_INTERNAL_URL` | Sites | api, worker | no | `http://127.0.0.1:3100` |  | Internal URL of apps/sites; the API asks it to refresh a site after a publication changes. |
-| `SITES_REVALIDATE_SECRET` | Sites | api, worker | no |  | yes | Shared secret signing revalidation calls to apps/sites, ≥ 32 chars. Unset: no revalidation (refused in production). |
-| `SITES_ASSETS_BASE_URL` | Sites | api, worker | no | `https://assets.sites.localhost` |  | Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host. |
-| `SITES_VIEW_TOKEN_SECRET` | Sites | api, worker | no |  | yes | Shared with apps/sites: signs the view-beacon token of published pages and salts the daily visitor hashes, ≥ 32 chars. Unset: views are not counted (refused in production). |
+| `SITES_REVALIDATE_SECRET` | Sites | api, worker, sites | no |  | yes | Shared secret signing revalidation calls to apps/sites, ≥ 32 chars. Unset: no revalidation (refused in production). |
+| `SITES_ASSETS_BASE_URL` | Sites | api, worker, sites | no | `https://assets.sites.localhost` |  | Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host. |
+| `SITES_VIEW_TOKEN_SECRET` | Sites | api, worker, sites | no |  | yes | Shared with apps/sites: signs the view-beacon token of published pages and salts the daily visitor hashes, ≥ 32 chars. Unset: views are not counted (refused in production). |
 | `FEATURE_MAPS_SCRAPER` | Feature flags | api, worker | no | `false` |  | Enable the self-hosted Google Maps scraper provider. |
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |

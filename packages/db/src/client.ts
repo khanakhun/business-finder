@@ -17,6 +17,8 @@ export interface CreateDbOptions {
   readonly statementTimeoutMs?: number;
   /** Every transaction is read-only (apps/sites). */
   readonly readOnly?: boolean;
+  /** Seconds to wait for a connection (postgres.js default 30): a public renderer fails fast instead. */
+  readonly connectTimeoutSeconds?: number;
 }
 
 /**
@@ -27,6 +29,9 @@ export function createDb(options: CreateDbOptions): DbClient {
   const client = postgres(options.url, {
     max: options.max ?? 10,
     idle_timeout: options.idleTimeout ?? 20,
+    ...(options.connectTimeoutSeconds !== undefined
+      ? { connect_timeout: options.connectTimeoutSeconds }
+      : {}),
     // Postgres NOTICEs (e.g. "extension already exists") are noise in app logs.
     onnotice: () => undefined,
     connection: {

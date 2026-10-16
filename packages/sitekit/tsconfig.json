@@ -1,4 +1,9 @@
 {
   "extends": "@bf/tsconfig/library.json",
+  "compilerOptions": {
+    // The static renderer (@bf/site-blocks) is TSX compiled from source; the screenshot script runs in the page.
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM"]
+  },
   "include": ["src", "fixtures", "*.config.ts"]
 }

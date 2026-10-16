@@ -369,6 +369,9 @@ catalogs:
     pino-pretty:
       specifier: 13.2.0
       version: 13.2.0
+    playwright:
+      specifier: 1.64.1
+      version: 1.64.1
     postgres:
       specifier: 3.4.9
       version: 3.4.9
@@ -1472,9 +1475,18 @@ importers:
 
   packages/sitekit:
     dependencies:
+      '@bf/site-blocks':
+        specifier: workspace:*
+        version: link:../site-blocks
       '@bf/site-schema':
         specifier: workspace:*
         version: link:../site-schema
+      playwright:
+        specifier: 'catalog:'
+        version: 1.64.1
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.1
       zod:
         specifier: 'catalog:'
         version: 4.6.7

@@ -26,31 +26,47 @@ export const currentScores = (items: readonly SampleItem[]): Scored[] =>
       : [],
   );
 
-/** Scores a config over the sample when it changes (debounced); the previous run is cancelled. */
+export type DraftScores =
+  | { readonly status: 'idle' | 'loading' }
+  | { readonly status: 'done'; readonly items: Scored[]; readonly ms: number }
+  | { readonly status: 'error'; readonly error: unknown };
+
+/**
+ * Scores a config over the sample when either changes (debounced); the previous run is cancelled. The same config
+ * over the same businesses is not scored twice in a row (a refetched sample or an undo costs no calls).
+ */
 export function useDraftScores(
   config: ScoringProfileConfig | null,
   sample: readonly SampleItem[] | undefined,
 ) {
-  const [state, setState] = React.useState<
-    | { readonly status: 'idle' | 'loading' }
-    | { readonly status: 'done'; readonly items: Scored[]; readonly ms: number }
-    | { readonly status: 'error'; readonly error: unknown }
-  >({ status: 'idle' });
-  const key = config && sample ? JSON.stringify(config) : null;
+  const [state, setState] = React.useState<DraftScores>({ status: 'idle' });
+  const ids = sample?.map((item) => item.businessId).join(',') ?? '';
+  const key = config && ids ? `${JSON.stringify(config)}|${ids}` : null;
+  const scored = React.useRef<{ key: string; state: DraftScores } | null>(null);
   React.useEffect(() => {
-    if (!key || !config || !sample || sample.length === 0) return;
+    if (!key || !config) return;
+    if (scored.current?.key === key) {
+      setState(scored.current.state);
+      return;
+    }
     const controller = new AbortController();
     setState({ status: 'loading' });
     const timer = window.setTimeout(async () => {
       const started = performance.now();
       try {
-        const items = await explainAll(
-          config,
-          sample.map((item) => item.businessId),
-          controller.signal,
-        );
-        if (!controller.signal.aborted)
-          setState({ status: 'done', items, ms: Math.round(performance.now() - started) });
+        const items = await explainAll(config, ids.split(','), controller.signal);
+        if (controller.signal.aborted) return;
+        const done: DraftScores = {
+          status: 'done',
+          items: items.map((item) => ({
+            businessId: item.businessId,
+            score: item.score,
+            tier: item.tier as ScoreTier,
+          })),
+          ms: Math.round(performance.now() - started),
+        };
+        scored.current = { key, state: done };
+        setState(done);
       } catch (error) {
         if (!controller.signal.aborted) setState({ status: 'error', error });
       }
@@ -59,8 +75,8 @@ export function useDraftScores(
       window.clearTimeout(timer);
       controller.abort();
     };
-    // `key` stands for the config's content (a new object each edit).
-  }, [key, sample]);
+    // `key` stands for the config's content and the sample's businesses (new objects on each edit or refetch).
+  }, [key]);
   return state;
 }
 
@@ -158,27 +174,34 @@ export function PreviewPanel({
   else if (scores.status === 'error')
     body = (
       <p role="alert" className="text-sm text-destructive">
-        {t('failed', { reason: errorMessage(scores.error) })}
+        {(scores.error as { status?: number } | null)?.status === 429
+          ? t('throttled')
+          : t('failed', { reason: errorMessage(scores.error) })}
       </p>
     );
   else if (scores.status !== 'done')
-    body = <p className="text-sm text-muted-foreground">{t('scoring', { count: items.length })}</p>;
+    body = (
+      <p role="status" className="text-sm text-muted-foreground">
+        {t('scoring', { count: items.length })}
+      </p>
+    );
   else {
-    const draft: Scored[] = scores.items.map((item) => ({
-      businessId: item.businessId,
-      score: item.score,
-      tier: item.tier as ScoreTier,
-    }));
+    const draft = scores.items;
     const rho = spearman(current, draft);
     const movers = topMovers(current, draft, 10);
     body = (
       <div className="grid gap-4">
-        <p className="text-sm text-muted-foreground" data-testid="preview-status">
+        <p role="status" className="text-sm text-muted-foreground" data-testid="preview-status">
           {t('scored', {
             count: draft.length,
             seconds: format.number(scores.ms / 1000, { maximumFractionDigits: 1 }),
           })}
         </p>
+        {current.length < draft.length ? (
+          <p className="text-sm text-muted-foreground">
+            {t('unscored', { count: draft.length - current.length })}
+          </p>
+        ) : null}
         <Distribution
           current={tierCounts(current)}
           draft={tierCounts(draft)}
@@ -214,7 +237,7 @@ export function PreviewPanel({
                   </Link>
                   <span className="text-muted-foreground">
                     {t(mover.change > 0 ? 'up' : mover.change < 0 ? 'down' : 'same', {
-                      places: format.number(Math.abs(mover.change), { maximumFractionDigits: 1 }),
+                      places: Math.abs(mover.change),
                     })}
                   </span>
                   <ScoreBadge score={mover.fromScore} tier={mover.fromTier} />
@@ -241,7 +264,7 @@ export function PreviewPanel({
         </h2>
         <p className="text-sm text-muted-foreground">{t('description', { count: items?.length ?? 0 })}</p>
       </div>
-      <div aria-live="polite">{body}</div>
+      <div aria-busy={scores.status === 'loading'}>{body}</div>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import {
 import { Label } from '@bf/ui/components/label';
 import { Textarea } from '@bf/ui/components/textarea';
 import { useTranslations } from 'next-intl';
+import { useValueLabel } from '../value-labels.ts';
 import { reasonKeys } from './draft.ts';
 
 // Reason templates (BF-032): the profile's own EN/FR texts for a feature's values, read before the registry's; empty
@@ -28,6 +29,7 @@ export function ReasonsEditor({
   readonly readOnly: boolean;
 }) {
   const t = useTranslations('scoringEditor.reasons');
+  const valueLabel = useValueLabel();
   const features = Object.keys(config.weights) as FeatureKey[];
   const set = (feature: FeatureKey, key: string, language: Locale, text: string) => {
     const current = { ...(config.reasonTemplates[feature] ?? {}) };
@@ -50,7 +52,9 @@ export function ReasonsEditor({
             <div className="mt-3 grid gap-3">
               {reasonKeys(feature, config).map((key) => (
                 <fieldset key={key} className="grid gap-2 sm:grid-cols-2">
-                  <legend className="mb-1 text-xs text-muted-foreground">{t('key', { key })}</legend>
+                  <legend className="mb-1 text-xs text-muted-foreground">
+                    {t('key', { key: valueLabel(feature, key) })}
+                  </legend>
                   {(['en', 'fr'] as const).map((language) => {
                     const id = `reason-${feature}-${key}-${language}`;
                     const text = config.reasonTemplates[feature]?.[key]?.[language] ?? '';

@@ -7,11 +7,11 @@ import {
   type ScoringProfileConfig,
 } from '@bf/contracts';
 import { Button } from '@bf/ui/components/button';
-import { Input } from '@bf/ui/components/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@bf/ui/components/select';
 import { XIcon } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { normalizedWeights, unweighted, withoutFeature, withWeight } from './draft.ts';
+import { NumericInput } from './numeric-input.tsx';
 
 // Weights (BF-032): a slider and a number per feature (−100…100), with each weight's share of the positive ones.
 
@@ -64,18 +64,12 @@ export function WeightsEditor({
                 className="w-full accent-primary"
                 onChange={(event) => onChange(withWeight(config, feature, clamp(Number(event.target.value))))}
               />
-              <Input
+              <NumericInput
                 id={id}
-                type="number"
-                min={-100}
-                max={100}
-                step={1}
+                integer
                 value={weight}
                 disabled={readOnly}
-                onChange={(event) => {
-                  const value = Number(event.target.value);
-                  if (Number.isFinite(value)) onChange(withWeight(config, feature, clamp(value)));
-                }}
+                onCommit={(value) => onChange(withWeight(config, feature, clamp(value)))}
               />
               <span
                 className="text-right text-sm tabular-nums text-muted-foreground"

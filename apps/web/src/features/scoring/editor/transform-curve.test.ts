@@ -8,8 +8,12 @@ describe('transformCurve', () => {
     expect(linear.at(-1)).toEqual([11.5, 1]);
     const inverse = transformCurve({ kind: 'inverse', min: 0, max: 10 }, 2) ?? [];
     expect(inverse.map(([, y]) => y)).toEqual([1, 0.5, 0]);
-    const log = transformCurve({ kind: 'log', max: 100 }, 10) ?? [];
-    expect(log.every(([, y]) => y >= 0 && y <= 1)).toBe(true);
+    const log = transformCurve({ kind: 'log', max: 100 }, 12) ?? [];
+    expect(log[0]).toEqual([0, 0]);
+    const ys = log.map(([, y]) => y);
+    expect(ys.every((y, i) => i === 0 || y >= (ys[i - 1] ?? 0))).toBe(true);
+    // Reaches 1 at the max (here x = 100 is sample 10 of 12 over 0–120).
+    expect(log[10]?.[1]).toBeCloseTo(1, 10);
     const piecewise =
       transformCurve(
         {

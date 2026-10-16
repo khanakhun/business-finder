@@ -7,7 +7,9 @@ import { Label } from '@bf/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@bf/ui/components/select';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useValueLabel } from '../value-labels.ts';
 import { type GateDraft, type Operator, operatorsFor, type Rule, ruleToLeaf } from './gates.ts';
+import { NumericInput } from './numeric-input.tsx';
 
 // Gates (BF-032): rules over features that exclude a business (tier X) or cap its score, each with an EN/FR reason.
 // A gate the builder cannot show is kept read-only.
@@ -15,8 +17,16 @@ import { type GateDraft, type Operator, operatorsFor, type Rule, ruleToLeaf } fr
 type Locale = 'en' | 'fr';
 type RulesGate = Extract<GateDraft, { mode: 'rules' }>;
 
-const newGate = (n: number): GateDraft => ({
-  id: `gate_${n}`,
+/** The first `gate_<n>` not taken (ids must be unique). */
+export function nextGateId(gates: readonly GateDraft[]): string {
+  const taken = new Set(gates.map((gate) => gate.id));
+  let n = 1;
+  while (taken.has(`gate_${n}`)) n += 1;
+  return `gate_${n}`;
+}
+
+const newGate = (id: string): GateDraft => ({
+  id,
   effect: { type: 'exclude' },
   reason: { en: '', fr: '' },
   mode: 'rules',
@@ -38,6 +48,7 @@ function ValueInput({
   readonly locale: Locale;
 }) {
   const t = useTranslations('scoringEditor.gates');
+  const valueLabel = useValueLabel();
   const { type, values } = FEATURE_DEFINITIONS[rule.feature];
   if (rule.op === 'isNull') return <span />;
   const choices =
@@ -51,7 +62,7 @@ function ValueInput({
         <SelectContent>
           {choices.map((choice) => (
             <SelectItem key={choice} value={choice}>
-              {type === 'boolean' ? t(choice as 'true' | 'false') : choice}
+              {type === 'boolean' ? t(choice as 'true' | 'false') : valueLabel(rule.feature, choice)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -252,17 +263,13 @@ export function GatesBuilder({
                   <Label htmlFor={`gate-${i}-max`} className="text-xs text-muted-foreground">
                     {t('capMax')}
                   </Label>
-                  <Input
+                  <NumericInput
                     id={`gate-${i}-max`}
-                    type="number"
-                    min={0}
-                    max={100}
+                    integer
                     value={gate.effect.max}
                     disabled={readOnly}
                     className="w-24"
-                    onChange={(event) =>
-                      set(i, { ...gate, effect: { type: 'cap', max: Number(event.target.value) } })
-                    }
+                    onCommit={(max) => set(i, { ...gate, effect: { type: 'cap', max } })}
                   />
                 </div>
               ) : null}
@@ -321,7 +328,7 @@ export function GatesBuilder({
           type="button"
           variant="outline"
           className="justify-self-start"
-          onClick={() => onChange([...gates, newGate(gates.length + 1)])}
+          onClick={() => onChange([...gates, newGate(nextGateId(gates))])}
         >
           <PlusIcon aria-hidden />
           {t('add')}

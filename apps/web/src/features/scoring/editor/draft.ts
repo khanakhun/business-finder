@@ -21,6 +21,9 @@ export interface Draft {
 
 export interface Issue {
   readonly path: readonly (string | number)[];
+  /** A profile problem code (contracts), `incomplete_gate`, or the schema's own code prefixed `schema:`. */
+  readonly code: string;
+  /** English, as the contracts word it (the editor shows its own text for the code). */
   readonly message: string;
 }
 
@@ -31,16 +34,24 @@ export function toDraft(config: ScoringProfileConfig): Draft {
 export function build(draft: Draft): { config: ScoringProfileConfig | null; issues: Issue[] } {
   const issues: Issue[] = [];
   const gates: Gate[] = [];
+  // The builder index of each built gate: problems name the gate the user sees.
+  const indices: number[] = [];
   draft.gates.forEach((gateDraft, i) => {
     const gate = toGate(gateDraft);
-    if (gate) gates.push(gate);
-    else issues.push({ path: ['gates', i, 'when'], message: 'incompleteGate' });
+    if (gate) {
+      gates.push(gate);
+      indices.push(i);
+    } else issues.push({ path: ['gates', i, 'when'], code: 'incomplete_gate', message: 'Incomplete rule' });
   });
   const parsed = ScoringProfileConfigSchema.safeParse({ ...draft.config, gates });
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
+      const path = issue.path.map((part) => (typeof part === 'symbol' ? String(part) : part));
+      if (path[0] === 'gates' && typeof path[1] === 'number') path[1] = indices[path[1]] ?? path[1];
+      const problem = (issue as { params?: { problem?: unknown } }).params?.problem;
       issues.push({
-        path: issue.path.map((part) => (typeof part === 'symbol' ? String(part) : part)),
+        path,
+        code: typeof problem === 'string' ? problem : `schema:${issue.code}`,
         message: issue.message,
       });
     }

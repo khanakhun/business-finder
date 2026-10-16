@@ -13,7 +13,13 @@ import { type Scored, spearman, TIERS, type TierMatrix, tierMatrix } from './pre
 // Version comparison (BF-032): two saved versions scored over the preview sample by the server's engine — how many
 // businesses move from each tier to each tier (X included), and how well the rankings agree.
 
-type Result = { readonly matrix: TierMatrix; readonly rho: number | null; readonly count: number };
+type Result = {
+  readonly from: number;
+  readonly to: number;
+  readonly matrix: TierMatrix;
+  readonly rho: number | null;
+  readonly count: number;
+};
 
 export function CompareVersions({
   profileId,
@@ -27,27 +33,38 @@ export function CompareVersions({
   const t = useTranslations('scoringEditor.compare');
   const format = useFormatter();
   const errorMessage = useErrorMessage();
-  const active = versions.find((v) => v.active)?.version ?? versions.at(-1)?.version ?? null;
-  const [left, setLeft] = React.useState<number | null>(
-    versions.find((v) => v.version !== active)?.version ?? null,
-  );
+  // Versions come newest first: compare the newest other version with the active one.
+  const active = versions.find((v) => v.active)?.version ?? versions[0]?.version ?? null;
+  const other = versions.find((v) => v.version !== active)?.version ?? null;
+  const [left, setLeft] = React.useState<number | null>(other);
   const [right, setRight] = React.useState<number | null>(active);
+  // A version saved later fills an empty picker.
+  React.useEffect(() => {
+    setLeft((current) => current ?? other);
+    setRight((current) => current ?? active);
+  }, [other, active]);
   const a = useProfileVersion(profileId, left);
   const b = useProfileVersion(profileId, right);
   const [result, setResult] = React.useState<Result | null>(null);
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const running = React.useRef<AbortController | null>(null);
   const ids = (sample?.items ?? []).map((item) => item.businessId);
+  // Leaving the page cancels a comparison under way.
+  React.useEffect(() => () => running.current?.abort(), []);
 
   const run = async () => {
-    if (!a.data || !b.data) return;
+    if (!a.data || !b.data || left === null || right === null) return;
+    running.current?.abort();
+    const controller = new AbortController();
+    running.current = controller;
     setPending(true);
     setError(null);
     try {
-      const [first, second] = await Promise.all([
-        explainAll(a.data.config, ids),
-        explainAll(b.data.config, ids),
-      ]);
+      // One after the other: a failure stops before the second half is spent.
+      const first = await explainAll(a.data.config, ids, controller.signal);
+      const second = await explainAll(b.data.config, ids, controller.signal);
+      if (controller.signal.aborted) return;
       const as = (items: typeof first): Scored[] =>
         items.map((item) => ({
           businessId: item.businessId,
@@ -55,14 +72,19 @@ export function CompareVersions({
           tier: item.tier as ScoreTier,
         }));
       setResult({
+        from: left,
+        to: right,
         matrix: tierMatrix(as(first), as(second)),
         rho: spearman(as(first), as(second)),
         count: first.length,
       });
     } catch (caught) {
-      setError(errorMessage(caught));
+      if (!controller.signal.aborted) setError(errorMessage(caught));
     } finally {
-      setPending(false);
+      if (running.current === controller) {
+        running.current = null;
+        setPending(false);
+      }
     }
   };
 
@@ -72,6 +94,9 @@ export function CompareVersions({
       <Select
         value={value === null ? '' : String(value)}
         onValueChange={(next) => {
+          running.current?.abort();
+          running.current = null;
+          setPending(false);
           setResult(null);
           onChange(Number(next));
         }}
@@ -123,11 +148,11 @@ export function CompareVersions({
         <div className="grid gap-3" aria-live="polite">
           <table className="w-fit text-sm" data-testid="tier-matrix">
             <caption className="mb-1 text-left text-muted-foreground">
-              {t('matrixCaption', { from: left ?? 0, to: right ?? 0, count: result.count })}
+              {t('matrixCaption', { from: result.from, to: result.to, count: result.count })}
             </caption>
             <thead>
               <tr>
-                <td />
+                <td aria-hidden />
                 {TIERS.map((tier) => (
                   <th key={tier} scope="col" className="px-3 font-medium">
                     {t('toTier', { tier })}

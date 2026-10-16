@@ -1645,7 +1645,10 @@
     "primary": {
       "label": "Profil de la colonne score",
       "readOnly": "Scores : {name}",
-      "changed": "La liste suit maintenant {name} ; les scores sont recalculés."
+      "changed": "La liste suit maintenant {name} ; les scores sont recalculés.",
+      "confirmTitle": "Faire de {name} le profil principal ?",
+      "confirmDescription": "Les scores, niveaux et tris de la liste le suivront, et tout l’espace est recalculé.",
+      "confirm": "Rendre principal"
     }
   },
   "scoringSettings": {
@@ -1695,12 +1698,12 @@
     "activate": "Activer la version {version}",
     "isActive": "Version active",
     "activated": "Version {version} activée : l’espace est recalculé.",
-    "recomputing": "Recalcul avec la version {version} : {done} entreprises sur {total}",
+    "recomputing": "Recalcul avec la version {version} : {done} sur {total, plural, one {# entreprise} other {# entreprises}}",
     "recomputingLabel": "Progression du recalcul",
     "recomputed": "Recalcul terminé : {count, plural, one {# entreprise notée} other {# entreprises notées}}.",
     "builtinReadOnly": "Les profils intégrés sont en lecture seule : dupliquez celui-ci dans Paramètres → Scoring pour l’ajuster.",
     "archivedReadOnly": "Ce profil est archivé : désarchivez-le pour le modifier.",
-    "memberReadOnly": "Vous pouvez consulter ce profil ; le modifier demande la permission de scoring.",
+    "memberReadOnly": "Vous pouvez consulter ce profil ; le modifier, l’aperçu en direct et la comparaison des versions demandent la permission de scoring.",
     "sections": {
       "weights": "Poids",
       "transforms": "Transformations",
@@ -1709,7 +1712,6 @@
       "reasons": "Raisons"
     },
     "issues": "Corrigez ces points avant de prévisualiser ou d’enregistrer :",
-    "incompleteGate": "Une règle est incomplète ou sa valeur ne convient pas au critère.",
     "save": "Enregistrer une nouvelle version",
     "reset": "Annuler les modifications",
     "saved": "Version {version} enregistrée. Activez-la pour noter l’espace avec.",
@@ -1740,7 +1742,8 @@
       "false": "Non",
       "default": "Autres valeurs",
       "points": "Points (valeur:mesure)",
-      "pointsHelp": "Séparés par des espaces, valeur croissante et mesure jamais décroissante, ex. 0:0 10:0.5 50:1."
+      "pointsHelp": "Séparés par des espaces, valeur croissante et mesure jamais décroissante, ex. 0:0 10:0.5 50:1.",
+      "pointsInvalid": "Écrivez au moins deux paires valeur:mesure séparées par des espaces, ex. 0:0 10:0,5 50:1."
     },
     "gates": {
       "help": "Les règles excluent une entreprise (niveau X, score 0) ou plafonnent son score. Ne pas contacter exclut toujours.",
@@ -1799,7 +1802,7 @@
       "invalid": "Corrigez les problèmes pour voir l’aperçu.",
       "loadingSample": "Chargement de l’échantillon…",
       "emptySample": "L’espace ne suit encore aucune entreprise pour l’aperçu.",
-      "scoring": "Notation de {count} entreprises…",
+      "scoring": "Notation de {count, plural, one {# entreprise} other {# entreprises}}…",
       "failed": "L’aperçu a échoué : {reason}",
       "scored": "{count, plural, one {# entreprise notée} other {# entreprises notées}} en {seconds} s.",
       "distributionCaption": "Entreprises par niveau, maintenant et avec le brouillon",
@@ -1810,10 +1813,12 @@
       "noCorrelation": "Pas assez d’entreprises notées pour comparer les classements.",
       "movers": "Plus grands mouvements",
       "noMovers": "Aucune entreprise ne change de rang ni de niveau.",
-      "up": "monte de {places} places",
-      "down": "descend de {places} places",
+      "up": "{places, plural, one {monte de # place} other {monte de # places}}",
+      "down": "{places, plural, one {descend de # place} other {descend de # places}}",
       "same": "même rang",
-      "to": "vers"
+      "to": "vers",
+      "throttled": "Trop d’aperçus en peu de temps : patientez un instant, l’aperçu reprend à votre prochaine modification.",
+      "unscored": "{count, plural, one {# entreprise n’a} other {# entreprises n’ont}} pas encore de score (un recalcul est sans doute en cours)."
     },
     "compare": {
       "title": "Comparer des versions",
@@ -1825,11 +1830,46 @@
       "version": "Version {version}",
       "activeVersion": "Version {version} (active)",
       "run": "Comparer",
-      "matrixCaption": "Version {from} (lignes) → version {to} (colonnes), {count} entreprises",
+      "matrixCaption": "Version {from} (lignes) → version {to} (colonnes), {count, plural, one {# entreprise} other {# entreprises}}",
       "fromTier": "{tier}",
       "toTier": "→ {tier}",
       "correlation": "Corrélation des rangs : {rho}",
       "noCorrelation": "Pas assez d’entreprises pour comparer les classements."
-    }
+    },
+    "valueKeys": {
+      "true": "oui",
+      "false": "non",
+      "below": "sous le milieu",
+      "above": "au-dessus du milieu",
+      "value": "toute valeur",
+      "missing": "complété par le profil"
+    },
+    "problems": {
+      "profile": "Profil",
+      "rule": "Règle {n}",
+      "language": {
+        "en": "anglais",
+        "fr": "français"
+      },
+      "codes": {
+        "no_positive_weight": "Au moins un critère doit avoir un poids positif.",
+        "transform_kind": "Cette transformation ne convient pas au critère : choisissez-en une autre.",
+        "transform_required": "Ce critère a besoin d’une transformation pour devenir une mesure de 0 à 1.",
+        "value_unknown": "Une valeur ne fait pas partie de celles de ce critère.",
+        "without_weight": "Défini pour un critère sans poids : donnez-lui un poids ou retirez-le.",
+        "never_missing": "Ce critère a toujours une valeur : il ne peut pas être inconnu.",
+        "reason_missing_unfilled": "Ce texte n’est lu que pour une valeur complétée par le profil.",
+        "placeholder_unknown": "Seule '{value}' peut être remplacée : corrigez les accolades.",
+        "gate_id_taken": "Une autre règle (ou une règle intégrée) a déjà cet identifiant.",
+        "not_a_number": "Ce critère n’est pas un nombre : il ne peut pas être comparé.",
+        "tiers_order": "Le niveau A doit commencer au-dessus du niveau B.",
+        "incomplete_gate": "Une condition est incomplète ou sa valeur ne convient pas au critère."
+      },
+      "bothLanguages": "Écrivez le texte dans les deux langues, ou videz les deux.",
+      "range": "Une valeur sort de l’intervalle permis.",
+      "format": "Une valeur n’a pas le format attendu.",
+      "invalid": "Quelque chose n’est pas valide ici."
+    },
+    "discardConfirm": "Abandonner vos modifications non enregistrées et ouvrir cette version ?"
   }
 }

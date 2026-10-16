@@ -1,9 +1,9 @@
 'use client';
 
 import type { ScoringProfileConfig } from '@bf/contracts';
-import { Input } from '@bf/ui/components/input';
 import { Label } from '@bf/ui/components/label';
 import { useTranslations } from 'next-intl';
+import { NumericInput } from './numeric-input.tsx';
 
 // Tier thresholds (BF-032): A from `A` points, B from `B`, C below; X is decided by gates (or do-not-contact).
 
@@ -24,20 +24,13 @@ export function TiersEditor({
         {(['A', 'B'] as const).map((tier) => (
           <div key={tier} className="grid gap-1">
             <Label htmlFor={`tier-${tier}`}>{t('from', { tier })}</Label>
-            <Input
+            <NumericInput
               id={`tier-${tier}`}
-              type="number"
-              min={tier === 'A' ? 1 : 0}
-              max={tier === 'A' ? 100 : 99}
+              integer
               value={config.tiers[tier]}
               disabled={readOnly}
               className="w-28"
-              onChange={(event) =>
-                onChange({
-                  ...config,
-                  tiers: { ...config.tiers, [tier]: Math.round(Number(event.target.value)) },
-                })
-              }
+              onCommit={(value) => onChange({ ...config, tiers: { ...config.tiers, [tier]: value } })}
             />
           </div>
         ))}

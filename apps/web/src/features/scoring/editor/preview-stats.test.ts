@@ -80,4 +80,31 @@ describe('preview statistics', () => {
     expect(matrix.B.B).toBe(1);
     expect(matrix.X.A).toBe(1);
   });
+
+  it('correlates partially tied ranks (Pearson on average ranks)', () => {
+    // Ranks (1.5, 1.5, 3, 4) vs (1, 2, 3, 4): r = 0.9487.
+    const rho = spearman(
+      [s('a', 9), s('b', 9), s('c', 5), s('d', 1)],
+      [s('a', 9), s('b', 8), s('c', 5), s('d', 1)],
+    );
+    expect(rho).toBeCloseTo(0.9487, 3);
+  });
+
+  it('keeps a tier change without a rank change, breaks ties by the score change, and stops at the limit', () => {
+    const before = [s('a', 90, 'A'), s('b', 50), s('c', 40), s('d', 30)];
+    const after = [s('a', 55, 'B'), s('b', 50), s('c', 45), s('d', 20)];
+    const movers = topMovers(before, after, 5);
+    expect(movers.map((m) => m.businessId)).toEqual(['a']);
+    const shuffled = topMovers([s('a', 90), s('b', 80), s('c', 10)], [s('a', 10), s('b', 85), s('c', 90)], 1);
+    expect(shuffled).toHaveLength(1);
+  });
+
+  it('leaves out of the matrix a business the second scoring lacks', () => {
+    const matrix = tierMatrix([s('a', 90, 'A'), s('b', 50)], [s('a', 50)]);
+    expect(
+      Object.values(matrix)
+        .flatMap((row) => Object.values(row))
+        .reduce((sum, n) => sum + n, 0),
+    ).toBe(1);
+  });
 });

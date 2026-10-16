@@ -10,7 +10,10 @@ import { Input } from '@bf/ui/components/input';
 import { Label } from '@bf/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@bf/ui/components/select';
 import { useTranslations } from 'next-intl';
+import * as React from 'react';
+import { useValueLabel } from '../value-labels.ts';
 import { transformKinds, transformOfKind } from './draft.ts';
+import { NumericInput, parseNumber } from './numeric-input.tsx';
 import { transformCurve } from './transform-curve.ts';
 
 // Transforms (BF-032): how each weighted feature's raw value becomes 0–1 — a form per kind and a small chart of the
@@ -24,7 +27,6 @@ function NumberField({
   value,
   onChange,
   readOnly,
-  step = 'any',
   min,
   max,
 }: {
@@ -33,7 +35,6 @@ function NumberField({
   readonly value: number;
   readonly onChange: (value: number) => void;
   readonly readOnly: boolean;
-  readonly step?: string;
   readonly min?: number;
   readonly max?: number;
 }) {
@@ -42,16 +43,13 @@ function NumberField({
       <Label htmlFor={id} className="text-xs text-muted-foreground">
         {label}
       </Label>
-      <Input
+      <NumericInput
         id={id}
-        type="number"
-        step={step}
-        {...(min !== undefined ? { min } : {})}
-        {...(max !== undefined ? { max } : {})}
-        value={Number.isFinite(value) ? value : ''}
+        value={value}
         disabled={readOnly}
         className="w-28"
-        onChange={(event) => onChange(Number(event.target.value))}
+        aria-invalid={(min !== undefined && value < min) || (max !== undefined && value > max)}
+        onCommit={onChange}
       />
     </div>
   );
@@ -130,7 +128,6 @@ function TransformFields({
               id={id(side)}
               label={t(side)}
               value={transform[side]}
-              step="0.05"
               min={0}
               max={1}
               readOnly={readOnly}
@@ -145,30 +142,72 @@ function TransformFields({
       );
     case 'piecewise':
       return (
-        <div className="grid gap-1">
-          <Label htmlFor={id('points')} className="text-xs text-muted-foreground">
-            {t('points')}
-          </Label>
-          <Input
-            id={id('points')}
-            defaultValue={transform.points.map(([x, y]) => `${x}:${y}`).join(' ')}
-            disabled={readOnly}
-            aria-describedby={id('points-help')}
-            onBlur={(event) => {
-              const points = event.target.value
-                .trim()
-                .split(/\s+/)
-                .map((pair) => pair.split(':').map(Number) as [number, number]);
-              if (points.length >= 2 && points.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y)))
-                onChange({ kind: 'piecewise', points });
-            }}
-          />
-          <p id={id('points-help')} className="text-xs text-muted-foreground">
-            {t('pointsHelp')}
-          </p>
-        </div>
+        <PiecewiseField id={id('points')} transform={transform} onChange={onChange} readOnly={readOnly} />
       );
   }
+}
+
+/** `x:y` pairs as typed (decimal comma allowed); null until every pair parses and there are at least two. */
+export function parsePoints(text: string): [number, number][] | null {
+  const pairs = text.trim().split(/\s+/).filter(Boolean);
+  if (pairs.length < 2) return null;
+  const points = pairs.map((pair) => {
+    const [x, y, extra] = pair.split(':');
+    return extra === undefined && x !== undefined && y !== undefined
+      ? [parseNumber(x), parseNumber(y)]
+      : [null, null];
+  });
+  return points.every(([x, y]) => x !== null && y !== null) ? (points as [number, number][]) : null;
+}
+
+const formatPoints = (points: readonly (readonly [number, number])[]) =>
+  points.map(([x, y]) => `${x}:${y}`).join(' ');
+
+function PiecewiseField({
+  id,
+  transform,
+  onChange,
+  readOnly,
+}: {
+  readonly id: string;
+  readonly transform: Extract<Transform, { kind: 'piecewise' }>;
+  readonly onChange: (transform: Transform) => void;
+  readonly readOnly: boolean;
+}) {
+  const t = useTranslations('scoringEditor.transforms');
+  const [text, setText] = React.useState(formatPoints(transform.points));
+  // Follow outside changes (a reset), not the echo of what was just typed.
+  React.useEffect(() => {
+    setText((current) => {
+      const parsed = parsePoints(current);
+      return parsed && formatPoints(parsed) === formatPoints(transform.points)
+        ? current
+        : formatPoints(transform.points);
+    });
+  }, [transform.points]);
+  const invalid = parsePoints(text) === null;
+  return (
+    <div className="grid gap-1">
+      <Label htmlFor={id} className="text-xs text-muted-foreground">
+        {t('points')}
+      </Label>
+      <Input
+        id={id}
+        value={text}
+        disabled={readOnly}
+        aria-invalid={invalid}
+        aria-describedby={`${id}-help`}
+        onChange={(event) => {
+          setText(event.target.value);
+          const points = parsePoints(event.target.value);
+          if (points) onChange({ kind: 'piecewise', points });
+        }}
+      />
+      <p id={`${id}-help`} className={invalid ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>
+        {invalid ? t('pointsInvalid') : t('pointsHelp')}
+      </p>
+    </div>
+  );
 }
 
 function EnumMapFields({
@@ -183,6 +222,7 @@ function EnumMapFields({
   readonly readOnly: boolean;
 }) {
   const t = useTranslations('scoringEditor.transforms');
+  const valueLabel = useValueLabel();
   const values = FEATURE_DEFINITIONS[feature].values ?? [];
   return (
     <div className="flex flex-wrap gap-3">
@@ -190,9 +230,8 @@ function EnumMapFields({
         <NumberField
           key={value}
           id={`transform-${feature}-${value}`}
-          label={value}
+          label={valueLabel(feature, value)}
           value={transform.map[value] ?? transform.default}
-          step="0.05"
           min={0}
           max={1}
           readOnly={readOnly}
@@ -203,7 +242,6 @@ function EnumMapFields({
         id={`transform-${feature}-default`}
         label={t('default')}
         value={transform.default}
-        step="0.05"
         min={0}
         max={1}
         readOnly={readOnly}

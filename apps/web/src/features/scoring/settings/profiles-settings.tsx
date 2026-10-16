@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
+import { ConfirmDialog } from '@/components/settings/confirm-dialog.tsx';
 import { SettingsSection } from '@/components/settings/section.tsx';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { usePermission } from '@/lib/session.tsx';
@@ -33,6 +34,7 @@ type Dialog = { readonly kind: 'duplicate' | 'rename'; readonly profile: Scoring
 export function ProfilesSettings() {
   const t = useTranslations('scoringSettings');
   const offers = useTranslations('scoring.offers');
+  const primaryText = useTranslations('scoring.primary');
   const labels = useErrorLabels();
   const errorMessage = useErrorMessage();
   const router = useRouter();
@@ -42,6 +44,7 @@ export function ProfilesSettings() {
   const update = useUpdateProfile();
   const primary = useSetPrimaryProfile();
   const [dialog, setDialog] = React.useState<Dialog>(null);
+  const [confirmPrimary, setConfirmPrimary] = React.useState<ScoringProfileSummary | null>(null);
 
   const run = async (action: () => Promise<unknown>, success: string) => {
     try {
@@ -131,14 +134,7 @@ export function ProfilesSettings() {
                             {t('duplicate')}
                           </DropdownMenuItem>
                           {!profile.primary && !profile.archived ? (
-                            <DropdownMenuItem
-                              onSelect={() =>
-                                void run(
-                                  () => primary.mutateAsync(profile.id),
-                                  t('primaryChanged', { name: profile.name }),
-                                )
-                              }
-                            >
+                            <DropdownMenuItem onSelect={() => setConfirmPrimary(profile)}>
                               {t('makePrimary')}
                             </DropdownMenuItem>
                           ) : null}
@@ -174,6 +170,20 @@ export function ProfilesSettings() {
           )}
         </SettingsSection>
       ))}
+      <ConfirmDialog
+        open={confirmPrimary !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmPrimary(null);
+        }}
+        title={primaryText('confirmTitle', { name: confirmPrimary?.name ?? '' })}
+        description={primaryText('confirmDescription')}
+        confirmLabel={primaryText('confirm')}
+        onConfirm={async () => {
+          if (!confirmPrimary) return;
+          await primary.mutateAsync(confirmPrimary.id);
+          (await getToast()).success(t('primaryChanged', { name: confirmPrimary.name }));
+        }}
+      />
       <NameDialog
         open={dialog !== null}
         onOpenChange={(open) => {

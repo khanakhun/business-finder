@@ -1645,7 +1645,10 @@
     "primary": {
       "label": "Profile behind the score column",
       "readOnly": "Scores: {name}",
-      "changed": "The listing now follows {name}; scores are being recomputed."
+      "changed": "The listing now follows {name}; scores are being recomputed.",
+      "confirmTitle": "Make {name} the primary profile?",
+      "confirmDescription": "The listing’s scores, tiers and sorting will follow it, and the whole workspace is recomputed.",
+      "confirm": "Make primary"
     }
   },
   "scoringSettings": {
@@ -1695,12 +1698,12 @@
     "activate": "Activate version {version}",
     "isActive": "Active version",
     "activated": "Version {version} activated: the workspace is being recomputed.",
-    "recomputing": "Recomputing with version {version}: {done} of {total} businesses",
+    "recomputing": "Recomputing with version {version}: {done} of {total, plural, one {# business} other {# businesses}}",
     "recomputingLabel": "Recompute progress",
     "recomputed": "Recompute finished: {count, plural, one {# business} other {# businesses}} scored.",
     "builtinReadOnly": "Built-in profiles are read-only: duplicate this one in Settings → Scoring to tune it.",
     "archivedReadOnly": "This profile is archived: unarchive it to edit it.",
-    "memberReadOnly": "You can read this profile; editing needs the scoring permission.",
+    "memberReadOnly": "You can read this profile; editing it, the live preview and the version comparison need the scoring permission.",
     "sections": {
       "weights": "Weights",
       "transforms": "Transforms",
@@ -1709,7 +1712,6 @@
       "reasons": "Reasons"
     },
     "issues": "Fix these before previewing or saving:",
-    "incompleteGate": "A rule is incomplete or its value does not fit the feature.",
     "save": "Save as a new version",
     "reset": "Discard changes",
     "saved": "Version {version} saved. Activate it to score the workspace with it.",
@@ -1740,7 +1742,8 @@
       "false": "No",
       "default": "Other values",
       "points": "Points (value:measure)",
-      "pointsHelp": "Space-separated, value increasing and measure never decreasing, e.g. 0:0 10:0.5 50:1."
+      "pointsHelp": "Space-separated, value increasing and measure never decreasing, e.g. 0:0 10:0.5 50:1.",
+      "pointsInvalid": "Write at least two value:measure pairs separated by spaces, e.g. 0:0 10:0.5 50:1."
     },
     "gates": {
       "help": "Rules exclude a business (tier X, score 0) or cap its score. Do-not-contact always excludes.",
@@ -1799,7 +1802,7 @@
       "invalid": "Fix the problems to see the preview.",
       "loadingSample": "Loading the sample…",
       "emptySample": "The workspace tracks no business to preview with yet.",
-      "scoring": "Scoring {count} businesses…",
+      "scoring": "Scoring {count, plural, one {# business} other {# businesses}}…",
       "failed": "The preview failed: {reason}",
       "scored": "{count, plural, one {# business} other {# businesses}} scored in {seconds} s.",
       "distributionCaption": "Businesses per tier, now and with the draft",
@@ -1810,10 +1813,12 @@
       "noCorrelation": "Not enough scored businesses to compare rankings.",
       "movers": "Biggest moves",
       "noMovers": "No business changes rank or tier.",
-      "up": "up {places} places",
-      "down": "down {places} places",
+      "up": "{places, plural, one {up # place} other {up # places}}",
+      "down": "{places, plural, one {down # place} other {down # places}}",
       "same": "same rank",
-      "to": "to"
+      "to": "to",
+      "throttled": "Too many previews in a short time: pause a moment, the preview resumes on your next change.",
+      "unscored": "{count, plural, one {# business has} other {# businesses have}} no current score yet (a recompute is probably under way)."
     },
     "compare": {
       "title": "Compare versions",
@@ -1825,11 +1830,46 @@
       "version": "Version {version}",
       "activeVersion": "Version {version} (active)",
       "run": "Compare",
-      "matrixCaption": "Version {from} (rows) → version {to} (columns), {count} businesses",
+      "matrixCaption": "Version {from} (rows) → version {to} (columns), {count, plural, one {# business} other {# businesses}}",
       "fromTier": "{tier}",
       "toTier": "→ {tier}",
       "correlation": "Rank correlation: {rho}",
       "noCorrelation": "Not enough businesses to compare rankings."
-    }
+    },
+    "valueKeys": {
+      "true": "yes",
+      "false": "no",
+      "below": "below the middle",
+      "above": "above the middle",
+      "value": "any value",
+      "missing": "filled in by the profile"
+    },
+    "problems": {
+      "profile": "Profile",
+      "rule": "Rule {n}",
+      "language": {
+        "en": "English",
+        "fr": "French"
+      },
+      "codes": {
+        "no_positive_weight": "At least one feature needs a positive weight.",
+        "transform_kind": "This transform does not fit the feature: pick another one.",
+        "transform_required": "This feature needs a transform to become a 0–1 measure.",
+        "value_unknown": "A value is not one this feature can take.",
+        "without_weight": "Set for a feature that has no weight: give it a weight or remove it.",
+        "never_missing": "This feature always has a value: it cannot be unknown.",
+        "reason_missing_unfilled": "This text is only read for a value the profile fills in.",
+        "placeholder_unknown": "Only '{value}' can be filled in: fix the braces.",
+        "gate_id_taken": "Another rule (or a built-in one) already has this id.",
+        "not_a_number": "This feature is not a number: it cannot be compared.",
+        "tiers_order": "Tier A must start above tier B.",
+        "incomplete_gate": "A condition is incomplete or its value does not fit the feature."
+      },
+      "bothLanguages": "Write the text in both languages, or clear both.",
+      "range": "A value is outside the allowed range.",
+      "format": "A value is not in the expected format.",
+      "invalid": "Something here is not valid."
+    },
+    "discardConfirm": "Discard your unsaved changes and open this version?"
   }
 }

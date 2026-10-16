@@ -32,6 +32,7 @@ import { OFFER_ICON } from '../score-badge.tsx';
 import { CompareVersions } from './compare.tsx';
 import { build, type Draft, toDraft } from './draft.ts';
 import { GatesBuilder } from './gates-builder.tsx';
+import { useIssueText } from './issue-text.ts';
 import { PreviewPanel } from './preview.tsx';
 import { ReasonsEditor } from './reasons.tsx';
 import { TiersEditor } from './tiers.tsx';
@@ -53,6 +54,7 @@ function Editor({
   sample,
   canPreview,
   onSaved,
+  onDirtyChange,
 }: {
   readonly profileId: string;
   readonly base: ScoringProfileConfig;
@@ -62,14 +64,17 @@ function Editor({
   readonly sample: ReturnType<typeof usePreviewSample>['data'];
   readonly canPreview: boolean;
   readonly onSaved: (version: number) => void;
+  readonly onDirtyChange: (dirty: boolean) => void;
 }) {
   const t = useTranslations('scoringEditor');
   const errorMessage = useErrorMessage();
+  const issueText = useIssueText(locale);
   const [draft, setDraft] = React.useState<Draft>(() => toDraft(base));
   const save = useSaveVersion(profileId);
   const { config, issues } = React.useMemo(() => build(draft), [draft]);
   const pristine = React.useMemo(() => JSON.stringify(build(toDraft(base)).config), [base]);
   const dirty = config ? JSON.stringify(config) !== pristine : true;
+  React.useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
   const setConfig = (next: ScoringProfileConfig) => setDraft((current) => ({ ...current, config: next }));
   const sections = [
     {
@@ -124,12 +129,14 @@ function Editor({
           >
             <p className="font-medium">{t('issues')}</p>
             <ul className="mt-1 list-disc pl-5">
-              {issues.map((issue) => (
-                <li key={`${issue.path.join('.')}:${issue.message}`}>
-                  <span className="font-mono text-xs">{issue.path.join(' › ')}</span>{' '}
-                  {issue.message === 'incompleteGate' ? t('incompleteGate') : issue.message}
-                </li>
-              ))}
+              {issues.map((issue) => {
+                const { where, what } = issueText(issue);
+                return (
+                  <li key={`${issue.path.join('.')}:${issue.code}`}>
+                    <span className="font-medium">{where}</span>: {what}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ) : null}
@@ -182,23 +189,33 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
   const sample = usePreviewSample(profileId, canManage);
   const activate = useActivateVersion(profileId);
   const [progress, setProgress] = React.useState<ScoringRecomputeProgress | null>(null);
+  const dirty = React.useRef(false);
+  const onDirtyChange = React.useCallback((next: boolean) => {
+    dirty.current = next;
+  }, []);
 
   useRealtimeEvent(REALTIME_EVENTS.scoringRecomputeProgressed, (event) => {
     const payload = event.payload as ScoringRecomputeProgress | null;
     if (payload?.profileId !== profileId) return;
-    setProgress(payload);
+    // Once an activation is under way, events of another version (a late one) are ignored.
+    setProgress((current) => (current && current.version !== payload.version ? current : payload));
     if (payload.finished)
       void getToast().then((toast) => toast.success(t('recomputed', { count: payload.done })));
   });
 
   if (profiles.isPending || versions.isPending) return <Skeleton className="h-96 w-full" />;
+  const notFound = (versions.error as { status?: number } | null)?.status === 404;
+  if (notFound) return <EmptyState icon={<GaugeIcon aria-hidden />} title={t('notFound')} />;
   const failed = profiles.error ?? versions.error;
   if (failed) {
     return (
       <ErrorState
         problem={toProblemLike(failed, t('loadFailed'))}
         labels={labels}
-        onRetry={() => void versions.refetch()}
+        onRetry={() => {
+          void profiles.refetch();
+          void versions.refetch();
+        }}
       />
     );
   }
@@ -232,7 +249,11 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
             <Label htmlFor="profile-version">{t('versionLabel')}</Label>
             <Select
               value={selected === null ? '' : String(selected)}
-              onValueChange={(v) => setChosen(Number(v))}
+              onValueChange={(v) => {
+                // Another base version starts a new draft: unsaved changes would be lost.
+                if (dirty.current && !window.confirm(t('discardConfirm'))) return;
+                setChosen(Number(v));
+              }}
             >
               <SelectTrigger id="profile-version" className="w-56">
                 <SelectValue />
@@ -255,11 +276,13 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
               variant={isActive ? 'outline' : 'default'}
               disabled={isActive || activate.isPending}
               onClick={async () => {
+                // Pending before the call: a fast recompute's "finished" event may arrive before the response.
+                setProgress({ profileId, version: selected, done: 0, total: 0, finished: false });
                 try {
                   await activate.mutateAsync(selected);
-                  setProgress({ profileId, version: selected, done: 0, total: 0, finished: false });
                   (await getToast()).success(t('activated', { version: selected }));
                 } catch (caught) {
+                  setProgress(null);
                   (await getToast()).error(errorMessage(caught));
                 }
               }}
@@ -300,6 +323,7 @@ export function ProfileEditor({ profileId }: { readonly profileId: string }) {
           locale={locale}
           sample={sample.data}
           canPreview={canManage}
+          onDirtyChange={onDirtyChange}
           onSaved={(saved) => setChosen(saved)}
         />
       ) : (

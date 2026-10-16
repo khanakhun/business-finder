@@ -371,13 +371,12 @@ const urlsRule: Rule = (spec, options) => {
   const scan = (text: string, path: Path) => {
     // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
     const rich = isRichText(path);
-    // E-mail addresses are the facts validator's; a web address dressed as one (`www.evil.com@a.bc`) is not.
     // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
     // is not: folded first, then judged by `www.` or the character just before it.
     const words = (rich ? withoutPageLinks(text) : text)
       .normalize('NFKC')
       .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
-        /^www\./i.test(local) || whole[offset - 1] === '/' ? address : '',
+        /^www\./i.test(local) || /[/\\:]/.test(whole[offset - 1] ?? '') ? address : '',
       );
     if (hasWebAddress(words)) {
       issues.push(

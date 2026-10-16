@@ -11,12 +11,12 @@ import {
   themeDataAttributes,
   themeToCssVars,
 } from '@bf/site-blocks';
-import type { BlockType } from '@bf/site-schema';
+import { BLOCK_SCHEMAS, type BlockType } from '@bf/site-schema';
 import { createUsePuck } from '@puckeditor/core';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { itemToBlock } from '../adapters/puck-to-ops.ts';
-import type { BlockItemProps } from '../adapters/spec-to-puck.ts';
-import { findPage } from '../adapters/spec-to-puck.ts';
+import { type BlockItemProps, findPage } from '../adapters/spec-to-puck.ts';
 import { useSiteEditor } from '../context.tsx';
 
 // The canvas (BF-037): the block library's own components, in the site's theme, inside Puck's iframe with the
@@ -82,8 +82,48 @@ export function CanvasBlock({ type, props }: { readonly type: BlockType; readonl
     const before = content.slice(0, Math.max(index, 0) + 1).filter((item) => item.type !== 'hero').length;
     tone = before % 2 === 1 ? 'alt' : 'base';
   }
-  const block = itemToBlock({ type, props });
-  return <BlockRenderer block={block} ctx={ctx} index={Math.max(index, 0)} tone={tone} />;
+  // Puck adds its own render props (`puck`, `editMode`): the block gets its schema's keys only.
+  const own = Object.keys(BLOCK_SCHEMAS[type].shape.props.shape);
+  const block = itemToBlock({
+    type,
+    props: Object.fromEntries(
+      Object.entries(props).filter(([key]) => key === 'id' || key === 'variant' || own.includes(key)),
+    ) as BlockItemProps,
+  });
+  // The library's blocks expect valid props: an item being written (a cleared required text, an empty list) shows a
+  // placeholder until it is complete, and the boundary keeps any other failure to this block.
+  const valid = BLOCK_SCHEMAS[type].shape.props.safeParse(block.props).success;
+  if (!valid) return <IncompleteBlock />;
+  return (
+    <BlockBoundary key={JSON.stringify(block.props)}>
+      <BlockRenderer block={block} ctx={ctx} index={Math.max(index, 0)} tone={tone} />
+    </BlockBoundary>
+  );
+}
+
+/** A block the canvas cannot show yet (its fields say what is missing). */
+function IncompleteBlock() {
+  const t = useTranslations('siteEditor');
+  return (
+    <section
+      role="note"
+      style={{ padding: '2rem 1.5rem', border: '2px dashed currentColor', opacity: 0.6, textAlign: 'center' }}
+    >
+      {t('incompleteBlock')}
+    </section>
+  );
+}
+
+class BlockBoundary extends React.Component<{ readonly children: React.ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  override render() {
+    return this.state.failed ? <IncompleteBlock /> : this.props.children;
+  }
 }
 
 /** Where the canvas's stylesheet is (scripts/next.mjs copies the block library's build there). */

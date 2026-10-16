@@ -12,6 +12,7 @@ import salon from '@bf/site-schema/fixtures/salon-gustavia.json' with { type: 'j
 import villa from '@bf/site-schema/fixtures/villa-agency.json' with { type: 'json' };
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
+import { defaultBlockProps } from '../puck/field-registry.ts';
 import { applyPuckDataToSpec, blockIdOf, deepEqual, itemToBlock, propsPatch } from './puck-to-ops.ts';
 import { type BlockItem, type EditorData, ITEM_KEYS, specPageToPuckData } from './spec-to-puck.ts';
 
@@ -162,6 +163,24 @@ const edit = fc.record({
         at: fc.nat(30),
         value: fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/),
       }),
+      // A translation dropped, an optional prop cleared (both are `null` in the patch).
+      fc.record({ kind: fc.constant('dropTranslation' as const), at: fc.nat(30) }),
+      fc.record({ kind: fc.constant('clearOptional' as const), at: fc.nat(30) }),
+      // A nested list item's text (an array replaced as a whole).
+      fc.record({
+        kind: fc.constant('nested' as const),
+        at: fc.nat(30),
+        value: fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/),
+      }),
+      // A new block from the drawer (its defaults for this site), at a position.
+      fc.record({ kind: fc.constant('add' as const), at: fc.nat(30), uuid: fc.uuid() }),
+      // The page's own settings: title, address, search texts.
+      fc.record({
+        kind: fc.constant('root' as const),
+        title: fc.stringMatching(/^[A-Za-z][A-Za-z ]{0,18}[A-Za-z]$/),
+        slug: fc.stringMatching(/^[a-z][a-z0-9]{2,10}$/),
+        seo: fc.stringMatching(/^[A-Za-z][A-Za-z ]{20,40}[A-Za-z]$/),
+      }),
     ),
     { maxLength: 8 },
   ),
@@ -169,8 +188,9 @@ const edit = fc.record({
 
 type Session = typeof edit extends fc.Arbitrary<infer T> ? T : never;
 
-function play(data: EditorData, steps: Session['steps']): EditorData {
+function play(data: EditorData, steps: Session['steps'], spec: SiteSpec): EditorData {
   const content = [...data.content];
+  let root = data.root.props;
   for (const step of steps) {
     const index = 'at' in step ? step.at % content.length : 0;
     const item = content[index] as BlockItem;
@@ -195,9 +215,43 @@ function play(data: EditorData, steps: Session['steps']): EditorData {
         ...item,
         props: { ...item.props, heading: { ...(item.props.heading as object), fr: step.value } },
       };
+    } else if (step.kind === 'dropTranslation') {
+      const heading = item.props.heading as Record<string, string> | undefined;
+      if (heading && Object.keys(heading).length > 1) {
+        const { en: _dropped, ...rest } = heading;
+        content[index] = { ...item, props: { ...item.props, heading: rest } };
+      }
+    } else if (step.kind === 'clearOptional') {
+      const optional = ['subtitle', 'eyebrow', 'intro', 'secondaryCta'].find((key) => key in item.props);
+      if (optional) {
+        const { [optional]: _cleared, ...rest } = item.props;
+        content[index] = { ...item, props: rest as BlockItem['props'] };
+      }
+    } else if (step.kind === 'nested' && Array.isArray(item.props.items) && item.props.items.length > 0) {
+      const items = structuredClone(item.props.items) as Record<string, unknown>[];
+      const first = items[0] as Record<string, unknown>;
+      const textKey = ['title', 'question', 'quote'].find((key) => key in first);
+      if (textKey) first[textKey] = { ...(first[textKey] as object), fr: step.value };
+      content[index] = { ...item, props: { ...item.props, items } };
+    } else if (step.kind === 'add') {
+      const props = defaultBlockProps('faq', { spec, placeholder: () => 'New text' });
+      if (props) {
+        const added = {
+          type: 'faq',
+          props: { ...props, id: `faq-${step.uuid}`, variant: 'accordion' },
+        } as BlockItem;
+        content.splice(step.at % (content.length + 1), 0, added);
+      }
+    } else if (step.kind === 'root') {
+      root = {
+        ...root,
+        title: { ...root.title, fr: step.title },
+        slug: root.slug === '' ? '' : step.slug,
+        seoTitle: { ...root.seoTitle, en: step.seo },
+      };
     }
   }
-  return { ...data, content };
+  return { root: { props: root }, content };
 }
 
 describe('editor sessions (property)', () => {
@@ -205,7 +259,7 @@ describe('editor sessions (property)', () => {
     fc.assert(
       fc.property(edit, ({ fixture: [name, pageId], steps }) => {
         const spec = FIXTURES[name] as SiteSpec;
-        const edited = play(specPageToPuckData(spec, pageId), steps);
+        const edited = play(specPageToPuckData(spec, pageId), steps, spec);
         const ids = edited.content.map((item) => blockIdOf(item.props.id));
         fc.pre(new Set(ids).size === ids.length);
         const ops = applyPuckDataToSpec(spec, pageId, edited);

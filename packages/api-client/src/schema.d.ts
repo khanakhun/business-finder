@@ -1851,7 +1851,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** A version with its spec and warnings */
+        /** A version with its spec and issues (errors a draft keeps block publishing) */
         get: operations["getSiteVersion"];
         put?: never;
         post?: never;

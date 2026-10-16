@@ -2,7 +2,7 @@
 // Runs the Next.js CLI with the validated environment from @bf/config (.env, .env.generated, real env), so the
 // dashboard uses the same ports and URLs as `pnpm infra:up` without its own .env file.
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { loadEnvOrExit, readRawEnv, webEnv } from '@bf/config';
@@ -23,7 +23,16 @@ for (const file of ['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']) {
 // The site block library's stylesheet and fonts (the site editor's canvas, BF-037), served from our origin at
 // /_bf (its @font-face URLs are relative: the fonts sit next to the stylesheet). Built on a fresh checkout.
 const blocks = dirname(dirname(createRequire(import.meta.url).resolve('@bf/site-blocks')));
-if (!existsSync(join(blocks, 'dist', 'styles.css'))) {
+const builtCss = join(blocks, 'dist', 'styles.css');
+/** The newest change in the block library's sources (a stylesheet older than it is rebuilt). */
+const newestSource = (dir) =>
+  Math.max(
+    0,
+    ...readdirSync(dir, { withFileTypes: true }).map((entry) =>
+      entry.isDirectory() ? newestSource(join(dir, entry.name)) : statSync(join(dir, entry.name)).mtimeMs,
+    ),
+  );
+if (!existsSync(builtCss) || statSync(builtCss).mtimeMs < newestSource(join(blocks, 'src'))) {
   const built = spawnSync('pnpm', ['--filter', '@bf/site-blocks', 'build'], { stdio: 'inherit' });
   if (built.status !== 0) process.exit(built.status ?? 1);
 }

@@ -34,7 +34,7 @@ export function serverPublicEnv(
   const read = (key: keyof PublicEnv) => {
     const configured = source[KEYS[key]];
     // Local defaults are for development only: a deployed server without its URLs must not point at localhost.
-    if (!configured && source.NODE_ENV === 'production' && (key === 'apiUrl' || key === 'appUrl')) {
+    if (!configured && source.NODE_ENV === 'production' && key !== 'mapStyleUrl') {
       throw new Error(`${KEYS[key]} is required in production`);
     }
     const value = configured || DEFAULTS[key];

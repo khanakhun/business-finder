@@ -2,14 +2,11 @@
 
 import { ApiError } from '@bf/api-client';
 import type { SiteVersion } from '@bf/contracts';
-import type { BaseOperation, SiteSpec } from '@bf/site-schema';
+import { type BaseOperation, MAX_BATCH, type SiteSpec } from '@bf/site-schema';
 import { apiClient } from '@/lib/api.ts';
 
 // The editor's calls (BF-037): every save is a new immutable version through the sites module (BF-035), from the
 // version the editor started on; the API refuses it (409) when someone saved in between.
-
-/** The API takes at most this many operations in one save (the BF-033 batch limit). */
-export const MAX_OPERATIONS = 200;
 
 /** Someone saved the site since the editor loaded it. */
 export class VersionConflict extends Error {
@@ -36,7 +33,8 @@ export async function saveSite(input: {
   readonly spec: SiteSpec;
 }): Promise<SiteVersion> {
   try {
-    if (input.operations.length <= MAX_OPERATIONS) {
+    // The API takes one batch of operations per save (the BF-033 limit); past it, the whole spec.
+    if (input.operations.length <= MAX_BATCH) {
       const { data } = await apiClient().POST('/v1/sites/{id}/operations', {
         params: { path: { id: input.siteId } },
         body: {

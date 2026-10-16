@@ -4,7 +4,6 @@ import {
   BLOCK_TYPES,
   type BlockType,
   blockVariants,
-  CATALOG,
   type CtaAction,
   LIMITS,
   type LocalizedText,
@@ -16,6 +15,7 @@ import type { BlockItemProps, PageRootProps } from '../adapters/spec-to-puck.ts'
 import { CanvasBlock, CanvasRoot } from './canvas.tsx';
 import {
   defaultBlockProps,
+  defaultItem,
   describeBlockFields,
   type FieldSpec,
   UnsupportedFieldError,
@@ -28,6 +28,7 @@ import {
   FactField,
   LocalizedTextField,
   PlainTextField,
+  SlugField,
 } from './fields.tsx';
 
 /** The editor's words for the config (labels of blocks, variants, fields and options; placeholders). */
@@ -51,15 +52,23 @@ const custom = <Value,>(label: string, render: CustomField<Value>['render']): Cu
   render,
 });
 
-/** The first text of an item in the site's default language: its summary in a list. */
-function summaryOf(item: unknown, locale: string): string | undefined {
-  if (typeof item === 'string') return item;
+/**
+ * An item's summary in a list: its first text in the site's language (a title, a question, a name), found in the
+ * order of the item's fields; a plain value (an icon name) only when the item has no text.
+ */
+export function summaryOf(item: unknown, fields: readonly FieldSpec[], locale: string): string | undefined {
   if (item === null || typeof item !== 'object') return undefined;
   const record = item as Record<string, unknown>;
-  if (typeof record[locale] === 'string') return record[locale] as string;
-  for (const value of Object.values(record)) {
-    const found = summaryOf(value, locale);
-    if (found) return found;
+  for (const field of fields) {
+    const value = record[field.key];
+    if ((field.kind === 'localizedText' || field.kind === 'richText') && value && typeof value === 'object') {
+      const text = (value as Record<string, unknown>)[locale] ?? Object.values(value)[0];
+      if (typeof text === 'string' && text) return text;
+    }
+  }
+  for (const field of fields) {
+    const value = record[field.key];
+    if (field.kind === 'text' && typeof value === 'string' && value) return value;
   }
   return undefined;
 }
@@ -152,7 +161,13 @@ export function toPuckField(spec: FieldSpec, labels: ConfigLabels, site: SiteSpe
         ...(spec.min !== undefined ? { min: spec.min } : {}),
         ...(spec.max !== undefined ? { max: spec.max } : {}),
         getItemSummary: (entry: unknown, index?: number) =>
-          summaryOf(entry, site.defaultLocale) ?? `${labels.field(spec.key)} ${(index ?? 0) + 1}`,
+          summaryOf(entry, item.fields, site.defaultLocale) ??
+          `${labels.field(spec.key)} ${(index ?? 0) + 1}`,
+        // "Add item" starts from a valid item for this site (never `{}`, which the blocks cannot render).
+        ...(() => {
+          const fresh = defaultItem(spec, { spec: site, placeholder: labels.placeholder });
+          return fresh === undefined ? {} : { defaultItemProps: fresh as Record<string, unknown> };
+        })(),
       };
     }
   }
@@ -202,11 +217,9 @@ export function buildPuckConfig(site: SiteSpec, labels: ConfigLabels): Config {
         labels,
         site,
       ),
-      slug: toPuckField(
-        { key: 'slug', kind: 'text', max: 60, optional: true, help: undefined },
-        labels,
-        site,
-      ),
+      slug: custom<string | undefined>(labels.field('slug'), (props) => (
+        <SlugField label={labels.field('slug')} {...props} />
+      )),
       seoTitle: toPuckField(
         {
           key: 'seoTitle',
@@ -243,6 +256,3 @@ export function buildPuckConfig(site: SiteSpec, labels: ConfigLabels): Config {
     },
   };
 }
-
-/** The catalog's purpose of a block type (the drawer's hint). */
-export const blockPurpose = (type: BlockType) => CATALOG[type].purpose;

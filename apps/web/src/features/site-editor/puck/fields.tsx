@@ -6,6 +6,7 @@ import {
   LIMITS,
   type LocalizedText,
   parseRichText,
+  RESERVED_SLUGS,
   type SiteLocale,
 } from '@bf/site-schema';
 import { Button } from '@bf/ui/components/button';
@@ -34,9 +35,17 @@ export interface CustomFieldProps<Value> {
 type TextSpec = Extract<FieldSpec, { kind: 'localizedText' | 'richText' }>;
 
 /** A character counter against the field's limit (the schema's), red past it. */
-function Counter({ length, max }: { readonly length: number; readonly max: number }) {
+function Counter({
+  id,
+  length,
+  max,
+}: {
+  readonly id?: string;
+  readonly length: number;
+  readonly max: number;
+}) {
   return (
-    <span className={length > max ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'}>
+    <span id={id} className={length > max ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'}>
       {length}/{max}
     </span>
   );
@@ -59,7 +68,8 @@ export function LocalizedTextField({
   const missing = editor.spec.locales.filter((locale) => !text[locale]);
   const set = (locale: SiteLocale, next: string) => {
     const copy: LocalizedText = { ...text };
-    if (next === '') delete copy[locale];
+    // A blank text is no text (the schema trims it): the translation is missing.
+    if (next.trim() === '') delete copy[locale];
     else copy[locale] = next;
     onChange(Object.keys(copy).length > 0 || !spec.optional ? copy : undefined);
   };
@@ -78,6 +88,7 @@ export function LocalizedTextField({
             lang: locale,
             'aria-label': `${label} (${locale.toUpperCase()})`,
             'aria-invalid': !current && editor.spec.locales.includes(locale) ? true : undefined,
+            'aria-describedby': `${inputId}-count${current ? '' : ` ${inputId}-missing`}`,
             onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
               set(locale, event.target.value),
           };
@@ -86,9 +97,13 @@ export function LocalizedTextField({
               <div className="flex items-center justify-between gap-2">
                 <label htmlFor={inputId} className="text-muted-foreground text-xs uppercase">
                   {locale}
-                  {current ? null : <span className="text-destructive ml-1 normal-case">{t('missing')}</span>}
+                  {current ? null : (
+                    <span id={`${inputId}-missing`} className="text-destructive ml-1 normal-case">
+                      {t('missing')}
+                    </span>
+                  )}
                 </label>
-                <Counter length={current.length} max={spec.max} />
+                <Counter id={`${inputId}-count`} length={current.length} max={spec.max} />
               </div>
               {spec.kind === 'richText' && !readOnly ? (
                 <RichTextToolbar targetId={inputId} value={current} onChange={(next) => set(locale, next)} />
@@ -367,10 +382,12 @@ export function CtaField({
   const labelText = value?.label ?? {};
   const choose = (next: string) => {
     if (next === '') return onChange(undefined);
-    if (next === 'page')
-      return onChange({ kind: 'page', label: labelText, pageId: spec.pages[0]?.id ?? 'home' });
-    if (next === 'url') return onChange({ kind: 'url', label: labelText, url: 'https://' });
-    onChange({ kind: next as 'call', label: labelText });
+    // A new button is labelled with its action until someone writes a better label (an empty label cannot be saved).
+    const label =
+      Object.keys(labelText).length > 0 ? labelText : { [spec.defaultLocale]: t(`cta.${next}` as never) };
+    if (next === 'page') return onChange({ kind: 'page', label, pageId: spec.pages[0]?.id ?? 'home' });
+    if (next === 'url') return onChange({ kind: 'url', label, url: 'https://' });
+    onChange({ kind: next as 'call', label });
   };
   return (
     <FieldLabel label={label} el="div" readOnly={readOnly ?? false}>
@@ -430,13 +447,62 @@ export function CtaField({
                   readOnly={readOnly}
                   inputMode="url"
                   aria-invalid={!HTTPS.test(value.url)}
+                  aria-describedby={`${id}-url-help`}
                   onChange={(event) => onChange({ ...value, url: event.target.value })}
                 />
-                <span className="text-muted-foreground text-xs">{t('ctaUrlHelp')}</span>
+                <span
+                  id={`${id}-url-help`}
+                  className={
+                    HTTPS.test(value.url) ? 'text-muted-foreground text-xs' : 'text-destructive text-xs'
+                  }
+                >
+                  {t('ctaUrlHelp')}
+                </span>
               </div>
             ) : null}
           </>
         ) : null}
+      </div>
+    </FieldLabel>
+  );
+}
+
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** A page's address: kebab-case, unique, not reserved; the home page's ("") never changes. */
+export function SlugField({ label, id, value, onChange, readOnly }: CustomFieldProps<string | undefined>) {
+  const t = useTranslations('siteEditor.fields');
+  const { spec, pageId } = useSiteEditor();
+  const home = spec.pages.find((page) => page.id === pageId)?.slug === '';
+  const current = value ?? '';
+  const taken = spec.pages.some((page) => page.id !== pageId && page.slug === current);
+  const problem = home
+    ? undefined
+    : !SLUG.test(current)
+      ? t('slugFormat')
+      : RESERVED_SLUGS.includes(current)
+        ? t('slugReserved')
+        : taken
+          ? t('slugTaken')
+          : undefined;
+  return (
+    <FieldLabel label={label} el="div" readOnly={readOnly || home}>
+      <div className="flex flex-col gap-1">
+        <Input
+          id={id}
+          aria-label={label}
+          value={home ? '/' : current}
+          readOnly={readOnly || home}
+          aria-invalid={problem ? true : undefined}
+          aria-describedby={`${id}-help`}
+          onChange={(event) => onChange(event.target.value.toLowerCase())}
+        />
+        <span
+          id={`${id}-help`}
+          className={problem ? 'text-destructive text-xs' : 'text-muted-foreground text-xs'}
+        >
+          {home ? t('slugHome') : (problem ?? t('slugHelp'))}
+        </span>
       </div>
     </FieldLabel>
   );

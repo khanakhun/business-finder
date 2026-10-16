@@ -17,12 +17,16 @@ describe('public env', () => {
 
   it('requires the deployment URLs in production', () => {
     expect(() => serverPublicEnv({ NODE_ENV: 'production' })).toThrow(/NEXT_PUBLIC_API_URL is required/);
+    const deployed = {
+      NODE_ENV: 'production',
+      NEXT_PUBLIC_API_URL: 'https://api.example',
+      NEXT_PUBLIC_APP_URL: 'https://app.example',
+    };
+    // The site editor's image host too: a deployed canvas must not point at a local default.
+    expect(() => serverPublicEnv(deployed)).toThrow(/NEXT_PUBLIC_SITES_ASSETS_BASE_URL is required/);
     expect(
-      serverPublicEnv({
-        NODE_ENV: 'production',
-        NEXT_PUBLIC_API_URL: 'https://api.example',
-        NEXT_PUBLIC_APP_URL: 'https://app.example',
-      }).mapStyleUrl,
+      serverPublicEnv({ ...deployed, NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'https://assets.example' })
+        .mapStyleUrl,
     ).toBe('https://tiles.openfreemap.org/styles/liberty');
   });
 

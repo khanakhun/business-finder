@@ -171,6 +171,7 @@ catalog:
   server-only: 0.0.1
 
 # Puck's Tiptap range (^3.11) would take 3.32.0 (2026-10-13): held at 3.31.4, the newest release at least two weeks old.
+# Review from 2026-10-27 (3.32.0 two weeks old), or at once for a Tiptap security advisory: these pins apply workspace-wide.
 overrides:
   '@tiptap/core': 3.31.4
   '@tiptap/extension-blockquote': 3.31.4

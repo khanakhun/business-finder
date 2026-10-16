@@ -1,10 +1,13 @@
 import {
   AssetRefSchema,
   BLOCK_SCHEMAS,
+  type Block,
   type BlockType,
+  blockVariants,
   CtaActionSchema,
   type LocalizedText,
   type SiteSpec,
+  validateSite,
 } from '@bf/site-schema';
 import type { z } from 'zod';
 
@@ -69,24 +72,33 @@ const bound = (schema: z.ZodType, check: 'min_length' | 'max_length') => {
   return check === 'min_length' ? found?.minimum : found?.maximum;
 };
 
-/** Optional, default and nullable wrappers peeled off. */
-function unwrap(schema: z.ZodType): { inner: z.ZodType; optional: boolean } {
+/**
+ * Optional and default wrappers peeled off. A nullable prop has no field: the editor's patches use `null` to remove a
+ * key (BF-033 `updateBlockProps`), so a null value could not be saved.
+ */
+function unwrap(schema: z.ZodType, key: string): { inner: z.ZodType; optional: boolean } {
   let inner = schema;
   let optional = false;
   for (;;) {
     const def = defOf(inner);
-    if (!['optional', 'default', 'nullable'].includes(def.type) || !def.innerType) return { inner, optional };
+    if (def.type === 'nullable') throw new UnsupportedFieldError(`No editor field for nullable "${key}".`);
+    if (!['optional', 'default'].includes(def.type) || !def.innerType) return { inner, optional };
     optional = true;
     inner = def.innerType;
   }
 }
 
+/** A text in the site's languages: a record keyed by locale, of bounded strings. */
 const isLocaleRecord = (def: Def) =>
-  def.type === 'record' && def.keyType !== undefined && defOf(def.keyType).type === 'enum';
+  def.type === 'record' &&
+  def.keyType !== undefined &&
+  defOf(def.keyType).type === 'enum' &&
+  def.valueType !== undefined &&
+  defOf(def.valueType).type === 'string';
 
 /** The field for one prop schema (`key` its name, `context` the block type for kind-specific strategies). */
 export function describeField(key: string, schema: z.ZodType, context: BlockType): FieldSpec {
-  const { inner, optional } = unwrap(schema);
+  const { inner, optional } = unwrap(schema, key);
   const def = defOf(inner);
   const common = { key, help: inner.description ?? schema.description, optional };
   // Strategies by identity first (shared schemas mean a meaning: an asset, an action), then by name, then by kind.
@@ -95,7 +107,8 @@ export function describeField(key: string, schema: z.ZodType, context: BlockType
   if (key === 'factId') return { ...common, kind: 'fact' };
   if (key === 'factIds') return { ...common, kind: 'facts' };
   if (isLocaleRecord(def)) {
-    const max = (def.valueType as unknown as { maxLength: number | null }).maxLength ?? 0;
+    const max = (def.valueType as unknown as { maxLength: number | null }).maxLength;
+    if (!max) throw new UnsupportedFieldError(`"${context}.${key}" has no length limit.`);
     if (context === 'rich_text' && key === 'body') return { ...common, kind: 'richText', max };
     return { ...common, kind: 'localizedText', max, multiline: max > 160 };
   }
@@ -124,7 +137,7 @@ export function describeField(key: string, schema: z.ZodType, context: BlockType
       const element = def.element as z.ZodType;
       const min = bound(inner, 'min_length');
       const max = bound(inner, 'max_length');
-      if (unwrap(element).inner === AssetRefSchema) return { ...common, kind: 'assets', min, max };
+      if (unwrap(element, key).inner === AssetRefSchema) return { ...common, kind: 'assets', min, max };
       return { ...common, kind: 'array', item: describeField(key, element, context), min, max };
     }
     case 'object':
@@ -200,26 +213,57 @@ function defaultsOf(fields: readonly FieldSpec[], ctx: DefaultsContext, assets: 
   return out;
 }
 
+/** The site's images, each used once (a block needing more distinct images than the site has cannot be filled). */
+function imagesOf(spec: SiteSpec): () => string {
+  const images = spec.assets.filter((asset) => asset.kind === 'image');
+  let next = 0;
+  return () => {
+    const asset = images[next++];
+    if (!asset) throw new Unfillable();
+    return asset.id;
+  };
+}
+
+function filled<T>(fill: () => T): T | undefined {
+  try {
+    return fill();
+  } catch (error) {
+    if (error instanceof Unfillable) return undefined;
+    throw error;
+  }
+}
+
+/** A new item of a list field (what "Add item" starts from), or undefined when the site cannot fill one. */
+export function defaultItem(field: FieldSpec & { kind: 'array' }, ctx: DefaultsContext): unknown {
+  return filled(() => defaultFor(field.item, ctx, imagesOf(ctx.spec)));
+}
+
 /**
  * The props of a new block of `type` for this site (its required fields filled: texts in the default language, the
- * site's images in turn, a button to the home page), or undefined when the site cannot fill it (no image for a block
- * that needs one, a block that needs a fact).
+ * site's images, a button to the home page), or undefined when the site cannot fill it (fewer images than the block
+ * needs, a fact, or what the validator requires of the site for this block: hours, an address, a booking page…).
  */
 export function defaultBlockProps(
   type: BlockType,
   ctx: DefaultsContext,
 ): Record<string, unknown> | undefined {
-  const images = ctx.spec.assets.filter((asset) => asset.kind === 'image');
-  let next = 0;
-  const assets = () => {
-    const asset = images[next++ % Math.max(images.length, 1)];
-    if (!asset) throw new Unfillable();
-    return asset.id;
+  const props = filled(() => defaultsOf(describeBlockFields(type), ctx, imagesOf(ctx.spec)));
+  if (!props) return undefined;
+  const page = ctx.spec.pages[0];
+  if (!page) return undefined;
+  const block = { id: 'candidate-block', type, variant: blockVariants(type)[0], props } as Block;
+  const candidate = {
+    ...ctx.spec,
+    pages: [{ ...page, blocks: [...page.blocks, block] }, ...ctx.spec.pages.slice(1)],
   };
-  try {
-    return defaultsOf(describeBlockFields(type), ctx, assets);
-  } catch (error) {
-    if (error instanceof Unfillable) return undefined;
-    throw error;
-  }
+  const at = page.blocks.length;
+  const hosts = [...new Set(ctx.spec.assets.map((asset) => new URL(asset.url).hostname))];
+  const refused = validateSite(candidate, { assetHosts: hosts, mode: 'preview' }).some(
+    (issue) =>
+      issue.code === 'block_requirement' &&
+      issue.path[0] === 'pages' &&
+      issue.path[1] === 0 &&
+      issue.path[3] === at,
+  );
+  return refused ? undefined : props;
 }

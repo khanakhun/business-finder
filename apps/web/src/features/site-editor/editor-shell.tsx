@@ -5,7 +5,6 @@ import '@puckeditor/core/no-external.css';
 import { ApiError } from '@bf/api-client';
 import type { SiteVersion } from '@bf/contracts';
 import {
-  applyAll,
   type BaseOperation,
   type BlockType,
   OperationError,
@@ -23,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@bf/ui/components/dialog';
-import { type Data, Puck } from '@puckeditor/core';
+import { type Data, type Dictionary, Puck } from '@puckeditor/core';
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -36,6 +35,7 @@ import { SiteEditorProvider } from './context.tsx';
 import { buildPuckConfig, type ConfigLabels } from './puck/build-config.tsx';
 import { CanvasFrame } from './puck/canvas.tsx';
 import type { FieldSpec } from './puck/field-registry.ts';
+import { applyInBatches, whereOf } from './state/session.ts';
 
 /** The version the editor works from: every save is based on it, and replaces it. */
 interface Base {
@@ -80,6 +80,9 @@ function useConfigLabels(): ConfigLabels {
  * The visual site editor (BF-037): one page of the site at a time on Puck's canvas, rendered by the block library.
  * Changes stay local until Save (⌘/Ctrl+S), which sends them as BF-033 operations from the version the editor
  * loaded; a concurrent save is a conflict to resolve, never an overwrite. Viewers see the same canvas, read-only.
+ *
+ * Puck owns the canvas's content once mounted (`data` is its initial state): the editor never pushes data back into a
+ * mounted Puck; it remounts it (another page, the latest version after a conflict) or only moves its own base.
  */
 export function SiteEditor({
   siteId,
@@ -98,106 +101,132 @@ export function SiteEditor({
   const [pending, setPending] = React.useState<readonly BaseOperation[]>([]);
   const [pageId, setPageId] = React.useState(base.spec.pages[0]?.id ?? '');
   const [locale, setLocale] = React.useState<SiteLocale>(base.spec.defaultLocale);
+  // The canvas's latest content (Puck's onChange), and what Puck was mounted with.
   const [data, setData] = React.useState<EditorData>(() => specPageToPuckData(base.spec, pageId));
-  // Bumped to remount Puck with fresh data (another page, a reload after a conflict).
+  const [initial, setInitial] = React.useState<EditorData>(data);
+  // Bumped to remount Puck with `initial` (another page, the latest version after a conflict).
   const [mount, setMount] = React.useState(0);
   const [saving, setSaving] = React.useState(false);
+  // Set before any await: a second ⌘S while a save is in flight must not send the same base twice.
+  const inFlight = React.useRef(false);
   const [conflict, setConflict] = React.useState<VersionConflict | null>(null);
+  const [reloading, setReloading] = React.useState(false);
 
   const config = React.useMemo(() => buildPuckConfig(working, labels), [working, labels]);
   const pageOps = React.useMemo(() => applyPuckDataToSpec(working, pageId, data), [working, pageId, data]);
   const dirty = pending.length > 0 || pageOps.length > 0;
+  const dictionary = React.useMemo(() => t.raw('puck' as never) as Dictionary, [t]);
 
-  // The working site as the canvas shows it (this page's edits folded in), for the fields and the frame.
-  const shown = React.useMemo(() => {
-    if (pageOps.length === 0) return working;
-    try {
-      return applyAll(working, pageOps).spec;
-    } catch {
-      return working;
-    }
-  }, [working, pageOps]);
+  const remount = (site: SiteSpec, page: string) => {
+    const fresh = specPageToPuckData(site, page);
+    setPageId(page);
+    setData(fresh);
+    setInitial(fresh);
+    setMount((n) => n + 1);
+  };
+
+  const reportRefused = React.useCallback(
+    async (error: unknown, spec: SiteSpec) => {
+      const toast = await getToast();
+      const detail =
+        error instanceof OperationError
+          ? error.details[0]
+          : error instanceof ApiError
+            ? error.problem.errors?.[0]
+            : undefined;
+      if (!detail) {
+        toast.error(
+          error instanceof OperationError ? t('refused', { reason: error.message }) : t('saveFailed'),
+        );
+        return;
+      }
+      const where = whereOf(spec, detail.path, { block: labels.block, field: labels.field, page: t('page') });
+      toast.error(t('refused', { reason: where ? `${where}: ${detail.message}` : detail.message }));
+    },
+    [t, labels],
+  );
 
   const switchPage = (next: string) => {
-    if (next === pageId) return;
+    if (next === pageId || inFlight.current) return;
     // The page left keeps its edits (folded into the working site, to be saved with the rest).
     let site = working;
     if (pageOps.length > 0) {
       try {
-        site = applyAll(working, pageOps).spec;
+        site = applyInBatches(working, pageOps);
       } catch (error) {
-        void reportRefused(error);
+        void reportRefused(error, working);
         return;
       }
       setWorking(site);
       setPending((before) => [...before, ...pageOps]);
     }
-    setPageId(next);
-    setData(specPageToPuckData(site, next));
-    setMount((n) => n + 1);
+    remount(site, next);
   };
 
-  async function reportRefused(error: unknown) {
-    const toast = await getToast();
-    if (error instanceof OperationError) {
-      toast.error(t('refused', { reason: error.details[0]?.message ?? error.message }));
-    } else if (error instanceof ApiError && error.problem.errors?.length) {
-      toast.error(t('refused', { reason: error.problem.errors[0]?.message ?? error.message }));
-    } else {
-      toast.error(t('saveFailed'));
-    }
-  }
-
   const save = React.useCallback(async () => {
-    if (!canEdit || saving) return;
-    const operations = [...pending, ...pageOps];
-    const toast = await getToast();
-    if (operations.length === 0) {
-      toast.message(t('noChanges'));
-      return;
-    }
-    let spec: SiteSpec;
+    if (!canEdit || inFlight.current) return;
+    inFlight.current = true;
     try {
-      // Refused here what the API would refuse (an edit that breaks the schema), with its reason.
-      spec = applyAll(base.spec, operations).spec;
-    } catch (error) {
-      await reportRefused(error);
-      return;
-    }
-    setSaving(true);
-    try {
-      const version = await saveSite({ siteId, baseVersionId: base.versionId, operations, spec });
-      const next = baseOf(version);
-      setBase(next);
-      setWorking(next.spec);
-      setPending([]);
-      // The canvas already shows this content: no remount (Puck keeps its history and selection).
-      setData(specPageToPuckData(next.spec, pageId));
-      const errors = version.issues.filter((issue) => issue.severity === 'error').length;
-      if (errors > 0) toast.warning(t('savedWithErrors', { version: version.versionNumber, count: errors }));
-      else toast.success(t('saved', { version: version.versionNumber }));
-    } catch (error) {
-      if (error instanceof VersionConflict) setConflict(error);
-      else await reportRefused(error);
+      const toast = await getToast();
+      const operations = [...pending, ...pageOps];
+      if (operations.length === 0) {
+        toast.message(t('noChanges'));
+        return;
+      }
+      let spec: SiteSpec;
+      try {
+        // Refused here what the API would refuse (an edit that breaks the schema), naming the field.
+        spec = applyInBatches(working, pageOps);
+      } catch (error) {
+        await reportRefused(error, working);
+        return;
+      }
+      setSaving(true);
+      try {
+        const version = await saveSite({ siteId, baseVersionId: base.versionId, operations, spec });
+        const next = baseOf(version);
+        // Only the base moves: the canvas keeps what is on screen (typing during the save stays, as a new change).
+        setBase(next);
+        setWorking(next.spec);
+        setPending([]);
+        const errors = version.issues.filter((issue) => issue.severity === 'error').length;
+        if (errors > 0)
+          toast.warning(t('savedWithErrors', { version: version.versionNumber, count: errors }));
+        else toast.success(t('saved', { version: version.versionNumber }));
+      } catch (error) {
+        if (error instanceof VersionConflict) setConflict(error);
+        else await reportRefused(error, spec);
+      } finally {
+        setSaving(false);
+      }
     } finally {
-      setSaving(false);
+      inFlight.current = false;
     }
-  }, [canEdit, saving, pending, pageOps, base, siteId, pageId, t]);
+  }, [canEdit, pending, pageOps, working, base, siteId, t, reportRefused]);
 
   const reloadLatest = async () => {
     const versionId = conflict?.currentVersionId;
-    setConflict(null);
-    if (!versionId) return;
-    const next = baseOf(await fetchVersion(siteId, versionId));
-    const page = next.spec.pages.some((candidate) => candidate.id === pageId)
-      ? pageId
-      : (next.spec.pages[0]?.id ?? '');
-    setBase(next);
-    setWorking(next.spec);
-    setPending([]);
-    setPageId(page);
-    setData(specPageToPuckData(next.spec, page));
-    setMount((n) => n + 1);
+    if (!versionId) {
+      setConflict(null);
+      return;
+    }
+    setReloading(true);
+    try {
+      const next = baseOf(await fetchVersion(siteId, versionId));
+      const page = next.spec.pages.some((candidate) => candidate.id === pageId)
+        ? pageId
+        : (next.spec.pages[0]?.id ?? '');
+      setBase(next);
+      setWorking(next.spec);
+      setPending([]);
+      remount(next.spec, page);
+      setConflict(null);
+    } catch {
+      // The dialog stays open: loading can be tried again.
+      (await getToast()).error(t('reloadFailed'));
+    } finally {
+      setReloading(false);
+    }
   };
 
   // ⌘/Ctrl+S saves; leaving with unsaved edits asks first.
@@ -220,9 +249,10 @@ export function SiteEditor({
     return () => window.removeEventListener('beforeunload', onLeave);
   }, [dirty]);
 
+  // The fields and the canvas read the working site (pages, images, theme): never re-applied on each keystroke.
   const editorState = React.useMemo(
-    () => ({ spec: shown, pageId, locale, readOnly: !canEdit }),
-    [shown, pageId, locale, canEdit],
+    () => ({ spec: working, pageId, locale, readOnly: !canEdit }),
+    [working, pageId, locale, canEdit],
   );
 
   return (
@@ -243,6 +273,7 @@ export function SiteEditor({
             <select
               className="border-input h-8 rounded-md border bg-transparent px-2"
               value={pageId}
+              disabled={saving}
               onChange={(event) => switchPage(event.target.value)}
             >
               {working.pages.map((page) => (
@@ -287,10 +318,11 @@ export function SiteEditor({
           <Puck
             key={`${pageId}:${mount}`}
             config={config}
-            data={data as unknown as Data}
+            data={initial as unknown as Data}
             onChange={(next) => setData(next as unknown as EditorData)}
             iframe={{ enabled: true, syncHostStyles: false }}
             overrides={{ header: () => <></>, iframe: CanvasFrame }}
+            dictionary={dictionary}
             {...(canEdit
               ? {}
               : {
@@ -306,17 +338,19 @@ export function SiteEditor({
           />
         </div>
       </div>
-      <Dialog open={conflict !== null} onOpenChange={(open) => !open && setConflict(null)}>
+      <Dialog open={conflict !== null} onOpenChange={(open) => !open && !reloading && setConflict(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('conflictTitle')}</DialogTitle>
             <DialogDescription>{t('conflictBody')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConflict(null)}>
+            <Button variant="outline" disabled={reloading} onClick={() => setConflict(null)}>
               {t('conflictKeep')}
             </Button>
-            <Button onClick={() => void reloadLatest()}>{t('conflictReload')}</Button>
+            <Button disabled={reloading} onClick={() => void reloadLatest()}>
+              {t('conflictReload')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

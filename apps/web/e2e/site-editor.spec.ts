@@ -1,7 +1,8 @@
 import salon from '@bf/site-schema/fixtures/salon-gustavia.json' with { type: 'json' };
-import type { Page } from '@playwright/test';
+import { type Page, request as playwrightRequest } from '@playwright/test';
 import { apiUrl, webUrl } from './env.ts';
 import { expect, test } from './fixtures.ts';
+import { browserHeaders, createVerifiedUser } from './users.ts';
 
 // The site editor (BF-037): a fixture site opened on Puck's canvas, a text edited in two languages and saved as a
 // new version through the operations API; a save after someone else's is a conflict, never an overwrite.
@@ -52,6 +53,10 @@ test('edits the hero title in French and English, and saves a new version with i
   await field(page, 'Title (EN)').fill('Hair, care and colour in Gustavia');
   await expect(hero).toHaveText('Hair, care and colour in Gustavia');
 
+  // The canvas is the site's content only: no script, no inline handler (it shares the dashboard's origin).
+  expect(await canvas(page).locator('script').count()).toBe(0);
+  expect(await canvas(page).locator('[onclick], [onload], [onerror], [onmouseover]').count()).toBe(0);
+
   await page.keyboard.press('ControlOrMeta+s');
   await expect(page.getByText('Saved as version 2')).toBeVisible();
   await expect(page.getByText('All changes saved')).toBeVisible();
@@ -99,4 +104,47 @@ test('stops a save made after someone else’s and loads the latest version', as
   await expect(page.getByRole('heading', { name: /Version 2/ })).toBeVisible();
   await expect(hero).toHaveText('Coiffure et soins à Gustavia');
   expect((await currentVersion(page, siteId)).versionNumber).toBe(2);
+});
+
+test('shows a viewer the canvas read-only, with no save', async ({ page, browser }) => {
+  const siteId = await createSite(page, 'Salon lecture');
+  const me = await page.request.get(`${apiUrl}/v1/me`, { headers: { Origin: webUrl } });
+  const { activeOrganization } = (await me.json()) as { activeOrganization: { id: string } };
+
+  const request = await playwrightRequest.newContext();
+  const viewer = await createVerifiedUser(request, 'site-viewer');
+  const invited = await page.request.post(`${apiUrl}/v1/invitations`, {
+    data: { email: viewer.email, role: 'viewer' },
+    headers: { Origin: webUrl },
+  });
+  expect(invited.status(), await invited.text()).toBe(201);
+  const { id: invitationId } = (await invited.json()) as { id: string };
+  const headers = browserHeaders();
+  await expect(
+    await request.post(`${apiUrl}/api/auth/organization/accept-invitation`, {
+      data: { invitationId },
+      headers,
+    }),
+  ).toBeOK();
+  await expect(
+    await request.post(`${apiUrl}/api/auth/organization/set-active`, {
+      data: { organizationId: activeOrganization.id },
+      headers,
+    }),
+  ).toBeOK();
+  const context = await browser.newContext({ storageState: await request.storageState() });
+  await request.dispose();
+  const viewerPage = await context.newPage();
+  try {
+    await viewerPage.goto(`${webUrl}/sites/${siteId}/edit`);
+    const hero = canvas(viewerPage).getByRole('heading', { level: 1 });
+    await expect(hero).toHaveText('Coiffure et soins à Gustavia');
+    await expect(viewerPage.getByText('Read only')).toBeVisible();
+    await expect(viewerPage.getByRole('button', { name: 'Save' })).toHaveCount(0);
+    // The page's fields (shown with nothing selected) are locked.
+    await expect(field(viewerPage, 'Page name (FR)')).not.toBeEditable();
+    await expect(field(viewerPage, 'Search title (FR)')).not.toBeEditable();
+  } finally {
+    await context.close();
+  }
 });

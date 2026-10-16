@@ -95,12 +95,14 @@ function rootOps(spec: SiteSpec, pageId: string, root: PageRootProps): BaseOpera
   const index = spec.pages.indexOf(page);
   const ops: BaseOperation[] = [];
   const titleChanged = !deepEqual(page.title, root.title);
-  if (titleChanged || page.slug !== root.slug) {
+  // A cleared field gives no slug: the page keeps "" (the home page's) rather than an undefined one.
+  const slug = root.slug ?? '';
+  if (titleChanged || page.slug !== slug) {
     ops.push({
       op: 'renamePage',
       pageId,
       title: structuredClone(root.title),
-      ...(page.slug !== root.slug ? { slug: root.slug } : {}),
+      ...(page.slug !== slug ? { slug } : {}),
     });
   }
   ops.push(...textOps(['pages', index, 'seo', 'title'], page.seo.title, root.seoTitle));

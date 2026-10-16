@@ -13,7 +13,8 @@ import { SiteSpecInvalidError } from '../domain/errors.ts';
 import type { SiteHosting } from './ports.ts';
 
 // Every spec that becomes a version, or is published, passes here (BF-035): upcast to the current schema version,
-// then the BF-033 validators. Errors refuse it (422, each at its path with its code); warnings are kept with it.
+// then the BF-033 validators. Errors refuse it (422, each at its path with its code) except, for a draft, the
+// `DRAFT_ERRORS` below; warnings and those errors are kept with it.
 // DECISION(BF-035): facts validation (strict mode) waits for the fact registry (BF-040), which is not stored yet.
 // DECISION(BF-037): a version (an editor's save) may keep errors of content still being written — a missing
 // translation, low contrast, a block's missing image — stored with it; publishing refuses them. Errors of shape,

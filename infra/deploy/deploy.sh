@@ -37,10 +37,12 @@ export IMAGE_REGISTRY="${IMAGE_REGISTRY:-$(env_value IMAGE_REGISTRY)}"
 : "${SITES_BASE_DOMAIN:?SITES_BASE_DOMAIN must be set in .env}"
 # The repository's local-only defaults (`bf_local_only…`, public in git) never reach a server: a copied local file
 # would let anyone forge view tokens or read the database. Names only, never values.
-for file in .env app.env caddy.env backup.env intel.env; do
-  if [ -f "$file" ] && grep -q 'local_only' "$file"; then
-    names="$(sed -n 's/^\([A-Za-z0-9_]*\)=.*local_only.*/\1/p' "$file" | tr '\n' ' ')"
-    echo "refusing to deploy: $file holds local-only defaults: ${names:-?}" >&2
+# Assignments only (`.env.example`, where env files start from, names them in comments).
+local_only='^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=.*local_only'
+for file in .env app.env caddy.env backup.env intel.env reacher.env; do
+  if [ -f "$file" ] && grep -Eq "$local_only" "$file"; then
+    names="$(sed -En "s/${local_only}.*/\\2/p" "$file" | tr '\n' ' ')"
+    echo "refusing to deploy: $file holds local-only defaults: ${names}" >&2
     exit 1
   fi
 done

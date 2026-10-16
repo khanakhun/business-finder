@@ -3,7 +3,8 @@
 // from .lighthouseci/ (git-ignored): under WSL chrome-launcher writes its profile to a Windows-style relative path.
 // DECISION(BF-034): Lighthouse CI runs through `pnpm dlx @lhci/cli@<pinned>` (package.json), out of the lockfile: its
 // dependency tree is resolved at run time, unscanned. Accepted: it audits our local static pages only, in a job with
-// read-only contents and no secrets.
+// read-only contents and no repository secret; on pushes to main the job still holds the Actions cache token (the
+// shared pnpm store), a risk accepted until Lighthouse moves to a job without the setup cache.
 const { chromium } = require('@playwright/test');
 
 const port = 4412;

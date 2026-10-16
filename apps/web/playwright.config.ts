@@ -27,12 +27,14 @@ export default defineConfig({
       // X-Forwarded-For (e2e/users.ts nextClientIp) separates rate-limit buckets. Never set this in production.
       // FAKE_CONNECTION_TESTS: provider connection tests pass without calling providers (refused in production).
       // The fake discovery provider (fixture businesses, no cost, no network) backs the search e2e (BF-023);
-      // the fake site intel (a readable site derived from the URL, no crawl) the enrichment e2e (BF-027).
+      // the fake site intel (a readable site derived from the URL, no crawl) the enrichment e2e (BF-027), and the
+      // fake e-mail verifier (a verdict from the address, no SMTP or DNS) the contacts e2e (BF-028).
       env: {
         AUTH_TRUSTED_PROXIES: '127.0.0.1,::1',
         FAKE_CONNECTION_TESTS: 'true',
         FAKE_DISCOVERY_PROVIDER: 'true',
         FAKE_SITE_INTEL: 'true',
+        FAKE_EMAIL_VERIFIER: 'true',
       },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
@@ -41,7 +43,7 @@ export default defineConfig({
     {
       // Outbox relay and event subscribers (notifications reach the bell through the worker).
       command: 'pnpm --filter @bf/api start:worker',
-      env: { FAKE_DISCOVERY_PROVIDER: 'true', FAKE_SITE_INTEL: 'true' },
+      env: { FAKE_DISCOVERY_PROVIDER: 'true', FAKE_SITE_INTEL: 'true', FAKE_EMAIL_VERIFIER: 'true' },
       url: workerMetricsUrl,
       reuseExistingServer: !ci,
       timeout: 60_000,

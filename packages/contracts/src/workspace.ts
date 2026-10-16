@@ -42,6 +42,8 @@ export const FEATURE_FLAGS = {
   autoSend: { default: false, env: 'FEATURE_AUTO_SEND' },
   codingEngines: { default: true, env: 'FEATURE_CODING_ENGINES' },
   mapsScraper: { default: false, env: 'FEATURE_MAPS_SCRAPER' },
+  /** Guess personal addresses from a published name (BF-028): off by default; never used for outreach unverified. */
+  emailPatternGuessing: { default: false },
   semanticSearch: { default: true },
 } as const satisfies Record<string, { readonly default: boolean; readonly env?: string }>;
 export type FeatureFlag = keyof typeof FEATURE_FLAGS;
@@ -200,6 +202,13 @@ export const SECRET_DEFINITIONS = {
     allowGlobalFallback: true,
     globalEnv: 'HF_TOKEN',
     validatePattern: '^hf_[0-9A-Za-z]{20,}$',
+  },
+  zerobounce: {
+    provider: 'zerobounce',
+    description: 'ZeroBounce API key (e-mail verification when SMTP port 25 is blocked).',
+    allowGlobalFallback: true,
+    globalEnv: 'ZEROBOUNCE_API_KEY',
+    validatePattern: '^[0-9a-f]{32}$',
   },
   unsplash: {
     provider: 'unsplash',

@@ -30,6 +30,13 @@ run's row lock the engine skips steps whose dependency failed, enqueues the read
 dependencies are terminal) and finalizes the run. This is the same DB-as-truth pattern as discovery runs, and the
 reconciler rebuilds lost jobs from the rows. Flows remain an option where the tree is genuinely known up front.
 
+BF-028 adds two step capabilities without changing that model: **optional dependencies** (a subset of `depends_on` that
+only orders a step — `email_verify` after `site_intel`, yet still run when there is no website) and **deferral**
+(`StepDeferredError`: the step is released to `queued` with a `not_before`, without using an attempt; `deferrals` counts
+them and the step bounds itself). Whatever stops an attempt, what it already spent and changed is booked first on the
+step and the run (`StepDeferredError` / `StepInterruptedError` carry it), so a retry answered from a cache never hides
+a cost. Like rate-limit waits, a deferral never holds a worker.
+
 ## Alternatives considered
 
 | Option | Why not (now) |

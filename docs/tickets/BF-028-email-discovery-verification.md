@@ -62,10 +62,59 @@ Every email contact is classified (generic/personal/department, free-mail, dispo
 - Contract: recorded Reacher responses (safe, invalid, catch-all, timeout).
 
 ## Acceptance criteria
-- [ ] Email contacts classified with subtype, free-mail, disposable, publication context.
-- [ ] Verifier chain (Reacher → commercial → DNS) with caching and per-domain politeness.
-- [ ] `email_verify` step registered; on-demand and bulk verification work.
-- [ ] SMTP port diagnostic available; contacts UI shows statuses.
+- [x] Email contacts classified with subtype, free-mail, disposable, publication context.
+- [x] Verifier chain (Reacher → commercial → DNS) with caching and per-domain politeness.
+- [x] `email_verify` step registered; on-demand and bulk verification work.
+- [x] SMTP port diagnostic available; contacts UI shows statuses.
+
+## Implementation notes (BF-028)
+- **Contracts**: `email-verification.ts` (verifier ids, published page kinds / found-as, `PublishedContext`,
+  `EmailVerificationDetails` with `checkedVia` incl. `classification`, `SmtpPortDiagnostic`); `Contact` gains
+  `verificationDetails`, `isFreeMail`, `isDisposable`, `onWebsiteDomain`, `publishedContext`; `SourceRecord.contactPages`
+  items carry `pageKind`/`foundAs`; `EnrichmentSettings.emailVerifiers` (ordered, unique); flag `emailPatternGuessing`
+  (default off); secret `zerobounce` (deployment fallback `ZEROBOUNCE_API_KEY`).
+- **Schema** (migration 0020, additive): `business_contacts.verification_details`, `published_context`, `is_free_mail`;
+  `enrichment_steps.deferrals`; `enrichment_email_verdicts` (key `sha256(lower(email))` — the address is never stored —
+  status, details, cost, checked/expires, inconclusive streak; purged nightly a full TTL after expiry, so the streak
+  survives for the backoff).
+- **Classification** (business-graph domain): `EmailAddress` FR/EN dictionaries (+ `bureau`), free-mail list (data,
+  FR overseas and Caribbean ISPs included), disposable list (CC0 `disposable-email-domains` pinned to a commit, regenerated
+  by `pnpm email:disposable-update [commit]`, subdomains match), `matchesWebsiteDomain`. Free-mail is stored on write;
+  disposable and own-domain are derived on read (also for contacts stored before BF-028).
+- **Publication context**: site intel's email source and page kind → `contactPages` → normalization → survivorship →
+  `Business.addContact` → upsert (`COALESCE(excluded, existing)`); a later crawl that sees the address on another page
+  refreshes it. `footer` exists in the enum but nothing produces it yet (site intel reports one page per address).
+- **Verifier chain** (enrichment, Chain of Responsibility + Adapters + Decorators): Reacher (`POST /v1/check_email`,
+  lenient parsing of failed sections, `x-reacher-secret`, per-process concurrency `EMAIL_VERIFY_CONCURRENCY`) always
+  behind `PoliteMailServerVerifier` (resolves MX itself, refuses non-public mail-server addresses, tokens per mail
+  server: a workspace's half share, then the server's, `EMAIL_VERIFY_PER_MAIL_SERVER_PER_MINUTE`); ZeroBounce
+  (`GET /v2/validate`, key from the vault, only conclusive answers billed, guarded by the workspace's actual monthly
+  spend, 4xx/429 kept out of the shared breaker); DNS (MX, null MX, implicit MX). Status mapping is pure
+  (`fromReacher`/`fromZeroBounce`/`fromDns`, recorded-shape fixtures). `EmailVerificationService`: suppression port
+  (no-op until BF-049, warned about in production) → cache (DNS-only `unknown` never hides a mailbox check) →
+  disposable classification → chain. A transient failure without a conclusive answer gives a *provisional* answer
+  (never cached, due again within the hour); conclusive verdicts are never downgraded or replaced by older ones. Paid
+  checks see the step's unbooked spend in the budget guard.
+- **Step** `email_verify` (optional dependency on `site_intel`; `provider` cost; estimate = known addresses, or up to
+  20 more when there is a website): no address stops the others (permanent failures counted, transient ones due again
+  within the hour); only a stop (cancel, shutdown) interrupts it with what it spent (`StepInterruptedError`); busy
+  mail servers are left for last and the step defers once for them (`StepDeferredError`,
+  at most 6 times, then finishes with `recheckAt`); `recheckAt` also marks inconclusive verdicts, and the nightly refresh
+  picks those up. Engine additions: optional dependencies (planner, readiness, `withoutOptionalDependencies`), deferral
+  counter, spend booked on every exit path (`addSpend`).
+- **Pattern guessing**: DECISION(BF-028) — runs only with the workspace flag AND a `PersonalAddressPolicy` that allows
+  personal addresses for the business (deny-all until BF-049), on the site's registrable domain (private suffixes
+  respected) when a published address already uses it, never webmail; candidates are checked uncached and only counted.
+- **API**: `POST /v1/contacts/:id/verify` (`business:write`; 404 across workspaces, 422 for non-email) starts an
+  `email_verify`-only run (no crawl); bulk is `POST /v1/enrichment/bulk` with `steps: ["email_verify"]`;
+  `POST /v1/workspace/diagnostics/smtp-port` (`settings:manage`, 5/min) opens a TCP connection to gmail.com's MX on 25.
+- **Web**: contacts tab (shared mailbox / person / department, webmail, disposable, business domain, "Found on the
+  contact page", verdict tooltip, Verify with "already verified recently"), Settings → Integrations (ZeroBounce key,
+  verifier order and switches, port-25 check), EN/FR.
+- **Telemetry**: request URLs in spans are redacted (keys and addresses in query strings) for every service;
+  `bf_email_verifications_total`, `bf_email_verifier_failures_total`, span `enrichment.email_verify`.
+- **Not demonstrated**: a live Reacher check (no host with outbound port 25 here) — the chain falls back to ZeroBounce
+  or DNS; Reacher is covered by recorded-shape responses.
 
 ## Agent prompt
 ```text

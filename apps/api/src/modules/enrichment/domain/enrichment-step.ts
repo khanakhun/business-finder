@@ -18,7 +18,10 @@ export interface EnrichmentSubject {
 export interface StepOutput {
   readonly finishedAt: Date;
   readonly inputHash: string | null;
-  /** Pointers to what the step produced (snapshot ids, artifact keys), never page content. */
+  /**
+   * Pointers to what the step produced (snapshot ids, artifact keys), never page content. An ISO `recheckAt` makes
+   * the output stale at that time for the nightly refresh (and the step's `isStale`).
+   */
   readonly outputRef: Readonly<Record<string, unknown>> | null;
 }
 
@@ -33,6 +36,8 @@ export interface StepExecution {
   readonly dependencies: ReadonlyMap<EnrichmentStepId, StepOutput>;
   /** Aborted when the run is cancelled or the job's lock is lost. */
   readonly signal: AbortSignal;
+  /** Times this step already deferred itself (StepDeferredError). */
+  readonly deferrals: number;
 }
 
 export type StepResult =
@@ -55,6 +60,11 @@ export interface StepRateLimit {
 export interface EnrichmentStep {
   readonly id: EnrichmentStepId;
   readonly dependsOn: readonly EnrichmentStepId[];
+  /**
+   * Dependencies (among `dependsOn`) that only order this step: it runs after them whatever their outcome — a
+   * skipped or failed one never skips it (e.g. e-mails known without a website are still verified).
+   */
+  readonly optionalDependencies?: readonly EnrichmentStepId[];
   readonly costCategory: EnrichmentCostCategory;
   /** Days an output stays fresh (configuration). */
   readonly ttlDays: number;
@@ -68,4 +78,43 @@ export interface EnrichmentStep {
   /** Overrides the TTL rule when a step knows better (e.g. an output older than its source). */
   isStale?(last: StepOutput, now: Date): boolean;
   execute(execution: StepExecution): Promise<StepResult>;
+}
+
+/** What a step spent and changed before it stopped early (booked on the step and its run whatever happens next). */
+export interface StepSpend {
+  readonly costUsd: number;
+  readonly changedFields: readonly string[];
+}
+
+/**
+ * Thrown by a step that has to wait (a mail server's politeness bucket is empty): the engine puts it back in the queue
+ * for `retryAfterMs` without using an attempt, after booking what it already spent and changed. Work done before stays
+ * done — a step must make re-running safe (BF-028). Steps bound their own deferrals (`StepExecution.deferrals`).
+ */
+export class StepDeferredError extends Error implements StepSpend {
+  constructor(
+    readonly retryAfterMs: number,
+    readonly costUsd: number,
+    readonly changedFields: readonly string[] = [],
+    message = 'Step deferred',
+  ) {
+    super(message);
+    this.name = 'StepDeferredError';
+  }
+}
+
+/**
+ * Wraps the error that stopped a step after it had spent money or changed facts (a paid check, then a failure): the
+ * engine books the spend, then handles `cause` as usual (retry, wait, fail) — so a retry served from a cache never
+ * hides a cost (BF-028).
+ */
+export class StepInterruptedError extends Error implements StepSpend {
+  constructor(
+    override readonly cause: unknown,
+    readonly costUsd: number,
+    readonly changedFields: readonly string[] = [],
+  ) {
+    super('Step interrupted', { cause });
+    this.name = 'StepInterruptedError';
+  }
 }

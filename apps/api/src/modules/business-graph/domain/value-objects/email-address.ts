@@ -24,6 +24,7 @@ const GENERIC = new Set([
   'ventes',
   'admin',
   'office',
+  'bureau',
   'team',
   'equipe',
   'support',

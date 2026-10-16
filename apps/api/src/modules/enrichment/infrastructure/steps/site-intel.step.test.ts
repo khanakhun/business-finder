@@ -24,6 +24,7 @@ const execution = (overrides: Partial<StepExecution> = {}): StepExecution => ({
   inputHash: 'h',
   dependencies: new Map(),
   signal: new AbortController().signal,
+  deferrals: 0,
   ...overrides,
 });
 

@@ -2171,6 +2171,20 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
             "type": "string"
           },
+          "isDisposable": {
+            "description": "email: a throw-away (disposable) domain.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "isFreeMail": {
+            "description": "email: a free webmail domain (gmail.com, orange.fr…).",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "lastSeenAt": {
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
@@ -2179,12 +2193,30 @@
           "normalizedValue": {
             "type": "string"
           },
+          "onWebsiteDomain": {
+            "description": "email: on the business’s own website domain; null without a website.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "personName": {
             "description": "Only when published by the business itself (data minimization).",
             "type": [
               "string",
               "null"
             ]
+          },
+          "publishedContext": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublishedContext"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "email: where the business published it on its own site."
           },
           "publishedOnSite": {
             "type": "boolean"
@@ -2225,6 +2257,17 @@
           "value": {
             "type": "string"
           },
+          "verificationDetails": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmailVerificationDetails"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "email: what the verifier saw."
+          },
           "verificationStatus": {
             "enum": [
               "unknown",
@@ -2262,6 +2305,11 @@
           "confidence",
           "verificationStatus",
           "verifiedAt",
+          "verificationDetails",
+          "isFreeMail",
+          "isDisposable",
+          "onWebsiteDomain",
+          "publishedContext",
           "firstSeenAt",
           "lastSeenAt"
         ],
@@ -3631,6 +3679,83 @@
           }
         ]
       },
+      "EmailVerificationDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "checkedVia": {
+            "enum": [
+              "reacher",
+              "zerobounce",
+              "dns",
+              "classification"
+            ],
+            "type": "string"
+          },
+          "isCatchAll": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "isDisposable": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "isRoleAccount": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "mxAcceptsMail": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mail provider, when the verifier knows it."
+          },
+          "reachable": {
+            "description": "The verifier’s own verdict.",
+            "enum": [
+              "safe",
+              "risky",
+              "invalid",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "smtpCanConnect": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "reachable",
+          "isCatchAll",
+          "isDisposable",
+          "isRoleAccount",
+          "mxAcceptsMail",
+          "smtpCanConnect",
+          "provider",
+          "checkedVia"
+        ],
+        "type": "object"
+      },
       "EnrichBusinessRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3869,6 +3994,20 @@
       "EnrichmentSettings": {
         "additionalProperties": false,
         "properties": {
+          "emailVerifiers": {
+            "description": "E-mail verifiers to try, in order (BF-028); `dns` (no mailbox check) is the usual last resort.",
+            "items": {
+              "enum": [
+                "reacher",
+                "zerobounce",
+                "dns"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array"
+          },
           "monthlyBudgetUsd": {
             "anyOf": [
               {
@@ -3891,6 +4030,7 @@
         },
         "required": [
           "monthlyBudgetUsd",
+          "emailVerifiers",
           "nightlyRefreshLimit"
         ],
         "type": "object"
@@ -4152,6 +4292,7 @@
             "autoSend",
             "codingEngines",
             "mapsScraper",
+            "emailPatternGuessing",
             "semanticSearch"
           ],
           "type": "string"
@@ -5397,6 +5538,7 @@
                 "autoSend",
                 "codingEngines",
                 "mapsScraper",
+                "emailPatternGuessing",
                 "semanticSearch"
               ],
               "type": "string"
@@ -5405,6 +5547,7 @@
               "autoSend",
               "codingEngines",
               "mapsScraper",
+              "emailPatternGuessing",
               "semanticSearch"
             ],
             "type": "object"
@@ -6357,6 +6500,55 @@
           "calls",
           "results",
           "costUsd"
+        ],
+        "type": "object"
+      },
+      "PublishedContext": {
+        "additionalProperties": false,
+        "properties": {
+          "foundAs": {
+            "anyOf": [
+              {
+                "enum": [
+                  "mailto",
+                  "text",
+                  "jsonld",
+                  "cfemail",
+                  "obfuscated"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pageKind": {
+            "enum": [
+              "contact",
+              "home",
+              "footer",
+              "legal",
+              "other"
+            ],
+            "type": "string"
+          },
+          "pageUrl": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "pageUrl",
+          "pageKind",
+          "foundAs"
         ],
         "type": "object"
       },
@@ -7321,6 +7513,7 @@
               "openai",
               "foursquare",
               "huggingface",
+              "zerobounce",
               "unsplash"
             ],
             "type": "string"
@@ -7415,6 +7608,67 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "SmtpPortDiagnostic": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "enum": [
+                  "timeout",
+                  "refused",
+                  "unreachable",
+                  "dns",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "host": {
+            "anyOf": [
+              {
+                "maxLength": 253,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mail server tried (an MX of a large mail provider)."
+          },
+          "latencyMs": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reachable": {
+            "type": "boolean"
+          },
+          "reacherConfigured": {
+            "description": "Whether this deployment has a Reacher backend (it needs port 25 to check mailboxes).",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "reachable",
+          "host",
+          "latencyMs",
+          "error",
+          "reacherConfigured"
+        ],
         "type": "object"
       },
       "SplitBusinessRequest": {
@@ -7856,6 +8110,20 @@
           "enrichment": {
             "additionalProperties": false,
             "properties": {
+              "emailVerifiers": {
+                "description": "E-mail verifiers to try, in order (BF-028); `dns` (no mailbox check) is the usual last resort.",
+                "items": {
+                  "enum": [
+                    "reacher",
+                    "zerobounce",
+                    "dns"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 3,
+                "minItems": 1,
+                "type": "array"
+              },
               "monthlyBudgetUsd": {
                 "anyOf": [
                   {
@@ -13850,6 +14118,107 @@
         ]
       }
     },
+    "/v1/contacts/{id}/verify": {
+      "post": {
+        "operationId": "verifyContact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichmentRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Verify an e-mail contact now: starts an `email_verify` enrichment run for its business (or returns the run already open, 200). Addresses are checked at most once per TTL; fresh verdicts come from the cache.",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
     "/v1/discovery-runs": {
       "get": {
         "operationId": "listDiscoveryRuns",
@@ -18712,6 +19081,68 @@
         "summary": "Members of the active workspace by name (owner and assignee pickers)",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/v1/workspace/diagnostics/smtp-port": {
+      "post": {
+        "operationId": "diagnoseSmtpPort",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpPortDiagnostic"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Can this deployment reach mail servers on port 25? Opens a TCP connection to a large provider’s MX (no mail sent). Without it, Reacher cannot check mailboxes: use the commercial verifier.",
+        "tags": [
+          "enrichment"
         ]
       }
     },

@@ -1,6 +1,7 @@
-import type { ContactType, SourceProvider } from '@bf/contracts';
+import type { ContactType, PublishedContext, SourceProvider } from '@bf/contracts';
 import { InvalidValueError } from './errors.ts';
 import { EmailAddress } from './value-objects/email-address.ts';
+import { isFreeMailDomain } from './value-objects/email-classification.ts';
 import { PhoneNumber } from './value-objects/phone-number.ts';
 import { WebsiteUrl } from './value-objects/website-url.ts';
 
@@ -16,6 +17,10 @@ export interface BusinessContactProps {
   readonly source: SourceProvider;
   readonly sourceUrl: string | null;
   readonly publishedOnSite: boolean;
+  /** E-mails: where the business's own site shows it (BF-028). */
+  readonly publishedContext: PublishedContext | null;
+  /** E-mails: a free webmail domain; null for other contact types. */
+  readonly isFreeMail: boolean | null;
   readonly confidence: number;
   /** The workspace that added a manual contact (attribution only, never shown to other workspaces). */
   readonly submittedByOrgId: string | null;
@@ -42,11 +47,15 @@ export function normalizeContact(
   type: ContactType,
   raw: string,
   regionHint: string | null,
-): { normalizedValue: string; subtype: string } {
+): { normalizedValue: string; subtype: string; isFreeMail?: boolean } {
   switch (type) {
     case 'email': {
       const email = EmailAddress.parse(raw);
-      return { normalizedValue: email.value, subtype: email.subtype };
+      return {
+        normalizedValue: email.value,
+        subtype: email.subtype,
+        isFreeMail: isFreeMailDomain(email.domain),
+      };
     }
     case 'phone':
     case 'whatsapp': {

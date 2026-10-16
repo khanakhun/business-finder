@@ -1,11 +1,14 @@
 import type {
+  EmailVerifierId,
   EnrichmentRunStatus,
   EnrichmentSkipReason,
   EnrichmentStepId,
   EnrichmentStepStatus,
   EnrichmentTrigger,
   SiteIntel,
+  SMTP_PROBE_ERRORS,
 } from '@bf/contracts';
+import type { EmailCheck } from '../domain/email-verification.ts';
 import type { EnrichmentSubject, StepOutput } from '../domain/enrichment-step.ts';
 
 // Ports of the enrichment module (BF-027).
@@ -36,6 +39,8 @@ export interface StepRecord {
   readonly dependsOn: readonly EnrichmentStepId[];
   readonly status: EnrichmentStepStatus;
   readonly attempt: number;
+  /** Times the step deferred itself (not attempts). */
+  readonly deferrals: number;
   readonly inputHash: string | null;
   readonly outputRef: Readonly<Record<string, unknown>> | null;
   readonly estimatedUsd: number;
@@ -107,7 +112,15 @@ export interface EnrichmentRepository {
   latestOutputsMany(businessIds: readonly string[]): Promise<Map<string, Map<EnrichmentStepId, StepOutput>>>;
   /** Estimated enrichment spend of a workspace this calendar month (UTC): costs of finished runs, estimates
    * of open ones. */
-  monthSpendUsd(organizationId: string, at: Date): Promise<number>;
+  /**
+   * The workspace's enrichment spend this month: finished runs' costs plus open runs' estimates (or costs so far,
+   * when higher); `actualOnly` counts only what was actually spent.
+   */
+  monthSpendUsd(
+    organizationId: string,
+    at: Date,
+    options?: { readonly actualOnly?: boolean },
+  ): Promise<number>;
   /** queued → running; false when the run is not queued. */
   markRunning(runId: string, at: Date): Promise<boolean>;
   /**
@@ -126,8 +139,18 @@ export interface EnrichmentRepository {
     stepRowId: string,
     error: string | null,
     at: Date,
-    options?: { readonly refund?: boolean; readonly notBefore?: Date },
+    options?: {
+      readonly refund?: boolean;
+      readonly notBefore?: Date;
+      /** The step deferred itself: counted in `deferrals`. */
+      readonly deferred?: boolean;
+    },
   ): Promise<StepRecord | undefined>;
+  /**
+   * Books what an attempt spent and changed before it stopped (whatever the step's or run's status, so a cancelled
+   * run still accounts for money already spent): adds to the step's and run's cost and the run's changed fields.
+   */
+  addSpend(stepRowId: string, costUsd: number, changedFields: readonly string[]): Promise<void>;
   /** running → terminal, adding its cost and changed fields to the run; false when it was not running. */
   completeStep(stepRowId: string, completion: StepCompletion, at: Date): Promise<boolean>;
   /** queued → skipped for these steps. */
@@ -155,6 +178,8 @@ export interface EnrichmentRepository {
     organizationId: string,
     steps: readonly { readonly step: EnrichmentStepId; readonly staleBefore: Date }[],
     limit: number,
+    /** An output whose `outputRef.recheckAt` is before this is stale too (inconclusive checks, BF-028). */
+    now: Date,
   ): Promise<string[]>;
 }
 export const ENRICHMENT_REPOSITORY = Symbol('EnrichmentRepository');
@@ -264,3 +289,70 @@ export interface NoSolicitationMarker {
   readonly snippet: string | null;
   readonly clearedAt: Date | null;
 }
+
+// E-mail verification (BF-028).
+
+export type SmtpProbeError = (typeof SMTP_PROBE_ERRORS)[number];
+
+/** One verifier of the chain (Adapter): Reacher, a commercial API, DNS. */
+export interface EmailVerifier {
+  readonly id: EmailVerifierId;
+  /** Whether this deployment (and workspace: its key) can use it at all. */
+  available(organizationId: string, context?: { readonly pendingUsd?: number }): Promise<boolean>;
+  /** Checks one normalized address. Throws on failure (transient errors are typed `ExternalServiceError`). */
+  verify(
+    email: string,
+    context: { readonly organizationId: string; readonly signal: AbortSignal },
+  ): Promise<EmailCheck>;
+}
+export const EMAIL_VERIFIER_LIST = Symbol('EmailVerifierList');
+
+export interface CachedVerdict {
+  readonly check: EmailCheck;
+  readonly checkedAt: Date;
+  readonly expiresAt: Date;
+  /** Consecutive inconclusive checks (backoff); 0 after a conclusive one. */
+  readonly inconclusiveStreak: number;
+}
+
+/**
+ * Verdicts by address, shared by every workspace: a mailbox is asked at most once per TTL. Implementations key by a
+ * hash of the address (never stored in clear).
+ */
+export interface EmailVerdictCache {
+  get(email: string): Promise<CachedVerdict | undefined>;
+  /** Stores a verdict unless a newer one is already there. */
+  put(email: string, verdict: CachedVerdict): Promise<void>;
+  /** Deletes verdicts that expired before `before` (retention); returns how many. */
+  purgeExpired(before: Date): Promise<number>;
+}
+export const EMAIL_VERDICT_CACHE = Symbol('EmailVerdictCache');
+
+/**
+ * Addresses that must not be checked (unsubscribed, objected): looked up before any verifier is called. No-op
+ * until outreach suppression lists exist (BF-049).
+ */
+export interface EmailSuppressionCheck {
+  isSuppressed(organizationId: string, email: string): Promise<boolean>;
+}
+export const EMAIL_SUPPRESSION = Symbol('EmailSuppressionCheck');
+
+/**
+ * Whether personal addresses may be contacted for this business (its jurisdiction and the workspace's choices):
+ * pattern guessing only runs when they may. Deny-all until outreach compliance exists (BF-049).
+ */
+export interface PersonalAddressPolicy {
+  allowsPersonalAddresses(organizationId: string, businessId: string): Promise<boolean>;
+}
+export const PERSONAL_ADDRESS_POLICY = Symbol('PersonalAddressPolicy');
+
+/** Port 25 towards a large mail provider's MX (Settings → Integrations diagnostic). */
+export interface SmtpPortProbe {
+  probe(signal: AbortSignal): Promise<{
+    readonly reachable: boolean;
+    readonly host: string | null;
+    readonly latencyMs: number | null;
+    readonly error: SmtpProbeError | null;
+  }>;
+}
+export const SMTP_PORT_PROBE = Symbol('SmtpPortProbe');

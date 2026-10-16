@@ -233,8 +233,24 @@ describe('Business.addContact', () => {
       value: 'Contact@Example.com',
       normalizedValue: 'contact@example.com',
       subtype: 'generic',
+      isFreeMail: false,
+      publishedContext: null,
     });
-    expect(business.pullNewContacts()).toHaveLength(2);
+    expect(phone.isFreeMail).toBeNull();
+    const webmail = business.addContact({
+      id: OTHER,
+      type: 'email',
+      value: 'salon.ondine@orange.fr',
+      source: 'website',
+      publishedContext: {
+        pageUrl: 'https://www.example.com/contact',
+        pageKind: 'contact',
+        foundAs: 'mailto',
+      },
+      confidence: 0.9,
+    });
+    expect(webmail).toMatchObject({ isFreeMail: true, publishedContext: { pageKind: 'contact' } });
+    expect(business.pullNewContacts()).toHaveLength(3);
     expect(business.pullNewContacts()).toHaveLength(0);
   });
 

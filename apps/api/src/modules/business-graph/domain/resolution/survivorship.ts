@@ -1,4 +1,10 @@
-import { type ContactType, type GoldenFieldName, providerRank, type SourceProvider } from '@bf/contracts';
+import {
+  type ContactType,
+  type GoldenFieldName,
+  type PublishedContext,
+  providerRank,
+  type SourceProvider,
+} from '@bf/contracts';
 import type { FieldValue } from '../business.entity.ts';
 import { BusinessName } from '../value-objects/business-name.ts';
 import { GeoPoint } from '../value-objects/geo-point.ts';
@@ -76,6 +82,8 @@ export interface GoldenContact {
   readonly source: SourceProvider;
   readonly sourceUrl: string | null;
   readonly publishedOnSite: boolean;
+  /** E-mails the business's own site shows: the page, its kind and how the address appeared (BF-028). */
+  readonly publishedContext: PublishedContext | null;
   readonly confidence: number;
   /** Set for manual contacts: the workspace that entered them. */
   readonly submittedByOrgId: string | null;
@@ -145,14 +153,19 @@ export function unionContacts(sources: readonly NormalizedSource[]): GoldenConta
   for (const source of ordered) {
     const fromSite = source.provider === 'website';
     const siteUrl = fromSite ? (source.website?.canonical ?? null) : null;
-    const entries: Array<[ContactType, string, string | undefined]> = [
-      ...source.phones.map((p) => ['phone', p.e164, p.pageUrl] as [ContactType, string, string | undefined]),
-      ...source.emails.map((e) => ['email', e.value, e.pageUrl] as [ContactType, string, string | undefined]),
-      ...source.socials.map((s) => ['social', s.url, s.pageUrl] as [ContactType, string, string | undefined]),
+    type Entry = [ContactType, string, string | undefined, NormalizedSource['emails'][number] | undefined];
+    const entries: Entry[] = [
+      ...source.phones.map((p): Entry => ['phone', p.e164, p.pageUrl, undefined]),
+      ...source.emails.map((e): Entry => ['email', e.value, e.pageUrl, e]),
+      ...source.socials.map((s): Entry => ['social', s.url, s.pageUrl, undefined]),
     ];
-    for (const [type, value, pageUrl] of entries) {
+    for (const [type, value, pageUrl, email] of entries) {
       // The page that shows it, when the crawl says (else the site itself).
       const sourceUrl = fromSite ? (pageUrl ?? siteUrl) : null;
+      const publishedContext: PublishedContext | null =
+        fromSite && email
+          ? { pageUrl: sourceUrl, pageKind: email.pageKind ?? 'other', foundAs: email.foundAs ?? null }
+          : null;
       const key = `${type}\u0000${value.toLowerCase()}`;
       const existing = contacts.get(key);
       if (!existing) {
@@ -162,6 +175,7 @@ export function unionContacts(sources: readonly NormalizedSource[]): GoldenConta
           source: source.provider,
           sourceUrl,
           publishedOnSite: fromSite,
+          publishedContext,
           confidence: source.confidence,
           submittedByOrgId: source.provider === 'manual' ? (source.submittedByOrgId ?? null) : null,
         });
@@ -170,6 +184,7 @@ export function unionContacts(sources: readonly NormalizedSource[]): GoldenConta
           ...existing,
           publishedOnSite: existing.publishedOnSite || fromSite,
           sourceUrl: existing.sourceUrl ?? sourceUrl,
+          publishedContext: existing.publishedContext ?? publishedContext,
           confidence: Math.max(existing.confidence, source.confidence),
         });
       }

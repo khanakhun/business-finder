@@ -157,7 +157,7 @@ export class AddContactCommand {
       submittedByOrgId: organizationId,
     });
     const existing = await this.contacts.find(businessId, added.type, added.normalizedValue);
-    if (existing) return toContact(existing);
+    if (existing) return toContact(existing, business.snapshot().websiteHost);
     await this.businesses.save(business);
     await recordEvents(this.events, business);
     await this.audit.record({
@@ -168,6 +168,6 @@ export class AddContactCommand {
     });
     const saved = await this.contacts.find(businessId, added.type, added.normalizedValue);
     if (!saved) throw new Error(`Contact ${added.id} missing after save`);
-    return toContact(saved);
+    return toContact(saved, business.snapshot().websiteHost);
   }
 }

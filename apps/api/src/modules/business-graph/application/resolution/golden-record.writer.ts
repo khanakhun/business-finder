@@ -1,4 +1,4 @@
-import { newId } from '@bf/contracts';
+import { newId, type PublishedContext } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventRecorder } from '../../../platform/events/event-recorder.ts';
 import { Business } from '../../domain/business.entity.ts';
@@ -15,6 +15,9 @@ import {
 import { recordEvents } from '../record-events.ts';
 import { TaxonomyCache } from '../taxonomy/taxonomy-cache.ts';
 import { RESOLUTION_REPOSITORY, type ResolutionRepository } from './ports.ts';
+
+const samePublication = (a: PublishedContext | null, b: PublishedContext) =>
+  a !== null && a.pageUrl === b.pageUrl && a.pageKind === b.pageKind && a.foundAs === b.foundAs;
 
 /** Accepts every proposed value: the winner was already chosen by `computeGolden`. */
 const ALWAYS = () => true;
@@ -98,6 +101,9 @@ export class GoldenRecordWriter {
       if (
         current &&
         (current.publishedOnSite || !contact.publishedOnSite) &&
+        // A crawl that sees it elsewhere now (another page, another form) refreshes where it is published.
+        (contact.publishedContext === null ||
+          samePublication(current.publishedContext, contact.publishedContext)) &&
         current.confidence >= contact.confidence
       ) {
         continue;
@@ -109,6 +115,7 @@ export class GoldenRecordWriter {
         source: contact.source,
         sourceUrl: contact.sourceUrl,
         publishedOnSite: contact.publishedOnSite,
+        publishedContext: contact.publishedContext,
         confidence: contact.confidence,
         submittedByOrgId: contact.submittedByOrgId,
       });

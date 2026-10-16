@@ -29,6 +29,24 @@ test('stores a provider key: status, last four characters and a connection test'
   await expect(page.getByRole('cell', { name: 'Key added' }).first()).toBeVisible();
 });
 
+test('orders e-mail verifiers and checks the mail server port (BF-028)', async ({ page }) => {
+  await page.goto('/settings/integrations');
+  const section = page.getByRole('region', { name: 'E-mail verification' });
+  await expect(section.getByRole('list', { name: 'Verifiers, in the order they are tried' })).toBeVisible();
+  await section.getByRole('button', { name: 'Move DNS only up' }).click();
+  await expect(page.getByText('E-mail verification saved')).toBeVisible();
+  await expect(section.getByRole('button', { name: 'Move DNS only down' })).toBeEnabled();
+  await section.getByRole('button', { name: 'Check port 25' }).click();
+  // The E2E API answers from a fake probe (FAKE_EMAIL_VERIFIER): nothing is dialled.
+  await expect(section.getByTestId('smtp-port-result')).toContainText(
+    'Port 25 is open (mx.example.test, 12 ms): Reacher can check mailboxes.',
+  );
+  await expect(section.getByText('No Reacher service is configured on this deployment')).toBeVisible();
+  // Restore the default order for other tests.
+  await section.getByRole('button', { name: 'Move DNS only down' }).click();
+  await expect(section.getByRole('button', { name: 'Move DNS only down' })).toBeDisabled();
+});
+
 test('workspace identity and address make outreach ready', async ({ page }) => {
   await page.goto('/settings/workspace');
   await expect(page.getByRole('heading', { level: 1, name: 'Workspace' })).toBeVisible();

@@ -1,4 +1,4 @@
-import type { SiteIntel, SourceRecordInput } from '@bf/contracts';
+import type { PublishedPageKind, SiteIntel, SourceRecordInput } from '@bf/contracts';
 import { getDomain } from 'tldts';
 import type { EnrichmentSubject } from './enrichment-step.ts';
 
@@ -137,7 +137,12 @@ export function websiteSourceRecord(
     socials,
     contactPages: [
       ...phones.map((p) => ({ value: p.e164, pageUrl: p.pageUrl })),
-      ...emails.map((e) => ({ value: e.email, pageUrl: e.pageUrl })),
+      ...emails.map((e) => ({
+        value: e.email,
+        pageUrl: e.pageUrl,
+        pageKind: publishedPageKind(intel, e),
+        foundAs: e.source,
+      })),
     ],
     ...(business?.geo ? { location: business.geo } : {}),
     ...(business?.address
@@ -154,6 +159,19 @@ export function websiteSourceRecord(
       noSolicitation: intel.noSolicitation.detected,
     },
   };
+}
+
+/**
+ * The kind of page an e-mail was published on (compliance: "published for that purpose", BF-049). Crawled page
+ * kinds outside contact/home/legal count as `other`.
+ */
+export function publishedPageKind(
+  intel: Pick<SiteIntel, 'pages'>,
+  email: Pick<SiteIntel['contacts']['emails'][number], 'pageUrl' | 'onContactPage'>,
+): PublishedPageKind {
+  if (email.onContactPage) return 'contact';
+  const kind = intel.pages.find((page) => page.url === email.pageUrl)?.kind;
+  return kind === 'contact' || kind === 'home' || kind === 'legal' ? kind : 'other';
 }
 
 /** Logo and content-image candidates as business media (external URLs; licensed as the owner's site). */

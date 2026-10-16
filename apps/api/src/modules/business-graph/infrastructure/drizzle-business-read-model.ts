@@ -89,7 +89,7 @@ export class DrizzleBusinessReadModel implements BusinessReadModel {
       hours: hours.map((h) => ({ weekday: h.weekday, opensAt: hhmm(h.opensAt), closesAt: hhmm(h.closesAt) })),
       // Stored objects get signed URLs once media storage lands (BF-026+); external URLs are provider links.
       media: media.map((m) => ({ id: m.id, kind: m.kind, license: m.license, url: m.externalUrl })),
-      contacts: contacts.map(toContact),
+      contacts: contacts.map((contact) => toContact(contact, b.websiteHost)),
       orgState: toOrgBusinessState(head.org),
       firstSeenAt: b.firstSeenAt.toISOString(),
       lastSeenAt: b.lastSeenAt.toISOString(),

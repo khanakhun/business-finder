@@ -6,6 +6,7 @@ import {
   type OperatingStatus,
   type PostalAddress as PostalAddressShape,
   type Provenance,
+  type PublishedContext,
   type SourceProvider,
 } from '@bf/contracts';
 import { type BusinessContactProps, normalizeContact } from './business-contact.ts';
@@ -273,6 +274,7 @@ export class Business {
     readonly source: SourceProvider;
     readonly sourceUrl?: string | null;
     readonly publishedOnSite?: boolean;
+    readonly publishedContext?: PublishedContext | null;
     readonly confidence: number;
     readonly submittedByOrgId?: string | null;
   }): BusinessContactProps {
@@ -280,13 +282,15 @@ export class Business {
     if (!(input.confidence >= 0 && input.confidence <= 1)) {
       throw new InvalidValueError('contact', 'Confidence must be between 0 and 1.');
     }
-    const normalized = normalizeContact(input.type, input.value, this.state.countryCode);
+    const { isFreeMail, ...normalized } = normalizeContact(input.type, input.value, this.state.countryCode);
     const contact: BusinessContactProps = {
       id: input.id,
       businessId: this.state.id,
       type: input.type,
       value: input.value.trim(),
       ...normalized,
+      isFreeMail: isFreeMail ?? null,
+      publishedContext: input.type === 'email' ? (input.publishedContext ?? null) : null,
       personName: input.personName?.trim() || null,
       source: input.source,
       sourceUrl: input.sourceUrl ?? null,

@@ -210,7 +210,7 @@ alias dc='docker compose -p bf --project-directory /opt/bf --env-file /opt/bf/.e
 | Roll back by hand | re-run **deploy-staging** with the previous sha (`cat IMAGE_TAG.previous`); on the server: `docker login ghcr.io` with a read-only token if the packages are private, then `./deploy.sh $(cat IMAGE_TAG.previous)` |
 | Shell in the database | `dc exec postgres psql -U bf bf` |
 | Deploy by hand | `./deploy.sh <sha>` (images must exist in GHCR; `docker login ghcr.io` first if private). A lock stops it from overlapping a CI deploy |
-| Optional services | `dc --profile scraper up -d gmaps-scraper` · `dc --profile verify up -d reacher` (needs outbound port 25) |
+| Optional services | `dc --profile scraper up -d gmaps-scraper` · `dc --profile verify up -d reacher` (needs outbound port 25; put a generated `RCH__HEADER_SECRET` in `reacher.env`, and `REACHER_URL=http://reacher:8080` plus the same secret as `REACHER_HEADER_SECRET` in `app.env`; then Settings → Integrations → "Check port 25") |
 
 Rollbacks never undo migrations: they are forward-only and keep the previous release working (expand/contract).
 

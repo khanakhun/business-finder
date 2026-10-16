@@ -1,0 +1,14 @@
+{
+  "address": "resa@hotel-baie.example.com",
+  "status": "unknown",
+  "sub_status": "greylisted",
+  "free_email": false,
+  "did_you_mean": null,
+  "account": "resa",
+  "domain": "hotel-baie.example.com",
+  "domain_age_days": "2100",
+  "smtp_provider": "",
+  "mx_found": "true",
+  "mx_record": "mail.hotel-baie.example.com",
+  "processed_at": "2026-10-15 12:00:00.000"
+}

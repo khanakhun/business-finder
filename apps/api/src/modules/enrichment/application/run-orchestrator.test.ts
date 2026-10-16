@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { setTransactionalDb } from '../../platform/db/transactional.ts';
 import type { EventRecorder } from '../../platform/events/event-recorder.ts';
 import type { RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
-import type { EnrichmentStep } from '../domain/enrichment-step.ts';
+import { type EnrichmentStep, StepDeferredError, StepInterruptedError } from '../domain/enrichment-step.ts';
 import type {
   EnrichmentQueue,
   EnrichmentRepository,
@@ -46,6 +46,7 @@ const queued = (attempt = 0): StepRecord => ({
   dependsOn: [],
   status: 'queued',
   attempt,
+  deferrals: 0,
   inputHash: 'h',
   outputRef: null,
   estimatedUsd: 0,
@@ -93,6 +94,7 @@ function harness(execute: EnrichmentStep['execute'], options: { attempt?: number
     skipSteps: vi.fn(async () => undefined),
     heartbeat: vi.fn(async () => undefined),
     latestOutputs: vi.fn(async () => new Map()),
+    addSpend: vi.fn(async () => undefined),
   } as unknown as EnrichmentRepository & Record<string, ReturnType<typeof vi.fn>>;
   const queue = { step: vi.fn(async () => undefined) } as unknown as EnrichmentQueue & {
     step: ReturnType<typeof vi.fn>;
@@ -234,6 +236,53 @@ describe('EnrichmentOrchestrator.executeStep', () => {
       delayMs: 60_000,
       retryKey: `cb${NOW.getTime()}`,
     });
+  });
+
+  it('requeues a step that defers itself, without an attempt, booking what it spent and changed', async () => {
+    const { orchestrator, runs, queue } = harness(async () => {
+      throw new StepDeferredError(9_000, 0.016, ['contacts']);
+    });
+    await orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(runs.addSpend).toHaveBeenCalledWith('step-1', 0.016, ['contacts']);
+    expect(runs.releaseStep).toHaveBeenCalledWith('step-1', null, NOW, {
+      refund: true,
+      notBefore: new Date(NOW.getTime() + 9_000),
+      deferred: true,
+    });
+    expect(queue.step).toHaveBeenCalledWith(expect.objectContaining({ attempt: 0 }), 'org-1', 'manual', {
+      delayMs: 9_000,
+      retryKey: `df${NOW.getTime()}`,
+    });
+    // Bounded: never sooner than a second, never later than ten minutes.
+    const late = harness(async () => {
+      throw new StepDeferredError(3_600_000, 0);
+    });
+    await late.orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(late.queue.step).toHaveBeenCalledWith(expect.anything(), 'org-1', 'manual', {
+      delayMs: 600_000,
+      retryKey: `df${NOW.getTime()}`,
+    });
+  });
+
+  it('books what an interrupted step spent, then handles the cause (retry or failure)', async () => {
+    const retried = harness(async () => {
+      throw new StepInterruptedError(transient(), 0.008, ['contacts']);
+    });
+    await retried.orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(retried.runs.addSpend).toHaveBeenCalledWith('step-1', 0.008, ['contacts']);
+    expect(retried.runs.releaseStep).toHaveBeenCalledWith('step-1', expect.any(String), NOW, {
+      notBefore: expect.any(Date),
+    });
+    const failed = harness(async () => {
+      throw new StepInterruptedError(new ValidationError('Not a website.'), 0.008);
+    });
+    await failed.orchestrator.executeStep('run-1', 'step-1', signal, 'job-1');
+    expect(failed.runs.addSpend).toHaveBeenCalledWith('step-1', 0.008, []);
+    expect(failed.runs.completeStep).toHaveBeenCalledWith(
+      'step-1',
+      { status: 'failed', error: 'Not a website.', costUsd: 0 },
+      NOW,
+    );
   });
 
   it('gives the attempt back when the worker stops mid-step, and hands the step on', async () => {

@@ -133,6 +133,9 @@ export class DrizzleBusinessRepository implements BusinessRepository {
           confidence: sql`GREATEST(${businessContacts.confidence}, excluded.confidence)`,
           publishedOnSite: sql`${businessContacts.publishedOnSite} OR excluded.published_on_site`,
           sourceUrl: sql`COALESCE(${businessContacts.sourceUrl}, excluded.source_url)`,
+          // The latest crawl knows best where the site shows it now; other sources leave it alone.
+          publishedContext: sql`COALESCE(excluded.published_context, ${businessContacts.publishedContext})`,
+          isFreeMail: sql`COALESCE(excluded.is_free_mail, ${businessContacts.isFreeMail})`,
         },
       });
   }

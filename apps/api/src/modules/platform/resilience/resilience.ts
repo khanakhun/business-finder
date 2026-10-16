@@ -69,6 +69,27 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /**
+   * Self-hosted Reacher (BF-028): an SMTP conversation can take a while (greylisting, slow servers). No retry here:
+   * the verifier chain moves on to the next verifier, and the enrichment engine retries the step.
+   */
+  reacher: {
+    timeoutMs: 60_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 120_000,
+  },
+  /** ZeroBounce (BF-028): its own deadline is the request's `timeout` (20 s); unknown answers are not billed. */
+  zerobounce: {
+    timeoutMs: 30_000,
+    maxRetries: 1,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,

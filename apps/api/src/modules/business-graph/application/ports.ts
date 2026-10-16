@@ -1,4 +1,11 @@
-import type { AddedVia, BusinessDetail, ContactType, PipelineStatus, SourceProvider } from '@bf/contracts';
+import type {
+  AddedVia,
+  BusinessDetail,
+  ContactType,
+  EmailVerificationDetails,
+  PipelineStatus,
+  SourceProvider,
+} from '@bf/contracts';
 import type { Business } from '../domain/business.entity.ts';
 import type { BusinessContactProps } from '../domain/business-contact.ts';
 
@@ -21,13 +28,31 @@ export const BUSINESS_REPOSITORY = Symbol('BusinessRepository');
 export interface ContactRecord extends BusinessContactProps {
   readonly verificationStatus: 'unknown' | 'valid' | 'invalid' | 'catch_all' | 'risky' | 'disposable';
   readonly verifiedAt: Date | null;
+  readonly verificationDetails: EmailVerificationDetails | null;
   readonly firstSeenAt: Date;
   readonly lastSeenAt: Date;
 }
 
 export interface ContactRepository {
   listByBusiness(businessId: string): Promise<ContactRecord[]>;
+  getById(id: string): Promise<ContactRecord | undefined>;
+  /** Distinct names of people the business's contacts mention (at most `limit`). */
+  personNames(businessId: string, limit: number): Promise<string[]>;
   find(businessId: string, type: ContactType, normalizedValue: string): Promise<ContactRecord | undefined>;
+  /**
+   * Sets the verdict on the business's e-mail contact; false when there is none or nothing changed. A verdict older
+   * than the recorded one is ignored, and an inconclusive one (`unknown`) never replaces a conclusive one.
+   */
+  recordVerification(
+    businessId: string,
+    email: string,
+    verdict: {
+      readonly status: ContactRecord['verificationStatus'];
+      readonly details: EmailVerificationDetails;
+      readonly verifiedAt: Date;
+      readonly isFreeMail: boolean;
+    },
+  ): Promise<boolean>;
 }
 export const CONTACT_REPOSITORY = Symbol('ContactRepository');
 

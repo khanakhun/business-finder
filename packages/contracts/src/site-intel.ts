@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EMAIL_FOUND_AS } from './email-verification.ts';
 
 // Website intelligence on services/intel (BF-026): a polite, SSRF-guarded crawl of a business's own site (home page
 // plus key pages) returning extracted facts and signals. Large artifacts (screenshots, per-page markdown) go to object
@@ -47,7 +48,7 @@ export const SitePageKindSchema = z.enum([
   'legal',
   'other',
 ]);
-export const EMAIL_SOURCES = ['mailto', 'text', 'jsonld', 'cfemail', 'obfuscated'] as const;
+export const EMAIL_SOURCES = EMAIL_FOUND_AS;
 
 export const SiteIntelRequestSchema = z
   .object({

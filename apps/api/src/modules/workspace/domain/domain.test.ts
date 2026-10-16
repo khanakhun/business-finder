@@ -38,6 +38,7 @@ describe('feature flags', () => {
     expect(Object.keys(featureStates({}, off)).sort()).toEqual([
       'autoSend',
       'codingEngines',
+      'emailPatternGuessing',
       'mapsScraper',
       'semanticSearch',
     ]);

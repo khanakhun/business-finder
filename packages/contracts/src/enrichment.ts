@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEFAULT_EMAIL_VERIFIERS, EMAIL_VERIFIERS, EmailVerifierIdSchema } from './email-verification.ts';
 import { defineEvent } from './events.ts';
 import { defineJob } from './jobs.ts';
 import { SiteIntelSchema } from './site-intel.ts';
@@ -69,6 +70,14 @@ export const EnrichmentSettingsSchema = z
       .max(100_000)
       .nullable()
       .describe('Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap.'),
+    emailVerifiers: z
+      .array(EmailVerifierIdSchema)
+      .min(1)
+      .max(EMAIL_VERIFIERS.length)
+      .refine((ids) => new Set(ids).size === ids.length, { message: 'Verifiers must be unique' })
+      .describe(
+        'E-mail verifiers to try, in order (BF-028); `dns` (no mailbox check) is the usual last resort.',
+      ),
     nightlyRefreshLimit: z
       .number()
       .int()
@@ -81,6 +90,7 @@ export type EnrichmentSettings = z.infer<typeof EnrichmentSettingsSchema>;
 
 export const DEFAULT_ENRICHMENT_SETTINGS: EnrichmentSettings = {
   monthlyBudgetUsd: null,
+  emailVerifiers: [...DEFAULT_EMAIL_VERIFIERS],
   nightlyRefreshLimit: 100,
 };
 

@@ -103,6 +103,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `PAGESPEED_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | PageSpeed Insights API key (audits). |
 | `FOURSQUARE_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Foursquare Places API key (discovery). |
 | `HF_TOKEN` | Provider keys (workspace fallback) | api, worker | no |  | yes | Hugging Face access token. |
+| `ZEROBOUNCE_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | ZeroBounce API key (e-mail verification without SMTP port 25). |
 | `UNSPLASH_ACCESS_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Unsplash access key (stock photos). |
 | `BETTER_AUTH_SECRET` | Auth & secrets | api, worker | yes |  | yes | Better Auth signing secret, ≥ 32 chars. Generate: openssl rand -base64 32 |
 | `SIGNUP_MODE` | Auth & secrets | api, worker | no |  |  | Who may create an account. Default: invite_only in production, open otherwise. |
@@ -126,6 +127,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FAKE_DISCOVERY_PROVIDER` | Feature flags | api, worker | no | `false` |  | Register the fixture discovery provider (tests and E2E only; refused in production). |
 | `FAKE_DISCOVERY_SYNTHETIC` | Feature flags | api, worker | no | `false` |  | The fixture discovery provider generates grid records instead of fixtures (benchmarks, tiling tests). |
 | `FAKE_SITE_INTEL` | Feature flags | api, worker | no | `false` |  | Website crawls answer from a built-in fake instead of services/intel (tests and E2E only; refused in production). |
+| `FAKE_EMAIL_VERIFIER` | Feature flags | api, worker | no | `false` |  | E-mail verification answers from a built-in fake (no SMTP or DNS; tests and E2E only; refused in production). |
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
@@ -149,6 +151,11 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `ENRICHMENT_TTL_PSI_DAYS` | App-specific | api, worker | no | `30` |  | Days a PageSpeed result stays fresh. |
 | `ENRICHMENT_TTL_VISION_AUDIT_DAYS` | App-specific | api, worker | no | `30` |  | Days a visual audit result stays fresh. |
 | `ENRICHMENT_SITE_INTEL_COST_USD` | App-specific | api, worker | no | `0` |  | Estimated cost of one website crawl, counted against enrichment budgets (self-hosted: 0). |
+| `REACHER_URL` | App-specific | api, worker | no |  |  | Self-hosted Reacher backend (compose profile `verify`; needs outbound port 25). Unset: skipped. |
+| `REACHER_HEADER_SECRET` | App-specific | api, worker | no |  | yes | Shared secret Reacher requires in `x-reacher-secret` (its `RCH__HEADER_SECRET`). |
+| `ENRICHMENT_EMAIL_VERIFY_COST_USD` | App-specific | api, worker | no | `0.008` |  | Estimated cost of one commercial e-mail verification (ZeroBounce), for budgets. |
+| `EMAIL_VERIFY_PER_MAIL_SERVER_PER_MINUTE` | App-specific | api, worker | no | `6` |  | Mailbox checks per mail server per minute, all workspaces together (one workspace gets half); politeness. |
+| `EMAIL_VERIFY_CONCURRENCY` | App-specific | api, worker | no | `4` |  | SMTP mailbox checks (Reacher) running at once per worker process. |
 | `ENRICHMENT_REFRESH_HOUR_UTC` | App-specific | api, worker | no | `3` |  | Hour (UTC) of the nightly refresh of stale enrichment. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |

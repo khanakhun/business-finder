@@ -15,7 +15,13 @@ import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { LOGGER } from '../../platform/logging/logger.ts';
 import { RATE_LIMITER, type RateLimiter } from '../../platform/rate-limit/valkey-rate-limiter.ts';
 import { isTransient } from '../../platform/resilience/resilience.ts';
-import type { EnrichmentStep, StepOutput, StepResult } from '../domain/enrichment-step.ts';
+import {
+  type EnrichmentStep,
+  StepDeferredError,
+  StepInterruptedError,
+  type StepOutput,
+  type StepResult,
+} from '../domain/enrichment-step.ts';
 import { finalStatus, isTerminalRun, isTerminalStep, readiness } from '../domain/run-state.ts';
 import {
   ENRICHMENT_QUEUE,
@@ -58,6 +64,10 @@ const safeMessage = (error: unknown) =>
   (error instanceof DomainError ? error.message : 'Unexpected error').slice(0, 500);
 
 /** Adapters report an open circuit as an external error with this reason (see `site-intel.adapters.ts`). */
+/** Bounds on a step's own deferral (StepDeferredError). */
+const MIN_DEFER_MS = 1_000;
+const MAX_DEFER_MS = 10 * 60_000;
+
 const isCircuitOpen = (error: unknown) =>
   error instanceof ExternalServiceError && error.details?.reason === 'circuit_open';
 
@@ -133,7 +143,7 @@ export class EnrichmentOrchestrator {
       const blocked = new Map<EnrichmentSkipReason, string[]>();
       for (const step of steps) {
         if (step.status !== 'queued') continue;
-        const state = readiness(step, steps);
+        const state = readiness(step, steps, this.optionalDependencies(step.step));
         if (state.kind === 'skip') blocked.set(state.reason, [...(blocked.get(state.reason) ?? []), step.id]);
       }
       if (blocked.size === 0) break;
@@ -151,9 +161,13 @@ export class EnrichmentOrchestrator {
       (step) =>
         step.status === 'queued' &&
         (!step.notBefore || step.notBefore <= now) &&
-        readiness(step, steps).kind === 'ready',
+        readiness(step, steps, this.optionalDependencies(step.step)).kind === 'ready',
     );
     return { run, steps, ready, finished: false };
+  }
+
+  private optionalDependencies(id: EnrichmentStepId): ReadonlySet<EnrichmentStepId> {
+    return new Set(this.registry.get(id)?.optionalDependencies ?? []);
   }
 
   /** `business.enriched` when at least one step produced something (a run that only skipped changes nothing). */
@@ -281,6 +295,7 @@ export class EnrichmentOrchestrator {
         inputHash: step.inputHash ?? plugin.inputHash(subject),
         dependencies: await this.dependencyOutputs(run, plugin.dependsOn),
         signal,
+        deferrals: step.deferrals,
       });
       return result.outcome === 'done'
         ? {
@@ -305,6 +320,13 @@ export class EnrichmentOrchestrator {
     signal: AbortSignal,
   ): Promise<StepCompletion | 'released'> {
     const now = this.clock.now();
+    // Money a step spent before stopping is booked first, whatever happens next (retry, wait, failure, cancel).
+    if (error instanceof StepDeferredError || error instanceof StepInterruptedError) {
+      if (error.costUsd > 0 || error.changedFields.length > 0) {
+        await this.runs.addSpend(step.id, error.costUsd, error.changedFields);
+      }
+    }
+    if (error instanceof StepInterruptedError) return this.onFailure(run, step, error.cause, signal);
     if (signal.aborted) {
       // A cancelled run already skipped its steps. Otherwise the worker is stopping (deploy) or lost its lock:
       // give the attempt back and let another worker take the step now.
@@ -320,6 +342,22 @@ export class EnrichmentOrchestrator {
       return 'released';
     }
     if (error instanceof BudgetExceededError) return { status: 'skipped', reason: 'budget', costUsd: 0 };
+    if (error instanceof StepDeferredError) {
+      // The step asked to wait (politeness towards a third party): no attempt used; its spend is booked above.
+      const delayMs = Math.min(MAX_DEFER_MS, Math.max(MIN_DEFER_MS, Math.ceil(error.retryAfterMs)));
+      const released = await this.runs.releaseStep(step.id, null, now, {
+        refund: true,
+        notBefore: new Date(now.getTime() + delayMs),
+        deferred: true,
+      });
+      if (released) {
+        await this.queue.step(released, run.organizationId, run.trigger, {
+          delayMs,
+          retryKey: `df${now.getTime()}`,
+        });
+      }
+      return 'released';
+    }
     if (isCircuitOpen(error)) {
       // The dependency is down for everyone: wait without using up this step's attempts.
       const until = new Date(now.getTime() + CIRCUIT_WAIT_MS);

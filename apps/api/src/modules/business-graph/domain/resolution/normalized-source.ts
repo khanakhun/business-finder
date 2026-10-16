@@ -1,7 +1,9 @@
 import {
+  type EmailFoundAs,
   type OperatingStatus,
   type PostalAddress as PostalAddressShape,
   PROVIDER_CONFIDENCE,
+  type PublishedPageKind,
   type SourceProvider,
   type SourceRecord,
 } from '@bf/contracts';
@@ -51,6 +53,9 @@ export interface NormalizedSource {
     readonly value: string;
     readonly subtype: EmailSubtype;
     readonly pageUrl?: string;
+    /** Where on its site the business shows it, and how (website sources, BF-028). */
+    readonly pageKind?: PublishedPageKind;
+    readonly foundAs?: EmailFoundAs;
   }>;
   readonly socials: ReadonlyArray<{
     readonly url: string;
@@ -112,10 +117,18 @@ export function normalizeSource(
           return { components: { ...value.components }, formatted: value.formatted };
         })
       : null;
-  const pages = new Map((record.contactPages ?? []).map((c) => [c.value, c.pageUrl]));
+  const pages = new Map((record.contactPages ?? []).map((c) => [c.value, c]));
   const onPage = (raw: string) => {
-    const pageUrl = pages.get(raw);
-    return pageUrl ? { pageUrl } : {};
+    const page = pages.get(raw);
+    return page ? { pageUrl: page.pageUrl } : {};
+  };
+  const publishedOn = (raw: string) => {
+    const page = pages.get(raw);
+    return {
+      ...onPage(raw),
+      ...(page?.pageKind ? { pageKind: page.pageKind } : {}),
+      ...(page?.foundAs ? { foundAs: page.foundAs } : {}),
+    };
   };
   const phones = uniqueBy(
     record.phones.flatMap((raw) => {
@@ -130,7 +143,7 @@ export function normalizeSource(
   const emails = uniqueBy(
     record.emails.flatMap((raw) => {
       const email = attempt(dropped, 'email', () => EmailAddress.parse(raw));
-      return email ? [{ value: email.value, subtype: email.subtype, ...onPage(raw) }] : [];
+      return email ? [{ value: email.value, subtype: email.subtype, ...publishedOn(raw) }] : [];
     }),
     (e) => e.value,
   );

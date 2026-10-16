@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { OperatingStatusSchema, SourceProviderSchema } from '../business.ts';
+import { EMAIL_FOUND_AS, PUBLISHED_PAGE_KINDS } from '../email-verification.ts';
 import { LatLngSchema } from '../geo.ts';
 import { IsoDateTimeSchema } from '../time.ts';
 
@@ -39,7 +40,14 @@ export const SourceRecordSchema = z
     emails: z.array(text(254)).max(20).default([]),
     socials: z.array(text(500)).max(20).default([]),
     contactPages: z
-      .array(z.object({ value: text(500), pageUrl: text(2_000) }))
+      .array(
+        z.object({
+          value: text(500),
+          pageUrl: text(2_000),
+          pageKind: z.enum(PUBLISHED_PAGE_KINDS).optional(),
+          foundAs: z.enum(EMAIL_FOUND_AS).optional(),
+        }),
+      )
       .max(80)
       .optional()
       .describe(

@@ -363,6 +363,32 @@ describe('edge cases', () => {
       ['email', 'https://www.le-tamarin.com/contact'],
       ['phone', 'https://www.le-tamarin.com/reservations'],
     ]);
+    // E-mails on the site carry where and how it shows them (BF-028); other sources carry no context.
+    const withKind = norm({
+      provider: 'website',
+      providerRef: 'w3',
+      emails: ['resa@le-tamarin.com', 'chef.paul@le-tamarin.com'],
+      contactPages: [
+        {
+          value: 'resa@le-tamarin.com',
+          pageUrl: 'https://www.le-tamarin.com/contact',
+          pageKind: 'contact',
+          foundAs: 'mailto',
+        },
+      ],
+    });
+    const emails = unionContacts([google, withKind]).filter((c) => c.type === 'email');
+    expect(emails.map((c) => [c.value, c.publishedContext])).toEqual([
+      [
+        'chef.paul@le-tamarin.com',
+        { pageUrl: 'https://www.le-tamarin.com/', pageKind: 'other', foundAs: null },
+      ],
+      ['info@le-tamarin.com', null],
+      [
+        'resa@le-tamarin.com',
+        { pageUrl: 'https://www.le-tamarin.com/contact', pageKind: 'contact', foundAs: 'mailto' },
+      ],
+    ]);
     expect(
       mergeCategories([{ ...google, categories: { primary: null, secondary: ['bar'], confidence: 0.8 } }]),
     ).toEqual([{ slug: 'bar', isPrimary: true, confidence: 0.4, source: 'google_places' }]);

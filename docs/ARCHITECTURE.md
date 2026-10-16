@@ -290,7 +290,10 @@ Concurrency values are configuration (`QUEUE_CONCURRENCY__GENERATION_CODEX=2`, �
 
 ### 7.2 Patterns
 
-- **Fan-out through rows, not BullMQ flows**: discovery runs grow their tree while running (quadtree splits, next pages), so each step enqueues its follow-ups and a locked `finalize` detects fan-in (BF-020). Enrichment runs are a DAG, not a tree (a step may need several others), so their step rows hold `depends_on`: under the run's row lock, `advance` skips steps whose dependency failed or was skipped, enqueues the ready ones and finalizes the run with `business.enriched` (BF-027, ADR-0006). Either way the database says what is left to do and the reconciler rebuilds lost jobs from it.
+- **Fan-out through rows, not BullMQ flows**: discovery runs grow their tree while running (quadtree splits, next pages), so each step enqueues its follow-ups and a locked `finalize` detects fan-in (BF-020). Enrichment runs are a DAG, not a tree (a step may need several others), so their step rows hold `depends_on`: under the run's row lock, `advance` skips steps whose dependency failed or was skipped, enqueues the ready ones and finalizes the run with `business.enriched` (BF-027, ADR-0006). Either way the database says what is left to do and the reconciler rebuilds lost jobs from it. A step may also declare *optional* dependencies (they only order it),
+defer itself (`StepDeferredError`: re-queued after a delay without using an attempt, counted in `deferrals` and bounded
+by the step) and report what it spent before failing (`StepInterruptedError`), e.g. while a mail server's politeness
+bucket refills (BF-028). An output's `recheckAt` makes it stale for the nightly refresh before its TTL.
 - **DB-backed scheduler** for anything with business-time semantics (sequence steps, preview expiry): rows carry `next_run_at`; a one-minute tick claims due rows with `SELECT … FOR UPDATE SKIP LOCKED` and enqueues work. Survives Valkey loss; easy to reason about.
 - **Transactional outbox**: domain events are written to `outbox_events` inside the business transaction; the relay (worker) publishes them and marks them dispatched. Consumers are idempotent.
 - **Realtime**: workers publish `RealtimeEvent`s to Valkey channel `rt:org:<orgId>`; the API's `/v1/realtime` SSE endpoint fans them out to that org's connected clients; the web app maps events to TanStack Query invalidations. Job-scoped streams (`/v1/generation-jobs/:id/events`) replay the persisted event log first, then tail live events.
@@ -345,6 +348,23 @@ sequenceDiagram
 ### F3 — Enrichment and scoring
 
 A run starts from the business page or bulk bar (`POST /v1/businesses/:id/enrich`, `/v1/enrichment/bulk`), a discovery run with `autoEnrich` (`discovery.business.found`) or the nightly refresh of stale steps. The planner resolves the requested steps and their dependencies into a DAG, skips fresh ones (per-step TTL and input hash) and what the workspace's monthly budget cannot pay; steps then run as their dependencies finish: `site_intel` (intel service, BF-026 — the website becomes a `website` source through ingestion) → `psi`, `email_verify`, `reviews`, `vision_audit` (BF-028–030, registered by their modules) → `business.enriched` → `scoring.compute` for every workspace tracking the business → `ScoreUpdated` → realtime (`enrichment.run.progressed` all along).
+
+**E-mail verification (BF-028).** `email_verify` runs after `site_intel` (an *optional* dependency: addresses known
+without a website are verified too; on-demand checks skip the crawl). For each e-mail contact: suppression check
+(BF-049; no-op before) → shared verdict cache (`enrichment_email_verdicts`, keyed by `sha256(address)`, 60 days;
+inconclusive verdicts back off 1, 2, 4… days; expired rows purged nightly; a DNS-only `unknown` never hides a mailbox
+check) → disposable classification (no check needed) → the workspace's verifier chain (Chain of Responsibility, first
+conclusive verdict wins): **Reacher** (self-hosted SMTP, needs outbound port 25, `REACHER_URL` + `x-reacher-secret`),
+always behind a politeness Decorator that resolves the mail hosts itself, refuses non-public addresses and takes a
+token per mail server (a workspace's half share first, then the server's; an empty bucket defers the step, bounded),
+**ZeroBounce** (key from the vault, billed per conclusive answer, guarded by the workspace's actual monthly spend) and
+**DNS** (MX / null MX only). When a verifier that could have answered is down, the answer is only *provisional*
+(never cached; the address is due again within the hour) and the step goes on with the other addresses — an outage
+never leaves a run waiting. Verdicts reach contacts through business-graph (`RecordEmailVerificationCommand`), never
+downgrading a conclusive one. A step stopped after paying (cancel, deferral) books what it spent
+(`StepInterruptedError`). `POST
+/v1/contacts/:id/verify` starts an `email_verify` run; `POST /v1/workspace/diagnostics/smtp-port` tells whether port
+25 is open. Request URLs in traces are redacted (keys and addresses in query strings).
 
 ### F4 — Batch site generation
 

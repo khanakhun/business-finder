@@ -1,7 +1,15 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { NextConfig } from 'next';
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+// The block library's fonts in public/_bf (scripts/next.mjs copies them before `next build`): only these are cached,
+// so a font a page names but this release lacks is a 404 that no cache keeps.
+const fontsDir = fileURLToPath(new URL('./public/_bf/fonts', import.meta.url));
+const fonts = existsSync(fontsDir)
+  ? readdirSync(fontsDir).filter((file) => /^[a-z0-9.-]+\.woff2$/.test(file))
+  : [];
 
 // Headers that do not depend on the request; the per-request CSP (with its nonce) and X-Robots-Tag are set in
 // src/proxy.ts.
@@ -40,7 +48,7 @@ const nextConfig: NextConfig = {
       ...(isProduction
         ? [
             { source: '/_bf/site-blocks.css', headers: cached },
-            { source: '/_bf/fonts/:file', headers: cached },
+            ...fonts.map((file) => ({ source: `/_bf/fonts/${file}`, headers: cached })),
           ]
         : []),
     ];

@@ -162,10 +162,10 @@ services:
     security_opt: [no-new-privileges:true]
     # Healthcheck (GET /health/ready) is defined in the image.
 
-  # apps/sites (BF-036), optional: `pnpm infra:up --profile apps` runs its production image, reading Postgres as the
-  # read-only role. For day-to-day work run it on the host with `pnpm --filter @bf/sites dev` (same port).
+  # apps/sites (BF-036), optional: `pnpm infra:up --profile sites` runs its production image, reading Postgres as the
+  # read-only role. Its own profile: it takes SITES_PORT, which `pnpm --filter @bf/sites dev` and the e2e suite use.
   sites:
-    profiles: [apps]
+    profiles: [sites]
     build:
       context: ../..
       dockerfile: infra/docker/sites/Dockerfile
@@ -187,8 +187,8 @@ services:
       - 127.0.0.1:${SITES_PORT:-3100}:3000
     read_only: true
     tmpfs:
-      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700
-      - /tmp
+      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700,size=128m
+      - /tmp:size=32m
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
 

@@ -216,6 +216,9 @@ alias dc='docker compose -p bf --project-directory /opt/bf --env-file /opt/bf/.e
 | Optional services | `dc --profile scraper up -d gmaps-scraper` · `dc --profile verify up -d reacher` (needs outbound port 25; put a generated `RCH__HEADER_SECRET` in `reacher.env`, and `REACHER_URL=http://reacher:8080` plus the same secret as `REACHER_HEADER_SECRET` in `app.env`; then Settings → Integrations → "Check port 25") |
 
 Rollbacks never undo migrations: they are forward-only and keep the previous release working (expand/contract).
+The health gate checks that an unknown client-site hostname gets the site renderer's 404, so a rollback to a release
+from before the renderer (BF-036) reports `ROLLBACK FAILED` although the dashboard and API are up: a one-time case.
+`deploy.sh` refuses to run while an env file holds one of the repository's local-only defaults (`…local_only…`).
 
 ## 7. Backups and restore
 

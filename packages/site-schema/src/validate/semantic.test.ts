@@ -424,9 +424,8 @@ describe('validateSite', () => {
   });
 
   it('refuses reserved slugs and hidden characters', () => {
-    expect(found(with_((s) => Object.assign(s.pages[1] ?? {}, { slug: 'en' })))).toEqual([
-      'schema@pages.1.slug',
-    ]);
+    for (const slug of ['en', 'claim', 'opt-out', 'privacy', 'health'])
+      expect(found(with_((s) => Object.assign(s.pages[1] ?? {}, { slug })))).toEqual(['schema@pages.1.slug']);
     const hidden = with_((s) => Object.assign(s.seo.title, { en: 'Salon \u202eLumière' }));
     expect(found(hidden)).toEqual(['schema@seo.title.en']);
   });

@@ -107,8 +107,8 @@ services:
     # Read-only root filesystem: Next's cache and /tmp are scratch space.
     read_only: true
     tmpfs:
-      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700
-      - /tmp
+      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700,size=128m
+      - /tmp:size=32m
     deploy:
       resources:
         limits: { cpus: '1', memory: 512M, pids: 256 }

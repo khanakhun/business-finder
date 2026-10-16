@@ -224,6 +224,7 @@ test('serves the block library’s stylesheet and preloaded fonts, and nothing e
   for (const path of ['/_bf/nothing-here', '/_bf/fonts/missing.woff2']) {
     const missing = await request.get(siteUrl(SLUGS.active, path));
     expect(missing.status(), path).toBe(404);
+    expect(missing.headers()['cache-control'] ?? '', path).not.toContain('public');
     expect(await missing.text()).not.toContain('Salon');
   }
 });

@@ -35,6 +35,15 @@ HTTPS_PORT="${HTTPS_PORT:-$(env_value HTTPS_PORT)}"
 export IMAGE_REGISTRY="${IMAGE_REGISTRY:-$(env_value IMAGE_REGISTRY)}"
 : "${BASE_DOMAIN:?BASE_DOMAIN must be set in .env}"
 : "${SITES_BASE_DOMAIN:?SITES_BASE_DOMAIN must be set in .env}"
+# The repository's local-only defaults (`bf_local_only…`, public in git) never reach a server: a copied local file
+# would let anyone forge view tokens or read the database. Names only, never values.
+for file in .env app.env caddy.env backup.env intel.env; do
+  if [ -f "$file" ] && grep -q 'local_only' "$file"; then
+    names="$(sed -n 's/^\([A-Za-z0-9_]*\)=.*local_only.*/\1/p' "$file" | tr '\n' ' ')"
+    echo "refusing to deploy: $file holds local-only defaults: ${names:-?}" >&2
+    exit 1
+  fi
+done
 : "${IMAGE_REGISTRY:?IMAGE_REGISTRY must be set in .env}"
 
 current_tag="$(cat IMAGE_TAG 2>/dev/null || true)"

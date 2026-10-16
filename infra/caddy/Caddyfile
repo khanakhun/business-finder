@@ -18,8 +18,9 @@
 				request>uri query {
 					replace r REDACTED
 				}
-				# A same-origin Referer is the full address of the page, `?r=` included.
+				# A same-origin Referer is the full address of the page, `?r=` included, as is a redirect's Location.
 				request>headers>Referer delete
+				resp_headers>Location delete
 			}
 		}
 	}
@@ -61,7 +62,7 @@
 }
 
 # An e-mail's signed outreach reference (`?r=`, on preview links) names the prospect it was sent to, so it is never
-# logged, not even in a Referer (docs/conventions/security.md §7).
+# logged, not even in a Referer or a redirect's Location (docs/conventions/security.md §7).
 (access_log) {
 	log {
 		output stdout
@@ -71,8 +72,9 @@
 				request>uri query {
 					replace r REDACTED
 				}
-				# A same-origin Referer is the full address of the page, `?r=` included.
+				# A same-origin Referer is the full address of the page, `?r=` included, as is a redirect's Location.
 				request>headers>Referer delete
+				resp_headers>Location delete
 			}
 		}
 	}

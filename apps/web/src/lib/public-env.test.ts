@@ -11,6 +11,7 @@ describe('public env', () => {
       apiUrl: 'https://api.staging.example',
       appUrl: 'http://localhost:3000',
       mapStyleUrl: 'https://tiles.openfreemap.org/styles/liberty',
+      sitesAssetsUrl: 'https://assets.sites.localhost',
     });
   });
 
@@ -30,6 +31,9 @@ describe('public env', () => {
     expect(() => serverPublicEnv({ NEXT_PUBLIC_MAP_STYLE_URL: 'javascript:alert(1)' })).toThrow(
       /NEXT_PUBLIC_MAP_STYLE_URL/,
     );
+    expect(() => serverPublicEnv({ NEXT_PUBLIC_SITES_ASSETS_BASE_URL: 'data:x' })).toThrow(
+      /NEXT_PUBLIC_SITES_ASSETS_BASE_URL/,
+    );
   });
 
   it('uses the values the server handed over in the browser, defaults before that', () => {
@@ -38,11 +42,13 @@ describe('public env', () => {
       apiUrl: 'https://api.example',
       appUrl: 'https://app.example',
       mapStyleUrl: 'https://tiles.example/style.json',
+      sitesAssetsUrl: 'https://assets.example',
     });
     expect(publicEnv()).toEqual({
       apiUrl: 'https://api.example',
       appUrl: 'https://app.example',
       mapStyleUrl: 'https://tiles.example/style.json',
+      sitesAssetsUrl: 'https://assets.example',
     });
   });
 });

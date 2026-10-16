@@ -11,7 +11,13 @@ import { serverPublicEnv } from './lib/public-env.ts';
  */
 export function buildCsp(
   nonce: string,
-  options: { dev: boolean; apiOrigin: string; https: boolean; mapOrigin?: string },
+  options: {
+    dev: boolean;
+    apiOrigin: string;
+    https: boolean;
+    mapOrigin?: string;
+    sitesAssetsOrigin?: string;
+  },
 ): string {
   return [
     "default-src 'self'",
@@ -19,7 +25,8 @@ export function buildCsp(
     "style-src 'self' 'unsafe-inline'",
     // The search map (BF-023) loads its style, tiles, glyphs and sprites from the map origin; MapLibre's workers
     // are blob: URLs.
-    `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}`,
+    // The site editor's canvas (BF-037) shows the sites' images from their CDN.
+    `img-src 'self' blob: data:${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.sitesAssetsOrigin ? ` ${options.sitesAssetsOrigin}` : ''}`,
     "worker-src 'self' blob:",
     "font-src 'self'",
     `connect-src 'self' ${options.apiOrigin}${options.mapOrigin ? ` ${options.mapOrigin}` : ''}${options.dev ? ' ws:' : ''}`,
@@ -40,6 +47,7 @@ export function proxy(request: NextRequest): NextResponse {
     apiOrigin: new URL(env.apiUrl).origin,
     https: env.appUrl.startsWith('https://'),
     mapOrigin: new URL(env.mapStyleUrl).origin,
+    sitesAssetsOrigin: new URL(env.sitesAssetsUrl).origin,
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);

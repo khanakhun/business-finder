@@ -167,7 +167,9 @@ const edit = fc.record({
   ),
 });
 
-function play(data: EditorData, steps: fc.RecordValue<typeof edit>['steps']): EditorData {
+type Session = typeof edit extends fc.Arbitrary<infer T> ? T : never;
+
+function play(data: EditorData, steps: Session['steps']): EditorData {
   const content = [...data.content];
   for (const step of steps) {
     const index = 'at' in step ? step.at % content.length : 0;

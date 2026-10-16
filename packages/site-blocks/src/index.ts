@@ -6,6 +6,10 @@ export { formatSpan, formatTime, groupDays, openStatus, timeZoneOf, weekdayName 
 export { formatPhone } from './format/phone.ts';
 export { formatPrice } from './format/price.ts';
 export { UI_STRINGS, type UiStrings, uiStrings } from './i18n/strings.ts';
+// The page chrome around the blocks: the editor's canvas (BF-037) frames them as SitePage does.
+export { PreviewBanner, SkipLink } from './layout/chrome.tsx';
+export { Footer } from './layout/footer.tsx';
+export { Header } from './layout/header.tsx';
 export { BlockRenderer, blockTones, UnknownBlockError } from './renderer/block-renderer.tsx';
 export { PlainLink, ResponsiveImage } from './renderer/defaults.tsx';
 export { BOOKING_EMBED_HOSTS, embedOrigins } from './renderer/embeds.ts';

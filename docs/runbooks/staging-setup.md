@@ -107,6 +107,8 @@ would break the URL) and `openssl rand -base64 32` for the others.
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | e.g. `bf`, `openssl rand -hex 32`, `bf` |
 | `BF_SITES_RO_PASSWORD` | `openssl rand -hex 32` (read-only role of apps/sites) |
 | `INTEL_SHARED_SECRET` | generated (also in `app.env`, same value) |
+| `SITES_REVALIDATE_SECRET`, `SITES_VIEW_TOKEN_SECRET` | `openssl rand -hex 32` each: shared by the API, the worker and the site renderer (compose passes them; not in `app.env`) |
+| `SITES_ASSETS_BASE_URL` | the public URL of site images (the CDN or public bucket in front of `S3_BUCKET_SITES`) |
 | `PG_SHARED_BUFFERS`, `PG_EFFECTIVE_CACHE_SIZE`, `PG_WORK_MEM`, … | optional tuning (defaults fit 8 GB) |
 
 **`app.env`** — the api and worker. Start from the repository's `.env.example` (every variable, described in
@@ -125,7 +127,7 @@ would break the URL) and `openssl rand -base64 32` for the others.
 | `SMTP_URL`, `MAIL_FROM` | system mail (invitations, password resets) |
 | AI and provider keys | as needed (`ANTHROPIC_API_KEY`, `GOOGLE_PLACES_API_KEY`, …) |
 
-The compose file sets the URLs between services (`APP_URL`, `API_URL`, `INTEL_URL`, `API_INTERNAL_URL`,
+The compose file sets the URLs between services (`APP_URL`, `API_URL`, `INTEL_URL`, `API_INTERNAL_URL`, `SITES_INTERNAL_URL`,
 `NEXT_PUBLIC_*`, `AUTH_TRUSTED_PROXIES`) from `BASE_DOMAIN`; do not set them in `app.env`.
 
 **`caddy.env`** — `ACME_DNS_API_TOKEN` (the zone-scoped token of §2), nothing else.

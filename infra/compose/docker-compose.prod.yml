@@ -59,6 +59,7 @@ services:
     depends_on:
       web: { condition: service_healthy }
       api: { condition: service_healthy }
+      sites: { condition: service_healthy }
     networks:
       edge: { ipv4_address: 172.30.0.10 }
     deploy:
@@ -80,6 +81,28 @@ services:
       resources:
         limits: { cpus: '1', memory: 512M }
 
+  # The site renderer (BF-036): published sites on *.SITES_BASE_DOMAIN. It reads the database as the read-only role
+  # and holds only the two secrets it shares with the API: no object storage, no API or provider keys.
+  sites:
+    <<: *hardened
+    image: ${IMAGE_REGISTRY:?}/bf-sites:${IMAGE_TAG:?}
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      APP_VERSION: ${IMAGE_TAG:?}
+      API_URL: https://api.${BASE_DOMAIN:?}
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
+      SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
+      SITES_DATABASE_URL: postgres://bf_sites_ro:${BF_SITES_RO_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+      SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
+      SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [edge, data]
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 512M }
+
   api:
     <<: *app
     image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
@@ -90,6 +113,12 @@ services:
       APP_URL: https://app.${BASE_DOMAIN:?}
       API_URL: https://api.${BASE_DOMAIN:?}
       INTEL_URL: http://intel:8000
+      # The site renderer, its asset host and the secrets the API and it share (revalidation, view tokens).
+      SITES_INTERNAL_URL: http://sites:3000
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
+      SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
+      SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
+      SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
       # Caddy and the web server (which forwards the visitor's address on its server-side calls), by their fixed
       # addresses on the edge network: the API rate-limits and audits per real client IP.
       AUTH_TRUSTED_PROXIES: 172.30.0.10,172.30.0.11

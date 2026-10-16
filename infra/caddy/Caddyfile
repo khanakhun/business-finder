@@ -91,12 +91,14 @@ api.{$BASE_DOMAIN} {
 	import wildcard_tls_{$CADDY_TLS:acme}
 	import security_headers
 	import access_log
-	# apps/sites arrives in M3 (BF-036): replace this block with `reverse_proxy sites:3000`.
-	header Cache-Control "no-store"
-	header Retry-After "3600"
-	rewrite * /sites-unavailable.html
-	file_server {
-		root /srv
-		status 503
+	encode zstd gzip
+	# Published sites receive no uploads (their contact form posts to the API).
+	request_body {
+		max_size 64KB
 	}
+	# The renderer's internal routes are for the API (revalidation) and the container (health), never the public.
+	@internal path /api/revalidate /health/*
+	respond @internal 404
+	# apps/sites (BF-036): every hostname of the sites domain; it answers 404 for one with no publication.
+	reverse_proxy sites:3000
 }

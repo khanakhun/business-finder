@@ -123,6 +123,8 @@ export function derivedEnv({ ports, env, projectName, offset, profiles = [] }) {
     APP_URL: `http://localhost:${ports.WEB_PORT}`,
     API_URL: `http://localhost:${ports.API_PORT}`,
     INTEL_URL: `http://127.0.0.1:${ports.INTEL_PORT}`,
+    // The site renderer (BF-036), which the API asks to refresh after publication changes.
+    SITES_INTERNAL_URL: `http://127.0.0.1:${ports.SITES_PORT}`,
     NEXT_PUBLIC_APP_URL: `http://localhost:${ports.WEB_PORT}`,
     NEXT_PUBLIC_API_URL: `http://localhost:${ports.API_PORT}`,
   };

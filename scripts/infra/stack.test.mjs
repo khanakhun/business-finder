@@ -99,6 +99,7 @@ describe('derivedEnv', () => {
     assert.equal(env.S3_ENDPOINT, 'http://127.0.0.1:9020');
     assert.equal(env.SMTP_URL, 'smtp://127.0.0.1:1045');
     assert.equal(env.API_URL, 'http://localhost:4020');
+    assert.equal(env.SITES_INTERNAL_URL, 'http://127.0.0.1:3120');
   });
 
   it('exports app ports and the project identity', () => {

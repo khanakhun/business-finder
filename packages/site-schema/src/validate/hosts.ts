@@ -109,7 +109,8 @@ export function carriesUrl(url: string): boolean {
       return REDIRECT_TARGET.test(value) || hasWebAddress(value);
     });
   } catch {
-    // A URL (or a fragment) that cannot be decoded and inspected is not a safe link.
+    // DECISION(BF-033): fail closed. A URL (or a fragment, e.g. `#100%`) that cannot be decoded and inspected is not
+    // a safe link, even when it would only be a malformed anchor.
     return true;
   }
 }
@@ -137,7 +138,7 @@ export function hasWebAddress(text: string): boolean {
   const folded = text
     .normalize('NFKC')
     .replace(/[。．｡․]/g, '.')
-    .replace(/[‧∙⋅•]/g, '·');
+    .replace(/[‧∙⋅•・⸱]/g, '·');
   return (
     /https?:\/\/|(?:^|[\s(])\/\/[\p{L}\p{N}-]+\.|\bwww\./iu.test(folded) ||
     DOMAIN.test(folded) ||

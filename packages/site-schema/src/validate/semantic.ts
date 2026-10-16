@@ -321,6 +321,17 @@ const skipped = (path: Path) => {
 };
 /** An e-mail address (anchored and bounded: linear on long words). */
 const EMAIL = /(?<![\w.+-])([\w.+-]{1,64})@[\w-]{1,63}(?:\.[\w-]{1,63}){1,10}/g;
+/** A URL scheme just before an e-mail (`http:evil.com@a.bc`); its last 40 characters are enough. */
+const SCHEME_BEFORE = /(?:^|[^\w+.-])([a-z][\w+.-]{0,30}):$/i;
+/** Words that label an e-mail rather than build a URL around it (`Email:anne@…`). */
+const EMAIL_LABEL = /^(?:mailto|e-?mail|mail|courriel|contact)$/i;
+
+/** An e-mail that is really a web address: `www.` local part, or `/`, `\\` or a URL scheme just before it. */
+function dressedEmail(local: string, before: string): boolean {
+  if (/^www\./i.test(local) || /[/\\]$/.test(before)) return true;
+  const scheme = SCHEME_BEFORE.exec(before.slice(-40))?.[1];
+  return scheme !== undefined && !EMAIL_LABEL.test(scheme);
+}
 
 const urlsRule: Rule = (spec, options) => {
   const issues: Issue[] = [];
@@ -372,11 +383,11 @@ const urlsRule: Rule = (spec, options) => {
     // Rich text: its links and HTML are the rich-text rule's; a web address in its words is still refused.
     const rich = isRichText(path);
     // E-mails are the facts validator's; one dressed around a web address (`www.evil.com@a.bc`, `//evil.com@a.bc`)
-    // is not: folded first, then judged by `www.` or the character just before it.
+    // is not: folded first, then judged by `www.` or what is just before it (`/`, `\\`, a scheme but `mailto:`).
     const words = (rich ? withoutPageLinks(text) : text)
       .normalize('NFKC')
       .replace(EMAIL, (address, local: string, offset: number, whole: string) =>
-        /^www\./i.test(local) || /[/\\:]/.test(whole[offset - 1] ?? '') ? address : '',
+        dressedEmail(local, whole.slice(0, offset)) ? address : '',
       );
     if (hasWebAddress(words)) {
       issues.push(

@@ -334,4 +334,24 @@ describe('SiteAssetCommands', () => {
     expect(assets.rows.get(id)?.status).toBe('ready');
     expect(publicFiles.files.size).toBeGreaterThan(0);
   });
+
+  it('keeps the files when a re-delivered job holds the stamp and the first one finishes first', async () => {
+    const id = await uploaded();
+    await commands.finalize(actor, siteId, id);
+    const original = images.dominantColors;
+    images.dominantColors = async (image, count) => {
+      // The retry re-stamps the image while the first delivery is about to finish.
+      const row = assets.rows.get(id);
+      if (row) assets.rows.set(id, { ...row, processingStartedAt: new Date('2026-10-14T12:05:00.000Z') });
+      return original(image, count);
+    };
+    try {
+      // The first delivery is fenced out: it finishes nothing and deletes nothing.
+      expect(await commands.process(id)).toBe('skipped');
+    } finally {
+      images.dominantColors = original;
+    }
+    expect(assets.rows.get(id)?.status).toBe('processing');
+    expect(publicFiles.files.size).toBeGreaterThan(0);
+  });
 });

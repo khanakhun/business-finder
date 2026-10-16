@@ -291,9 +291,10 @@ export class SiteAssetCommands {
       startedAt,
     );
     if (!done) {
-      // Another delivery finished it (the same keys: its files stay), or it was deleted or failed meanwhile.
+      // Another delivery holds the stamp (the same keys: its files stay, whether it has finished or not; the sweep
+      // cleans up if it dies). Only a deleted or failed image loses the files this one wrote.
       const current = await this.assets.byId(asset.id);
-      if (current?.status !== 'ready')
+      if (!current || current.status === 'failed')
         for (const variant of variants) await this.publicFiles.delete(variant.key);
       return 'skipped';
     }

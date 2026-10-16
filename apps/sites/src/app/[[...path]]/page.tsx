@@ -64,26 +64,24 @@ export default async function SitePageRoute(props: Props) {
     : undefined;
   const ref = (await props.searchParams).r;
   const actions =
-    tenant.environment === 'preview'
-      ? previewActionLinks({
-          siteId: tenant.siteId,
-          claimUrl: env.SITES_CLAIM_URL,
-          optOutUrl: env.SITES_OPT_OUT_URL,
-          outreachRef: typeof ref === 'string' ? ref : undefined,
-        })
-      : {};
-  return (
-    <>
+    tenant.environment === 'preview' && env.SITES_PREVIEW_ACTIONS ? (
       <PreviewActions
-        links={actions}
-        business={tenant.businessName}
+        links={previewActionLinks({
+          spec: tenant.spec,
+          locale: current.locale,
+          outreachRef: typeof ref === 'string' ? ref : undefined,
+        })}
         strings={rendererStrings(current.locale)}
       />
+    ) : undefined;
+  return (
+    <>
       <SitePage
         spec={tenant.spec}
         page={current.page.id}
         locale={current.locale}
         preview={tenant.environment === 'preview'}
+        previewActions={actions}
         agencyName={tenant.agencyName}
         assetsResolver={(asset) => ({ src: asset.url, srcSet: tenant.images[asset.url] })}
       />

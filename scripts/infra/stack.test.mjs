@@ -71,7 +71,7 @@ describe('servicesFor / portsFor', () => {
   });
 
   it('adds profile services', () => {
-    assert.deepEqual(servicesFor(['apps']).slice(-1), ['intel']);
+    assert.deepEqual(servicesFor(['apps']).slice(-2), ['intel', 'sites']);
     const services = servicesFor(['scraper', 'observability']);
     assert.ok(services.includes('gmaps-scraper'));
     assert.ok(services.includes('jaeger'));

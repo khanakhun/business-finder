@@ -33,14 +33,25 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   async headers() {
+    // The block library's stylesheet (its URL carries the release) and fonts (fixed per font): cached, in production.
+    const cached = [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }];
     return [
       { source: '/:path*', headers: securityHeaders },
-      // The block library's stylesheet and fonts: stable names, refreshed with each deploy.
-      {
-        source: '/_bf/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }],
-      },
+      ...(isProduction
+        ? [
+            { source: '/_bf/site-blocks.css', headers: cached },
+            { source: '/_bf/fonts/:file', headers: cached },
+          ]
+        : []),
     ];
+  },
+  async rewrites() {
+    // public/_bf skips the proxy (src/proxy.ts): a path there that is no file is a plain 404, never a site page.
+    return {
+      beforeFiles: [],
+      afterFiles: [{ source: '/_bf/:path*', destination: '/-/unknown' }],
+      fallback: [],
+    };
   },
 };
 

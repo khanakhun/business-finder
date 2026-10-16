@@ -12,7 +12,6 @@ export interface RendererStrings {
   readonly unknownBody: string;
   readonly unavailableTitle: string;
   readonly unavailableBody: string;
-  readonly previewActionsLabel: (business: string) => string;
   readonly claim: string;
   readonly optOut: string;
   readonly errorTitle: string;
@@ -21,7 +20,6 @@ export interface RendererStrings {
 
 export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
   fr: {
-    previewActionsLabel: (business) => `Aperçu proposé à ${business} — ce n’est pas son site officiel.`,
     claim: 'C’est mon entreprise — ça m’intéresse',
     optOut: 'Pas intéressé — ne plus me contacter',
     unavailableTitle: 'Site momentanément indisponible',
@@ -39,7 +37,6 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'La page n’a pas pu être affichée. Réessayez dans un instant.',
   },
   en: {
-    previewActionsLabel: (business) => `Concept preview made for ${business} — not its official site.`,
     claim: 'This is my business — I’m interested',
     optOut: 'Not interested — don’t contact me',
     unavailableTitle: 'Site temporarily unavailable',
@@ -56,7 +53,6 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'The page could not be shown. Please try again in a moment.',
   },
   nl: {
-    previewActionsLabel: (business) => `Conceptpreview voor ${business} — niet de officiële site.`,
     claim: 'Dit is mijn bedrijf — ik heb interesse',
     optOut: 'Geen interesse — neem geen contact op',
     unavailableTitle: 'Site tijdelijk niet beschikbaar',
@@ -74,7 +70,6 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'De pagina kon niet worden getoond. Probeer het zo meteen opnieuw.',
   },
   es: {
-    previewActionsLabel: (business) => `Vista previa creada para ${business} — no es su sitio oficial.`,
     claim: 'Es mi negocio — me interesa',
     optOut: 'No me interesa — no me contacten',
     unavailableTitle: 'Sitio no disponible temporalmente',
@@ -92,7 +87,6 @@ export const RENDERER_STRINGS: Readonly<Record<SiteLocale, RendererStrings>> = {
     errorBody: 'No se pudo mostrar la página. Inténtelo de nuevo en un momento.',
   },
   de: {
-    previewActionsLabel: (business) => `Konzeptvorschau für ${business} — nicht die offizielle Website.`,
     claim: 'Das ist mein Unternehmen — ich bin interessiert',
     optOut: 'Kein Interesse — bitte nicht kontaktieren',
     unavailableTitle: 'Website vorübergehend nicht verfügbar',

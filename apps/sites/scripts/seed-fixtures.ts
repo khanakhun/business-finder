@@ -1,11 +1,11 @@
 // pnpm --filter @bf/sites seed:fixtures — publishes the four fixture sites as previews in the local database, so the
 // renderer can be tried at http://<slug>.sites.localhost:<SITES_PORT>/ without the dashboard (BF-036). Local only:
-// it refuses any database that is not on this machine, and replaces its own workspace each run.
+// it refuses production and any database that is not on this machine, and replaces only its own workspace (and the
+// businesses of its sites) each run.
 import { closeDb } from '@bf/db';
-import { businesses, organization, orgSettings } from '@bf/db/schema';
-import { eq, like } from 'drizzle-orm';
+import { organization, orgSettings } from '@bf/db/schema';
 import { BASE_DOMAIN, env } from '../e2e/env.ts';
-import { db, publish } from '../e2e/seed.ts';
+import { db, dropWorkspace, publish } from '../e2e/seed.ts';
 
 const ORG_SLUG = 'local-fixture-sites';
 const LABEL = 'Local fixture';
@@ -16,10 +16,9 @@ const SITES = [
   { fixtureName: 'villa-agency', slug: 'villa-agency-demo04' },
 ];
 
-const client = db();
+const client = db('pnpm sites:seed');
 try {
-  await client.delete(organization).where(eq(organization.slug, ORG_SLUG));
-  await client.delete(businesses).where(like(businesses.displayName, `${LABEL} %`));
+  await dropWorkspace(client, ORG_SLUG);
   const orgId = crypto.randomUUID();
   await client.insert(organization).values({ id: orgId, name: 'Local fixture sites', slug: ORG_SLUG });
   await client

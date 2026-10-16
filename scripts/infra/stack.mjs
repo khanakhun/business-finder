@@ -36,6 +36,8 @@ export const PORT_SERVICES = Object.freeze({
   BF_OTLP_HTTP_PORT: 'otel-collector',
   // Profile `apps` runs services/intel in a container; without it, `pnpm --filter @bf/intel dev` uses the port.
   INTEL_PORT: 'intel',
+  // Profile `apps` runs apps/sites' image too; without it, `pnpm --filter @bf/sites dev` uses the port.
+  SITES_PORT: 'sites',
 });
 
 export const DEFAULT_SERVICES = Object.freeze(['postgres', 'valkey', 's3', 's3-init', 'mailpit']);
@@ -44,7 +46,7 @@ export const PROFILE_SERVICES = Object.freeze({
   scraper: ['gmaps-scraper'],
   verify: ['reacher'],
   observability: ['otel-collector', 'jaeger'],
-  apps: ['intel'],
+  apps: ['intel', 'sites'],
 });
 
 export const MAX_OFFSET = 70;

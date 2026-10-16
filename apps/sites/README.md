@@ -15,7 +15,11 @@ pnpm --filter @bf/sites dev          # http://salon-gustavia-demo01.sites.localh
 with no DNS setup (`SITES_BASE_DOMAIN=sites.localhost` is the local default; the port is `SITES_PORT`, 3100 plus your
 `BF_PORT_OFFSET`). Tools that use the system resolver (curl, autocannon) may not resolve `*.localhost`: send the
 request to `127.0.0.1` with the site's `Host` header (`curl -H 'Host: salon-gustavia-demo01.sites.localhost'
-http://127.0.0.1:3110/`), or use `lvh.me` (a public name for 127.0.0.1) with `SITES_BASE_DOMAIN=lvh.me`.
+http://127.0.0.1:3100/`, with your `SITES_PORT`). The seed, e2e and Lighthouse runs publish under `sites.localhost`.
+
+The block library's stylesheet and fonts are copied to `public/_bf` when the renderer starts: restart `dev` after
+rebuilding `@bf/site-blocks`. In a container: `pnpm infra:up --profile apps` also runs the renderer's image (built
+from the repository, port `SITES_PORT`), with the secrets from your `.env` (local-only ones when unset).
 
 Publishing from the dashboard works too: the API refreshes the renderer through `SITES_INTERNAL_URL` (set by
 `infra:up`) when `SITES_REVALIDATE_SECRET` is the same on both sides; without it, a change shows within a minute.
@@ -32,7 +36,8 @@ Publishing from the dashboard works too: the API refreshes the renderer through 
 | The database unreachable | the last known site for a few minutes, else 503 |
 | `robots.txt` | previews: closed to all crawlers but our screenshot bot |
 | `sitemap.xml` | live sites that ask to be indexed only |
-| `POST /api/revalidate` | the API's signed cache refresh (internal; Caddy refuses it from outside) |
+| `POST /api/revalidate`, `/health/*` | the API's signed cache refresh and the health checks: on the internal address only (a site hostname gets its 404; Caddy refuses them too) |
+| `/_bf/…` | the block library's stylesheet and fonts; anything else there is a plain 404 |
 
 ## Checks
 
@@ -40,5 +45,8 @@ Publishing from the dashboard works too: the API refreshes the renderer through 
 pnpm --filter @bf/sites test         # unit (src/lib)
 pnpm --filter @bf/sites e2e          # Playwright against a production build (seeds its own workspace)
 pnpm --filter @bf/sites lighthouse   # Lighthouse CI on the seeded fixture previews (build first)
-pnpm --filter @bf/sites load         # autocannon on a cached page (build and seed first)
+pnpm --filter @bf/sites load         # autocannon on a cached page (build and seed first; fails past p95 50 ms)
 ```
+
+Previews show "This is my business" and "Not interested" in their banner (links to the renderer's `/claim` and
+`/opt-out` pages, BF-048) once `SITES_PREVIEW_ACTIONS=true`.

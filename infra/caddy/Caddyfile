@@ -1,6 +1,6 @@
 # Edge proxy for staging/production (BF-025, ADR-0014). Values come from the environment (compose passes them):
 #   BASE_DOMAIN        app.{BASE_DOMAIN} → web, api.{BASE_DOMAIN} → api
-#   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (a 503 page until apps/sites ships, BF-036)
+#   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (apps/sites, BF-036)
 #   ACME_EMAIL         account e-mail for Let's Encrypt
 #   ACME_DNS_PROVIDER  DNS module for the wildcard (cloudflare by default; the image must include it)
 #   ACME_DNS_API_TOKEN token of that provider (DNS edit on the zone only)
@@ -9,9 +9,19 @@
 	email {$ACME_EMAIL}
 	# Admin API on loopback only (the healthcheck reads it).
 	admin 127.0.0.1:2019
+	# Error logs carry the request too: the same redaction as the access logs.
 	log default {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace r REDACTED
+				}
+				# A same-origin Referer is the full address of the page, `?r=` included.
+				request>headers>Referer delete
+			}
+		}
 	}
 	servers {
 		timeouts {
@@ -50,10 +60,21 @@
 	}
 }
 
+# An e-mail's signed outreach reference (`?r=`, on preview links) names the prospect it was sent to, so it is never
+# logged, not even in a Referer (docs/conventions/security.md §7).
 (access_log) {
 	log {
 		output stdout
-		format json
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace r REDACTED
+				}
+				# A same-origin Referer is the full address of the page, `?r=` included.
+				request>headers>Referer delete
+			}
+		}
 	}
 }
 

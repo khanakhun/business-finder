@@ -2,6 +2,7 @@ import './renderer.css';
 import { pairPreloads } from '@bf/site-blocks';
 import type { ReactNode } from 'react';
 import { currentSite } from '@/lib/current-site.ts';
+import { sitesEnvironment } from '@/lib/env.ts';
 import { localeOfPath } from '@/lib/locale-routing.ts';
 import { BLOCKS_BASE } from '@/lib/static-files.ts';
 
@@ -28,7 +29,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             crossOrigin="anonymous"
           />
         ))}
-        <link rel="stylesheet" href={`${BLOCKS_BASE}/site-blocks.css`} />
+        {/* The release in the URL: a deploy that changes the blocks' classes never meets yesterday's cached sheet. */}
+        <link
+          rel="stylesheet"
+          href={`${BLOCKS_BASE}/site-blocks.css?v=${encodeURIComponent(sitesEnvironment().APP_VERSION)}`}
+        />
       </head>
       <body>{children}</body>
     </html>

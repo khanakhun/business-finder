@@ -131,19 +131,28 @@ Verify: pnpm verify && pnpm e2e (sites suite); Lighthouse CI + load test reports
   flight. This replaces `'use cache'`/ISR, which a per-request nonce rules out. Run one renderer replica until
   revalidation fans out.
 - **Previews**: the block library's banner (forced by the `preview` render option), `noindex` three ways (header,
-  meta, robots.txt closed to all but our screenshot bot), and claim/opt-out buttons. The buttons exist once
-  `SITES_CLAIM_URL` / `SITES_OPT_OUT_URL` are set (BF-048/BF-055); the opt-out passes an e-mail's signed `?r=` on.
+  meta, robots.txt closed to all but our screenshot bot), and the claim/opt-out links inside the banner (right after
+  the skip link). They point at the renderer's own `/claim` and `/opt-out` pages in the page's language, passing an
+  e-mail's signed `?r=` on; they show once `SITES_PREVIEW_ACTIONS=true`, when BF-048 adds the pages. The opt-out
+  page must not suppress on a GET (link scanners): BF-048/BF-055 verify `r` and ask to confirm.
 - **View beacon**: a credential-less `text/plain` fetch, not sent under DNT/GPC; the API counts it only from a site
   origin.
 - **Part 2 (PR #104)**:
-  - Docker image (`infra/docker/sites`), a production compose `sites` service (read-only role and the two shared
-    secrets only), and Caddy proxying `*.SITES_BASE_DOMAIN` (internal routes refused, 64 KB bodies).
-  - `infra:up` derives `SITES_INTERNAL_URL`; `pnpm sites:seed` publishes the four fixtures locally;
-    `apps/sites/README.md` covers local wildcard hosts.
-  - The block library's stylesheet and fonts are served at stable paths so each site preloads its fonts (CLS 0).
+  - Docker image (`infra/docker/sites`) and a production compose `sites` service: the read-only role and the two
+    shared secrets only, a read-only root filesystem, and internal networks of its own (Postgres; Caddy; the API):
+    no internet, no Valkey. The local `apps` profile runs the same image.
+  - Caddy proxies `*.SITES_BASE_DOMAIN` (internal routes refused, 64 KB bodies; the renderer itself answers them only
+    on its internal address). Logs never carry `?r=` (query redacted, Referer dropped). The deploy gate checks that
+    an unknown site hostname gets the renderer's 404.
+  - `infra:up` derives `SITES_INTERNAL_URL`; `pnpm sites:seed` publishes the four fixtures locally (local databases
+    only, its own workspace only); `apps/sites/README.md` covers local wildcard hosts.
+  - The block library's stylesheet (versioned by release) and fonts are served at stable paths so each site preloads
+    its fonts (CLS 0); anything else under `/_bf` is a plain 404.
 - **Measured**:
-  - Lighthouse (mobile, four fixture previews): performance 0.99, accessibility 1, best practices 0.96–1, CLS 0. SEO is
-    0.66–0.69 by design (previews are `noindex`).
+  - Lighthouse (mobile, four fixture previews, images and preview actions included): performance 0.98–0.99,
+    accessibility 1, best practices 1, CLS 0, LCP ≈ 2.0 s. SEO is 0.66–0.69 by design (previews are `noindex`).
+  - `pnpm --filter @bf/sites load` fails when a response is not 2xx or p97.5 (autocannon's bound above p95) passes
+    50 ms.
   - autocannon on a cached page at 200 req/s, no errors:
     - 4 connections: median 7 ms, p97.5 21 ms;
     - 10 connections: median 16–21 ms, p90 42 ms, p97.5 51–70 ms (across runs);
@@ -159,4 +168,6 @@ Verify: pnpm verify && pnpm e2e (sites suite); Lighthouse CI + load test reports
   - `next/image` is not used: images are processed variants on our CDN, rendered as plain `<img>` with `srcset`.
   - The dev-only `/__blocks` gallery stays the block library's static gallery (`pnpm --filter @bf/site-blocks
     gallery`), not a renderer route.
+  - The preview banner is not dismissible: it is the "not the official site" disclosure, so it stays (the
+    conservative choice; it is one line in the page's flow).
 

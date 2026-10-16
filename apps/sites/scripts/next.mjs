@@ -11,10 +11,11 @@ const require = createRequire(import.meta.url);
 const [command = 'dev', ...rest] = process.argv.slice(2);
 const env = loadEnvOrExit(sitesEnv, { label: 'sites' });
 
-// The block library's stylesheet and fonts are built files (git-ignored): build them on a fresh checkout.
+// The block library's stylesheet and fonts are built files (git-ignored): build them on a fresh checkout. They are
+// copied once, at start: restart `dev` after rebuilding the block library.
 // The package exports its source entry (src/index.ts): its root is two levels up.
 const blocks = dirname(dirname(require.resolve('@bf/site-blocks')));
-if (command !== 'start' && !existsSync(join(blocks, 'dist', 'styles.css'))) {
+if (!existsSync(join(blocks, 'dist', 'styles.css'))) {
   const built = spawnSync('pnpm', ['--filter', '@bf/site-blocks', 'build'], { stdio: 'inherit' });
   if (built.status !== 0) process.exit(built.status ?? 1);
 }

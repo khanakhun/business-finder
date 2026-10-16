@@ -17,6 +17,7 @@ export function PreviewBanner({ ctx }: { ctx: RenderContext }) {
   return (
     <aside aria-label={ctx.strings.previewLabel} className="bf-preview-banner">
       {agency ? ctx.strings.previewBannerBy(brand.name, agency) : ctx.strings.previewBanner(brand.name)}
+      {ctx.options.previewActions ? <> {ctx.options.previewActions}</> : null}
     </aside>
   );
 }

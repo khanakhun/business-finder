@@ -359,25 +359,21 @@ describe('cacheUntil', () => {
 });
 
 describe('previewActionLinks', () => {
-  const base = {
-    siteId: 'site-1',
-    claimUrl: 'https://app.example/claim',
-    optOutUrl: 'https://api.example/optout',
-  };
+  const spec = { defaultLocale: 'fr' } as SiteSpec;
 
-  it('links the claim form and the opt-out, passing an e-mail’s signed reference on', () => {
-    expect(previewActionLinks({ ...base, outreachRef: 'v1.abcdefgh.sig_-' })).toEqual({
-      claim: 'https://app.example/claim?site=site-1',
-      optOut: 'https://api.example/optout?site=site-1&r=v1.abcdefgh.sig_-',
+  it('links the renderer’s claim and opt-out pages, passing an e-mail’s signed reference on', () => {
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: 'v1.abcdefgh.sig_-' })).toEqual({
+      claim: '/claim',
+      optOut: '/opt-out?r=v1.abcdefgh.sig_-',
     });
   });
 
-  it('shows no button without its URL, and drops a reference that is not one', () => {
-    expect(
-      previewActionLinks({ siteId: 's', claimUrl: undefined, optOutUrl: undefined, outreachRef: undefined }),
-    ).toEqual({});
-    expect(previewActionLinks({ ...base, outreachRef: '"><script>' }).optOut).toBe(
-      'https://api.example/optout?site=site-1',
-    );
+  it('keeps the page’s language, and drops a reference that is not one', () => {
+    expect(previewActionLinks({ spec, locale: 'en', outreachRef: undefined })).toEqual({
+      claim: '/en/claim',
+      optOut: '/en/opt-out',
+    });
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: '"><script>' }).optOut).toBe('/opt-out');
+    expect(previewActionLinks({ spec, locale: 'fr', outreachRef: 'short' }).optOut).toBe('/opt-out');
   });
 });

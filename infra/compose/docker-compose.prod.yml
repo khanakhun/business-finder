@@ -11,7 +11,8 @@
 #   caddy.env   the DNS provider token          backup.env  object storage key and backup passphrase
 #   intel.env   services/intel: object storage settings (its own, narrowly scoped key) and open-data tuning
 #
-# Only Caddy publishes ports. Postgres and Valkey sit on an internal network with no route out.
+# Only Caddy publishes ports. Postgres and Valkey sit on an internal network with no route out. The site renderer has
+# internal networks of its own: one to Postgres (nothing else of the data network), one per caller (Caddy, the API).
 
 name: bf
 
@@ -31,7 +32,8 @@ x-hardened: &hardened
 x-app: &app
   <<: *hardened
   env_file: app.env
-  networks: [edge, data]
+  # sites-api: the renderer's revalidation endpoint (http://sites:3000).
+  networks: [edge, data, sites-api]
 
 services:
   caddy:
@@ -62,6 +64,7 @@ services:
       sites: { condition: service_healthy }
     networks:
       edge: { ipv4_address: 172.30.0.10 }
+      sites-edge: {}
     deploy:
       resources:
         limits: { cpus: '0.5', memory: 256M }
@@ -96,12 +99,19 @@ services:
       SITES_DATABASE_URL: postgres://bf_sites_ro:${BF_SITES_RO_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
       SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
       SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
+      SITES_PREVIEW_ACTIONS: ${SITES_PREVIEW_ACTIONS:-false}
     depends_on:
       postgres: { condition: service_healthy }
-    networks: [edge, data]
+    # The most exposed container (every site hostname, server rendering): no internet, no Valkey, no API or intel.
+    networks: [sites-edge, sites-api, sites-db]
+    # Read-only root filesystem: Next's cache and /tmp are scratch space.
+    read_only: true
+    tmpfs:
+      - /app/apps/sites/.next/cache:uid=1000,gid=1000,mode=0700
+      - /tmp
     deploy:
       resources:
-        limits: { cpus: '1', memory: 512M }
+        limits: { cpus: '1', memory: 512M, pids: 256 }
 
   api:
     <<: *app
@@ -213,7 +223,7 @@ services:
     shm_size: 1g
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks: [data]
+    networks: [data, sites-db]
     deploy:
       resources:
         limits: { cpus: '2', memory: 2560M }
@@ -295,6 +305,14 @@ networks:
           ip_range: 172.30.0.128/25
   # Databases: no route outside the host.
   data:
+    internal: true
+  # The site renderer's: Postgres only (as the read-only role), and each of its callers apart, so Caddy and the API
+  # still meet only on edge (the API trusts Caddy's fixed address there).
+  sites-db:
+    internal: true
+  sites-edge:
+    internal: true
+  sites-api:
     internal: true
 
 volumes:

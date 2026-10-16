@@ -26,25 +26,20 @@
 
 /* A preview's actions bar (claim, opt out): above the site, in the flow, readable on any theme. */
 .bf-preview-actions {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-  align-items: center;
+  gap: 0.25rem 1rem;
   justify-content: center;
-  padding: 0.6rem 1rem;
-  font:
-    14px / 1.4 system-ui,
-    sans-serif;
-  color: #f8fafc;
-  background: #0f172a;
+  margin-inline-start: 0.5rem;
 }
+/* The banner's colours (the theme's text on its background, contrast-checked by the spec validator). */
 .bf-preview-actions a {
-  color: #fff;
+  color: inherit;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .bf-preview-actions a:focus-visible {
-  outline: 2px solid #fbbf24;
+  outline: 2px solid currentColor;
   outline-offset: 2px;
 }

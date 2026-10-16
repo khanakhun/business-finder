@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 // node scripts/perf.mjs lighthouse|load — the renderer's performance checks (BF-036) against a production build
 // (`pnpm build` first) and the fixture previews (`pnpm sites:seed` first). It starts the renderer, runs the check and
-// stops everything. Lighthouse CI and autocannon are pinned and run through `pnpm dlx` (kept out of the lockfile).
+// stops everything. Lighthouse CI and autocannon are pinned and run through `pnpm dlx` (kept out of the lockfile; pnpm
+// runs none of their install scripts without --allow-build).
 //
 // The fixtures' images live on `https://assets.bf-sites.test` (a name that resolves nowhere): for Lighthouse, Chrome
 // maps that host to a local HTTPS server (throwaway self-signed certificate) drawing a placeholder of each image's
 // size, and the view beacon goes to a local endpoint answering 204, so the page loads as it would in production.
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash, X509Certificate } from 'node:crypto';
 import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { createServer as createHttpServer } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import { createRequire } from 'node:module';
+import { createServer as createTcpServer } from 'node:net';
 import { dirname, join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { loadEnvOrExit, sitesEnv } from '@bf/config';
@@ -20,6 +23,8 @@ const [check = 'lighthouse'] = process.argv.slice(2);
 const env = loadEnvOrExit(sitesEnv, { label: 'sites' });
 const port = String(env.SITES_PORT);
 const ASSETS_HOST = 'assets.bf-sites.test';
+/** The load check's limit: autocannon reports p90 and p97.5, not p95; p97.5 bounds it from above. */
+const LOAD_P975_LIMIT_MS = 50;
 
 /** Every fixture image by its URL path, with its size and a colour. */
 function fixtureImages() {
@@ -70,8 +75,9 @@ if (check === 'lighthouse') {
   );
   if (made.status !== 0) throw new Error('openssl could not make a throwaway certificate');
   const images = fixtureImages();
+  const cert = readFileSync('.lighthouseci/tls/cert.pem');
   const assets = createHttpsServer(
-    { key: readFileSync('.lighthouseci/tls/key.pem'), cert: readFileSync('.lighthouseci/tls/cert.pem') },
+    { key: readFileSync('.lighthouseci/tls/key.pem'), cert },
     (request, response) => {
       const image = images.get(new URL(request.url ?? '/', `https://${ASSETS_HOST}`).pathname);
       if (!image) return response.writeHead(404).end();
@@ -91,14 +97,32 @@ if (check === 'lighthouse') {
     () => assets.close(),
     () => beacon.close(),
   );
-  extraEnv = { SITES_ASSETS_BASE_URL: `https://${ASSETS_HOST}`, API_URL: `http://127.0.0.1:${beaconPort}` };
-  chromeFlags += ` --host-resolver-rules="MAP ${ASSETS_HOST}:443 127.0.0.1:${assetsPort}" --ignore-certificate-errors`;
+  // The preview actions on: the banner that ships is the one audited.
+  extraEnv = {
+    SITES_ASSETS_BASE_URL: `https://${ASSETS_HOST}`,
+    API_URL: `http://127.0.0.1:${beaconPort}`,
+    SITES_PREVIEW_ACTIONS: 'true',
+  };
+  // Chrome trusts this one throwaway certificate (by its key's hash), not every certificate.
+  const spki = createHash('sha256')
+    .update(new X509Certificate(cert).publicKey.export({ type: 'spki', format: 'der' }))
+    .digest('base64');
+  chromeFlags += ` --host-resolver-rules="MAP ${ASSETS_HOST}:443 127.0.0.1:${assetsPort}" --ignore-certificate-errors-spki-list=${spki}`;
 }
+
+// The port must be free: otherwise the checks would measure whatever answers there (a `dev` server, say).
+await new Promise((resolve, reject) => {
+  const probe = createTcpServer()
+    .once('error', () => reject(new Error(`port ${port} is in use: stop what runs there first`)))
+    .once('listening', () => probe.close(resolve))
+    .listen(Number(port), '127.0.0.1');
+});
 
 // A production build requires both shared secrets: throwaway ones unless real ones are set.
 const throwaway = 'perf-run-throwaway-secret-not-a-real-one-0123456789';
 const server = spawn(process.execPath, ['scripts/next.mjs', 'start'], {
-  stdio: 'ignore',
+  // Its errors show (a missing build, a refused setting).
+  stdio: ['ignore', 'ignore', 'inherit'],
   env: {
     ...process.env,
     SITES_REVALIDATE_SECRET: process.env.SITES_REVALIDATE_SECRET ?? throwaway,
@@ -111,8 +135,13 @@ const stop = () => {
   for (const close of closers) close();
 };
 process.on('exit', stop);
+let exited = false;
+server.once('exit', () => {
+  exited = true;
+});
 
 for (let tries = 0; ; tries += 1) {
+  if (exited) throw new Error('the renderer stopped before it was ready (did `pnpm build` run?)');
   try {
     if ((await fetch(`http://127.0.0.1:${port}/health/ready`)).ok) break;
   } catch {}
@@ -122,36 +151,58 @@ for (let tries = 0; ; tries += 1) {
 
 let status = 0;
 if (check === 'lighthouse') {
-  status =
-    spawnSync('pnpm', ['dlx', '@lhci/cli@0.15.1', 'autorun', '--config=../lighthouserc.cjs'], {
-      cwd: '.lighthouseci',
-      stdio: 'inherit',
-      env: { ...process.env, SITES_PORT: port, LHCI_CHROME_FLAGS: chromeFlags },
-    }).status ?? 1;
+  // Not spawnSync: the image stand-in and the beacon endpoint run in this process and must keep answering.
+  const lighthouse = spawn('pnpm', ['dlx', '@lhci/cli@0.15.1', 'autorun', '--config=../lighthouserc.cjs'], {
+    cwd: '.lighthouseci',
+    stdio: 'inherit',
+    env: { ...process.env, SITES_PORT: port, LHCI_CHROME_FLAGS: chromeFlags },
+  });
+  status = await new Promise((resolve) => lighthouse.once('exit', (code) => resolve(code ?? 1)));
 } else {
-  // A cached page under load: 200 requests per second over 10 connections, p95 under 50 ms (ticket), by Host header (autocannon resolves
-  // with the system resolver, which may not know *.localhost).
-  status =
-    spawnSync(
-      'pnpm',
-      [
-        'dlx',
-        'autocannon@8.0.0',
-        // LOAD_ARGS overrides the load (e.g. `--connections 1 --duration 10` for one request at a time).
-        ...(process.env.LOAD_ARGS?.split(' ') ?? [
-          '--connections',
-          '10',
-          '--duration',
-          '20',
-          '--overallRate',
-          '200',
-        ]),
-        '--headers',
-        'host=salon-gustavia-demo01.sites.localhost',
-        `http://127.0.0.1:${port}/`,
-      ],
-      { stdio: 'inherit' },
-    ).status ?? 1;
+  // A cached page under load: 200 requests per second over 10 connections, p95 under 50 ms (ticket), by Host header
+  // (autocannon resolves with the system resolver, which may not know *.localhost).
+  const run = spawnSync(
+    'pnpm',
+    [
+      '--silent',
+      'dlx',
+      'autocannon@8.0.0',
+      // LOAD_ARGS overrides the load (e.g. `--connections 1 --duration 10` for one request at a time).
+      ...(process.env.LOAD_ARGS?.split(' ') ?? [
+        '--connections',
+        '10',
+        '--duration',
+        '20',
+        '--overallRate',
+        '200',
+      ]),
+      '--json',
+      '--headers',
+      'host=salon-gustavia-demo01.sites.localhost',
+      `http://127.0.0.1:${port}/`,
+    ],
+    { stdio: ['ignore', 'pipe', 'inherit'], encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 },
+  );
+  status = run.status ?? 1;
+  if (status === 0) {
+    const result = JSON.parse(run.stdout.trim().split('\n').at(-1) ?? '{}');
+    const { latency, requests } = result;
+    const failures = [
+      ...(result.non2xx > 0
+        ? [`${result.non2xx} responses were not 2xx (did \`pnpm sites:seed\` run?)`]
+        : []),
+      ...(result.errors > 0 ? [`${result.errors} requests failed`] : []),
+      ...(latency.p97_5 > LOAD_P975_LIMIT_MS
+        ? [`p97.5 ${latency.p97_5} ms is over ${LOAD_P975_LIMIT_MS} ms`]
+        : []),
+    ];
+    process.stdout.write(
+      `${requests.total} requests, ${Math.round(requests.average)}/s: p50 ${latency.p50} ms, p90 ${latency.p90} ms, ` +
+        `p97.5 ${latency.p97_5} ms, p99 ${latency.p99} ms, max ${latency.max} ms\n`,
+    );
+    for (const failure of failures) process.stderr.write(`load: ${failure}\n`);
+    if (failures.length > 0) status = 1;
+  }
 }
 stop();
 process.exit(status);

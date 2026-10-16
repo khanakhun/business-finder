@@ -109,6 +109,7 @@ would break the URL) and `openssl rand -base64 32` for the others.
 | `INTEL_SHARED_SECRET` | generated (also in `app.env`, same value) |
 | `SITES_REVALIDATE_SECRET`, `SITES_VIEW_TOKEN_SECRET` | `openssl rand -hex 32` each: shared by the API, the worker and the site renderer (compose passes them; not in `app.env`) |
 | `SITES_ASSETS_BASE_URL` | the public URL of site images (the CDN or public bucket in front of `S3_BUCKET_SITES`) |
+| `SITES_PREVIEW_ACTIONS` | optional, `true` once BF-048's claim and opt-out pages exist (previews then link to them) |
 | `PG_SHARED_BUFFERS`, `PG_EFFECTIVE_CACHE_SIZE`, `PG_WORK_MEM`, … | optional tuning (defaults fit 8 GB) |
 
 **`app.env`** — the api and worker. Start from the repository's `.env.example` (every variable, described in

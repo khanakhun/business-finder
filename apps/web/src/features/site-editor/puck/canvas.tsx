@@ -100,7 +100,7 @@ export function CanvasBlock({ type, props }: { readonly type: BlockType; readonl
     parsed.error.issues.every((issue) => issue.code === 'too_big' || issue.code === 'invalid_format');
   if (!renderable) return <IncompleteBlock />;
   return (
-    <BlockBoundary resetKey={props}>
+    <BlockBoundary resetKey={JSON.stringify(block.props)}>
       <BlockRenderer block={block} ctx={ctx} index={Math.max(index, 0)} tone={tone} />
     </BlockBoundary>
   );

@@ -54,6 +54,8 @@ export function whereOf(
  * The site with one page's blocks as the canvas has them, unchecked: refusal paths point into the edited site (after
  * the operations), so they are named against it, not against the site before them.
  */
+// DECISION(BF-037): past one batch (200 operations on a page) a refusal from an earlier batch points into the order at
+// that point, not the final one: the name may then be off by the blocks moved later. Rare enough to accept.
 export function withPageBlocks(spec: SiteSpec, pageId: string, blocks: readonly Block[]): SiteSpec {
   return {
     ...spec,

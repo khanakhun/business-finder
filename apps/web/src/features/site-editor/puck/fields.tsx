@@ -301,9 +301,11 @@ export function AssetListField({
         <ol className="flex flex-col gap-1">
           {ids.map((assetId, index) => {
             const name = byId.get(assetId)?.alt[locale] ?? assetId;
-            // An image may be listed twice: its place in the list is part of its key.
+            // An image may be listed twice (stored data): its key counts earlier copies, so it stays stable when a
+            // row moves (focus follows the moved image) and unique when an id repeats.
+            const copy = ids.slice(0, index).filter((other) => other === assetId).length;
             return (
-              <li key={`${assetId}:${index}`} className="flex items-center gap-1 text-sm">
+              <li key={`${assetId}#${copy}`} className="flex items-center gap-1 text-sm">
                 <span className="flex-1 truncate">{name}</span>
                 {readOnly ? null : (
                   <>

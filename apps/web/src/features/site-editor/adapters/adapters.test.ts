@@ -23,7 +23,6 @@ const PAGES = Object.entries(FIXTURES).flatMap(([name, spec]) =>
   spec.pages.map((page) => [name, page.id] as const),
 );
 
-/** The data the editor would show after applying `ops`, ids mapped as a save maps them. */
 /** A text as the schema stores it (trimmed, blank languages absent). */
 const trim = (text: Record<string, string | undefined>) =>
   Object.fromEntries(
@@ -32,6 +31,7 @@ const trim = (text: Record<string, string | undefined>) =>
       .filter(([, value]) => value),
   );
 
+/** The data the editor would show after applying `ops`, ids mapped as a save maps them. */
 const normalized = (data: EditorData): EditorData => ({
   root: {
     props: {

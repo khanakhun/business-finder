@@ -11,10 +11,12 @@ import {
   ValidationError,
 } from '@bf/contracts';
 import { afterCommit, type DbClient } from '@bf/db';
-import { Inject, Injectable } from '@nestjs/common';
+import type { Logger } from '@bf/observability';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
+import { LOGGER } from '../../platform/logging/logger.ts';
 import type { ObjectStorage } from '../../platform/storage/object-storage.ts';
 import { MAX_IMAGE_PIXELS, sniffImageType } from '../domain/image-type.ts';
 import {
@@ -98,7 +100,20 @@ export class SiteAssetCommands {
     @Inject(ASSET_PROCESSING_QUEUE) private readonly queue: AssetProcessingQueue,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(DB_CLIENT) private readonly db: DbClient,
+    @Optional() @Inject(LOGGER) private readonly logger?: Logger,
   ) {}
+
+  /** Best effort: a file left behind is logged (to be found and removed), never a reason to fail the caller. */
+  private async discard(storage: Pick<PublicFiles, 'delete'>, assetId: string, key: string): Promise<void> {
+    try {
+      await storage.delete(key);
+    } catch (error) {
+      this.logger?.warn(
+        { assetId, key, err: error instanceof Error ? error.message : String(error) },
+        'site image file not deleted',
+      );
+    }
+  }
 
   /** A pending asset and a presigned URL to upload its original to (exactly the declared type and size). */
   @Transactional()
@@ -167,7 +182,7 @@ export class SiteAssetCommands {
     const refuse = async (message: string, reason: string) => {
       if (await this.assets.transition(asset.id, ['pending'], { status: 'failed' })) {
         // Best effort: a failed asset is never processed or served, whether or not its original is gone.
-        await this.originals.delete(asset.storageKey).catch(() => undefined);
+        await this.discard(this.originals, asset.id, asset.storageKey);
       }
       return new ValidationError(message, [{ path: ['file'], message, code: reason.toLowerCase() }], {
         details: { reason },
@@ -296,7 +311,7 @@ export class SiteAssetCommands {
       const current = await this.assets.byId(asset.id);
       if (!current || current.status === 'failed')
         // Best effort, like fail(): a retry would find the image settled and skip, so one error must not stop the rest.
-        for (const variant of variants) await this.publicFiles.delete(variant.key).catch(() => undefined);
+        for (const variant of variants) await this.discard(this.publicFiles, asset.id, variant.key);
       return 'skipped';
     }
     return 'ready';
@@ -309,7 +324,7 @@ export class SiteAssetCommands {
   async fail(assetId: string): Promise<void> {
     const asset = await this.assets.byId(assetId);
     if (!asset || !(await this.assets.transition(assetId, ['processing'], { status: 'failed' }))) return;
-    for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
+    for (const key of this.variantKeys(asset)) await this.discard(this.publicFiles, assetId, key);
   }
 
   /**
@@ -319,7 +334,7 @@ export class SiteAssetCommands {
   async failStale(limit = 500): Promise<number> {
     const stale = await this.assets.failStale(staleCutoffs(this.clock.now()), limit);
     for (const asset of stale)
-      for (const key of this.variantKeys(asset)) await this.publicFiles.delete(key).catch(() => undefined);
+      for (const key of this.variantKeys(asset)) await this.discard(this.publicFiles, asset.id, key);
     return stale.length;
   }
 

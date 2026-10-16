@@ -369,8 +369,10 @@ describe('SiteAssetCommands', () => {
       if (calls === 1) throw new Error('storage unavailable');
       return remove(key);
     };
+    let written = 0;
     images.dominantColors = async (image, count) => {
       // The image failed meanwhile (the stale sweep, or the retry's last attempt) after a re-stamp.
+      written = publicFiles.files.size;
       const row = assets.rows.get(id);
       if (row) assets.rows.set(id, { ...row, status: 'failed', processingStartedAt: null });
       return original(image, count);
@@ -381,7 +383,8 @@ describe('SiteAssetCommands', () => {
       images.dominantColors = original;
       publicFiles.delete = remove;
     }
-    expect(calls).toBeGreaterThan(1);
+    // Every file it wrote was tried: one failed (and is left), the rest are gone.
+    expect(calls).toBe(written);
     expect(publicFiles.files.size).toBe(1);
   });
 });

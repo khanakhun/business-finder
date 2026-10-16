@@ -101,7 +101,7 @@ would break the URL) and `openssl rand -base64 32` for the others.
 |---|---|
 | `IMAGE_REGISTRY` | `ghcr.io/<github-owner>` (lowercase) |
 | `POSTGRES_IMAGE_TAG`, `CADDY_IMAGE_TAG`, `BACKUP_IMAGE_TAG` | the sha of a `main` build whose images to use; bump on purpose (a new Postgres tag restarts the database) |
-| `BASE_DOMAIN`, `SITES_BASE_DOMAIN` | the domains of §2 |
+| `BASE_DOMAIN`, `SITES_BASE_DOMAIN` | the domains of §2 — `SITES_BASE_DOMAIN` must be a separate registrable domain (e.g. `example-sites.com`), never under the dashboard's cookie domain: the API refuses to start otherwise |
 | `ACME_EMAIL` | an address that receives certificate warnings |
 | `ACME_DNS_PROVIDER` | `cloudflare` (default) or the module you built |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | e.g. `bf`, `openssl rand -hex 32`, `bf` |

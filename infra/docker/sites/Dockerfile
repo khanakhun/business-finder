@@ -40,6 +40,8 @@ ENV NODE_ENV=production \
 WORKDIR /app
 COPY --from=build --chown=root:root /repo/apps/sites/.next/standalone/ ./
 COPY --from=build --chown=root:root /repo/apps/sites/.next/static ./apps/sites/.next/static
+# The block library's stylesheet and fonts, copied into public/_bf by the build (scripts/next.mjs).
+COPY --from=build --chown=root:root /repo/apps/sites/public ./apps/sites/public
 # The only writable path: Next's cache. The code itself stays root-owned (read-only to the server).
 RUN mkdir -p apps/sites/.next/cache && chown node:node apps/sites/.next/cache
 USER node

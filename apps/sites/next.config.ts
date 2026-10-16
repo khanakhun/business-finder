@@ -33,7 +33,14 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // The block library's stylesheet and fonts: stable names, refreshed with each deploy.
+      {
+        source: '/_bf/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' }],
+      },
+    ];
   },
 };
 

@@ -718,6 +718,106 @@
         ],
         "type": "object"
       },
+      "BulkEnrichRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "businessIds": {
+            "items": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "force": {
+            "default": false,
+            "type": "boolean"
+          },
+          "steps": {
+            "items": {
+              "enum": [
+                "site_intel",
+                "email_verify",
+                "reviews",
+                "psi",
+                "vision_audit"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "businessIds",
+          "force"
+        ],
+        "type": "object"
+      },
+      "BulkEnrichResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "rejected": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "businessId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "reason": {
+                  "description": "`busy`: the workspace already has too many runs waiting.",
+                  "enum": [
+                    "not_found",
+                    "budget",
+                    "nothing_to_do",
+                    "busy"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "businessId",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "runs": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "businessId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "runId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "businessId",
+                "runId"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "runs",
+          "rejected"
+        ],
+        "type": "object"
+      },
       "BulkResult": {
         "additionalProperties": false,
         "properties": {
@@ -1102,6 +1202,69 @@
         ],
         "type": "object"
       },
+      "BusinessEnrichment": {
+        "additionalProperties": false,
+        "properties": {
+          "latestRun": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnrichmentRun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "fresh": {
+                  "type": "boolean"
+                },
+                "lastDoneAt": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "registered": {
+                  "type": "boolean"
+                },
+                "step": {
+                  "enum": [
+                    "site_intel",
+                    "email_verify",
+                    "reviews",
+                    "psi",
+                    "vision_audit"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "step",
+                "registered",
+                "lastDoneAt",
+                "fresh"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "latestRun",
+          "steps"
+        ],
+        "type": "object"
+      },
       "BusinessFacets": {
         "additionalProperties": false,
         "properties": {
@@ -1396,6 +1559,40 @@
               "null"
             ]
           },
+          "enrichment": {
+            "additionalProperties": false,
+            "description": "This workspace's latest enrichment run of the business (BF-027).",
+            "properties": {
+              "finishedAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "status": {
+                "enum": [
+                  "none",
+                  "queued",
+                  "running",
+                  "done",
+                  "partial",
+                  "failed"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "finishedAt"
+            ],
+            "type": "object"
+          },
           "hasEmail": {
             "description": "Whether an email contact is known (the address itself is not listed).",
             "type": "boolean"
@@ -1573,7 +1770,8 @@
           "lastActivityAt",
           "distanceMeters",
           "hasEmail",
-          "addedVia"
+          "addedVia",
+          "enrichment"
         ],
         "type": "object"
       },
@@ -3106,7 +3304,7 @@
         "properties": {
           "autoEnrich": {
             "default": false,
-            "description": "Emit `discovery.business_found` for enrichment (BF-027).",
+            "description": "Enrich businesses this run adds to the workspace (`discovery.business.found`, BF-027).",
             "type": "boolean"
           },
           "fieldTier": {
@@ -3432,6 +3630,371 @@
             "type": "object"
           }
         ]
+      },
+      "EnrichBusinessRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "force": {
+            "default": false,
+            "description": "Re-run steps whose last output is still fresh.",
+            "type": "boolean"
+          },
+          "steps": {
+            "description": "Default: every registered step. Dependencies are added.",
+            "items": {
+              "enum": [
+                "site_intel",
+                "email_verify",
+                "reviews",
+                "psi",
+                "vision_audit"
+              ],
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "force"
+        ],
+        "type": "object"
+      },
+      "EnrichmentEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "budget": {
+            "additionalProperties": false,
+            "properties": {
+              "monthlyBudgetUsd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "remainingUsd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "spentUsd": {
+                "description": "Estimated enrichment spend this month (UTC).",
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "monthlyBudgetUsd",
+              "spentUsd",
+              "remainingUsd"
+            ],
+            "type": "object"
+          },
+          "businesses": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "costUsd": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "skipped": {
+                  "description": "Fresh, not applicable or not registered.",
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "step": {
+                  "enum": [
+                    "site_intel",
+                    "email_verify",
+                    "reviews",
+                    "psi",
+                    "vision_audit"
+                  ],
+                  "type": "string"
+                },
+                "willRun": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "step",
+                "willRun",
+                "skipped",
+                "costUsd"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "totalCostUsd": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "withinBudget": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "businesses",
+          "steps",
+          "totalCostUsd",
+          "budget",
+          "withinBudget"
+        ],
+        "type": "object"
+      },
+      "EnrichmentRun": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "costUsd": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "requestedSteps": {
+            "items": {
+              "enum": [
+                "site_intel",
+                "email_verify",
+                "reviews",
+                "psi",
+                "vision_audit"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "partially_completed",
+              "failed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/EnrichmentStep"
+            },
+            "type": "array"
+          },
+          "trigger": {
+            "enum": [
+              "discovery",
+              "manual",
+              "bulk",
+              "schedule",
+              "event"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "trigger",
+          "requestedSteps",
+          "force",
+          "status",
+          "costUsd",
+          "error",
+          "steps",
+          "createdAt",
+          "startedAt",
+          "finishedAt"
+        ],
+        "type": "object"
+      },
+      "EnrichmentSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "monthlyBudgetUsd": {
+            "anyOf": [
+              {
+                "maximum": 100000,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap."
+          },
+          "nightlyRefreshLimit": {
+            "description": "Businesses with stale steps re-enriched per night (0 disables the nightly refresh).",
+            "maximum": 5000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "monthlyBudgetUsd",
+          "nightlyRefreshLimit"
+        ],
+        "type": "object"
+      },
+      "EnrichmentStep": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "costUsd": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "skipReason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "fresh",
+                  "no_website",
+                  "not_applicable",
+                  "dependency_failed",
+                  "dependency_skipped",
+                  "budget",
+                  "cancelled",
+                  "not_registered"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "skipped",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "step": {
+            "enum": [
+              "site_intel",
+              "email_verify",
+              "reviews",
+              "psi",
+              "vision_audit"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "step",
+          "status",
+          "attempt",
+          "costUsd",
+          "skipReason",
+          "error",
+          "startedAt",
+          "finishedAt"
+        ],
+        "type": "object"
       },
       "EstimateDiscoveryRunRequest": {
         "additionalProperties": false,
@@ -4822,6 +5385,9 @@
           "discovery": {
             "$ref": "#/components/schemas/DiscoverySettings"
           },
+          "enrichment": {
+            "$ref": "#/components/schemas/EnrichmentSettings"
+          },
           "features": {
             "additionalProperties": {
               "$ref": "#/components/schemas/FeatureFlagState"
@@ -4922,6 +5488,7 @@
           "defaultCountryCode",
           "senderDefaults",
           "discovery",
+          "enrichment",
           "features",
           "outreachReadiness",
           "updatedAt"
@@ -7286,6 +7853,31 @@
             },
             "type": "object"
           },
+          "enrichment": {
+            "additionalProperties": false,
+            "properties": {
+              "monthlyBudgetUsd": {
+                "anyOf": [
+                  {
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap."
+              },
+              "nightlyRefreshLimit": {
+                "description": "Businesses with stale steps re-enriched per night (0 disables the nightly refresh).",
+                "maximum": 5000,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "type": "object"
+          },
           "features": {
             "$ref": "#/components/schemas/FeatureFlags"
           },
@@ -7441,6 +8033,977 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "WebsiteSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "analytics": {
+            "additionalProperties": false,
+            "properties": {
+              "ga4": {
+                "type": "boolean"
+              },
+              "gtm": {
+                "type": "boolean"
+              },
+              "metaPixel": {
+                "type": "boolean"
+              },
+              "others": {
+                "items": {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "tiktokPixel": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "ga4",
+              "gtm",
+              "metaPixel",
+              "tiktokPixel",
+              "others"
+            ],
+            "type": "object"
+          },
+          "booking": {
+            "additionalProperties": false,
+            "properties": {
+              "providers": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "evidence": {
+                      "description": "What matched (a host, a script, a link) — never page text.",
+                      "maxLength": 300,
+                      "type": "string"
+                    },
+                    "name": {
+                      "maxLength": 100,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "evidence"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "providers"
+            ],
+            "type": "object"
+          },
+          "businessId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "chat": {
+            "additionalProperties": false,
+            "properties": {
+              "providers": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "evidence": {
+                      "description": "What matched (a host, a script, a link) — never page text.",
+                      "maxLength": 300,
+                      "type": "string"
+                    },
+                    "name": {
+                      "maxLength": 100,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "evidence"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "providers"
+            ],
+            "type": "object"
+          },
+          "contacts": {
+            "additionalProperties": false,
+            "properties": {
+              "contactForms": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "action": {
+                      "anyOf": [
+                        {
+                          "maxLength": 2000,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "pageUrl": {
+                      "maxLength": 2000,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "pageUrl",
+                    "action"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "emails": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "email": {
+                      "maxLength": 254,
+                      "type": "string"
+                    },
+                    "onContactPage": {
+                      "type": "boolean"
+                    },
+                    "pageUrl": {
+                      "maxLength": 2000,
+                      "type": "string"
+                    },
+                    "source": {
+                      "enum": [
+                        "mailto",
+                        "text",
+                        "jsonld",
+                        "cfemail",
+                        "obfuscated"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "email",
+                    "source",
+                    "pageUrl",
+                    "onContactPage"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              "phones": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "e164": {
+                      "maxLength": 20,
+                      "type": "string"
+                    },
+                    "isWhatsApp": {
+                      "type": "boolean"
+                    },
+                    "pageUrl": {
+                      "maxLength": 2000,
+                      "type": "string"
+                    },
+                    "raw": {
+                      "maxLength": 60,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "e164",
+                    "raw",
+                    "pageUrl",
+                    "isWhatsApp"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 30,
+                "type": "array"
+              },
+              "whatsappLinks": {
+                "items": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "emails",
+              "phones",
+              "whatsappLinks",
+              "contactForms"
+            ],
+            "type": "object"
+          },
+          "fetchedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "finalUrl": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "freshness": {
+            "additionalProperties": false,
+            "properties": {
+              "copyrightYear": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "httpLastModified": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "latestDatedContent": {
+                "anyOf": [
+                  {
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sitemapLastmod": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "copyrightYear",
+              "httpLastModified",
+              "sitemapLastmod",
+              "latestDatedContent"
+            ],
+            "type": "object"
+          },
+          "httpStatus": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "imageCandidates": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "alt": {
+                  "anyOf": [
+                    {
+                      "maxLength": 300,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "height": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "url": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "url",
+                "alt",
+                "width",
+                "height"
+              ],
+              "type": "object"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "languages": {
+            "additionalProperties": false,
+            "properties": {
+              "declared": {
+                "items": {
+                  "maxLength": 35,
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "detected": {
+                "items": {
+                  "maxLength": 5,
+                  "type": "string"
+                },
+                "maxItems": 5,
+                "type": "array"
+              },
+              "hasLanguageSwitcher": {
+                "type": "boolean"
+              },
+              "hreflang": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "lang": {
+                      "maxLength": 35,
+                      "type": "string"
+                    },
+                    "url": {
+                      "maxLength": 2000,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "lang",
+                    "url"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 30,
+                "type": "array"
+              }
+            },
+            "required": [
+              "declared",
+              "detected",
+              "hreflang",
+              "hasLanguageSwitcher"
+            ],
+            "type": "object"
+          },
+          "logoCandidates": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "height": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "source": {
+                  "enum": [
+                    "link-icon",
+                    "og:image",
+                    "img-logo"
+                  ],
+                  "type": "string"
+                },
+                "url": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": -9007199254740991,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "url",
+                "source",
+                "width",
+                "height"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "mobile": {
+            "additionalProperties": false,
+            "properties": {
+              "fontSizeIssues": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "hasViewportMeta": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "hasViewportMeta",
+              "fontSizeIssues"
+            ],
+            "type": "object"
+          },
+          "noSolicitation": {
+            "additionalProperties": false,
+            "properties": {
+              "checked": {
+                "description": "A live page of the business (2xx, reachability ok or redirected) was read. `false` — blocked, bot wall, error page, parked, unreachable, social-only — means nothing is known: outreach must treat the business as not checked (manual review), never as \"no statement\".",
+                "type": "boolean"
+              },
+              "detected": {
+                "type": "boolean"
+              },
+              "pageUrl": {
+                "anyOf": [
+                  {
+                    "maxLength": 2000,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "phrases": {
+                "items": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "snippet": {
+                "anyOf": [
+                  {
+                    "maxLength": 400,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "At most 30 words around the first match."
+              }
+            },
+            "required": [
+              "checked",
+              "detected",
+              "phrases",
+              "pageUrl",
+              "snippet"
+            ],
+            "type": "object"
+          },
+          "noSolicitationMarker": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "firstDetectedAt": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "lastDetectedAt": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "pageUrl": {
+                    "maxLength": 2000,
+                    "type": "string"
+                  },
+                  "phrases": {
+                    "items": {
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    "maxItems": 20,
+                    "type": "array"
+                  },
+                  "snippet": {
+                    "anyOf": [
+                      {
+                        "maxLength": 400,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstDetectedAt",
+                  "lastDetectedAt",
+                  "pageUrl",
+                  "phrases",
+                  "snippet"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sticky: set when any crawl saw a \"do not solicit\" statement, even if the latest crawl did not (compliance)."
+          },
+          "ordering": {
+            "additionalProperties": false,
+            "properties": {
+              "providers": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "evidence": {
+                      "description": "What matched (a host, a script, a link) — never page text.",
+                      "maxLength": 300,
+                      "type": "string"
+                    },
+                    "name": {
+                      "maxLength": 100,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "evidence"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "required": [
+              "providers"
+            ],
+            "type": "object"
+          },
+          "pages": {
+            "items": {
+              "additionalProperties": false,
+              "description": "Markdown stays in storage.",
+              "properties": {
+                "h1": {
+                  "anyOf": [
+                    {
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "kind": {
+                  "enum": [
+                    "home",
+                    "contact",
+                    "about",
+                    "services",
+                    "menu",
+                    "booking",
+                    "legal",
+                    "other"
+                  ],
+                  "type": "string"
+                },
+                "lang": {
+                  "anyOf": [
+                    {
+                      "maxLength": 35,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "metaDescription": {
+                  "anyOf": [
+                    {
+                      "maxLength": 1000,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "maxLength": 500,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "url": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "wordCount": {
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "url",
+                "kind",
+                "title",
+                "metaDescription",
+                "lang",
+                "h1",
+                "wordCount"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "performanceHints": {
+            "additionalProperties": false,
+            "properties": {
+              "domContentLoadedMs": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pageWeightKb": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "requestCount": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "pageWeightKb",
+              "requestCount",
+              "domContentLoadedMs"
+            ],
+            "type": "object"
+          },
+          "reachability": {
+            "enum": [
+              "ok",
+              "redirected",
+              "not_found",
+              "server_error",
+              "timeout",
+              "dns_error",
+              "tls_error",
+              "parked",
+              "blocked"
+            ],
+            "type": "string"
+          },
+          "screenshots": {
+            "additionalProperties": false,
+            "properties": {
+              "desktop": {
+                "type": "boolean"
+              },
+              "mobile": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "desktop",
+              "mobile"
+            ],
+            "type": "object"
+          },
+          "security": {
+            "additionalProperties": false,
+            "properties": {
+              "hsts": {
+                "type": "boolean"
+              },
+              "https": {
+                "type": "boolean"
+              },
+              "mixedContent": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "https",
+              "hsts",
+              "mixedContent"
+            ],
+            "type": "object"
+          },
+          "socialOnly": {
+            "description": "The \"website\" is a social profile or link page; it was not crawled.",
+            "type": "boolean"
+          },
+          "socials": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "handle": {
+                  "anyOf": [
+                    {
+                      "maxLength": 200,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "network": {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                "url": {
+                  "maxLength": 2000,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "network",
+                "url",
+                "handle"
+              ],
+              "type": "object"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "tech": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "categories": {
+                  "items": {
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "maxItems": 10,
+                  "type": "array"
+                },
+                "confidence": {
+                  "maximum": 100,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "name": {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                "version": {
+                  "anyOf": [
+                    {
+                      "maxLength": 50,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "version",
+                "categories",
+                "confidence"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "tls": {
+            "additionalProperties": false,
+            "properties": {
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "issuer": {
+                "anyOf": [
+                  {
+                    "maxLength": 300,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "valid": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "valid",
+              "expiresAt",
+              "issuer"
+            ],
+            "type": "object"
+          },
+          "url": {
+            "maxLength": 2000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "finalUrl",
+          "reachability",
+          "socialOnly",
+          "tls",
+          "security",
+          "languages",
+          "contacts",
+          "socials",
+          "booking",
+          "ordering",
+          "chat",
+          "analytics",
+          "tech",
+          "freshness",
+          "mobile",
+          "performanceHints",
+          "noSolicitation",
+          "logoCandidates",
+          "imageCandidates",
+          "id",
+          "businessId",
+          "url",
+          "httpStatus",
+          "fetchedAt",
+          "pages",
+          "screenshots",
+          "noSolicitationMarker"
+        ],
         "type": "object"
       }
     },
@@ -10437,6 +12000,198 @@
         ]
       }
     },
+    "/v1/businesses/{id}/enrich": {
+      "post": {
+        "operationId": "enrichBusiness",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrichBusinessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichmentRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Enrich a business now: plans the steps (dependencies added, fresh ones skipped unless `force`) and starts a run. `Idempotency-Key` returns the same run; a run already open for the business is returned (200).",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/enrichment": {
+      "get": {
+        "operationId": "getBusinessEnrichment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessEnrichment"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The business's latest enrichment run in this workspace and where each step stands",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
     "/v1/businesses/{id}/notes": {
       "get": {
         "operationId": "listNotes",
@@ -11528,6 +13283,159 @@
         "summary": "Track a business in the workspace (idempotent: 201 when added, 200 when already tracked)",
         "tags": [
           "businesses"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/website": {
+      "get": {
+        "operationId": "getBusinessWebsite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebsiteSnapshot"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "What the business website showed at its latest crawl (404 until crawled)",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/businesses/{id}/website/screenshots/{kind}": {
+      "get": {
+        "operationId": "getBusinessWebsiteScreenshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A screenshot of the business website from its latest crawl (`desktop` or `mobile`)",
+        "tags": [
+          "enrichment"
         ]
       }
     },
@@ -12943,6 +14851,312 @@
         "summary": "Provider calls, results and estimated cost per day, provider and SKU",
         "tags": [
           "discovery"
+        ]
+      }
+    },
+    "/v1/enrichment/bulk": {
+      "post": {
+        "operationId": "enrichBusinesses",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkEnrichRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkEnrichResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Enrich several businesses: one run each (`Idempotency-Key` per request); refused ones say why (not tracked, budget, nothing to do)",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/enrichment/estimate": {
+      "post": {
+        "operationId": "estimateEnrichment",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkEnrichRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichmentEstimate"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "What enriching these businesses would run and cost, against the monthly budget (no side effects)",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/enrichment/runs/{id}": {
+      "get": {
+        "operationId": "getEnrichmentRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichmentRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "An enrichment run with its steps",
+        "tags": [
+          "enrichment"
+        ]
+      }
+    },
+    "/v1/enrichment/runs/{id}/cancel": {
+      "post": {
+        "operationId": "cancelEnrichmentRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrichmentRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Cancel a run: queued steps are skipped, running ones are stopped at their next checkpoint",
+        "tags": [
+          "enrichment"
         ]
       }
     },

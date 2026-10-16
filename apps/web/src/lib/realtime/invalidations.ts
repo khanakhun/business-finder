@@ -8,7 +8,10 @@ import type { QueryKey } from '@tanstack/react-query';
 export const REALTIME_EVENTS = {
   notificationCreated: 'notification.created',
   crmActivityCreated: 'crm.activity.created',
+  enrichmentRunProgressed: 'enrichment.run.progressed',
 } as const;
+
+const FINISHED_RUN = new Set(['completed', 'partially_completed', 'failed', 'cancelled']);
 
 /**
  * The one place that says which cached queries a realtime event makes stale (event type → query keys). Feature
@@ -20,6 +23,16 @@ export const realtimeInvalidations: Readonly<Record<string, (event: RealtimeEven
     [REALTIME_EVENTS.notificationCreated]: () => [['notifications']],
     // Something happened on a business (BF-024): its page, the pipeline board and task lists.
     [REALTIME_EVENTS.crmActivityCreated]: (event) => [['business', event.entityId], ['crm']],
+    // An enrichment run moved (BF-027): the business's page; the listing's status column once it ends.
+    [REALTIME_EVENTS.enrichmentRunProgressed]: (event) => {
+      const status = (event.payload as { status?: string } | null)?.status ?? '';
+      return FINISHED_RUN.has(status)
+        ? [
+            ['business', event.entityId],
+            ['search', 'listing'],
+          ]
+        : [['business', event.entityId]];
+    },
   };
 
 /** Sent by the server when the client may have missed events (slow connection, retention): refetch everything. */

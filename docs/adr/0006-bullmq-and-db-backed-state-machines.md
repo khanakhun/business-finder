@@ -22,6 +22,14 @@ Async workloads: discovery fan-out (minutes), enrichment pipelines (per business
 - **Transactional outbox** (`outbox_events`) bridges DB transactions and queues; relay uses `LISTEN/NOTIFY` for low latency plus a polling fallback.
 - **Cancellation**: jobs check an `AbortSignal` tied to a Valkey cancel key; sandboxed agent containers are killed by the worker on cancel.
 
+## Amendment (BF-027, 2026-10-16)
+
+Enrichment runs do **not** use BullMQ flows. Their steps form a DAG (a step may need several others; vision needs site
+intel and reviews), which a flow tree cannot express without duplicating nodes. Step rows carry `depends_on`; under the
+run's row lock the engine skips steps whose dependency failed, enqueues the ready ones (a step is only claimed once its
+dependencies are terminal) and finalizes the run. This is the same DB-as-truth pattern as discovery runs, and the
+reconciler rebuilds lost jobs from the rows. Flows remain an option where the tree is genuinely known up front.
+
 ## Alternatives considered
 
 | Option | Why not (now) |

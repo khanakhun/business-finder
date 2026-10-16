@@ -1,4 +1,5 @@
 import { registerCrmBulkActions } from '@/features/business/bulk-actions.tsx';
+import { registerEnrichmentBulkAction } from '@/features/enrichment/bulk-enrich.tsx';
 import { type BulkAction, registerBulkAction } from './registry.ts';
 
 // The bulk actions BF-023 ships. Later tickets register theirs the same way (and replace the placeholders by id).
@@ -60,4 +61,6 @@ export function registerDefaultBulkActions(): void {
   for (const action of actions) registerBulkAction(action);
   // Tags and pipeline status (BF-024).
   registerCrmBulkActions();
+  // Enrich (BF-027).
+  registerEnrichmentBulkAction();
 }

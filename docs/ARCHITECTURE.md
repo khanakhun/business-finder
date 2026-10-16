@@ -267,8 +267,9 @@ erDiagram
 | `discovery.plan` | `StartDiscoveryRun`, reconciler | 2 | 3× exp | `runId:attemptKey` |
 | `discovery.fetch` | plan step, fetch step (splits, next pages), reconciler | 4, provider limiter | 5× exp + jitter | `taskId:attempt[:window]` |
 | `discovery.ingest` | fetch step, reconciler | 4 | 3× | `taskId:attemptKey` (records wait on the task row) |
-| `enrichment.run` | `BusinessCreated` / user | 4 | 3× | `businessId:pipelineVersion:yyyymmdd` |
-| `enrichment.step` | `enrichment.run` (flow children) | 8 | per step | `businessId:step:inputHash` |
+| `enrichment-run` | `StartEnrichment` (manual, bulk, `discovery.business.found`, nightly refresh), reconciler | 4 | 3× | `runId:attemptKey` |
+| `enrichment-step` | `advance` (steps whose dependencies are terminal), retries, reconciler | 8 | per step (engine: 3 attempts, backoff; open circuit not counted) | `stepRowId:attempt[:retryKey]` (freshness by `businessId:step:inputHash`) |
+| `enrichment-refresh` | scheduler (worker, hourly check) | 1 | 3× | `refresh:yyyy-mm-dd` |
 | `scoring.compute` | `BusinessEnriched`, profile change | 8 | 3× | `orgId:businessId:profileVersion:featureHash` |
 | `search.embed` | `BusinessUpdated` | 4 | 5× | `businessId:model:textHash` |
 | `generation.blocks` | `GenerationService` | 6 | 2× then failover | `jobId:attempt` |
@@ -289,7 +290,7 @@ Concurrency values are configuration (`QUEUE_CONCURRENCY__GENERATION_CODEX=2`, �
 
 ### 7.2 Patterns
 
-- **Flows** (BullMQ parent/child) for fan-out/fan-in where the tree is known up front: enrichment fans out to steps, then triggers scoring. Discovery runs grow their tree while running (quadtree splits, next pages), so they fan out through task rows instead: each step enqueues its follow-ups and a locked `finalize` detects fan-in (BF-020, ADR-0006).
+- **Fan-out through rows, not BullMQ flows**: discovery runs grow their tree while running (quadtree splits, next pages), so each step enqueues its follow-ups and a locked `finalize` detects fan-in (BF-020). Enrichment runs are a DAG, not a tree (a step may need several others), so their step rows hold `depends_on`: under the run's row lock, `advance` skips steps whose dependency failed or was skipped, enqueues the ready ones and finalizes the run with `business.enriched` (BF-027, ADR-0006). Either way the database says what is left to do and the reconciler rebuilds lost jobs from it.
 - **DB-backed scheduler** for anything with business-time semantics (sequence steps, preview expiry): rows carry `next_run_at`; a one-minute tick claims due rows with `SELECT … FOR UPDATE SKIP LOCKED` and enqueues work. Survives Valkey loss; easy to reason about.
 - **Transactional outbox**: domain events are written to `outbox_events` inside the business transaction; the relay (worker) publishes them and marks them dispatched. Consumers are idempotent.
 - **Realtime**: workers publish `RealtimeEvent`s to Valkey channel `rt:org:<orgId>`; the API's `/v1/realtime` SSE endpoint fans them out to that org's connected clients; the web app maps events to TanStack Query invalidations. Job-scoped streams (`/v1/generation-jobs/:id/events`) replay the persisted event log first, then tail live events.
@@ -343,7 +344,7 @@ sequenceDiagram
 
 ### F3 — Enrichment and scoring
 
-`BusinessCreated` → `enrichment.run` → steps: `site-intel` (intel service) → `psi` → `email-verify` → `reviews` → `vision-audit` → `BusinessEnriched` → `scoring.compute` for every workspace tracking the business → `ScoreUpdated` → realtime.
+A run starts from the business page or bulk bar (`POST /v1/businesses/:id/enrich`, `/v1/enrichment/bulk`), a discovery run with `autoEnrich` (`discovery.business.found`) or the nightly refresh of stale steps. The planner resolves the requested steps and their dependencies into a DAG, skips fresh ones (per-step TTL and input hash) and what the workspace's monthly budget cannot pay; steps then run as their dependencies finish: `site_intel` (intel service, BF-026 — the website becomes a `website` source through ingestion) → `psi`, `email_verify`, `reviews`, `vision_audit` (BF-028–030, registered by their modules) → `business.enriched` → `scoring.compute` for every workspace tracking the business → `ScoreUpdated` → realtime (`enrichment.run.progressed` all along).
 
 ### F4 — Batch site generation
 

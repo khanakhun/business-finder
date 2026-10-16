@@ -8,6 +8,7 @@ import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
 import { LOGGER } from '../platform/logging/logger.ts';
+import { ValkeyRateLimiter } from '../platform/rate-limit/valkey-rate-limiter.ts';
 import { RealtimeModule } from '../realtime/index.ts';
 import { ConnectionTesterRegistry, SecretResolver, WorkspaceDefaults } from '../workspace/index.ts';
 import {
@@ -49,7 +50,6 @@ import { OpenDataProvider } from './infrastructure/providers/open-data/provider.
 import { OsmOverpassProvider } from './infrastructure/providers/osm/provider.ts';
 import { RealtimeRunProgress } from './infrastructure/realtime-run-progress.ts';
 import { RECONCILER_AUTOSTART, RunReconciler } from './infrastructure/run-reconciler.ts';
-import { ValkeyRateLimiter } from './infrastructure/valkey-rate-limiter.ts';
 import { DiscoveryController } from './interface/http/discovery.controller.ts';
 import { DiscoveryRunsController } from './interface/http/discovery-runs.controller.ts';
 import {

@@ -38,7 +38,11 @@ export class GoldenRecordWriter {
   async write(
     businessId: string,
     sources: readonly NormalizedSource[],
-    options: { readonly create: boolean },
+    options: {
+      readonly create: boolean;
+      /** Receives the golden fields this write changed (not called for a new business). */
+      readonly onChanged?: (fields: readonly string[]) => void;
+    },
   ): Promise<Business> {
     const golden = computeGolden(sources);
     const name = golden.fields.find((f) => f.value.field === 'displayName');
@@ -122,7 +126,8 @@ export class GoldenRecordWriter {
       side.push('hours');
     }
     business.noteChanged(side);
-    await recordEvents(this.events, business);
+    const changed = await recordEvents(this.events, business);
+    options.onChanged?.(changed);
     return business;
   }
 }

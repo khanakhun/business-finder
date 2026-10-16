@@ -1,15 +1,36 @@
 'use client';
 
-import type { BusinessListItem } from '@bf/contracts';
+import type { BusinessListItem, EnrichmentListingStatus } from '@bf/contracts';
 import { Badge } from '@bf/ui/components/badge';
 import { Checkbox } from '@bf/ui/components/checkbox';
 import { type ColumnDef, DataTable, type RowSelectionState, type VisibilityState } from '@bf/ui/data-table';
-import { GlobeIcon, MailIcon, StarIcon } from 'lucide-react';
+import {
+  CircleAlertIcon,
+  CircleCheckIcon,
+  CircleDashedIcon,
+  CircleXIcon,
+  ClockIcon,
+  GlobeIcon,
+  LoaderCircleIcon,
+  type LucideIcon,
+  MailIcon,
+  StarIcon,
+} from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useCategories } from './hooks.tsx';
 import { safeWebUrl } from './safe-url.ts';
 import type { STATUSES } from './url-state.ts';
+
+/** The enrichment status column (BF-027): one icon, its meaning in the label. */
+const ENRICHMENT_ICONS: Record<EnrichmentListingStatus, { icon: LucideIcon; className: string }> = {
+  none: { icon: CircleDashedIcon, className: 'text-muted-foreground' },
+  queued: { icon: ClockIcon, className: 'text-muted-foreground' },
+  running: { icon: LoaderCircleIcon, className: 'text-lagoon motion-safe:animate-spin' },
+  done: { icon: CircleCheckIcon, className: 'text-kelp' },
+  partial: { icon: CircleAlertIcon, className: 'text-amber-600' },
+  failed: { icon: CircleXIcon, className: 'text-destructive' },
+};
 
 export interface ResultsTableProps {
   readonly items: readonly BusinessListItem[];
@@ -29,6 +50,7 @@ export function ResultsTable(props: ResultsTableProps) {
   const t = useTranslations('search.table');
   const status = useTranslations('search.status');
   const via = useTranslations('search.addedVia');
+  const enrichment = useTranslations('enrichment.listing');
   const format = useFormatter();
   const { labels } = useCategories();
   const [visibility, setVisibility] = React.useState<VisibilityState>({ score: false, lastActivity: false });
@@ -118,6 +140,21 @@ export function ResultsTable(props: ResultsTableProps) {
           ),
       },
       {
+        id: 'enrichment',
+        header: t('enrichment'),
+        cell: ({ row }) => {
+          const { status: state, finishedAt } = row.original.enrichment;
+          const { icon: Icon, className } = ENRICHMENT_ICONS[state];
+          const label = enrichment(state);
+          const when = finishedAt ? ` · ${format.relativeTime(new Date(finishedAt))}` : '';
+          return (
+            <span title={`${label}${when}`}>
+              <Icon role="img" aria-label={`${label}${when}`} className={`size-4 ${className}`} />
+            </span>
+          );
+        },
+      },
+      {
         id: 'phone',
         header: t('phone'),
         cell: ({ row }) => (
@@ -147,7 +184,7 @@ export function ResultsTable(props: ResultsTableProps) {
       },
       { id: 'addedVia', header: t('addedVia'), cell: ({ row }) => via(row.original.addedVia) },
     ],
-    [t, status, via, format, labels],
+    [t, status, via, enrichment, format, labels],
   );
 
   return (

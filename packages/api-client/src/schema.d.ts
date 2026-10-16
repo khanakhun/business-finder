@@ -174,6 +174,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses/{id}/enrich": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enrich a business now: plans the steps (dependencies added, fresh ones skipped unless `force`) and starts a run. `Idempotency-Key` returns the same run; a run already open for the business is returned (200). */
+        post: operations["enrichBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/enrichment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The business's latest enrichment run in this workspace and where each step stands */
+        get: operations["getBusinessEnrichment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/notes": {
         parameters: {
             query?: never;
@@ -289,6 +323,40 @@ export type paths = {
         put?: never;
         /** Track a business in the workspace (idempotent: 201 when added, 200 when already tracked) */
         post: operations["trackBusiness"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/website": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the business website showed at its latest crawl (404 until crawled) */
+        get: operations["getBusinessWebsite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/businesses/{id}/website/screenshots/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A screenshot of the business website from its latest crawl (`desktop` or `mobile`) */
+        get: operations["getBusinessWebsiteScreenshot"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -648,6 +716,74 @@ export type paths = {
         get: operations["getDiscoveryUsage"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/enrichment/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enrich several businesses: one run each (`Idempotency-Key` per request); refused ones say why (not tracked, budget, nothing to do) */
+        post: operations["enrichBusinesses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/enrichment/estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** What enriching these businesses would run and cost, against the monthly budget (no side effects) */
+        post: operations["estimateEnrichment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/enrichment/runs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An enrichment run with its steps */
+        get: operations["getEnrichmentRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/enrichment/runs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a run: queued steps are skipped, running ones are stopped at their next checkpoint */
+        post: operations["cancelEnrichmentRun"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1462,6 +1598,29 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        BulkEnrichRequest: {
+            businessIds: string[];
+            /** @default false */
+            force: boolean;
+            steps?: ("site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit")[];
+        };
+        BulkEnrichResponse: {
+            rejected: {
+                /** Format: uuid */
+                businessId: string;
+                /**
+                 * @description `busy`: the workspace already has too many runs waiting.
+                 * @enum {string}
+                 */
+                reason: "not_found" | "budget" | "nothing_to_do" | "busy";
+            }[];
+            runs: {
+                /** Format: uuid */
+                businessId: string;
+                /** Format: uuid */
+                runId: string;
+            }[];
+        };
         BulkResult: {
             changed: number;
             failed: {
@@ -1540,6 +1699,16 @@ export type components = {
             version: number;
             websiteUrl: string | null;
         };
+        BusinessEnrichment: {
+            latestRun: components["schemas"]["EnrichmentRun"] | null;
+            steps: {
+                fresh: boolean;
+                lastDoneAt: string | null;
+                registered: boolean;
+                /** @enum {string} */
+                step: "site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit";
+            }[];
+        };
         BusinessFacets: {
             /** @description Top-level categories, plus children of selected ones. */
             categories: {
@@ -1603,6 +1772,12 @@ export type components = {
             displayName: string;
             /** @description From `near` or the area centre; null otherwise. */
             distanceMeters: number | null;
+            /** @description This workspace's latest enrichment run of the business (BF-027). */
+            enrichment: {
+                finishedAt: string | null;
+                /** @enum {string} */
+                status: "none" | "queued" | "running" | "done" | "partial" | "failed";
+            };
             /** @description Whether an email contact is known (the address itself is not listed). */
             hasEmail: boolean;
             /**
@@ -1930,7 +2105,7 @@ export type components = {
         };
         DiscoveryRunOptions: {
             /**
-             * @description Emit `discovery.business_found` for enrichment (BF-027).
+             * @description Enrich businesses this run adds to the workspace (`discovery.business.found`, BF-027).
              * @default false
              */
             autoEnrich: boolean;
@@ -2004,6 +2179,73 @@ export type components = {
             };
             /** @constant */
             type: "BBox";
+        };
+        EnrichBusinessRequest: {
+            /**
+             * @description Re-run steps whose last output is still fresh.
+             * @default false
+             */
+            force: boolean;
+            /** @description Default: every registered step. Dependencies are added. */
+            steps?: ("site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit")[];
+        };
+        EnrichmentEstimate: {
+            budget: {
+                monthlyBudgetUsd: number | null;
+                remainingUsd: number | null;
+                /** @description Estimated enrichment spend this month (UTC). */
+                spentUsd: number;
+            };
+            businesses: number;
+            steps: {
+                costUsd: number;
+                /** @description Fresh, not applicable or not registered. */
+                skipped: number;
+                /** @enum {string} */
+                step: "site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit";
+                willRun: number;
+            }[];
+            totalCostUsd: number;
+            withinBudget: boolean;
+        };
+        EnrichmentRun: {
+            /** Format: uuid */
+            businessId: string;
+            costUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            error: string | null;
+            finishedAt: string | null;
+            force: boolean;
+            /** Format: uuid */
+            id: string;
+            requestedSteps: ("site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit")[];
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "running" | "completed" | "partially_completed" | "failed" | "cancelled";
+            steps: components["schemas"]["EnrichmentStep"][];
+            /** @enum {string} */
+            trigger: "discovery" | "manual" | "bulk" | "schedule" | "event";
+        };
+        EnrichmentSettings: {
+            /** @description Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap. */
+            monthlyBudgetUsd: number | null;
+            /** @description Businesses with stale steps re-enriched per night (0 disables the nightly refresh). */
+            nightlyRefreshLimit: number;
+        };
+        EnrichmentStep: {
+            attempt: number;
+            costUsd: number;
+            error: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            skipReason: ("fresh" | "no_website" | "not_applicable" | "dependency_failed" | "dependency_skipped" | "budget" | "cancelled" | "not_registered") | null;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "running" | "done" | "skipped" | "failed";
+            /** @enum {string} */
+            step: "site_intel" | "email_verify" | "reviews" | "psi" | "vision_audit";
         };
         EstimateDiscoveryRunRequest: {
             /** @description A stored area (BF-017) or a drawn geometry. */
@@ -2313,6 +2555,7 @@ export type components = {
             /** @description Country hint for resolving places typed without one (BL for a Saint-Barth agency). */
             defaultCountryCode: string | null;
             discovery: components["schemas"]["DiscoverySettings"];
+            enrichment: components["schemas"]["EnrichmentSettings"];
             features: {
                 [key: string]: components["schemas"]["FeatureFlagState"];
             };
@@ -2844,6 +3087,12 @@ export type components = {
                 /** @description Default budget of one discovery run (a run never spends more). */
                 runBudgetUsd?: number;
             };
+            enrichment?: {
+                /** @description Estimated enrichment spend allowed per calendar month (UTC); null for no workspace cap. */
+                monthlyBudgetUsd?: number | null;
+                /** @description Businesses with stale steps re-enriched per night (0 disables the nightly refresh). */
+                nightlyRefreshLimit?: number;
+            };
             features?: components["schemas"]["FeatureFlags"];
             legalName?: string | null;
             locales?: ("fr" | "en")[];
@@ -2866,6 +3115,160 @@ export type components = {
             sort?: ("relevance" | "-score" | "score" | "-rating" | "rating" | "-reviews" | "reviews" | "distance" | "-recent" | "recent" | "name") | null;
             /** @enum {string} */
             visibility?: "private" | "workspace";
+        };
+        WebsiteSnapshot: {
+            analytics: {
+                ga4: boolean;
+                gtm: boolean;
+                metaPixel: boolean;
+                others: string[];
+                tiktokPixel: boolean;
+            };
+            booking: {
+                providers: {
+                    /** @description What matched (a host, a script, a link) — never page text. */
+                    evidence: string;
+                    name: string;
+                }[];
+            };
+            /** Format: uuid */
+            businessId: string;
+            chat: {
+                providers: {
+                    /** @description What matched (a host, a script, a link) — never page text. */
+                    evidence: string;
+                    name: string;
+                }[];
+            };
+            contacts: {
+                contactForms: {
+                    action: string | null;
+                    pageUrl: string;
+                }[];
+                emails: {
+                    email: string;
+                    onContactPage: boolean;
+                    pageUrl: string;
+                    /** @enum {string} */
+                    source: "mailto" | "text" | "jsonld" | "cfemail" | "obfuscated";
+                }[];
+                phones: {
+                    e164: string;
+                    isWhatsApp: boolean;
+                    pageUrl: string;
+                    raw: string;
+                }[];
+                whatsappLinks: string[];
+            };
+            /** Format: date-time */
+            fetchedAt: string;
+            finalUrl: string | null;
+            freshness: {
+                copyrightYear: number | null;
+                httpLastModified: string | null;
+                latestDatedContent: string | null;
+                sitemapLastmod: string | null;
+            };
+            httpStatus: number | null;
+            /** Format: uuid */
+            id: string;
+            imageCandidates: {
+                alt: string | null;
+                height: number | null;
+                url: string;
+                width: number | null;
+            }[];
+            languages: {
+                declared: string[];
+                detected: string[];
+                hasLanguageSwitcher: boolean;
+                hreflang: {
+                    lang: string;
+                    url: string;
+                }[];
+            };
+            logoCandidates: {
+                height: number | null;
+                /** @enum {string} */
+                source: "link-icon" | "og:image" | "img-logo";
+                url: string;
+                width: number | null;
+            }[];
+            mobile: {
+                fontSizeIssues: boolean | null;
+                hasViewportMeta: boolean;
+            };
+            noSolicitation: {
+                /** @description A live page of the business (2xx, reachability ok or redirected) was read. `false` — blocked, bot wall, error page, parked, unreachable, social-only — means nothing is known: outreach must treat the business as not checked (manual review), never as "no statement". */
+                checked: boolean;
+                detected: boolean;
+                pageUrl: string | null;
+                phrases: string[];
+                /** @description At most 30 words around the first match. */
+                snippet: string | null;
+            };
+            /** @description Sticky: set when any crawl saw a "do not solicit" statement, even if the latest crawl did not (compliance). */
+            noSolicitationMarker: {
+                /** Format: date-time */
+                firstDetectedAt: string;
+                /** Format: date-time */
+                lastDetectedAt: string;
+                pageUrl: string;
+                phrases: string[];
+                snippet: string | null;
+            } | null;
+            ordering: {
+                providers: {
+                    /** @description What matched (a host, a script, a link) — never page text. */
+                    evidence: string;
+                    name: string;
+                }[];
+            };
+            pages: {
+                h1: string | null;
+                /** @enum {string} */
+                kind: "home" | "contact" | "about" | "services" | "menu" | "booking" | "legal" | "other";
+                lang: string | null;
+                metaDescription: string | null;
+                title: string | null;
+                url: string;
+                wordCount: number;
+            }[];
+            performanceHints: {
+                domContentLoadedMs: number | null;
+                pageWeightKb: number | null;
+                requestCount: number | null;
+            };
+            /** @enum {string} */
+            reachability: "ok" | "redirected" | "not_found" | "server_error" | "timeout" | "dns_error" | "tls_error" | "parked" | "blocked";
+            screenshots: {
+                desktop: boolean;
+                mobile: boolean;
+            };
+            security: {
+                hsts: boolean;
+                https: boolean;
+                mixedContent: boolean;
+            };
+            /** @description The "website" is a social profile or link page; it was not crawled. */
+            socialOnly: boolean;
+            socials: {
+                handle: string | null;
+                network: string;
+                url: string;
+            }[];
+            tech: {
+                categories: string[];
+                confidence: number;
+                name: string;
+                version: string | null;
+            }[];
+            tls: {
+                expiresAt: string | null;
+                issuer: string | null;
+                valid: boolean | null;
+            };
+            url: string;
         };
     };
     responses: never;
@@ -3780,6 +4183,162 @@ export interface operations {
             };
         };
     };
+    enrichBusiness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrichBusinessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichmentRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessEnrichment"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     listNotes: {
         parameters: {
             query?: never;
@@ -4529,6 +5088,130 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessWebsite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebsiteSnapshot"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessWebsiteScreenshot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6132,6 +6815,260 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    enrichBusinesses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkEnrichRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkEnrichResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    estimateEnrichment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkEnrichRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichmentEstimate"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getEnrichmentRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichmentRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    cancelEnrichmentRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrichmentRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

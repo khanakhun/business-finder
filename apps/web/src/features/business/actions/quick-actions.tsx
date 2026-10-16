@@ -23,6 +23,9 @@ export function QuickActions({
   const me = useSession();
   const permissions = React.useMemo(() => new Set<Permission>(me.permissions), [me.permissions]);
   const context = { business, crm, permissions };
+  const ui = {
+    t: (key: string, values?: Record<string, string | number>) => t(key as never, values as never),
+  };
   return (
     <div
       role="toolbar"
@@ -50,7 +53,7 @@ export function QuickActions({
               aria-disabled={!enabled}
               className={enabled ? undefined : 'opacity-50'}
               aria-describedby={reason ? `${action.id}-why` : undefined}
-              onClick={() => (enabled ? void action.run?.(context) : undefined)}
+              onClick={() => (enabled ? void action.run?.(context, ui) : undefined)}
             >
               <Icon aria-hidden />
               {label}

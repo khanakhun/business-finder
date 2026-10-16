@@ -1,4 +1,9 @@
 // Public surface of the business-graph module: other modules import only from here.
+
+export {
+  ReplaceWebsiteMediaCommand,
+  type WebsiteMediaItem,
+} from './application/media/replace-website-media.command.ts';
 export {
   BUSINESS_REPOSITORY,
   type BusinessRepository,

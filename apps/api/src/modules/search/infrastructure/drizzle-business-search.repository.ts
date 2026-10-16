@@ -1,6 +1,18 @@
-import type { BusinessFacets, BusinessListItem } from '@bf/contracts';
+import type {
+  BusinessFacets,
+  BusinessListItem,
+  EnrichmentListingStatus,
+  EnrichmentRunStatus,
+} from '@bf/contracts';
 import { type DbClient, getExecutor, runInTransaction } from '@bf/db';
-import { businessCategories, businessContacts, businesses, categories, orgBusinesses } from '@bf/db/schema';
+import {
+  businessCategories,
+  businessContacts,
+  businesses,
+  categories,
+  enrichmentRuns,
+  orgBusinesses,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { eq, type SQL, sql } from 'drizzle-orm';
 import { APP_ENV, type AppEnv } from '../../platform/config/app-env.ts';
@@ -41,21 +53,45 @@ const itemColumns = (origin: ListingSpec['origin']) => ({
   lastActivityAt: orgBusinesses.lastActivityAt,
   hasEmail: sql<boolean>`EXISTS (SELECT 1 FROM ${businessContacts} bce WHERE bce.business_id = ${businesses.id} AND bce.type = 'email')`,
   addedVia: orgBusinesses.addedVia,
+  // This workspace's latest enrichment run (BF-027): one index lookup per listed row.
+  latestEnrichment: sql<{ status: EnrichmentRunStatus; finishedAt: string | null } | null>`(
+    SELECT jsonb_build_object('status', er.status, 'finishedAt', er.finished_at)
+    FROM ${enrichmentRuns} er
+    WHERE er.business_id = ${businesses.id} AND er.triggered_by_org_id = ${orgBusinesses.organizationId}
+    ORDER BY er.created_at DESC LIMIT 1)`,
   distanceMeters: origin
     ? sql<number | null>`ST_Distance(${businesses.location}, ${point(origin)})::float8`
     : sql<null>`NULL`,
 });
 
-interface ItemRow extends Omit<BusinessListItem, 'id' | 'trackedAt' | 'lastActivityAt' | 'distanceMeters'> {
+interface ItemRow
+  extends Omit<BusinessListItem, 'id' | 'trackedAt' | 'lastActivityAt' | 'distanceMeters' | 'enrichment'> {
   readonly id: string;
+  readonly latestEnrichment: { status: EnrichmentRunStatus; finishedAt: string | null } | null;
   readonly trackedAt: Date;
   readonly lastActivityAt: Date | null;
   readonly distanceMeters: number | null;
 }
 
-const toItem = (row: ItemRow): BusinessListItem => ({
+const LISTING_STATUS: Record<EnrichmentRunStatus, EnrichmentListingStatus> = {
+  queued: 'queued',
+  running: 'running',
+  completed: 'done',
+  partially_completed: 'partial',
+  failed: 'failed',
+  // Stopped by a person: not a failure, and whatever it did shows on the business page.
+  cancelled: 'none',
+};
+
+const toItem = ({ latestEnrichment, ...row }: ItemRow): BusinessListItem => ({
   ...row,
   id: row.id as BusinessListItem['id'],
+  enrichment: latestEnrichment
+    ? {
+        status: LISTING_STATUS[latestEnrichment.status],
+        finishedAt: latestEnrichment.finishedAt ? new Date(latestEnrichment.finishedAt).toISOString() : null,
+      }
+    : { status: 'none', finishedAt: null },
   trackedAt: row.trackedAt.toISOString(),
   lastActivityAt: row.lastActivityAt?.toISOString() ?? null,
   distanceMeters: row.distanceMeters === null ? null : Math.round(row.distanceMeters),

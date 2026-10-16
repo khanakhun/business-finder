@@ -38,6 +38,14 @@ export const SourceRecordSchema = z
     website: text(2_000).optional(),
     emails: z.array(text(254)).max(20).default([]),
     socials: z.array(text(500)).max(20).default([]),
+    contactPages: z
+      .array(z.object({ value: text(500), pageUrl: text(2_000) }))
+      .max(80)
+      .optional()
+      .describe(
+        'Crawls (BF-027): the page that shows each phone, e-mail or social (value as given above). Optional, ' +
+          'so records without it keep their content hash.',
+      ),
     hours: z
       .array(
         z.object({

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { DiscoverySettingsSchema } from './discovery-settings.ts';
+import { EnrichmentSettingsSchema } from './enrichment.ts';
 import { CountryCodeSchema } from './geo.ts';
 import { LocaleSchema } from './i18n.ts';
 import { CursorPageRequestSchema, cursorPage } from './pagination.ts';
@@ -108,6 +109,7 @@ export const OrgSettingsSchema = z
       .describe('Country hint for resolving places typed without one (BL for a Saint-Barth agency).'),
     senderDefaults: SenderDefaultsSchema,
     discovery: DiscoverySettingsSchema,
+    enrichment: EnrichmentSettingsSchema,
     features: z.record(FeatureFlagSchema, FeatureFlagStateSchema),
     outreachReadiness: OutreachReadinessSchema,
     updatedAt: IsoDateTimeSchema.nullable().describe('Null until the settings are first saved.'),
@@ -128,6 +130,7 @@ export const UpdateOrgSettingsRequestSchema = z
     defaultCountryCode: CountryCodeSchema.nullable(),
     senderDefaults: SenderDefaultsSchema,
     discovery: DiscoverySettingsSchema.partial(),
+    enrichment: EnrichmentSettingsSchema.partial(),
     features: FeatureFlagsSchema,
   })
   .partial()

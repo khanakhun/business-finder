@@ -31,7 +31,7 @@ describe('quick actions', () => {
       ['business.open-website', true, 'https://example.test/'],
       ['business.call', true, 'tel:+33199002700'],
       ['business.whatsapp', true, 'https://wa.me/33199002700'],
-      ['enrichment.enrich', false, null],
+      ['enrichment.enrich', true, null],
       ['sites.generate', false, null],
       ['outreach.send-email', false, null],
     ]);

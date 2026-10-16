@@ -43,6 +43,11 @@ export interface IngestOptions {
   readonly sourceId?: string;
   /** `false` classifies without the LLM step (interactive paths). */
   readonly classifyWithModel?: boolean;
+  /**
+   * The business this record describes (a crawl of its own website, BF-027): linked to it without matching. A
+   * record already linked elsewhere stays there (moving it is a manual split).
+   */
+  readonly targetBusinessId?: string;
 }
 
 export interface IngestResult {
@@ -52,6 +57,8 @@ export interface IngestResult {
   /** Score of the matched business, when merged by matching. */
   readonly score?: MatchScore;
   readonly possibleDuplicates: readonly string[];
+  /** Golden fields the ingestion changed on an existing business (empty when unchanged or created). */
+  readonly changedFields?: readonly string[];
 }
 
 /** French-speaking places get French classification hints. */
@@ -223,8 +230,14 @@ export class IngestSourceRecordCommand {
       // A known record with new content: recompute its (live) business. Re-linking a record whose content moved to
       // another business is a manual split (see the ticket notes).
       const businessId = await this.lockLive(stored.businessId);
-      await this.recompute(businessId);
-      return { outcome: 'merged', businessId, sourceId: stored.id, possibleDuplicates: [] };
+      const changedFields = await this.recompute(businessId);
+      return { outcome: 'merged', businessId, sourceId: stored.id, possibleDuplicates: [], changedFields };
+    }
+    if (options.targetBusinessId) {
+      const businessId = await this.lockLive(options.targetBusinessId);
+      await this.resolution.linkSource(stored.id, businessId, 1, linkedBy);
+      const changedFields = await this.recompute(businessId);
+      return { outcome: 'merged', businessId, sourceId: stored.id, possibleDuplicates: [], changedFields };
     }
 
     let candidateIds = await this.resolution.findCandidateIds(normalized, BLOCKING.maxCandidates);
@@ -291,13 +304,20 @@ export class IngestSourceRecordCommand {
     throw new Error(`Merge chain too long from business ${businessId}`);
   }
 
-  private async recompute(businessId: string): Promise<void> {
+  private async recompute(businessId: string): Promise<readonly string[]> {
     const linked = await this.resolution.listLinkedSources(businessId);
+    let changed: readonly string[] = [];
     await this.writer.write(
       businessId,
       linked.map((s) => s.normalized),
-      { create: false },
+      {
+        create: false,
+        onChanged: (fields) => {
+          changed = fields;
+        },
+      },
     );
+    return changed;
   }
 }
 

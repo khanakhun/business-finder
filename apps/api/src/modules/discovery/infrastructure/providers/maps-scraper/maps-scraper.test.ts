@@ -174,7 +174,7 @@ describe('scraper gates (truth table)', () => {
   const guarded = (acknowledged: boolean) =>
     new GuardedProvider(scraper(acknowledged), {
       secrets,
-      limiter: { acquire: vi.fn(async () => true) },
+      limiter: { acquire: vi.fn(async () => true), tryTake: vi.fn(async () => 0) },
       meter,
       clock: fixedClock(NOW),
       logger: createLogger({ service: 'test', level: 'fatal' }),

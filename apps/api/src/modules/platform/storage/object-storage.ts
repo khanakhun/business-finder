@@ -5,6 +5,8 @@ export interface ObjectStorage {
   delete(key: string): Promise<void>;
 }
 export const OBJECT_STORAGE = Symbol('ObjectStorage');
+/** The artifacts bucket (crawl screenshots and page markdown written by services/intel, BF-026): read-only here. */
+export const ARTIFACT_STORAGE = Symbol('ArtifactStorage');
 
 /** In-memory adapter for tests (and the OpenAPI build, which connects to nothing). */
 export class InMemoryObjectStorage implements ObjectStorage {

@@ -214,3 +214,29 @@ test('has no detectable accessibility violations on the business page', async ({
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations).toEqual([]);
 });
+
+test('enriches a business: Enrich now → live status → Website tab facts (BF-027)', async ({ page }) => {
+  const name = `Salon Enrich ${run}`;
+  const id = await createBusiness(page, {
+    displayName: name,
+    websiteUrl: `https://salon-enrich-${run}.com`,
+    location: spot(),
+  });
+  await page.goto(`/businesses/${id}?tab=website`);
+  await expect(page.getByText('Website not analysed yet')).toBeVisible();
+  await page.getByRole('button', { name: 'Enrich now' }).first().click();
+  // The worker runs the steps; realtime moves the status without a reload.
+  await expect(page.getByText(/^Completed ·/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(`hello@salon-enrich-${run}.com`)).toBeVisible();
+  await expect(page.getByText('Planity')).toBeVisible();
+  await expect(page.getByText('WordPress 6.4')).toBeVisible();
+  // Sonner toasts fade out while axe runs (same exclusion as the other pages).
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa'])
+    .exclude('[data-sonner-toaster]')
+    .analyze();
+  expect(results.violations).toEqual([]);
+  // The e-mail joined the golden record, with the page that shows it.
+  await page.getByRole('tab', { name: 'Contacts' }).click();
+  await expect(page.getByRole('cell', { name: `hello@salon-enrich-${run}.com` })).toBeVisible();
+});

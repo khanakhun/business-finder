@@ -1,0 +1,71 @@
+import type { EnrichmentCostCategory, EnrichmentSkipReason, EnrichmentStepId } from '@bf/contracts';
+
+// The step plugin contract (BF-027, Strategy/Plugin): the engine plans, schedules, retries, meters and records;
+// a step only says what it needs, whether it applies, what it costs and how to run. Later tickets (email
+// verification, reviews, PageSpeed, visual audit) add steps by registering one — never by changing the engine.
+
+/** What a step knows about the business before it runs (from the golden record). */
+export interface EnrichmentSubject {
+  readonly businessId: string;
+  readonly displayName: string;
+  readonly websiteUrl: string | null;
+  readonly countryCode: string | null;
+  readonly locales: readonly string[];
+  readonly emails: readonly string[];
+}
+
+/** A finished step of an earlier run (or of this run): what freshness and dependents read. */
+export interface StepOutput {
+  readonly finishedAt: Date;
+  readonly inputHash: string | null;
+  /** Pointers to what the step produced (snapshot ids, artifact keys), never page content. */
+  readonly outputRef: Readonly<Record<string, unknown>> | null;
+}
+
+export interface StepExecution {
+  readonly runId: string;
+  readonly stepRowId: string;
+  /** The workspace that asked (cost attribution, ingestion org context). */
+  readonly organizationId: string;
+  readonly subject: EnrichmentSubject;
+  readonly inputHash: string;
+  /** Latest outputs of the steps this one depends on (from this run, or fresh ones it did not repeat). */
+  readonly dependencies: ReadonlyMap<EnrichmentStepId, StepOutput>;
+  /** Aborted when the run is cancelled or the job's lock is lost. */
+  readonly signal: AbortSignal;
+}
+
+export type StepResult =
+  | {
+      readonly outcome: 'done';
+      readonly costUsd: number;
+      readonly outputRef: Readonly<Record<string, unknown>>;
+      /** Golden-record fields the step changed (reported in `business.enriched`). */
+      readonly changedFields: readonly string[];
+    }
+  | { readonly outcome: 'skipped'; readonly reason: EnrichmentSkipReason; readonly costUsd: number };
+
+/** A shared token bucket the engine takes from before running the step (provider quotas). */
+export interface StepRateLimit {
+  readonly key: string;
+  readonly capacity: number;
+  readonly perSecond: number;
+}
+
+export interface EnrichmentStep {
+  readonly id: EnrichmentStepId;
+  readonly dependsOn: readonly EnrichmentStepId[];
+  readonly costCategory: EnrichmentCostCategory;
+  /** Days an output stays fresh (configuration). */
+  readonly ttlDays: number;
+  readonly rateLimit?: StepRateLimit;
+  /** `true`, or why the step does not apply to this business (`no_website`, `not_applicable`). */
+  appliesTo(subject: EnrichmentSubject): true | EnrichmentSkipReason;
+  /** What the step reads, hashed: idempotency (`businessId:step:inputHash`) and freshness. */
+  inputHash(subject: EnrichmentSubject): string;
+  /** Estimated cost in USD (budgets are checked against estimates before running). */
+  estimateCost(subject: EnrichmentSubject): number;
+  /** Overrides the TTL rule when a step knows better (e.g. an output older than its source). */
+  isStale?(last: StepOutput, now: Date): boolean;
+  execute(execution: StepExecution): Promise<StepResult>;
+}

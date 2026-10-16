@@ -6,7 +6,9 @@ import {
   PhoneIcon,
   SparklesIcon,
 } from 'lucide-react';
+import { enrichNow } from '@/features/enrichment/api.ts';
 import { safeWebUrl } from '@/features/search/safe-url.ts';
+import { getToast } from '@/lib/toast.tsx';
 import { quickActions } from './registry.ts';
 
 /** `wa.me` takes the international number without `+` or separators. */
@@ -49,12 +51,21 @@ export function registerDefaultQuickActions(): void {
     href: ({ business }) => whatsAppUrl(business.primaryPhone),
   });
   quickActions.register({
+    // BF-027: every available step now; the Website tab picks steps and re-runs.
     id: 'enrichment.enrich',
     labelKey: 'business.actions.enrich',
     icon: SparklesIcon,
     order: 40,
     permission: 'business:write',
-    disabledReason: () => 'business.actions.comingEnrichment',
+    run: async ({ business }, ui) => {
+      const toast = await getToast();
+      try {
+        await enrichNow(business.id);
+        toast.success(ui.t('enrichment.started'));
+      } catch {
+        toast.error(ui.t('enrichment.startFailed'));
+      }
+    },
   });
   quickActions.register({
     id: 'sites.generate',

@@ -4,6 +4,7 @@ import { authEnv } from '../fragments/auth.ts';
 import { coreEnv } from '../fragments/core.ts';
 import { dbEnv } from '../fragments/db.ts';
 import { discoveryEnv } from '../fragments/discovery.ts';
+import { enrichmentEnv } from '../fragments/enrichment.ts';
 import { featureFlagsEnv } from '../fragments/features.ts';
 import { geoEnv } from '../fragments/geo.ts';
 import { intelEnv } from '../fragments/intel.ts';
@@ -26,6 +27,7 @@ const backendShape = {
   ...geoEnv.shape,
   ...searchEnv.shape,
   ...discoveryEnv.shape,
+  ...enrichmentEnv.shape,
   ...authEnv.shape,
   ...mailEnv.shape,
   ...intelEnv.shape,

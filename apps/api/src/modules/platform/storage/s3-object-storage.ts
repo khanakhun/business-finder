@@ -18,13 +18,13 @@ type S3Env = Pick<
   | 'S3_BUCKET_ASSETS'
 >;
 
-/** The assets bucket on any S3-compatible store (RustFS locally). */
+/** One bucket (the assets bucket by default) on any S3-compatible store (RustFS locally). */
 export class S3ObjectStorage implements ObjectStorage {
   private readonly client: S3Client;
   private readonly bucket: string;
 
-  constructor(env: S3Env) {
-    this.bucket = env.S3_BUCKET_ASSETS;
+  constructor(env: S3Env, bucket: string = env.S3_BUCKET_ASSETS) {
+    this.bucket = bucket;
     this.client = new S3Client({
       endpoint: env.S3_ENDPOINT,
       region: env.S3_REGION,

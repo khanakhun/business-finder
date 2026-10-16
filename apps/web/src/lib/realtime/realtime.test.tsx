@@ -1,4 +1,4 @@
-import { CRM_ACTIVITY_CREATED, NOTIFICATION_CREATED } from '@bf/contracts';
+import { CRM_ACTIVITY_CREATED, ENRICHMENT_RUN_PROGRESSED, NOTIFICATION_CREATED } from '@bf/contracts';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REALTIME_EVENTS, realtimeInvalidations } from './invalidations.ts';
@@ -127,5 +127,16 @@ describe('realtime event names', () => {
     const event = { type: CRM_ACTIVITY_CREATED, entity: 'business', entityId: 'b1' } as never;
     expect(realtimeInvalidations[CRM_ACTIVITY_CREATED]?.(event)).toEqual([['business', 'b1'], ['crm']]);
     expect(Object.keys(realtimeInvalidations)).toContain(NOTIFICATION_CREATED);
+    expect(REALTIME_EVENTS.enrichmentRunProgressed).toBe(ENRICHMENT_RUN_PROGRESSED);
+    const progress = (status: string) =>
+      ({ type: ENRICHMENT_RUN_PROGRESSED, entity: 'business', entityId: 'b1', payload: { status } }) as never;
+    // The listing's status column refreshes when a run ends, not on every step.
+    expect(realtimeInvalidations[ENRICHMENT_RUN_PROGRESSED]?.(progress('running'))).toEqual([
+      ['business', 'b1'],
+    ]);
+    expect(realtimeInvalidations[ENRICHMENT_RUN_PROGRESSED]?.(progress('completed'))).toEqual([
+      ['business', 'b1'],
+      ['search', 'listing'],
+    ]);
   });
 });

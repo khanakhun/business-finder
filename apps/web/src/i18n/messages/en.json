@@ -758,7 +758,8 @@
       "open": "Open",
       "openWebsite": "Open website",
       "summary": "Summary",
-      "openPage": "Open business page"
+      "openPage": "Open business page",
+      "enrichment": "Enrichment"
     },
     "facets": {
       "title": "Refine",
@@ -808,7 +809,8 @@
       "done": "{count, plural, one {Done for # business} other {Done for # businesses}}",
       "partial": "{done} done, {failed} not changed",
       "exporting": "Your export is downloading",
-      "tooMany": "Export up to 200 selected rows, or clear the selection to export all results"
+      "tooMany": "Export up to 200 selected rows, or clear the selection to export all results",
+      "enrich": "Enrich"
     },
     "lists": {
       "title": "Lists",
@@ -935,7 +937,8 @@
     "tabs": {
       "overview": "Overview",
       "contacts": "Contacts",
-      "activity": "Activity"
+      "activity": "Activity",
+      "website": "Website"
     },
     "actions": {
       "label": "Quick actions",
@@ -946,7 +949,6 @@
       "generateSite": "Generate site",
       "sendEmail": "Send email",
       "doNotContact": "Marked do not contact",
-      "comingEnrichment": "Available with enrichment",
       "comingSites": "Available with site generation",
       "comingOutreach": "Available with outreach"
     },
@@ -1207,5 +1209,133 @@
     "emptyHint": "Add tasks from a business page, in its Activity tab.",
     "toPipeline": "Open the pipeline",
     "more": "Show more"
+  },
+  "enrichment": {
+    "title": "Enrichment",
+    "neverRun": "Not enriched yet.",
+    "runStatus": "{status} · {when}",
+    "enrichNow": "Enrich now",
+    "rerun": "Re-run",
+    "cancel": "Stop",
+    "stepsLegend": "Steps to run",
+    "fresh": "up to date",
+    "comingSoon": "coming soon",
+    "started": "Enrichment started",
+    "startFailed": "Enrichment could not start. Try again.",
+    "steps": {
+      "site_intel": "Website crawl",
+      "email_verify": "E-mail verification",
+      "reviews": "Reviews",
+      "psi": "PageSpeed",
+      "vision_audit": "Visual audit"
+    },
+    "runStatuses": {
+      "queued": "Queued",
+      "running": "Running",
+      "completed": "Completed",
+      "partially_completed": "Partly completed",
+      "failed": "Failed",
+      "cancelled": "Stopped"
+    },
+    "stepStatuses": {
+      "queued": "Waiting",
+      "running": "Running",
+      "done": "Done",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "skipReasons": {
+      "fresh": "still up to date",
+      "no_website": "no website",
+      "not_applicable": "does not apply",
+      "dependency_failed": "a step it needs failed",
+      "dependency_skipped": "a step it needs did not run",
+      "budget": "monthly budget reached",
+      "cancelled": "stopped",
+      "not_registered": "not available yet"
+    },
+    "noSolicitation": {
+      "title": "This business asks not to be solicited",
+      "description": "Its website says so. Outreach to it is blocked; check before any contact."
+    },
+    "site": {
+      "title": "Website",
+      "reachability": "Status",
+      "finalUrl": "Address",
+      "crawled": "Read",
+      "https": "HTTPS",
+      "tls": "Valid certificate",
+      "mixedContent": "Insecure content",
+      "languages": "Languages",
+      "copyright": "Copyright year",
+      "viewport": "Mobile viewport",
+      "smallText": "Small text on mobile",
+      "weight": "Home page weight",
+      "kb": "{kb} KB"
+    },
+    "reachability": {
+      "ok": "Online",
+      "redirected": "Online (redirected)",
+      "not_found": "Not found",
+      "server_error": "Server error",
+      "timeout": "Too slow to answer",
+      "dns_error": "Domain does not resolve",
+      "tls_error": "Certificate problem",
+      "parked": "Parked or for sale",
+      "blocked": "Blocked our visit"
+    },
+    "contacts": {
+      "title": "Contacts on the site",
+      "none": "No e-mail or phone found on the site.",
+      "onPage": "seen on this page",
+      "socials": "Social profiles"
+    },
+    "tools": {
+      "title": "Tools and technology",
+      "booking": "Booking",
+      "ordering": "Ordering",
+      "chat": "Chat",
+      "analytics": "Analytics and ads",
+      "tech": "Technology"
+    },
+    "screenshots": {
+      "title": "Screenshots",
+      "desktop": "Desktop screenshot of the website",
+      "mobile": "Mobile screenshot of the website"
+    },
+    "auditComing": "Performance scores and design findings arrive with the website audit.",
+    "emptyTitle": "Website not analysed yet",
+    "empty": "Enrich the business to read its website: contacts, tools, languages and screenshots.",
+    "noWebsite": "This business has no known website.",
+    "error": "The website facts could not be loaded.",
+    "yes": "Yes",
+    "no": "No",
+    "unknown": "Unknown",
+    "none": "None found",
+    "bulk": {
+      "title": "{count, plural, one {Enrich # business} other {Enrich # businesses}}",
+      "description": "Each business gets a run of every available step; steps still up to date are skipped.",
+      "estimating": "Estimating…",
+      "willRun": "{step}: {count, plural, one {# run} other {# runs}}",
+      "cost": "Estimated cost: {cost}",
+      "budget": "Left this month: {left}",
+      "noBudget": "No monthly limit",
+      "overBudget": "More than the monthly budget left: some businesses will be skipped.",
+      "start": "Enrich",
+      "cancel": "Cancel",
+      "started": "{count, plural, one {Enrichment started for # business} other {Enrichment started for # businesses}}",
+      "partial": "{started} started, {rejected} not started (budget, up to date or not tracked)",
+      "failed": "Enrichment could not start. Try again.",
+      "tooMany": "Select up to 500 businesses",
+      "estimateFailed": "The estimate could not be computed. Try again."
+    },
+    "listing": {
+      "none": "Not enriched",
+      "queued": "Enrichment queued",
+      "running": "Enriching…",
+      "done": "Enriched",
+      "partial": "Partly enriched",
+      "failed": "Enrichment failed"
+    }
   }
 }

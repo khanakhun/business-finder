@@ -21,6 +21,7 @@ import {
   ListPlusIcon,
   type LucideIcon,
   SendIcon,
+  SparklesIcon,
   TagsIcon,
   XIcon,
 } from 'lucide-react';
@@ -47,6 +48,7 @@ const ICONS: Record<string, LucideIcon> = {
   kanban: KanbanIcon,
   'layout-template': LayoutTemplateIcon,
   send: SendIcon,
+  sparkles: SparklesIcon,
 };
 
 /** Starts a download of an API path (the session cookie travels with a top-level navigation). */

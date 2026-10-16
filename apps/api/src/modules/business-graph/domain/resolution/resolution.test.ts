@@ -348,6 +348,21 @@ describe('edge cases', () => {
       sourceUrl: 'https://www.le-tamarin.com/',
       confidence: 1,
     });
+    // A crawl says on which page it saw each contact (BF-027): that page is the contact's source URL.
+    const crawled = norm({
+      provider: 'website',
+      providerRef: 'w2',
+      emails: ['resa@le-tamarin.com'],
+      phones: ['+590590270001'],
+      contactPages: [
+        { value: 'resa@le-tamarin.com', pageUrl: 'https://www.le-tamarin.com/contact' },
+        { value: '+590590270001', pageUrl: 'https://www.le-tamarin.com/reservations' },
+      ],
+    });
+    expect(unionContacts([crawled]).map((c) => [c.type, c.sourceUrl])).toEqual([
+      ['email', 'https://www.le-tamarin.com/contact'],
+      ['phone', 'https://www.le-tamarin.com/reservations'],
+    ]);
     expect(
       mergeCategories([{ ...google, categories: { primary: null, secondary: ['bar'], confidence: 0.8 } }]),
     ).toEqual([{ slug: 'bar', isPrimary: true, confidence: 0.4, source: 'google_places' }]);

@@ -1,4 +1,9 @@
-import { type AuditLogEntry, type OrgSettings, resolveDiscoverySettings } from '@bf/contracts';
+import {
+  type AuditLogEntry,
+  type OrgSettings,
+  resolveDiscoverySettings,
+  resolveEnrichmentSettings,
+} from '@bf/contracts';
 import { featureStates } from '../domain/feature-flags.ts';
 import { outreachReadiness } from '../domain/readiness.ts';
 import type { AuditEntryRecord, DeploymentEnv, OrgSettingsRecord } from './ports.ts';
@@ -17,6 +22,7 @@ export const DEFAULT_SETTINGS = {
   defaultCountryCode: null,
   senderDefaults: {},
   discovery: {},
+  enrichment: {},
   features: {},
   updatedAt: null,
 } as const satisfies Omit<OrgSettingsRecord, 'organizationId'>;
@@ -35,6 +41,7 @@ export function toOrgSettings(record: OrgSettingsRecord | undefined, env: Deploy
     defaultCountryCode: settings.defaultCountryCode,
     senderDefaults: settings.senderDefaults,
     discovery: resolveDiscoverySettings(settings.discovery),
+    enrichment: resolveEnrichmentSettings(settings.enrichment),
     features: featureStates(settings.features, env),
     outreachReadiness: outreachReadiness(settings),
     updatedAt: settings.updatedAt?.toISOString() ?? null,

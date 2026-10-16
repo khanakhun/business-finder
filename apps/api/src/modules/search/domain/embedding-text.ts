@@ -14,9 +14,17 @@ export interface EmbeddingSource {
   readonly categories: readonly EmbeddingCategory[];
   readonly locality: string | null;
   readonly countryCode: string | null;
-  /** Site intel summary (BF-026) once available. */
   readonly shortDescription: string | null;
   readonly priceLevel: number | null;
+  /**
+   * What the business's own website says about it (BF-027, latest readable crawl): its home page description and
+   * the online booking / ordering tools it offers. Null until crawled.
+   */
+  readonly website?: {
+    readonly description: string | null;
+    readonly booking: readonly string[];
+    readonly ordering: readonly string[];
+  } | null;
 }
 
 const PRICE = ['free', 'inexpensive', 'moderate', 'expensive', 'very expensive'] as const;
@@ -33,12 +41,21 @@ export function composeEmbeddingText(source: EmbeddingSource): string {
     });
   const place = [source.locality, source.countryCode].filter(Boolean).join(', ');
   const price = source.priceLevel === null ? undefined : PRICE[source.priceLevel];
+  const site = source.website;
+  const online = site
+    ? [
+        site.booking.length > 0 ? `booking (${[...site.booking].sort().join(', ')})` : undefined,
+        site.ordering.length > 0 ? `ordering (${[...site.ordering].sort().join(', ')})` : undefined,
+      ].filter((part): part is string => part !== undefined)
+    : [];
   return [
     clean(source.displayName),
     categories.length > 0 ? `Categories: ${categories.join('; ')}` : undefined,
     place ? `Location: ${clean(place)}` : undefined,
     source.shortDescription ? clean(source.shortDescription).slice(0, 1_000) : undefined,
     price ? `Price: ${price}` : undefined,
+    site?.description ? `Website: ${clean(site.description).slice(0, 300)}` : undefined,
+    online.length > 0 ? `Online: ${online.join('; ')}` : undefined,
   ]
     .filter((line): line is string => line !== undefined)
     .join('\n');

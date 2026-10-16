@@ -9171,7 +9171,7 @@
         "additionalProperties": false,
         "properties": {
           "config": {
-            "$ref": "#/components/schemas/ScoringProfileConfig"
+            "$ref": "#/components/schemas/StoredScoringProfileConfig"
           },
           "createdAt": {
             "format": "date-time",
@@ -10207,6 +10207,322 @@
       },
       "StartDiscoveryRunRequest": {
         "$ref": "#/components/schemas/EstimateDiscoveryRunRequest"
+      },
+      "StoredScoringProfileConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "gates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ScoringGate"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "kind": {
+            "const": "rules",
+            "default": "rules",
+            "type": "string"
+          },
+          "missing": {
+            "additionalProperties": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "normalization": {
+            "const": "weighted_sum",
+            "default": "weighted_sum",
+            "type": "string"
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "reasonTemplates": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "additionalProperties": false,
+                "properties": {
+                  "en": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 300,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "en",
+                  "fr"
+                ],
+                "type": "object"
+              },
+              "propertyNames": {
+                "maxLength": 40,
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "tiers": {
+            "additionalProperties": false,
+            "properties": {
+              "A": {
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "B": {
+                "maximum": 99,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "A",
+              "B"
+            ],
+            "type": "object"
+          },
+          "transforms": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ScoringTransform"
+            },
+            "default": {},
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "weights": {
+            "additionalProperties": {
+              "maximum": 100,
+              "minimum": -100,
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "has_website",
+                "website_status",
+                "website_quality_score",
+                "psi_mobile_performance",
+                "lcp_mobile_seconds",
+                "vision_overall",
+                "has_https",
+                "site_freshness_years",
+                "has_booking_tool",
+                "has_online_menu",
+                "has_contact_form",
+                "has_language_gap_for_market",
+                "no_solicitation_notice",
+                "category_offer_relevance",
+                "appointment_based",
+                "tourism_facing",
+                "price_level",
+                "rating_avg",
+                "review_count_log",
+                "owner_response_rate",
+                "multi_location",
+                "ad_pixels_present",
+                "operating_status",
+                "pain_share.booking_friction",
+                "pain_share.unreachable_by_phone",
+                "pain_share.slow_or_no_reply",
+                "pain_share.website_broken_or_outdated",
+                "pain_share.no_online_menu_or_prices",
+                "pain_share.hard_to_find_info",
+                "pain_share.language_barrier",
+                "pain_share.payment_friction",
+                "pain_share.long_wait_times",
+                "pain_share.inconsistent_hours",
+                "pain_share.poor_communication",
+                "pain_share.positive_strong_reputation",
+                "sentiment_avg",
+                "has_verified_email",
+                "has_usable_email",
+                "has_generic_email_only",
+                "has_phone",
+                "has_whatsapp",
+                "do_not_contact",
+                "pipeline_status",
+                "days_since_last_contact"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind",
+          "offer",
+          "weights",
+          "transforms",
+          "missing",
+          "gates",
+          "tiers",
+          "normalization",
+          "reasonTemplates"
+        ],
+        "type": "object"
       },
       "SystemInfo": {
         "additionalProperties": false,

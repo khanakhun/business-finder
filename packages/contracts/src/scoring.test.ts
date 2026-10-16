@@ -241,18 +241,29 @@ describe('profile problems', () => {
 
   it('accepts only the {value} placeholder in reason templates', () => {
     expect(unknownPlaceholders('{value} reviews')).toEqual([]);
+    expect(unknownPlaceholders('{value} and {value} again')).toEqual([]);
     expect(unknownPlaceholders('{valeur} avis, {value}, {valeur}')).toEqual(['{valeur}']);
     expect(unknownPlaceholders('no placeholder {} here')).toEqual(['{}']);
+    // Typos the engine would show as typed.
+    for (const typo of ['{value', 'value}', '{{value}}', '{value}}', '{ value }', '{Value}']) {
+      expect(unknownPlaceholders(`Rated ${typo}`), typo).not.toEqual([]);
+    }
     const problems = profileProblems(
       config({
         weights: { review_count_log: 10 },
         transforms: { review_count_log: { kind: 'linear', min: 0, max: 4 } },
-        reasonTemplates: { review_count_log: { value: { en: '{value} reviews', fr: '{nombre} avis' } } },
+        reasonTemplates: { review_count_log: { value: { en: '{count} reviews', fr: '{nombre} avis' } } },
       }),
     );
     expect(problems).toEqual([
       {
+        path: ['reasonTemplates', 'review_count_log', 'value', 'en'],
+        code: 'placeholder_unknown',
+        message: 'Unknown placeholder {count} (only {value})',
+      },
+      {
         path: ['reasonTemplates', 'review_count_log', 'value', 'fr'],
+        code: 'placeholder_unknown',
         message: 'Unknown placeholder {nombre} (only {value})',
       },
     ]);

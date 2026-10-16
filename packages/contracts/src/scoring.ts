@@ -806,7 +806,10 @@ const ProfileConfigObjectSchema = z.object({
   /** Tier A from `A`, B from `B`, else C (gated out: X). */
   tiers: z
     .object({ A: z.number().int().min(1).max(100), B: z.number().int().min(0).max(99) })
-    .refine((tiers) => tiers.A > tiers.B, { message: 'Tier A must start above tier B' }),
+    .refine((tiers) => tiers.A > tiers.B, {
+      message: 'Tier A must start above tier B',
+      params: { problem: 'tiers_order' satisfies ProfileProblemCode },
+    }),
   /**
    * `weighted_sum`: 100 × Σ weight × transformed ÷ Σ positive weights, clamped to 0–100. A missing feature
    * contributes nothing (or its `missing` value), but its weight still counts.
@@ -817,13 +820,34 @@ const ProfileConfigObjectSchema = z.object({
 });
 
 export type ProblemPath = readonly (string | number)[];
+/** What is wrong (stable, for the editor's own wording; `message` is the English text). */
+export const PROFILE_PROBLEM_CODES = [
+  'no_positive_weight',
+  'transform_kind',
+  'transform_required',
+  'value_unknown',
+  'without_weight',
+  'never_missing',
+  'reason_missing_unfilled',
+  'placeholder_unknown',
+  'gate_id_taken',
+  'not_a_number',
+  'tiers_order',
+] as const;
+export type ProfileProblemCode = (typeof PROFILE_PROBLEM_CODES)[number];
+
 export interface ProfileProblem {
   /** Path in the config (`['transforms', 'pain_share.booking_friction']`, `['gates', 0, 'when', 'any', 1]`). */
   readonly path: ProblemPath;
+  readonly code: ProfileProblemCode;
   readonly message: string;
 }
 export const ProfileProblemSchema = z
-  .object({ path: z.array(z.union([z.string(), z.number()])), message: z.string() })
+  .object({
+    path: z.array(z.union([z.string(), z.number()])),
+    code: z.enum(PROFILE_PROBLEM_CODES),
+    message: z.string(),
+  })
   .meta({ id: 'ScoringProfileProblem' });
 
 /** The transforms that fit a feature's type (the editor offers these). */
@@ -856,16 +880,29 @@ function conditionProblems(condition: GateCondition, path: ProblemPath, problems
       definition.type === 'enum'
         ? typeof value === 'string' && (definition.values ?? []).includes(value)
         : typeof value === (definition.type === 'number' ? 'number' : 'boolean');
-    if (!fits) problems.push({ path, message: `${String(value)} is not a value of ${condition.feature}` });
+    if (!fits)
+      problems.push({
+        path,
+        code: 'value_unknown',
+        message: `${String(value)} is not a value of ${condition.feature}`,
+      });
   }
   const ordered = [condition.gt, condition.gte, condition.lt, condition.lte].some(
     (value) => value !== undefined,
   );
   if (ordered && definition.type !== 'number') {
-    problems.push({ path, message: `${condition.feature} is not a number: it cannot be compared` });
+    problems.push({
+      path,
+      code: 'not_a_number',
+      message: `${condition.feature} is not a number: it cannot be compared`,
+    });
   }
   if (condition.isNull !== undefined && definition.missingDefault !== undefined) {
-    problems.push({ path, message: `${condition.feature} is never missing (it has a default)` });
+    problems.push({
+      path,
+      code: 'never_missing',
+      message: `${condition.feature} is never missing (it has a default)`,
+    });
   }
 }
 
@@ -878,7 +915,11 @@ function conditionProblems(condition: GateCondition, path: ProblemPath, problems
 export function profileProblems(config: z.output<typeof ProfileConfigObjectSchema>): ProfileProblem[] {
   const problems: ProfileProblem[] = [];
   if (!Object.values(config.weights).some((weight) => (weight ?? 0) > 0)) {
-    problems.push({ path: ['weights'], message: 'At least one feature needs a positive weight' });
+    problems.push({
+      path: ['weights'],
+      code: 'no_positive_weight',
+      message: 'At least one feature needs a positive weight',
+    });
   }
   for (const [key, weight] of Object.entries(config.weights) as [FeatureKey, number][]) {
     if (weight === 0) continue;
@@ -887,15 +928,21 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     if (transform && !TRANSFORM_KINDS_FOR[definition.type].includes(transform.kind)) {
       problems.push({
         path: ['transforms', key],
+        code: 'transform_kind',
         message: `A ${definition.type} feature cannot use ${transform.kind}`,
       });
     }
     if (!transform && definition.type === 'enum') {
-      problems.push({ path: ['transforms', key], message: 'An enum feature needs an enumMap transform' });
+      problems.push({
+        path: ['transforms', key],
+        code: 'transform_required',
+        message: 'An enum feature needs an enumMap transform',
+      });
     }
     if (!transform && definition.type === 'number' && definition.unit !== 'share') {
       problems.push({
         path: ['transforms', key],
+        code: 'transform_required',
         message: 'This number is not on 0–1: it needs a transform',
       });
     }
@@ -904,6 +951,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
         if (!(definition.values ?? []).includes(value)) {
           problems.push({
             path: ['transforms', key, 'map', value],
+            code: 'value_unknown',
             message: `${value} is not a value of ${key}`,
           });
         }
@@ -913,13 +961,21 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
   for (const section of ['transforms', 'missing'] as const) {
     for (const key of Object.keys(config[section]) as FeatureKey[]) {
       if (config.weights[key] === undefined) {
-        problems.push({ path: [section, key], message: 'Set for a feature without a weight' });
+        problems.push({
+          path: [section, key],
+          code: 'without_weight',
+          message: 'Set for a feature without a weight',
+        });
       }
     }
   }
   for (const key of Object.keys(config.missing) as FeatureKey[]) {
     if (FEATURE_DEFINITIONS[key].missingDefault !== undefined) {
-      problems.push({ path: ['missing', key], message: `${key} is never missing (it has a default)` });
+      problems.push({
+        path: ['missing', key],
+        code: 'never_missing',
+        message: `${key} is never missing (it has a default)`,
+      });
     }
   }
   for (const [key, texts] of Object.entries(config.reasonTemplates) as [
@@ -938,6 +994,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
       if (value === 'missing' && config.missing[key] === undefined) {
         problems.push({
           path: ['reasonTemplates', key, value],
+          code: 'reason_missing_unfilled',
           message: 'Read only for a value this profile fills in',
         });
         continue;
@@ -945,6 +1002,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
       if (!allowed.has(value)) {
         problems.push({
           path: ['reasonTemplates', key, value],
+          code: 'value_unknown',
           message: `${value} is not a value of ${key}`,
         });
       }
@@ -953,6 +1011,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
         if (unknown.length > 0) {
           problems.push({
             path: ['reasonTemplates', key, value, locale],
+            code: 'placeholder_unknown',
             message: `Unknown placeholder ${unknown.join(', ')} (only {value})`,
           });
         }
@@ -962,7 +1021,11 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
   const ids = new Set<string>([DO_NOT_CONTACT_GATE_ID]);
   for (const [i, gate] of config.gates.entries()) {
     if (ids.has(gate.id)) {
-      problems.push({ path: ['gates', i, 'id'], message: `Gate id ${gate.id} is reserved or used twice` });
+      problems.push({
+        path: ['gates', i, 'id'],
+        code: 'gate_id_taken',
+        message: `Gate id ${gate.id} is reserved or used twice`,
+      });
     }
     ids.add(gate.id);
     conditionProblems(gate.when, ['gates', i, 'when'], problems);
@@ -973,18 +1036,37 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
 /** The placeholders a reason template may use. */
 export const REASON_PLACEHOLDERS = ['{value}'] as const;
 
-/** Placeholders of a reason template other than `{value}` (a typo would be shown to the user as is). */
+/**
+ * What in a reason template is not `{value}`: other placeholders and stray braces (`{valeur}`, `{value`,
+ * `{{value}}`) — the engine fills in `{value}` only, so anything else would be shown to the user as typed.
+ */
 export function unknownPlaceholders(template: string): string[] {
-  const found = template.match(/\{[^{}]*\}/g) ?? [];
-  return [...new Set(found.filter((token) => !(REASON_PLACEHOLDERS as readonly string[]).includes(token)))];
+  let rest = template;
+  // Removed first: what is left of `{{value}}` (`{}`) or a lone brace is flagged.
+  for (const placeholder of REASON_PLACEHOLDERS) rest = rest.replaceAll(placeholder, '');
+  const found = rest.match(/\{[^{}]*\}?|\}/g) ?? [];
+  return [...new Set(found)];
 }
 
-/** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path). */
+/** A usable profile config: the shapes, then `profileProblems` (each problem an issue at its path, its code in params). */
 export const ScoringProfileConfigSchema = ProfileConfigObjectSchema.superRefine((config, ctx) => {
   for (const problem of profileProblems(config)) {
-    ctx.addIssue({ code: 'custom', path: [...problem.path], message: problem.message });
+    ctx.addIssue({
+      code: 'custom',
+      path: [...problem.path],
+      message: problem.message,
+      params: { problem: problem.code },
+    });
   }
 }).meta({ id: 'ScoringProfileConfig' });
+
+/**
+ * A stored version's config, read back: the shapes and their defaults only. Rules added since a version was saved
+ * never make it unreadable (stored versions are immutable; new versions are checked with the full schema).
+ */
+export const StoredScoringProfileConfigSchema = ProfileConfigObjectSchema.meta({
+  id: 'StoredScoringProfileConfig',
+});
 export type ScoringProfileConfig = z.infer<typeof ScoringProfileConfigSchema>;
 export type ScoringProfileConfigInput = z.input<typeof ScoringProfileConfigSchema>;
 
@@ -1078,7 +1160,8 @@ export const ScoringProfileVersionSchema = z
   .object({
     profileId: z.uuid(),
     version: z.number().int().positive(),
-    config: ScoringProfileConfigSchema,
+    /** As saved: rules added since may no longer accept it (save a new version to fix it). */
+    config: StoredScoringProfileConfigSchema,
     createdAt: IsoDateTimeSchema,
   })
   .meta({ id: 'ScoringProfileVersion' });

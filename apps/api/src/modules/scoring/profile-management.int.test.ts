@@ -1,5 +1,11 @@
 import type { DbClient } from '@bf/db';
-import { businesses, businessScores, orgBusinesses, scoringProfiles } from '@bf/db/schema';
+import {
+  businesses,
+  businessScores,
+  orgBusinesses,
+  scoringProfiles,
+  scoringProfileVersions,
+} from '@bf/db/schema';
 import { aBusiness } from '@bf/testing';
 import type { INestApplicationContext } from '@nestjs/common';
 import { and, asc, count, eq, max } from 'drizzle-orm';
@@ -275,6 +281,30 @@ describe('workspace scoring profiles', () => {
       .toBeGreaterThan(before?.getTime() ?? 0);
     const shown = (await owner.get(`/v1/businesses/${tracked[0]}/scores`).expect(200)).body.items;
     expect(shown.map((score: { profileId: string }) => score.profileId)).toContain(profileId);
+  });
+});
+
+describe('stored versions', () => {
+  it('reads a saved version that rules added since would refuse', async () => {
+    const [own] = await db
+      .select()
+      .from(scoringProfiles)
+      .where(eq(scoringProfiles.organizationId, org))
+      .limit(1);
+    if (!own) throw new Error('no workspace profile');
+    const v1 = (await owner.get(`/v1/scoring/profiles/${own.id}/versions/1`).expect(200)).body.config;
+    // As saved before the placeholder check existed (stored versions are immutable).
+    const legacy = {
+      ...v1,
+      reasonTemplates: { has_phone: { true: { en: 'Has a phone', fr: 'A un {numero}' } } },
+    };
+    await db
+      .insert(scoringProfileVersions)
+      .values({ profileId: own.id, version: 50, config: legacy, createdBy: null });
+    const { body } = await owner.get(`/v1/scoring/profiles/${own.id}/versions/50`).expect(200);
+    expect(body.config.reasonTemplates.has_phone.true.fr).toBe('A un {numero}');
+    // A new version with the same text is refused.
+    await owner.post(`/v1/scoring/profiles/${own.id}/versions`).send({ config: legacy }).expect(422);
   });
 });
 

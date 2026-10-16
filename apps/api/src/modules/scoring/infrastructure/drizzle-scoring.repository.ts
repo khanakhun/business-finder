@@ -4,7 +4,7 @@ import {
   type Offer,
   type ScoreTier,
   type ScoringProfileConfig,
-  ScoringProfileConfigSchema,
+  StoredScoringProfileConfigSchema,
 } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import {
@@ -107,8 +107,9 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return rows.map(({ profile, config }) => ({
       ...toProfile(profile),
       activeVersion: profile.activeVersion as number,
-      // Stored configs were validated when written; parsing applies defaults added since.
-      config: ScoringProfileConfigSchema.parse(config),
+      // Stored configs were validated when written; parsing applies defaults added since (shapes only: a rule added
+      // later never makes a saved version unreadable).
+      config: StoredScoringProfileConfigSchema.parse(config),
     }));
   }
 
@@ -173,7 +174,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
       ? {
           profileId: row.profileId,
           version: row.version,
-          config: ScoringProfileConfigSchema.parse(row.config),
+          config: StoredScoringProfileConfigSchema.parse(row.config),
           createdAt: row.createdAt,
         }
       : undefined;

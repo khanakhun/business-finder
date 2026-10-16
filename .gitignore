@@ -60,3 +60,6 @@ services/intel/.cache/
 # Copied from maplibre-gl by apps/web/scripts/next.mjs (BF-023).
 apps/web/public/maplibre/
 apps/web/public/_bf/
+
+# sitekit renders and screenshots inside workspaces (BF-042)
+.sitekit/

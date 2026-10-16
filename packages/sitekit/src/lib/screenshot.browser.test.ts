@@ -57,6 +57,30 @@ describe.runIf(browser)('screenshots in Chromium', () => {
   }, 60_000);
 });
 
+describe.runIf(browser && existsSync(fileURLToPath(new URL('../../dist/sitekit.mjs', import.meta.url))))(
+  'the bundled CLI',
+  () => {
+    it('validates cold in under 400 ms and checks a fixture to done', async () => {
+      const { spawnSync } = await import('node:child_process');
+      const cli = fileURLToPath(new URL('../../dist/sitekit.mjs', import.meta.url));
+      const cwd = fileURLToPath(new URL('../../fixtures/workspace-salon/', import.meta.url));
+      const started = performance.now();
+      const validate = spawnSync(process.execPath, [cli, 'validate', '--cwd', cwd]);
+      const elapsed = performance.now() - started;
+      expect(validate.status).toBe(0);
+      expect(elapsed).toBeLessThan(400);
+      const { workspace } = await salon();
+      const done = spawnSync(process.execPath, [cli, 'check', '--json', '--cwd', workspace.root]);
+      expect(done.status, done.stderr.toString()).toBe(0);
+      expect(JSON.parse(done.stdout.toString())).toMatchObject({
+        command: 'check',
+        ok: true,
+        data: { done: true },
+      });
+    }, 60_000);
+  },
+);
+
 describe('the loopback server', () => {
   it('serves its folder only', async () => {
     const dir = mkdtempSync(join(scratch, 'serve-'));

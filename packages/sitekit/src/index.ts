@@ -1,5 +1,6 @@
 // @bf/sitekit (BF-042): the site toolbelt generation agents use — as a library, a CLI and an MCP server.
 
+export { type AgentToolFactory, createSitekitAgentTools } from './agent-tools.ts';
 export { type CheckItem, type CheckReport, check, SHOTS_DIR } from './lib/check.ts';
 export {
   CONFIG_FILE,
@@ -45,3 +46,12 @@ export {
 export { asSpec, readSiteRaw, SITE_FILE, writeSite } from './lib/site.ts';
 export { parseFacts, pathString, type SitekitIssue, type ValidateInput, validate } from './lib/validate.ts';
 export { MAX_READ_BYTES, Workspace, WorkspaceError } from './lib/workspace.ts';
+export { createSitekitMcpServer, SERVER_INFO, serveStdio, toCallToolResult } from './mcp.ts';
+export {
+  runTool,
+  SITEKIT_TOOLS,
+  type SitekitTool,
+  type SitekitToolName,
+  type ToolContext,
+  type ToolResult,
+} from './tools.ts';

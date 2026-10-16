@@ -120,11 +120,11 @@ packages/sitekit/
 - **Performance:** cold-start and `check` timing benchmarks recorded.
 
 ## Acceptance criteria
-- [ ] Library API: validate (with hints), lintCopy (FR/EN rules as data, safe autofix), ops/diff, render, screenshot, catalog/facts/assets readers, check.
-- [ ] CLI with stable JSON schemas, exit codes and agent-friendly messages; single-file bundle.
-- [ ] MCP server and Agent SDK tool factory with parity tests.
-- [ ] Workspace confinement and no network egress; deterministic render and screenshots.
-- [ ] Docs: README + agent quick reference.
+- [x] Library API: validate (with hints), lintCopy (FR/EN rules as data, safe autofix), ops/diff, render, screenshot, catalog/facts/assets readers, check.
+- [x] CLI with stable JSON schemas, exit codes and agent-friendly messages; single-file bundle.
+- [x] MCP server and Agent SDK tool factory with parity tests.
+- [x] Workspace confinement and no network egress; deterministic render and screenshots.
+- [x] Docs: README + agent quick reference.
 
 ## Agent prompt
 ```text

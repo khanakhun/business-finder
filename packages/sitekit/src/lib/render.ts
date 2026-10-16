@@ -1,7 +1,8 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { copyFile, readdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readStylesheet, renderStaticPage, staticPath } from '@bf/site-blocks/static';
 import type { SiteLocale, SiteSpec } from '@bf/site-schema';
 import type { Workspace } from './workspace.ts';
@@ -27,15 +28,30 @@ export interface RenderResult {
   readonly fonts: boolean;
 }
 
-/** The block library's built fonts (absent in a source checkout that was not built: pages still render). */
-function fontsDir(): string | undefined {
+/**
+ * Where the block library's stylesheet and fonts are: next to the bundled CLI (`dist/site-blocks/`, BF-043's runner
+ * image), else the package's build (`@bf/site-blocks/dist`). Absent in an unbuilt checkout: pages still render.
+ */
+export function blockAssetsDir(): string | undefined {
+  const bundled = fileURLToPath(new URL('./site-blocks/', import.meta.url));
+  if (existsSync(join(bundled, 'styles.css'))) return bundled;
   try {
-    const root = dirname(createRequire(import.meta.url).resolve('@bf/site-blocks/package.json'));
-    const dir = join(root, 'dist', 'fonts');
-    return existsSync(dir) ? dir : undefined;
+    const renderer = createRequire(import.meta.url).resolve('@bf/site-blocks/static');
+    const dir = join(dirname(dirname(dirname(renderer))), 'dist');
+    return existsSync(join(dir, 'styles.css')) ? dir : undefined;
   } catch {
     return undefined;
   }
+}
+
+function fontsDir(): string | undefined {
+  const root = blockAssetsDir();
+  return root && existsSync(join(root, 'fonts')) ? join(root, 'fonts') : undefined;
+}
+
+function stylesheet(): string {
+  const root = blockAssetsDir();
+  return root ? readFileSync(join(root, 'styles.css'), 'utf8') : readStylesheet();
 }
 
 const escapeHtml = (text: string) =>
@@ -50,7 +66,7 @@ export async function renderSite(
   options: { pages?: readonly string[]; locales?: readonly SiteLocale[]; outDir?: string; css?: string } = {},
 ): Promise<RenderResult> {
   const outDir = options.outDir ?? RENDER_DIR;
-  const css = options.css ?? readStylesheet();
+  const css = options.css ?? stylesheet();
   const pages: RenderedPage[] = [];
   for (const locale of spec.locales) {
     if (options.locales && !options.locales.includes(locale)) continue;

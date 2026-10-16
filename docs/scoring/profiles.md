@@ -153,7 +153,19 @@ than a social page or a parked domain) caps at 40; `already_books_online` caps a
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 | `pain_share.positive_strong_reputation` | 2 | linear 0–50 % | Praise to amplify. |
 
-## Golden table
+## Workspace profiles and the editor (BF-032)
+
+Built-in profiles are read-only. A workspace duplicates one (Settings → Scoring) to tune it: the copy starts at
+version 1 with the source's active config and is scored right away. The editor works on a draft: weights, transforms,
+gates (rules that exclude or cap), tier thresholds and EN/FR reason templates (only `{value}` is filled in). The
+live preview scores a sample of up to 200 of the workspace's businesses, stratified by their current tier, with the
+draft on the server (`POST /v1/scoring/explain/batch`, nothing stored), and shows the tier distribution, the rank
+correlation with the current scores and the biggest moves. Saving creates a new immutable version; activating it
+recomputes the workspace (progress in realtime). Two versions can be compared over the same sample (tier movement
+matrix and rank correlation). The primary profile (the listing's score, tier, facet and sort) is switched from the
+listing's toolbar or the profiles list; an archived profile is not scored and cannot be primary.
+
+
 
 Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their tier per profile, pinned by
 `golden.test.ts`:

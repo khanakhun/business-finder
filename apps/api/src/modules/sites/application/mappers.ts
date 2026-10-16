@@ -7,7 +7,13 @@ import type {
   SiteVersion,
   SiteVersionSummary,
 } from '@bf/contracts';
-import type { StoredPublication, StoredSite, StoredVersion, StoredVersionSummary } from './ports.ts';
+import type {
+  StoredPublication,
+  StoredSite,
+  StoredThumbnails,
+  StoredVersion,
+  StoredVersionSummary,
+} from './ports.ts';
 
 /** Previews are served over https at their hostname (BF-036). */
 export const publicationUrl = (hostname: string) => `https://${hostname}/`;
@@ -70,8 +76,18 @@ export const toSiteDetail = (
   site: StoredSite,
   current: StoredVersionSummary | undefined,
   publications: readonly StoredPublication[],
+  insights: { thumbnails: StoredThumbnails | null; views: SiteDetail['views'] },
 ): SiteDetail => ({
   ...toSiteSummary(site),
   currentVersionSummary: current ? toVersionSummary(current) : null,
   publications: publications.map(toPublication),
+  thumbnails: insights.thumbnails
+    ? {
+        publicationId: insights.thumbnails.publicationId,
+        takenAt: insights.thumbnails.takenAt,
+        desktop: insights.thumbnails.desktopKey !== null,
+        mobile: insights.thumbnails.mobileKey !== null,
+      }
+    : null,
+  views: insights.views,
 });

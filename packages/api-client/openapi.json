@@ -3014,6 +3014,75 @@
         ],
         "type": "object"
       },
+      "CreateSiteAssetUploadRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "additionalProperties": {
+              "maxLength": 150,
+              "minLength": 1,
+              "type": "string"
+            },
+            "propertyNames": {
+              "pattern": "^[a-z]{2}$",
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "bytes": {
+            "maximum": 15728640,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "license": {
+            "enum": [
+              "owner_site",
+              "stock",
+              "ai_generated",
+              "uploaded"
+            ],
+            "type": "string"
+          },
+          "licenseDetails": {
+            "additionalProperties": false,
+            "properties": {
+              "attributionText": {
+                "maxLength": 200,
+                "type": "string"
+              },
+              "author": {
+                "maxLength": 120,
+                "type": "string"
+              },
+              "provider": {
+                "maxLength": 60,
+                "type": "string"
+              },
+              "sourceUrl": {
+                "format": "uri",
+                "maxLength": 500,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "mime": {
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/avif"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "mime",
+          "bytes",
+          "license"
+        ],
+        "type": "object"
+      },
       "CreateSiteRequest": {
         "additionalProperties": false,
         "properties": {
@@ -10244,6 +10313,251 @@
         ],
         "type": "object"
       },
+      "SiteAsset": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maxLength": 150,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "pattern": "^[a-z]{2}$",
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bytes": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "dominantColors": {
+            "anyOf": [
+              {
+                "items": {
+                  "pattern": "^#[0-9a-f]{6}$",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "license": {
+            "enum": [
+              "owner_site",
+              "stock",
+              "ai_generated",
+              "uploaded"
+            ],
+            "type": "string"
+          },
+          "licenseDetails": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mime": {
+            "type": "string"
+          },
+          "publicUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "siteId": {
+            "anyOf": [
+              {
+                "description": "SiteId (UUID)",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "format": {
+                  "enum": [
+                    "webp",
+                    "avif"
+                  ],
+                  "type": "string"
+                },
+                "url": {
+                  "format": "uri",
+                  "type": "string"
+                },
+                "width": {
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "width",
+                "format",
+                "url"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "siteId",
+          "status",
+          "mime",
+          "width",
+          "height",
+          "bytes",
+          "publicUrl",
+          "variants",
+          "license",
+          "licenseDetails",
+          "alt",
+          "dominantColors",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "SiteAssetList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SiteAsset"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "SiteAssetUpload": {
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/SiteAsset"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "method": {
+            "const": "PUT",
+            "type": "string"
+          },
+          "uploadUrl": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset",
+          "uploadUrl",
+          "method",
+          "headers",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
       "SiteDetail": {
         "additionalProperties": false,
         "properties": {
@@ -10367,10 +10681,23 @@
             ],
             "type": "string"
           },
+          "thumbnails": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SiteThumbnails"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "updatedAt": {
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
             "type": "string"
+          },
+          "views": {
+            "$ref": "#/components/schemas/SiteViewStats"
           }
         },
         "required": [
@@ -10387,7 +10714,9 @@
           "createdAt",
           "updatedAt",
           "currentVersionSummary",
-          "publications"
+          "publications",
+          "thumbnails",
+          "views"
         ],
         "type": "object"
       },
@@ -10673,6 +11002,34 @@
           "createdBy",
           "createdAt",
           "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SiteThumbnails": {
+        "additionalProperties": false,
+        "properties": {
+          "desktop": {
+            "type": "boolean"
+          },
+          "mobile": {
+            "type": "boolean"
+          },
+          "publicationId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "takenAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "publicationId",
+          "takenAt",
+          "desktop",
+          "mobile"
         ],
         "type": "object"
       },
@@ -11122,6 +11479,84 @@
           "schemaVersion",
           "warnings",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "SiteViewBeacon": {
+        "additionalProperties": false,
+        "properties": {
+          "c": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "type": "string"
+          },
+          "locale": {
+            "pattern": "^[a-z]{2}$",
+            "type": "string"
+          },
+          "pageId": {
+            "pattern": "^[a-z][a-z0-9-]{1,31}$",
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 200,
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "pageId",
+          "locale"
+        ],
+        "type": "object"
+      },
+      "SiteViewStats": {
+        "additionalProperties": false,
+        "properties": {
+          "last30Days": {
+            "additionalProperties": false,
+            "properties": {
+              "pageViews": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "uniqueEstimate": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "pageViews",
+              "uniqueEstimate"
+            ],
+            "type": "object"
+          },
+          "last7Days": {
+            "additionalProperties": false,
+            "properties": {
+              "pageViews": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "uniqueEstimate": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "pageViews",
+              "uniqueEstimate"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "last7Days",
+          "last30Days"
         ],
         "type": "object"
       },
@@ -22626,6 +23061,71 @@
         ]
       }
     },
+    "/v1/public/sites/views": {
+      "post": {
+        "operationId": "recordSiteView",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteViewBeacon"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Count a page view of a published site (anonymous beacon; never stores IPs or user agents)",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/v1/realtime": {
       "get": {
         "operationId": "streamRealtime",
@@ -25035,6 +25535,357 @@
         ]
       }
     },
+    "/v1/sites/{id}/assets": {
+      "get": {
+        "operationId": "listSiteAssets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAssetList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The site’s images, newest first",
+        "tags": [
+          "sites"
+        ]
+      },
+      "post": {
+        "operationId": "createSiteAssetUpload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSiteAssetUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAssetUpload"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Start an image upload: a pending image and a presigned URL to PUT its bytes to",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/assets/{assetId}": {
+      "delete": {
+        "operationId": "deleteSiteAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Delete an image no version of the site uses",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/assets/{assetId}/finalize": {
+      "post": {
+        "operationId": "finalizeSiteAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteAsset"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Check an uploaded image (type, size, dimensions) and queue its processing",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
     "/v1/sites/{id}/diff": {
       "get": {
         "operationId": "diffSiteVersions",
@@ -25585,6 +26436,88 @@
           }
         },
         "summary": "Make an earlier version’s content current again, as a new version",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/v1/sites/{id}/thumbnails/{kind}": {
+      "get": {
+        "operationId": "getSiteThumbnail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A picture of the site’s published home page (desktop or mobile)",
         "tags": [
           "sites"
         ]

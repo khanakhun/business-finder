@@ -22,4 +22,13 @@ export const sitesApiEnv = z.object({
     .describe(
       'Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host.',
     ),
+  SITES_VIEW_TOKEN_SECRET: secret(
+    z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        'Shared with apps/sites: signs the view-beacon token of published pages and salts the daily visitor hashes, ≥ 32 chars. Unset: views are not counted (refused in production).',
+      ),
+  ),
 });

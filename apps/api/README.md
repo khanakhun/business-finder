@@ -85,6 +85,7 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 | `GET /metrics` | Prometheus scrape (internal network) |
 | `GET /v1/system/info` | Version and environment for the dashboard's connection card and deploy checks |
 | `GET /v1/identity/config` | Which sign-in/sign-up options the auth pages may show (sign-up mode, Google) |
+| `POST /v1/public/sites/views` | View beacon of published sites (BF-035): a token signed by the renderer, 120/min per IP; stores no IP or user agent |
 | `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
 ## Workspace settings, secrets and audit log (BF-011)

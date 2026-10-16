@@ -1,11 +1,20 @@
-import { type Clock, type SiteId, SitesExpireJob, SitesRevalidateJob } from '@bf/contracts';
+import {
+  type Clock,
+  type OrgId,
+  type SiteId,
+  SitesAssetProcessJob,
+  SitesExpireJob,
+  SitesRevalidateJob,
+  SitesScreenshotJob,
+  SitesViewsFlushJob,
+} from '@bf/contracts';
 import { QUEUES, TypedProducer } from '@bf/queue';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
-import type { SiteRevalidation } from '../application/ports.ts';
+import type { AssetProcessingQueue, SiteRevalidation, SiteScreenshotQueue } from '../application/ports.ts';
 
 /** Revalidations go through a job: retried with backoff while the renderer is down. */
 @Injectable()
@@ -70,5 +79,83 @@ export class SitesExpiryScheduler implements OnApplicationBootstrap, OnApplicati
   async tick(): Promise<void> {
     const hour = this.clock.now().toISOString().slice(0, 13);
     await this.jobs.add({ orgId: null, idempotencyKey: `sites-expire:${hour}` });
+  }
+}
+
+@Injectable()
+export class BullmqAssetProcessingQueue implements AssetProcessingQueue {
+  private readonly jobs: TypedProducer<typeof SitesAssetProcessJob>;
+
+  constructor(@InjectQueue(QUEUES.sitesAssetProcess.name) queue: Queue) {
+    this.jobs = new TypedProducer(queue, SitesAssetProcessJob);
+  }
+
+  async process(assetId: string, organizationId: string): Promise<void> {
+    await this.jobs.add({
+      orgId: organizationId as OrgId,
+      idempotencyKey: `asset-process:${assetId}`,
+      assetId,
+    });
+  }
+}
+
+@Injectable()
+export class BullmqSiteScreenshotQueue implements SiteScreenshotQueue {
+  private readonly jobs: TypedProducer<typeof SitesScreenshotJob>;
+
+  constructor(@InjectQueue(QUEUES.sitesScreenshot.name) queue: Queue) {
+    this.jobs = new TypedProducer(queue, SitesScreenshotJob);
+  }
+
+  async capture(input: Parameters<SiteScreenshotQueue['capture']>[0]): Promise<void> {
+    await this.jobs.add({
+      orgId: input.organizationId as OrgId,
+      idempotencyKey: input.idempotencyKey,
+      siteId: input.siteId as SiteId,
+      publicationId: input.publicationId,
+    });
+  }
+}
+
+/** OpenAPI generation boots without Valkey. */
+export const OPENAPI_ASSET_QUEUE: AssetProcessingQueue = { process: async () => {} };
+export const OPENAPI_SCREENSHOT_QUEUE: SiteScreenshotQueue = { capture: async () => {} };
+
+export const SITES_VIEWS_AUTOSTART = Symbol('SitesViewsAutostart');
+/** Views are moved from Valkey to the database every 5 minutes. */
+const FLUSH_MS = 5 * 60_000;
+
+/** Enqueues one views flush per 5-minute slot (the job id is per slot), in the worker only. */
+@Injectable()
+export class SitesViewsFlushScheduler implements OnApplicationBootstrap, OnApplicationShutdown {
+  private readonly jobs: TypedProducer<typeof SitesViewsFlushJob>;
+  private timer: NodeJS.Timeout | undefined;
+
+  constructor(
+    @InjectQueue(QUEUES.sitesViews.name) queue: Queue,
+    @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(LOGGER) private readonly logger: Logger,
+    @Inject(SITES_VIEWS_AUTOSTART) private readonly autostart: boolean,
+  ) {
+    this.jobs = new TypedProducer(queue, SitesViewsFlushJob);
+  }
+
+  onApplicationBootstrap(): void {
+    if (!this.autostart) return;
+    const run = () =>
+      this.tick().catch((error: unknown) =>
+        this.logger.error({ err: error }, 'site views flush scheduling failed'),
+      );
+    this.timer = setInterval(run, FLUSH_MS / 5);
+    this.timer.unref();
+  }
+
+  onApplicationShutdown(): void {
+    clearInterval(this.timer);
+  }
+
+  async tick(): Promise<void> {
+    const slot = Math.floor(this.clock.now().getTime() / FLUSH_MS);
+    await this.jobs.add({ orgId: null, idempotencyKey: `sites-views:${slot}` });
   }
 }

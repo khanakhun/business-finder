@@ -155,3 +155,187 @@ export interface SiteHosting {
   readonly assetHosts: readonly string[];
 }
 export const SITE_HOSTING = Symbol('SiteHosting');
+
+// ── Views (part 2) ──────────────────────────────────────────────────────────────────────────────────────────────
+
+export interface DayViews {
+  readonly siteId: string;
+  readonly day: string;
+  readonly pageViews: number;
+  readonly uniqueEstimate: number;
+  readonly byLocale: Record<string, number>;
+  readonly byCampaign: Record<string, number>;
+}
+
+/** Where views are counted until they are flushed (Valkey). */
+export interface SiteViewCounter {
+  record(view: {
+    siteId: string;
+    day: string;
+    hour: string;
+    /** A daily-salted hash of the visitor (never an IP or a user agent). */
+    visitor: string;
+    locale: string;
+    campaign?: string | undefined;
+  }): Promise<void>;
+  takeDays(limit: number): Promise<DayViews[]>;
+  returnDays(views: readonly DayViews[]): Promise<void>;
+  completedHours(
+    beforeHour: string,
+    limit: number,
+  ): Promise<{ siteId: string; hour: string; pageViews: number; uniqueEstimate: number }[]>;
+  forgetHour(siteId: string, hour: string): Promise<void>;
+}
+export const SITE_VIEW_COUNTER = Symbol('SiteViewCounter');
+
+/** The views store of the database (site_view_daily) and what view analytics need from sites. */
+export interface SiteViewsRepository {
+  /** Writes the days' totals (absolute) for sites that still exist; returns how many rows it wrote. */
+  upsertDays(views: readonly DayViews[]): Promise<number>;
+  /** Page views and unique estimates from `fromDay` (inclusive). */
+  totals(siteId: string, fromDay: string): Promise<{ pageViews: number; uniqueEstimate: number }>;
+  /** The workspace and business of sites (those that exist). */
+  refs(siteIds: readonly string[]): Promise<{ id: string; organizationId: string; businessId: string }[]>;
+}
+export const SITE_VIEWS_REPOSITORY = Symbol('SiteViewsRepository');
+
+/** The secret shared with the renderer (view tokens, daily salts); undefined when views are not configured. */
+export const SITE_VIEW_SECRET = Symbol('SiteViewSecret');
+
+// ── Assets (part 2) ─────────────────────────────────────────────────────────────────────────────────────────────
+
+export interface StoredAsset {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly siteId: string | null;
+  readonly storageKey: string;
+  readonly status: 'pending' | 'processing' | 'ready' | 'failed';
+  readonly mime: string;
+  readonly width: number | null;
+  readonly height: number | null;
+  readonly bytes: number | null;
+  readonly publicUrl: string | null;
+  readonly variants: { width: number; format: string; key: string; url: string; bytes: number }[] | null;
+  readonly license: 'owner_site' | 'stock' | 'ai_generated' | 'uploaded';
+  readonly licenseDetails: Record<string, string> | null;
+  readonly alt: Record<string, string> | null;
+  readonly dominantColors: string[] | null;
+  readonly createdAt: Date;
+}
+
+export interface SiteAssetsRepository {
+  insert(
+    asset: Omit<
+      StoredAsset,
+      'status' | 'width' | 'height' | 'publicUrl' | 'variants' | 'dominantColors' | 'createdAt'
+    > & {
+      createdBy: string | null;
+    },
+  ): Promise<StoredAsset>;
+  get(organizationId: string, siteId: string, assetId: string): Promise<StoredAsset | undefined>;
+  /** By id only (the processing job). */
+  byId(assetId: string): Promise<StoredAsset | undefined>;
+  list(organizationId: string, siteId: string): Promise<StoredAsset[]>;
+  update(
+    assetId: string,
+    changes: Partial<Omit<StoredAsset, 'id' | 'organizationId' | 'siteId' | 'storageKey'>> & {
+      sha256?: string;
+    },
+  ): Promise<void>;
+  /** Whether a version of the site names the asset (its id or one of its URLs). */
+  referenced(siteId: string, needles: readonly string[]): Promise<boolean>;
+  delete(assetId: string): Promise<void>;
+}
+export const SITE_ASSETS_REPOSITORY = Symbol('SiteAssetsRepository');
+
+/** The private bucket of uploaded originals (`ObjectStorage` on the assets bucket); the worker needs it too. */
+export const SITE_ORIGINALS = Symbol('SiteOriginals');
+/** The artifacts bucket, read-only: the screenshots services/intel took of published sites. */
+export const SITE_ARTIFACTS = Symbol('SiteArtifacts');
+
+/** Presigned uploads to the private originals bucket. */
+export interface UploadSigner {
+  presignPut(
+    key: string,
+    contentType: string,
+    bytes: number,
+    expiresInSeconds: number,
+  ): Promise<{ url: string; headers: Record<string, string> }>;
+}
+export const UPLOAD_SIGNER = Symbol('UploadSigner');
+
+/** The public bucket behind the CDN (`SITES_ASSETS_BASE_URL`): processed variants only. */
+export interface PublicFiles {
+  put(key: string, body: Buffer, contentType: string): Promise<void>;
+  delete(key: string): Promise<void>;
+  url(key: string): string;
+}
+export const PUBLIC_FILES = Symbol('PublicFiles');
+
+/** Image decoding and re-encoding (sharp). */
+export interface ImageProcessor {
+  inspect(image: Buffer): Promise<{ width: number; height: number }>;
+  /** Oriented, metadata stripped, resized (never enlarged) and re-encoded. */
+  variants(
+    image: Buffer,
+    widths: readonly number[],
+  ): Promise<{ width: number; format: 'webp' | 'avif'; body: Buffer }[]>;
+  dominantColors(image: Buffer, count: number): Promise<string[]>;
+}
+export const IMAGE_PROCESSOR = Symbol('ImageProcessor');
+
+/** Queues the processing of a finalized asset. */
+export interface AssetProcessingQueue {
+  process(assetId: string, organizationId: string): Promise<void>;
+}
+export const ASSET_PROCESSING_QUEUE = Symbol('AssetProcessingQueue');
+
+// ── Screenshots and the detail's insights (part 2) ──────────────────────────────────────────────────────────────
+
+export interface StoredThumbnails {
+  readonly publicationId: string;
+  readonly takenAt: string;
+  readonly desktopKey: string | null;
+  readonly mobileKey: string | null;
+}
+
+export interface SiteThumbnailsRepository {
+  /** A publication of the site, with the workspace (the screenshot job checks it is still active). */
+  publication(
+    siteId: string,
+    publicationId: string,
+  ): Promise<{ organizationId: string; hostname: string; status: StoredPublication['status'] } | undefined>;
+  get(siteId: string): Promise<StoredThumbnails | null>;
+  set(siteId: string, thumbnails: StoredThumbnails): Promise<void>;
+}
+export const SITE_THUMBNAILS_REPOSITORY = Symbol('SiteThumbnailsRepository');
+
+/** Desktop and mobile pictures of a page (services/intel's browser), stored under the prefix in the artifacts bucket. */
+export interface SiteScreenshotter {
+  capture(
+    url: string,
+    artifactPrefix: string,
+    signal: AbortSignal,
+  ): Promise<{ desktopKey: string | null; mobileKey: string | null }>;
+}
+export const SITE_SCREENSHOTTER = Symbol('SiteScreenshotter');
+
+export interface SiteScreenshotQueue {
+  capture(input: {
+    organizationId: string;
+    siteId: string;
+    publicationId: string;
+    idempotencyKey: string;
+  }): Promise<void>;
+}
+export const SITE_SCREENSHOT_QUEUE = Symbol('SiteScreenshotQueue');
+
+/** What a site's detail shows beside the site itself: its pictures and its views. */
+export interface SiteInsights {
+  thumbnails(siteId: string): Promise<StoredThumbnails | null>;
+  views(siteId: string): Promise<{
+    last7Days: { pageViews: number; uniqueEstimate: number };
+    last30Days: { pageViews: number; uniqueEstimate: number };
+  }>;
+}
+export const SITE_INSIGHTS = Symbol('SiteInsights');

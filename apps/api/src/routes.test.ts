@@ -47,6 +47,7 @@ const ANONYMOUS = [
   'IdentityConfigController.get',
   'HealthController.ready',
   'MetricsController.scrape',
+  'PublicSiteViewsController.record',
   'SystemController.info',
 ];
 

@@ -46,7 +46,7 @@ class UnpublishBody extends zodDto(UnpublishSiteRequestSchema) {}
 class RollbackBody extends zodDto(RollbackSiteRequestSchema) {}
 
 /** Routes guarantee an active workspace (`@RequirePermission`); reaching here without one is a wiring bug. */
-function actorOf(auth: AuthContext): SiteActor {
+export function actorOf(auth: AuthContext): SiteActor {
   if (!auth.orgId) throw new Error('Sites route reached without an active workspace');
   return { organizationId: auth.orgId, userId: auth.userId ?? null };
 }

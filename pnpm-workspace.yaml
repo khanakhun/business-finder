@@ -158,6 +158,8 @@ catalog:
   sharp: 0.35.5
   msw: 3.0.2
   '@aws-sdk/client-s3': 3.1148.0
+  # Presigned uploads of site images (BF-035); 3.1145.0 is the newest release at least two weeks old.
+  '@aws-sdk/s3-request-presigner': 3.1145.0
   '@react-email/components': 1.0.12
   '@react-email/render': 2.1.0
   otplib: 13.5.0

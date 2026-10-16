@@ -59,6 +59,13 @@ export const sites = pgTable(
     /** The current version (null until the first one); set by the API in the transaction that inserts it. */
     currentVersionId: uuid().references((): AnyPgColumn => siteVersions.id, { onDelete: 'set null' }),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    /** Desktop and mobile pictures of the published home page (artifacts bucket keys), BF-035 part 2. */
+    thumbnails: jsonb().$type<{
+      publicationId: string;
+      takenAt: string;
+      desktopKey: string | null;
+      mobileKey: string | null;
+    }>(),
     ...timestamps(),
   },
   (table) => [

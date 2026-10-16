@@ -1,6 +1,7 @@
 import { newId } from '@bf/contracts';
 import type {
   NewVersion,
+  SiteInsights,
   SiteListFilter,
   SitesRepository,
   StoredPublication,
@@ -201,3 +202,12 @@ export class InMemorySitesRepository implements SitesRepository {
     };
   }
 }
+
+/** A detail without pictures or views (unit tests of the sites themselves). */
+export const NO_INSIGHTS: SiteInsights = {
+  thumbnails: async () => null,
+  views: async () => ({
+    last7Days: { pageViews: 0, uniqueEstimate: 0 },
+    last30Days: { pageViews: 0, uniqueEstimate: 0 },
+  }),
+};

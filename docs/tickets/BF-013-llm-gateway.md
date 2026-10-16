@@ -81,12 +81,12 @@ apps/api/src/modules/platform/ai/{ai.module.ts, key-resolver.ts, llm-call.reposi
 - Eval harness: runs on a fake gateway with fixtures (CI) and produces a report.
 
 ## Acceptance criteria
-- [ ] `@bf/ai` exposes run/stream/embed/vision with routing, structured output + repair, resilience, cache, cost, budgets, telemetry.
-- [ ] Prompts are versioned files; rendering fails on missing variables.
-- [ ] `llm_calls` ledger populated; `GET /v1/ai/usage` returns aggregates.
-- [ ] Fake gateway with record/replay fixtures; tests never hit the network.
-- [ ] `pnpm eval --task demo.extract_business_facts` works with real keys and fails below threshold; workflow skips without secrets.
-- [ ] Docs: `packages/ai/README.md` (how to add a task, prompt, eval; how to record fixtures).
+- [x] `@bf/ai` exposes run/stream/embed/vision with routing, structured output + repair, resilience, cache, cost, budgets, telemetry.
+- [x] Prompts are versioned files; rendering fails on missing variables.
+- [x] `llm_calls` ledger populated; `GET /v1/ai/usage` returns aggregates.
+- [x] Fake gateway with record/replay fixtures; tests never hit the network.
+- [x] `pnpm eval --task demo.extract_business_facts` works with real keys and fails below threshold; workflow skips without secrets.
+- [x] Docs: `packages/ai/README.md` (how to add a task, prompt, eval; how to record fixtures).
 
 ## Agent prompt
 ```text
@@ -111,3 +111,41 @@ report; otherwise attach the fake-gateway report and note it.
 ## References
 - ADR-0011 · docs/conventions/ai-engineering.md · docs/ARCHITECTURE.md §9
 - AI SDK: https://ai-sdk.dev/docs · Langfuse: https://langfuse.com/docs · Anthropic models overview: https://docs.claude.com/en/docs/about-claude/models/overview
+
+## Implementation notes
+- **Versions** (checked against installed types, each published ≥ 1 week before use): `ai` 7.0.135,
+  `@ai-sdk/anthropic` 4.0.78, `@ai-sdk/openai` 4.0.91, `@ai-sdk/otel` 1.0.135, `@langfuse/otel` 5.13.1, `sharp`
+  0.35.5, `msw` 3.0.2 (tests). AI SDK 7 specifics: structured output is `generateText({ output: Output.object })`
+  (`generateObject` is deprecated); images are `file` parts with an image media type; telemetry is pluggable
+  (`registerTelemetry(new OpenTelemetry())` from `@ai-sdk/otel`); usage exposes `inputTokenDetails.cacheReadTokens`.
+  MSW 3 renamed the strict option to `onUnhandledFrame: 'error'`.
+- **Split**: part 1/2 `@bf/ai` (tasks, routing, prompts, untrusted, gateway, resilience, cache, cost, budget/ledger
+  ports, embeddings, vision, testing utilities, eval harness, demo task, evals workflow); part 2/2 API wiring
+  (`platform/ai`, `llm_calls`, usage endpoint, Langfuse, config).
+- **Gateway**: Facade with budget → cache → model chain (primary + `AI_MODEL_FALLBACKS`) → per-provider cockatiel
+  retry (decorrelated jitter, transient errors only) + circuit breaker → one repair round (the validation error is
+  sent back) → `AiOutputInvalidError`. Unconfigured providers in the chain are skipped; none configured →
+  `AiProviderNotConfiguredError` naming the secret. Overhead ≈ 0.4 ms per call with a mock model (requirement < 5 ms).
+- **Pricing**: `AI_PRICING` has **no defaults** (prices change and must not be guessed); unpriced calls record
+  `cost_usd = null` and do not count toward budgets — set prices per model in production (QUESTIONS.md).
+- **Budgets**: monthly per workspace from the ledger (60 s in-memory cache), soft → `ai.budget_soft_limit_reached`
+  event once a month, hard → `BudgetExceededError` (402) for tasks without `essential: true`. Deployment-wide
+  limits for now (per-workspace overrides can come with workspace settings).
+- **Caching**: Valkey keys `bf:ai:resp:*` (task, prompt version, model, input, workspace unless the task declares
+  `cacheScope: 'global'`) and `bf:ai:emb:*` (model + text hash, 30 days). Cache errors are misses.
+- **Untrusted data**: `untrusted()` strips control/zero-width/bidi characters (regex built from code points —
+  Biome rewrites `\u2028`-style escapes into literal line separators), defuses `<untrusted_data>` tags inside the
+  text, collapses whitespace and truncates; `UNTRUSTED_DATA_RULES` goes in every relevant system prompt.
+- **Tracing**: `ai.task <name>` spans from `@bf/ai` around AI SDK spans; Langfuse processor in the telemetry
+  preload exports only LLM spans and masks emails/phones; bodies only with `AI_TRACE_CONTENT=true`.
+- **Testing**: record/replay fake gateway (`fixtures/<task>/v<N>/<hash>.json`), deterministic fake embeddings,
+  MSW failing any real request. `pnpm verify` replays the demo eval on its fixtures.
+- **Evals**: `pnpm eval --task <name> [--model] [--limit] [--replay|--record]`, reports in `evals/reports/`.
+  No provider keys were available locally, so the demo fixtures are hand-written and the attached report is the
+  replay run; `.github/workflows/evals.yml` runs real models nightly/on demand and skips without secrets.
+- **Security review** (fixed): vision URL policy + no SDK-side downloads, image limits, billed tokens of failed
+  attempts recorded, unpriced-model warning, single-pass rendering, tag characters/NFKC in `untrusted()`, AI span
+  bodies masked before every exporter, eval `--task` validation.
+- **Tests**: `@bf/ai` 37 unit (95% lines), API 209 unit / 92 integration (ledger, workspace vs global keys, cache,
+  usage aggregates + permissions, soft event once + hard block).
+

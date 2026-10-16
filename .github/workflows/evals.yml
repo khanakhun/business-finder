@@ -1,0 +1,62 @@
+# LLM evals on real models (BF-013): manual or nightly. Costs money; needs repository secrets. Skips cleanly when
+# no provider key is configured (forks, fresh clones). CI runs the same evals on recorded fixtures in `pnpm verify`.
+name: evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Task to evaluate
+        required: true
+        default: demo.extract_business_facts
+      model:
+        description: Model override (empty = routing table)
+        required: false
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AI_PRICING: ${{ vars.AI_PRICING }}
+      TASK: ${{ inputs.task || 'demo.extract_business_facts' }}
+      MODEL: ${{ inputs.model }}
+    steps:
+      - name: Check provider keys
+        id: keys
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENAI_API_KEY" ]; then
+            echo "No ANTHROPIC_API_KEY / OPENAI_API_KEY secret: skipping evals." >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.keys.outputs.run == 'true'
+      - uses: ./.github/actions/setup
+        if: steps.keys.outputs.run == 'true'
+        with:
+          cache-key: evals
+      - name: Run eval
+        if: steps.keys.outputs.run == 'true'
+        run: pnpm eval --task "$TASK" ${MODEL:+--model "$MODEL"}
+      - name: Report
+        if: always() && steps.keys.outputs.run == 'true'
+        run: cat packages/ai/evals/reports/*.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.keys.outputs.run == 'true'
+        with:
+          name: eval-reports
+          path: packages/ai/evals/reports/
+          if-no-files-found: ignore

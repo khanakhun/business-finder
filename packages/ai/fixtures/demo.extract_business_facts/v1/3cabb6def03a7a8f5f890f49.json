@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Club Forme",
+    "websiteUrl": "https://club-forme.example.test",
+    "pageText": "Club Forme : musculation, cours collectifs, coaching. info@club-forme.example.test — 05 90 00 00 08. Lun-ven 6h-21h, week-end 8h-13h."
+  },
+  "output": {
+    "phones": ["05 90 00 00 08"],
+    "emails": ["info@club-forme.example.test"],
+    "openingHours": "Lun-ven 6h-21h, week-end 8h-13h",
+    "services": ["musculation", "cours collectifs", "coaching"],
+    "languages": ["fr"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

@@ -87,6 +87,18 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `ANTHROPIC_API_KEY` | AI providers | api, worker | no |  | yes | Anthropic API key (LLM gateway, agents). |
 | `OPENAI_API_KEY` | AI providers | api, worker | no |  | yes | OpenAI API key (LLM gateway, Codex engine). |
 | `AI_MODEL_OVERRIDES` | AI providers | api, worker | no |  |  | JSON map overriding the prompt registry model per task, e.g. {"classify":"<model-id>"}. |
+| `AI_MODEL_FAST` | AI providers | api, worker | no | `claude-haiku-5-5` |  | Model for `fast` tasks. |
+| `AI_MODEL_SMART` | AI providers | api, worker | no | `claude-sonnet-5-5` |  | Model for `smart` tasks. |
+| `AI_MODEL_AGENT` | AI providers | api, worker | no | `claude-opus-5-5` |  | Model for `agent` tasks. |
+| `AI_MODEL_FALLBACKS` | AI providers | api, worker | no |  |  | JSON map: model id or tier → models tried when it is unavailable, in order. |
+| `AI_EMBEDDING_MODEL` | AI providers | api, worker | no | `openai:text-embedding-3-small` |  | Embedding model (1536 dimensions by default). |
+| `AI_PRICING` | AI providers | api, worker | no |  |  | JSON map: model id → USD per million input/output/cached tokens. Unpriced models cost null. |
+| `AI_BUDGET_MONTHLY_SOFT_USD` | AI providers | api, worker | no | `25` |  | Per-workspace monthly AI spend that triggers a warning. |
+| `AI_BUDGET_MONTHLY_HARD_USD` | AI providers | api, worker | no | `100` |  | Per-workspace monthly AI spend above which non-essential tasks stop. |
+| `AI_TRACE_CONTENT` | AI providers | api, worker | no | `false` |  | Send prompt and response bodies to tracing/Langfuse (emails and phones masked). Keep off in production. |
+| `LANGFUSE_PUBLIC_KEY` | AI providers | api, worker | no |  |  | Langfuse public key; tracing to Langfuse is off when unset. |
+| `LANGFUSE_SECRET_KEY` | AI providers | api, worker | no |  | yes | Langfuse secret key. |
+| `LANGFUSE_BASE_URL` | AI providers | api, worker | no | `https://cloud.langfuse.com` |  | Langfuse host (cloud region or self-hosted). |
 | `GOOGLE_PLACES_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Google Places API key (discovery). |
 | `PAGESPEED_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | PageSpeed Insights API key (audits). |
 | `FOURSQUARE_API_KEY` | Provider keys (workspace fallback) | api, worker | no |  | yes | Foursquare Places API key (discovery). |

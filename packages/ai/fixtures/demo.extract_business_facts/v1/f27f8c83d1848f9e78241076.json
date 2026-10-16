@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Salon Corail",
+    "websiteUrl": "https://salon-corail.example.test",
+    "pageText": "Salon Corail / Coral Salon. Coupe homme, coupe femme, couleur. Haircuts and colour. Du mardi au samedi 9h-18h. 05 90 00 00 03"
+  },
+  "output": {
+    "phones": ["05 90 00 00 03"],
+    "emails": [],
+    "openingHours": "Du mardi au samedi 9h-18h",
+    "services": ["coupe homme", "coupe femme", "couleur"],
+    "languages": ["fr", "en"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

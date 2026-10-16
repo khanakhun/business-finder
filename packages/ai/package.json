@@ -1,0 +1,39 @@
+{
+  "name": "@bf/ai",
+  "version": "0.0.0",
+  "private": true,
+  "description": "LLM gateway on the Vercel AI SDK: tasks, routing, prompt registry, structured output, cost ledger, evals.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts",
+    "./evals": "./src/evals/index.ts"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "eval": "node scripts/eval.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "catalog:",
+    "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/otel": "catalog:",
+    "@bf/contracts": "workspace:*",
+    "@opentelemetry/api": "catalog:",
+    "ai": "catalog:",
+    "cockatiel": "catalog:",
+    "sharp": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@bf/testing": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "msw": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

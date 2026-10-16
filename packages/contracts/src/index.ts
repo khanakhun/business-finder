@@ -1,4 +1,11 @@
 export {
+  AiBudgetSoftLimitReached,
+  type AiUsage,
+  type AiUsageQuery,
+  AiUsageQuerySchema,
+  AiUsageSchema,
+} from './ai.ts';
+export {
   BudgetExceededError,
   ConflictError,
   DomainError,

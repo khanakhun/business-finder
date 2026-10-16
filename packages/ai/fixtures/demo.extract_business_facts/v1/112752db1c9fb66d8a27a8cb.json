@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Boulangerie du Port",
+    "websiteUrl": "https://boulangerie-du-port.example.test",
+    "pageText": "Boulangerie du Port — Gustavia. Pain, viennoiseries et pâtisseries. Ouvert tous les jours 6h30–13h. Tél. 05 90 00 00 01. Commandes : contact@boulangerie-du-port.example.test"
+  },
+  "output": {
+    "phones": ["05 90 00 00 01"],
+    "emails": ["contact@boulangerie-du-port.example.test"],
+    "openingHours": "tous les jours 6h30–13h",
+    "services": ["pain", "viennoiseries", "pâtisseries"],
+    "languages": ["fr"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

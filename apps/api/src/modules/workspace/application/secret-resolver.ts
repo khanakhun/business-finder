@@ -19,8 +19,9 @@ export class SecretResolver {
     @Inject(DEPLOYMENT_ENV) private readonly env: DeploymentEnv,
   ) {}
 
-  async resolve(organizationId: string, name: SecretName): Promise<ResolvedSecret | undefined> {
-    const own = await this.vault.get(organizationId, name);
+  /** `organizationId` null (platform work, evals): only the deployment value is considered. */
+  async resolve(organizationId: string | null, name: SecretName): Promise<ResolvedSecret | undefined> {
+    const own = organizationId ? await this.vault.get(organizationId, name) : undefined;
     if (own !== undefined) return { value: own, source: 'workspace' };
     const global = this.globalValue(name);
     return global === undefined ? undefined : { value: global, source: 'global' };

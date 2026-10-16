@@ -1,0 +1,7 @@
+{
+  "extends": "@bf/tsconfig/library.json",
+  "include": ["src", "scripts", "evals", "test", "*.config.ts"],
+  "compilerOptions": {
+    "erasableSyntaxOnly": true
+  }
+}

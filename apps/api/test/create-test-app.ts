@@ -49,6 +49,8 @@ export interface TestAppOptions {
   readonly storage?: ObjectStorage;
   /** Application logger (e.g. one writing to a capture stream); defaults to the env's (silent in tests). */
   readonly logger?: Logger;
+  /** Any other provider to replace (e.g. AI_MODEL_FACTORY with mock models). */
+  readonly overrides?: ReadonlyArray<{ readonly token: symbol | string; readonly value: unknown }>;
 }
 
 export interface TestApp {
@@ -81,6 +83,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
     .overrideProvider(OBJECT_STORAGE)
     .useValue(options.storage ?? new InMemoryObjectStorage());
   if (options.logger) builder.overrideProvider(LOGGER).useValue(options.logger);
+  for (const { token, value } of options.overrides ?? []) builder.overrideProvider(token).useValue(value);
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication({ logger: false });
   configureHttp(app, env);

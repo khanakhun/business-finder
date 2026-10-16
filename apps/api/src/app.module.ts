@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { IdentityModule } from './modules/identity/identity.module.ts';
+import { AiModule } from './modules/platform/ai/ai.module.ts';
 import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { EventsModule } from './modules/platform/events/events.module.ts';
 import { PlatformModule } from './modules/platform/platform.module.ts';
@@ -33,6 +34,7 @@ export class AppModule {
         ...(mode === 'openapi' ? [] : [QueueModule.forRoot(mode)]),
         EventsModule.forRoot(mode),
         WorkspaceModule.forRoot(mode),
+        AiModule.forRoot(mode),
         RealtimeModule.forRoot(mode),
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),

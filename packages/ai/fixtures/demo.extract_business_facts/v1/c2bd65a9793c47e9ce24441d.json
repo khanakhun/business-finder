@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Pharmacie de Saint-Jean",
+    "websiteUrl": "https://pharmacie-saint-jean.example.test",
+    "pageText": "Pharmacie de Saint-Jean. Tél. 05 90 00 00 05 — urgences 05 90 00 00 06. Lundi-samedi 8h-19h30, dimanche 9h-12h."
+  },
+  "output": {
+    "phones": ["05 90 00 00 05", "05 90 00 00 06"],
+    "emails": [],
+    "openingHours": "Lundi-samedi 8h-19h30, dimanche 9h-12h",
+    "services": ["pharmacie"],
+    "languages": ["fr"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

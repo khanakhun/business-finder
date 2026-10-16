@@ -1,0 +1,18 @@
+{
+  "task": "demo.extract_business_facts",
+  "promptVersion": 1,
+  "input": {
+    "businessName": "Épicerie Fine",
+    "websiteUrl": "https://epicerie-fine.example.test",
+    "pageText": "Épicerie​ Fine — vins, fromages, produits fins.\n\n\n\nOuvert 9h - 20h sauf dimanche.   Tél : 05 90 00 00 07"
+  },
+  "output": {
+    "phones": ["05 90 00 00 07"],
+    "emails": [],
+    "openingHours": "9h - 20h sauf dimanche",
+    "services": ["vins", "fromages", "produits fins"],
+    "languages": ["fr"],
+    "warnings": [],
+    "confidence": 0.9
+  }
+}

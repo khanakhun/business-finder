@@ -7,7 +7,7 @@ const cap = (defaultValue: number, what: string) =>
 export const scoringEnv = z.object({
   SCORING_MAX_WORKSPACE_PROFILES: cap(
     20,
-    'Scoring profiles a workspace may create (archived ones count); each active one is scored for every business.',
+    'Scoring profiles of its own a workspace may have unarchived (each is scored for every tracked business).',
   ),
   SCORING_MAX_PROFILE_VERSIONS: cap(200, 'Saved versions per workspace scoring profile.'),
 });

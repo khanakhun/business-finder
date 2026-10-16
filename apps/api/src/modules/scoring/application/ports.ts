@@ -65,8 +65,10 @@ export interface ScoringRepository {
     profileId: string,
     mode: 'update' | 'share',
   ): Promise<ProfileRecord | undefined>;
-  /** Profiles the workspace created (archived ones included). */
-  countOwnProfiles(organizationId: string): Promise<number>;
+  /** Profiles the workspace created that are not archived (the ones scored). */
+  countActiveOwnProfiles(organizationId: string): Promise<number>;
+  /** Serializes creating and unarchiving profiles in the workspace until the transaction ends (exact cap). */
+  lockProfileCreation(organizationId: string): Promise<void>;
   version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined>;
   /** Creates the built-in profiles and versions that do not exist yet (idempotent); returns the ones it activated. */
   ensureBuiltins(

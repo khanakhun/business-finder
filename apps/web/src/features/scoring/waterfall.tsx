@@ -1,7 +1,7 @@
 'use client';
 
 import type { ScoreContribution } from '@bf/contracts';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // How a score is built (BF-032): each contribution as a step from the previous total, the adjustment that brings the
@@ -41,7 +41,10 @@ export function waterfallSteps(
     });
     running = Math.round((running + delta) * 10) / 10;
   }
-  if (running !== score) {
+  // Decided like the engine (whole points of the unrounded sum): only the bounds or a gate change the score; a gap
+  // left by the steps' rounding is not an adjustment.
+  const sum = ordered.reduce((total, contribution) => total + contribution.contribution, 0);
+  if (Math.round(sum) !== score) {
     steps.push({
       label: labels.adjustment,
       base: Math.min(running, score),
@@ -69,6 +72,7 @@ const COLOR: Record<WaterfallStep['kind'], string> = {
 
 export function Waterfall({ steps }: { readonly steps: readonly WaterfallStep[] }) {
   const t = useTranslations('scoring.tab');
+  const format = useFormatter();
   return (
     <div aria-hidden className="h-[22rem] w-full" data-testid="score-waterfall">
       <ResponsiveContainer width="100%" height="100%">
@@ -81,7 +85,10 @@ export function Waterfall({ steps }: { readonly steps: readonly WaterfallStep[] 
           <CartesianGrid horizontal={false} strokeDasharray="3 3" />
           <XAxis type="number" domain={waterfallDomain(steps)} tickCount={6} />
           <YAxis type="category" dataKey="label" width={170} tick={{ fontSize: 12 }} />
-          <Tooltip formatter={(value) => [value, t('points')]} cursor={{ fillOpacity: 0.1 }} />
+          <Tooltip
+            formatter={(value) => [format.number(Number(value), { maximumFractionDigits: 1 }), t('points')]}
+            cursor={{ fillOpacity: 0.1 }}
+          />
           <Bar dataKey="base" stackId="w" fill="transparent" tooltipType="none" isAnimationActive={false} />
           <Bar dataKey="delta" stackId="w" isAnimationActive={false}>
             {steps.map((step, i) => (

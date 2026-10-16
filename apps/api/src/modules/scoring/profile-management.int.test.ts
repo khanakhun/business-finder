@@ -17,8 +17,8 @@ import { BUILTIN_PRIMARY_PROFILE_ID, BUILTIN_PROFILE_IDS } from './application/b
 import { ScoringService } from './application/scoring.service.ts';
 
 // Workspace scoring profiles (BF-032) end to end: duplicate a built-in, version, activate (the workspace recomputes
-// through the outbox), rename, archive; the editor's preview sample and batch explain. Caps are lowered (3 profiles,
-// 4 versions) so the tests reach them. The describes run in order and share the profile they create.
+// through the outbox), rename, archive; the editor's preview sample and batch explain. Caps are lowered (3 unarchived
+// profiles, 4 versions) so the tests reach them. The describes run in order and share the profile they create.
 
 const mailer = new FakeMailer();
 let t: TestApp;
@@ -253,7 +253,14 @@ describe('workspace scoring profiles', () => {
     expect(shown.map((score: { profileId: string }) => score.profileId)).not.toContain(profileId);
   });
 
-  it('unarchives: the workspace is scored with the profile again', async () => {
+  it('unarchives within the cap: the workspace is scored with the profile again', async () => {
+    // Archived, it left room for another; unarchiving would pass the cap until that one is archived.
+    const fourth = await owner
+      .post('/v1/scoring/profiles')
+      .send({ fromProfileId: BUILTIN_PROFILE_IDS.booking_system, name: 'Fourth' })
+      .expect(201);
+    await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: false }).expect(409);
+    await owner.patch(`/v1/scoring/profiles/${fourth.body.id}`).send({ archived: true }).expect(200);
     const before = await lastComputed(profileId);
     await owner.patch(`/v1/scoring/profiles/${profileId}`).send({ archived: false }).expect(200);
     await expect
@@ -280,6 +287,24 @@ describe('business scores', () => {
 
 describe('profile editor preview', () => {
   it('samples the workspace’s businesses with their current tier for a profile', async () => {
+    // A merged duplicate the workspace still tracks is never sampled.
+    const merged = aBusiness({
+      websiteUrl: null,
+      websiteHost: null,
+      websiteRegistrableDomain: null,
+      mergedIntoId: tracked[0] ?? null,
+    });
+    await db.insert(businesses).values(merged);
+    await db
+      .insert(orgBusinesses)
+      .values({ organizationId: org, businessId: merged.id, addedVia: 'import' as const });
+    const all = (
+      await owner
+        .get('/v1/scoring/preview-sample')
+        .query({ profileId: BUILTIN_PRIMARY_PROFILE_ID })
+        .expect(200)
+    ).body.items.map((item: { businessId: string }) => item.businessId);
+    expect([...all].sort()).toEqual([...tracked].sort());
     const { body } = await owner
       .get('/v1/scoring/preview-sample')
       .query({ profileId: BUILTIN_PRIMARY_PROFILE_ID, size: 4 })

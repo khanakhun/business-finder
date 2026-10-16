@@ -1,4 +1,5 @@
 import {
+  NotFoundError,
   newId,
   type Offer,
   type ScoreTier,
@@ -141,12 +142,18 @@ export class DrizzleScoringRepository implements ScoringRepository {
     return row ? toProfile(row) : undefined;
   }
 
-  async countOwnProfiles(organizationId: string): Promise<number> {
+  async countActiveOwnProfiles(organizationId: string): Promise<number> {
     const [row] = await getExecutor(this.db)
       .select({ n: count() })
       .from(scoringProfiles)
-      .where(eq(scoringProfiles.organizationId, organizationId));
+      .where(and(eq(scoringProfiles.organizationId, organizationId), isNull(scoringProfiles.archivedAt)));
     return row?.n ?? 0;
+  }
+
+  async lockProfileCreation(organizationId: string): Promise<void> {
+    await getExecutor(this.db).execute(
+      sql`SELECT pg_advisory_xact_lock(hashtextextended(${`bf:scoring-profiles:${organizationId}`}, 0))`,
+    );
   }
 
   async version(profileId: string, version: number): Promise<ProfileVersionRecord | undefined> {
@@ -274,7 +281,7 @@ export class DrizzleScoringRepository implements ScoringRepository {
       .from(scoringProfiles)
       .where(and(eq(scoringProfiles.id, profileId), eq(scoringProfiles.organizationId, organizationId)))
       .for('update');
-    if (!own) throw new Error(`scoring profile ${profileId} is not the workspace's own`);
+    if (!own) throw new NotFoundError('ScoringProfile', profileId);
     const [row] = await x
       .select({ last: sql<number>`coalesce(max(${scoringProfileVersions.version}), 0)::int` })
       .from(scoringProfileVersions)

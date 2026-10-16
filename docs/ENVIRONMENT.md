@@ -133,7 +133,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FAKE_CONNECTION_TESTS` | Feature flags | api, worker | no | `false` |  | Development/E2E only: provider connection tests succeed without calling providers. Refused in production. |
 | `RESOLUTION_MATCH_THRESHOLD` | App-specific | api, worker | no | `0.85` |  | Match score at or above which a source record is merged into an existing business. |
 | `RESOLUTION_POSSIBLE_THRESHOLD` | App-specific | api, worker | no | `0.6` |  | Match score at or above which (below the match threshold) a new business is flagged as a possible duplicate. |
-| `SCORING_MAX_WORKSPACE_PROFILES` | App-specific | api, worker | no | `20` |  | Scoring profiles a workspace may create (archived ones count); each active one is scored for every business. |
+| `SCORING_MAX_WORKSPACE_PROFILES` | App-specific | api, worker | no | `20` |  | Scoring profiles of its own a workspace may have unarchived (each is scored for every tracked business). |
 | `SCORING_MAX_PROFILE_VERSIONS` | App-specific | api, worker | no | `200` |  | Saved versions per workspace scoring profile. |
 | `GEOCODER_PROVIDER` | App-specific | api, worker | no | `nominatim` |  | External geocoder used when an area is not in geo_areas (google uses the google_places secret). |
 | `NOMINATIM_BASE_URL` | App-specific | api, worker | no | `https://nominatim.openstreetmap.org` |  | Nominatim endpoint; point it at a self-hosted instance for volume. |

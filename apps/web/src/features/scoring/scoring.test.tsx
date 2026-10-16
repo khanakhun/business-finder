@@ -62,8 +62,36 @@ describe('waterfallSteps', () => {
     expect(reached(steps)).toBe(score);
   });
 
+  it('adds no adjustment for rounding, however many contributions round the same way', () => {
+    const features = [
+      'has_phone',
+      'rating_avg',
+      'has_https',
+      'has_website',
+      'has_booking_tool',
+      'has_online_menu',
+      'has_contact_form',
+      'site_freshness_years',
+      'vision_overall',
+      'website_quality_score',
+      'lcp_mobile_seconds',
+      'psi_mobile_performance',
+    ] as const;
+    // Each 3.05 is shown to a tenth, so the steps drift from the sum (36.6), whose round is the score.
+    const steps = waterfallSteps(
+      features.map((feature) => contribution(feature, 3.05)),
+      37,
+      String,
+      labels,
+    );
+    expect(steps.filter((step) => step.kind === 'adjustment')).toEqual([]);
+    expect(steps.at(-1)).toEqual({ label: 'Score', base: 0, delta: 37, kind: 'total' });
+  });
+
   it('rounds to a tenth of a point, and keeps only the total when nothing contributes', () => {
-    expect(waterfallSteps([contribution('has_phone', 2.345)], 2.3, String, labels)).toHaveLength(2);
+    expect(waterfallSteps([contribution('has_phone', 2.345)], 2, String, labels)[0]).toMatchObject({
+      delta: 2.3,
+    });
     expect(waterfallSteps([], 0, String, labels)).toEqual([
       { label: 'Score', base: 0, delta: 0, kind: 'total' },
     ]);

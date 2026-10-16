@@ -51,13 +51,7 @@ export class ScoringProfileCommands {
     userId: string | null,
   ): Promise<ScoringProfileSummary> {
     const source = await this.visible(organizationId, request.fromProfileId);
-    // Every active profile is scored for every tracked business: the workspace's own are capped.
-    // DECISION(BF-032): a soft cap (two concurrent creates may pass it by one); the create route is throttled.
-    if ((await this.repository.countOwnProfiles(organizationId)) >= this.env.SCORING_MAX_WORKSPACE_PROFILES) {
-      throw new ConflictError(
-        `A workspace has at most ${this.env.SCORING_MAX_WORKSPACE_PROFILES} scoring profiles (archived ones count).`,
-      );
-    }
+    await this.assertRoomForProfile(organizationId);
     if (!source.activeVersion) throw new ConflictError('The profile has no active version to start from.');
     const version = await this.repository.version(source.id, source.activeVersion);
     if (!version) throw new NotFoundError('ScoringProfileVersion', `${source.id}@${source.activeVersion}`);
@@ -86,6 +80,8 @@ export class ScoringProfileCommands {
         'The primary profile cannot be archived: choose another primary profile first.',
       );
     }
+    // Unarchived, it is scored again: it counts toward the cap.
+    if (request.archived === false && profile.archived) await this.assertRoomForProfile(organizationId);
     // Archiving again keeps the first archive time.
     const archiving = request.archived !== undefined && request.archived !== profile.archived;
     if (request.name !== undefined || archiving) {
@@ -152,6 +148,22 @@ export class ScoringProfileCommands {
     return { ...this.summary(profile), activeVersion: request.version, primary: profile.id === primary };
   }
 
+  /**
+   * Every scored (not archived) profile is computed for every tracked business: the workspace's own are capped,
+   * counted under a workspace lock so concurrent creates and unarchives cannot pass the cap.
+   */
+  private async assertRoomForProfile(organizationId: string): Promise<void> {
+    await this.repository.lockProfileCreation(organizationId);
+    if (
+      (await this.repository.countActiveOwnProfiles(organizationId)) >=
+      this.env.SCORING_MAX_WORKSPACE_PROFILES
+    ) {
+      throw new ConflictError(
+        `A workspace scores at most ${this.env.SCORING_MAX_WORKSPACE_PROFILES} of its own profiles: archive one first.`,
+      );
+    }
+  }
+
   private async activated(organizationId: string, profileId: string, version: number): Promise<void> {
     await this.events.record(ScoringProfileVersionActivated, {
       orgId: organizationId,
@@ -165,12 +177,15 @@ export class ScoringProfileCommands {
     return profile;
   }
 
-  /** A profile of this workspace (built-ins are read-only), locked for the change. */
+  /**
+   * A profile of this workspace (built-ins are read-only), locked for the change. Built-ins are refused before any
+   * lock: their rows are shared by every workspace.
+   */
   private async own(organizationId: string, profileId: string): Promise<ProfileRecord> {
+    if ((await this.visible(organizationId, profileId)).builtin)
+      throw new ConflictError('Built-in profiles are read-only: duplicate one to change it.');
     const profile = await this.repository.lockProfile(organizationId, profileId, 'update');
     if (!profile) throw new NotFoundError('ScoringProfile', profileId);
-    if (profile.builtin)
-      throw new ConflictError('Built-in profiles are read-only: duplicate one to change it.');
     return profile;
   }
 

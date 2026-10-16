@@ -167,7 +167,6 @@ const DEFINITIONS = {
     source: 'website audit (BF-030)',
     reasons: {
       value: { en: 'Website quality score {value}.', fr: 'Score de qualité du site : {value}.' },
-      missing: { en: 'The website could not be measured.', fr: 'Le site n’a pas pu être mesuré.' },
     },
   },
   psi_mobile_performance: {
@@ -832,6 +831,13 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
       ...(definition.pivot !== undefined ? ['below', 'above'] : []),
     ]);
     for (const value of Object.keys(texts)) {
+      if (value === 'missing' && config.missing[key] === undefined) {
+        problems.push({
+          path: ['reasonTemplates', key, value],
+          message: 'Read only for a value this profile fills in',
+        });
+        continue;
+      }
       if (!allowed.has(value)) {
         problems.push({
           path: ['reasonTemplates', key, value],

@@ -18,7 +18,7 @@ duplicates one to customize it (BF-032). Change a weight here and in code togeth
    transform. Numeric transforms are monotone; for "less is better" use `inverse` or a negative weight.
 3. **Weighted sum**: `score = clamp(100 × Σ weight × transformed ÷ Σ positive weights, 0, 100)`. A missing feature
    takes the profile's `missing` value if it sets one — which can raise a score; the built-ins use it only for
-   redesign and booking, each paired with a cap — else contributes nothing while its weight still counts. Negative
+   booking, paired with a cap — else contributes nothing while its weight still counts. Negative
    weights lower the score. Each contribution says what stood in (`imputed`: the registry default or the profile's
    `missing` value).
 4. **Gates** (conditions on the features, defaults applied; a comparison with a missing value is false, so
@@ -89,10 +89,11 @@ Extra gate: `has_working_website` (status ok/strong) caps at 30 — that busines
 | `has_phone` | 3 | yes/no | Reachable by phone. |
 | `multi_location` | −6 | yes/no | Chains have central sites. |
 
-Missing value: no quality score at all (nothing could be measured: a broken or unreadable site) counts as 0.9 — a
-poor site. A single failed measurement (PageSpeed quota, model outage) stays missing. Extra gates: `no_website_to_redesign` (status none/parked/social only) caps at
-20 — that business belongs to the new website offer; `not_audited_yet` (a website, no audit) caps at 40 until the
-audit runs. A broken site scores both offers (it may need a rebuild).
+A missing measurement (PageSpeed quota, model outage, a site that cannot be audited) contributes nothing: a
+broken site is already rewarded by `website_status` (broken → 1). Extra gates: `no_website_to_redesign` (status
+none/parked/social only) caps at 20 — that business belongs to the new website offer; `not_audited_yet` (a website,
+no audit) caps at 40 until the audit runs. A broken site leads with the new website offer (a rebuild): redesign
+ranks it lower, since nothing on it could be measured.
 
 ## `ai_receptionist` — businesses that miss calls and messages (tiers A ≥ 65, B ≥ 45)
 
@@ -131,7 +132,7 @@ Extra gate: `no_phone_line` (no phone) caps at 40.
 
 Missing value: `has_booking_tool` counts as "no tool" when unknown (no readable site, e.g. only a social page).
 Extra gates: `booking_not_checked` (a website whose crawl did not say — not crawled yet, blocked, broken — other
-than a social page or a parked domain) caps at 40 until it does; `already_books_online` caps at 35.
+than a social page or a parked domain) caps at 40; `already_books_online` caps at 35.
 
 ## `local_seo` — businesses customers struggle to find (tiers A ≥ 65, B ≥ 45)
 
@@ -167,6 +168,6 @@ Twelve fictional businesses (`scoring/domain/__fixtures__/golden.ts`) and their 
 | Permanently closed café | X | X | X | X | X |
 | Do-not-contact bakery | X | X | X | X | X |
 | Garage, unreachable | C | C | C | C | C |
-| Spa, broken site, many complaints | B | B | A | C | C |
+| Spa, broken site, many complaints | B | C | A | C | C |
 | Chain boutique, shared website | C | C | C | C | C |
 | Won customer, no website | C | C | C | C | C |

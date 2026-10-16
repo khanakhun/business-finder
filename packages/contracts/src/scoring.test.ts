@@ -199,6 +199,15 @@ describe('profile problems', () => {
         }),
       )[0]?.path,
     ).toEqual(['transforms', 'pain_share.booking_friction']);
+    // A `missing` text the profile can never read (it fills in no value for that feature).
+    const dead = profileProblems(
+      config({
+        weights: { vision_overall: 10 },
+        transforms: { vision_overall: { kind: 'linear', min: 0, max: 10 } },
+        reasonTemplates: { vision_overall: { missing: { en: 'x', fr: 'x' } } },
+      }),
+    );
+    expect(dead.map((p) => p.path)).toEqual([['reasonTemplates', 'vision_overall', 'missing']]);
     // A missing value for a feature with a registry default can never apply.
     expect(
       profileProblems(config({ weights: { has_phone: 10 }, missing: { has_phone: 1 } })).map((p) => p.path),

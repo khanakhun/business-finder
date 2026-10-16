@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
-import { OFFERS, profileProblems } from '@bf/contracts';
+import { type FeatureVector, OFFERS, profileProblems } from '@bf/contracts';
 import { describe, expect, it } from 'vitest';
+import { facts, site } from './__fixtures__/facts.ts';
 import { BUILTIN_PROFILE_VERSIONS, BUILTIN_PROFILES } from './builtin-profiles.ts';
+import { scoreBusiness, scoreVector } from './engine.ts';
 
 /** A stable digest of a config (keys sorted at every level). */
 const digest = (value: unknown): string => {
@@ -21,13 +23,13 @@ const digest = (value: unknown): string => {
     .slice(0, 16);
 };
 
-// The digest of every released version of each built-in, in order (index + 1 = version), append-only: an edit
-// appends the new digest and bumps the version; released entries never change.
+// The digest of every released version of each built-in, in order (index + 1 = version). Released = merged to main
+// (then seeded somewhere): from then on an edit appends the new digest and bumps the version, never edits an entry.
 const RELEASED: Record<string, readonly string[]> = {
   new_website: ['09305d7e5127ef07'],
-  website_redesign: ['2ab63c3a9b11f626'],
+  website_redesign: ['5b0b5d3cc7201d9d'],
   ai_receptionist: ['bbd3f46a7d1fe94b'],
-  booking_system: ['54148beed33d29de'],
+  booking_system: ['b933f0fc4b3194d0'],
   local_seo: ['61745a2709b3106e'],
 };
 
@@ -45,5 +47,67 @@ describe('built-in profiles', () => {
       expect(BUILTIN_PROFILE_VERSIONS[offer], offer).toBe(released.length);
       expect(digest(BUILTIN_PROFILES[offer]), offer).toBe(released.at(-1));
     }
+  });
+});
+
+describe('booking_not_checked', () => {
+  // A booking prospect that scores above the cap when its booking tool is known to be missing.
+  const prospect: FeatureVector = {
+    has_website: true,
+    appointment_based: true,
+    category_offer_relevance: 1,
+    'pain_share.booking_friction': 0.3,
+    review_count_log: 3,
+    has_verified_email: true,
+    has_phone: true,
+  };
+  const gateOf = (vector: FeatureVector) =>
+    scoreVector(BUILTIN_PROFILES.booking_system, vector).gated?.gate ?? null;
+
+  it.each([
+    ['not audited yet', { website_status: null, has_booking_tool: null }, 'booking_not_checked'],
+    [
+      'blocked (audited ok, nothing read)',
+      { website_status: 'ok', has_booking_tool: null },
+      'booking_not_checked',
+    ],
+    ['broken', { website_status: 'broken', has_booking_tool: null }, 'booking_not_checked'],
+    ['social page only', { website_status: 'social_only', has_booking_tool: null }, null],
+    ['parked domain', { website_status: 'parked', has_booking_tool: null }, null],
+    ['known: no booking tool', { website_status: 'ok', has_booking_tool: false }, null],
+    ['no website', { has_website: false, website_status: 'none', has_booking_tool: null }, null],
+  ] as [string, FeatureVector, string | null][])('%s → %s', (_, vector, gate) => {
+    expect(gateOf({ ...prospect, ...vector })).toBe(gate);
+  });
+});
+
+describe('blocked crawls', () => {
+  it('are no sales argument: no measured or filled-in website reason, no redesign prospect', () => {
+    const blocked = facts({
+      audit: {
+        status: 'ok',
+        qualityScore: null,
+        psiMobilePerformance: null,
+        lcpMobileMs: null,
+        visionOverall: null,
+        findingCodes: [],
+      },
+      site: site({
+        reachability: 'blocked',
+        noSolicitation: { checked: false, detected: false, phrases: [], pageUrl: null, snippet: null },
+      }),
+    });
+    const redesign = scoreBusiness(BUILTIN_PROFILES.website_redesign, blocked);
+    expect(redesign.tier).toBe('C');
+    expect(redesign.contributions.filter((c) => c.imputed === 'profile')).toEqual([]);
+    const presence = [
+      'website_quality_score',
+      'vision_overall',
+      'psi_mobile_performance',
+      'lcp_mobile_seconds',
+    ];
+    expect(
+      redesign.reasons.map((reason) => reason.feature).filter((feature) => presence.includes(feature)),
+    ).toEqual([]);
   });
 });

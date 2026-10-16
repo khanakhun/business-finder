@@ -164,9 +164,6 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
       has_https: notHaving,
       has_contact_form: notHaving,
     },
-    // No quality score at all (nothing could be measured: a broken or unreadable site) counts as a poor site. A
-    // single failed measurement (PageSpeed quota, model outage) leaves its feature missing instead.
-    missing: { website_quality_score: 0.9 },
     gates: [
       ...COMMON_GATES,
       {
@@ -265,8 +262,8 @@ const PROFILES: Record<Offer, ScoringProfileConfigInput> = {
         },
         effect: { type: 'cap', max: 40 },
         reason: {
-          en: 'The website was not checked for online booking yet.',
-          fr: 'La réservation en ligne du site n’a pas encore été vérifiée.',
+          en: 'We could not check the website for online booking.',
+          fr: 'Nous n’avons pas pu vérifier la réservation en ligne sur le site.',
         },
       },
       {

@@ -60,6 +60,10 @@ export const QUEUES = {
     },
     concurrency: 4,
   },
+  /** Scoring (BF-031): scores of a few businesses after a change. */
+  scoring: { name: 'scoring', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  /** Bulk recomputes of a profile version for a workspace (long: one or two at a time). */
+  scoringRecompute: { name: 'scoring-recompute', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

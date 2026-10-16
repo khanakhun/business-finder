@@ -277,6 +277,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/businesses/{id}/scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The business's current score per profile of the workspace, with contributions and reasons */
+        get: operations["getBusinessScores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/businesses/{id}/split": {
         parameters: {
             query?: never;
@@ -1363,6 +1380,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/scoring/explain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Score a tracked business with a draft profile config, nothing stored (profile editor preview) */
+        post: operations["explainScore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/primary-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose the workspace's primary profile: the listing's score and tier follow it (recomputed) */
+        put: operations["setPrimaryScoringProfile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The scoring profiles the workspace sees (built-in and its own), and which one is primary */
+        get: operations["listScoringProfiles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/profiles/{id}/recompute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recompute every tracked business's score with the profile's active version (progress in realtime) */
+        post: operations["recomputeScoringProfile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/profiles/{id}/versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One version of a scoring profile (its config) */
+        get: operations["getScoringProfileVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/search/intent": {
         parameters: {
             query?: never;
@@ -1596,7 +1698,7 @@ export type components = {
             id: string;
             /** Format: date-time */
             occurredAt: string;
-            /** @description Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated; later tickets add more. */
+            /** @description Built-in: business.tracked, status.changed, owner.changed, tags.changed, do_not_contact.changed, note.added, task.created, task.completed, business.merged, business.updated, score.updated; later tickets add more. */
             type: string;
         };
         ActivityPage: {
@@ -1944,6 +2046,40 @@ export type components = {
             insights: components["schemas"]["ReviewInsights"] | null;
             /** @description What this workspace may analyse now. */
             sources: components["schemas"]["ReviewSourceGate"][];
+        };
+        BusinessScore: {
+            /** Format: uuid */
+            businessId: string;
+            /** Format: date-time */
+            computedAt: string;
+            contributions: components["schemas"]["ScoreContribution"][];
+            features: {
+                [key: string]: number | boolean | string | null;
+            };
+            featureSetVersion: number;
+            gated: {
+                applied: boolean;
+                /** @enum {string} */
+                effect: "exclude" | "cap";
+                gate: string;
+                reason: {
+                    en: string;
+                    fr: string;
+                };
+            } | null;
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** Format: uuid */
+            profileId: string;
+            profileVersion: number;
+            reasons: components["schemas"]["ScoreReason"][];
+            score: number;
+            /** @enum {string} */
+            tier: "A" | "B" | "C" | "X";
+        };
+        /** @description The business's current score per profile of the workspace. */
+        BusinessScoreList: {
+            items: components["schemas"]["BusinessScore"][];
         };
         BusinessSearchPage: {
             items: components["schemas"]["BusinessListItem"][];
@@ -3139,6 +3275,188 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        ScoreContribution: {
+            contribution: number;
+            /** @enum {string} */
+            feature: "has_website" | "website_status" | "website_quality_score" | "psi_mobile_performance" | "lcp_mobile_seconds" | "vision_overall" | "has_https" | "site_freshness_years" | "has_booking_tool" | "has_online_menu" | "has_contact_form" | "has_language_gap_for_market" | "no_solicitation_notice" | "category_offer_relevance" | "appointment_based" | "tourism_facing" | "price_level" | "rating_avg" | "review_count_log" | "owner_response_rate" | "multi_location" | "ad_pixels_present" | "operating_status" | "pain_share.booking_friction" | "pain_share.unreachable_by_phone" | "pain_share.slow_or_no_reply" | "pain_share.website_broken_or_outdated" | "pain_share.no_online_menu_or_prices" | "pain_share.hard_to_find_info" | "pain_share.language_barrier" | "pain_share.payment_friction" | "pain_share.long_wait_times" | "pain_share.inconsistent_hours" | "pain_share.poor_communication" | "pain_share.positive_strong_reputation" | "sentiment_avg" | "has_verified_email" | "has_usable_email" | "has_generic_email_only" | "has_phone" | "has_whatsapp" | "do_not_contact" | "pipeline_status" | "days_since_last_contact";
+            imputed: ("default" | "profile") | null;
+            rawValue: number | boolean | string | null;
+            transformed: number | null;
+            weight: number;
+        };
+        ScoreReason: {
+            contribution: number;
+            /** @enum {string} */
+            direction: "positive" | "negative";
+            /** @enum {string} */
+            feature: "has_website" | "website_status" | "website_quality_score" | "psi_mobile_performance" | "lcp_mobile_seconds" | "vision_overall" | "has_https" | "site_freshness_years" | "has_booking_tool" | "has_online_menu" | "has_contact_form" | "has_language_gap_for_market" | "no_solicitation_notice" | "category_offer_relevance" | "appointment_based" | "tourism_facing" | "price_level" | "rating_avg" | "review_count_log" | "owner_response_rate" | "multi_location" | "ad_pixels_present" | "operating_status" | "pain_share.booking_friction" | "pain_share.unreachable_by_phone" | "pain_share.slow_or_no_reply" | "pain_share.website_broken_or_outdated" | "pain_share.no_online_menu_or_prices" | "pain_share.hard_to_find_info" | "pain_share.language_barrier" | "pain_share.payment_friction" | "pain_share.long_wait_times" | "pain_share.inconsistent_hours" | "pain_share.poor_communication" | "pain_share.positive_strong_reputation" | "sentiment_avg" | "has_verified_email" | "has_usable_email" | "has_generic_email_only" | "has_phone" | "has_whatsapp" | "do_not_contact" | "pipeline_status" | "days_since_last_contact";
+            text: {
+                en: string;
+                fr: string;
+            };
+        };
+        ScoringExplainRequest: {
+            /** Format: uuid */
+            businessId: string;
+            config: components["schemas"]["ScoringProfileConfig"];
+        };
+        ScoringExplainResponse: {
+            contributions: components["schemas"]["ScoreContribution"][];
+            features: {
+                [key: string]: number | boolean | string | null;
+            };
+            featureSetVersion: number;
+            gated: {
+                applied: boolean;
+                /** @enum {string} */
+                effect: "exclude" | "cap";
+                gate: string;
+                reason: {
+                    en: string;
+                    fr: string;
+                };
+            } | null;
+            reasons: components["schemas"]["ScoreReason"][];
+            score: number;
+            /** @enum {string} */
+            tier: "A" | "B" | "C" | "X";
+        };
+        ScoringGate: {
+            effect: {
+                /** @constant */
+                type: "exclude";
+            } | {
+                max: number;
+                /** @constant */
+                type: "cap";
+            };
+            id: string;
+            reason: {
+                en: string;
+                fr: string;
+            };
+            when: components["schemas"]["ScoringGateCondition"];
+        };
+        ScoringGateCondition: {
+            eq?: number | boolean | string;
+            /** @enum {string} */
+            feature: "has_website" | "website_status" | "website_quality_score" | "psi_mobile_performance" | "lcp_mobile_seconds" | "vision_overall" | "has_https" | "site_freshness_years" | "has_booking_tool" | "has_online_menu" | "has_contact_form" | "has_language_gap_for_market" | "no_solicitation_notice" | "category_offer_relevance" | "appointment_based" | "tourism_facing" | "price_level" | "rating_avg" | "review_count_log" | "owner_response_rate" | "multi_location" | "ad_pixels_present" | "operating_status" | "pain_share.booking_friction" | "pain_share.unreachable_by_phone" | "pain_share.slow_or_no_reply" | "pain_share.website_broken_or_outdated" | "pain_share.no_online_menu_or_prices" | "pain_share.hard_to_find_info" | "pain_share.language_barrier" | "pain_share.payment_friction" | "pain_share.long_wait_times" | "pain_share.inconsistent_hours" | "pain_share.poor_communication" | "pain_share.positive_strong_reputation" | "sentiment_avg" | "has_verified_email" | "has_usable_email" | "has_generic_email_only" | "has_phone" | "has_whatsapp" | "do_not_contact" | "pipeline_status" | "days_since_last_contact";
+            gt?: number;
+            gte?: number;
+            in?: (number | boolean | string)[];
+            isNull?: boolean;
+            lt?: number;
+            lte?: number;
+            neq?: number | boolean | string;
+        } | {
+            all: components["schemas"]["ScoringGateCondition"][];
+        } | {
+            any: components["schemas"]["ScoringGateCondition"][];
+        } | {
+            not: components["schemas"]["ScoringGateCondition"];
+        };
+        ScoringProfileConfig: {
+            /** @default [] */
+            gates: components["schemas"]["ScoringGate"][];
+            /**
+             * @default rules
+             * @constant
+             */
+            kind: "rules";
+            /** @default {} */
+            missing: {
+                [key: string]: number;
+            };
+            /**
+             * @default weighted_sum
+             * @constant
+             */
+            normalization: "weighted_sum";
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** @default {} */
+            reasonTemplates: {
+                [key: string]: {
+                    [key: string]: {
+                        en: string;
+                        fr: string;
+                    };
+                };
+            };
+            tiers: {
+                A: number;
+                B: number;
+            };
+            /** @default {} */
+            transforms: {
+                [key: string]: components["schemas"]["ScoringTransform"];
+            };
+            weights: {
+                [key: string]: number;
+            };
+        };
+        ScoringProfileList: {
+            items: components["schemas"]["ScoringProfileSummary"][];
+        };
+        ScoringProfileSummary: {
+            activeVersion: number | null;
+            builtin: boolean;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            primary: boolean;
+        };
+        ScoringProfileVersion: {
+            config: components["schemas"]["ScoringProfileConfig"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            profileId: string;
+            version: number;
+        };
+        ScoringRecomputeResponse: {
+            /** Format: uuid */
+            profileId: string;
+            total: number;
+            version: number;
+        };
+        ScoringTransform: {
+            /** @constant */
+            kind: "linear";
+            max: number;
+            min: number;
+        } | {
+            /** @constant */
+            kind: "inverse";
+            max: number;
+            min: number;
+        } | {
+            /** @constant */
+            kind: "piecewise";
+            points: [
+                number,
+                number
+            ][];
+        } | {
+            /** @constant */
+            kind: "log";
+            max: number;
+        } | {
+            false: number;
+            /** @constant */
+            kind: "boolean";
+            true: number;
+        } | {
+            /** @default 0 */
+            default: number;
+            /** @constant */
+            kind: "enumMap";
+            map: {
+                [key: string]: number;
+            };
+        };
         ScraperStatus: {
             /** @description The owner acknowledgement in force (current warning version), if any. */
             acknowledgement: {
@@ -3274,6 +3592,10 @@ export type components = {
         SenderDefaults: {
             fromName?: string;
             signatureMarkdown?: string;
+        };
+        SetPrimaryScoringProfileRequest: {
+            /** Format: uuid */
+            profileId: string;
         };
         SmtpPortDiagnostic: {
             error: ("timeout" | "refused" | "unreachable" | "dns" | "other") | null;
@@ -5079,6 +5401,64 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getBusinessScores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessScoreList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10319,6 +10699,353 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SavedSearch"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    explainScore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScoringExplainRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoringExplainResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    setPrimaryScoringProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrimaryScoringProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoringRecomputeResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listScoringProfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoringProfileList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    recomputeScoringProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoringRecomputeResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getScoringProfileVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoringProfileVersion"];
                 };
             };
             /** @description Problem details (RFC 9457) */

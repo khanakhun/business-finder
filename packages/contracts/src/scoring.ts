@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { OPERATING_STATUSES, PIPELINE_STATUSES } from './business.ts';
+import { defineEvent } from './events.ts';
+import { BusinessId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import { PAIN_SIGNAL_TAGS, type PainSignalTag } from './reviews.ts';
 import { ScoreTierSchema } from './search-intent.ts';
 import { OfferSchema } from './taxonomy.ts';
@@ -935,3 +938,107 @@ export const BusinessScoreSchema = ScoreResultSchema.extend({
   computedAt: IsoDateTimeSchema,
 }).meta({ id: 'BusinessScore' });
 export type BusinessScore = z.infer<typeof BusinessScoreSchema>;
+
+// ---------------------------------------------------------------------------------------------------------------
+// API, events and jobs (BF-031 part 2)
+
+export const ScoringProfileSummarySchema = z
+  .object({
+    id: z.uuid(),
+    offer: OfferSchema,
+    name: z.string(),
+    builtin: z.boolean(),
+    activeVersion: z.number().int().positive().nullable(),
+    /** The workspace's primary profile (its score and tier fill the listing). */
+    primary: z.boolean(),
+  })
+  .meta({ id: 'ScoringProfileSummary' });
+export type ScoringProfileSummary = z.infer<typeof ScoringProfileSummarySchema>;
+export const ScoringProfileListSchema = z
+  .object({ items: z.array(ScoringProfileSummarySchema) })
+  .meta({ id: 'ScoringProfileList' });
+export type ScoringProfileList = z.infer<typeof ScoringProfileListSchema>;
+
+export const ScoringProfileVersionSchema = z
+  .object({
+    profileId: z.uuid(),
+    version: z.number().int().positive(),
+    config: ScoringProfileConfigSchema,
+    createdAt: IsoDateTimeSchema,
+  })
+  .meta({ id: 'ScoringProfileVersion' });
+export type ScoringProfileVersion = z.infer<typeof ScoringProfileVersionSchema>;
+
+export const BusinessScoreListSchema = z.object({ items: z.array(BusinessScoreSchema) }).meta({
+  id: 'BusinessScoreList',
+  description: "The business's current score per profile of the workspace.",
+});
+export type BusinessScoreList = z.infer<typeof BusinessScoreListSchema>;
+
+/** Score a business with a draft config, nothing stored (the profile editor's preview, BF-032). */
+export const ScoringExplainRequestSchema = z
+  .object({ businessId: z.uuid(), config: ScoringProfileConfigSchema })
+  .meta({ id: 'ScoringExplainRequest' });
+export type ScoringExplainRequest = z.infer<typeof ScoringExplainRequestSchema>;
+export const ScoringExplainResponseSchema = ScoreResultSchema.extend({
+  features: FeatureVectorSchema,
+  featureSetVersion: z.number().int().positive(),
+}).meta({ id: 'ScoringExplainResponse' });
+export type ScoringExplainResponse = z.infer<typeof ScoringExplainResponseSchema>;
+
+export const ScoringRecomputeResponseSchema = z
+  .object({
+    profileId: z.uuid(),
+    version: z.number().int().positive(),
+    /** Tracked businesses to score (progress arrives as `scoring.recompute.progressed`). */
+    total: z.number().int().nonnegative(),
+  })
+  .meta({ id: 'ScoringRecomputeResponse' });
+export type ScoringRecomputeResponse = z.infer<typeof ScoringRecomputeResponseSchema>;
+
+export const SetPrimaryScoringProfileRequestSchema = z
+  .object({ profileId: z.uuid() })
+  .meta({ id: 'SetPrimaryScoringProfileRequest' });
+export type SetPrimaryScoringProfileRequest = z.infer<typeof SetPrimaryScoringProfileRequestSchema>;
+
+/** A business's score changed for a workspace profile (realtime, activity timeline, analytics). */
+export const ScoreUpdated = defineEvent(
+  'score.updated',
+  1,
+  z.object({
+    businessId: BusinessId,
+    profileId: z.uuid(),
+    profileVersion: z.number().int().positive(),
+    offer: OfferSchema,
+    score: z.number().int().min(0).max(100),
+    tier: ScoreTierSchema,
+    previousScore: z.number().int().min(0).max(100).nullable(),
+    previousTier: ScoreTierSchema.nullable(),
+    /** The workspace's primary profile (its tier is the business's tier in the listing). */
+    primary: z.boolean(),
+  }),
+);
+
+/** Realtime: a business's scores were written (its page and the listing refetch). Not sent during bulk recomputes. */
+export const SCORING_SCORES_UPDATED = 'scoring.scores.updated';
+/** Realtime: bulk recompute progress (≤ 1/s per profile, and once when it ends). */
+export const SCORING_RECOMPUTE_PROGRESSED = 'scoring.recompute.progressed';
+export const ScoringRecomputeProgressSchema = z.object({
+  profileId: z.uuid(),
+  version: z.number().int().positive(),
+  done: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+  finished: z.boolean(),
+});
+export type ScoringRecomputeProgress = z.infer<typeof ScoringRecomputeProgressSchema>;
+
+/** Scores businesses of a workspace with its active profiles (or the given ones). */
+export const ScoringComputeJob = defineJob('scoring', 'compute', {
+  businessIds: z.array(z.uuid()).min(1).max(1_000),
+  profileIds: z.array(z.uuid()).max(50).optional(),
+});
+/** Scores every tracked business of a workspace with one profile version, in pages, with progress. */
+export const ScoringRecomputeJob = defineJob('scoring-recompute', 'recompute', {
+  profileId: z.uuid(),
+  version: z.number().int().positive(),
+});

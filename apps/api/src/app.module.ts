@@ -3,6 +3,7 @@ import { BusinessGraphModule } from './modules/business-graph/index.ts';
 import { CrmModule } from './modules/crm/index.ts';
 import { DiscoveryModule } from './modules/discovery/index.ts';
 import { EnrichmentModule } from './modules/enrichment/index.ts';
+import { GenerationModule } from './modules/generation/index.ts';
 import { GeoModule } from './modules/geo/index.ts';
 import { IdentityModule } from './modules/identity/identity.module.ts';
 import { AiModule } from './modules/platform/ai/ai.module.ts';
@@ -48,6 +49,7 @@ export class AppModule {
         IdentityModule.forRoot(mode),
         SystemModule.forRoot(mode),
         SitesModule.forRoot(mode),
+        GenerationModule.forRoot(mode),
         // Before BusinessGraphModule: Express matches routes in registration order, and the listing's
         // `GET /businesses/facets` (search) must win over `GET /businesses/:id` (business graph).
         SearchModule.forRoot(mode),

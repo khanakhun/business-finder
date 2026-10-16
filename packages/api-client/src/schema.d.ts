@@ -909,6 +909,144 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/generation-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Generation batches of the workspace, newest first */
+        get: operations["listGenerationBatches"];
+        put?: never;
+        /** Generate sites for businesses (`Idempotency-Key` header: the same key returns the same batch) */
+        post: operations["createGenerationBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation-batches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A batch with its jobs, counts and cost */
+        get: operations["getGenerationBatch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation-batches/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel every job of the batch that has not finished */
+        post: operations["cancelGenerationBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation-jobs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A job with its attempts */
+        get: operations["getGenerationJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change a waiting job’s priority or engine */
+        patch: operations["updateGenerationJob"];
+        trace?: never;
+    };
+    "/v1/generation-jobs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a job (a running one stops within seconds) */
+        post: operations["cancelGenerationJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation-jobs/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run a failed, cancelled or reviewed job again (on another engine if given) */
+        post: operations["retryGenerationJob"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation-jobs/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Order a batch’s waiting jobs (the first runs first) */
+        post: operations["reorderGenerationJobs"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/generation/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The engines, their capabilities, availability and load */
+        get: operations["listGenerationEngines"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/geo/areas": {
         parameters: {
             query?: never;
@@ -2739,6 +2877,34 @@ export type components = {
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
         };
+        CreateGenerationBatchRequest: {
+            items: {
+                budgetUsd?: number;
+                /**
+                 * Format: uuid
+                 * @description BusinessId (UUID)
+                 */
+                businessId: string;
+                /** @default auto */
+                engine: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
+                priority?: number;
+                /**
+                 * Format: uuid
+                 * @description SiteId (UUID)
+                 */
+                siteId?: string;
+            }[];
+            name?: string;
+            /** @default {} */
+            settings: {
+                autoPublishPreview?: boolean;
+                budgetUsd?: number;
+                locales?: string[];
+                maxParallel?: number;
+                offer?: string;
+                style?: string;
+            };
+        };
         CreateManualBusinessRequest: {
             countryCode: string;
             displayName: string;
@@ -3016,6 +3182,14 @@ export type components = {
             reachable: "safe" | "risky" | "invalid" | "unknown";
             smtpCanConnect: boolean | null;
         };
+        EngineCapabilities: {
+            maxParallel: number;
+            sandboxed: boolean;
+            supportsChatEdit: boolean;
+            supportsRepair: boolean;
+            typicalCostUsd: number;
+            typicalDurationSec: number;
+        };
         EnrichBusinessRequest: {
             /**
              * @description Re-run steps whose last output is still fresh.
@@ -3145,6 +3319,141 @@ export type components = {
             /** @default 2 */
             count: number;
             prompt: string;
+        };
+        GenerationAttempt: {
+            attemptNo: number;
+            costUsd: number;
+            /** @enum {string} */
+            engine: "blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake";
+            exitReason: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            mode: "create" | "repair";
+            /** Format: date-time */
+            startedAt: string;
+            /** @enum {string} */
+            status: "running" | "succeeded" | "failed" | "cancelled";
+        };
+        GenerationBatch: {
+            budgetUsd: number | null;
+            costUsd: number;
+            counts: {
+                [key: string]: number;
+            };
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            maxParallel: number | null;
+            name: string;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "running" | "completed" | "completed_with_issues" | "cancelled";
+        };
+        GenerationBatchDetail: {
+            budgetUsd: number | null;
+            costUsd: number;
+            counts: {
+                [key: string]: number;
+            };
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            jobs: components["schemas"]["GenerationJob"][];
+            maxParallel: number | null;
+            name: string;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "running" | "completed" | "completed_with_issues" | "cancelled";
+        };
+        GenerationBatchPage: {
+            items: components["schemas"]["GenerationBatch"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
+        GenerationEngineListing: {
+            items: {
+                available: boolean;
+                capabilities: components["schemas"]["EngineCapabilities"];
+                /** @enum {string} */
+                id: "blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake";
+                queued: number;
+                running: number;
+            }[];
+        };
+        GenerationJob: {
+            attemptCount: number;
+            /** Format: uuid */
+            batchId: string;
+            budgetUsd: number;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            businessName: string;
+            costUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** @enum {string} */
+            engineCurrent: "blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake";
+            engineRequested: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
+            engineSelectionReason: string;
+            errorCode: string | null;
+            errorMessage: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            position: number;
+            priority: number;
+            publishedUrl: string | null;
+            qualityScore: number | null;
+            resultVersionId: string | null;
+            siteId: string | null;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "preparing" | "running" | "validating" | "repairing" | "succeeded" | "needs_review" | "failed" | "cancelled";
+        };
+        GenerationJobDetail: {
+            attemptCount: number;
+            attempts: components["schemas"]["GenerationAttempt"][];
+            /** Format: uuid */
+            batchId: string;
+            budgetUsd: number;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            businessName: string;
+            costUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** @enum {string} */
+            engineCurrent: "blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake";
+            engineRequested: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
+            engineSelectionReason: string;
+            errorCode: string | null;
+            errorMessage: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            position: number;
+            priority: number;
+            publishedUrl: string | null;
+            qualityScore: number | null;
+            resultVersionId: string | null;
+            siteId: string | null;
+            startedAt: string | null;
+            /** @enum {string} */
+            status: "queued" | "preparing" | "running" | "validating" | "repairing" | "succeeded" | "needs_review" | "failed" | "cancelled";
         };
         GeoAreaFeature: {
             geometry: {
@@ -3678,6 +3987,11 @@ export type components = {
         PutSecretRequest: {
             value: string;
         };
+        ReorderGenerationJobsRequest: {
+            /** Format: uuid */
+            batchId: string;
+            jobIds: string[];
+        };
         /** @description The delivery job that will run the subscriber again. */
         ReplayEventAccepted: {
             jobId: string;
@@ -3694,6 +4008,10 @@ export type components = {
              * @description Which of the two businesses survives a merge (default: A).
              */
             survivorId?: string;
+        };
+        RetryGenerationJobRequest: {
+            /** @enum {string} */
+            engine?: "blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake";
         };
         ReviewCategoryMappingRequest: {
             /** @enum {string} */
@@ -4668,6 +4986,10 @@ export type components = {
         UnpublishSiteRequest: {
             /** @enum {string} */
             environment: "preview" | "live";
+        };
+        UpdateGenerationJobRequest: {
+            engine?: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
+            priority?: number;
         };
         UpdateNotificationPreferencesRequest: {
             items: components["schemas"]["NotificationPreference"][];
@@ -9249,6 +9571,693 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listGenerationBatches: {
+        parameters: {
+            query?: {
+                cursor?: string;
+                limit?: number;
+                status?: "queued" | "running" | "completed" | "completed_with_issues" | "cancelled";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationBatchPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createGenerationBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGenerationBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationBatchDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGenerationBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationBatchDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    cancelGenerationBatch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGenerationJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationJobDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateGenerationJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGenerationJobRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationJob"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    cancelGenerationJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationJob"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    retryGenerationJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetryGenerationJobRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationJob"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    reorderGenerationJobs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderGenerationJobsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listGenerationEngines: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationEngineListing"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

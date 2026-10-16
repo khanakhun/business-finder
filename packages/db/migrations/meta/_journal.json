@@ -176,6 +176,13 @@
       "when": 1792126457717,
       "tag": "0024_scoring",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792128523838,
+      "tag": "0025_scoring_profile_archive",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,7 @@ import { buildSiteCsp } from './lib/csp.ts';
 import { sitesEnvironment } from './lib/env.ts';
 import { siteHostname } from './lib/host.ts';
 import { localeOfPath, resolveRoute } from './lib/locale-routing.ts';
+import { cleanHeaders } from './lib/proxy-headers.ts';
 import { siteScheme } from './lib/seo.ts';
 import { getTenant, type Tenant, TenantUnavailableError } from './lib/tenant.ts';
 
@@ -23,18 +24,8 @@ const SITE_FILES = new Set(['/robots.txt', '/sitemap.xml']);
  */
 /** The internal routes (the API's revalidation, the container's health checks): exact paths only. */
 const INTERNAL = new Set(['/api/revalidate', '/health/live', '/health/ready']);
-/** Headers only the proxy may set: a visitor's own values are always dropped. */
-const PROXY_HEADERS = ['x-nonce', 'content-security-policy'];
-
-function cleanHeaders(request: NextRequest): Headers {
-  const headers = new Headers(request.headers);
-  for (const name of PROXY_HEADERS) headers.delete(name);
-  for (const name of [...headers.keys()]) if (name.startsWith('x-bf-')) headers.delete(name);
-  return headers;
-}
-
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  const requestHeaders = cleanHeaders(request);
+  const requestHeaders = cleanHeaders(request.headers);
   const { pathname } = request.nextUrl;
   if (INTERNAL.has(pathname)) return NextResponse.next({ request: { headers: requestHeaders } });
   const env = sitesEnvironment();
@@ -78,7 +69,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     frameOrigins: embedOrigins(spec),
   });
   requestHeaders.set('x-nonce', nonce);
-  requestHeaders.set('x-bf-path', pathname);
+  // The decoded path (the route was resolved from decoded segments: `/%65n/x` is `/en/x`).
+  requestHeaders.set('x-bf-path', `/${pathname.split('/').filter(Boolean).map(safeDecode).join('/')}`);
   requestHeaders.set('Content-Security-Policy', csp);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set('Content-Security-Policy', csp);

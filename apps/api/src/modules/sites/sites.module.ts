@@ -30,6 +30,7 @@ import { SiteViewRecorder, SiteViewsFlusher } from './application/site-views.ts'
 import { SiteCommands } from './application/sites.commands.ts';
 import { SiteQueries } from './application/sites.queries.ts';
 import { SiteRenderSubscriber } from './application/sites.subscribers.ts';
+import { sitesShareCookieDomain } from './domain/hosting.ts';
 import {
   BullmqAssetProcessingQueue,
   BullmqSiteRevalidation,
@@ -162,11 +163,9 @@ export class SitesModule {
             const api = env as ApiEnv;
             // Previews must not share the dashboard's cookies: under the auth cookie domain, every preview host
             // would receive staff sessions and count as same-site with the API.
-            const cookie = api.AUTH_COOKIE_DOMAIN?.replace(/^\./, '');
             if (
               api.NODE_ENV === 'production' &&
-              cookie &&
-              (api.SITES_BASE_DOMAIN === cookie || api.SITES_BASE_DOMAIN.endsWith(`.${cookie}`))
+              sitesShareCookieDomain(api.SITES_BASE_DOMAIN, api.AUTH_COOKIE_DOMAIN)
             )
               throw new Error(
                 'SITES_BASE_DOMAIN must not be under AUTH_COOKIE_DOMAIN (use a separate domain).',

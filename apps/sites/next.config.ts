@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
   // Workspace packages are consumed as TypeScript source (packages/README.md).
   transpilePackages: ['@bf/site-blocks', '@bf/site-schema', '@bf/contracts', '@bf/config', '@bf/db'],
   poweredByHeader: false,
+  experimental: {
+    // Sites take no visitor body (the contact form posts to the API): the proxy buffers at most this much of one.
+    proxyClientMaxBodySize: '16kb',
+  },
   reactStrictMode: true,
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

@@ -251,7 +251,7 @@ jobs:
         run: pnpm --filter @bf/web exec playwright install --with-deps chromium
       - name: Playwright (no retries — flaky tests are bugs)
         # The dashboard and the site renderer (BF-036), each against a production build.
-        run: pnpm turbo run e2e --filter=@bf/web --filter=@bf/sites -- --retries=0
+        run: pnpm turbo run e2e --filter=@bf/web --filter=@bf/sites --concurrency=1 -- --retries=0
       - name: Upload traces and screenshots
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

@@ -1,6 +1,6 @@
 'use client';
 
-import type { SiteLocale, SiteSpec } from '@bf/site-schema';
+import type { BaseOperation, Issue, SiteLocale, SiteSpec } from '@bf/site-schema';
 import * as React from 'react';
 
 /**
@@ -31,4 +31,41 @@ export function useSiteEditor(): SiteEditorState {
   const state = React.useContext(SiteEditorContext);
   if (!state) throw new Error('useSiteEditor needs a SiteEditorProvider.');
   return state;
+}
+
+/** What the editor's panels can do (site settings, pages, issues), beside the canvas. */
+export interface SiteEditorActions {
+  /**
+   * Applies a site-level change (settings, menu, languages, pages), then opens `open` if given; refusals are
+   * reported, nothing changes then.
+   */
+  readonly change: (op: BaseOperation, options?: { readonly open?: string }) => void;
+  readonly undo: () => void;
+  readonly redo: () => void;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  readonly openPage: (pageId: string) => void;
+  /** Validation issues of the site as edited (from the worker), and the way to their field. */
+  readonly issues: readonly Issue[];
+  /** The site the issues' paths point into: as the canvas shows it (the page on screen as edited). */
+  readonly issuesSite: SiteSpec;
+  readonly showIssue: (issue: Issue) => void;
+}
+
+const SiteEditorActionsContext = React.createContext<SiteEditorActions | null>(null);
+
+export function SiteEditorActionsProvider({
+  value,
+  children,
+}: {
+  readonly value: SiteEditorActions;
+  readonly children: React.ReactNode;
+}) {
+  return <SiteEditorActionsContext.Provider value={value}>{children}</SiteEditorActionsContext.Provider>;
+}
+
+export function useSiteEditorActions(): SiteEditorActions {
+  const actions = React.useContext(SiteEditorActionsContext);
+  if (!actions) throw new Error('useSiteEditorActions needs a SiteEditorActionsProvider.');
+  return actions;
 }

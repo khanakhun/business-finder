@@ -6,6 +6,8 @@ import {
   MAX_BATCH,
   type SiteSpec,
 } from '@bf/site-schema';
+import { itemToBlock } from '../adapters/puck-to-ops.ts';
+import type { EditorData } from '../adapters/spec-to-puck.ts';
 
 // The editor session's pure parts (BF-037): applying any number of edits, and naming the field a refusal is about.
 
@@ -60,5 +62,27 @@ export function withPageBlocks(spec: SiteSpec, pageId: string, blocks: readonly 
   return {
     ...spec,
     pages: spec.pages.map((page) => (page.id === pageId ? { ...page, blocks: [...blocks] } : page)),
+  };
+}
+
+/**
+ * The site as the canvas shows it, unchecked (what the validators look at while the person edits): the working site
+ * with the page on screen's blocks and settings (title, address, search texts) as the canvas has them.
+ */
+export function canvasSite(spec: SiteSpec, pageId: string, data: EditorData): SiteSpec {
+  const root = data.root.props;
+  return {
+    ...spec,
+    pages: spec.pages.map((page) =>
+      page.id === pageId
+        ? {
+            ...page,
+            title: root.title,
+            slug: root.slug ?? '',
+            seo: { ...page.seo, title: root.seoTitle, description: root.seoDescription },
+            blocks: data.content.map(itemToBlock),
+          }
+        : page,
+    ),
   };
 }

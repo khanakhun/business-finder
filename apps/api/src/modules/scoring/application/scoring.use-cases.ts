@@ -100,6 +100,13 @@ export class ScoringQueries {
     return { ...scoreBusiness(request.config, facts), featureSetVersion: FEATURE_SET_VERSION };
   }
 
+  /** Recomputes one business now, every active profile (the Scores tab's button), then returns its scores. */
+  async recomputeBusiness(organizationId: string, businessId: string): Promise<BusinessScoreList> {
+    await this.assertTracked(organizationId, businessId);
+    await this.scoring.compute(organizationId, [businessId], { force: true });
+    return this.businessScores(organizationId, businessId);
+  }
+
   private async assertTracked(organizationId: string, businessId: string): Promise<void> {
     if (!(await this.repository.tracks(organizationId, businessId)))
       throw new NotFoundError('Business', businessId);

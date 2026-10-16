@@ -88,6 +88,23 @@ export class BusinessScoresController {
   ): Promise<BusinessScoreList> {
     return this.queries.businessScores(workspaceOf(auth), businessId);
   }
+
+  @Post(':id/scores/recompute')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @RequirePermission('business:write')
+  @ApiRoute({
+    summary: 'Recompute the business’s scores now (every active profile) and return them',
+    operationId: 'recomputeBusinessScores',
+    response: { status: 200, schema: BusinessScoreListSchema },
+    errors: [401, 403, 404, 429],
+  })
+  recompute(
+    @Ctx() auth: AuthContext,
+    @Param('id', ParseUUIDPipe) businessId: string,
+  ): Promise<BusinessScoreList> {
+    return this.queries.recomputeBusiness(workspaceOf(auth), businessId);
+  }
 }
 
 /** Scoring profiles (BF-031): built-ins and the workspace's own, versions, recompute, primary choice, explain. */

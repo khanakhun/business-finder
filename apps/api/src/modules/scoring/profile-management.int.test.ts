@@ -164,6 +164,15 @@ describe('workspace scoring profiles', () => {
   });
 });
 
+describe('business scores', () => {
+  it('recomputes one business on demand (members may; another workspace gets 404)', async () => {
+    const id = tracked[1] ?? '';
+    const { body } = await member.post(`/v1/businesses/${id}/scores/recompute`).expect(200);
+    expect(body.items.length).toBeGreaterThanOrEqual(5);
+    await outsider.post(`/v1/businesses/${id}/scores/recompute`).expect(404);
+  });
+});
+
 describe('profile editor preview', () => {
   it('samples the workspace’s businesses with their current tier for a profile', async () => {
     const { body } = await owner

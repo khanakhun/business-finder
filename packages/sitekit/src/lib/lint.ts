@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { type Fact, type FactRegistry, SITE_LOCALES, type SiteSpec } from '@bf/site-schema';
 import { parse } from 'yaml';
 import { z } from 'zod';
@@ -67,8 +67,14 @@ const LocaleRulesSchema = z.object({
 });
 type LocaleRules = z.infer<typeof LocaleRulesSchema>;
 
-const RULES_DIR = new URL('../../rules/', import.meta.url);
-const readRules = (name: string) => parse(readFileSync(new URL(name, RULES_DIR), 'utf8'));
+/** The rules next to the bundled CLI (`dist/rules/`), else the package's `rules/`. */
+const RULES_DIR = [new URL('./rules/', import.meta.url), new URL('../../rules/', import.meta.url)].find(
+  (dir) => existsSync(new URL('common.yaml', dir)),
+);
+const readRules = (name: string) => {
+  if (!RULES_DIR) throw new Error('sitekit: the copy lint rules (rules/*.yaml) are missing');
+  return parse(readFileSync(new URL(name, RULES_DIR), 'utf8'));
+};
 
 let cached: { common: z.infer<typeof CommonRulesSchema>; locales: Map<string, LocaleRules> } | undefined;
 export function rules() {

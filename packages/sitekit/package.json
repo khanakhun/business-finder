@@ -10,6 +10,10 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "sitekit": "tsx --tsconfig ../site-blocks/tsconfig.json src/cli/bin.ts",
+    "schemas": "tsx src/cli/write-schemas.ts",
+    "schemas:check": "tsx src/cli/write-schemas.ts --check",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
@@ -17,6 +21,7 @@
   "dependencies": {
     "@bf/site-blocks": "workspace:*",
     "@bf/site-schema": "workspace:*",
+    "@modelcontextprotocol/sdk": "catalog:",
     "playwright": "catalog:",
     "yaml": "catalog:",
     "zod": "catalog:"
@@ -27,12 +32,12 @@
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "esbuild": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "files": [
-    "src",
-    "rules",
-    "fixtures"
-  ]
+  "bin": {
+    "sitekit": "./dist/sitekit.mjs"
+  }
 }

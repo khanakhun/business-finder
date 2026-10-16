@@ -1,0 +1,26 @@
+{
+  "name": "@bf/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared TypeScript compiler presets (docs/conventions/coding-standards.md §1).",
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./nestjs.json": "./nestjs.json",
+    "./nextjs.json": "./nextjs.json",
+    "./node-script.json": "./node-script.json"
+  },
+  "files": [
+    "*.json"
+  ],
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "for p in base library nestjs nextjs node-script; do tsc -p fixtures/$p.json || exit 1; done"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "../nextjs.json",
+  "files": ["./sample.ts"]
+}

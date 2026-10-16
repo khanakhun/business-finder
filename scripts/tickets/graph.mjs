@@ -9,8 +9,8 @@
 // Checks: unique ids matching file names, existing dependencies, no cycles, no dependency on a later milestone,
 // `blocks` equal to the reverse of `depends_on`. No external dependencies (Node ≥ 20).
 
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -18,7 +18,14 @@ const TICKETS_DIR = join(ROOT, 'docs', 'tickets');
 const README = join(TICKETS_DIR, 'README.md');
 const WRITE = process.argv.includes('--write');
 
-const MILESTONE_ORDER = ['M0 Foundations', 'M1 Find & List', 'M2 Understand', 'M3 Build', 'M4 Reach', 'M5 Learn & Scale'];
+const MILESTONE_ORDER = [
+  'M0 Foundations',
+  'M1 Find & List',
+  'M2 Understand',
+  'M3 Build',
+  'M4 Reach',
+  'M5 Learn & Scale',
+];
 
 const errors = [];
 const warnings = [];
@@ -56,7 +63,8 @@ for (const t of tickets) {
   if (t.meta.id !== idFromFile) errors.push(`${t.file}: id "${t.meta.id}" does not match file name`);
   if (byId.has(t.meta.id)) errors.push(`${t.file}: duplicate id ${t.meta.id}`);
   byId.set(t.meta.id, t);
-  if (!MILESTONE_ORDER.includes(t.meta.milestone)) errors.push(`${t.file}: unknown milestone "${t.meta.milestone}"`);
+  if (!MILESTONE_ORDER.includes(t.meta.milestone))
+    errors.push(`${t.file}: unknown milestone "${t.meta.milestone}"`);
 }
 
 // Dependencies exist, are not self-references, and do not point to a later milestone.
@@ -70,7 +78,10 @@ for (const t of tickets) {
     if (dep === t.meta.id) errors.push(`${t.meta.id}: depends on itself`);
     const mi = MILESTONE_ORDER.indexOf(t.meta.milestone);
     const di = MILESTONE_ORDER.indexOf(d.meta.milestone);
-    if (di > mi) errors.push(`${t.meta.id} (${t.meta.milestone}) depends on ${dep} from a later milestone (${d.meta.milestone})`);
+    if (di > mi)
+      errors.push(
+        `${t.meta.id} (${t.meta.milestone}) depends on ${dep} from a later milestone (${d.meta.milestone})`,
+      );
   }
 }
 
@@ -109,7 +120,9 @@ for (const t of tickets) {
     t.meta.blocks = want;
     rewritten++;
   } else {
-    errors.push(`${t.meta.id}: blocks [${have.join(', ')}] ≠ reverse deps [${want.join(', ')}] (run with --write)`);
+    errors.push(
+      `${t.meta.id}: blocks [${have.join(', ')}] ≠ reverse deps [${want.join(', ')}] (run with --write)`,
+    );
   }
 }
 
@@ -172,13 +185,17 @@ function readmeGraph() {
     const key = ms.split(' ')[0];
     lines.push(`  subgraph ${key}["${ms}"]`);
     for (const t of inMs) {
-      const short = t.meta.title.split(/ — |: |\(/)[0].replace(/["[\]]/g, '').trim();
+      const short = t.meta.title
+        .split(/ — |: |\(/)[0]
+        .replace(/["[\]]/g, '')
+        .trim();
       lines.push(`    ${t.meta.id.replace('-', '')}["${t.meta.id}<br/>${short}"]`);
     }
     lines.push('  end');
   }
   for (const t of tickets) {
-    for (const dep of reduced.get(t.meta.id)) lines.push(`  ${dep.replace('-', '')} --> ${t.meta.id.replace('-', '')}`);
+    for (const dep of reduced.get(t.meta.id))
+      lines.push(`  ${dep.replace('-', '')} --> ${t.meta.id.replace('-', '')}`);
   }
   lines.push('```');
   return lines.join('\n');
@@ -186,7 +203,10 @@ function readmeGraph() {
 
 function readmeWaves() {
   const max = Math.max(...level.values());
-  const out = ['| Wave | Tickets that can start once all earlier waves they depend on are merged |', '|---|---|'];
+  const out = [
+    '| Wave | Tickets that can start once all earlier waves they depend on are merged |',
+    '|---|---|',
+  ];
   for (let w = 0; w <= max; w++) {
     const ids = tickets.filter((t) => level.get(t.meta.id) === w).map((t) => t.meta.id);
     out.push(`| ${w} | ${ids.join(', ')} |`);

@@ -1,0 +1,36 @@
+packages:
+  - apps/*
+  - packages/*
+  - services/*
+
+# Single source of truth for versions shared across workspaces; reference with "catalog:".
+# Entries without a consumer yet are pinned now so the first ticket that needs them gets an aligned major.
+catalog:
+  # tooling
+  '@biomejs/biome': 2.5.15
+  '@commitlint/cli': 21.2.3
+  '@commitlint/config-conventional': 21.2.3
+  lefthook: 2.2.2
+  turbo: 2.11.8
+  # DECISION(BF-001): TypeScript 6.x, not 7.x — TS 7 (native port) only ships an `unstable/*` compiler API,
+  # which tsup dts, the NestJS CLI and typescript-eslint still depend on. Revisit when its stable API lands.
+  typescript: 6.0.3
+  '@types/node': 24.19.2
+  # testing
+  vitest: 5.0.4
+  '@vitest/coverage-v8': 5.0.4
+  '@faker-js/faker': 10.6.0
+  # runtime
+  zod: 4.6.7
+  react: 19.3.1
+  react-dom: 19.3.1
+  next: 16.4.1
+  '@nestjs/common': 12.1.3
+  '@nestjs/core': 12.1.3
+  '@nestjs/testing': 12.1.3
+
+# lefthook's postinstall only copies a binary that pnpm already installs from its optional platform
+# package; `pnpm prepare` installs the git hooks. Everything else stays blocked (pnpm 10 default).
+# `allowBuilds` (pnpm ≥ 10.26) replaces the onlyBuilt/ignoredBuilt lists removed in pnpm 11.
+allowBuilds:
+  lefthook: false

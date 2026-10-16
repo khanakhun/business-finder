@@ -1,0 +1,4 @@
+{
+  "extends": "../nestjs.json",
+  "files": ["./sample.ts"]
+}

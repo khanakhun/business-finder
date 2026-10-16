@@ -70,11 +70,29 @@ This repository is designed to be implemented by coding agents (Claude Code, Cod
 
 Independent tracks (for example the website platform track `BF-033…BF-037` and the business-graph track `BF-014…BF-017`) can be built in parallel by separate agents using git worktrees. The [roadmap](docs/ROADMAP.md#parallel-work-with-several-agents) proposes five lanes; the [waves table](docs/tickets/README.md#waves-what-can-run-in-parallel) shows what can run at the same time.
 
-## Quick start (after BF-001 and BF-002 land)
+## Quick start
+
+Requirements: **Node.js 24** (see `.nvmrc`) with corepack. Nothing else needs a global install.
 
 ```bash
-corepack enable                      # pnpm via corepack
-pnpm install
+corepack enable                      # provides the pnpm version pinned in package.json
+pnpm install                         # also installs the git hooks (lefthook)
+pnpm verify                          # lint + typecheck + unit tests across the workspace
+```
+
+| Command | What it does |
+|---|---|
+| `pnpm verify` | `turbo run lint typecheck test` — the gate every PR must pass |
+| `pnpm lint` / `pnpm typecheck` / `pnpm test` | One stage of `verify` |
+| `pnpm format` | Format and auto-fix with Biome |
+| `pnpm build` | Build every workspace that has a `build` script |
+| `pnpm clean` | Remove build outputs, caches and `node_modules` |
+
+Commits must follow Conventional Commits; `feat`, `fix`, `refactor` and `perf` subjects must reference their ticket, e.g. `feat(repo): bootstrap toolchain (BF-001)`. The pre-commit hook formats staged files.
+
+Coming with BF-002 (local infrastructure) and the app tickets:
+
+```bash
 cp .env.example .env                 # fill in API keys you have; everything else has local defaults
 pnpm infra:up                        # postgres(+postgis+pgvector), valkey, minio, mailpit, …
 pnpm db:migrate && pnpm db:seed

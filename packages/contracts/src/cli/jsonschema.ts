@@ -1,29 +1,34 @@
 // pnpm contracts:jsonschema [--check] — writes generated/jsonschema/<target>/<Id>.json for every opted-in schema
-// and removes stale files. --check exits 1 instead of writing when the committed files are out of date.
+// plus generated/error-codes.json (the error registry, for non-TypeScript services), and removes stale files.
+// --check exits 1 instead of writing when the committed files are out of date.
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildJsonSchemas, EXPORT_TARGETS } from '../registry.ts';
+import { ERROR_CODES, ERROR_TYPE_BASE } from '../errors.ts';
+import { buildJsonSchemas, EXPORT_TARGETS, sortKeys } from '../registry.ts';
 
-const OUT_DIR = fileURLToPath(new URL('../../generated/jsonschema', import.meta.url));
+const OUT_DIR = fileURLToPath(new URL('../../generated', import.meta.url));
 
-/** Expected files (relative path → content) for every target. */
+const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
+
+/** Expected files (path relative to generated/ → content). */
 export function expectedFiles(): Map<string, string> {
   const files = new Map<string, string>();
   for (const target of EXPORT_TARGETS) {
     for (const [id, schema] of Object.entries(buildJsonSchemas(target))) {
-      files.set(join(target, `${id}.json`), `${JSON.stringify(schema, null, 2)}\n`);
+      files.set(join('jsonschema', target, `${id}.json`), json(schema));
     }
   }
+  files.set('error-codes.json', json(sortKeys({ typeBase: ERROR_TYPE_BASE, codes: ERROR_CODES })));
   return files;
 }
 
-function existingFiles(): Map<string, string> {
+function existingFiles(dir = OUT_DIR, prefix = ''): Map<string, string> {
   const files = new Map<string, string>();
-  for (const target of existsSync(OUT_DIR) ? readdirSync(OUT_DIR) : []) {
-    for (const file of readdirSync(join(OUT_DIR, target))) {
-      files.set(join(target, file), readFileSync(join(OUT_DIR, target, file), 'utf8'));
-    }
+  for (const entry of existsSync(dir) ? readdirSync(dir, { withFileTypes: true }) : []) {
+    const path = join(prefix, entry.name);
+    if (entry.isDirectory()) for (const [k, v] of existingFiles(join(dir, entry.name), path)) files.set(k, v);
+    else files.set(path, readFileSync(join(dir, entry.name), 'utf8'));
   }
   return files;
 }
@@ -35,11 +40,11 @@ function main(check: boolean): number {
   const changed = [...expected].filter(([f, content]) => existing.get(f) !== content).map(([f]) => f);
   if (check) {
     if (stale.length + changed.length === 0) {
-      console.log(`JSON Schemas up to date (${expected.size} files).`);
+      console.log(`Generated contracts up to date (${expected.size} files).`);
       return 0;
     }
     console.error(
-      `JSON Schemas out of date: ${[...changed, ...stale].join(', ')}. Run: pnpm contracts:jsonschema`,
+      `Generated contracts out of date: ${[...changed, ...stale].join(', ')}. Run: pnpm contracts:jsonschema`,
     );
     return 1;
   }
@@ -49,7 +54,7 @@ function main(check: boolean): number {
     writeFileSync(join(OUT_DIR, file), content);
   }
   console.log(
-    `Wrote ${expected.size} JSON Schema file(s) to ${OUT_DIR} (${changed.length} changed, ${stale.length} removed).`,
+    `Wrote ${expected.size} generated file(s) to ${OUT_DIR} (${changed.length} changed, ${stale.length} removed).`,
   );
   return 0;
 }

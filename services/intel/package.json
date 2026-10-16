@@ -1,0 +1,13 @@
+{
+  "name": "@bf/intel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Python intel service (FastAPI). This file only lets Turborepo run its uv-managed checks.",
+  "scripts": {
+    "dev": "uv run --locked python -m app.serve --reload",
+    "lint": "uv run --locked ruff check . && uv run --locked ruff format --check .",
+    "typecheck": "uv run --locked mypy",
+    "test": "uv run --locked pytest -q",
+    "contracts": "uv run --locked python scripts/gen_contracts.py"
+  }
+}

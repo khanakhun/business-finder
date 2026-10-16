@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/turbo/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      // Tests read the shared contract artifacts and the env declaration from outside this package.
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/contracts/generated/**",
+        "$TURBO_ROOT$/packages/contracts/fixtures/**",
+        "$TURBO_ROOT$/.env.example"
+      ],
+      "outputs": []
+    }
+  }
+}

@@ -6,7 +6,13 @@ import { buildJsonSchemas, exportSchema, sortKeys } from './registry.ts';
 describe('JSON Schema export', () => {
   it('is deterministic', () => {
     expect(JSON.stringify(buildJsonSchemas('python'))).toBe(JSON.stringify(buildJsonSchemas('python')));
-    expect([...expectedFiles().keys()]).toEqual(['python/LatLng.json', 'python/ProblemDetails.json']);
+    expect([...expectedFiles().keys()]).toEqual([
+      'jsonschema/python/EchoRequest.json',
+      'jsonschema/python/EchoResponse.json',
+      'jsonschema/python/LatLng.json',
+      'jsonschema/python/ProblemDetails.json',
+      'error-codes.json',
+    ]);
   });
 
   it('emits draft 2020-12 documents with $id, title and description', () => {

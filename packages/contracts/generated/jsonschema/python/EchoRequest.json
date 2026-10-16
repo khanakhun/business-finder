@@ -1,0 +1,19 @@
+{
+  "$id": "https://schemas.business-finder.dev/EchoRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/echo request on services/intel.",
+  "properties": {
+    "message": {
+      "description": "Text echoed back unchanged.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "message"
+  ],
+  "title": "EchoRequest",
+  "type": "object"
+}

@@ -59,6 +59,7 @@ These are created by BF-001/BF-002 and must keep working. If a command you need 
 | DB: apply migrations / seed | `pnpm db:migrate` / `pnpm db:seed` |
 | Regenerate OpenAPI + web client | `pnpm api:codegen` |
 | Regenerate Python models from contracts | `pnpm contracts:py` |
+| Check generated contracts are current (CI) | `pnpm contracts:check` |
 | Python checks (in `services/intel`) | `uv run task verify` (ruff, mypy, pytest) |
 | LLM evals (manual / nightly, costs money) | `pnpm eval --filter=@bf/ai` |
 

@@ -11,10 +11,27 @@ export function pickText(text: LocalizedText | undefined, locale: SiteLocale, fa
   return text[locale] ?? text[fallback] ?? Object.values(text).find((value) => value !== undefined) ?? '';
 }
 
+/**
+ * A link the renderer may emit, else undefined: http(s), `tel:`, `mailto:`, or a same-site path, query or fragment
+ * (`/carte`, never `//evil.example`). The schema checks links; this keeps a page safe regardless (`data:`,
+ * `vbscript:` and protocol-relative links are dropped).
+ */
+export function safeHref(href: string | undefined): string | undefined {
+  if (!href) return undefined;
+  if (/^[/?#]/.test(href)) return /^\/[/\\]/.test(href) || href.includes('\\') ? undefined : href;
+  try {
+    return ['https:', 'http:', 'tel:', 'mailto:'].includes(new URL(href).protocol) ? href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** The default page URL: the default locale at the root, the others under `/<locale>`. */
 export function defaultPageHref(page: Page, locale: SiteLocale, spec: SiteSpec): string {
   const prefix = locale === spec.defaultLocale ? '' : `/${locale}`;
-  return page.slug ? `${prefix}/${page.slug}` : prefix || '/';
+  // A slug never starts with a slash (the schema's pattern); stripping one keeps `//host` out of every link.
+  const slug = page.slug.replace(/^[/\\]+/, '');
+  return slug ? `${prefix}/${slug}` : prefix || '/';
 }
 
 /** An OpenStreetMap link to the business (coordinates first, else its address): no tracking, no API key. */
@@ -32,8 +49,10 @@ export function mapLink(contact: SiteSpec['contact']): string | undefined {
 export function resolveCta(action: CtaAction, ctx: RenderContext): ResolvedCta | null {
   const { contact } = ctx.spec;
   const label = ctx.t(action.label);
-  const to = (href: string | undefined, external: boolean): ResolvedCta | null =>
-    href ? { href, label, kind: action.kind, external } : null;
+  const to = (raw: string | undefined, external: boolean): ResolvedCta | null => {
+    const href = safeHref(raw);
+    return href ? { href, label, kind: action.kind, external } : null;
+  };
   switch (action.kind) {
     case 'call':
       return to(contact.phone && `tel:${contact.phone.value}`, false);

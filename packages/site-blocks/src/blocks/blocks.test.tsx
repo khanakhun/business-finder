@@ -249,4 +249,22 @@ describe('variants that differ', () => {
       testimonial.value.quote,
     );
   });
+
+  it('testimonials: the author and rating come from the fact, not the spec, when the registry is given', () => {
+    const salon = fixture('salon-gustavia');
+    const registry = facts('salon-gustavia');
+    const spec: SiteSpec = structuredClone(salon);
+    for (const block of spec.pages[0]?.blocks ?? [])
+      if (block.type === 'testimonials')
+        for (const item of block.props.items)
+          Object.assign(item, { author: 'Jean-Pierre Martin', rating: 1 });
+    const { container } = render(<SitePage spec={spec} page="home" locale="fr" facts={registry} />);
+    const testimonial = registry.facts.find((fact) => fact.kind === 'testimonial');
+    if (testimonial?.kind !== 'testimonial') throw new Error('no testimonial fact');
+    expect(container).not.toHaveTextContent('Jean-Pierre Martin');
+    expect(container).toHaveTextContent(testimonial.value.author ?? '');
+    // Without a registry (the editor before facts load) the spec's own are shown.
+    const unchecked = render(<SitePage spec={spec} page="home" locale="fr" />).container;
+    expect(unchecked).toHaveTextContent('Jean-Pierre Martin');
+  });
 });

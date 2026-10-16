@@ -1,6 +1,6 @@
 import { Icon } from '../icons/icon.tsx';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
-import { cx, Media, Section, SectionHead } from './shared.tsx';
+import { blockDomId, cx, Media, Section, SectionHead } from './shared.tsx';
 
 /** A photo that opens larger in a viewer (a native popover: no script, Esc and outside clicks close it). */
 function Zoomable({
@@ -69,7 +69,7 @@ function Zoomable({
 export function Gallery({ block, ctx, tone }: BlockProps<'gallery'>) {
   const { props, variant } = block;
   const ids = props.assetIds.filter((id) => ctx.image(id));
-  const viewer = (i: number) => `${block.id}-photo-${i}`;
+  const viewer = (i: number) => `${blockDomId(block.id)}-photo-${i}`;
   const label = props.heading ? undefined : ctx.strings.photos;
   return (
     <Section id={block.id} type="gallery" variant={variant} tone={tone} labelled={Boolean(props.heading)}>

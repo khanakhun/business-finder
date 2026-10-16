@@ -122,7 +122,8 @@ describe('BookingEmbed', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: strings.show }));
     const frame = container.querySelector('iframe');
-    expect(frame).toHaveAttribute('sandbox', 'allow-scripts allow-forms allow-same-origin allow-popups');
+    expect(frame).toHaveAttribute('sandbox', 'allow-scripts allow-forms allow-same-origin');
+    expect(frame).toHaveAttribute('referrerpolicy', 'no-referrer');
     expect(frame).toHaveAttribute('title', strings.frameTitle);
   });
 });

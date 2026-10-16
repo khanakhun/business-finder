@@ -98,7 +98,7 @@ function head(
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<title>${text(page.seo.title)}</title>`,
     `<meta name="description" content="${text(page.seo.description)}">`,
-    spec.settings.noindex ? '<meta name="robots" content="noindex, nofollow">' : '',
+    spec.settings.noindex || options.preview ? '<meta name="robots" content="noindex, nofollow">' : '',
     `<meta name="theme-color" content="${escapeHtml(spec.theme.palette.background)}">`,
     options.origin
       ? `<link rel="canonical" href="${escapeHtml(absolute(hrefFor(page, locale, spec)))}">`
@@ -108,7 +108,7 @@ function head(
       ? [
           ...spec.locales.map(
             (alternate) =>
-              `<link rel="alternate" hreflang="${alternate}" href="${escapeHtml(absolute(hrefFor(page, alternate, spec)))}">`,
+              `<link rel="alternate" hreflang="${escapeHtml(alternate)}" href="${escapeHtml(absolute(hrefFor(page, alternate, spec)))}">`,
           ),
           `<link rel="alternate" hreflang="x-default" href="${escapeHtml(absolute(hrefFor(page, spec.defaultLocale, spec)))}">`,
         ]

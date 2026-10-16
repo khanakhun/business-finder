@@ -1,5 +1,6 @@
 import type { SiteSpec } from '@bf/site-schema';
 import { Icon } from '../icons/icon.tsx';
+import { safeHref } from '../renderer/resolvers.ts';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
 import { cx, Section, SectionHead } from './shared.tsx';
 
@@ -26,7 +27,10 @@ export function SocialList({
   variant: 'icons' | 'buttons';
   className?: string | undefined;
 }) {
-  const socials = ctx.spec.contact.socials ?? [];
+  // Profiles are web pages: anything that is not an https link is left out.
+  const socials = (ctx.spec.contact.socials ?? []).filter((social) =>
+    safeHref(social.url)?.startsWith('https:'),
+  );
   const { Link } = ctx;
   return (
     <ul className={cx('flex flex-wrap gap-3', className)}>

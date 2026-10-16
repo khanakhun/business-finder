@@ -1,6 +1,6 @@
 import { Icon } from '../icons/icon.tsx';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
-import { shownQuote } from './facts.ts';
+import { shownQuote, shownReviewer } from './facts.ts';
 import { cx, Section, SectionHead, Stars } from './shared.tsx';
 
 type Item = BlockProps<'testimonials'>['block']['props']['items'][number];
@@ -9,14 +9,11 @@ const SOURCES = { google: 'Google', tripadvisor: 'Tripadvisor', facebook: 'Faceb
 
 function Quote({ item, ctx, large = false }: { item: Item; ctx: RenderContext; large?: boolean }) {
   const quote = shownQuote(item, ctx);
+  const { author, rating } = shownReviewer(item, ctx);
   const source = item.source ? SOURCES[item.source] : '';
   return (
     <figure className={cx('flex h-full flex-col gap-5', !large && 'bf-card')}>
-      {item.rating ? (
-        <Stars rating={item.rating} ctx={ctx} />
-      ) : (
-        <Icon name="quote" size={28} className="bf-icon" />
-      )}
+      {rating ? <Stars rating={rating} ctx={ctx} /> : <Icon name="quote" size={28} className="bf-icon" />}
       <blockquote
         lang={quote.lang}
         className={cx(
@@ -26,7 +23,7 @@ function Quote({ item, ctx, large = false }: { item: Item; ctx: RenderContext; l
         <p>{ctx.strings.quote(quote.text)}</p>
       </blockquote>
       <figcaption className="bf-muted mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        {item.author ? <span className="font-semibold text-[var(--bf-text)]">{item.author}</span> : null}
+        {author ? <span className="font-semibold text-[var(--bf-text)]">{author}</span> : null}
         {source ? <span>{ctx.strings.reviewOn(source)}</span> : null}
         {quote.translated ? <span className="bf-badge !text-xs">{ctx.strings.translated}</span> : null}
       </figcaption>

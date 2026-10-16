@@ -1,12 +1,13 @@
 import { BookingEmbed } from '../islands/booking-embed.tsx';
 import { hostOfUrl, isEmbeddable } from '../renderer/embeds.ts';
+import { safeHref } from '../renderer/resolvers.ts';
 import type { BlockProps } from '../renderer/types.ts';
 import { cx, headingId, Section } from './shared.tsx';
 
 /** Sends visitors to the business's existing booking page; `embed` shows it in place, on request only. */
 export function Booking({ block, ctx, tone }: BlockProps<'booking'>) {
   const { props, variant } = block;
-  const url = ctx.spec.contact.bookingUrl?.value;
+  const url = safeHref(ctx.spec.contact.bookingUrl?.value);
   const { Link } = ctx;
   const embed = variant === 'embed' && url && isEmbeddable(url);
   return (

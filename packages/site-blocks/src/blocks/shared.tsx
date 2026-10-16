@@ -13,7 +13,12 @@ export { cx };
 export const itemHeading = (sectionHeading: unknown): 'h2' | 'h3' => (sectionHeading ? 'h3' : 'h2');
 
 /** The id of a block's heading (block ids are unique in a site, so this is unique on a page). */
-export const headingId = (blockId: string) => `${blockId}-title`;
+/**
+ * A block's DOM id: prefixed, so a block id never shadows a global (`__next_f`) or one of the layout's own ids
+ * (`bf-mobile-menu`, `main`). Every id derived from a block starts from it.
+ */
+export const blockDomId = (blockId: string) => `b-${blockId}`;
+export const headingId = (blockId: string) => `${blockDomId(blockId)}-title`;
 
 /** A block's section: its spacing, tone and accessible name. */
 export function Section({
@@ -36,7 +41,7 @@ export function Section({
 }) {
   return (
     <section
-      id={id}
+      id={blockDomId(id)}
       data-block={type}
       data-variant={variant}
       data-tone={tone}

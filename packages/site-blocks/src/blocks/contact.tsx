@@ -3,7 +3,7 @@ import { Icon } from '../icons/icon.tsx';
 import type { IconName } from '../icons/paths.ts';
 import { ContactForm } from '../islands/contact-form.tsx';
 import type { BlockProps, RenderContext } from '../renderer/types.ts';
-import { cx, Section, SectionHead } from './shared.tsx';
+import { blockDomId, cx, Section, SectionHead } from './shared.tsx';
 
 interface Channel {
   readonly key: string;
@@ -85,8 +85,8 @@ export function Contact({ block, ctx, tone }: BlockProps<'contact'>) {
     ) : null;
   const contactForm = form ? (
     <ContactForm
-      formId={`${block.id}-form`}
-      action={ctx.options.contactFormAction}
+      formId={`${blockDomId(block.id)}-form`}
+      action={ctx.options.preview ? undefined : ctx.options.contactFormAction}
       strings={ctx.strings.form}
       className={cx(variant === 'split' && 'bf-card !h-auto')}
     />

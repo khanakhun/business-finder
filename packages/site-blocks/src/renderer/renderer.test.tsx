@@ -4,7 +4,14 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { FIXTURES, facts, fixture } from '../test-utils.tsx';
 import { BlockRenderer, blockTones, UnknownBlockError } from './block-renderer.tsx';
-import { createRenderContext, defaultPageHref, mapLink, pickText, resolveCta } from './resolvers.ts';
+import {
+  createRenderContext,
+  defaultPageHref,
+  mapLink,
+  pickText,
+  resolveCta,
+  safeHref,
+} from './resolvers.ts';
 import { SitePage } from './site-page.tsx';
 import type { SiteImageProps } from './types.ts';
 
@@ -86,6 +93,23 @@ describe('SitePage', () => {
       />,
     );
     expect(container.querySelector('.bf-preview-banner')).toBeNull();
+  });
+
+  it('shows the banner and disables the contact form on a preview, whatever the spec says', () => {
+    const official = { ...salon, settings: { ...salon.settings, previewBanner: false, noindex: false } };
+    const { container } = render(<SitePage spec={official} page="contact" locale="fr" preview />);
+    expect(container.querySelector('.bf-preview-banner')).not.toBeNull();
+    for (const form of container.querySelectorAll('form')) expect(form).not.toHaveAttribute('action');
+  });
+
+  it('prefixes the DOM ids taken from block ids (a block id never shadows a global or a layout id)', () => {
+    const spec = structuredClone(salon);
+    const hero = spec.pages[0]?.blocks[0];
+    if (hero) hero.id = '__next_f';
+    const { container } = render(<SitePage spec={spec} page="home" locale="fr" />);
+    expect(container.querySelector('[id="__next_f"]')).toBeNull();
+    expect(container.querySelector('#b-__next_f-title')).not.toBeNull();
+    for (const section of container.querySelectorAll('section[id]')) expect(section.id).toMatch(/^b-/);
   });
 
   it('injects the image and link components; the hero image is a priority, the others lazy', () => {
@@ -251,5 +275,48 @@ describe('resolvers', () => {
     expect(pickText({ fr: 'Bonjour' }, 'en', 'fr')).toBe('Bonjour');
     expect(pickText({ de: 'Hallo' }, 'en', 'fr')).toBe('Hallo');
     expect(pickText(undefined, 'en', 'fr')).toBe('');
+  });
+});
+
+describe('safeHref', () => {
+  it.each([
+    'https://calendly.com/salon',
+    'http://localhost:3100/carte',
+    'tel:+590590000101',
+    'mailto:bonjour@salon.example',
+    '/carte',
+    '/en/menu',
+    '#contact',
+    '?page=menu',
+  ])('keeps %s', (href) => {
+    expect(safeHref(href)).toBe(href);
+  });
+
+  it.each([
+    'javascript:alert(1)',
+    'JaVaScRiPt:alert(1)',
+    'data:text/html,<script>alert(1)</script>',
+    'vbscript:msgbox(1)',
+    '//evil.example',
+    '/\\evil.example',
+    '/\\/evil.example',
+    'evil.example',
+    '',
+    undefined,
+  ])('drops %s', (href) => {
+    expect(safeHref(href)).toBeUndefined();
+  });
+
+  it('keeps a slug from making a protocol-relative page link, and drops unsafe CTA links', () => {
+    const page = { ...(salon.pages[1] as SiteSpec['pages'][number]), slug: '/evil.example' };
+    expect(defaultPageHref(page, 'fr', salon)).toBe('/evil.example');
+    expect(defaultPageHref({ ...page, slug: '//evil.example' }, 'en', salon)).toBe('/en/evil.example');
+    const spec = structuredClone(salon);
+    if (spec.contact.bookingUrl) spec.contact.bookingUrl.value = 'javascript:alert(1)';
+    const ctx = createRenderContext(spec, spec.pages[0] as SiteSpec['pages'][number], 'fr', {});
+    expect(resolveCta({ kind: 'booking', label: { fr: 'Réserver', en: 'Book' } }, ctx)).toBeNull();
+    expect(
+      resolveCta({ kind: 'url', url: 'data:text/html,x', label: { fr: 'Voir', en: 'See' } } as never, ctx),
+    ).toBeNull();
   });
 });

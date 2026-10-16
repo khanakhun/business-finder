@@ -11,7 +11,7 @@ export function SkipLink({ ctx }: { ctx: RenderContext }) {
 
 /** The "concept preview" banner of previews (ADR-0009): this is not the business's official site. */
 export function PreviewBanner({ ctx }: { ctx: RenderContext }) {
-  if (!ctx.spec.settings.previewBanner) return null;
+  if (!ctx.spec.settings.previewBanner && !ctx.options.preview) return null;
   const { brand } = ctx.spec;
   const agency = ctx.options.agencyName;
   return (

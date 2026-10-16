@@ -34,8 +34,10 @@ export function BookingEmbed({
         src={src}
         title={frameTitle}
         className="h-[44rem] w-full max-w-4xl rounded-card border border-[var(--bf-line)] bg-white"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-        referrerPolicy="strict-origin-when-cross-origin"
+        // No popups or top navigation: the provider's own page (the link below) is there for anything more.
+        sandbox="allow-scripts allow-forms allow-same-origin"
+        // The page's address names the preview: the provider does not need it.
+        referrerPolicy="no-referrer"
         loading="lazy"
       />
     );

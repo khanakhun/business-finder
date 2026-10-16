@@ -82,7 +82,12 @@ export interface RenderOptions {
   readonly facts?: FactRegistry;
   /** The agency named on the preview banner. */
   readonly agencyName?: string;
-  /** Where the contact form posts (BF-048); without it the form is shown disabled. */
+  /**
+   * A preview of a site the business has not approved (BF-036 sets it for preview publications): the banner and
+   * `noindex` whatever the spec says, and the contact form disabled (no visitor data before the business agrees).
+   */
+  readonly preview?: boolean;
+  /** Where the contact form posts (BF-048); without it (or on a preview) the form is shown disabled. */
   readonly contactFormAction?: string;
   /** A static map image of the location on our storage (BF-036); without one a link to the map is shown. */
   readonly mapImage?: (geo: {

@@ -27,3 +27,23 @@ export function shownQuote(
   }
   return { text: ctx.t(item.quote), translated: false };
 }
+
+/**
+ * A review's author and rating as shown: from its fact when the registry is given (the spec may leave either out,
+ * never change it); the spec's own only without a registry (the editor's previews before facts load).
+ */
+export function shownReviewer(
+  item: {
+    readonly factId: string;
+    readonly author?: string | undefined;
+    readonly rating?: number | undefined;
+  },
+  ctx: RenderContext,
+): { author: string | undefined; rating: number | undefined } {
+  const fact = ctx.fact(item.factId);
+  if (fact?.kind !== 'testimonial') return { author: item.author, rating: item.rating };
+  return {
+    author: item.author ? fact.value.author : undefined,
+    rating: item.rating ? fact.value.rating : undefined,
+  };
+}

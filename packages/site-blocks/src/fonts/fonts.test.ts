@@ -58,6 +58,13 @@ describe('booking embeds', () => {
   it('frames only allowlisted providers, and declares their origin for the CSP', () => {
     expect(isEmbeddable('https://calendly.com/salon')).toBe(true);
     expect(isEmbeddable('https://evil.example/calendly.com')).toBe(false);
+    expect(isEmbeddable('https://salon.simplybook.me/v2/')).toBe(true);
+    // Not a provider's subdomain, not two levels deep, not http, not our own or the business's domain.
+    expect(isEmbeddable('https://evil.calendly.com/x')).toBe(false);
+    expect(isEmbeddable('https://a.b.simplybook.me/')).toBe(false);
+    expect(isEmbeddable('http://calendly.com/salon')).toBe(false);
+    expect(isEmbeddable('https://salon-lumiere-x7k2pq.sites.localhost/')).toBe(false);
+    expect(isEmbeddable('https://salon-lumiere.fr/reserver')).toBe(false);
     const villa = fixture('villa-agency');
     expect(embedOrigins(villa)).toEqual([]);
     const embedded = {

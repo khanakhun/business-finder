@@ -69,6 +69,13 @@ describe('renderStaticPage', () => {
     expect(once).not.toContain('name="robots"');
   });
 
+  it('forces robots noindex and the banner on a preview, whatever the spec says', () => {
+    const official = { ...salon, settings: { ...salon.settings, noindex: false, previewBanner: false } };
+    const { html } = renderStaticPage(official, 'home', 'fr', { css: TEST_CSS, preview: true });
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
+    expect(html).toContain('bf-preview-banner');
+  });
+
   it('throws for a page the site does not have, and for a spec the schema refuses', () => {
     expect(() => renderStaticPage(salon, 'nowhere', 'fr', { css: TEST_CSS })).toThrow(/no page "nowhere"/);
     const hostile = {

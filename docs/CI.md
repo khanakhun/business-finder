@@ -18,6 +18,7 @@ E2E suite, a Dockerfile, `services/intel`) skip themselves, so the pipeline grow
 | `e2e` | web/api/packages/infra changed and `apps/web/playwright.config.ts` exists | Throwaway secrets → `pnpm infra:up` (cached Postgres image, `BF_INFRA_SKIP_BUILD=1`) → migrate → seed → Playwright with **no retries**; traces and screenshots uploaded on failure. | `pnpm infra:up && pnpm db:migrate && pnpm e2e` |
 | `security` | always | gitleaks (the PR's commits; full history on `main`), OSV-Scanner on every lockfile (`pnpm-lock.yaml`, `uv.lock`), `pnpm audit --prod` (advisory, never fails the run). | see below |
 | `images` + `publish` | push to `main`, after `quality` and `integration` | Builds every image in `infra/docker/images.json` whose Dockerfile exists, with Buildx + layer cache, SBOM and provenance; pushes `ghcr.io/<owner>/bf-<name>:<sha>` and `:main`. | `docker build -f <dockerfile> <context>` |
+| `deploy-staging` (`deploy-staging.yml`) | CI succeeded on a push to `main`, or by hand (from `main`) with a sha of `main` | Uploads the compose file and `infra/deploy/deploy.sh` **from main** through the key's forced command, then the server pulls that sha's images, migrates, updates the containers and checks health through Caddy — rolling back to the previous release on failure; then `scripts/smoke-staging.mjs` from outside. One deploy at a time; older builds are skipped. | [staging runbook](runbooks/staging-setup.md) |
 | CodeQL `analyze` | PR to `main`, push to `main`, weekly | `security-extended` queries for JavaScript/TypeScript, Python and the workflows (`build-mode: none`). | — |
 
 A docs-only pull request runs `changes` and `security` only (about a minute). Superseded PR runs are cancelled;
@@ -87,6 +88,10 @@ blocks): `docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:1.7.12`. Run
    images may already be there; they are skipped until the Dockerfile exists.
 3. Pin base images by digest. On the next push to `main`, `publish (<name>)` pushes
    `ghcr.io/<owner>/bf-<name>:<sha>` and `:main`.
+4. Images run as a non-root user with a `HEALTHCHECK`, contain no secrets, and read every URL and key from the
+   environment at run time (the web image too: `apps/web/src/lib/public-env.ts`), so one image serves staging and
+   production. Deployed images: `api` (roles `http`, `worker`, `migrate`, package scripts), `web`, `intel`,
+   `postgres`, `caddy` (with the DNS-01 module), `backup`.
 
 ## Dependency updates
 

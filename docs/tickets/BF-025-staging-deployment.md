@@ -61,11 +61,53 @@ Every merge to `main` deploys automatically to a staging environment at `app.<st
 - Workflow: shellcheck for scripts; `act` dry-run optional; first real deploy documented in PR (if a server is available) with logs.
 
 ## Acceptance criteria
-- [ ] Production Dockerfiles for api/worker/migrate, web (and intel reused) — non-root, healthchecks, pruned.
-- [ ] Prod compose + Caddy (with DNS-01 capable build) + headers; SSE works through the proxy.
-- [ ] Deploy workflow with migrations, health gate and automatic rollback.
-- [ ] Nightly staging backups to object storage with documented restore.
-- [ ] Runbook enables a fresh server setup by following it step by step.
+- [x] Production Dockerfiles for api/worker/migrate, web (and intel reused) — non-root, healthchecks, pruned.
+- [x] Prod compose + Caddy (with DNS-01 capable build) + headers; SSE works through the proxy.
+- [x] Deploy workflow with migrations, health gate and automatic rollback.
+- [x] Nightly staging backups to object storage with documented restore.
+- [x] Runbook enables a fresh server setup by following it step by step.
+
+## Implementation notes (BF-025)
+- **Images** (`infra/docker/{api,web,backup}`, `infra/caddy`; intel and postgres reused): multi-stage, `turbo prune
+  --docker`, bases pinned by digest (the PostGIS base too), non-root users, `HEALTHCHECK`s, per-Dockerfile
+  `.dockerignore` (no `.env`/`*.env` anywhere in the context).
+  - `api`: one image; entrypoint roles `http` (default), `worker`, `migrate`, or any `apps/api` package script
+    (`admin:bootstrap --email …`) run without pnpm. TypeScript runs through `@swc-node/register` as in development,
+    so `@bf/tsconfig` became a runtime dependency. 938 MB: better-auth's optional peers (Next, Vitest…) come along —
+    follow-up.
+  - `web`: Next.js standalone output (`NEXT_OUTPUT=standalone`, set by the Dockerfile only), 277 MB; only
+    `.next/cache` is writable. **No URL baked in**: `NEXT_PUBLIC_*` are read by the server at run time (required and
+    validated in production) and handed to `<Providers>` (`src/lib/public-env.ts`); one image for staging and
+    production. Server-side API calls use the internal network (`API_INTERNAL_URL`) and forward the visitor's
+    `X-Forwarded-For`.
+- **Compose** (`infra/compose/docker-compose.prod.yml`): caddy, web, api, worker, intel, postgres, valkey (AOF,
+  400 MB cap, `noeviction`), backup, one-shot `migrate`, optional `scraper`/`verify` profiles. **Secrets per audience**:
+  `.env` (compose variables only), `app.env` (api/worker), `caddy.env` (DNS token), `backup.env`, `intel.env` (its own
+  storage key); `web` gets none. `cap_drop: [ALL]` + `no-new-privileges` on the app containers. Networks: `edge`
+  (Caddy `.10` and web `.11` fixed, outside the dynamic `ip_range`: the API's only trusted proxies) and an internal
+  `data` network. Infrastructure images (postgres, caddy, backup) have their own tags in `.env`, so a release never
+  restarts the database. Only Caddy publishes ports.
+- **Caddy**: xcaddy build with a DNS module (Cloudflare default); `app.`/`api.` automatic HTTPS, `*.{SITES_BASE_DOMAIN}`
+  DNS-01 wildcard with a 503 page until BF-036; headers only where the apps set none; streaming (`flush_interval -1`)
+  and no compression for SSE; body limits; JSON logs; `CADDY_TLS=internal` for rehearsals.
+- **Deploy**: `deploy-staging.yml` runs on CI success for `main` (or by hand, only from `main`); scripts always come
+  from `main`, the image sha must be on `main`, an older build than the deployed one is skipped; the SSH key can only
+  run the forced command `infra/deploy/ssh-command.sh` (`current`, `upload <sha>`, `login`, `logout`, `deploy <sha>`);
+  the key is deleted before the smoke test. `deploy.sh`: lock, ignores hangups, release directories (`releases/<sha>/`,
+  a rollback uses its own compose file), pull → migrate → `up --wait` → health through Caddy → keep (prune older
+  releases and images) or roll back; the CI log shows container states only, never logs.
+- **Backups** (`bf-backup`): nightly `pg_dump -Fc`, encrypted before upload (rclone crypt), retention only after a
+  successful upload; restore requires `--into <db>` or `--overwrite-live` and runs in one transaction. The first
+  restore test found `bf_tsvector()` unrestorable under pg_restore's empty `search_path`: **migration 0018** (+ test).
+- **Verified locally twice** (second run after the review fixes, fresh volumes, split env files, release directories):
+  r1 → r2 (Postgres not restarted) → bootstrap through compose → smoke green with the release check → broken r3 →
+  rolled back to r2; SSE events streamed through Caddy (first run); encrypted backup → ciphertext in the bucket →
+  restore into a new database with the identical schema.
+- **Decision**: separate migration/runtime database roles are BF-060's (the reviewer-suggested `bf_app` role was
+  prototyped and dropped: default grants would also give UPDATE/DELETE on the append-only audit log).
+- **Not done here**: a deploy to a real server (none available); shellcheck runs locally (official image), not in CI.
+- **Follow-ups**: slimmer api image; shellcheck in CI; IPv6 on the edge network; production, PITR and image digests
+  (BF-061); runtime DB role (BF-060).
 
 ## Agent prompt
 ```text

@@ -3,11 +3,10 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { setWorkerUrl } from 'maplibre-gl';
 import MapGL, { AttributionControl, Marker, NavigationControl } from 'react-map-gl/maplibre';
+import { publicEnv } from '@/lib/public-env.ts';
 
 // Copied to /public by scripts/next.mjs (see features/search/results-map.tsx).
 setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
-
-const STYLE = process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty';
 
 /** Where the business is (one marker; loaded only when the Overview tab shows a location). */
 export function LocationMap({
@@ -23,7 +22,7 @@ export function LocationMap({
     <div className="h-56 overflow-hidden rounded-lg border">
       <MapGL
         initialViewState={{ latitude: lat, longitude: lng, zoom: 15 }}
-        mapStyle={STYLE}
+        mapStyle={publicEnv().mapStyleUrl}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
       >

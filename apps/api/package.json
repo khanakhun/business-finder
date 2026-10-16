@@ -33,6 +33,7 @@
     "@bf/db": "workspace:*",
     "@bf/observability": "workspace:*",
     "@bf/queue": "workspace:*",
+    "@bf/tsconfig": "workspace:*",
     "@bull-board/api": "catalog:",
     "@bull-board/express": "catalog:",
     "@bull-board/nestjs": "catalog:",
@@ -79,7 +80,6 @@
   },
   "devDependencies": {
     "@bf/testing": "workspace:*",
-    "@bf/tsconfig": "workspace:*",
     "@biomejs/biome": "catalog:",
     "@nestjs/testing": "catalog:",
     "@opentelemetry/sdk-trace-base": "catalog:",

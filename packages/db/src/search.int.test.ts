@@ -151,3 +151,16 @@ describe('businesses search text', () => {
     expect(await matches(id, 'pizzeria')).toBe(false);
   });
 });
+
+describe('restorable search functions (BF-025)', () => {
+  it('work with an empty search_path, as during pg_restore', async () => {
+    // pg_restore loads data with search_path = '': generated columns call bf_tsvector() there (migration 0018).
+    const rows = await db.transaction(async (tx) => {
+      await tx.execute(sql`SET LOCAL search_path = ''`);
+      return tx.execute<{ doc: string }>(
+        sql`SELECT public.bf_tsvector('Cafés du port', 'Boulangerie', 'Gustavia')::text AS doc`,
+      );
+    });
+    expect(rows[0]?.doc).toContain('cafe');
+  });
+});

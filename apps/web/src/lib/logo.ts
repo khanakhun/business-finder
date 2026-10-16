@@ -1,8 +1,9 @@
 'use client';
 
 import { networkError, toApiError } from '@bf/api-client';
+import { publicEnv } from './public-env.ts';
 
-const apiUrl = () => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const apiUrl = () => publicEnv().apiUrl;
 
 /**
  * The workspace logo image (fetched with the session cookie), or null when the workspace has none. Display it

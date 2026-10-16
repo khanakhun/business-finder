@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { serverPublicEnv } from './lib/public-env.ts';
 
 /**
  * Per-request Content-Security-Policy (security.md §8: nonce-based for scripts). Next.js reads the nonce from the
@@ -33,13 +34,12 @@ export function buildCsp(
 
 export function proxy(request: NextRequest): NextResponse {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const env = serverPublicEnv();
   const csp = buildCsp(nonce, {
     dev: process.env.NODE_ENV === 'development',
-    apiOrigin: new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').origin,
-    https: (process.env.NEXT_PUBLIC_APP_URL ?? '').startsWith('https://'),
-    mapOrigin: new URL(
-      process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty',
-    ).origin,
+    apiOrigin: new URL(env.apiUrl).origin,
+    https: env.appUrl.startsWith('https://'),
+    mapOrigin: new URL(env.mapStyleUrl).origin,
   });
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);

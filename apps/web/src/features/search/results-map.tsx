@@ -18,13 +18,13 @@ import MapGL, {
 } from 'react-map-gl/maplibre';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
 import { apiClient } from '@/lib/api.ts';
+import { publicEnv } from '@/lib/public-env.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { useArea, useSearchState } from './hooks.tsx';
 
 // Copied to /public by scripts/next.mjs: the bundle cannot resolve MapLibre's worker next to its module.
 setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 
-const STYLE = process.env.NEXT_PUBLIC_MAP_STYLE_URL ?? 'https://tiles.openfreemap.org/styles/liberty';
 const LAGOON = '#0b7480';
 const BUOY = '#c98a04';
 
@@ -153,7 +153,7 @@ export function ResultsMap({
     <section aria-label={t('label')} className="relative min-h-96 flex-1 overflow-hidden rounded-lg border">
       <MapGL
         ref={mapRef}
-        mapStyle={STYLE}
+        mapStyle={publicEnv().mapStyleUrl}
         initialViewState={{ longitude: -62.84, latitude: 17.9, zoom: 12 }}
         attributionControl={false}
         interactiveLayerIds={draw ? [] : ['clusters', 'points']}

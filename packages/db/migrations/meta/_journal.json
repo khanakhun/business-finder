@@ -127,6 +127,13 @@
       "when": 1792086098877,
       "tag": "0017_crm_basics",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792090621225,
+      "tag": "0018_restorable_search_functions",
+      "breakpoints": true
     }
   ]
 }

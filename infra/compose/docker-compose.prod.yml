@@ -1,0 +1,267 @@
+# Staging/production stack on one VPS (BF-025, ADR-0014). Deployed to /opt/bf by .github/workflows/deploy-staging.yml
+# (infra/deploy/deploy.sh); the runbook is docs/runbooks/staging-setup.md.
+#
+#   IMAGE_REGISTRY  ghcr.io/<owner>          IMAGE_TAG  the git sha CI built (set by the deploy script)
+#   POSTGRES_IMAGE_TAG, CADDY_IMAGE_TAG, BACKUP_IMAGE_TAG (in .env): infrastructure images move only when bumped on
+#   purpose, never with each release (no database restart on deploys, no binary swap on rollbacks).
+#
+# Each service receives only the secrets it needs (files in /opt/bf, mode 600; docs/runbooks/staging-setup.md):
+#   .env        compose variables: domains, registry, Postgres owner and role passwords, tuning (never sent whole)
+#   app.env     api and worker (application secrets)
+#   caddy.env   the DNS provider token          backup.env  object storage key and backup passphrase
+#   intel.env   services/intel: object storage settings (its own, narrowly scoped key) and open-data tuning
+#
+# Only Caddy publishes ports. Postgres and Valkey sit on an internal network with no route out.
+
+name: bf
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '5'
+
+# Least privilege for the application containers (Postgres and Valkey need their entrypoints' privileges).
+x-hardened: &hardened
+  restart: unless-stopped
+  logging: *logging
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
+
+x-app: &app
+  <<: *hardened
+  env_file: app.env
+  networks: [edge, data]
+
+services:
+  caddy:
+    image: ${IMAGE_REGISTRY:?}/bf-caddy:${CADDY_IMAGE_TAG:?}
+    restart: unless-stopped
+    logging: *logging
+    ports:
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+      - ${HTTPS_PORT:-443}:443/udp
+    # Binds 80/443 through the binary's file capability; everything else dropped.
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    # ACME_DNS_API_TOKEN (and only that) lives in caddy.env.
+    env_file: caddy.env
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:?}
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
+      ACME_EMAIL: ${ACME_EMAIL:?}
+      ACME_DNS_PROVIDER: ${ACME_DNS_PROVIDER:-cloudflare}
+      CADDY_TLS: ${CADDY_TLS:-acme}
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web: { condition: service_healthy }
+      api: { condition: service_healthy }
+    networks:
+      edge: { ipv4_address: 172.30.0.10 }
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256M }
+
+  # The public face: no secrets at all, only where things are.
+  web:
+    <<: *hardened
+    image: ${IMAGE_REGISTRY:?}/bf-web:${IMAGE_TAG:?}
+    environment:
+      PORT: '3000'
+      API_INTERNAL_URL: http://api:4000
+      NEXT_PUBLIC_APP_URL: https://app.${BASE_DOMAIN:?}
+      NEXT_PUBLIC_API_URL: https://api.${BASE_DOMAIN:?}
+    networks:
+      edge: { ipv4_address: 172.30.0.11 }
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 512M }
+
+  api:
+    <<: *app
+    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    command: [http]
+    environment: &app-env
+      APP_VERSION: ${IMAGE_TAG:?}
+      API_PORT: '4000'
+      APP_URL: https://app.${BASE_DOMAIN:?}
+      API_URL: https://api.${BASE_DOMAIN:?}
+      INTEL_URL: http://intel:8000
+      # Caddy and the web server (which forwards the visitor's address on its server-side calls), by their fixed
+      # addresses on the edge network: the API rate-limits and audits per real client IP.
+      AUTH_TRUSTED_PROXIES: 172.30.0.10,172.30.0.11
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+    deploy:
+      resources:
+        limits: { cpus: '1.5', memory: 1280M }
+
+  worker:
+    <<: *app
+    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    command: [worker]
+    environment:
+      <<: *app-env
+      WORKER_METRICS_PORT: '9464'
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:9464/metrics').then((r)=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      start_period: 30s
+      retries: 3
+    # In-flight jobs get WORKER_SHUTDOWN_TIMEOUT_MS (30 s by default) to finish on deploys.
+    stop_grace_period: 45s
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+    deploy:
+      resources:
+        limits: { cpus: '1.5', memory: 1280M }
+
+  # Renders untrusted pages in Chromium: its shared secret and its own storage key, nothing of the application's.
+  intel:
+    <<: *hardened
+    image: ${IMAGE_REGISTRY:?}/bf-intel:${IMAGE_TAG:?}
+    env_file: intel.env
+    environment:
+      NODE_ENV: production
+      APP_VERSION: ${IMAGE_TAG:?}
+      INTEL_SHARED_SECRET: ${INTEL_SHARED_SECRET:?}
+      INTEL_HOST: 0.0.0.0
+      INTEL_PORT: '8000'
+    networks: [edge]
+    shm_size: 512m
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 1280M }
+
+  # One-shot: forward-only migrations, run by the deploy script before the app containers change.
+  migrate:
+    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    command: [migrate]
+    <<: *hardened
+    restart: 'no'
+    # The owner role (the application uses the same one until BF-060 separates migration and runtime roles).
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+    healthcheck: { disable: true }
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+    profiles: [tools]
+
+  postgres:
+    image: ${IMAGE_REGISTRY:?}/bf-postgres:${POSTGRES_IMAGE_TAG:?}
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      BF_SITES_RO_PASSWORD: ${BF_SITES_RO_PASSWORD:?}
+    # Sized for a 4 vCPU / 8 GB host; override in .env as the host grows.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${PG_SHARED_BUFFERS:-2GB}
+      - -c
+      - effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-5GB}
+      - -c
+      - work_mem=${PG_WORK_MEM:-16MB}
+      - -c
+      - maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM:-256MB}
+      - -c
+      - max_connections=${PG_MAX_CONNECTIONS:-100}
+    shm_size: 1g
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [data]
+    deploy:
+      resources:
+        limits: { cpus: '2', memory: 2560M }
+
+  valkey:
+    image: valkey/valkey:8.1.10-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+    restart: unless-stopped
+    logging: *logging
+    # AOF so queued jobs survive restarts; never evict (BullMQ keys must not disappear).
+    command:
+      - valkey-server
+      - --appendonly
+      - 'yes'
+      - --appendfsync
+      - everysec
+      # Below the container limit, so a full Valkey answers OOM errors instead of being killed.
+      - --maxmemory
+      - 400mb
+      - --maxmemory-policy
+      - noeviction
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: [CMD, valkey-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [data]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 512M }
+
+  # Nightly pg_dump to object storage (14 days); `docker compose run --rm backup restore <name>` restores.
+  backup:
+    image: ${IMAGE_REGISTRY:?}/bf-backup:${BACKUP_IMAGE_TAG:?}
+    <<: *hardened
+    # A real PID 1 forwards SIGTERM to the scheduling shell (fast, clean restarts on deploys).
+    init: true
+    env_file: backup.env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [edge, data]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256M }
+
+  # Optional: Google Maps scraper provider (BF-019), `docker compose --profile scraper up -d`.
+  gmaps-scraper:
+    image: gosom/google-maps-scraper:v1.18.1
+    restart: unless-stopped
+    logging: *logging
+    command: [-web, -data-folder, /gmapsdata]
+    volumes:
+      - gmaps-data:/gmapsdata
+    networks: [edge]
+    profiles: [scraper]
+
+  # Optional: e-mail verification (needs outbound port 25 from the host), `--profile verify`.
+  reacher:
+    image: reacherhq/backend:v0.11.9
+    restart: unless-stopped
+    logging: *logging
+    networks: [edge]
+    profiles: [verify]
+
+networks:
+  # Outbound access (providers, models, object storage) and Caddy's upstreams.
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          # Dynamic addresses never take the fixed ones of Caddy (.10) and web (.11), the API's trusted proxies.
+          ip_range: 172.30.0.128/25
+  # Databases: no route outside the host.
+  data:
+    internal: true
+
+volumes:
+  caddy-data: {}
+  caddy-config: {}
+  postgres-data: {}
+  valkey-data: {}
+  gmaps-data: {}

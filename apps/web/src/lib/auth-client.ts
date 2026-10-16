@@ -1,12 +1,13 @@
 'use client';
 
 import { type BfAuthClient, createBfAuthClient } from '@bf/auth/client';
+import { publicEnv } from './public-env.ts';
 
 let client: BfAuthClient | undefined;
 
 /** Better Auth client (sign-in, sign-up, 2FA, workspace switching). Imported only by pages that need it. */
 export function authClient(): BfAuthClient {
-  client ??= createBfAuthClient(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000', {
+  client ??= createBfAuthClient(publicEnv().apiUrl, {
     onTwoFactorRedirect: () => {
       const next = new URLSearchParams(window.location.search).get('next');
       window.location.assign(`/two-factor${next ? `?next=${encodeURIComponent(next)}` : ''}`);

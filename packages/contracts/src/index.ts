@@ -673,6 +673,7 @@ export {
   type ScoringProfileSummary,
   ScoringProfileSummarySchema,
   type ScoringProfileVersion,
+  ScoringProfileVersionActivated,
   ScoringProfileVersionSchema,
   ScoringRecomputeJob,
   type ScoringRecomputeProgress,

@@ -16,6 +16,7 @@ function setup() {
         ]),
     ),
     trackedByRun: vi.fn(async () => [BUSINESS, '01990000-0000-7000-8000-0000000000c2']),
+    workspacesWithBusinesses: vi.fn(async () => [ORG, OTHER]),
   } as unknown as ScoringRepository;
   const queue: ScoringQueue = { compute: vi.fn(async () => {}), recompute: vi.fn(async () => {}) };
   return { subscribers: new ScoringSubscribers(repository, queue), queue };
@@ -50,6 +51,29 @@ describe('ScoringSubscribers', () => {
     });
     await subscribers.onWorkspaceFacts(event(null, { businessId: BUSINESS }));
     expect(queue.compute).toHaveBeenCalledTimes(1);
+  });
+
+  it('recomputes every workspace with businesses when a new version is activated', async () => {
+    const { subscribers, queue } = setup();
+    await subscribers.onActivated(event(null, { profileId: 'p1', version: 2 }));
+    expect(queue.recompute).toHaveBeenCalledWith({
+      organizationId: ORG,
+      profileId: 'p1',
+      version: 2,
+      idempotencyKey: `event:evt-1:${ORG}`,
+    });
+    expect(queue.recompute).toHaveBeenCalledWith({
+      organizationId: OTHER,
+      profileId: 'p1',
+      version: 2,
+      idempotencyKey: `event:evt-1:${OTHER}`,
+    });
+  });
+
+  it('rescores the survivor of a merge for the workspaces tracking it', async () => {
+    const { subscribers, queue } = setup();
+    await subscribers.onSharedFacts(event(ORG, { businessId: 'loser', intoId: BUSINESS }));
+    expect(queue.compute).toHaveBeenCalledTimes(2);
   });
 
   it('scores what a discovery run added when it ends', async () => {

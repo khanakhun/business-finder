@@ -85,7 +85,6 @@ export class ScoringService {
     const profiles = options.profileIds
       ? all.filter((profile) => options.profileIds?.includes(profile.id))
       : all;
-    const primary = await this.primaryProfileId(organizationId);
     let outcome: ComputeOutcome = { scored: 0, written: 0, unchanged: 0 };
     // Sorted: every job takes the businesses' locks in the same order.
     const ids = [...new Set(businessIds)].sort();
@@ -94,7 +93,6 @@ export class ScoringService {
         organizationId,
         ids.slice(start, start + SCORING_BATCH),
         profiles,
-        primary,
         options,
       );
       outcome = {
@@ -110,11 +108,11 @@ export class ScoringService {
     organizationId: string,
     businessIds: readonly string[],
     profiles: readonly ActiveProfile[],
-    primary: string,
     options: { readonly force?: boolean; readonly notify?: boolean },
   ): Promise<ComputeOutcome> {
-    const now = this.clock.now();
-    const facts = await this.assembler.assemble(organizationId, businessIds, now);
+    // One clock for every process (the database's), taken before the facts: it orders concurrent writes.
+    const computedAt = await this.repository.databaseNow();
+    const facts = await this.assembler.assemble(organizationId, businessIds, this.clock.now());
     // The engine is pure: score everything first, then decide and write under the businesses' locks.
     const scored = facts.flatMap((business) =>
       profiles.map((profile) => {
@@ -129,7 +127,7 @@ export class ScoringService {
             profileVersion: profile.activeVersion,
             featureSetVersion: FEATURE_SET_VERSION,
             factsHash: vectorHash(result.features),
-            computedAt: now,
+            computedAt,
           } satisfies ScoreWrite,
         };
       }),
@@ -138,9 +136,7 @@ export class ScoringService {
       organizationId,
       facts.map((f) => f.businessId),
       scored,
-      primary,
       options.force ?? false,
-      now,
     );
     // After the commit (`compute` is never called inside an outer transaction): pages showing these businesses
     // refetch their scores (best effort, like all realtime).
@@ -175,9 +171,7 @@ export class ScoringService {
     organizationId: string,
     businessIds: readonly string[],
     scored: readonly { readonly profile: ActiveProfile; readonly write: ScoreWrite }[],
-    primary: string,
     force: boolean,
-    now: Date,
   ): Promise<{
     readonly written: number;
     readonly unchanged: number;
@@ -185,6 +179,8 @@ export class ScoringService {
   }> {
     if (scored.length === 0) return { written: 0, unchanged: 0, businesses: new Set() };
     await this.repository.lockBusinesses(organizationId, businessIds);
+    // Read under the locks: a primary switch or a newer version committed meanwhile is what this batch sees.
+    const primary = await this.primaryProfileId(organizationId);
     const current = await this.repository.currentScores(organizationId, businessIds);
     const writes: ScoreWriteRequest[] = [];
     const previous = new Map<string, { score: number; tier: ScoreWrite['tier'] }>();
@@ -195,8 +191,16 @@ export class ScoringService {
         stored?.profileVersion === write.profileVersion &&
         stored.featureSetVersion === write.featureSetVersion &&
         stored.factsHash === write.factsHash;
-      // Another job wrote newer facts meanwhile, or nothing changed (unless forced): leave the stored score.
-      if ((stored && stored.computedAt.getTime() > now.getTime()) || (same && !force)) {
+      // Another job wrote newer facts or versions meanwhile (versions only go up), or nothing changed (unless
+      // forced): leave the stored score.
+      // DECISION(BF-031): an unchanged write keeps its computed_at, so facts going A → B → A may let a slow job
+      // holding B land after the second A; the next change of facts corrects it.
+      const newer =
+        stored !== undefined &&
+        (stored.computedAt.getTime() > write.computedAt.getTime() ||
+          stored.profileVersion > write.profileVersion ||
+          stored.featureSetVersion > write.featureSetVersion);
+      if (newer || (same && !force)) {
         unchanged += 1;
         continue;
       }

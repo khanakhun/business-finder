@@ -714,7 +714,7 @@ const BoundedGateConditionSchema = z
   .unknown()
   .superRefine((raw, ctx) => {
     const problem = conditionTooLarge(raw);
-    if (problem) ctx.addIssue({ code: 'custom', message: problem, abort: true });
+    if (problem) ctx.addIssue({ code: 'custom', message: problem });
   })
   .pipe(GateConditionSchema)
   .meta({
@@ -1060,6 +1060,13 @@ export const ScoreUpdated = defineEvent(
     /** The workspace's primary profile (its tier is the business's tier in the listing). */
     primary: z.boolean(),
   }),
+);
+
+/** A profile version became active (a new built-in version at boot): every workspace using it recomputes. */
+export const ScoringProfileVersionActivated = defineEvent(
+  'scoring.profile_version.activated',
+  1,
+  z.object({ profileId: z.uuid(), version: z.number().int().positive() }),
 );
 
 /** Realtime: a business's scores were written (its page and the listing refetch). Not sent during bulk recomputes. */

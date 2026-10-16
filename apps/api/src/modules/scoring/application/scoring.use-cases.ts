@@ -126,7 +126,7 @@ export class RecomputeProfileCommand {
       organizationId,
       profileId,
       version: profile.activeVersion,
-      // A new request recomputes again (forced): one job per request.
+      // Unique per request (the job id); the queue merges requests per workspace and profile (deduplication).
       idempotencyKey: `recompute:${organizationId}:${profileId}:${profile.activeVersion}:${this.clock.now().getTime()}`,
       ...(userId ? { requestedBy: userId } : {}),
     });
@@ -146,9 +146,11 @@ export class RecomputeRunner {
   async run(
     organizationId: string,
     profileId: string,
-    version: number,
+    requested: number,
     signal?: AbortSignal,
   ): Promise<{ readonly done: number; readonly written: number }> {
+    // Scores use the version active now (a merged request may name an older one): progress says which.
+    const version = (await this.repository.profile(organizationId, profileId))?.activeVersion ?? requested;
     const total = await this.repository.trackedCount(organizationId);
     let after: string | null = null;
     let done = 0;

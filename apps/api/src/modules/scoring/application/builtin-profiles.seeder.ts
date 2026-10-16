@@ -1,9 +1,11 @@
-import type { Offer } from '@bf/contracts';
+import { type Offer, ScoringProfileVersionActivated } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import { Inject, Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import { Transactional } from '../../platform/db/transactional.ts';
+import { EventRecorder } from '../../platform/events/event-recorder.ts';
 import { LOGGER } from '../../platform/logging/logger.ts';
 import { BUILTIN_PROFILE_VERSIONS, BUILTIN_PROFILES } from '../domain/builtin-profiles.ts';
-import { SCORING_QUEUE, SCORING_REPOSITORY, type ScoringQueue, type ScoringRepository } from './ports.ts';
+import { SCORING_REPOSITORY, type ScoringRepository } from './ports.ts';
 
 // The built-in profiles live in code (domain) and in the database (scores reference their rows): every process
 // makes sure their rows and current versions exist at boot (idempotent, safe when several start at once).
@@ -32,7 +34,7 @@ const NAMES: Record<Offer, string> = {
 export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
   constructor(
     @Inject(SCORING_REPOSITORY) private readonly repository: ScoringRepository,
-    @Inject(SCORING_QUEUE) private readonly queue: ScoringQueue,
+    private readonly events: EventRecorder,
     @Inject(LOGGER) private readonly logger: Logger,
   ) {}
 
@@ -42,7 +44,7 @@ export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
 
   async seed(): Promise<void> {
     const offers = Object.keys(BUILTIN_PROFILES) as Offer[];
-    const activated = await this.repository.ensureBuiltins(
+    const activated = await this.ensure(
       offers.map((offer) => ({
         id: BUILTIN_PROFILE_IDS[offer],
         offer,
@@ -51,22 +53,27 @@ export class BuiltinProfilesSeeder implements OnApplicationBootstrap {
         config: BUILTIN_PROFILES[offer],
       })),
     );
-    // A new built-in version rescores every workspace (the first boot activates v1 with nothing to rescore yet).
-    // Keyed per version and workspace: processes booting together enqueue it once.
-    const workspaces = activated.length > 0 ? await this.repository.workspacesWithBusinesses() : [];
-    for (const { profileId, version } of activated) {
-      for (const organizationId of workspaces) {
-        await this.queue.recompute({
-          organizationId,
-          profileId,
-          version,
-          idempotencyKey: `builtin:${profileId}:${version}:${organizationId}`,
-        });
-      }
-    }
     this.logger.debug(
       { profiles: offers.length, activated: activated.length },
       'built-in scoring profiles ensured',
     );
+  }
+
+  /**
+   * Ensures the rows and records, in the same transaction, `scoring.profile_version.activated` for each version it
+   * activated: the outbox then rescores every workspace (a crash or an unreachable queue loses nothing). On a
+   * populated database the first boot's activation of v1 is the backfill.
+   */
+  @Transactional()
+  async ensure(profiles: Parameters<ScoringRepository['ensureBuiltins']>[0]) {
+    const activated = await this.repository.ensureBuiltins(profiles);
+    for (const { profileId, version } of activated) {
+      await this.events.record(ScoringProfileVersionActivated, {
+        orgId: null,
+        actor: { type: 'system', id: 'scoring' },
+        payload: { profileId, version },
+      });
+    }
+    return activated;
   }
 }

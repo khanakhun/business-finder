@@ -207,16 +207,24 @@ export class DrizzleScoringRepository implements ScoringRepository {
       });
   }
 
+  async databaseNow(): Promise<Date> {
+    const [row] = await getExecutor(this.db).execute<{ now: Date | string }>(sql`SELECT now() AS now`);
+    return new Date(row?.now ?? Date.now());
+  }
+
   async lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void> {
     if (businessIds.length === 0) return;
-    const keys = [...new Set(businessIds)].sort().map((id) => `scoring:${organizationId}:${id}`);
-    // One round trip, in key order: two batches sharing businesses never wait on each other in a cycle.
+    // Row locks on the workspace's rows (no shared lock-table entries), in id order: concurrent batches never wait
+    // on each other in a cycle, and the listing columns updated later in the transaction are already ours.
     await getExecutor(this.db).execute(sql`
-      SELECT pg_advisory_xact_lock(hashtextextended(k, 0))
-      FROM unnest(ARRAY[${sql.join(
-        keys.map((key) => sql`${key}`),
-        sql`, `,
-      )}]::text[]) WITH ORDINALITY AS t(k, n) ORDER BY n`);
+      SELECT 1 FROM ${orgBusinesses}
+      WHERE organization_id = ${organizationId}
+        AND business_id = ANY(${sql`ARRAY[${sql.join(
+          businessIds.map((id) => sql`${id}`),
+          sql`, `,
+        )}]::uuid[]`})
+      ORDER BY business_id
+      FOR NO KEY UPDATE`);
   }
 
   async currentScores(organizationId: string, businessIds: readonly string[]) {

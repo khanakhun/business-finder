@@ -512,6 +512,26 @@ describe('scoring', () => {
     expect(theirs?.workspace.lastContactedAt).toBeNull();
   });
 
+  it('serializes concurrent computes for a business: one current row per profile, history once', async () => {
+    const id = await trackNew({ ratingCount: 77 });
+    await expect.poll(() => storedScores(id), { timeout: 20_000, interval: 200 }).toBe(5);
+    await db.update(businesses).set({ ratingCount: 78 }).where(eq(businesses.id, id));
+    const scoring = t.app.get(ScoringService);
+    const results = await Promise.all([
+      scoring.compute(org, [id], { notify: false }),
+      scoring.compute(org, [id], { notify: false }),
+      scoring.compute(org, [id], { force: true, notify: false }),
+    ]);
+    // Exactly one of the jobs wrote the new vector's history; the others found it written.
+    expect(results.map((r) => r.scored)).toEqual([5, 5, 5]);
+    expect(await storedScores(id)).toBe(5);
+    const [history] = await db
+      .select({ n: count() })
+      .from(businessScoreHistory)
+      .where(and(eq(businessScoreHistory.organizationId, org), eq(businessScoreHistory.businessId, id)));
+    expect(history?.n).toBe(10);
+  });
+
   it('emits org_business.tracked once, however often a business is tracked', async () => {
     const id = await trackNew();
     await owner.post(`/v1/businesses/${id}/track`).send({ addedVia: 'search' }).expect(200);
@@ -547,9 +567,20 @@ describe('scoring', () => {
       config,
     };
     try {
-      expect(await repository.ensureBuiltins([{ ...base, version: 2 }])).toEqual([
-        { profileId: base.id, version: 2 },
-      ]);
+      // A newer version activates, with its event in the outbox (every workspace then recomputes); an older
+      // process never rolls it back.
+      expect(await seeder.ensure([{ ...base, version: 2 }])).toEqual([{ profileId: base.id, version: 2 }]);
+      const [activated] = await db
+        .select({ n: count() })
+        .from(outboxEvents)
+        .where(
+          and(
+            eq(outboxEvents.type, 'scoring.profile_version.activated'),
+            sql`${outboxEvents.payload}->>'profileId' = ${base.id}`,
+            sql`${outboxEvents.payload}->>'version' = '2'`,
+          ),
+        );
+      expect(activated?.n).toBe(1);
       expect(await repository.ensureBuiltins([{ ...base, version: 1 }])).toEqual([]);
       const [row] = await db
         .select({ version: scoringProfiles.activeVersion })

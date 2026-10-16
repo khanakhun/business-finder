@@ -8,6 +8,7 @@ import {
   DoNotContactSet,
   OrgBusinessStatusChanged,
   OrgBusinessTracked,
+  ScoringProfileVersionActivated,
 } from '@bf/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import { OnDomainEvent } from '../../platform/events/on-domain-event.decorator.ts';
@@ -47,6 +48,20 @@ export class ScoringSubscribers {
       await this.queue.compute({
         organizationId,
         businessIds,
+        idempotencyKey: `event:${event.id}:${organizationId}`,
+      });
+    }
+  }
+
+  /** A new active version (built-in, at boot): every workspace with businesses recomputes with it. */
+  @OnDomainEvent(ScoringProfileVersionActivated, { id: 'scoring.recompute-activated-version' })
+  async onActivated(event: DomainEvent<typeof ScoringProfileVersionActivated>): Promise<void> {
+    const { profileId, version } = event.payload;
+    for (const organizationId of await this.repository.workspacesWithBusinesses()) {
+      await this.queue.recompute({
+        organizationId,
+        profileId,
+        version,
         idempotencyKey: `event:${event.id}:${organizationId}`,
       });
     }

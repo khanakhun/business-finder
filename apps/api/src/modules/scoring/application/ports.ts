@@ -71,7 +71,9 @@ export interface ScoringRepository {
   /** The workspace's primary profile id (null: the default built-in). */
   primaryProfileId(organizationId: string): Promise<string | null>;
   setPrimaryProfile(organizationId: string, profileId: string, userId: string | null): Promise<void>;
-  /** Serializes score writes per business of the workspace (transaction-scoped advisory locks, in id order). */
+  /** The database's clock (one for every process). */
+  databaseNow(): Promise<Date>;
+  /** Serializes score writes per business of the workspace (row locks on its workspace rows, in id order). */
   lockBusinesses(organizationId: string, businessIds: readonly string[]): Promise<void>;
   /** The current scores of these businesses (fingerprints to skip unchanged writes). */
   currentScores(

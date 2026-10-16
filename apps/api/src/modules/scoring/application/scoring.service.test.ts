@@ -48,6 +48,7 @@ function setup(current: Map<string, Stored[]> = new Map()) {
     activeProfiles: vi.fn(async () => [active('new_website'), active('local_seo')]),
     primaryProfileId: vi.fn(async () => null),
     lockBusinesses: vi.fn(async () => {}),
+    databaseNow: vi.fn(async () => NOW),
     currentScores: vi.fn(async () => current),
     writeScores: vi.fn(async (batch: readonly ScoreWriteRequest[]) => {
       writes.push([...batch]);
@@ -129,6 +130,25 @@ describe('ScoringService', () => {
     );
     expect(await service.compute(ORG, [BUSINESS], { force: true })).toEqual({
       scored: 2,
+      written: 0,
+      unchanged: 2,
+    });
+    expect(writes).toEqual([]);
+  });
+
+  it('never writes over a newer profile or feature-set version (versions only go up)', async () => {
+    const { service, writes } = setup(
+      new Map([
+        [
+          BUSINESS,
+          [
+            stored({ profileId: BUILTIN_PRIMARY_PROFILE_ID, profileVersion: 2 }),
+            stored({ profileId: BUILTIN_PROFILE_IDS.local_seo, featureSetVersion: 2 }),
+          ],
+        ],
+      ]),
+    );
+    expect(await service.compute(ORG, [BUSINESS], { force: true })).toMatchObject({
       written: 0,
       unchanged: 2,
     });

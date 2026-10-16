@@ -704,6 +704,7 @@ export {
   ScoringVersionCreatedSchema,
   type SetPrimaryScoringProfileRequest,
   SetPrimaryScoringProfileRequestSchema,
+  TRANSFORM_KINDS_FOR,
   type Transform,
   TransformSchema,
   type UpdateScoringProfileRequest,

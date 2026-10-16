@@ -826,11 +826,13 @@ export const ProfileProblemSchema = z
   .object({ path: z.array(z.union([z.string(), z.number()])), message: z.string() })
   .meta({ id: 'ScoringProfileProblem' });
 
-const FITS: Record<FeatureDefinition['type'], readonly Transform['kind'][]> = {
-  number: ['linear', 'inverse', 'piecewise', 'log'],
-  boolean: ['boolean'],
-  enum: ['enumMap'],
-};
+/** The transforms that fit a feature's type (the editor offers these). */
+export const TRANSFORM_KINDS_FOR: Readonly<Record<FeatureDefinition['type'], readonly Transform['kind'][]>> =
+  {
+    number: ['linear', 'inverse', 'piecewise', 'log'],
+    boolean: ['boolean'],
+    enum: ['enumMap'],
+  };
 
 function conditionProblems(condition: GateCondition, path: ProblemPath, problems: ProfileProblem[]): void {
   if ('all' in condition) {
@@ -882,7 +884,7 @@ export function profileProblems(config: z.output<typeof ProfileConfigObjectSchem
     if (weight === 0) continue;
     const definition = FEATURE_DEFINITIONS[key];
     const transform = config.transforms[key];
-    if (transform && !FITS[definition.type].includes(transform.kind)) {
+    if (transform && !TRANSFORM_KINDS_FOR[definition.type].includes(transform.kind)) {
       problems.push({
         path: ['transforms', key],
         message: `A ${definition.type} feature cannot use ${transform.kind}`,

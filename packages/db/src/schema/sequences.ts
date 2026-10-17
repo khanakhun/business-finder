@@ -5,6 +5,7 @@
 import type { EnrollmentStatus, Offer, SequenceSettings, SequenceStep } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -75,6 +76,8 @@ export const sequenceEnrollments = pgTable(
     waitingMessageId: uuid().references(() => outboundMessages.id, { onDelete: 'set null' }),
     leaseUntil: tz(),
     variantAssignments: jsonb().$type<Record<string, string>>().notNull().default({}),
+    /** The enroller could auto-send (`outreach:auto_send`): steps skip approval when the policy and flag allow. */
+    autoSend: boolean().notNull().default(false),
     stopReason: text(),
     pauseReason: text(),
     stoppedAt: tz(),

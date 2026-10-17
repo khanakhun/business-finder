@@ -465,6 +465,11 @@ export const SiteViewBeaconSchema = z
       .string()
       .regex(/^[A-Za-z0-9_-]{1,64}$/)
       .optional(),
+    /** The outreach token of the email the visitor came from (`?r=`, BF-052/053): attribution, no personal data. */
+    r: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{16}$/)
+      .optional(),
   })
   .meta({ id: 'SiteViewBeacon' });
 export type SiteViewBeacon = z.infer<typeof SiteViewBeaconSchema>;

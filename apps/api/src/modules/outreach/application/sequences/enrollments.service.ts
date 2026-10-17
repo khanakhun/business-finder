@@ -43,7 +43,12 @@ export class EnrollmentsService {
     private readonly events: EventRecorder,
   ) {}
 
-  async enroll(actor: DraftActor, sequenceId: string, input: EnrollRequest): Promise<EnrollResult> {
+  async enroll(
+    actor: DraftActor,
+    sequenceId: string,
+    input: EnrollRequest,
+    canAutoSend = false,
+  ): Promise<EnrollResult> {
     const request = EnrollRequestSchema.parse(input);
     const sequence = await this.repository.get(actor.organizationId, sequenceId);
     if (!sequence) throw new NotFoundError('Sequence', sequenceId);
@@ -55,6 +60,7 @@ export class EnrollmentsService {
     if (!version) throw new NotFoundError('SequenceVersion', `${sequence.id}@${sequence.headVersion}`);
     const timeZone = await this.workspace.timeZone(actor.organizationId);
     const result: EnrollResult = { enrolled: [], skipped: [] };
+    const autoSend = canAutoSend && version.settings.approval === 'auto_when_permitted';
     if (request.fromMessageId) {
       const message = await this.messages.get(actor.organizationId, request.fromMessageId);
       if (!message) throw new NotFoundError('OutboundMessage', request.fromMessageId);
@@ -66,6 +72,7 @@ export class EnrollmentsService {
           details: { reason: 'NOTHING_TO_FOLLOW' },
         });
       await this.one(actor, version, timeZone, result, {
+        autoSend,
         businessId: message.businessId,
         contactId: message.contactId,
         mailboxId: message.mailboxId,
@@ -77,6 +84,7 @@ export class EnrollmentsService {
     }
     for (const item of request.items ?? [])
       await this.one(actor, version, timeZone, result, {
+        autoSend,
         businessId: item.businessId,
         contactId: item.contactId,
         mailboxId: null,
@@ -93,6 +101,7 @@ export class EnrollmentsService {
     timeZone: string,
     result: EnrollResult,
     item: {
+      readonly autoSend: boolean;
       readonly businessId: string;
       readonly contactId: string | null;
       readonly mailboxId: string | null;
@@ -140,6 +149,7 @@ export class EnrollmentsService {
           })
         : now,
       variantAssignments: {},
+      autoSend: item.autoSend,
       enrolledBy: actor.userId,
     });
     if (!enrolled) {

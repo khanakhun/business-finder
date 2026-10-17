@@ -660,6 +660,10 @@
       "lead_opted_out": {
         "title": "{business} ne souhaite pas être contactée",
         "body": "Ne pas contacter est activé ; l’aperçu est retiré si demandé."
+      },
+      "sequence_paused": {
+        "title": "Relances en pause pour {business}",
+        "body": "{reason}"
       }
     },
     "preferences": {
@@ -680,7 +684,8 @@
         "member_joined": "Nouveaux membres",
         "system_test": "Notifications de test",
         "site_needs_review": "Sites à revoir",
-        "lead_opted_out": "Refus de contact depuis un aperçu"
+        "lead_opted_out": "Refus de contact depuis un aperçu",
+        "sequence_paused": "Relances en pause"
       }
     }
   },

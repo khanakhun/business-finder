@@ -127,6 +127,8 @@ export const QUEUES = {
   outreachBulk: { name: 'outreach-bulk', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   outreachTick: { name: 'outreach-tick', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   outreachSend: { name: 'outreach-send', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 4 },
+  /** Sequences (BF-053): one due step per job (a draft, maybe a model call, then the outbound pipeline). */
+  outreachSequence: { name: 'outreach-sequence', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** Replies (BF-054): one sync per mailbox and poll (or push); one triage per human reply (a model call). */
   outreachSync: { name: 'outreach-sync', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   outreachTriage: {

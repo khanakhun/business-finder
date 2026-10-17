@@ -130,7 +130,10 @@ export class OutboundCommands {
       readonly mailboxId: string | undefined;
       readonly requestedAt: Date | null;
       readonly idempotencyKey: string;
-      readonly pending?: { readonly bulkRunId: string } | undefined;
+      /** Waits in the approvals queue (bulk runs, sequence steps that need approval). */
+      readonly pending?: { readonly bulkRunId: string | null } | undefined;
+      /** A sequence step (BF-053): the message reports back to its enrollment. */
+      readonly sequence?: { readonly enrollmentId: string; readonly stepIndex: number } | undefined;
     },
   ): Promise<{ message: OutboundRecord; created: boolean }> {
     const now = this.clock.now();
@@ -184,8 +187,8 @@ export class OutboundCommands {
       threadId: threadRow.id,
       mailboxId: mailbox.id,
       draftId: draft.id,
-      sequenceEnrollmentId: null,
-      sequenceStep: null,
+      sequenceEnrollmentId: input.sequence?.enrollmentId ?? null,
+      sequenceStep: input.sequence?.stepIndex ?? null,
       bulkRunId: input.pending?.bulkRunId ?? null,
       purpose: draft.purpose,
       offer: draft.offer,

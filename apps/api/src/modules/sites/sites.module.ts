@@ -43,6 +43,7 @@ import {
 } from './application/ports.ts';
 import { SiteAssetCommands } from './application/site-assets.ts';
 import { SiteInsightsReader, SiteThumbnailCommands } from './application/site-thumbnails.ts';
+import { SiteViewAttribution } from './application/site-view-attribution.ts';
 import { SiteViewRecorder, SiteViewsFlusher } from './application/site-views.ts';
 import { SiteCommands } from './application/sites.commands.ts';
 import { SiteQueries } from './application/sites.queries.ts';
@@ -309,6 +310,7 @@ export class SitesModule {
         SiteQueries,
         SiteAssetCommands,
         SiteThumbnailCommands,
+        SiteViewAttribution,
         SiteViewRecorder,
         SiteViewsFlusher,
         SiteRenderSubscriber,
@@ -332,7 +334,7 @@ export class SitesModule {
             ]
           : []),
       ],
-      exports: [SiteCommands, SiteQueries, SiteAssetCommands],
+      exports: [SiteCommands, SiteQueries, SiteAssetCommands, SiteViewAttribution],
     };
   }
 }

@@ -10,4 +10,5 @@ export type {
 } from './application/ports.ts';
 export { SANDBOX_PROVIDER, type SandboxProvider } from './application/sandbox.ports.ts';
 export { SiteFactExtraction } from './application/site-facts.extraction.ts';
+export { toSiteFactRegistry } from './domain/facts/site-facts.ts';
 export { GenerationModule } from './generation.module.ts';

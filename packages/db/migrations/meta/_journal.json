@@ -253,6 +253,13 @@
       "when": 1792227103183,
       "tag": "0035_generation_workspace_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792227754317,
+      "tag": "0036_site_chat",
+      "breakpoints": true
     }
   ]
 }

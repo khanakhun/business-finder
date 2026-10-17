@@ -94,6 +94,18 @@ export function createFakeAiGateway(options: FakeAiGatewayOptions): FakeAiGatewa
       }
       return { textStream: chunks(), result };
     },
+    // A recorded agent run replays its final text only (no tool calls): tool-calling runs are tested with a scripted
+    // model through the real gateway (ModelFactory), not with fixtures.
+    async agent(task, input, ctx, agentOptions) {
+      const result = answer<string>(task, task.input.parse(input), ctx, async () => {
+        const run = await (options.gateway as AiGateway).agent(task, input, ctx, agentOptions);
+        return run.result;
+      });
+      async function* events() {
+        yield { type: 'text' as const, text: (await result).output };
+      }
+      return { events: events(), result };
+    },
     async embed(texts, embedOptions) {
       calls.push({ task: `embed.${embedOptions.purpose}`, input: texts, orgId: embedOptions.orgId });
       const dims = options.embeddingDims ?? 1536;

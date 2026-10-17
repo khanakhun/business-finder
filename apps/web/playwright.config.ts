@@ -39,6 +39,8 @@ export default defineConfig({
         FAKE_EMAIL_VERIFIER: 'true',
         FAKE_REVIEWS: 'true',
         FAKE_WEBSITE_AUDIT: 'true',
+        // Areas come from the BL pack in geo_areas (CI imports it); never a live geocoder (its answers change).
+        GEOCODER_PROVIDER: 'none',
         // The site fixtures' image host (the site editor e2e creates sites from them, BF-037).
         SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
       },
@@ -55,6 +57,7 @@ export default defineConfig({
         FAKE_EMAIL_VERIFIER: 'true',
         FAKE_REVIEWS: 'true',
         FAKE_WEBSITE_AUDIT: 'true',
+        GEOCODER_PROVIDER: 'none',
       },
       url: workerMetricsUrl,
       reuseExistingServer: !ci,

@@ -37,6 +37,7 @@ import {
   type WorkspaceBudget,
   type WorkspacePreparer,
 } from './ports.ts';
+import { qualityReportKey } from './quality-report.ts';
 import { JobTransitions } from './transitions.ts';
 
 // One attempt of a generation job (BF-039), the Template Method every engine queue runs: take the slots (the
@@ -209,6 +210,19 @@ export class GenerationRunner {
       engineAttempts: job.engineAttempts + 1,
     });
     const previous = mode === 'repair' ? await this.repository.attempt(job.id, attemptNo - 1) : undefined;
+    // What the quality gate found on the previous attempt (absent: repair from the spec alone).
+    let repairIssues: unknown[] = [];
+    if (previous) {
+      const report = await this.artifacts
+        .get(qualityReportKey(job.organizationId, job.id, previous.attemptNo))
+        .catch(() => undefined);
+      try {
+        const parsed = report ? (JSON.parse(report.toString('utf8')) as { issues?: unknown[] }) : undefined;
+        repairIssues = Array.isArray(parsed?.issues) ? parsed.issues : [];
+      } catch {
+        repairIssues = [];
+      }
+    }
     const buffer: EngineEvent[] = [];
     const flush = async () => {
       if (buffer.length === 0) return;
@@ -282,7 +296,7 @@ export class GenerationRunner {
           budgetUsd: job.budgetUsd,
           deadlineAt,
           locales: settings.locales,
-          ...(previous?.specRef ? { repair: { baseSpecRef: previous.specRef, issues: [] } } : {}),
+          ...(previous?.specRef ? { repair: { baseSpecRef: previous.specRef, issues: repairIssues } } : {}),
           logger,
           writeSpec: async (spec) => {
             const body = Buffer.from(JSON.stringify(spec));

@@ -37,6 +37,11 @@ export const SiteCopyInput = z.object({
             }),
           )
           .max(12),
+        /** What was wrong with this block's previous texts (a re-ask or a repair), to fix in the new ones. */
+        problems: z
+          .array(z.object({ key: z.string().max(60), message: z.string().max(400) }))
+          .max(12)
+          .optional(),
       }),
     )
     .min(1)

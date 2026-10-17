@@ -80,9 +80,11 @@ function gateway(answers: {
   fail?: boolean;
 }) {
   const calls: string[] = [];
+  const inputs: unknown[] = [];
   const api = {
     async run(task: { name: string }, input: unknown) {
       calls.push(task.name);
+      inputs.push(input);
       if (answers.fail) throw new Error('provider down');
       const output =
         task.name === 'generation.site_plan'
@@ -102,7 +104,7 @@ function gateway(answers: {
       };
     },
   } as unknown as AiGateway;
-  return { api, calls };
+  return { api, calls, inputs };
 }
 
 /** Copy that fills every field with a text in every locale (FR/EN), optionally spoiled. */
@@ -160,8 +162,18 @@ async function run(engine: BlocksEngine, bundle: Uint8Array, overrides: Partial<
   return { events, spec: written[0] as Parameters<typeof validateSite>[0] | undefined };
 }
 
-const engineWith = (bundle: Uint8Array, api: AiGateway) =>
-  new BlocksEngine(api, { get: async () => Buffer.from(bundle) });
+const engineWith = (bundle: Uint8Array, api: AiGateway, objects: Record<string, unknown> = {}) =>
+  new BlocksEngine(api, {
+    get: async (key: string) =>
+      key === 'bundle'
+        ? Buffer.from(bundle)
+        : key in objects
+          ? Buffer.from(JSON.stringify(objects[key]))
+          : undefined,
+  });
+
+const isCopyInput = (input: unknown): input is SiteCopyInput =>
+  !!input && typeof input === 'object' && 'blocks' in input && 'page' in input;
 
 describe('BlocksEngine', () => {
   it('plans, writes every page and returns a valid, fact-checked site with its events', async () => {
@@ -267,5 +279,135 @@ describe('BlocksEngine', () => {
     expect(down.events.at(-1)).toMatchObject({ type: 'error', code: 'PROVIDER_ERROR', retryable: true });
     const missing = await run(new BlocksEngine(gateway({}).api, { get: async () => undefined }), bundle);
     expect(missing.events.at(-1)).toMatchObject({ type: 'error', code: 'INVALID_BRIEF' });
+  });
+
+  it('asks again for a failing text with what was wrong, and keeps the fixed text', async () => {
+    const { bundle } = workspace();
+    const { api, inputs } = gateway({
+      copy: (input) =>
+        goodCopy((blockId, key) => {
+          const block = input.blocks.find((candidate) => candidate.blockId === blockId);
+          if (key !== 'heading') return undefined;
+          return block?.problems?.length
+            ? 'Nos prestations, sur rendez-vous'
+            : 'Le meilleur salon de Gustavia';
+        })(input),
+    });
+    const { events, spec } = await run(engineWith(bundle, api), bundle);
+    expect(events.at(-1)?.type).toBe('done');
+    const reasks = inputs.filter(isCopyInput).filter((input) => input.blocks.some((b) => b.problems?.length));
+    expect(reasks.length).toBeGreaterThan(0);
+    // Only the failing fields are asked again, each with the check's message.
+    for (const input of reasks)
+      for (const block of input.blocks) {
+        expect(block.fields.map((field) => field.key)).toEqual(['heading']);
+        expect(block.problems?.[0]?.message.length).toBeGreaterThan(0);
+      }
+    const text = JSON.stringify(spec);
+    expect(text).not.toContain('meilleur');
+    expect(text).toContain('Nos prestations, sur rendez-vous');
+    expect(events.some((event) => event.type === 'log' && /Asking again for/.test(event.message))).toBe(true);
+  });
+
+  it('stops asking again after two rounds, or near the budget, and restores the starter text', async () => {
+    const { bundle } = workspace();
+    const spoiled = goodCopy((_blockId, key) => (key === 'heading' ? 'Le meilleur salon' : undefined));
+    const stubborn = gateway({ copy: spoiled });
+    const first = await run(engineWith(bundle, stubborn.api), bundle);
+    const pages = stubborn.inputs
+      .filter(isCopyInput)
+      .filter((input) => !input.blocks.some((b) => b.problems));
+    const rounds = stubborn.inputs.filter(isCopyInput).length - pages.length;
+    expect(rounds).toBeGreaterThan(0);
+    expect(rounds).toBeLessThanOrEqual(2 * pages.length);
+    expect(JSON.stringify(first.spec)).not.toContain('meilleur');
+
+    // A budget of 0.3 with calls at 0.075: the plan and the pages spend more than 80% of it, so no re-ask starts.
+    const tight = gateway({ copy: spoiled, costUsd: 0.3 / 4 });
+    const second = await run(engineWith(bundle, tight.api), bundle, { budgetUsd: 0.3 } as never);
+    expect(tight.inputs.filter(isCopyInput).length).toBeGreaterThanOrEqual(3);
+    expect(tight.inputs.filter(isCopyInput).some((input) => input.blocks.some((b) => b.problems))).toBe(
+      false,
+    );
+    expect(second.events.at(-1)?.type).toBe('done');
+    expect(JSON.stringify(second.spec)).not.toContain('meilleur');
+  });
+
+  it('repairs the previous site: rewrites the reported texts and restores the reported blocks', async () => {
+    const { bundle, starter } = workspace();
+    const base = structuredClone(starter) as unknown as {
+      pages: { id: string; blocks: { id: string; type: string; props: Record<string, unknown> }[] }[];
+    };
+    const page = base.pages[0];
+    if (!page) throw new Error('no page');
+    const headingIndex = page.blocks.findIndex(
+      (block) => block.type !== 'hero' && typeof block.props.heading === 'object',
+    );
+    const heroIndex = page.blocks.findIndex((block) => block.type === 'hero');
+    const headed = page.blocks[headingIndex];
+    const hero = page.blocks[heroIndex];
+    if (!headed || !hero) throw new Error('no blocks');
+    headed.props.heading = { fr: 'Le meilleur salon', en: 'The best salon' };
+    hero.props.title = { fr: 'Salon Corail, repris', en: 'Salon Corail, kept' };
+    const contactIndex = page.blocks.findIndex((block) => block.type === 'contact');
+    const issues = [
+      {
+        path: ['pages', 0, 'blocks', headingIndex, 'props', 'heading', 'fr'],
+        code: 'copy',
+        severity: 'error',
+        message: 'Remove the superlative.',
+      },
+      ...(contactIndex >= 0
+        ? [
+            {
+              path: ['pages', 0, 'blocks', contactIndex, 'props', 'phone'],
+              code: 'fact',
+              severity: 'error',
+              message: 'Unknown phone.',
+            },
+          ]
+        : []),
+      { at: 'nowhere', message: 'ignored' },
+      'not an issue',
+    ];
+    const { api, calls, inputs } = gateway({
+      copy: goodCopy((_blockId, key) => (key === 'heading' ? 'Nos prestations' : undefined)),
+    });
+    const { events, spec } = await run(engineWith(bundle, api, { 'previous/site.json': base }), bundle, {
+      mode: 'repair',
+      attemptNo: 2,
+      repair: { baseSpecRef: 'previous/site.json', issues },
+    } as never);
+    expect(events.at(-1)).toEqual({ type: 'done', siteSpecRef: 'spec-ref' });
+    expect(calls).not.toContain('generation.site_plan');
+    const copies = inputs.filter(isCopyInput);
+    expect(copies.length).toBe(1);
+    expect(copies[0]?.blocks).toEqual([
+      expect.objectContaining({
+        blockId: headed.id,
+        fields: [expect.objectContaining({ key: 'heading' })],
+        problems: [{ key: 'heading', message: 'Remove the superlative.' }],
+      }),
+    ]);
+    const text = JSON.stringify(spec);
+    expect(text).toContain('Nos prestations');
+    expect(text).not.toContain('meilleur');
+    // The rest of the previous site is kept.
+    expect(text).toContain('Salon Corail, repris');
+    expect(events.some((event) => event.type === 'log' && /Repairing \d+ issue/.test(event.message))).toBe(
+      true,
+    );
+  });
+
+  it('writes a new site when a repair has no previous site to start from', async () => {
+    const { bundle } = workspace();
+    const { api, calls } = gateway({ copy: goodCopy() });
+    const { events } = await run(engineWith(bundle, api), bundle, {
+      mode: 'repair',
+      repair: { baseSpecRef: 'gone', issues: [] },
+    } as never);
+    expect(calls[0]).toBe('generation.site_plan');
+    expect(events.some((event) => event.type === 'log' && /No previous site/.test(event.message))).toBe(true);
+    expect(events.at(-1)?.type).toBe('done');
   });
 });

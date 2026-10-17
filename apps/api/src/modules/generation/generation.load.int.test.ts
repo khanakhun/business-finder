@@ -26,6 +26,8 @@ const ENV = {
   SITES_BASE_DOMAIN: 'sites.test',
   SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
   GENERATION_FAKE_ENGINE: 'true',
+  // The fake engine only: the blocks engine (the default) has its own suite.
+  GENERATION_BLOCKS_ENGINE: 'false',
   GENERATION_FAKE_DURATION_MS: String(ENGINE_MS),
   GENERATION_MAX_SANDBOXES: '8',
 };

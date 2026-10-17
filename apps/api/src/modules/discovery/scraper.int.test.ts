@@ -22,7 +22,7 @@ describe('Google Maps scraper deployed', () => {
   beforeAll(async () => {
     scraperApp = await createTestApp({
       mailer,
-      valkeyDb: 0,
+      valkeyDb: 29,
       env: { FEATURE_MAPS_SCRAPER: 'true', MAPS_SCRAPER_URL: 'http://scraper.invalid:8080' },
     });
     boss = await signUpVerified(scraperApp, mailer, 'boss@scraper.test', 'Bea Boss');

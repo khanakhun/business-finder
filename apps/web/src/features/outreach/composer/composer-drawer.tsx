@@ -18,6 +18,7 @@ import { useContacts } from '@/features/business/api.ts';
 import { useEvaluation } from '@/features/compliance/api.ts';
 import { CompliancePanel } from '@/features/compliance/compliance-panel.tsx';
 import { useMailboxes } from '@/features/mailboxes/api.ts';
+import { useSequences } from '@/features/sequences/api.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { useDraftActions, useDraftPreview, useTemplates } from '../api.ts';
 import { SendButton } from '../send/send-button.tsx';
@@ -257,6 +258,7 @@ function DraftEditor({
     setBody(draft.bodyMd);
   }, [draft.subject, draft.bodyMd]);
   const dirty = subject !== draft.subject || body !== draft.bodyMd;
+  const [followUp, setFollowUp] = React.useState<string | null>(null);
   const preview = useDraftPreview(dirty ? null : draft);
   const save = async () => {
     const toast = await getToast();
@@ -433,14 +435,45 @@ function DraftEditor({
           <CopyIcon aria-hidden />
           {t('copy')}
         </Button>
+        <FollowUpPicker value={followUp} onChange={setFollowUp} />
         <SendButton
           draft={draft}
           decision={decision}
+          followUpSequenceId={followUp}
           disabled={dirty || errors.length > 0 || busy}
           copyText={() => `${preview.data?.subject ?? subject}\n\n${preview.data?.text ?? body}`}
         />
       </div>
     </div>
+  );
+}
+
+/** "Then follow up with" (BF-053): an active sequence attached after this email. */
+function FollowUpPicker({
+  value,
+  onChange,
+}: {
+  readonly value: string | null;
+  readonly onChange: (value: string | null) => void;
+}) {
+  const t = useTranslations('composer');
+  const sequences = useSequences();
+  const active = (sequences.data ?? []).filter((sequence) => sequence.status === 'active');
+  if (active.length === 0) return null;
+  return (
+    <Select value={value ?? 'none'} onValueChange={(next) => onChange(next === 'none' ? null : next)}>
+      <SelectTrigger aria-label={t('followUp')} className="h-8 w-60">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">{t('noFollowUp')}</SelectItem>
+        {active.map((sequence) => (
+          <SelectItem key={sequence.id} value={sequence.id}>
+            {t('followUpWith', { name: sequence.name })}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

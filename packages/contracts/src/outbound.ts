@@ -60,6 +60,9 @@ export const OutboundMessageSummarySchema = z
     lastError: OutboundErrorSchema.nullable(),
     /** Why the send-time check stopped it (status `blocked`). */
     blockedReasons: z.array(z.string()),
+    /** A sequence step (BF-053): which enrollment and step index sent it. */
+    sequence: z.object({ enrollmentId: z.uuid(), stepIndex: z.number().int() }).nullable(),
+    bulkRunId: z.uuid().nullable(),
     createdAt: IsoDateTimeSchema,
   })
   .meta({ id: 'OutboundMessageSummary' });

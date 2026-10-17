@@ -75,7 +75,10 @@ export function useMessageActions() {
     void client.invalidateQueries({ queryKey: ['outreach', 'bulk-run'] });
   };
   const post = async (
-    path: '/v1/outreach/messages/{id}/cancel' | '/v1/outreach/messages/{id}/retry',
+    path:
+      | '/v1/outreach/messages/{id}/cancel'
+      | '/v1/outreach/messages/{id}/retry'
+      | '/v1/outreach/messages/{id}/approve',
     id: string,
   ) => unwrap<OutboundMessage>(await apiClient().POST(path, { params: { path: { id } } }));
   return {
@@ -96,6 +99,11 @@ export function useMessageActions() {
     }),
     retry: useMutation({
       mutationFn: (id: string) => post('/v1/outreach/messages/{id}/retry', id),
+      onSuccess: settle,
+    }),
+    /** A message waiting for approval (a sequence step): judged again, then queued. */
+    approve: useMutation({
+      mutationFn: (id: string) => post('/v1/outreach/messages/{id}/approve', id),
       onSuccess: settle,
     }),
     reschedule: useMutation({

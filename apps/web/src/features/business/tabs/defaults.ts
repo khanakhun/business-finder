@@ -72,6 +72,16 @@ export function registerDefaultTabs(): void {
     ),
   });
   businessTabs.register({
+    // BF-053.
+    id: 'sequences',
+    labelKey: 'business.tabs.sequences',
+    order: 29.7,
+    permission: 'outreach:send',
+    component: dynamic(() => import('@/features/sequences/business-tab.tsx').then((m) => m.SequencesTab), {
+      loading: TabSkeleton,
+    }),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

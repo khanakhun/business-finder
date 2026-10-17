@@ -1057,7 +1057,8 @@
       "reviews": "Avis",
       "scores": "Scores",
       "sites": "Sites",
-      "compliance": "Conformité"
+      "compliance": "Conformité",
+      "sequences": "Séquences"
     },
     "actions": {
       "label": "Actions rapides",
@@ -3883,7 +3884,10 @@
     "save": "Enregistrer le brouillon",
     "copy": "Copier",
     "send": "Envoyer",
-    "sendSoon": "L’envoi arrive avec le pipeline d’envoi."
+    "sendSoon": "L’envoi arrive avec le pipeline d’envoi.",
+    "followUp": "Séquence de relance",
+    "noFollowUp": "Aucune relance",
+    "followUpWith": "Puis relancer : {name}"
   },
   "templatesPage": {
     "title": "Modèles",
@@ -3945,7 +3949,10 @@
       "tooLate": "Trop tard pour annuler : l’e-mail est déjà en route.",
       "failed": "L’e-mail n’a pas pu être mis en file d’attente.",
       "manualOnly": "Ce contact ne peut être joint que manuellement.",
-      "manualSummary": "Envoyé manuellement : « {subject} »"
+      "manualSummary": "Envoyé manuellement : « {subject} »",
+      "followUpAttached": "Relances planifiées.",
+      "followUpSkipped": "Aucune relance : cette entreprise suit déjà une séquence ou ne peut pas recevoir d’e-mails.",
+      "followUpFailed": "Les relances n’ont pas pu être rattachées."
     },
     "manual": {
       "title": "Consigner un contact",
@@ -4083,7 +4090,11 @@
       "subject": "Objet",
       "body": "Message",
       "save": "Enregistrer",
-      "saved": "E-mail mis à jour."
+      "saved": "E-mail mis à jour.",
+      "sequenceSteps": "E-mails de relance à valider ({count})",
+      "sequenceStep": "Étape {step} de la séquence",
+      "approvedOne": "E-mail validé.",
+      "rejectedOne": "E-mail refusé : l’étape est ignorée."
     }
   },
   "inbox": {
@@ -4158,6 +4169,151 @@
       "save": "Enregistrer",
       "saved": "Réponse enregistrée.",
       "failed": "La réponse n’a pas pu être rédigée."
+    }
+  },
+  "sequences": {
+    "title": "Séquences",
+    "description": "Quelques relances bien espacées, qui s’arrêtent dès que l’entreprise répond.",
+    "new": "Nouvelle séquence",
+    "startersFr": "Ajouter les séquences de démarrage (FR)",
+    "startersEn": "Ajouter les séquences de démarrage (EN)",
+    "startersCreated": "Séquences de démarrage ajoutées en brouillon.",
+    "failed": "Cela n’a pas fonctionné.",
+    "loadError": "Les séquences n’ont pas pu être chargées.",
+    "emptyTitle": "Aucune séquence pour l’instant",
+    "emptyBody": "Ajoutez les séquences de démarrage ou créez la vôtre.",
+    "summary": "{steps} étapes · version {version} · {running} en cours",
+    "stats": "Résultats",
+    "edit": "Modifier",
+    "activate": "Activer",
+    "activated": "Séquence activée.",
+    "archive": "Archiver",
+    "archived": "Séquence archivée.",
+    "status": {
+      "draft": "Brouillon",
+      "active": "Active",
+      "archived": "Archivée"
+    },
+    "kinds": {
+      "email": "E-mail",
+      "task_call": "Tâche d’appel",
+      "task_whatsapp": "Tâche WhatsApp",
+      "task_custom": "Tâche"
+    },
+    "reasons": {
+      "replied": "l’entreprise a répondu",
+      "bounced": "l’e-mail est revenu en erreur",
+      "unsubscribed": "l’entreprise s’est désinscrite",
+      "suppressed": "l’entreprise est exclue des envois",
+      "do_not_contact": "ne pas contacter",
+      "converted": "une demande de contact est arrivée via l’aperçu",
+      "pipeline_changed": "le statut du pipeline a changé",
+      "manual": "arrêtée par une personne",
+      "contact_invalid": "l’adresse est invalide",
+      "mailbox_removed": "la boîte mail a été supprimée",
+      "compliance_blocked": "le contrôle de conformité l’a bloquée",
+      "completed": "terminée"
+    },
+    "builder": {
+      "newTitle": "Nouvelle séquence",
+      "editTitle": "Modifier la séquence",
+      "description": "L’enregistrement crée une nouvelle version ; les entreprises déjà inscrites conservent la leur.",
+      "name": "Nom",
+      "offer": "Offre",
+      "rails": "Garde-fous",
+      "maxEmails": "E-mails au maximum",
+      "minGap": "Jours ouvrés entre deux e-mails",
+      "approval": "Validation",
+      "approvalAuto": "Seulement si l’envoi automatique n’est pas autorisé",
+      "approvalAlways": "Toujours",
+      "calendars": "Jours fériés",
+      "stopOnLead": "Arrêter dès une demande de contact via l’aperçu",
+      "addStep": "Ajouter une étape",
+      "timeline": "À partir d’aujourd’hui (week-ends exclus)",
+      "issues": "Problèmes",
+      "railsOk": "Les garde-fous sont respectés.",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saved": "Séquence enregistrée.",
+      "failed": "La séquence n’a pas pu être enregistrée.",
+      "stepNumber": "Étape {number}",
+      "wait": "+{days} jours ouvrés à {time}",
+      "up": "Monter",
+      "down": "Descendre",
+      "remove": "Supprimer l’étape",
+      "kind": "Type",
+      "waitDays": "Jours ouvrés d’attente",
+      "time": "Heure souhaitée (destinataire)",
+      "condition": "Condition",
+      "conditions": {
+        "always": "Toujours",
+        "previewViewed": "Si l’aperçu a été consulté",
+        "previewNotViewed": "Si l’aperçu n’a pas été consulté"
+      },
+      "kinds": {
+        "email": "E-mail",
+        "task_call": "Tâche d’appel",
+        "task_whatsapp": "Tâche WhatsApp",
+        "task_custom": "Tâche"
+      },
+      "threading": "Conversation",
+      "inThread": "Répondre dans la même conversation",
+      "newThread": "Nouvelle conversation",
+      "skipUnverified": "Ignorer si l’adresse n’est pas vérifiée",
+      "variantId": "Variante",
+      "weight": "Poids (%)",
+      "writer": "Rédigé par",
+      "aiWriter": "L’IA, à partir des faits",
+      "instructions": "Consignes pour cet e-mail",
+      "addVariant": "Ajouter une variante",
+      "taskTitle": "À faire"
+    },
+    "statsTable": {
+      "none": "Aucun e-mail envoyé pour l’instant.",
+      "caption": "Résultats par étape et par variante",
+      "step": "Étape",
+      "variant": "Variante",
+      "sent": "Envoyés",
+      "replies": "Réponses",
+      "positive": "Positives",
+      "views": "Aperçu consulté",
+      "bounces": "Retours en erreur",
+      "unsubscribes": "Désinscriptions",
+      "interval": "Intervalle à 95 % : {low}–{high} %",
+      "insufficient": "* Moins de 30 e-mails : trop peu pour comparer."
+    },
+    "tab": {
+      "pick": "Choisir une séquence",
+      "enroll": "Inscrire",
+      "enrolled": "Entreprise inscrite.",
+      "failed": "Cela n’a pas fonctionné.",
+      "none": "Cette entreprise n’est dans aucune séquence.",
+      "progress": "Étape {step} sur {total}",
+      "next": "suivante {when}",
+      "pause": "Mettre en pause",
+      "paused": "Inscription mise en pause.",
+      "resume": "Reprendre",
+      "resumed": "Inscription reprise.",
+      "stop": "Arrêter",
+      "stopped": "Inscription arrêtée.",
+      "stopReason": "Arrêtée : {reason}",
+      "pauseReason": "En pause : {reason}",
+      "status": {
+        "active": "En cours",
+        "paused": "En pause",
+        "completed": "Terminée",
+        "stopped": "Arrêtée"
+      },
+      "events": {
+        "enrolled": "Inscrite",
+        "executed": "Étape effectuée",
+        "skipped": "Étape ignorée",
+        "paused": "Mise en pause",
+        "resumed": "Reprise",
+        "stopped": "Arrêtée",
+        "rescheduled": "Replanifiée",
+        "completed": "Terminée"
+      }
     }
   }
 }

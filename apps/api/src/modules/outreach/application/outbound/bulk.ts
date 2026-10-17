@@ -260,6 +260,8 @@ export class BulkOutreach {
           attempts: row.attempts,
           lastError: row.lastError,
           blockedReasons: row.blockedReasons,
+          sequence: null,
+          bulkRunId: row.bulkRunId,
           createdAt: row.createdAt.toISOString(),
           draftId: row.draftId,
           bodyText: row.bodyText,

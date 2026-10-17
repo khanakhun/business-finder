@@ -7,6 +7,7 @@ import { ClipboardCopyIcon, SendIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toProblemLike } from '@/components/states/problem.ts';
+import { useSequenceActions } from '@/features/sequences/api.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { closeComposer } from '../composer/store.ts';
 import { useMessageActions } from '../outbound-api.ts';
@@ -25,15 +26,19 @@ export function SendButton({
   decision,
   disabled,
   copyText,
+  followUpSequenceId,
 }: {
   readonly draft: EmailDraft;
   /** Today's compliance decision for the recipient (preview). */
   readonly decision: string | undefined;
   readonly disabled: boolean;
   readonly copyText: () => string;
+  /** Enroll the business in this sequence once the email is queued (BF-053, "attach follow-ups"). */
+  readonly followUpSequenceId?: string | null;
 }) {
   const t = useTranslations('outbound.send');
   const actions = useMessageActions();
+  const sequences = useSequenceActions();
   const [manual, setManual] = React.useState(false);
   // One key per saved version of the draft: a double click (or a retried request) sends once.
   const key = `send-${draft.id}-${draft.updatedAt}`.replace(/[^A-Za-z0-9_.:-]/g, '');
@@ -47,6 +52,15 @@ export function SendButton({
     const toast = await getToast();
     try {
       const message = await actions.send.mutateAsync({ body: { draftId: draft.id, sendMode: 'now' }, key });
+      if (followUpSequenceId)
+        await sequences.enroll
+          .mutateAsync({ id: followUpSequenceId, body: { fromMessageId: message.id } })
+          .then((result) =>
+            result.enrolled.length > 0
+              ? toast.success(t('followUpAttached'))
+              : toast.info(t('followUpSkipped')),
+          )
+          .catch(() => toast.error(t('followUpFailed')));
       closeComposer();
       toast.success(t('queued', { seconds: UNDO_SECONDS }), {
         duration: UNDO_SECONDS * 1000,

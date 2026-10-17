@@ -1057,7 +1057,8 @@
       "reviews": "Reviews",
       "scores": "Scores",
       "sites": "Sites",
-      "compliance": "Compliance"
+      "compliance": "Compliance",
+      "sequences": "Sequences"
     },
     "actions": {
       "label": "Quick actions",
@@ -3883,7 +3884,10 @@
     "save": "Save draft",
     "copy": "Copy",
     "send": "Send",
-    "sendSoon": "Sending arrives with the outbound pipeline."
+    "sendSoon": "Sending arrives with the outbound pipeline.",
+    "followUp": "Follow-up sequence",
+    "noFollowUp": "No follow-up",
+    "followUpWith": "Then follow up: {name}"
   },
   "templatesPage": {
     "title": "Templates",
@@ -3945,7 +3949,10 @@
       "tooLate": "Too late to undo: the email is already on its way.",
       "failed": "The email could not be queued.",
       "manualOnly": "This contact may only be reached by hand.",
-      "manualSummary": "Sent by hand: “{subject}”"
+      "manualSummary": "Sent by hand: “{subject}”",
+      "followUpAttached": "Follow-ups scheduled.",
+      "followUpSkipped": "No follow-ups: this business already runs a sequence or cannot be emailed.",
+      "followUpFailed": "The follow-ups could not be attached."
     },
     "manual": {
       "title": "Log a contact",
@@ -4083,7 +4090,11 @@
       "subject": "Subject",
       "body": "Message",
       "save": "Save",
-      "saved": "Email updated."
+      "saved": "Email updated.",
+      "sequenceSteps": "Follow-up emails to approve ({count})",
+      "sequenceStep": "Sequence step {step}",
+      "approvedOne": "Email approved.",
+      "rejectedOne": "Email rejected: the step is skipped."
     }
   },
   "inbox": {
@@ -4158,6 +4169,151 @@
       "save": "Save",
       "saved": "Reply saved.",
       "failed": "The reply could not be drafted."
+    }
+  },
+  "sequences": {
+    "title": "Sequences",
+    "description": "A few well-spaced follow-ups that stop as soon as the business replies.",
+    "new": "New sequence",
+    "startersFr": "Add starter sequences (FR)",
+    "startersEn": "Add starter sequences (EN)",
+    "startersCreated": "Starter sequences added as drafts.",
+    "failed": "That did not work.",
+    "loadError": "The sequences could not be loaded.",
+    "emptyTitle": "No sequence yet",
+    "emptyBody": "Add the starter sequences or build your own.",
+    "summary": "{steps} steps · version {version} · {running} running",
+    "stats": "Results",
+    "edit": "Edit",
+    "activate": "Activate",
+    "activated": "Sequence activated.",
+    "archive": "Archive",
+    "archived": "Sequence archived.",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "kinds": {
+      "email": "Email",
+      "task_call": "Call task",
+      "task_whatsapp": "WhatsApp task",
+      "task_custom": "Task"
+    },
+    "reasons": {
+      "replied": "they replied",
+      "bounced": "the email bounced",
+      "unsubscribed": "they unsubscribed",
+      "suppressed": "the business is suppressed",
+      "do_not_contact": "do not contact",
+      "converted": "a lead came from the preview",
+      "pipeline_changed": "the pipeline status changed",
+      "manual": "stopped by a person",
+      "contact_invalid": "the address is invalid",
+      "mailbox_removed": "the mailbox was removed",
+      "compliance_blocked": "the compliance check blocked it",
+      "completed": "completed"
+    },
+    "builder": {
+      "newTitle": "New sequence",
+      "editTitle": "Edit sequence",
+      "description": "Saving creates a new version; businesses already enrolled keep theirs.",
+      "name": "Name",
+      "offer": "Offer",
+      "rails": "Safety rails",
+      "maxEmails": "Emails at most",
+      "minGap": "Business days between emails",
+      "approval": "Approval",
+      "approvalAuto": "Only when auto-send is not allowed",
+      "approvalAlways": "Always",
+      "calendars": "Holidays",
+      "stopOnLead": "Stop on a preview lead",
+      "addStep": "Add a step",
+      "timeline": "From today (weekends skipped)",
+      "issues": "Problems",
+      "railsOk": "The safety rails are respected.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saved": "Sequence saved.",
+      "failed": "The sequence could not be saved.",
+      "stepNumber": "Step {number}",
+      "wait": "+{days} business days at {time}",
+      "up": "Move up",
+      "down": "Move down",
+      "remove": "Remove the step",
+      "kind": "Kind",
+      "waitDays": "Business days to wait",
+      "time": "Preferred time (recipient)",
+      "condition": "Condition",
+      "conditions": {
+        "always": "Always",
+        "previewViewed": "If the preview was viewed",
+        "previewNotViewed": "If the preview was not viewed"
+      },
+      "kinds": {
+        "email": "Email",
+        "task_call": "Call task",
+        "task_whatsapp": "WhatsApp task",
+        "task_custom": "Task"
+      },
+      "threading": "Threading",
+      "inThread": "Reply in the same thread",
+      "newThread": "New thread",
+      "skipUnverified": "Skip when the address is not verified",
+      "variantId": "Variant",
+      "weight": "Weight (%)",
+      "writer": "Written by",
+      "aiWriter": "AI, from the facts",
+      "instructions": "Instructions for this email",
+      "addVariant": "Add a variant",
+      "taskTitle": "What to do"
+    },
+    "statsTable": {
+      "none": "No email sent yet.",
+      "caption": "Results per step and variant",
+      "step": "Step",
+      "variant": "Variant",
+      "sent": "Sent",
+      "replies": "Replies",
+      "positive": "Positive",
+      "views": "Preview viewed",
+      "bounces": "Bounces",
+      "unsubscribes": "Unsubscribes",
+      "interval": "95% interval: {low}–{high}%",
+      "insufficient": "* Fewer than 30 emails: too few to compare."
+    },
+    "tab": {
+      "pick": "Choose a sequence",
+      "enroll": "Enroll",
+      "enrolled": "Business enrolled.",
+      "failed": "That did not work.",
+      "none": "This business is not in any sequence.",
+      "progress": "Step {step} of {total}",
+      "next": "next {when}",
+      "pause": "Pause",
+      "paused": "Enrollment paused.",
+      "resume": "Resume",
+      "resumed": "Enrollment resumed.",
+      "stop": "Stop",
+      "stopped": "Enrollment stopped.",
+      "stopReason": "Stopped: {reason}",
+      "pauseReason": "Paused: {reason}",
+      "status": {
+        "active": "Running",
+        "paused": "Paused",
+        "completed": "Completed",
+        "stopped": "Stopped"
+      },
+      "events": {
+        "enrolled": "Enrolled",
+        "executed": "Step done",
+        "skipped": "Step skipped",
+        "paused": "Paused",
+        "resumed": "Resumed",
+        "stopped": "Stopped",
+        "rescheduled": "Rescheduled",
+        "completed": "Completed"
+      }
     }
   }
 }

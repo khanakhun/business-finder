@@ -281,6 +281,27 @@ export class OutboundCommands {
     return moved;
   }
 
+  /** One message waiting for approval (a sequence step, or a bulk item from the outbox): judged again, then queued. */
+  async approveOne(actor: DraftActor, id: string): Promise<OutboundRecord> {
+    const message = await this.load(actor, id);
+    if (message.status !== 'pending_approval')
+      throw new ConflictError('This message is not waiting for approval.', {
+        details: { reason: 'NOT_PENDING' },
+      });
+    const decision = await this.compliance.evaluate(
+      {
+        organizationId: actor.organizationId,
+        businessId: message.businessId,
+        ...(message.contactId ? { contactId: message.contactId } : {}),
+      },
+      'email',
+      { purpose: message.offer, stage: 'enqueue' },
+    );
+    const moved = await this.approve(actor, message, decision, actor.userId);
+    if (!moved) throw new ConflictError('The message changed meanwhile.', { details: { reason: 'CHANGED' } });
+    return moved;
+  }
+
   /** A pending message's preview after its draft was edited (bulk approvals, inline edit). */
   async refreshPreview(actor: DraftActor, message: OutboundRecord): Promise<OutboundRecord | undefined> {
     if (message.status !== 'pending_approval' || !message.draftId || !message.mailboxId) return message;

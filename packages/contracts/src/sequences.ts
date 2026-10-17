@@ -211,6 +211,114 @@ export const SequenceStatsSchema = z
   .meta({ id: 'SequenceStats' });
 export type SequenceStats = z.infer<typeof SequenceStatsSchema>;
 
+// ── Safety rails (shared by the API and the builder's live check) ─────────────────────────────────────────────────
+
+/** One rail a definition breaks. */
+export interface DefinitionIssue {
+  readonly path: string;
+  readonly code: string;
+  readonly message: string;
+}
+
+const COMPLEMENT = {
+  previewViewed: 'previewNotViewed',
+  previewNotViewed: 'previewViewed',
+  always: null,
+} as const;
+
+/**
+ * An email that is the other branch of the email just before it (preview viewed / not viewed, no wait between): only
+ * one of the two is sent, so it counts once and shares its partner's gap.
+ */
+export function isAlternative(steps: readonly SequenceStep[], index: number): boolean {
+  const step = steps[index];
+  const previous = steps[index - 1];
+  return (
+    !!step &&
+    !!previous &&
+    step.kind === 'email' &&
+    previous.kind === 'email' &&
+    step.wait.businessDays === 0 &&
+    COMPLEMENT[step.condition] === previous.condition
+  );
+}
+
+/**
+ * The safety rails (BF-053): an email step, at most `maxEmails` (≤ 4) emails (an alternate branch counts once), at
+ * least `minGapBusinessDays` (≥ 2) between two emails, variant weights adding up to 100, unique ids, tasks that say
+ * what to do, and no preview condition on the first email.
+ */
+export function validateDefinition(
+  settings: SequenceSettings,
+  steps: readonly SequenceStep[],
+): DefinitionIssue[] {
+  const issues: DefinitionIssue[] = [];
+  const emails = steps.filter((step, index) => step.kind === 'email' && !isAlternative(steps, index));
+  if (emails.length === 0)
+    issues.push({ path: 'steps', code: 'no_email', message: 'A sequence needs at least one email step.' });
+  if (emails.length > settings.maxEmails)
+    issues.push({
+      path: 'steps',
+      code: 'too_many_emails',
+      message: `At most ${settings.maxEmails} emails per sequence.`,
+    });
+  const ids = new Set<string>();
+  let sinceEmail: number | null = null;
+  steps.forEach((step, index) => {
+    const path = `steps.${index}`;
+    if (ids.has(step.id))
+      issues.push({ path: `${path}.id`, code: 'duplicate_id', message: 'Step ids must be unique.' });
+    ids.add(step.id);
+    if (sinceEmail !== null) sinceEmail += step.wait.businessDays;
+    const alternative = isAlternative(steps, index);
+    if (step.kind === 'email') {
+      // The first email may go at once (day 0); every later one waits the minimum gap after the previous email.
+      if (!alternative && sinceEmail !== null && sinceEmail < settings.minGapBusinessDays)
+        issues.push({
+          path: `${path}.wait`,
+          code: 'gap_too_short',
+          message: `Wait at least ${settings.minGapBusinessDays} business days between two emails.`,
+        });
+      sinceEmail = 0;
+      if (step.variants.length === 0)
+        issues.push({
+          path: `${path}.variants`,
+          code: 'no_variant',
+          message: 'An email step needs a variant.',
+        });
+      const weights = step.variants.reduce((sum, variant) => sum + variant.weight, 0);
+      if (step.variants.length > 0 && weights !== 100)
+        issues.push({
+          path: `${path}.variants`,
+          code: 'weights',
+          message: 'Variant weights must add up to 100.',
+        });
+      const variantIds = new Set(step.variants.map((variant) => variant.id));
+      if (variantIds.size !== step.variants.length)
+        issues.push({
+          path: `${path}.variants`,
+          code: 'duplicate_variant',
+          message: 'Variant ids must be unique.',
+        });
+      for (const [v, variant] of step.variants.entries())
+        if (!variant.templateId && !variant.instructions)
+          issues.push({
+            path: `${path}.variants.${v}`,
+            code: 'empty_variant',
+            message: 'A variant needs a template or AI instructions.',
+          });
+      if (index === 0 && step.threading === 'reply_in_thread' && step.condition !== 'always')
+        issues.push({
+          path: `${path}.condition`,
+          code: 'first_condition',
+          message: 'The first email cannot depend on preview views (nothing was sent yet).',
+        });
+    } else if (step.kind === 'task_custom' && !step.taskTitle)
+      issues.push({ path: `${path}.taskTitle`, code: 'task_title', message: 'Say what the task is.' });
+  });
+  return issues;
+}
+
 // ── Events ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
 export const EnrollmentStopped = defineEvent(

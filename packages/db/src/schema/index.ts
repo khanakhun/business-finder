@@ -19,6 +19,7 @@ export * from './platform.ts';
 export * from './realtime.ts';
 export * from './reviews.ts';
 export * from './scoring.ts';
+export * from './scoring-ml.ts';
 export * from './search.ts';
 export * from './sequences.ts';
 export * from './site-chat.ts';

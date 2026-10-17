@@ -1312,6 +1312,18 @@ export {
   unknownPlaceholders,
 } from './scoring.ts';
 export {
+  type BuildMlDatasetRequest,
+  BuildMlDatasetRequestSchema,
+  ML_FEATURE_TYPES,
+  ML_MIN_LABELLED,
+  ML_MIN_POSITIVES,
+  type MlDataset,
+  MlDatasetSchema,
+  type MlReadiness,
+  MlReadinessQuerySchema,
+  MlReadinessSchema,
+} from './scoring-ml.ts';
+export {
   PAIN_SIGNALS,
   type PainSignal,
   PainSignalSchema,

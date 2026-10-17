@@ -1,6 +1,11 @@
+import type { ApiEnv } from '@bf/config';
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { AppMode } from '../platform/config/app-env.ts';
+import { APP_ENV, type AppEnv } from '../platform/config/app-env.ts';
+import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { BuiltinProfilesSeeder } from './application/builtin-profiles.seeder.ts';
+import { DatasetBuilder } from './application/ml/dataset-builder.ts';
+import { ML_REPOSITORY, ML_STORAGE } from './application/ml/ports.ts';
 import {
   FACTS_ASSEMBLER,
   RECOMPUTE_PROGRESS,
@@ -20,7 +25,9 @@ import {
 import { BullmqScoringQueue, OPENAPI_SCORING_QUEUE } from './infrastructure/bullmq-scoring-queue.ts';
 import { DrizzleScoringRepository } from './infrastructure/drizzle-scoring.repository.ts';
 import { SqlFactsAssembler } from './infrastructure/facts-assembler.sql.ts';
+import { DrizzleMlRepository } from './infrastructure/ml/drizzle-ml.repository.ts';
 import { RealtimeRecomputeProgress } from './infrastructure/realtime-recompute-progress.ts';
+import { ScoringMlController } from './interface/http/ml.controller.ts';
 import {
   BusinessScoresController,
   ScoringController,
@@ -52,7 +59,9 @@ export class ScoringModule {
     return {
       module: ScoringModule,
       controllers:
-        mode === 'worker' ? [] : [BusinessScoresController, ScoringController, ScoringProfilesController],
+        mode === 'worker'
+          ? []
+          : [BusinessScoresController, ScoringController, ScoringProfilesController, ScoringMlController],
       providers: [
         { provide: SCORING_REPOSITORY, useClass: DrizzleScoringRepository },
         { provide: FACTS_ASSEMBLER, useClass: SqlFactsAssembler },
@@ -69,6 +78,15 @@ export class ScoringModule {
         ScoringProfileCommands,
         ScoringEditorQueries,
         ScoringSubscribers,
+        // BF-059: outcome-trained scoring.
+        { provide: ML_REPOSITORY, useClass: DrizzleMlRepository },
+        {
+          provide: ML_STORAGE,
+          inject: [APP_ENV],
+          useFactory: (env: AppEnv) =>
+            new S3ObjectStorage(env as ApiEnv, (env as ApiEnv).S3_BUCKET_ARTIFACTS),
+        },
+        DatasetBuilder,
         // OpenAPI generation has no database.
         ...(mode === 'openapi' ? [] : [BuiltinProfilesSeeder]),
         ...(mode === 'worker' ? [ScoringComputeProcessor, ScoringRecomputeProcessor] : []),

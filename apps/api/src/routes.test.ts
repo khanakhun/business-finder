@@ -51,6 +51,8 @@ const ANONYMOUS = [
   // BF-048: preview lead forms (proof of work, anti-spam, CORS to the sites domain, no IP stored).
   'PublicLeadsController.challenge',
   'PublicLeadsController.submit',
+  // BF-055: the privacy page's data-subject request form (site token, rate limits, always "received").
+  'PublicDsrController.submit',
   // BF-050: the OAuth redirect back from Google/Microsoft (signed single-use state, PKCE, server-side attempt).
   'MailboxOAuthController.callback',
   // BF-055: RFC 8058 one-click and the human unsubscribe page (token only; same answer for unknown tokens).

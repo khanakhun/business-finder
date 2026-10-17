@@ -8,6 +8,9 @@ import { getDomain } from 'tldts';
 export function normalizeKey(scope: SuppressionScope, value: string): string | null {
   const raw = value.trim();
   switch (scope) {
+    // A keyed hash (base64url HMAC-SHA256) kept instead of an erased address (BF-055).
+    case 'email_hash':
+      return /^[A-Za-z0-9_-]{43}$/.test(raw) ? raw : null;
     case 'email': {
       // Split checks, no backtracking regex: one @, a local part, a dotted domain, no spaces.
       const email = raw.toLowerCase();

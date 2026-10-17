@@ -1,4 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { ComplianceModule } from '../compliance/index.ts';
 import type { AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
 import { ActivitySubscriber } from './application/activity.subscriber.ts';
@@ -6,6 +7,7 @@ import { CrmQueries } from './application/crm.queries.ts';
 import { CrmPipeline, CrmService } from './application/crm.service.ts';
 import { CRM_REPOSITORY } from './application/ports.ts';
 import { DrizzleCrmRepository } from './infrastructure/drizzle-crm.repository.ts';
+import { NotePersonalData } from './infrastructure/note-personal-data.ts';
 import { CrmController } from './interface/http/crm.controller.ts';
 
 /** CRM basics (BF-024): pipeline, owner, tags, do-not-contact, notes, tasks, activity timeline, board. */
@@ -26,12 +28,13 @@ export class CrmModule {
   private static build(mode: AppMode): DynamicModule {
     return {
       module: CrmModule,
-      imports: [RealtimeModule.forRoot(mode)],
+      imports: [RealtimeModule.forRoot(mode), ComplianceModule.forRoot(mode)],
       controllers: mode === 'worker' ? [] : [CrmController],
       providers: [
         { provide: CRM_REPOSITORY, useClass: DrizzleCrmRepository },
         CrmService,
         CrmPipeline,
+        NotePersonalData,
         CrmQueries,
         ActivitySubscriber,
       ],

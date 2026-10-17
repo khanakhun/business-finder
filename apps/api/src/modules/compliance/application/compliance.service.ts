@@ -20,6 +20,7 @@ import { AuditLogger } from '../../workspace/index.ts';
 import { alternativesFor } from '../domain/alternatives.ts';
 import { normalizeKey } from '../domain/normalizers.ts';
 import { type EvaluablePolicy, evaluatePolicy, type PolicySet } from '../domain/policy-evaluator.ts';
+import { privacyHash } from '../domain/unsubscribe-token.ts';
 import {
   COMPLIANCE_INPUTS,
   COMPLIANCE_TELEMETRY,
@@ -31,6 +32,8 @@ import {
   type PolicyRepository,
   SUPPRESSION_REPOSITORY,
   type SuppressionRepository,
+  UNSUBSCRIBE_SETTINGS,
+  type UnsubscribeSettings,
 } from './ports.ts';
 
 // The compliance gate (BF-049, ADR-0012): the only way to know whether a business may be contacted on a channel for
@@ -62,8 +65,22 @@ export class ComplianceService {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly events: EventRecorder,
     private readonly audit: AuditLogger,
+    @Inject(UNSUBSCRIBE_SETTINGS) private readonly privacy: UnsubscribeSettings,
     @Optional() @Inject(COMPLIANCE_TELEMETRY) private readonly telemetry?: ComplianceTelemetry,
   ) {}
+
+  /** Every email key also as its keyed hash: an erased address (BF-055) is still suppressed. */
+  private withHashes(keys: readonly { scope: SuppressionScope; value: string }[]) {
+    return [
+      ...keys,
+      ...keys
+        .filter((key) => key.scope === 'email')
+        .map((key) => ({
+          scope: 'email_hash' as const,
+          value: privacyHash(this.privacy.pepper, 'email', key.value),
+        })),
+    ];
+  }
 
   /** The policies that apply: per candidate jurisdiction, its seed and the workspace's override. */
   private async policySets(
@@ -109,7 +126,10 @@ export class ComplianceService {
   ): Promise<ComplianceDecision> {
     const started = performance.now();
     const gathered = await this.inputs.gather({ ...target, channel, purpose: context.purpose });
-    const hits = await this.suppressions.find(target.organizationId, gathered.suppressionKeys);
+    const hits = await this.suppressions.find(
+      target.organizationId,
+      this.withHashes(gathered.suppressionKeys),
+    );
     for (const hit of hits) this.telemetry?.suppressed(hit.scope);
     const inputs: EvaluationInputs = {
       ...gathered.inputs,
@@ -270,6 +290,6 @@ export class ComplianceService {
       const value = normalizeKey(key.scope, key.value);
       return value ? [{ scope: key.scope, value }] : [];
     });
-    return normalized.length === 0 ? [] : this.suppressions.find(organizationId, normalized);
+    return normalized.length === 0 ? [] : this.suppressions.find(organizationId, this.withHashes(normalized));
   }
 }

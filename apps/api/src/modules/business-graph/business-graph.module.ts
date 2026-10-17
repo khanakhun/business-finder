@@ -1,4 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { ComplianceModule } from '../compliance/index.ts';
 import type { AppMode } from '../platform/config/app-env.ts';
 import {
   AddContactCommand,
@@ -40,6 +41,7 @@ import {
   SearchCategoriesQuery,
 } from './application/taxonomy/taxonomy.queries.ts';
 import { TaxonomyCache } from './application/taxonomy/taxonomy-cache.ts';
+import { ContactPersonalData } from './infrastructure/contact-personal-data.ts';
 import { DrizzleBusinessRepository } from './infrastructure/drizzle-business.repository.ts';
 import { DrizzleBusinessReadModel } from './infrastructure/drizzle-business-read-model.ts';
 import { DrizzleContactRepository } from './infrastructure/drizzle-contact.repository.ts';
@@ -80,6 +82,7 @@ export class BusinessGraphModule {
   private static build(mode: AppMode): DynamicModule {
     return {
       module: BusinessGraphModule,
+      imports: [ComplianceModule.forRoot(mode)],
       // ResolutionController first: its static paths (`possible-duplicates`, `merge`) must win over `:id`.
       controllers:
         mode === 'worker' ? [] : [ResolutionController, BusinessesController, CategoriesController],
@@ -90,6 +93,7 @@ export class BusinessGraphModule {
         TrackBusinessCommand,
         AddContactCommand,
         DrizzleContactRepository,
+        ContactPersonalData,
         { provide: BUSINESS_REPOSITORY, useClass: DrizzleBusinessRepository },
         { provide: CONTACT_REPOSITORY, useExisting: DrizzleContactRepository },
         { provide: SOURCE_RECORD_REPOSITORY, useClass: DrizzleSourceRecordRepository },

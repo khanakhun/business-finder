@@ -77,6 +77,7 @@
     "cockatiel": "catalog:",
     "drizzle-orm": "catalog:",
     "express": "catalog:",
+    "fflate": "catalog:",
     "helmet": "catalog:",
     "imapflow": "catalog:",
     "ioredis": "catalog:",

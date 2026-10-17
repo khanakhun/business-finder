@@ -2,9 +2,12 @@ import type {
   ComplianceDecision,
   ComplianceDecisionValue,
   ComplianceStage,
+  DsrStatus,
+  DsrType,
   EvaluationInputs,
   OutreachChannel,
   PolicyDocument,
+  RetentionRun,
   SuppressionReason,
   SuppressionScope,
   SuppressionSource,
@@ -294,3 +297,49 @@ export interface UnsubscribeSettings {
   readonly pepper: string;
 }
 export const UNSUBSCRIBE_SETTINGS = Symbol('UnsubscribeSettings');
+
+// ── Data-subject requests and retention (BF-055) ────────────────────────────────────────────────────────────────
+
+export interface StoredDsrRequest {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly type: DsrType;
+  readonly status: DsrStatus;
+  readonly source: 'admin' | 'public';
+  readonly subjectSealed: string | null;
+  readonly subjectHash: string | null;
+  readonly receivedAt: Date;
+  readonly dueAt: Date;
+  readonly verification: { method: string; notes: string; at: string; by: string | null } | null;
+  readonly actions: { at: string; kind: string; by: string | null; detail: Record<string, unknown> }[];
+  readonly exportKey: string | null;
+  readonly handledBy: string | null;
+  readonly remindedAt: string[];
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface DsrRepository {
+  insert(row: Omit<StoredDsrRequest, 'id' | 'createdAt' | 'updatedAt'>): Promise<StoredDsrRequest>;
+  list(organizationId: string): Promise<StoredDsrRequest[]>;
+  get(organizationId: string, id: string): Promise<StoredDsrRequest | undefined>;
+  update(
+    organizationId: string,
+    id: string,
+    patch: Partial<Omit<StoredDsrRequest, 'id' | 'organizationId' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<StoredDsrRequest>;
+  /** Open requests of every workspace due before `before` (reminders). */
+  openDueBefore(before: Date): Promise<StoredDsrRequest[]>;
+  /** Completed requests whose export is older than `before` (retention of exports). */
+  exportsBefore(before: Date, limit: number): Promise<StoredDsrRequest[]>;
+}
+export const DSR_REPOSITORY = Symbol('DsrRepository');
+
+export interface RetentionRunRepository {
+  start(dryRun: boolean, triggeredBy: string | null): Promise<string>;
+  finish(id: string, results: RetentionRun['results']): Promise<RetentionRun>;
+  recent(limit: number): Promise<RetentionRun[]>;
+  /** Starts today's real run for the one process that may (none in the last 20 hours); null otherwise. */
+  claimDailyRun(): Promise<string | null>;
+}
+export const RETENTION_RUNS = Symbol('RetentionRunRepository');

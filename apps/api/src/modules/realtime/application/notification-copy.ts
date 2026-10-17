@@ -30,6 +30,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Mailbox needs reconnecting: {mailbox}',
       body: 'Sending from it stopped: {reason}.',
     },
+    dsr_due: {
+      title: 'A data request is due {when}',
+      body: 'A {type} request must be answered by its deadline.',
+    },
     member_joined: { title: '{name} joined the workspace', body: 'They accepted their invitation.' },
     system_test: { title: 'Test notification', body: 'Notifications work.' },
   },
@@ -59,6 +63,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
     mailbox_error: {
       title: 'Boîte d’envoi à reconnecter : {mailbox}',
       body: 'Les envois depuis cette boîte sont arrêtés : {reason}.',
+    },
+    dsr_due: {
+      title: 'Une demande sur les données arrive à échéance {when}',
+      body: 'Une demande ({type}) doit recevoir une réponse avant son échéance.',
     },
     member_joined: {
       title: '{name} a rejoint l’espace de travail',

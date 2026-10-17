@@ -2678,7 +2678,8 @@
       "blockedUnsaved": "Enregistrez vos modifications avant de publier.",
       "noPermission": "Votre rôle ne permet pas de publier des sites.",
       "failed": "Cela n’a pas fonctionné. Réessayez.",
-      "failedWith": "Cela n’a pas fonctionné : {reason}"
+      "failedWith": "Cela n’a pas fonctionné : {reason}",
+      "goLive": "Mettre en ligne…"
     },
     "json": {
       "button": "JSON",
@@ -3207,7 +3208,8 @@
       "banner": "Bandeau de l’aperçu",
       "claim_page": "Page de revendication",
       "contact_block": "Formulaire de contact",
-      "opt_out_link": "Lien de refus"
+      "opt_out_link": "Lien de refus",
+      "live_site": "Formulaire du site en ligne"
     },
     "channel": {
       "phone": "Téléphone",
@@ -4763,6 +4765,135 @@
       "rollback": "Revenir en arrière",
       "done": "Retour à la version précédente effectué.",
       "failed": "Le retour en arrière n’a pas fonctionné."
+    }
+  },
+  "goLive": {
+    "title": "Mise en ligne",
+    "description": "Vérifiez que le site est prêt, complétez ses informations légales, choisissez où arrivent les demandes de contact, connectez un domaine, puis publiez-le en ligne.",
+    "loadError": "Impossible de charger les vérifications de mise en ligne",
+    "stepLabel": "{n}. {label}",
+    "steps": {
+      "readiness": "Vérifications",
+      "legal": "Mentions légales",
+      "routing": "Formulaire de contact",
+      "domains": "Domaines",
+      "publish": "Publication"
+    },
+    "continue": "Continuer vers la publication",
+    "readyTitle": "Prêt pour la mise en ligne",
+    "notReadyTitle": "Pas encore prêt",
+    "summary": "{failing, plural, =0 {Aucun blocage} one {# vérification bloquante} other {# vérifications bloquantes}} · {warnings, plural, =0 {aucun avertissement} one {# avertissement} other {# avertissements}}",
+    "checks": {
+      "deal": "Accord conclu",
+      "assets": "Images et médias",
+      "legal": "Mentions légales",
+      "privacy": "Politique de confidentialité",
+      "routing": "Réception du formulaire de contact",
+      "content": "Contenu",
+      "quality": "Contrôles qualité",
+      "confirmation": "Validation du client",
+      "seo": "Bases du référencement",
+      "fix": "Corriger",
+      "status": {
+        "pass": "Validé",
+        "warn": "Avertissement",
+        "fail": "En échec"
+      }
+    },
+    "legal": {
+      "help": "Les pages de mentions légales et de politique de confidentialité sont générées à partir de ces informations. Chaque enregistrement conserve la version précédente.",
+      "fields": {
+        "businessLegalName": "Raison sociale",
+        "legalForm": "Forme juridique",
+        "registration": "Numéro d’immatriculation (SIRET, RCS…)",
+        "vatNumber": "N° de TVA",
+        "address": "Siège social",
+        "phone": "Téléphone",
+        "email": "E-mail de contact",
+        "publicationDirector": "Directeur de la publication",
+        "dpoContact": "Délégué à la protection des données / contact RGPD"
+      },
+      "privacyTitle": "Politique de confidentialité",
+      "privacyDone": "Lue et acceptée le {date}.",
+      "privacyAcknowledge": "J’ai lu la politique de confidentialité générée et elle correspond à la façon dont cette entreprise traite les données personnelles.",
+      "confirmTitle": "Validation du client",
+      "confirmDone": "Contenu validé par {name} le {date}.",
+      "confirmBy": "Nom du client ayant relu le contenu (laissez vide s’il ne l’a pas encore fait)",
+      "save": "Enregistrer les informations légales",
+      "saved": "Informations légales enregistrées",
+      "failed": "Impossible d’enregistrer les informations légales"
+    },
+    "routing": {
+      "help": "Les messages envoyés depuis le formulaire de contact du site en ligne arrivent à cette adresse. Elle ne reçoit rien tant que son propriétaire ne l’a pas confirmée via le lien que nous lui envoyons par e-mail.",
+      "current": "Envoyé à {email}",
+      "verified": "Confirmée le {date}",
+      "none": "Aucune adresse confirmée pour le moment.",
+      "pending": "En attente de confirmation par {email}.",
+      "email": "Adresse de réception",
+      "cc": "Copie à (facultatif)",
+      "send": "Envoyer le lien de confirmation",
+      "sent": "Lien de confirmation envoyé à {email}",
+      "failed": "Impossible de définir l’adresse de réception"
+    },
+    "domains": {
+      "help": "Créez ces enregistrements chez le registrar du domaine, puis vérifiez-les. Un domaine vérifié est servi dès que le site est en ligne ; son certificat est émis à la première visite.",
+      "hostname": "Domaine",
+      "includeWww": "Servir aussi l’adresse www (redirigée)",
+      "add": "Ajouter le domaine",
+      "added": "{hostname} ajouté",
+      "failed": "L’action sur le domaine a échoué",
+      "emptyTitle": "Aucun domaine personnalisé",
+      "emptyBody": "Sans domaine personnalisé, le site en ligne est servi sur son adresse par défaut.",
+      "status": {
+        "pending_dns": "En attente du DNS",
+        "verifying": "Vérification en cours",
+        "verified": "Vérifié",
+        "active": "Actif",
+        "failed": "Échec",
+        "removed": "Supprimé"
+      },
+      "redirects": "redirige vers {target}",
+      "check": "Vérifier maintenant",
+      "checked": "DNS vérifié",
+      "remove": "Supprimer",
+      "removeConfirm": "Confirmer la suppression",
+      "removed": "Domaine supprimé",
+      "recordsCaption": "Enregistrements DNS à créer pour {hostname}",
+      "type": "Type",
+      "name": "Nom",
+      "value": "Valeur",
+      "copy": "Copier",
+      "copyValue": "Copier {value}",
+      "copied": "Copié",
+      "copyFailed": "Impossible de copier",
+      "lastCheck": "Dernière vérification le {date}",
+      "ok": "Trouvé",
+      "missing": "Manquant",
+      "found": "trouvé : {values}",
+      "foundNothing": "rien trouvé pour le moment"
+    },
+    "publish": {
+      "help": "La publication fait de cette version le site en ligne, indexé par les moteurs de recherche, avec ses pages légales et son formulaire de contact.",
+      "blockedTitle": "Certaines vérifications échouent",
+      "blocked": "{count, plural, one {# vérification doit réussir} other {# vérifications doivent réussir}} avant la mise en ligne du site.",
+      "review": "Revoir les vérifications",
+      "overrideLabel": "Aucun accord n’est enregistré. Pourquoi mettre ce site en ligne malgré tout ?",
+      "overrideHelp": "10 caractères minimum. La raison est conservée dans le journal d’audit.",
+      "overrideNoPermission": "Aucun accord n’est enregistré. Seule une personne qui gère l’espace de travail peut publier sans accord.",
+      "button": "Mettre en ligne",
+      "published": "En ligne sur {hostname}",
+      "failed": "Impossible de mettre le site en ligne",
+      "liveTitle": "Le site est en ligne",
+      "liveHelp": "Les domaines personnalisés commencent à le servir dès que leur DNS est vérifié.",
+      "opensNewTab": "(s’ouvre dans un nouvel onglet)"
+    },
+    "confirmContact": {
+      "title": "Confirmer l’adresse de contact",
+      "body": "Confirmez que cette adresse doit recevoir les messages envoyés depuis le formulaire de contact du site web.",
+      "submit": "Confirmer cette adresse",
+      "confirmed": "Merci, l’adresse est confirmée. Les demandes de contact du site web lui parviendront désormais.",
+      "invalid": "Ce lien est invalide ou a expiré. Demandez un nouveau lien de confirmation.",
+      "error": "Une erreur est survenue. Veuillez réessayer."
     }
   }
 }

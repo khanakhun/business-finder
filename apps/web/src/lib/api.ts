@@ -131,6 +131,12 @@ export const queryKeys = {
     readiness: () => ['deliverability', 'readiness'] as const,
     health: () => ['deliverability', 'health'] as const,
   }),
+  goLive: defineQueryKeys('goLive', {
+    readiness: (siteId: string) => ['goLive', 'readiness', siteId] as const,
+    legal: (siteId: string) => ['goLive', 'legal', siteId] as const,
+    routing: (siteId: string) => ['goLive', 'routing', siteId] as const,
+    domains: (siteId: string) => ['goLive', 'domains', siteId] as const,
+  }),
   sequences: defineQueryKeys('sequences', {
     list: () => ['sequences', 'list'] as const,
     stats: (id: string) => ['sequences', 'stats', id] as const,

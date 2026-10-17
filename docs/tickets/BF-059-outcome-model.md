@@ -136,11 +136,13 @@ apps/web/src/features/scoring/models/{models-tab.tsx, model-card.tsx, calibratio
 - **Parity:** TS ONNX scoring equals Python predictions (1e-6) on 1,000 random rows.
 
 ## Acceptance criteria
-- [ ] Versioned label definition and leakage-safe dataset builder with a minimum-data gate.
-- [ ] Intel training (LR default, optional GBM), temporal validation, calibration, baseline comparison, ONNX export, model cards.
-- [ ] Model registry; ONNX scoring in the API with explanations; parity tests.
-- [ ] Shadow mode with prospective comparison; promotion criteria; rollback.
-- [ ] Drift and decay monitoring with alerts; Models UI.
+- [x] Versioned label definition and leakage-safe dataset builder with a minimum-data gate.
+- [x] Intel training (LR default, optional GBM), temporal validation, calibration, baseline comparison, ONNX export, model cards.
+  (GBM is trained as a challenger but cannot be exported with skl2onnx 1.20 + scikit-learn 1.9.)
+- [ ] Model registry; ONNX scoring in the API with explanations; parity tests. (Registry, scoring and explanations
+  done; parity measured exact by a script on 500 rows, no committed parity test while testing is paused.)
+- [x] Shadow mode with prospective comparison; promotion criteria; rollback.
+- [x] Drift and decay monitoring with alerts; Models UI.
 
 ## Agent prompt
 ```text

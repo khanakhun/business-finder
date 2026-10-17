@@ -59,6 +59,18 @@ export const queryKeys = {
     reviews: (id: string) => ['business', id, 'reviews'] as const,
     scores: (id: string) => ['business', id, 'scores'] as const,
   }),
+  scoringMl: defineQueryKeys('scoring-ml', {
+    readiness: (offer: string) => ['scoring-ml', 'readiness', offer] as const,
+    datasets: () => ['scoring-ml', 'datasets'] as const,
+    runs: () => ['scoring-ml', 'runs'] as const,
+    models: () => ['scoring-ml', 'models'] as const,
+    importance: (id: string) => ['scoring-ml', 'importance', id] as const,
+    shadow: () => ['scoring-ml', 'shadow'] as const,
+    comparison: (profileId: string) => ['scoring-ml', 'comparison', profileId] as const,
+    promotions: () => ['scoring-ml', 'promotions'] as const,
+    monitoring: (id: string) => ['scoring-ml', 'monitoring', id] as const,
+    businessShadow: (businessId: string) => ['scoring-ml', 'business-shadow', businessId] as const,
+  }),
   scoring: defineQueryKeys('scoring', {
     profiles: () => ['scoring', 'profiles'] as const,
     versions: (profileId: string) => ['scoring', 'versions', profileId] as const,

@@ -5,8 +5,10 @@ import {
   MlReadinessQuerySchema,
   MlReadinessSchema,
   MlTrainingRunSchema,
+  ModelImportanceSchema,
   ModelMonitoringSchema,
   ModelPromotionSchema,
+  NotFoundError,
   PromoteModelRequestSchema,
   ProspectiveComparisonSchema,
   RollbackModelRequestSchema,
@@ -15,7 +17,7 @@ import {
   ShadowScoreSchema,
   StartMlTrainingRequestSchema,
 } from '@bf/contracts';
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { z } from 'zod';
@@ -24,8 +26,10 @@ import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { DatasetBuilder, type MlActor } from '../../application/ml/dataset-builder.ts';
+import { ModelScoring } from '../../application/ml/model-scoring.ts';
 import { ModelTrainer } from '../../application/ml/model-trainer.ts';
 import { ModelMonitor } from '../../application/ml/monitor.ts';
+import { MODEL_REGISTRY, type ModelRegistry } from '../../application/ml/ports.ts';
 import { PromotionService } from '../../application/ml/promotion.service.ts';
 import { ProspectiveComparisonService } from '../../application/ml/prospective.ts';
 import { ShadowService } from '../../application/ml/shadow.service.ts';
@@ -72,6 +76,8 @@ export class ScoringMlController {
     private readonly comparison: ProspectiveComparisonService,
     private readonly promotions: PromotionService,
     private readonly monitor: ModelMonitor,
+    private readonly scoring: ModelScoring,
+    @Inject(MODEL_REGISTRY) private readonly registry: ModelRegistry,
   ) {}
 
   @Get('readiness')
@@ -276,5 +282,19 @@ export class ScoringMlController {
   })
   runMonitoring(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
     return this.monitor.run(actorOf(auth).organizationId, id);
+  }
+
+  @Get('models/:id/importance')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'What drives a model: its coefficient per feature (logistic regression)',
+    operationId: 'getScoringModelImportance',
+    response: { status: 200, schema: ModelImportanceSchema },
+    errors: [401, 403, 404],
+  })
+  async importance(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+    const model = await this.registry.model(actorOf(auth).organizationId, id);
+    if (!model) throw new NotFoundError('ScoringModel', id);
+    return { items: await this.scoring.importance(model) };
   }
 }

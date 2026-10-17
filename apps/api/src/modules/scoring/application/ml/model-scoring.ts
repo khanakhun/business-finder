@@ -39,6 +39,18 @@ export const decisionContext = (offer: string) => ({
 export class ModelScoring {
   constructor(@Inject(MODEL_RUNTIME) private readonly runtime: ModelRuntime) {}
 
+  /** Logistic regression's coefficients summed per feature (by absolute size); [] for other kinds. */
+  async importance(model: MlModelRecord): Promise<{ feature: string; weight: number }[]> {
+    const spec = await this.runtime.spec(model);
+    if (!spec.linear) return [];
+    const weights = new Map<string, number>();
+    for (const [j, column] of spec.columns.entries())
+      weights.set(column.source, (weights.get(column.source) ?? 0) + (spec.linear.coefficients[j] ?? 0));
+    return [...weights.entries()]
+      .map(([feature, weight]) => ({ feature, weight: round(weight) }))
+      .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight));
+  }
+
   async score(
     model: MlModelRecord,
     config: ScoringProfileConfig,

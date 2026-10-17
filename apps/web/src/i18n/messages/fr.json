@@ -1710,7 +1710,11 @@
       "emptyDescription": "Les scores apparaissent une fois l’entreprise suivie et enrichie. Recalculez pour la noter maintenant.",
       "adjustBounds": "Ramené entre 0 et 100",
       "adjustCapped": "Plafonné par une règle",
-      "adjustExcluded": "Exclu par une règle"
+      "adjustExcluded": "Exclu par une règle",
+      "shadowTitle": "Scores en observation",
+      "shadowBadge": "Observation",
+      "shadowLine": "Modèle v{version} aux côtés de {profile} : {score} ({tier}), {probability} de chances",
+      "shadowHint": "Un modèle à l’essai : il ne modifie ni les niveaux, ni le tri, ni les automatisations tant qu’il n’est pas promu."
     },
     "primary": {
       "label": "Profil de la colonne score",
@@ -4657,6 +4661,108 @@
       "byFeature": "Dépenses par fonctionnalité",
       "empty": "Aucune dépense enregistrée sur cette période.",
       "summary": "Dépenses par tâche IA ou fournisseur de données."
+    }
+  },
+  "scoringModels": {
+    "title": "Modèles entraînés sur vos résultats",
+    "description": "Dès qu’assez de contacts ont un résultat, entraînez un modèle sur ce qui a réellement fonctionné, testez-le en observation aux côtés d’un profil et promouvez-le seulement s’il fait mieux.",
+    "offer": "Offre",
+    "buildDataset": "Constituer un jeu de données",
+    "datasetBuilt": "Jeu de données constitué.",
+    "failed": "Cela n’a pas fonctionné.",
+    "contacts": "{n} contacts sur {required} avec un résultat",
+    "positives": "{n} résultats positifs sur {required}",
+    "readinessHint": "Un contact compte une fois sa fenêtre de {horizon} jours écoulée ou s’il a déjà abouti ; {censored} contacts sont encore dans leur fenêtre.",
+    "datasets": "Jeux de données",
+    "noDatasets": "Aucun jeu de données pour l’instant.",
+    "datasetCounts": "{rows} contacts, {positives} positifs",
+    "train": "Entraîner un modèle",
+    "trainingQueued": "Entraînement lancé : comptez quelques minutes.",
+    "runs": "Entraînements",
+    "noRuns": "Aucun entraînement pour l’instant.",
+    "runStatus": {
+      "queued": "En attente",
+      "running": "En cours",
+      "succeeded": "Terminé",
+      "failed": "Échoué"
+    },
+    "noModels": "Aucun modèle entraîné pour l’instant.",
+    "status": {
+      "trained": "Entraîné",
+      "shadow": "En observation",
+      "active": "Actif",
+      "retired": "Retiré",
+      "rejected": "Rejeté"
+    },
+    "card": {
+      "title": "Version {version} · {kind}",
+      "logreg": "Régression logistique",
+      "hgb": "Gradient boosting",
+      "metrics": "Métriques sur les contacts les plus récents",
+      "metric": "Métrique",
+      "model": "Modèle",
+      "rules": "Score par règles",
+      "metrics_rocAuc": "ROC-AUC (classement)",
+      "metrics_prAuc": "PR-AUC",
+      "metrics_brier": "Score de Brier (plus il est bas, mieux c’est)",
+      "metrics_liftTop10": "Gain sur les 10 % les mieux classés",
+      "metrics_liftTop20": "Gain sur les 20 % les mieux classés",
+      "spearman": "Concordance des classements avec le score par règles : {value}",
+      "calibration": "Calibration",
+      "calibrationSummary": "Taux de succès observé selon la probabilité prédite ; la ligne en pointillés représente une calibration parfaite.",
+      "observed": "Observé",
+      "lift": "Gain",
+      "liftSummary": "Combien de fois plus souvent les 10 % et 20 % les mieux classés aboutissent par rapport à la moyenne, modèle contre score par règles.",
+      "noDrivers": "Ce type de modèle n’a pas d’explication simple par caractéristique.",
+      "drivers": "Facteurs déterminants",
+      "driversHint": "Coefficients sur des caractéristiques standardisées : un coefficient positif augmente les chances de succès."
+    },
+    "drift": {
+      "title": "Dérive et précision",
+      "checkNow": "Vérifier maintenant",
+      "alerts": "{count, plural, one {# alerte levée.} other {# alertes levées.}}",
+      "noAlerts": "Aucune dérive détectée.",
+      "failed": "La vérification n’a pas fonctionné.",
+      "never": "Pas encore vérifié (chaque mois, ou maintenant).",
+      "checked": "Vérifié {when}.",
+      "stable": "Stable : aucune caractéristique n’a bougé et la précision s’est maintenue.",
+      "auc": "ROC-AUC sur les nouveaux contacts : {now} (à l’entraînement : {before}, {n} contacts).",
+      "top": "(caractéristique clé)",
+      "notEnoughRecent": "Pas assez d’entreprises récentes pour mesurer la dérive."
+    },
+    "shadow": {
+      "title": "Mode observation",
+      "profile": "Exécuter aux côtés du profil",
+      "none": "Pas en observation",
+      "hint": "En observation, le modèle note chaque entreprise sans modifier les niveaux, le tri ni les automatisations.",
+      "started": "Observation lancée : les scores sont en cours de calcul.",
+      "stopped": "Observation arrêtée.",
+      "failed": "Cela n’a pas fonctionné."
+    },
+    "comparison": {
+      "summary": "Depuis {since} : {contacts} contacts avec un résultat, {positives} positifs.",
+      "topRates": "Succès des 20 % les mieux classés : profil {active}, modèle {shadow} (gain {lift}).",
+      "criteriaPositives": "Au moins {min} résultats positifs",
+      "criteriaLift": "Les 20 % les mieux classés par le modèle convertissent au moins {min}× mieux",
+      "criteriaIntervals": "L’écart se confirme à 90 % de confiance",
+      "promote": "Promouvoir le modèle",
+      "override": "Promouvoir quand même…",
+      "overrideTitle": "Promouvoir sans remplir les critères ?",
+      "overrideHint": "Les preuves ne sont pas encore concluantes. Indiquez pourquoi vous promouvez quand même : la raison est enregistrée.",
+      "reason": "Raison",
+      "cancel": "Annuler",
+      "overrideConfirm": "Promouvoir",
+      "promoted": "Modèle promu : le profil est en cours de recalcul.",
+      "failed": "La promotion n’a pas fonctionné."
+    },
+    "promotions": {
+      "title": "Promotions",
+      "line": "{profile} : version {from} → {to}, {when}",
+      "overridden": "dérogation : {reason}",
+      "rolledBack": "annulée par retour en arrière",
+      "rollback": "Revenir en arrière",
+      "done": "Retour à la version précédente effectué.",
+      "failed": "Le retour en arrière n’a pas fonctionné."
     }
   }
 }

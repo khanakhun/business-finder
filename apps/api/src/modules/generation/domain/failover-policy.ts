@@ -16,6 +16,12 @@ export const RETRYABLE_CODES = new Set([
   'TIMEOUT',
   'PROVIDER_ERROR',
   'SANDBOX_CRASHED',
+  // The sandbox's own failures (BF-043): another try, then another engine.
+  'SANDBOX_OOM',
+  'SANDBOX_TIMEOUT',
+  'SANDBOX_CRASH',
+  'SANDBOX_PROTOCOL_ERROR',
+  'SANDBOX_UNAVAILABLE',
   'HEARTBEAT_LOST',
   'INVALID_OUTPUT',
   'ENGINE_ERROR',

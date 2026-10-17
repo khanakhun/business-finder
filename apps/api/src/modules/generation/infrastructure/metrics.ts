@@ -1,6 +1,7 @@
 import type { EngineId, GenerationJobStatus } from '@bf/contracts';
 import { metrics } from '@bf/observability';
 import type { GenerationTelemetry, StoredJob } from '../application/ports.ts';
+import type { SandboxTelemetry } from '../application/sandbox.ports.ts';
 
 // Generation metrics (BF-039): outcomes per engine, phase durations, queue waits, cost per job, sandboxes in use and
 // how often jobs waited for a slot.
@@ -57,4 +58,36 @@ export const PROMETHEUS_TELEMETRY: GenerationTelemetry = {
     jobsTotal().inc({ engine: job.engineCurrent, outcome });
     jobCostUsd().observe({ engine: job.engineCurrent }, job.costUsd);
   },
+};
+
+// Sandboxes (BF-043): runs by outcome (including the typed failures, e.g. SANDBOX_OOM), their durations, and frames
+// the supervisor sent that were not valid protocol.
+const sandboxRuns = () =>
+  metrics.counter({
+    name: 'bf_sandbox_runs_total',
+    help: 'Sandbox runs that ended, by outcome (completed, failed, aborted or a SANDBOX_* error)',
+    labelNames: ['outcome'],
+  });
+const sandboxSeconds = () =>
+  metrics.histogram({
+    name: 'bf_sandbox_run_seconds',
+    help: 'Wall time of sandbox runs, container creation to removal',
+    labelNames: ['outcome'],
+    buckets: [5, 15, 60, 180, 600, 1200, 2400, 3600],
+  });
+const sandboxFrameErrors = () =>
+  metrics.counter({
+    name: 'bf_sandbox_frame_errors_total',
+    help: 'Lines from a sandbox that were not valid frames',
+  });
+const sandboxStarts = () =>
+  metrics.counter({ name: 'bf_sandbox_started_total', help: 'Sandbox containers created' });
+
+export const PROMETHEUS_SANDBOX_TELEMETRY: SandboxTelemetry = {
+  started: () => sandboxStarts().inc(),
+  finished: (outcome, seconds) => {
+    sandboxRuns().inc({ outcome });
+    sandboxSeconds().observe({ outcome }, seconds);
+  },
+  frameError: () => sandboxFrameErrors().inc(),
 };

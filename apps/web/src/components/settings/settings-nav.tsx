@@ -27,6 +27,8 @@ export function SettingsNav() {
     { href: '/settings/scoring', label: t('scoring'), show: true },
     // Everyone sees the generation settings; `settings:manage` changes them (BF-046).
     { href: '/settings/generation', label: t('generation'), show: true },
+    // Everyone reads the compliance policies; `compliance:manage` reviews and overrides them (BF-049).
+    { href: '/settings/compliance', label: t('compliance'), show: true },
   ].filter((item) => item.show);
   return (
     <nav aria-label={t('label')} className="mb-6 flex gap-1 overflow-x-auto border-b">

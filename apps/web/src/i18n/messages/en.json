@@ -234,7 +234,8 @@
     "notifications": "Notifications",
     "taxonomy": "Categories",
     "scoring": "Scoring",
-    "generation": "Generation"
+    "generation": "Generation",
+    "compliance": "Compliance"
   },
   "account": {
     "title": "Account",
@@ -1034,7 +1035,8 @@
       "website": "Website",
       "reviews": "Reviews",
       "scores": "Scores",
-      "sites": "Sites"
+      "sites": "Sites",
+      "compliance": "Compliance"
     },
     "actions": {
       "label": "Quick actions",
@@ -3246,6 +3248,162 @@
         "blockMoved": "{type} section moved on {page}",
         "blockChanged": "{type} on {page}: {fields}",
         "section": "Site {section} changed"
+      }
+    }
+  },
+  "compliance": {
+    "decision": {
+      "allowed": "Allowed",
+      "allowed_with_conditions": "Allowed with conditions",
+      "manual_only": "Manual only",
+      "blocked": "Blocked"
+    },
+    "channels": {
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "letter": "Letter"
+    },
+    "panel": {
+      "jurisdictions": "Jurisdictions: {list}",
+      "autoSend": "Automatic sending permitted",
+      "required": "Every message must include",
+      "alternatives": "Instead you can"
+    },
+    "elements": {
+      "sender_identity": "Who is sending",
+      "postal_address": "A postal address",
+      "opt_out_link": "A working opt-out link",
+      "unsubscribe_headers": "One-click unsubscribe headers",
+      "source_disclosure": "Where the address came from",
+      "relevance": "Why it is relevant to them",
+      "recipient_language": "The recipient's language",
+      "honest_subject": "An honest subject line",
+      "identify_on_call": "Introduce yourself on the call",
+      "stop_on_request": "Stop when asked"
+    },
+    "rules": {
+      "condition": "{field} is {values}",
+      "fields": {
+        "recipientType": "the recipient",
+        "addressType": "the address",
+        "publishedContext": "the address was published",
+        "designatedForSolicitation": "the address is meant for offers",
+        "relevance": "the offer",
+        "previousContact": "the previous contact"
+      },
+      "or": " or ",
+      "and": " and ",
+      "always": "In every case",
+      "if": "If {condition}",
+      "otherwise": "Otherwise"
+    },
+    "values": {
+      "legal_person": "a company",
+      "sole_trader": "a sole trader",
+      "public_body": "a public body",
+      "unknown": "unknown",
+      "generic": "generic",
+      "department": "a department",
+      "personal": "personal",
+      "own_contact_page": "on its contact page",
+      "own_site_other": "elsewhere on its site",
+      "directory": "in a directory",
+      "relevant": "relevant",
+      "not_relevant": "not relevant",
+      "none": "none",
+      "replied": "a reply",
+      "bounced": "a bounce",
+      "yes": "yes",
+      "no": "no"
+    },
+    "policies": {
+      "loadError": "Could not load the policies.",
+      "notLegalAdvice": "These policies are a starting point, not legal advice. Have them reviewed by a lawyer before enabling automatic sending.",
+      "caption": "Outreach policy per jurisdiction and channel",
+      "jurisdiction": "Jurisdiction",
+      "anyOther": "Any other",
+      "open": "Open the {channel} policy for {jurisdiction}",
+      "needsReview": "Needs legal review",
+      "reviewed": "Reviewed",
+      "autoSend": "auto-send",
+      "overridden": "overridden",
+      "policy": "Policy",
+      "policyHint": "Rules, sources, review and versions of this policy.",
+      "reviewSaved": "Review recorded.",
+      "saveError": "Could not save.",
+      "overrideInvalid": "The override is not a valid policy.",
+      "overrideSaved": "Override saved: {stricter} of {total} situations become stricter.",
+      "version": "Version {version} ({kind})",
+      "kind": {
+        "seed": "seeded",
+        "override": "override"
+      },
+      "reviewedBy": "Reviewed by {name} on {when}",
+      "rules": "Rules",
+      "sources": "Sources",
+      "reviewTitle": "Legal review",
+      "reviewHint": "Record who reviewed this policy. Automatic sending stays off until a review is recorded.",
+      "reviewer": "Reviewer name",
+      "notes": "Notes",
+      "confirm": "I confirm this policy was reviewed by a qualified person.",
+      "enableAutoSend": "Enable automatic sending for this jurisdiction and channel",
+      "ownerOnly": "Only owners can enable automatic sending.",
+      "saveReview": "Record review",
+      "overrideTitle": "Stricter override",
+      "overrideHint": "Edit the policy as JSON. Overrides can only make decisions stricter; looser rules are refused.",
+      "saveOverride": "Save override",
+      "versions": "Versions"
+    },
+    "lia": {
+      "saveError": "Could not save.",
+      "loadError": "Could not load the assessments.",
+      "hint": "Legitimate-interest outreach needs an approved assessment.",
+      "fromTemplate": "New from template",
+      "emptyTitle": "No assessment yet",
+      "emptyBody": "Start from the template and adapt it to your activity.",
+      "version": "v{version}",
+      "status": {
+        "draft": "Draft",
+        "approved": "Approved",
+        "retired": "Retired"
+      },
+      "approvedBy": "Approved by {name} on {when}",
+      "fields": {
+        "title": "Title",
+        "purpose": "Purpose",
+        "dataCategories": "Data used",
+        "necessity": "Necessity",
+        "balancingTest": "Balancing test",
+        "safeguards": "Safeguards",
+        "retention": "Retention"
+      },
+      "saved": "Saved.",
+      "save": "Save draft",
+      "approve": "Approve",
+      "approved": "Approved.",
+      "retire": "Retire",
+      "retired": "Retired."
+    },
+    "settings": {
+      "title": "Compliance",
+      "description": "Outreach policies per jurisdiction and channel, their legal review, and your lawful-basis assessments.",
+      "policies": "Policies",
+      "lawfulBasis": "Lawful basis"
+    },
+    "tab": {
+      "today": "If you contacted them today",
+      "todayHint": "What the compliance gate would decide for a new-website offer. This is a preview; nothing is recorded.",
+      "noPermission": "You need outreach permission to preview decisions.",
+      "loadError": "Could not evaluate this channel.",
+      "history": "Recorded decisions",
+      "noHistory": "No decision recorded yet.",
+      "stage": {
+        "preview": "Preview",
+        "enqueue": "Queued",
+        "send": "Send",
+        "manual_log": "Manual log"
       }
     }
   }

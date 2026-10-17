@@ -88,6 +88,15 @@ export const queryKeys = {
     detail: (id: string) => ['leads', 'detail', id] as const,
     counts: () => ['leads', 'counts'] as const,
   }),
+  compliance: defineQueryKeys('compliance', {
+    policies: () => ['compliance', 'policies'] as const,
+    versions: (jurisdiction: string, channel: string) =>
+      ['compliance', 'versions', jurisdiction, channel] as const,
+    lawfulBasis: () => ['compliance', 'lawful-basis'] as const,
+    evaluation: (businessId: string, channel: string, purpose: string) =>
+      ['compliance', 'evaluation', businessId, channel, purpose] as const,
+    decisions: (businessId: string) => ['compliance', 'decisions', businessId] as const,
+  }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,
     logo: () => ['workspace', 'logo'] as const,

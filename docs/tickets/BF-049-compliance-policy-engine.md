@@ -192,13 +192,13 @@ tooling/architecture/{dependency-rules.cjs, compliance-gate.test.ts}
 - **UI/E2E:** owner reviews the FR policy and enables auto-send eligibility; a member cannot edit policies; the business compliance section explains a block in FR and EN.
 
 ## Acceptance criteria
-- [ ] Versioned typed-DSL policies seeded for US/FR/BL/MF/NL/BE/DE/GB/* across channels, all flagged for legal review, with sources.
-- [ ] Pure evaluator with overlays, most-restrictive combination and stricter-only overrides (property-tested).
-- [ ] `ComplianceService.evaluate` persisted decisions with explanations, required elements, alternatives; `isAutoSendPermitted` gating.
-- [ ] Append-only suppression core with fast lookup, events, opt-out subscriber; BF-028 pre-check port implemented.
-- [ ] Lawful-basis records with approval; offer relevance table.
-- [ ] Settings → Compliance UI (matrix, rule viewer, review, overrides, LIA) and reusable compliance panel.
-- [ ] Architecture rules preventing gate bypass; metrics and alerts.
+- [x] Versioned typed-DSL policies seeded for US/FR/BL/MF/NL/BE/DE/GB/* across channels, all flagged for legal review, with sources.
+- [x] Pure evaluator with overlays, most-restrictive combination and stricter-only overrides (property-tested).
+- [x] `ComplianceService.evaluate` persisted decisions with explanations, required elements, alternatives; `isAutoSendPermitted` gating.
+- [x] Append-only suppression core with fast lookup, events, opt-out subscriber; BF-028 pre-check port implemented.
+- [x] Lawful-basis records with approval; offer relevance table.
+- [x] Settings → Compliance UI (matrix, rule viewer, review, overrides, LIA) and reusable compliance panel.
+- [x] Architecture rules preventing gate bypass; metrics and alerts.
 
 ## Agent prompt
 ```text

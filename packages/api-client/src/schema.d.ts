@@ -7795,7 +7795,7 @@ export type components = {
             features: {
                 contribution: number;
                 /** @enum {string} */
-                feature: "name" | "distance" | "phone" | "website" | "category" | "address" | "phoneConflict" | "websiteConflict" | "sameProvider";
+                feature: "name" | "distance" | "phone" | "website" | "category" | "address" | "phoneConflict" | "websiteConflict" | "sameProvider" | "colocated";
                 value: number;
             }[];
             /** @description Human-readable explanations, e.g. "same phone +590590…". */

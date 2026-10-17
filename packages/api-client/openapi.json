@@ -14708,7 +14708,8 @@
                     "address",
                     "phoneConflict",
                     "websiteConflict",
-                    "sameProvider"
+                    "sameProvider",
+                    "colocated"
                   ],
                   "type": "string"
                 },

@@ -161,7 +161,7 @@ export function AppShell({ children }: { readonly children: React.ReactNode }) {
           onOpenMobileNav={() => setMobileNav(true)}
           onPalettePrefetch={() => void loadPalette()}
         />
-        <main id="content" tabIndex={-1} className="w-full max-w-6xl flex-1 px-4 py-8 outline-none sm:px-8">
+        <main id="content" tabIndex={-1} className="w-full min-w-0 flex-1 px-4 py-8 outline-none sm:px-8">
           {children}
         </main>
       </div>

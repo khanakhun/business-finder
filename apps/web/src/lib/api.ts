@@ -88,6 +88,13 @@ export const queryKeys = {
     detail: (id: string) => ['leads', 'detail', id] as const,
     counts: () => ['leads', 'counts'] as const,
   }),
+  outreach: defineQueryKeys('outreach', {
+    drafts: (businessId: string) => ['outreach', 'drafts', businessId] as const,
+    draft: (id: string) => ['outreach', 'draft', id] as const,
+    preview: (id: string, updatedAt: string) => ['outreach', 'preview', id, updatedAt] as const,
+    templates: (archived: boolean) => ['outreach', 'templates', archived] as const,
+    templateVersions: (id: string) => ['outreach', 'template-versions', id] as const,
+  }),
   mailboxes: defineQueryKeys('mailboxes', {
     list: () => ['mailboxes', 'list'] as const,
     detail: (id: string) => ['mailboxes', 'detail', id] as const,
@@ -98,8 +105,8 @@ export const queryKeys = {
     versions: (jurisdiction: string, channel: string) =>
       ['compliance', 'versions', jurisdiction, channel] as const,
     lawfulBasis: () => ['compliance', 'lawful-basis'] as const,
-    evaluation: (businessId: string, channel: string, purpose: string) =>
-      ['compliance', 'evaluation', businessId, channel, purpose] as const,
+    evaluation: (businessId: string, channel: string, purpose: string, contactId?: string) =>
+      ['compliance', 'evaluation', businessId, channel, purpose, contactId ?? null] as const,
     decisions: (businessId: string) => ['compliance', 'decisions', businessId] as const,
     suppressions: (filters: Record<string, string | undefined>) =>
       ['compliance', 'suppressions', filters] as const,

@@ -154,10 +154,11 @@ apps/web/src/features/outreach/templates/{templates-page.tsx, template-editor.ts
 - **Evals:** report attached.
 
 ## Acceptance criteria
-- [ ] Typed templates with variables, versions, lint and seeded EN/FR library.
-- [ ] Grounded `email-draft` task with subject variants, facts/findings citations, validators and repair; evals pass thresholds.
-- [ ] Recipient language policy; translation; final preview with deterministic footer shared with sending.
-- [ ] Drafts API and composer UI integrated in listing/business/leads with compliance and verification context.
+- [x] Typed templates with variables, versions, lint and seeded EN/FR library.
+- [x] Grounded `email-draft` task with subject variants, facts/findings citations, validators and repair.
+- [ ] Evals pass thresholds (not done: the eval set is not written yet, testing is paused).
+- [x] Recipient language policy; translation; final preview with deterministic footer shared with sending.
+- [x] Drafts API and composer UI integrated in listing/business/leads with compliance and verification context.
 
 ## Agent prompt
 ```text

@@ -1,7 +1,7 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import { suppressionEntries, unsubscribeTokens } from '@bf/db/schema';
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
-import { and, count, eq, inArray, or, sql } from 'drizzle-orm';
+import { and, count, eq, inArray, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import { DsrService } from '../../application/dsr.service.ts';
 import {
@@ -177,7 +177,7 @@ export class ComplianceDataRegistrations implements OnModuleInit {
         const [row] = await this.db
           .select({ n: count() })
           .from(unsubscribeTokens)
-          .where(sql`${unsubscribeTokens.expiresAt} < ${now}`);
+          .where(lt(unsubscribeTokens.expiresAt, now));
         return Number(row?.n ?? 0);
       },
       apply: (now, limit) => this.tokenRepository.deleteExpired(now, limit),

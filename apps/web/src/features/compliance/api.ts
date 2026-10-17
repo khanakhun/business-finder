@@ -128,13 +128,14 @@ export function useEvaluation(
   channel: OutreachChannel,
   purpose: string,
   enabled: boolean,
+  contactId?: string,
 ) {
   return useQuery({
-    queryKey: queryKeys.compliance.evaluation(businessId, channel, purpose),
+    queryKey: queryKeys.compliance.evaluation(businessId, channel, purpose, contactId),
     queryFn: async () =>
       unwrap<ComplianceDecision>(
         await apiClient().POST('/v1/compliance/evaluate', {
-          body: { businessId, channel, purpose } as never,
+          body: { businessId, channel, purpose, ...(contactId ? { contactId } : {}) } as never,
         }),
       ),
     enabled,

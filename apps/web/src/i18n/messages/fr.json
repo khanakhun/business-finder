@@ -29,7 +29,8 @@
     "leads": "Contacts entrants",
     "compliance": "Conformité",
     "outbox": "Boîte d’envoi",
-    "approvals": "Validations"
+    "approvals": "Validations",
+    "deliverability": "Délivrabilité"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -664,6 +665,10 @@
       "sequence_paused": {
         "title": "Relances en pause pour {business}",
         "body": "{reason}"
+      },
+      "deliverability_digest": {
+        "title": "Délivrabilité de la semaine : {sent} e-mails, {bounceRate} en erreur",
+        "body": "{summary}"
       }
     },
     "preferences": {
@@ -685,7 +690,8 @@
         "system_test": "Notifications de test",
         "site_needs_review": "Sites à revoir",
         "lead_opted_out": "Refus de contact depuis un aperçu",
-        "sequence_paused": "Relances en pause"
+        "sequence_paused": "Relances en pause",
+        "deliverability_digest": "Résumé hebdomadaire de délivrabilité"
       }
     }
   },
@@ -4314,6 +4320,94 @@
         "rescheduled": "Replanifiée",
         "completed": "Terminée"
       }
+    }
+  },
+  "deliverability": {
+    "title": "Délivrabilité",
+    "description": "Préservez la confiance envers vos domaines : authentification, santé et arrêt d’urgence.",
+    "loadError": "Impossible de charger la délivrabilité.",
+    "failed": "Cela n’a pas fonctionné.",
+    "emptyTitle": "Aucune boîte d’envoi connectée",
+    "emptyBody": "Connectez une boîte d’envoi dans Paramètres → Boîtes d’envoi pour vérifier son domaine.",
+    "tools": "Outils des fournisseurs :",
+    "ready": "Peut envoyer",
+    "notReady": "Bloqué : domaine non authentifié",
+    "overridden": "Dérogation active",
+    "recheck": "Vérifier à nouveau",
+    "rechecked": "Domaine vérifié à nouveau.",
+    "override": "Autoriser quand même",
+    "overrideCleared": "Dérogation supprimée.",
+    "clearOverride": "Supprimer la dérogation",
+    "overrideTitle": "Laisser {email} envoyer malgré ses vérifications ?",
+    "overrideBody": "Uniquement pour des e-mails personnels, de type transactionnel. Les e-mails non authentifiés sont souvent rejetés ou classés comme spam. Le motif est enregistré.",
+    "reason": "Motif",
+    "cancel": "Annuler",
+    "checked": "{domain} · vérifié {when}",
+    "notChecked": "Ce domaine n’a pas encore été vérifié.",
+    "status": {
+      "connected": "Connectée",
+      "warming": "En préchauffe",
+      "active": "Active",
+      "paused": "En pause",
+      "error": "Erreur"
+    },
+    "outcome": {
+      "pass": "OK",
+      "warn": "Avertissement",
+      "fail": "En échec",
+      "unknown": "Inconnu"
+    },
+    "checks": {
+      "spf": "SPF",
+      "dkim": "DKIM",
+      "dmarc": "DMARC",
+      "mx": "MX",
+      "mta_sts": "MTA-STS",
+      "tls_rpt": "Rapports TLS",
+      "bimi": "BIMI",
+      "blocklist": "Liste de blocage"
+    },
+    "health": {
+      "sends": "Envoyés",
+      "sendsValue": "{day} aujourd’hui · {week} cette semaine",
+      "bounces": "Retours en erreur (50 derniers)",
+      "unsubscribes": "Désinscriptions (7 jours)",
+      "positive": "Réponses positives (7 jours)",
+      "negative": "Réponses négatives (7 jours)",
+      "deferrals": "Reports (7 jours)",
+      "trend": "E-mails envoyés par jour sur 30 jours (rouge : jours avec retours en erreur)"
+    },
+    "warnings": {
+      "would_pause": "Une règle de pause est déclenchée",
+      "unsubscribe_rate_high": "Taux de désinscription supérieur à 5 %",
+      "bounce_rate_rising": "Taux de retours en erreur en hausse"
+    },
+    "blocklist": {
+      "title": "Listes de blocage",
+      "off": "Les vérifications de listes de blocage sont désactivées (aucune clé Spamhaus configurée).",
+      "sitesDomain": "Domaine des aperçus {domain} :",
+      "listed": "Listé",
+      "clean": "Non listé"
+    },
+    "killSwitch": {
+      "title": "Arrêter tous les envois",
+      "off": "Les envois fonctionnent normalement.",
+      "on": "Tous les envois sont arrêtés depuis {when} : {reason}",
+      "stop": "Arrêter tous les envois",
+      "resume": "Reprendre les envois",
+      "stopTitle": "Arrêter tous les envois maintenant ?",
+      "stopBody": "Aucun e-mail ne quitte cet espace de travail tant que vous ne reprenez pas : les e-mails en file d’attente patientent et les séquences se mettent en pause.",
+      "resumeTitle": "Reprendre les envois ?",
+      "resumeBody": "Les e-mails en file d’attente repartent dans les limites de leurs boîtes d’envoi et les séquences en pause reprennent.",
+      "reason": "Motif",
+      "cancel": "Annuler",
+      "stopped": "Tous les envois sont arrêtés.",
+      "resumed": "Envois repris.",
+      "failed": "Cela n’a pas fonctionné."
+    },
+    "banner": {
+      "active": "Tous les envois sont arrêtés (arrêt d’urgence) : {reason}",
+      "open": "Délivrabilité"
     }
   }
 }

@@ -141,11 +141,11 @@ apps/web/src/features/outreach/deliverability/{dashboard.tsx, domain-card.tsx, m
 - **E2E:** dashboard shows a failing DKIM with Google instructions; re-check after fixing the mocked DNS shows pass; kill switch banner appears and resume works.
 
 ## Acceptance criteria
-- [ ] SPF/DKIM/DMARC/MX (+ informational MTA-STS/TLS-RPT/BIMI) checks with exact fix instructions and readiness gating.
-- [ ] Rolling health metrics and data-driven auto-pause rules with safe rescheduling and notifications.
-- [ ] Workspace kill switch effective within seconds; audited.
-- [ ] Optional blocklist checks behind a flag with documented terms.
-- [ ] Deliverability dashboard and weekly digest; metrics and alerts.
+- [x] SPF/DKIM/DMARC/MX (+ informational MTA-STS/TLS-RPT/BIMI) checks with exact fix instructions and readiness gating (the real-message alignment check is a follow-up).
+- [x] Rolling health metrics and data-driven auto-pause rules with safe rescheduling and notifications.
+- [x] Workspace kill switch effective within seconds; audited.
+- [x] Optional blocklist checks behind a flag with documented terms (domains; sending IPs of SMTP mailboxes are a follow-up).
+- [x] Deliverability dashboard and weekly digest; metrics and alerts.
 
 ## Agent prompt
 ```text

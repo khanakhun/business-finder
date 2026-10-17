@@ -15,6 +15,7 @@ import {
   SearchIcon,
   SendIcon,
   SettingsIcon,
+  ShieldAlertIcon,
   ShieldCheckIcon,
   SparklesIcon,
 } from 'lucide-react';
@@ -35,6 +36,7 @@ export type NavKey =
   | 'sequences'
   | 'templates'
   | 'mailboxes'
+  | 'deliverability'
   | 'analytics'
   | 'compliance'
   | 'settings';
@@ -82,6 +84,7 @@ export const NAVIGATION: readonly NavGroup[] = [
       { key: 'sequences', href: '/outreach/sequences', icon: ListOrderedIcon },
       { key: 'templates', href: '/outreach/templates', icon: MailIcon },
       { key: 'mailboxes', href: '/outreach/mailboxes', icon: MailsIcon },
+      { key: 'deliverability', href: '/outreach/deliverability', icon: ShieldAlertIcon },
     ],
   },
   {

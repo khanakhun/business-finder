@@ -29,7 +29,8 @@
     "leads": "Leads",
     "compliance": "Compliance",
     "outbox": "Outbox",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "deliverability": "Deliverability"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -664,6 +665,10 @@
       "sequence_paused": {
         "title": "Follow-ups paused for {business}",
         "body": "{reason}"
+      },
+      "deliverability_digest": {
+        "title": "Deliverability this week: {sent} emails, {bounceRate} bounced",
+        "body": "{summary}"
       }
     },
     "preferences": {
@@ -685,7 +690,8 @@
         "system_test": "Test notifications",
         "site_needs_review": "Sites to review",
         "lead_opted_out": "Opt-outs from previews",
-        "sequence_paused": "Follow-ups paused"
+        "sequence_paused": "Follow-ups paused",
+        "deliverability_digest": "Weekly deliverability summary"
       }
     }
   },
@@ -4314,6 +4320,94 @@
         "rescheduled": "Rescheduled",
         "completed": "Completed"
       }
+    }
+  },
+  "deliverability": {
+    "title": "Deliverability",
+    "description": "Keep your domains trusted: authentication, health, and an emergency stop.",
+    "loadError": "Deliverability could not be loaded.",
+    "failed": "That did not work.",
+    "emptyTitle": "No mailbox connected",
+    "emptyBody": "Connect a mailbox in Settings → Mailboxes to check its domain.",
+    "tools": "Providers’ own tools:",
+    "ready": "Can send",
+    "notReady": "Blocked: domain not authenticated",
+    "overridden": "Override on",
+    "recheck": "Check again",
+    "rechecked": "Domain checked again.",
+    "override": "Allow anyway",
+    "overrideCleared": "Override removed.",
+    "clearOverride": "Remove the override",
+    "overrideTitle": "Let {email} send despite its checks?",
+    "overrideBody": "Only for personal, transactional-like mail. Unauthenticated mail is often rejected or marked as spam. The reason is recorded.",
+    "reason": "Reason",
+    "cancel": "Cancel",
+    "checked": "{domain} · checked {when}",
+    "notChecked": "This domain has not been checked yet.",
+    "status": {
+      "connected": "Connected",
+      "warming": "Warming up",
+      "active": "Active",
+      "paused": "Paused",
+      "error": "Error"
+    },
+    "outcome": {
+      "pass": "OK",
+      "warn": "Warning",
+      "fail": "Failing",
+      "unknown": "Unknown"
+    },
+    "checks": {
+      "spf": "SPF",
+      "dkim": "DKIM",
+      "dmarc": "DMARC",
+      "mx": "MX",
+      "mta_sts": "MTA-STS",
+      "tls_rpt": "TLS reporting",
+      "bimi": "BIMI",
+      "blocklist": "Blocklist"
+    },
+    "health": {
+      "sends": "Sent",
+      "sendsValue": "{day} today · {week} this week",
+      "bounces": "Bounces (last 50)",
+      "unsubscribes": "Unsubscribes (7 days)",
+      "positive": "Positive replies (7 days)",
+      "negative": "Negative replies (7 days)",
+      "deferrals": "Deferrals (7 days)",
+      "trend": "Emails sent per day over 30 days (red: days with bounces)"
+    },
+    "warnings": {
+      "would_pause": "A pause rule is tripped",
+      "unsubscribe_rate_high": "Unsubscribe rate above 5%",
+      "bounce_rate_rising": "Bounce rate rising"
+    },
+    "blocklist": {
+      "title": "Blocklists",
+      "off": "Blocklist checks are off (no Spamhaus key configured).",
+      "sitesDomain": "Preview domain {domain}:",
+      "listed": "Listed",
+      "clean": "Not listed"
+    },
+    "killSwitch": {
+      "title": "Stop all sending",
+      "off": "Sending runs normally.",
+      "on": "All sending is stopped since {when}: {reason}",
+      "stop": "Stop all sending",
+      "resume": "Resume sending",
+      "stopTitle": "Stop all sending now?",
+      "stopBody": "No email leaves this workspace until you resume: queued emails wait and sequences pause.",
+      "resumeTitle": "Resume sending?",
+      "resumeBody": "Queued emails go out again within their mailboxes’ limits and paused sequences resume.",
+      "reason": "Reason",
+      "cancel": "Cancel",
+      "stopped": "All sending stopped.",
+      "resumed": "Sending resumed.",
+      "failed": "That did not work."
+    },
+    "banner": {
+      "active": "All sending is stopped (kill switch): {reason}",
+      "open": "Deliverability"
     }
   }
 }

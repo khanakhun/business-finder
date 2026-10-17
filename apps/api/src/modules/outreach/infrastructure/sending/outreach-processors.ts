@@ -16,6 +16,7 @@ import type { z } from 'zod';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../../platform/logging/logger.ts';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
+import { DeliverabilityDigest } from '../../application/deliverability/digest.ts';
 import {
   INBOUND_QUEUES,
   INBOUND_REPOSITORY,
@@ -101,6 +102,7 @@ export class OutreachTickProcessor extends TypedProcessor<
     @Inject(INBOUND_QUEUES) private readonly inboundQueues: InboundQueues,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(SEQUENCE_REPOSITORY) private readonly sequences: SequenceRepository,
+    private readonly digest: DeliverabilityDigest,
     @InjectQueue(QUEUES.outreachSend.name) sendQueue: Queue,
     @InjectQueue(QUEUES.outreachSequence.name) sequenceQueue: Queue,
   ) {
@@ -132,6 +134,10 @@ export class OutreachTickProcessor extends TypedProcessor<
         enrollmentId: enrollment.id,
         lease: lease.toISOString(),
       });
+    // BF-056: the weekly deliverability digest (Monday morning, once per workspace and week).
+    await this.digest
+      .runIfDue()
+      .catch((error: unknown) => context.logger.warn({ err: error }, 'deliverability digest failed'));
     // Replies (BF-054): mailboxes whose next poll is due.
     const minute = now.toISOString().slice(0, 16);
     for (const mailbox of await this.inbound.dueMailboxes(now, 200))

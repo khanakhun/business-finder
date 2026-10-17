@@ -1,6 +1,7 @@
 import { PageHeader } from '@bf/ui/components/page-header';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { KillSwitchBanner } from '@/features/deliverability/kill-switch-banner.tsx';
 import { SequencesPage } from '@/features/sequences/sequences-page.tsx';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,6 +13,7 @@ export default async function OutreachSequencesPage() {
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
+      <KillSwitchBanner />
       <SequencesPage />
     </>
   );

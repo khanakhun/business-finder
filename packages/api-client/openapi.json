@@ -13711,6 +13711,7 @@
               "discovery_completed",
               "mailbox_paused",
               "sequence_paused",
+              "deliverability_digest",
               "mailbox_error",
               "dsr_due",
               "member_joined",
@@ -13785,6 +13786,7 @@
               "discovery_completed",
               "mailbox_paused",
               "sequence_paused",
+              "deliverability_digest",
               "mailbox_error",
               "dsr_due",
               "member_joined",
@@ -25633,7 +25635,7 @@
             "items": {
               "$ref": "#/components/schemas/NotificationPreference"
             },
-            "maxItems": 12,
+            "maxItems": 13,
             "minItems": 1,
             "type": "array"
           }

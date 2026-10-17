@@ -204,6 +204,11 @@ export class ComplianceService {
     return this.decisions.forBusiness(organizationId, businessId, 50);
   }
 
+  /** Persisted decisions by id (an outbound message's enqueue and send decisions). */
+  decisionsById(organizationId: string, ids: readonly string[]) {
+    return this.decisions.byIds(organizationId, ids);
+  }
+
   // ── Suppression ─────────────────────────────────────────────────────────────────────────────────────────────────
 
   @Transactional()

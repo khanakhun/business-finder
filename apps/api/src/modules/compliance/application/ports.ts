@@ -152,6 +152,7 @@ export interface DecisionRepository {
     validUntil: Date | null;
   }): Promise<{ id: string; evaluatedAt: Date }>;
   forBusiness(organizationId: string, businessId: string, limit: number): Promise<ComplianceDecision[]>;
+  byIds(organizationId: string, ids: readonly string[]): Promise<ComplianceDecision[]>;
 }
 export const DECISION_REPOSITORY = Symbol('DecisionRepository');
 

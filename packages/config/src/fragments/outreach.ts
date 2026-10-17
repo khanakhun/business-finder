@@ -11,6 +11,13 @@ export const outreachEnv = z.object({
   MAILBOX_MAX_DAILY_CAP_SMTP: cap(300, 'Highest daily cap an SMTP/IMAP mailbox may be set to.'),
   OUTREACH_WORKSPACE_DAILY_CAP: cap(300, 'Messages a workspace may send per day across all its mailboxes.'),
   OUTREACH_DOMAIN_HOURLY_LIMIT: cap(3, 'Messages per hour to one recipient domain, per workspace.'),
+  OUTREACH_UNDO_WINDOW_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(600)
+    .default(10)
+    .describe('Seconds a sent email waits in the queue so the sender can undo it (BF-052).'),
   MAILBOX_SMTP_INSECURE_HOSTS: z
     .string()
     .default('localhost,127.0.0.1,::1,mailpit')

@@ -323,6 +323,13 @@
       "when": 1792239167606,
       "tag": "0045_email_template_seeds",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1792243510225,
+      "tag": "0046_outbound_messages",
+      "breakpoints": true
     }
   ]
 }

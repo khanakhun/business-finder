@@ -796,14 +796,16 @@ const ProfileConfigObjectSchema = z.object({
    * for the gates, the reason texts and a rollback.
    */
   kind: z.enum(['rules', 'model']).default('rules'),
-  /** A model profile's model and its tiers by calibrated probability (A from `A`, B from `B`). */
+  /**
+   * A model profile's model and its tiers by calibrated probability (A from `A`, B from `B`). Optional, without a
+   * default: rules configs stay byte-identical (the built-ins' pinned digests).
+   */
   model: z
     .object({
       modelId: z.uuid(),
       tiers: z.object({ A: z.number().gt(0).max(1), B: z.number().min(0).lt(1) }),
     })
-    .nullable()
-    .default(null),
+    .optional(),
   offer: OfferSchema,
   /** Feature → weight (negative weights lower the score). */
   weights: z.partialRecord(FeatureKeySchema, z.number().min(-100).max(100)),

@@ -26,6 +26,10 @@ export {
   PromptError,
 } from './errors.ts';
 export {
+  type AgentEvent,
+  type AgentOptions,
+  type AgentRun,
+  type AgentTurn,
   type AiContext,
   type AiGateway,
   type AiGatewayOptions,
@@ -115,6 +119,7 @@ export {
   ParseSearchIntentOutput,
   SearchParseIntent,
 } from './tasks/search-parse-intent.ts';
+export { SiteEditAgentInput, SitesEditAgent } from './tasks/sites-edit-agent.ts';
 export {
   ClassifyBusinessInput,
   ClassifyBusinessOutput,

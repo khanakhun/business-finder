@@ -161,3 +161,14 @@ export const TranslateSiteRequestSchema = z
   .object({ locale, scope: z.enum(['missing', 'all']).default('missing') })
   .meta({ id: 'TranslateSiteRequest' });
 export type TranslateSiteRequest = z.input<typeof TranslateSiteRequestSchema>;
+
+/** What `POST /v1/sites/:id/translate` returns: the thread it ran in and its proposal (null when none was made). */
+export const TranslateSiteResultSchema = z
+  .object({
+    threadId: z.uuid(),
+    proposal: SiteChangeProposalSchema.nullable(),
+    /** The assistant's answer (why there is no proposal, when there is none). */
+    message: z.string(),
+  })
+  .meta({ id: 'TranslateSiteResult' });
+export type TranslateSiteResult = z.infer<typeof TranslateSiteResultSchema>;

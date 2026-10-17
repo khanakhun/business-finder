@@ -12,7 +12,9 @@ import {
   NoObjectGeneratedError,
   NoOutputGeneratedError,
   Output,
+  stepCountIs,
   streamText,
+  type ToolSet,
 } from 'ai';
 import type { z } from 'zod';
 import { embeddingCacheKey, responseCacheKey } from './cache.ts';
@@ -61,6 +63,33 @@ export interface AiStream {
   readonly result: Promise<AiResult<string>>;
 }
 
+/** A turn of an agent conversation before the current request (plain text). */
+export interface AgentTurn {
+  readonly role: 'user' | 'assistant';
+  readonly content: string;
+}
+
+/** What an agent run emits as it goes (text as it is written, each tool call and its result). */
+export type AgentEvent =
+  | { readonly type: 'text'; readonly text: string }
+  | { readonly type: 'tool-call'; readonly tool: string; readonly input: unknown }
+  | { readonly type: 'tool-result'; readonly tool: string; readonly output: unknown }
+  | { readonly type: 'tool-error'; readonly tool: string; readonly error: string };
+
+export interface AgentRun {
+  readonly events: AsyncIterable<AgentEvent>;
+  /** Settles when the run ends (and the call is recorded): the final text, usage and cost of every step. */
+  readonly result: Promise<AiResult<string>>;
+}
+
+export interface AgentOptions {
+  /** The tools the model may call (AI SDK `tool()`s; their `execute` runs in the caller's process). */
+  readonly tools: ToolSet;
+  /** Model steps at most (each step may call tools). */
+  readonly maxSteps: number;
+  readonly history?: readonly AgentTurn[];
+}
+
 export interface EmbedOptions {
   /** What the vectors are for (ledger and telemetry), e.g. `business.search`. */
   readonly purpose: string;
@@ -89,6 +118,13 @@ export interface AiGateway {
     ctx: AiContext,
   ): Promise<AiResult<OutputOf<T>>>;
   stream<T extends TextTask>(task: T, input: z.input<T['input']>, ctx: AiContext): Promise<AiStream>;
+  /** A tool-using run of a text task (BF-047): streamed, at most `maxSteps` model steps. */
+  agent<T extends TextTask>(
+    task: T,
+    input: z.input<T['input']>,
+    ctx: AiContext,
+    options: AgentOptions,
+  ): Promise<AgentRun>;
   embed(texts: readonly string[], options: EmbedOptions): Promise<EmbedResult>;
   vision<T extends VisionTask>(
     task: T,
@@ -526,6 +562,91 @@ export function createAiGateway(options: AiGatewayOptions): AiGateway {
       // Nobody may await `result`: avoid an unhandled rejection; callers still see the error when they do.
       result.catch(() => undefined);
       return { textStream: stream.textStream, result };
+    },
+
+    async agent(task, rawInput, ctx, agentOptions) {
+      const input = task.input.parse(rawInput);
+      await enforceBudget(task, ctx);
+      const prompt = prompts.get(task.prompt);
+      const rendered = prompt.render((task.variables?.(input) ?? input) as Record<string, unknown>);
+      const [ref] = routeFor(task, options.routing);
+      if (!ref) throw new Error(`No model routed for ${task.name}`);
+      const apiKey = await options.keys.resolve(ctx.orgId, ref.provider);
+      if (!apiKey) throw new AiProviderNotConfiguredError(ref.provider, PROVIDER_SECRETS[ref.provider]);
+      const started = performance.now();
+      const stream = streamText({
+        model: models.language(ref, apiKey),
+        system: rendered.system,
+        messages: [
+          ...(agentOptions.history ?? []).map(
+            (turn): ModelMessage => ({ role: turn.role, content: turn.content }),
+          ),
+          { role: 'user', content: rendered.user },
+        ],
+        tools: agentOptions.tools,
+        stopWhen: stepCountIs(agentOptions.maxSteps),
+        ...(task.temperature === undefined ? {} : { temperature: task.temperature }),
+        maxOutputTokens: task.maxOutputTokens,
+        abortSignal: AbortSignal.any([
+          AbortSignal.timeout(task.timeoutMs),
+          ...(ctx.signal ? [ctx.signal] : []),
+        ]),
+        telemetry: sdkTelemetry(task.name, traceContent),
+      });
+      async function* events(): AsyncIterable<AgentEvent> {
+        for await (const part of stream.fullStream) {
+          if (part.type === 'text-delta') yield { type: 'text', text: part.text };
+          else if (part.type === 'tool-call')
+            yield { type: 'tool-call', tool: part.toolName, input: part.input };
+          else if (part.type === 'tool-result')
+            yield { type: 'tool-result', tool: part.toolName, output: part.output };
+          else if (part.type === 'tool-error')
+            yield { type: 'tool-error', tool: part.toolName, error: String(part.error).slice(0, 500) };
+        }
+      }
+      const base = { orgId: ctx.orgId, task: task.name, promptVersion: prompt.version, traceId: null };
+      const result = (async (): Promise<AiResult<string>> => {
+        try {
+          const [text, usage] = await Promise.all([stream.text, stream.totalUsage]);
+          const tokens = toUsage(usage);
+          const latencyMs = Math.round(performance.now() - started);
+          const cost = price(ref.model, tokens);
+          await record({
+            ...base,
+            provider: ref.provider,
+            model: ref.model,
+            ...tokens,
+            costUsd: cost,
+            latencyMs,
+            status: 'ok',
+            errorCode: null,
+          });
+          return {
+            output: text,
+            provider: ref.provider,
+            model: ref.model,
+            promptVersion: prompt.version,
+            usage: tokens,
+            costUsd: cost,
+            cached: false,
+            latencyMs,
+          };
+        } catch (error) {
+          await record({
+            ...base,
+            provider: ref.provider,
+            model: ref.model,
+            ...ZERO_USAGE,
+            costUsd: null,
+            latencyMs: Math.round(performance.now() - started),
+            status: 'error',
+            errorCode: errorCode(error),
+          });
+          throw error;
+        }
+      })();
+      result.catch(() => undefined);
+      return { events: events(), result };
     },
 
     async embed(texts, embedOptions) {

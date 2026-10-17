@@ -3,9 +3,11 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import { GenerationModule } from '../generation/index.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { SitesModule } from '../sites/index.ts';
-import { SITE_CHAT_REPOSITORY } from './application/ports.ts';
+import { EDIT_AGENT, SITE_CHAT_REPOSITORY } from './application/ports.ts';
+import { SITE_CHAT_ASSET_HOSTS, SiteChatMessages } from './application/site-chat.messages.ts';
 import { SiteChatProposals } from './application/site-chat.proposals.ts';
 import { SITE_CHAT_RETENTION_DAYS, SiteChatRetention } from './application/site-chat.retention.ts';
+import { AiEditAgent } from './infrastructure/ai-edit-agent.ts';
 import { DrizzleSiteChatRepository } from './infrastructure/drizzle-site-chat.repository.ts';
 import { SiteChatController } from './interface/http/site-chat.controller.ts';
 
@@ -28,6 +30,14 @@ export class SiteChatModule {
           useFactory: (env: AppEnv) => (env as ApiEnv).SITE_CHAT_RETENTION_DAYS,
         },
         SiteChatProposals,
+        SiteChatMessages,
+        { provide: EDIT_AGENT, useClass: AiEditAgent },
+        {
+          // Images of a site come from our storage/CDN only (the dry run checks proposed images against it).
+          provide: SITE_CHAT_ASSET_HOSTS,
+          inject: [APP_ENV],
+          useFactory: (env: AppEnv) => [new URL((env as ApiEnv).SITES_ASSETS_BASE_URL).host],
+        },
         ...(mode === 'worker' ? [SiteChatRetention] : []),
       ],
     };

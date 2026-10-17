@@ -75,3 +75,51 @@ export interface SiteChatRepository {
   deleteThreadsBefore(before: Date, limit: number): Promise<number>;
 }
 export const SITE_CHAT_REPOSITORY = Symbol('SiteChatRepository');
+
+// ── The edit agent (part 2) ─────────────────────────────────────────────────────────────────────────────────────
+
+/** What the agent's action tools do, decided by the application (dry run, policy, storage). */
+export interface EditAgentActions {
+  /** A dry run of the operations: a proposal id when valid, else the problems to fix. */
+  propose(
+    operations: unknown[],
+    summary: string,
+  ): Promise<
+    { readonly ok: true; readonly proposalId: string } | { readonly ok: false; readonly problems: string[] }
+  >;
+  /** A fact the user stated, to confirm with the next proposal. */
+  proposeFact(fact: {
+    kind: string;
+    value: unknown;
+    locale?: string | undefined;
+    note?: string | undefined;
+  }): { readonly ok: true; readonly id: string } | { readonly ok: false; readonly problem: string };
+  clarify(question: string, options: string[]): void;
+  refuse(reason: string, alternatives: string[]): void;
+}
+
+export type EditAgentEvent =
+  | { readonly type: 'text'; readonly text: string }
+  | { readonly type: 'tool'; readonly tool: string; readonly summary: string };
+
+export interface EditAgentRequest {
+  readonly organizationId: string;
+  readonly uiLanguage: 'en' | 'fr';
+  readonly selection: string;
+  readonly message: string;
+  readonly history: readonly { readonly role: 'user' | 'assistant'; readonly content: string }[];
+  /** The site as of the base version (read tools look into it). */
+  readonly spec: import('@bf/site-schema').SiteSpec;
+  /** The display facts the site may state (read tools look into them). */
+  readonly facts: import('@bf/site-schema').FactRegistry;
+  readonly brief: string;
+}
+
+export interface EditAgent {
+  run(
+    request: EditAgentRequest,
+    actions: EditAgentActions,
+    emit: (event: EditAgentEvent) => void,
+  ): Promise<{ readonly text: string; readonly costUsd: number }>;
+}
+export const EDIT_AGENT = Symbol('EditAgent');

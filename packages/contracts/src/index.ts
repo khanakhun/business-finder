@@ -940,6 +940,8 @@ export {
   SiteChatThreadSchema,
   type TranslateSiteRequest,
   TranslateSiteRequestSchema,
+  type TranslateSiteResult,
+  TranslateSiteResultSchema,
 } from './site-chat.ts';
 export {
   EMAIL_SOURCES,

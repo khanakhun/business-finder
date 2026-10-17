@@ -136,6 +136,17 @@ export const queryKeys = {
     legal: (siteId: string) => ['goLive', 'legal', siteId] as const,
     routing: (siteId: string) => ['goLive', 'routing', siteId] as const,
     domains: (siteId: string) => ['goLive', 'domains', siteId] as const,
+    grants: (siteId: string) => ['goLive', 'grants', siteId] as const,
+    approvals: (siteId: string) => ['goLive', 'approvals', siteId] as const,
+    changeRequests: (siteId: string) => ['goLive', 'change-requests', siteId] as const,
+  }),
+  portal: defineQueryKeys('portal', {
+    sites: () => ['portal', 'sites'] as const,
+    site: (siteId: string) => ['portal', 'site', siteId] as const,
+    stats: (siteId: string) => ['portal', 'stats', siteId] as const,
+    leads: (siteId: string) => ['portal', 'leads', siteId] as const,
+    changeRequests: (siteId: string) => ['portal', 'change-requests', siteId] as const,
+    approvals: (siteId: string) => ['portal', 'approvals', siteId] as const,
   }),
   sequences: defineQueryKeys('sequences', {
     list: () => ['sequences', 'list'] as const,

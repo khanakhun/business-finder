@@ -4777,7 +4777,8 @@
       "legal": "Mentions légales",
       "routing": "Formulaire de contact",
       "domains": "Domaines",
-      "publish": "Publication"
+      "publish": "Publication",
+      "handover": "Remise au client"
     },
     "continue": "Continuer vers la publication",
     "readyTitle": "Prêt pour la mise en ligne",
@@ -4894,6 +4895,111 @@
       "confirmed": "Merci, l’adresse est confirmée. Les demandes de contact du site web lui parviendront désormais.",
       "invalid": "Ce lien est invalide ou a expiré. Demandez un nouveau lien de confirmation.",
       "error": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "handover": {
+      "portalTitle": "Espace client",
+      "portalHelp": "Invitez le propriétaire de l’entreprise : il se connecte avec un lien envoyé par e-mail et voit les visites et les demandes de contact de ce site, peut demander des modifications et valider les nouvelles versions. Rien d’autre dans l’espace de travail ne lui est visible.",
+      "email": "E-mail du propriétaire",
+      "language": "Langue",
+      "invite": "Inviter",
+      "invited": "Invitation envoyée à {email}",
+      "failed": "L’action a échoué",
+      "noGrants": "Personne n’a encore accès à l’espace client.",
+      "joined": "A rejoint le {date}",
+      "invitedOn": "Invité le {date}",
+      "revoke": "Retirer l’accès",
+      "revoked": "Accès retiré",
+      "approvalsTitle": "Validation",
+      "approvalsHelp": "Demandez au client de valider la version actuelle. Publiez-la d’abord en aperçu : c’est là que le client la consulte.",
+      "note": "Note pour le client (facultatif)",
+      "ask": "Demander une validation",
+      "asked": "Validation demandée",
+      "version": "Version {n}",
+      "status": {
+        "pending": "En attente",
+        "approved": "Validée",
+        "changes_requested": "Modifications demandées",
+        "withdrawn": "Retirée"
+      },
+      "changesTitle": "Demandes de modifications",
+      "noChanges": "Aucune demande de modification pour le moment.",
+      "screenshot": "Capture d’écran {n}"
+    }
+  },
+  "portal": {
+    "title": "Votre site web",
+    "sitesTitle": "Vos sites web",
+    "loadError": "Impossible de charger votre site web",
+    "emptyTitle": "Pas encore de site web",
+    "emptyBody": "Lorsque votre agence vous donne accès à un site web, il apparaît ici.",
+    "live": "En ligne",
+    "notLive": "Pas encore en ligne",
+    "notLiveYet": "Ce site web n’est pas encore en ligne.",
+    "pendingApprovals": "{count, plural, one {# version à valider} other {# versions à valider}}",
+    "opensNewTab": "(s’ouvre dans un nouvel onglet)",
+    "back": "Tous vos sites web",
+    "signOut": "Se déconnecter",
+    "signOutFailed": "Impossible de vous déconnecter",
+    "tabs": {
+      "overview": "Vue d’ensemble",
+      "leads": "Demandes de contact",
+      "changes": "Demander des modifications",
+      "approvals": "Validations"
+    },
+    "overview": {
+      "views": "Pages vues ({days} jours)",
+      "visitors": "Visiteurs ({days} jours)",
+      "leads": "Demandes de contact ({days} jours)",
+      "daily": "Pages vues par jour",
+      "noViews": "Aucune visite enregistrée pour le moment.",
+      "byLanguage": "Visites par langue"
+    },
+    "leads": {
+      "emptyTitle": "Pas encore de demande de contact",
+      "emptyBody": "Les messages envoyés depuis le formulaire de contact de votre site web apparaissent ici.",
+      "anonymous": "Nom non renseigné"
+    },
+    "changes": {
+      "help": "Décrivez ce que vous souhaitez modifier. Votre agence le reçoit sous forme de tâche.",
+      "message": "Que faut-il modifier ?",
+      "page": "Quelle page ? (facultatif)",
+      "screenshots": "Captures d’écran (facultatif)",
+      "screenshotsHelp": "Jusqu’à 3 images (PNG, JPEG ou WebP), 5 Mo chacune.",
+      "filesRefused": "Certains fichiers ont été ignorés : utilisez au maximum 3 images PNG, JPEG ou WebP de 5 Mo chacune.",
+      "submit": "Envoyer la demande",
+      "sent": "Demande envoyée à votre agence",
+      "failed": "Impossible d’envoyer la demande",
+      "sentTitle": "Vos demandes",
+      "none": "Vous n’avez pas encore envoyé de demande.",
+      "withScreenshots": "{count, plural, one {# capture d’écran} other {# captures d’écran}}"
+    },
+    "approvals": {
+      "none": "Aucune version n’attend votre validation.",
+      "version": "Version {n}",
+      "status": {
+        "pending": "En attente de votre validation",
+        "approved": "Validée",
+        "changes_requested": "Modifications demandées",
+        "withdrawn": "Retirée"
+      },
+      "look": "Voir cette version",
+      "noPreview": "L’aperçu n’est pas disponible pour le moment ; votre agence vous l’enverra à nouveau.",
+      "yourComment": "Votre commentaire : {comment}",
+      "comment": "Commentaire (obligatoire pour demander des modifications)",
+      "approve": "Valider",
+      "requestChanges": "Demander des modifications",
+      "approvedToast": "Version validée",
+      "changesToast": "Vos demandes de modifications ont été envoyées",
+      "failed": "Impossible d’enregistrer votre décision"
+    },
+    "signIn": {
+      "title": "Connectez-vous à l’espace client de votre site web",
+      "help": "Saisissez l’adresse e-mail invitée par votre agence. Nous vous enverrons un lien de connexion par e-mail.",
+      "email": "Adresse e-mail",
+      "submit": "Recevoir un lien de connexion par e-mail",
+      "sent": "Si {email} a accès, un lien de connexion est en route. Il fonctionne une seule fois et expire dans 15 minutes.",
+      "error": "Une erreur est survenue. Veuillez réessayer dans une minute.",
+      "linkFailed": "Ce lien de connexion n’est pas valide ou a expiré. Demandez-en un nouveau ci-dessous."
     }
   }
 }

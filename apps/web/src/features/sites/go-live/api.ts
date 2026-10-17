@@ -3,12 +3,19 @@
 import {
   type AddSiteDomainRequest,
   AddSiteDomainRequestSchema,
+  type ChangeRequest,
   type GoLiveReadiness,
+  type InvitePortalClientRequest,
+  InvitePortalClientRequestSchema,
+  type PortalGrant,
   type PublishLiveResult,
+  type RequestApproval,
+  RequestApprovalSchema,
   type SaveSiteLegalProfileRequest,
   SaveSiteLegalProfileRequestSchema,
   type SetContactRoutingRequest,
   SetContactRoutingRequestSchema,
+  type SiteApproval,
   type SiteContactRouting,
   type SiteDomain,
   type SiteLegalProfile,
@@ -130,4 +137,73 @@ export async function confirmContactRouting(token: string): Promise<boolean> {
   return unwrap<{ confirmed: boolean }>(
     await apiClient().POST('/v1/public/sites/contact-routing/confirm', { body: { token } }),
   ).confirmed;
+}
+
+// ── Handover: the client portal (BF-062) ─────────────────────────────────────────────────────────────────────────
+
+export function usePortalGrants(siteId: string) {
+  return useQuery({
+    queryKey: queryKeys.goLive.grants(siteId),
+    queryFn: async () =>
+      unwrap<{ items: PortalGrant[] }>(
+        await apiClient().GET('/v1/sites/{id}/portal/grants', { params: { path: { id: siteId } } }),
+      ).items,
+  });
+}
+
+export function useSiteApprovals(siteId: string) {
+  return useQuery({
+    queryKey: queryKeys.goLive.approvals(siteId),
+    queryFn: async () =>
+      unwrap<{ items: SiteApproval[] }>(
+        await apiClient().GET('/v1/sites/{id}/portal/approvals', { params: { path: { id: siteId } } }),
+      ).items,
+  });
+}
+
+export function useSiteChangeRequests(siteId: string) {
+  return useQuery({
+    queryKey: queryKeys.goLive.changeRequests(siteId),
+    queryFn: async () =>
+      unwrap<{ items: ChangeRequest[] }>(
+        await apiClient().GET('/v1/sites/{id}/portal/change-requests', { params: { path: { id: siteId } } }),
+      ).items,
+  });
+}
+
+export function useHandoverActions(siteId: string) {
+  const client = useQueryClient();
+  const settle = () => void client.invalidateQueries({ queryKey: ['goLive'] });
+  const path = { path: { id: siteId } };
+  return {
+    invite: useMutation({
+      mutationFn: async (body: InvitePortalClientRequest) =>
+        unwrap<{ items: PortalGrant[] }>(
+          await apiClient().POST('/v1/sites/{id}/portal/grants', {
+            params: path,
+            body: InvitePortalClientRequestSchema.parse(body),
+          }),
+        ),
+      onSuccess: settle,
+    }),
+    revoke: useMutation({
+      mutationFn: async (grantId: string) => {
+        const { error } = await apiClient().DELETE('/v1/sites/{id}/portal/grants/{grantId}', {
+          params: { path: { id: siteId, grantId } },
+        });
+        if (error) throw error;
+      },
+      onSuccess: settle,
+    }),
+    requestApproval: useMutation({
+      mutationFn: async (body: RequestApproval) =>
+        unwrap<{ items: SiteApproval[] }>(
+          await apiClient().POST('/v1/sites/{id}/portal/approvals', {
+            params: path,
+            body: RequestApprovalSchema.parse(body),
+          }),
+        ),
+      onSuccess: settle,
+    }),
+  };
 }

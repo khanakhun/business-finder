@@ -17,15 +17,16 @@ import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useContactRouting, useDomains, useGoLiveActions, useLegalProfile, useReadiness } from './api.ts';
 import { DomainStep } from './domain-step.tsx';
+import { HandoverStep } from './handover-step.tsx';
 import { LegalStep } from './legal-step.tsx';
 import { type GoLiveStep, ReadinessChecklist } from './readiness-checklist.tsx';
 import { RoutingStep } from './routing-step.tsx';
 
 // The go-live wizard (BF-062): the readiness checklist, then each step that fixes a check (legal profile, contact
-// routing, custom domains), then the live publication of the version the checks ran on. The step is in the URL
-// (`?step=`) so the checks' fix links land on it.
+// routing, custom domains), then the live publication of the version the checks ran on, and the handover to the
+// client (portal, approvals, change requests). The step is in the URL (`?step=`) so the checks' fix links land on it.
 
-const STEPS: readonly GoLiveStep[] = ['readiness', 'legal', 'routing', 'domains', 'publish'];
+const STEPS: readonly GoLiveStep[] = ['readiness', 'legal', 'routing', 'domains', 'publish', 'handover'];
 const isStep = (value: string | null): value is GoLiveStep => STEPS.includes(value as GoLiveStep);
 
 function Loading() {
@@ -103,6 +104,9 @@ export function GoLiveWizard({ siteId }: { readonly siteId: string }) {
         ) : (
           <Loading />
         )}
+      </TabsContent>
+      <TabsContent value="handover">
+        {readiness.data ? <HandoverStep siteId={siteId} versionId={readiness.data.versionId} /> : <Loading />}
       </TabsContent>
     </Tabs>
   );

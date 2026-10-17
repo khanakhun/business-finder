@@ -14,3 +14,20 @@ regexes = ['''^S3-compatible$''']
 description = "The redaction test's fake AWS key (sequential letters, an example shape, never a credential; BF-043)."
 regexTarget = "secret"
 regexes = ['''^AKIAABCDEFGHIJKLMNOP$''']
+
+[[allowlists]]
+description = "Sequential hex used as a fake API key in tests (0123…cdef twice), never a credential."
+regexTarget = "secret"
+regexes = ['''^0123456789abcdef0123456789abcdef$''']
+
+[[allowlists]]
+description = "Provider category keys in the taxonomy eval data: Foursquare's public 24-hex category ids and OSM tags."
+condition = "AND"
+regexTarget = "secret"
+paths = ['''^packages/ai/(evals|fixtures)/taxonomy\.classify_business/''']
+regexes = ['''^[0-9a-f]{24}$''', '''^[a-z_]+=[a-z_]+$''']
+
+[[allowlists]]
+description = "An environment variable assignment named in prose (the fake gateway's error message), not a secret."
+regexTarget = "secret"
+regexes = ['''^AI_FIXTURES=record$''']

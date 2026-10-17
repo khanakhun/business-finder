@@ -253,6 +253,8 @@ jobs:
           pnpm infra:up
           pnpm db:migrate
           if jq -e '.scripts["db:seed"]' package.json > /dev/null; then pnpm db:seed; fi
+          # The search e2e resolves "Saint-Barthélemy" from the BL area pack, offline (no live geocoder).
+          pnpm geo:import --pack bl
       - name: Playwright browsers
         run: pnpm --filter @bf/web exec playwright install --with-deps chromium
       - name: Playwright (no retries — flaky tests are bugs)

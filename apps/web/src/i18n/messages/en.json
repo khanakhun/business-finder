@@ -3207,7 +3207,8 @@
       "banner": "Preview banner",
       "claim_page": "Claim page",
       "contact_block": "Contact form",
-      "opt_out_link": "Opt-out link"
+      "opt_out_link": "Opt-out link",
+      "live_site": "Live site contact form"
     },
     "channel": {
       "phone": "Phone",

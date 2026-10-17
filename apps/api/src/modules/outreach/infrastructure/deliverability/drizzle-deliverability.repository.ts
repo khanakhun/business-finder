@@ -1,8 +1,16 @@
 import type { DomainCheck } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
-import { deliverabilityDomains, mailboxReadinessOverrides } from '@bf/db/schema';
+import {
+  deliverabilityDomains,
+  deliverabilitySettings,
+  inboundMessages,
+  mailboxDailyUsage,
+  mailboxReadinessOverrides,
+  outboundMessages,
+  unsubscribeTokens,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, type SQL, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type { DeliverabilityRepository, ReadinessOverride } from '../../application/deliverability/ports.ts';
 
@@ -92,5 +100,112 @@ export class DrizzleDeliverabilityRepository implements DeliverabilityRepository
       )
       .returning({ id: mailboxReadinessOverrides.mailboxId });
     return rows.length > 0;
+  }
+
+  async health(mailboxId: string, now: Date) {
+    const day = 86_400_000;
+    const since24h = new Date(now.getTime() - day);
+    const since7d = new Date(now.getTime() - 7 * day);
+    const since30d = new Date(now.getTime() - 30 * day).toISOString().slice(0, 10);
+    const SENT = ['sent', 'replied', 'bounced'] as const;
+    const last50 = await this.x
+      .select({ status: outboundMessages.status })
+      .from(outboundMessages)
+      .where(and(eq(outboundMessages.mailboxId, mailboxId), inArray(outboundMessages.status, [...SENT])))
+      .orderBy(desc(outboundMessages.sentAt))
+      .limit(50);
+    const sendsSince = async (since: Date) => {
+      const [row] = await this.x
+        .select({ n: count() })
+        .from(outboundMessages)
+        .where(
+          and(
+            eq(outboundMessages.mailboxId, mailboxId),
+            inArray(outboundMessages.status, [...SENT]),
+            gte(outboundMessages.sentAt, since),
+          ),
+        );
+      return Number(row?.n ?? 0);
+    };
+    const inbound = async (condition: SQL, since: Date) => {
+      const [row] = await this.x
+        .select({ n: count() })
+        .from(inboundMessages)
+        .where(
+          and(eq(inboundMessages.mailboxId, mailboxId), gte(inboundMessages.receivedAt, since), condition),
+        );
+      return Number(row?.n ?? 0);
+    };
+    const triageClass = sql`coalesce(${inboundMessages.correctedClass}, ${inboundMessages.triage} ->> 'class')`;
+    const [oneClick] = await this.x
+      .select({ n: count() })
+      .from(unsubscribeTokens)
+      .innerJoin(outboundMessages, eq(outboundMessages.id, unsubscribeTokens.outboundMessageId))
+      .where(and(eq(outboundMessages.mailboxId, mailboxId), gte(unsubscribeTokens.usedAt, since7d)));
+    const usage = await this.x
+      .select()
+      .from(mailboxDailyUsage)
+      .where(and(eq(mailboxDailyUsage.mailboxId, mailboxId), gte(mailboxDailyUsage.day, since30d)))
+      .orderBy(mailboxDailyUsage.day);
+    const since7dDay = since7d.toISOString().slice(0, 10);
+    return {
+      last50Sends: last50.length,
+      last50Bounces: last50.filter((row) => row.status === 'bounced').length,
+      bounces24h: await inbound(
+        sql`${inboundMessages.kind} = 'bounce' and (${inboundMessages.dsn} ->> 'permanent') = 'true'`,
+        since24h,
+      ),
+      sends24h: await sendsSince(since24h),
+      sends7d: await sendsSince(since7d),
+      unsubscribes7d:
+        Number(oneClick?.n ?? 0) +
+        (await inbound(sql`${inboundMessages.unsubscribeDetected} = true`, since7d)),
+      negative7d: await inbound(sql`${triageClass} = 'negative'`, since7d),
+      positive7d: await inbound(sql`${triageClass} in ('interested', 'question')`, since7d),
+      autoReplies7d: await inbound(sql`${inboundMessages.kind} = 'auto_reply'`, since7d),
+      deferrals7d: usage.filter((row) => row.day >= since7dDay).reduce((sum, row) => sum + row.failed, 0),
+      daily: usage.map((row) => ({
+        day: row.day,
+        sent: row.sent,
+        bounced: row.bounced,
+        replies: row.replies,
+        failed: row.failed,
+      })),
+    };
+  }
+
+  async mailboxOfMessage(messageId: string) {
+    const [row] = await this.x
+      .select({ organizationId: outboundMessages.organizationId, mailboxId: outboundMessages.mailboxId })
+      .from(outboundMessages)
+      .where(eq(outboundMessages.id, messageId));
+    return row?.mailboxId ? { organizationId: row.organizationId, mailboxId: row.mailboxId } : undefined;
+  }
+
+  async killSwitch(organizationId: string) {
+    const [row] = await this.x
+      .select()
+      .from(deliverabilitySettings)
+      .where(eq(deliverabilitySettings.organizationId, organizationId));
+    return {
+      active: row?.killSwitch ?? false,
+      reason: row?.killReason ?? null,
+      by: row?.killBy ?? null,
+      at: row?.killAt ?? null,
+    };
+  }
+
+  async setKillSwitch(organizationId: string, active: boolean, reason: string, by: string | null) {
+    const values = {
+      killSwitch: active,
+      killReason: reason,
+      killBy: by,
+      killAt: new Date(),
+      updatedAt: new Date(),
+    };
+    await this.x
+      .insert(deliverabilitySettings)
+      .values({ organizationId, ...values })
+      .onConflictDoUpdate({ target: deliverabilitySettings.organizationId, set: values });
   }
 }

@@ -26,3 +26,19 @@ groups:
         annotations:
           summary: Outbound emails are stuck in sending
           description: Messages are still sending more than 10 minutes after their lease ended. Check that the worker runs and the outreach-tick queue drains.
+      - alert: OutreachMailboxAutoPaused
+        # BF-056: a deliverability rule paused a mailbox (bounce rate, warming bounces, unsubscribe rate).
+        expr: sum by (reason) (increase(bf_outreach_mailbox_paused_total[10m])) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: A mailbox was paused by a deliverability rule ({{ $labels.reason }})
+          description: Look at Outreach → Deliverability for the mailbox's health; resume only after fixing the cause.
+      - alert: OutreachKillSwitchActive
+        # BF-056: a workspace stopped all sending.
+        expr: max(bf_outreach_kill_switch_active) > 0
+        labels:
+          severity: warn
+        annotations:
+          summary: A workspace's kill switch is on (all sending stopped)
+          description: The audit log says who turned it on and why.

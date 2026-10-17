@@ -1047,6 +1047,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/deliverability/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Each mailbox’s rolling health (bounces, unsubscribes, replies, deferrals) and the rules’ warnings */
+        get: operations["listMailboxHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/deliverability/kill-switch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Stop (or resume) all sending in the workspace, effective within seconds (owners and admins; audited) */
+        put: operations["setKillSwitch"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/deliverability/mailboxes": {
         parameters: {
             query?: never;
@@ -1094,6 +1128,23 @@ export type paths = {
         post?: never;
         /** Remove the override (the checks decide again) */
         delete: operations["clearMailboxReadinessOverride"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/deliverability/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The kill switch and the preview domain’s blocklist status */
+        get: operations["getDeliverabilityOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5192,6 +5243,14 @@ export type components = {
             name?: string;
             phone?: string;
         };
+        DeliverabilityOverview: {
+            blocklist: {
+                enabled: boolean;
+                listed: boolean | null;
+                sitesDomain: string;
+            };
+            killSwitch: components["schemas"]["KillSwitch"];
+        };
         DiscoveryIntent: {
             /** @default [] */
             categoryIds: string[];
@@ -5370,7 +5429,7 @@ export type components = {
                 } | null;
                 found: string | null;
                 /** @enum {string} */
-                id: "spf" | "dkim" | "dmarc" | "mx" | "mta_sts" | "tls_rpt" | "bimi";
+                id: "spf" | "dkim" | "dmarc" | "mx" | "mta_sts" | "tls_rpt" | "bimi" | "blocklist";
                 informational: boolean;
                 /** @enum {string} */
                 outcome: "pass" | "warn" | "fail" | "unknown";
@@ -6363,6 +6422,12 @@ export type components = {
             /** @enum {string} */
             role: "owner" | "admin" | "member" | "viewer";
         };
+        KillSwitch: {
+            active: boolean;
+            at: string | null;
+            by: string | null;
+            reason: string | null;
+        };
         /** @description WGS84 coordinates in decimal degrees. */
         LatLng: {
             lat: number;
@@ -6499,6 +6564,53 @@ export type components = {
             reachable: boolean | null;
             sendTestOk: boolean | null;
             tokenOk: boolean | null;
+        };
+        MailboxHealthList: {
+            items: components["schemas"]["MailboxHealthStats"][];
+        };
+        MailboxHealthStats: {
+            autoReplies7d: {
+                count: number;
+                n: number;
+                rate: number | null;
+            };
+            bounces: {
+                count: number;
+                n: number;
+                rate: number | null;
+            };
+            bounces24h: number;
+            daily: {
+                bounced: number;
+                /** Format: date */
+                day: string;
+                failed: number;
+                replies: number;
+                sent: number;
+            }[];
+            deferrals7d: number;
+            email: string;
+            /** Format: uuid */
+            mailboxId: string;
+            negative7d: {
+                count: number;
+                n: number;
+                rate: number | null;
+            };
+            positive7d: {
+                count: number;
+                n: number;
+                rate: number | null;
+            };
+            sends7d: number;
+            sends24h: number;
+            status: string;
+            unsubscribes7d: {
+                count: number;
+                n: number;
+                rate: number | null;
+            };
+            warnings: string[];
         };
         MailboxList: {
             items: components["schemas"]["Mailbox"][];
@@ -8306,6 +8418,10 @@ export type components = {
                     variantId: string;
                 }[];
             }[];
+        };
+        SetKillSwitchRequest: {
+            active: boolean;
+            reason: string;
         };
         SetPrimaryScoringProfileRequest: {
             /** Format: uuid */
@@ -14355,6 +14471,122 @@ export interface operations {
             };
         };
     };
+    listMailboxHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MailboxHealthList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    setKillSwitch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetKillSwitchRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KillSwitch"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     listMailboxReadiness: {
         parameters: {
             query?: never;
@@ -14585,6 +14817,53 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getDeliverabilityOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliverabilityOverview"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

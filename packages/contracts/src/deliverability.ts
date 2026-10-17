@@ -10,7 +10,7 @@ export const CHECK_OUTCOMES = ['pass', 'warn', 'fail', 'unknown'] as const;
 export const CheckOutcomeSchema = z.enum(CHECK_OUTCOMES);
 export type CheckOutcome = z.infer<typeof CheckOutcomeSchema>;
 
-export const DNS_CHECKS = ['spf', 'dkim', 'dmarc', 'mx', 'mta_sts', 'tls_rpt', 'bimi'] as const;
+export const DNS_CHECKS = ['spf', 'dkim', 'dmarc', 'mx', 'mta_sts', 'tls_rpt', 'bimi', 'blocklist'] as const;
 export const DnsCheckIdSchema = z.enum(DNS_CHECKS);
 export type DnsCheckId = z.infer<typeof DnsCheckIdSchema>;
 
@@ -61,3 +61,57 @@ export const ReadinessListSchema = z
 export const ReadinessOverrideRequestSchema = z
   .object({ reason: z.string().trim().min(10).max(500) })
   .meta({ id: 'ReadinessOverrideRequest' });
+
+// ── Health and the kill switch ──────────────────────────────────────────────────────────────────────────────────
+
+const Rate = z.object({ n: z.number().int(), count: z.number().int(), rate: z.number().nullable() });
+
+export const MailboxHealthStatsSchema = z
+  .object({
+    mailboxId: z.uuid(),
+    email: z.string(),
+    status: z.string(),
+    sends24h: z.number().int(),
+    sends7d: z.number().int(),
+    /** Hard bounces over the last 50 sends. */
+    bounces: Rate,
+    bounces24h: z.number().int(),
+    unsubscribes7d: Rate,
+    negative7d: Rate,
+    positive7d: Rate,
+    deferrals7d: z.number().int(),
+    autoReplies7d: Rate,
+    /** What the rules say now: warnings and the reason a pause would happen. */
+    warnings: z.array(z.string()),
+    /** Daily sends, bounces, unsubscribes and replies for the trend charts (oldest first, 30 days). */
+    daily: z.array(
+      z.object({
+        day: z.iso.date(),
+        sent: z.number().int(),
+        bounced: z.number().int(),
+        replies: z.number().int(),
+        failed: z.number().int(),
+      }),
+    ),
+  })
+  .meta({ id: 'MailboxHealthStats' });
+export type MailboxHealthStats = z.infer<typeof MailboxHealthStatsSchema>;
+
+export const MailboxHealthListSchema = z
+  .object({ items: z.array(MailboxHealthStatsSchema) })
+  .meta({ id: 'MailboxHealthList' });
+
+export const KillSwitchSchema = z
+  .object({
+    active: z.boolean(),
+    reason: z.string().nullable(),
+    by: z.uuid().nullable(),
+    at: IsoDateTimeSchema.nullable(),
+  })
+  .meta({ id: 'KillSwitch' });
+export type KillSwitch = z.infer<typeof KillSwitchSchema>;
+
+export const SetKillSwitchRequestSchema = z
+  .object({ active: z.boolean(), reason: z.string().trim().min(5).max(500) })
+  .meta({ id: 'SetKillSwitchRequest' });
+export type SetKillSwitchRequest = z.input<typeof SetKillSwitchRequestSchema>;

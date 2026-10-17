@@ -70,6 +70,15 @@ export const outreachEnv = z.object({
     .describe(
       'Public HTTPS origin of the unsubscribe links (e.g. https://u.example.com routed to the API); defaults to API_URL.',
     ),
+  SPAMHAUS_DQS_KEY: secret(
+    z
+      .string()
+      .regex(/^[a-z0-9]{20,40}$/)
+      .optional()
+      .describe(
+        'Spamhaus Data Query Service key for the optional blocklist checks (BF-056). Unset: blocklist checks are off. Spamhaus forbids queries through public resolvers and limits free use to low-volume, non-commercial users; commercial use needs a subscription (spamhaus.com/data-access).',
+      ),
+  ),
   PRIVACY_HASH_PEPPER: secret(
     z
       .string()

@@ -12,6 +12,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ComplianceService } from '../../../compliance/index.ts';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { EventRecorder } from '../../../platform/events/event-recorder.ts';
+import { KillSwitchService } from '../../application/deliverability/kill-switch.ts';
 import { MAILBOX_READINESS, type MailboxReadinessGate } from '../../application/deliverability/ports.ts';
 import { MailboxCapacity } from '../../application/mailbox/mailbox-capacity.ts';
 import { MailboxesService } from '../../application/mailbox/mailboxes.service.ts';
@@ -64,6 +65,7 @@ export class OutboundSender {
     private readonly compliance: ComplianceService,
     private readonly events: EventRecorder,
     @Optional() @Inject(MAILBOX_READINESS) private readonly readiness?: MailboxReadinessGate,
+    @Optional() private readonly killSwitch?: KillSwitchService,
   ) {}
 
   async send(messageId: string, leaseIso: string, logger: Logger): Promise<SendOutcome> {
@@ -83,6 +85,9 @@ export class OutboundSender {
         new Date(this.clock.now().getTime() + 60 * MIN),
         'mailbox unavailable',
       );
+    // BF-056: the workspace's kill switch stops every send at once; the message waits for it to be lifted.
+    if (this.killSwitch && (await this.killSwitch.isActive(message.organizationId)))
+      return this.requeue(message, lease, new Date(this.clock.now().getTime() + 15 * MIN), 'kill switch');
     // BF-056: the domain's authentication regressed (no owner override): the message waits for the fix.
     if (this.readiness && !(await this.readiness.isReady(mailbox.organizationId, mailbox.id, mailbox.email)))
       return this.requeue(

@@ -276,6 +276,50 @@ export class DrizzleSequencesRepository implements SequenceRepository {
     return !!row;
   }
 
+  async pauseAll(organizationId: string, reason: string) {
+    const rows = await this.x
+      .update(sequenceEnrollments)
+      .set({ status: 'paused', pauseReason: reason, leaseUntil: null })
+      .where(
+        and(eq(sequenceEnrollments.organizationId, organizationId), eq(sequenceEnrollments.status, 'active')),
+      )
+      .returning({ id: sequenceEnrollments.id });
+    for (const row of rows)
+      await this.addEvent({
+        enrollmentId: row.id,
+        kind: 'paused',
+        stepId: null,
+        variantId: null,
+        detail: reason,
+        messageId: null,
+      });
+    return rows.length;
+  }
+
+  async resumeAll(organizationId: string, reason: string) {
+    const rows = await this.x
+      .update(sequenceEnrollments)
+      .set({ status: 'active', pauseReason: null })
+      .where(
+        and(
+          eq(sequenceEnrollments.organizationId, organizationId),
+          eq(sequenceEnrollments.status, 'paused'),
+          eq(sequenceEnrollments.pauseReason, reason),
+        ),
+      )
+      .returning({ id: sequenceEnrollments.id });
+    for (const row of rows)
+      await this.addEvent({
+        enrollmentId: row.id,
+        kind: 'resumed',
+        stepId: null,
+        variantId: null,
+        detail: reason,
+        messageId: null,
+      });
+    return rows.length;
+  }
+
   async businessName(businessId: string) {
     const [row] = await this.x
       .select({ name: businesses.displayName })

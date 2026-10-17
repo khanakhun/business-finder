@@ -379,6 +379,13 @@
       "when": 1792249386501,
       "tag": "0053_deliverability",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1792249771015,
+      "tag": "0054_deliverability_settings",
+      "breakpoints": true
     }
   ]
 }

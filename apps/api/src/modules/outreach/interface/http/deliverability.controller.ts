@@ -1,14 +1,45 @@
-import { DomainCheckSchema, ReadinessListSchema, ReadinessOverrideRequestSchema } from '@bf/contracts';
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import type { ApiEnv } from '@bf/config';
+import {
+  DomainCheckSchema,
+  KillSwitchSchema,
+  MailboxHealthListSchema,
+  ReadinessListSchema,
+  ReadinessOverrideRequestSchema,
+  SetKillSwitchRequestSchema,
+} from '@bf/contracts';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { z } from 'zod';
+import { APP_ENV, type AppEnv } from '../../../platform/config/app-env.ts';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { DeliverabilityService } from '../../application/deliverability/deliverability.service.ts';
+import { DeliverabilityHealth } from '../../application/deliverability/health.ts';
+import { KillSwitchService } from '../../application/deliverability/kill-switch.ts';
 
 class OverrideBody extends zodDto(ReadinessOverrideRequestSchema) {}
+class KillSwitchBody extends zodDto(SetKillSwitchRequestSchema) {}
+
+const OverviewSchema = z
+  .object({
+    killSwitch: KillSwitchSchema,
+    blocklist: z.object({ enabled: z.boolean(), sitesDomain: z.string(), listed: z.boolean().nullable() }),
+  })
+  .meta({ id: 'DeliverabilityOverview' });
 
 const orgOf = (auth: AuthContext) => {
   if (!auth.orgId) throw new Error('Deliverability route reached without a workspace');
@@ -22,7 +53,55 @@ const orgOf = (auth: AuthContext) => {
 @ApiTags('outreach')
 @Controller('deliverability')
 export class DeliverabilityController {
-  constructor(private readonly deliverability: DeliverabilityService) {}
+  constructor(
+    private readonly deliverability: DeliverabilityService,
+    private readonly health: DeliverabilityHealth,
+    private readonly killSwitch: KillSwitchService,
+    @Inject(APP_ENV) private readonly env: AppEnv,
+  ) {}
+
+  @Get('overview')
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary: 'The kill switch and the preview domain’s blocklist status',
+    operationId: 'getDeliverabilityOverview',
+    response: { status: 200, schema: OverviewSchema },
+    errors: [401, 403],
+  })
+  async overview(@Ctx() auth: AuthContext) {
+    const sitesDomain = (this.env as ApiEnv).SITES_BASE_DOMAIN;
+    return {
+      killSwitch: await this.killSwitch.get(orgOf(auth)),
+      blocklist: { sitesDomain, ...(await this.deliverability.sitesDomainListed(sitesDomain)) },
+    };
+  }
+
+  @Get('health')
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary:
+      'Each mailbox’s rolling health (bounces, unsubscribes, replies, deferrals) and the rules’ warnings',
+    operationId: 'listMailboxHealth',
+    response: { status: 200, schema: MailboxHealthListSchema },
+    errors: [401, 403],
+  })
+  async mailboxHealth(@Ctx() auth: AuthContext) {
+    return { items: await this.health.stats(orgOf(auth)) };
+  }
+
+  @Put('kill-switch')
+  @RequirePermission('settings:manage')
+  @ApiRoute({
+    summary:
+      'Stop (or resume) all sending in the workspace, effective within seconds (owners and admins; audited)',
+    operationId: 'setKillSwitch',
+    body: KillSwitchBody,
+    response: { status: 200, schema: KillSwitchSchema },
+    errors: [400, 401, 403, 422],
+  })
+  async setKillSwitch(@Ctx() auth: AuthContext, @Body() body: KillSwitchBody) {
+    return this.killSwitch.set(orgOf(auth), auth.userId, body);
+  }
 
   @Get('mailboxes')
   @RequirePermission('outreach:send')

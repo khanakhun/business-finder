@@ -18,6 +18,57 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/analytics/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The same query as CSV (audited) */
+        post: operations["exportAnalytics"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/analytics/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Metrics by dimensions over a period (422 for unknown names or a query past 10 s) */
+        post: operations["queryAnalytics"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/analytics/registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every metric and dimension, with how it is calculated */
+        get: operations["getAnalyticsRegistry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/api-keys": {
         parameters: {
             query?: never;
@@ -4292,6 +4343,43 @@ export type components = {
                 outputTokens: number;
             };
         };
+        AnalyticsQuery: {
+            /** @default [] */
+            dimensions: string[];
+            /** @default {} */
+            filters: {
+                [key: string]: string[];
+            };
+            /** Format: date-time */
+            from: string;
+            /** @default 1000 */
+            limit: number;
+            metrics: string[];
+            timeZone?: string;
+            /** Format: date-time */
+            to: string;
+        };
+        AnalyticsRegistry: {
+            dimensions: components["schemas"]["DimensionDefinition"][];
+            metrics: components["schemas"]["MetricDefinition"][];
+        };
+        AnalyticsResult: {
+            dimensions: string[];
+            freshness: {
+                lagSeconds: number | null;
+                watermark: string | null;
+            };
+            labels: {
+                [key: string]: {
+                    [key: string]: string;
+                };
+            };
+            metrics: string[];
+            rows: {
+                [key: string]: string | number | null;
+            }[];
+            truncated: boolean;
+        };
         AnalyzePastedReviewsRequest: {
             reviews: {
                 rating?: number;
@@ -5450,6 +5538,18 @@ export type components = {
                 sitesDomain: string;
             };
             killSwitch: components["schemas"]["KillSwitch"];
+        };
+        DimensionDefinition: {
+            description: {
+                en: string;
+                fr: string;
+            };
+            id: string;
+            label: {
+                en: string;
+                fr: string;
+            };
+            time: boolean;
         };
         DiscoveryIntent: {
             /** @default [] */
@@ -6988,6 +7088,25 @@ export type components = {
              */
             survivorId: string;
         };
+        MetricDefinition: {
+            caveats: {
+                en: string;
+                fr: string;
+            } | null;
+            denominator: string | null;
+            description: {
+                en: string;
+                fr: string;
+            };
+            /** @enum {string} */
+            format: "count" | "rate" | "usd" | "duration" | "score";
+            id: string;
+            label: {
+                en: string;
+                fr: string;
+            };
+            numerator: string | null;
+        };
         Note: {
             authorId: string | null;
             bodyMarkdown: string;
@@ -7321,7 +7440,7 @@ export type components = {
         /** @description RFC 9457 problem details (application/problem+json). */
         ProblemDetails: {
             /** @enum {string} */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "IDEMPOTENCY_KEY_REUSED" | "INVALID_STATE_TRANSITION" | "RATE_LIMITED" | "BUDGET_EXCEEDED" | "DISCOVERY_PROVIDER_NOT_CONFIGURED" | "SITE_VERSION_CONFLICT" | "EXTERNAL_SERVICE_FAILED" | "INTERNAL";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "IDEMPOTENCY_KEY_REUSED" | "INVALID_STATE_TRANSITION" | "RATE_LIMITED" | "BUDGET_EXCEEDED" | "DISCOVERY_PROVIDER_NOT_CONFIGURED" | "SITE_VERSION_CONFLICT" | "ANALYTICS_QUERY_TOO_HEAVY" | "EXTERNAL_SERVICE_FAILED" | "INTERNAL";
             /** Format: uuid */
             currentVersionId?: string;
             detail?: string;
@@ -9764,6 +9883,189 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    exportAnalytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyticsQuery"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    queryAnalytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyticsQuery"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getAnalyticsRegistry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsRegistry"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

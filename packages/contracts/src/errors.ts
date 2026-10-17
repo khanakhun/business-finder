@@ -16,6 +16,7 @@ export const ERROR_CODES = {
   BUDGET_EXCEEDED: { status: 402, title: 'Budget exceeded' },
   DISCOVERY_PROVIDER_NOT_CONFIGURED: { status: 409, title: 'Discovery provider not configured' },
   SITE_VERSION_CONFLICT: { status: 409, title: 'The site changed since this edit started' },
+  ANALYTICS_QUERY_TOO_HEAVY: { status: 422, title: 'The analytics query took too long' },
   EXTERNAL_SERVICE_FAILED: { status: 502, title: 'External service failed' },
   INTERNAL: { status: 500, title: 'Internal error' },
 } as const satisfies Record<string, { status: number; title: string }>;

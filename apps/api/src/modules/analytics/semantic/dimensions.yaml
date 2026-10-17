@@ -1,0 +1,115 @@
+# Analytics dimensions (BF-058). `sql` groups facts (alias `f`); `{{tz}}` is the query's time zone (a parameter).
+# Values are always text. Filters compare the same expression.
+
+- id: day
+  time: true
+  sql: to_char(date_trunc('day', f.occurred_at AT TIME ZONE {{tz}}), 'YYYY-MM-DD')
+  label: { en: Day, fr: Jour }
+  description: { en: The day of the event., fr: Le jour de l’événement. }
+
+- id: week
+  time: true
+  sql: to_char(date_trunc('week', f.occurred_at AT TIME ZONE {{tz}}), 'YYYY-MM-DD')
+  label: { en: Week, fr: Semaine }
+  description: { en: The week of the event (from its Monday)., fr: La semaine de l’événement (à partir du lundi). }
+
+- id: month
+  time: true
+  sql: to_char(date_trunc('month', f.occurred_at AT TIME ZONE {{tz}}), 'YYYY-MM')
+  label: { en: Month, fr: Mois }
+  description: { en: The month of the event., fr: Le mois de l’événement. }
+
+- id: category
+  sql: subpath(f.category_path, 0, 1)::text
+  label: { en: Category, fr: Catégorie }
+  description: { en: The business’s top-level category when the event happened., fr: La catégorie principale de l’entreprise au moment de l’événement. }
+
+- id: subcategory
+  sql: (CASE WHEN nlevel(f.category_path) >= 2 THEN subpath(f.category_path, 0, 2) ELSE f.category_path END)::text
+  label: { en: Subcategory, fr: Sous-catégorie }
+  description: { en: The business’s category at the second level., fr: La catégorie de l’entreprise au deuxième niveau. }
+
+- id: area
+  sql: f.area_id::text
+  label: { en: Area, fr: Zone }
+  description: { en: The smallest area that covers the business., fr: La plus petite zone qui contient l’entreprise. }
+
+- id: country
+  sql: f.country
+  label: { en: Country, fr: Pays }
+  description: { en: The business’s country., fr: Le pays de l’entreprise. }
+
+- id: offer
+  sql: f.offer
+  label: { en: Offer, fr: Offre }
+  description: { en: The offer of the email., fr: L’offre de l’e-mail. }
+
+- id: score_tier
+  sql: f.score_tier
+  label: { en: Score tier, fr: Niveau de score }
+  description: { en: The business’s tier when the event happened., fr: Le niveau de l’entreprise au moment de l’événement. }
+
+- id: score_bucket
+  sql: lpad((least(f.score_value, 99) / 10 * 10)::text, 2, '0')
+  label: { en: Score decile, fr: Décile de score }
+  description: { en: The business’s score in bands of ten when the event happened., fr: Le score de l’entreprise par tranches de dix au moment de l’événement. }
+
+- id: engine
+  sql: f.engine
+  label: { en: Engine, fr: Moteur }
+  description: { en: The site generation engine., fr: Le moteur de génération du site. }
+
+- id: template
+  sql: f.template_id::text
+  label: { en: Template, fr: Modèle }
+  description: { en: The email template the draft came from., fr: Le modèle d’e-mail du brouillon. }
+
+- id: template_version
+  sql: (f.template_id::text || ':' || f.template_version::text)
+  label: { en: Template version, fr: Version du modèle }
+  description: { en: The template and its version., fr: Le modèle et sa version. }
+
+- id: variant
+  sql: f.variant_id
+  label: { en: Sequence variant, fr: Variante de séquence }
+  description: { en: The A/B variant of a sequence step., fr: La variante A/B d’une étape de séquence. }
+
+- id: mailbox
+  sql: f.mailbox_id::text
+  label: { en: Mailbox, fr: Boîte d’envoi }
+  description: { en: The mailbox that sent the email., fr: La boîte qui a envoyé l’e-mail. }
+
+- id: locale
+  sql: f.locale
+  label: { en: Language, fr: Langue }
+  description: { en: The language of the email., fr: La langue de l’e-mail. }
+
+- id: creator
+  sql: f.creator_id::text
+  label: { en: Created by, fr: Créé par }
+  description: { en: "The member who sent, generated or ran it.", fr: "Le membre qui l’a envoyé, généré ou lancé." }
+
+- id: reply_class
+  sql: (CASE WHEN f.event_type = 'reply_triaged' THEN f.outcome END)
+  label: { en: Reply class, fr: Type de réponse }
+  description: { en: How a reply was triaged., fr: Le classement d’une réponse. }
+
+- id: pipeline_stage
+  sql: (CASE WHEN f.event_type = 'pipeline_changed' THEN f.outcome END)
+  label: { en: Pipeline stage, fr: Étape du pipeline }
+  description: { en: The stage a business moved to., fr: L’étape vers laquelle une entreprise est passée. }
+
+- id: cost_category
+  sql: (CASE WHEN f.event_type = 'cost' THEN f.outcome END)
+  label: { en: Spend category, fr: Catégorie de dépense }
+  description: { en: AI models or data providers., fr: Modèles d’IA ou fournisseurs de données. }
+
+- id: feature
+  sql: (f.dims ->> 'feature')
+  label: { en: Feature, fr: Fonction }
+  description: { en: The AI task or the provider a cost belongs to., fr: La tâche d’IA ou le fournisseur d’un coût. }
+
+- id: event_type
+  sql: f.event_type
+  label: { en: Event, fr: Événement }
+  description: { en: What the fact records., fr: Ce que le fait enregistre. }

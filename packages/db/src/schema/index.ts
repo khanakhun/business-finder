@@ -1,4 +1,5 @@
 // Drizzle schema barrel: one file per bounded context, re-exported here (e.g. `export * from './business-graph.ts';`).
+export * from './analytics.ts';
 export * from './assist.ts';
 export * from './auth.ts';
 export * from './business-graph.ts';

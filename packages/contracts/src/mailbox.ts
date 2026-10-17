@@ -257,6 +257,16 @@ export const MailboxOAuthStartQuerySchema = z.object({
   mailboxId: z.uuid().optional(),
 });
 
+export const MailboxOAuthProvidersSchema = z
+  .object({ google: z.boolean(), microsoft: z.boolean() })
+  .meta({ id: 'MailboxOAuthProviders' });
+
+export const MailboxOAuthCallbackQuerySchema = z.object({
+  code: z.string().max(4096).optional(),
+  state: z.string().max(512).optional(),
+  error: z.string().max(200).optional(),
+});
+
 export const MailboxOAuthStartSchema = z.object({ url: z.url() }).meta({ id: 'MailboxOAuthStart' });
 
 // ── Selection and capacity (BF-052 calls these) ─────────────────────────────────────────────────────────────────

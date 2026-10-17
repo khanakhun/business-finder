@@ -51,6 +51,8 @@ const ANONYMOUS = [
   // BF-048: preview lead forms (proof of work, anti-spam, CORS to the sites domain, no IP stored).
   'PublicLeadsController.challenge',
   'PublicLeadsController.submit',
+  // BF-050: the OAuth redirect back from Google/Microsoft (signed single-use state, PKCE, server-side attempt).
+  'MailboxOAuthController.callback',
   'SystemController.info',
 ];
 

@@ -55,7 +55,9 @@ export function isSpam(kind: LeadKind, result: SpamVerdict): boolean {
 }
 
 const URL_PATTERN = /\b(?:https?:\/\/|www\.)\S+/gi;
-const MARKUP = /<\s*\/?\s*(script|iframe|a|img|style|object|embed|svg)\b|javascript:|on\w+\s*=/i;
+// Bounded whitespace: no polynomial backtracking on a long run of spaces after `<`.
+const MARKUP =
+  /<\s{0,4}\/?\s{0,4}(script|iframe|a|img|style|object|embed|svg)\b|javascript:|\bon[a-z]{2,20}\s{0,4}=/i;
 /** A short list of throwaway mailbox domains (the common ones; not exhaustive by design). */
 const DISPOSABLE = new Set([
   'mailinator.com',

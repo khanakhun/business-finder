@@ -754,6 +754,8 @@ export {
   type MailboxLastError,
   MailboxLastErrorSchema,
   MailboxListSchema,
+  MailboxOAuthCallbackQuerySchema,
+  MailboxOAuthProvidersSchema,
   MailboxOAuthStartQuerySchema,
   MailboxOAuthStartSchema,
   type MailboxProviderKind,

@@ -15,9 +15,10 @@ export class MailboxProviderError extends ExternalServiceError {
     message: string,
     options: { retryable?: boolean; retryAfterSeconds?: number; cause?: unknown } = {},
   ) {
-    super(provider, message, { cause: options.cause, details: { reason } });
+    const retryable = options.retryable ?? (reason === 'unreachable' || reason === 'rate_limited');
+    super(provider, message, { cause: options.cause, details: { reason, retryable } });
     this.reason = reason;
-    this.retryable = options.retryable ?? (reason === 'unreachable' || reason === 'rate_limited');
+    this.retryable = retryable;
     this.retryAfterSeconds = options.retryAfterSeconds;
   }
 

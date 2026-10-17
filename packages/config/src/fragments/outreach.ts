@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { secret } from '../schema.ts';
 
 const cap = (fallback: number, what: string) =>
   z.coerce.number().int().min(1).max(10_000).default(fallback).describe(what);
@@ -26,4 +27,27 @@ export const outreachEnv = z.object({
     .email()
     .optional()
     .describe('Address the optional weekly send test goes to; unset, the weekly test is off.'),
+  GOOGLE_OAUTH_CLIENT_ID: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'OAuth client of the Google Cloud project (type Web, user type Internal to the Workspace) for Gmail mailboxes.',
+    ),
+  GOOGLE_OAUTH_CLIENT_SECRET: secret(
+    z.string().min(1).optional().describe('Secret of GOOGLE_OAUTH_CLIENT_ID.'),
+  ),
+  MICROSOFT_OAUTH_CLIENT_ID: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Application (client) id of the Entra ID app registration for Microsoft 365 mailboxes.'),
+  MICROSOFT_OAUTH_CLIENT_SECRET: secret(
+    z.string().min(1).optional().describe('Client secret of MICROSOFT_OAUTH_CLIENT_ID.'),
+  ),
+  MICROSOFT_OAUTH_TENANT: z
+    .string()
+    .min(1)
+    .default('organizations')
+    .describe('Entra ID tenant id, or `organizations` (any work account) / `common`.'),
 });

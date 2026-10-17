@@ -172,6 +172,24 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /** Mailbox sends (BF-050): never retried — a send that timed out may have gone — but breaker-guarded. */
+  'mailbox-send': {
+    timeoutMs: 60_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
+  /** Mailbox reads, sync and OAuth token calls (BF-050). */
+  'mailbox-api': {
+    timeoutMs: 30_000,
+    maxRetries: 2,
+    initialDelayMs: 500,
+    maxDelayMs: 5_000,
+    breakerThreshold: 5,
+    halfOpenAfterMs: 60_000,
+  },
   intel: {
     timeoutMs: 60_000,
     maxRetries: 1,

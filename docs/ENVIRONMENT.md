@@ -209,6 +209,11 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `OUTREACH_DOMAIN_HOURLY_LIMIT` | App-specific | api, worker | no | `3` |  | Messages per hour to one recipient domain, per workspace. |
 | `MAILBOX_SMTP_INSECURE_HOSTS` | App-specific | api, worker | no |  |  | Comma-separated SMTP/IMAP hosts allowed without TLS (Mailpit in development and E2E). Ignored in production. |
 | `MAILBOX_HEALTH_SEED_ADDRESS` | App-specific | api, worker | no |  |  | Address the optional weekly send test goes to; unset, the weekly test is off. |
+| `GOOGLE_OAUTH_CLIENT_ID` | App-specific | api, worker | no |  |  | OAuth client of the Google Cloud project (type Web, user type Internal to the Workspace) for Gmail mailboxes. |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | App-specific | api, worker | no |  | yes | Secret of GOOGLE_OAUTH_CLIENT_ID. |
+| `MICROSOFT_OAUTH_CLIENT_ID` | App-specific | api, worker | no |  |  | Application (client) id of the Entra ID app registration for Microsoft 365 mailboxes. |
+| `MICROSOFT_OAUTH_CLIENT_SECRET` | App-specific | api, worker | no |  | yes | Client secret of MICROSOFT_OAUTH_CLIENT_ID. |
+| `MICROSOFT_OAUTH_TENANT` | App-specific | api, worker | no | `organizations` |  | Entra ID tenant id, or `organizations` (any work account) / `common`. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

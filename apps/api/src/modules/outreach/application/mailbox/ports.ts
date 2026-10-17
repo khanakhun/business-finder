@@ -148,8 +148,10 @@ export interface MailboxCtx {
   readonly organizationId: string;
   readonly email: string;
   readonly providerState: MailboxProviderState;
-  /** Resolves (and refreshes) the credentials just in time; never logged. */
+  /** Resolves the credentials just in time; never logged. */
   readonly credentials: () => Promise<MailboxCredentials>;
+  /** OAuth mailboxes: a valid access token (refreshed single-flight when about to expire). */
+  readonly accessToken: () => Promise<string>;
 }
 
 export type SyncCursor =
@@ -267,3 +269,69 @@ export interface RunLock {
   acquire(name: string, ttlSeconds: number): Promise<boolean>;
 }
 export const RUN_LOCK = Symbol('RunLock');
+
+// ── OAuth (Google, Microsoft) ────────────────────────────────────────────────────────────────────────────────────
+
+export interface OAuthTokens {
+  readonly accessToken: string;
+  /** Null when the provider kept the previous one. */
+  readonly refreshToken: string | null;
+  readonly expiresAt: Date;
+  readonly scope: string | null;
+}
+
+export interface OAuthClient {
+  readonly provider: 'google' | 'microsoft';
+  readonly kind: MailboxProviderKind;
+  readonly configured: boolean;
+  authorizeUrl(input: {
+    readonly state: string;
+    readonly codeChallenge: string;
+    readonly loginHint?: string;
+  }): string;
+  exchange(code: string, codeVerifier: string): Promise<OAuthTokens>;
+  refresh(refreshToken: string): Promise<OAuthTokens>;
+  /** Best effort: revoke the grant when the provider supports it. */
+  revoke(token: string): Promise<void>;
+  /** The connected account's address and name. */
+  profile(accessToken: string): Promise<{ readonly email: string; readonly displayName: string }>;
+}
+export const OAUTH_CLIENTS = Symbol('OAuthClients');
+export type OAuthClientRegistry = ReadonlyMap<'google' | 'microsoft', OAuthClient>;
+
+/** One OAuth attempt, kept server-side for 10 minutes and usable once (the PKCE verifier never leaves the API). */
+export interface OAuthAttempt {
+  readonly provider: 'google' | 'microsoft';
+  readonly organizationId: string;
+  readonly userId: string;
+  readonly shared: boolean;
+  /** The starter had `settings:manage` (checked when the attempt began). */
+  readonly manage: boolean;
+  readonly mailboxId: string | null;
+  readonly codeVerifier: string;
+  readonly locale: Locale;
+}
+
+export interface OAuthAttemptStore {
+  put(nonce: string, attempt: OAuthAttempt, ttlSeconds: number): Promise<void>;
+  /** Returns and deletes it (single use). */
+  take(nonce: string): Promise<OAuthAttempt | null>;
+}
+export const OAUTH_ATTEMPTS = Symbol('OAuthAttemptStore');
+
+/** Single-flight access-token refresh across processes. */
+export interface RefreshLock {
+  /** Runs `fn` holding the mailbox's refresh lock, or returns null when another process holds it. */
+  withLock<T>(mailboxId: string, fn: () => Promise<T>): Promise<T | null>;
+}
+export const REFRESH_LOCK = Symbol('RefreshLock');
+
+export interface OAuthSettings {
+  /** `${API_URL}/v1/mailboxes/oauth/:provider/callback` */
+  readonly callbackUrl: (provider: 'google' | 'microsoft') => string;
+  /** Where the browser lands afterwards: the dashboard's mailbox settings. */
+  readonly returnUrl: string;
+  /** HMAC key for the `state` parameter. */
+  readonly stateKey: string;
+}
+export const OAUTH_SETTINGS = Symbol('OAuthSettings');

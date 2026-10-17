@@ -41,9 +41,12 @@ import {
   type MailboxProviderRegistry,
   type MailboxRecord,
   type MailboxRepository,
+  OAUTH_CLIENTS,
+  type OAuthClientRegistry,
   SMTP_CONNECTION_TESTER,
   type SmtpConnectionTester,
 } from './ports.ts';
+import { oauthProviderOf, TokenRefresher } from './token-refresher.ts';
 
 // Mailbox use cases (BF-050): connect (SMTP/IMAP here, OAuth in `mailbox-oauth.ts`), settings, pause/resume with a
 // health check, a test send to the person's own address, and disconnect (vault secret purged, history kept).
@@ -69,9 +72,11 @@ export class MailboxesService {
     @Inject(MAILBOX_LIMITS) private readonly limits: MailboxLimits,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
+    @Inject(OAUTH_CLIENTS) private readonly oauthClients: OAuthClientRegistry,
     private readonly credentials: MailboxCredentialStore,
     private readonly lifecycle: MailboxLifecycle,
     private readonly events: EventRecorder,
+    private readonly tokens: TokenRefresher,
   ) {}
 
   async list(actor: MailboxActor) {
@@ -366,6 +371,7 @@ export class MailboxesService {
             automatic: false,
             actorUserId: actor.userId,
           });
+    await this.revoke(mailbox);
     await this.credentials.delete(actor.organizationId, id);
     await this.repository.update(actor.organizationId, id, {
       secretRef: null,
@@ -383,6 +389,19 @@ export class MailboxesService {
       orgId: actor.organizationId,
       payload: { mailboxId: id, email: mailbox.email },
     });
+  }
+
+  /** Revokes an OAuth grant where the provider supports it (best effort: the vault entry goes anyway). */
+  private async revoke(mailbox: MailboxRecord): Promise<void> {
+    const provider = oauthProviderOf(mailbox.provider);
+    const client = provider ? this.oauthClients.get(provider) : undefined;
+    if (!client?.configured) return;
+    try {
+      const stored = await this.credentials.get(mailbox.organizationId, mailbox.id);
+      if (stored?.kind === 'oauth') await client.revoke(stored.refreshToken);
+    } catch (error) {
+      this.logger.warn({ err: error, mailboxId: mailbox.id }, 'could not revoke the mailbox grant');
+    }
   }
 
   /** Runs the provider's health check and records it; an authentication failure puts the mailbox in `error`. */
@@ -432,6 +451,7 @@ export class MailboxesService {
           throw new MailboxProviderError(mailbox.provider, 'auth_failed', 'No stored credentials');
         return credentials;
       },
+      accessToken: () => this.tokens.accessToken(mailbox),
     };
   }
 
@@ -500,6 +520,13 @@ export class MailboxesService {
       },
       now,
     );
+  }
+
+  /** A mailbox the actor may change (owner or admin), or 403/404. */
+  async editable(actor: MailboxActor, id: string): Promise<MailboxRecord> {
+    const mailbox = await this.load(actor, id);
+    this.assertCanEdit(actor, mailbox);
+    return mailbox;
   }
 
   private async load(actor: MailboxActor, id: string): Promise<MailboxRecord> {

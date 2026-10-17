@@ -56,8 +56,10 @@ export class SecretsVault {
     return this.seal(organizationId, ref, value, createdBy);
   }
 
+  /** Always read from the database (no in-process cache): another process may have rotated it (token refresh). */
   getScoped(organizationId: string, ref: ScopedSecretRef): Promise<string | undefined> {
     assertScoped(ref);
+    this.cache.delete(cacheKey(organizationId, ref));
     return this.get(organizationId, ref);
   }
 

@@ -88,6 +88,11 @@ export const queryKeys = {
     detail: (id: string) => ['leads', 'detail', id] as const,
     counts: () => ['leads', 'counts'] as const,
   }),
+  mailboxes: defineQueryKeys('mailboxes', {
+    list: () => ['mailboxes', 'list'] as const,
+    detail: (id: string) => ['mailboxes', 'detail', id] as const,
+    providers: () => ['mailboxes', 'providers'] as const,
+  }),
   compliance: defineQueryKeys('compliance', {
     policies: () => ['compliance', 'policies'] as const,
     versions: (jurisdiction: string, channel: string) =>

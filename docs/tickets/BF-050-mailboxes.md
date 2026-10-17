@@ -171,11 +171,11 @@ apps/web/src/features/mailboxes/{mailboxes-page.tsx, connect-dialogs/*, window-e
 - **E2E:** connect an SMTP mailbox (Mailpit) → set the window → test send arrives; pause/resume; settings validation errors.
 
 ## Acceptance criteria
-- [ ] Gmail/Workspace, Microsoft 365 and SMTP/IMAP connections with secure OAuth/credential handling and the vault.
-- [ ] `MailboxProvider` port with raw MIME send (returning provider and RFC 822 ids) and transport-level change sync.
-- [ ] Lifecycle state machine with notifications; health checks; token refresh with single-flight.
-- [ ] Capacity (ramp), windows (recipient timezone, holidays), interval/jitter, domain throttling, global cap, rotation with stickiness; atomic usage accounting.
-- [ ] Settings → Mailboxes UI; Mailpit-based end-to-end path for development and CI.
+- [x] Gmail/Workspace, Microsoft 365 and SMTP/IMAP connections with secure OAuth/credential handling and the vault.
+- [x] `MailboxProvider` port with raw MIME send (returning provider and RFC 822 ids) and transport-level change sync.
+- [x] Lifecycle state machine with notifications; health checks; token refresh with single-flight.
+- [x] Capacity (ramp), windows (recipient timezone, holidays), interval/jitter, domain throttling, global cap, rotation with stickiness; atomic usage accounting.
+- [x] Settings → Mailboxes UI; Mailpit-based end-to-end path for development and CI.
 
 ## Agent prompt
 ```text

@@ -4,6 +4,7 @@ import { buildSiteCsp } from './lib/csp.ts';
 import { sitesEnvironment } from './lib/env.ts';
 import { siteHostname, underSitesDomain } from './lib/host.ts';
 import { leadPageOf } from './lib/lead-pages.ts';
+import { livePageOf } from './lib/live-paths.ts';
 import { localeOfPath, resolveRoute } from './lib/locale-routing.ts';
 import { cleanHeaders } from './lib/proxy-headers.ts';
 import { siteScheme } from './lib/seo.ts';
@@ -64,7 +65,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     // A preview's lead pages (BF-048) are the renderer's own: /claim, /opt-out, /privacy in each language.
     const leadPage =
       tenant.environment === 'preview' && env.SITES_PREVIEW_ACTIONS && leadPageOf(spec, decoded);
-    if (!leadPage && !resolveRoute(spec, decoded)) {
+    // BF-062: a live site's legal pages (/legal, /privacy in each language).
+    const livePage = tenant.environment === 'live' && livePageOf(spec, decoded);
+    if (!leadPage && !livePage && !resolveRoute(spec, decoded)) {
       return rewrite(NOT_FOUND_PATH, { 'x-bf-locale': localeOfPath(spec, segments) });
     }
   }

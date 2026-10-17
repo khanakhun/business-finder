@@ -30,6 +30,11 @@ const shared = (): Shared => {
   return holder[SHARED];
 };
 
+/** The renderer's read-only database (shared by tenants and the live legal pages, BF-062). */
+export function rendererDb(): DbClient {
+  return db();
+}
+
 function db(): DbClient {
   const state = shared();
   state.db ??= createDb({

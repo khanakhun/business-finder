@@ -3207,7 +3207,8 @@
       "banner": "Bandeau de l’aperçu",
       "claim_page": "Page de revendication",
       "contact_block": "Formulaire de contact",
-      "opt_out_link": "Lien de refus"
+      "opt_out_link": "Lien de refus",
+      "live_site": "Formulaire du site en ligne"
     },
     "channel": {
       "phone": "Téléphone",

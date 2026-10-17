@@ -20,7 +20,9 @@ export interface LeadSite {
   /** Who created the site (a lead's task goes to them when the business has no owner). */
   readonly createdBy: string | null;
   readonly publicationId: string | null;
-  /** The preview is published now. */
+  /** The latest publication's environment (BF-062: live sites deliver their messages to the business). */
+  readonly environment: 'preview' | 'live' | null;
+  /** The publication is active now. */
   readonly active: boolean;
   /** When the latest preview publication ended (null while active, or never published). */
   readonly endedAt: Date | null;
@@ -111,3 +113,20 @@ export const PROOF_OF_WORK = Symbol('ProofOfWork');
 
 /** The renderer's shared secret (BF-036): site tokens and lead form tokens. Null: lead capture is off. */
 export const LEAD_TOKEN_SECRET = Symbol('LeadTokenSecret');
+
+/** BF-062: delivers a live site's contact message to the business's confirmed address. */
+export interface LiveLeadDelivery {
+  deliver(input: {
+    readonly siteId: string;
+    readonly organizationId: string;
+    readonly businessName: string;
+    readonly locale: string;
+    readonly lead: {
+      readonly name: string | null;
+      readonly email: string | null;
+      readonly phone: string | null;
+      readonly message: string | null;
+    };
+  }): Promise<boolean>;
+}
+export const LIVE_LEAD_DELIVERY = Symbol('LiveLeadDelivery');

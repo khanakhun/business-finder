@@ -37,10 +37,12 @@ export class DrizzleLeadsRepository implements LeadsRepository {
         status: sitePublications.status,
         endedAt: sitePublications.endedAt,
         versionId: sitePublications.versionId,
+        environment: sitePublications.environment,
       })
       .from(sitePublications)
-      .where(and(eq(sitePublications.siteId, siteId), eq(sitePublications.environment, 'preview')))
-      .orderBy(desc(sitePublications.publishedAt))
+      .where(eq(sitePublications.siteId, siteId))
+      // An active publication first (a live site after its preview ended), then the latest one.
+      .orderBy(desc(sql`${sitePublications.status} = 'active'`), desc(sitePublications.publishedAt))
       .limit(1);
     let generationJobId: string | null = null;
     let engine: string | null = null;
@@ -64,6 +66,7 @@ export class DrizzleLeadsRepository implements LeadsRepository {
       ...site,
       hostname: publication?.hostname ?? null,
       publicationId: publication?.id ?? null,
+      environment: publication?.environment ?? null,
       active: publication?.status === 'active',
       endedAt: publication && publication.status !== 'active' ? (publication.endedAt ?? null) : null,
       versionId: publication?.versionId ?? null,

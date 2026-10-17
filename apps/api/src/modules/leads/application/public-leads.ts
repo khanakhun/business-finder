@@ -9,7 +9,7 @@ import {
   verifyLeadFormToken,
   verifySiteViewToken,
 } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { withoutClientDetails } from '../../platform/context/request-context.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
@@ -23,6 +23,8 @@ import {
   type LeadGuard,
   type LeadSite,
   type LeadsRepository,
+  LIVE_LEAD_DELIVERY,
+  type LiveLeadDelivery,
   PROOF_OF_WORK,
   type ProofOfWork,
 } from './ports.ts';
@@ -60,6 +62,7 @@ export class PublicLeads {
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(LOGGER) private readonly logger: Logger,
     private readonly events: EventRecorder,
+    @Optional() @Inject(LIVE_LEAD_DELIVERY) private readonly delivery?: LiveLeadDelivery,
   ) {}
 
   /** A proof-of-work challenge for a site's form (harder while the site receives spam). */
@@ -71,12 +74,17 @@ export class PublicLeads {
     return this.pow.challenge({ siteId: siteId ?? 'unknown', hard });
   }
 
-  async submit(lead: PublicLead, client: { ip: string | undefined }): Promise<PublicLeadResponse> {
+  async submit(input: PublicLead, client: { ip: string | undefined }): Promise<PublicLeadResponse> {
+    let lead = input;
     if (!this.secret) throw new LeadCaptureDisabledError();
     const siteId = await verifySiteViewToken(lead.siteToken, this.secret);
     if (!siteId) return RECEIVED(lead.kind);
     const site = await this.repository.siteForLead(siteId);
     if (!site || !this.accepts(site, lead.kind)) return RECEIVED(lead.kind);
+    // BF-062: a live site takes contact requests only (no claim, no opt-out: it is the business's own site).
+    const live = site.environment === 'live';
+    if (live && lead.kind !== 'contact_request') return RECEIVED(lead.kind);
+    if (live) lead = { ...lead, source: 'live_site' };
     if (await this.repository.bySubmission(siteId, lead.submissionId)) return RECEIVED(lead.kind);
 
     const signals: SpamSignal[] = [];
@@ -106,7 +114,23 @@ export class PublicLeads {
     const spammy = isSpam(lead.kind, spam);
     if (spammy) await this.guard.noteSpam(siteId);
 
-    await withoutClientDetails(() => this.store(site, lead, spam, spammy));
+    const stored = await withoutClientDetails(() => this.store(site, lead, spam, spammy));
+    // A live site's message goes to the business (its confirmed address), not into the agency's prospecting.
+    if (live && stored && !spammy)
+      await this.delivery
+        ?.deliver({
+          siteId,
+          organizationId: site.organizationId,
+          businessName: site.businessName,
+          locale: lead.locale,
+          lead: {
+            name: lead.name ?? null,
+            email: lead.email ?? null,
+            phone: lead.phone ?? null,
+            message: lead.message ?? null,
+          },
+        })
+        .catch((error: unknown) => this.logger.warn({ err: error, siteId }, 'live lead delivery failed'));
     // No PII in logs: the site, the kind and the verdict only.
     this.logger.info(
       { siteId, kind: lead.kind, spam: spam.score, signals: spam.signals },
@@ -126,7 +150,12 @@ export class PublicLeads {
   }
 
   @Transactional()
-  private async store(site: LeadSite, lead: PublicLead, spam: ReturnType<typeof verdict>, spammy: boolean) {
+  private async store(
+    site: LeadSite,
+    lead: PublicLead,
+    spam: ReturnType<typeof verdict>,
+    spammy: boolean,
+  ): Promise<boolean> {
     const now = this.clock.now();
     const { lead: stored, created } = await this.repository.insert({
       id: newId(),
@@ -160,7 +189,9 @@ export class PublicLeads {
       status: spammy ? 'spam' : 'new',
       submissionId: lead.submissionId,
     });
-    if (!created) return;
+    if (!created) return false;
+    // BF-062: a live site's message is the business's own customer: no prospecting event.
+    if (lead.source === 'live_site') return true;
     const payload = { leadId: stored.id, siteId: site.siteId, businessId: site.businessId };
     if (lead.kind === 'opt_out') {
       await this.events.record(SiteOptOutRequested, {
@@ -184,5 +215,6 @@ export class PublicLeads {
         },
       });
     }
+    return true;
   }
 }

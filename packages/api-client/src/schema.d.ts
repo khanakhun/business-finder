@@ -8230,7 +8230,7 @@ export type components = {
             removePreview?: unknown;
             siteToken: string;
             /** @enum {string} */
-            source: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+            source: "banner" | "claim_page" | "contact_block" | "opt_out_link" | "live_site";
             /** Format: uuid */
             submissionId: string;
             whatsapp?: unknown;
@@ -9810,7 +9810,7 @@ export type components = {
             siteId: string;
             siteName: string;
             /** @enum {string} */
-            source: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+            source: "banner" | "claim_page" | "contact_block" | "opt_out_link" | "live_site";
             spam: {
                 score: number;
                 signals: string[];
@@ -20023,7 +20023,7 @@ export interface operations {
                 kind?: "claim_interest" | "contact_request" | "opt_out";
                 limit?: number;
                 siteId?: string;
-                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link" | "live_site";
                 status?: "new" | "in_progress" | "qualified" | "discarded" | "spam";
             };
             header?: never;
@@ -20283,7 +20283,7 @@ export interface operations {
                 kind?: "claim_interest" | "contact_request" | "opt_out";
                 limit?: number;
                 siteId?: string;
-                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link" | "live_site";
                 status?: "new" | "in_progress" | "qualified" | "discarded" | "spam";
             };
             header?: never;

@@ -12,7 +12,8 @@ export const LEAD_KINDS = ['claim_interest', 'contact_request', 'opt_out'] as co
 export const LeadKindSchema = z.enum(LEAD_KINDS);
 export type LeadKind = z.infer<typeof LeadKindSchema>;
 
-export const LEAD_SOURCES = ['banner', 'claim_page', 'contact_block', 'opt_out_link'] as const;
+// BF-062: `live_site` — the contact form of a live site (the business's own customers; delivered to the business).
+export const LEAD_SOURCES = ['banner', 'claim_page', 'contact_block', 'opt_out_link', 'live_site'] as const;
 export const LeadSourceSchema = z.enum(LEAD_SOURCES);
 export type LeadSource = z.infer<typeof LeadSourceSchema>;
 

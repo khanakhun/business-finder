@@ -128,6 +128,42 @@ export const GenerationSettingsSchema = z
   .meta({ id: 'GenerationSettings' });
 export type GenerationSettings = z.infer<typeof GenerationSettingsSchema>;
 
+/** A saved engine assignment, e.g. "2 claude-code + 2 codex + rest blocks" (BF-046 create flow). */
+export const EngineAssignmentPresetSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]{1,40}$/),
+  name: z.string().trim().min(1).max(60),
+  pattern: z.string().trim().min(1).max(200),
+});
+export type EngineAssignmentPreset = z.infer<typeof EngineAssignmentPresetSchema>;
+
+export const GENERATION_RUN_MODES = ['parallel', 'sequential'] as const;
+
+/** What a workspace sets for generation (BF-046 Settings → Generation): the engine settings and the UI's defaults. */
+export const GenerationWorkspaceSettingsSchema = GenerationSettingsSchema.extend({
+  defaultRunMode: z.enum(GENERATION_RUN_MODES),
+  presets: z.array(EngineAssignmentPresetSchema).max(20),
+}).meta({ id: 'GenerationWorkspaceSettings' });
+export type GenerationWorkspaceSettings = z.infer<typeof GenerationWorkspaceSettingsSchema>;
+
+/** `GET /v1/generation/settings`: the workspace's settings and what this deployment allows. */
+export const GenerationSettingsViewSchema = z
+  .object({
+    settings: GenerationWorkspaceSettingsSchema,
+    /** Engines registered on this deployment: the ones a workspace may allow. */
+    engines: z.array(EngineIdSchema),
+    /** Highest per-engine concurrency a workspace may set. */
+    maxConcurrency: z.number().int().positive(),
+    /** Null while the workspace runs on the defaults. */
+    updatedAt: z.iso.datetime().nullable(),
+  })
+  .meta({ id: 'GenerationSettingsView' });
+export type GenerationSettingsView = z.infer<typeof GenerationSettingsViewSchema>;
+
+export const UpdateGenerationSettingsRequestSchema = GenerationWorkspaceSettingsSchema.meta({
+  id: 'UpdateGenerationSettingsRequest',
+});
+export type UpdateGenerationSettingsRequest = z.infer<typeof UpdateGenerationSettingsRequestSchema>;
+
 export const CreateGenerationBatchRequestSchema = z
   .object({
     name: z.string().trim().min(1).max(120).optional(),

@@ -25,6 +25,8 @@ export function SettingsNav() {
     { href: '/settings/taxonomy', label: t('taxonomy'), show: canManageSettings },
     // Everyone reads the scoring profiles; `scoring:manage` edits them.
     { href: '/settings/scoring', label: t('scoring'), show: true },
+    // Everyone sees the generation settings; `settings:manage` changes them (BF-046).
+    { href: '/settings/generation', label: t('generation'), show: true },
   ].filter((item) => item.show);
   return (
     <nav aria-label={t('label')} className="mb-6 flex gap-1 overflow-x-auto border-b">

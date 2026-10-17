@@ -1253,6 +1253,24 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/generation/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace’s generation settings, and the engines this deployment offers */
+        get: operations["getGenerationSettings"];
+        /** Replace the workspace’s generation settings */
+        put: operations["updateGenerationSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/geo/areas": {
         parameters: {
             query?: never;
@@ -3875,6 +3893,33 @@ export type components = {
                 [key: string]: unknown;
             })[];
         };
+        GenerationSettingsView: {
+            engines: ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake")[];
+            maxConcurrency: number;
+            settings: components["schemas"]["GenerationWorkspaceSettings"];
+            updatedAt: string | null;
+        };
+        GenerationWorkspaceSettings: {
+            allowedEngines: ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake")[];
+            autoPublishPreview: boolean;
+            defaultEngine: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
+            /** @enum {string} */
+            defaultRunMode: "parallel" | "sequential";
+            engineBudgetsUsd: {
+                [key: string]: number;
+            };
+            engineConcurrency: {
+                [key: string]: number;
+            };
+            failoverChain: ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake")[];
+            locales: string[];
+            maxAttemptsPerEngine: number;
+            presets: {
+                id: string;
+                name: string;
+                pattern: string;
+            }[];
+        };
         GeoAreaFeature: {
             geometry: {
                 coordinates: [
@@ -5694,6 +5739,7 @@ export type components = {
             engine?: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
             priority?: number;
         };
+        UpdateGenerationSettingsRequest: components["schemas"]["GenerationWorkspaceSettings"];
         UpdateNotificationPreferencesRequest: {
             items: components["schemas"]["NotificationPreference"][];
         };
@@ -11923,6 +11969,122 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGenerationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationSettingsView"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateGenerationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGenerationSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationSettingsView"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

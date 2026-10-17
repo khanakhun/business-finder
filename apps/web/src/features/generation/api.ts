@@ -13,6 +13,8 @@ import type {
   GenerationJobPage,
   GenerationJobQuality,
   GenerationJobWorkspace,
+  GenerationSettingsView,
+  GenerationWorkspaceSettings,
   SitePage,
 } from '@bf/contracts';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -111,6 +113,27 @@ export function useJobWorkspace(jobId: string, enabled: boolean) {
         .data as GenerationJobWorkspace,
     enabled,
     staleTime: 60_000,
+  });
+}
+
+/** The workspace's generation settings and what this deployment offers. */
+export function useGenerationSettings() {
+  return useQuery({
+    queryKey: queryKeys.generation.settings(),
+    queryFn: async () => (await apiClient().GET('/v1/generation/settings')).data as GenerationSettingsView,
+    staleTime: 60_000,
+  });
+}
+
+export function useSaveGenerationSettings() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (settings: GenerationWorkspaceSettings) => {
+      const { data, error } = await apiClient().PUT('/v1/generation/settings', { body: settings as never });
+      if (error || !data) throw error ?? new Error('Not saved');
+      return data as GenerationSettingsView;
+    },
+    onSuccess: (view) => client.setQueryData(queryKeys.generation.settings(), view),
   });
 }
 

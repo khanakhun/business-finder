@@ -1928,7 +1928,9 @@
         "gate_id_taken": "Another rule (or a built-in one) already has this id.",
         "not_a_number": "This feature is not a number: it cannot be compared.",
         "tiers_order": "Tier A must start above tier B.",
-        "incomplete_gate": "A condition is incomplete or its value does not fit the feature."
+        "incomplete_gate": "A condition is incomplete or its value does not fit the feature.",
+        "model_required": "A model profile needs a trained model.",
+        "model_tiers_order": "Tier A must start at a higher probability than tier B."
       },
       "bothLanguages": "Write the text in both languages, or clear both.",
       "range": "A value is outside the allowed range.",

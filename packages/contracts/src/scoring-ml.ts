@@ -214,3 +214,36 @@ export type StartMlTrainingRequest = z.input<typeof StartMlTrainingRequestSchema
 
 /** Trains a model in intel for one training run (worker; one at a time, one attempt). */
 export const ScoringMlTrainJob = defineJob('scoring-ml-train', 'train', { runId: z.uuid() });
+
+// ── Shadow mode ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+export const SetShadowModelRequestSchema = z
+  .object({ profileId: z.uuid(), modelId: z.uuid().nullable() })
+  .meta({ id: 'SetShadowModelRequest' });
+export type SetShadowModelRequest = z.input<typeof SetShadowModelRequestSchema>;
+
+export const ShadowAssignmentSchema = z
+  .object({ profileId: z.uuid(), modelId: z.uuid(), startedAt: IsoDateTimeSchema })
+  .meta({ id: 'ShadowAssignment' });
+export type ShadowAssignment = z.infer<typeof ShadowAssignmentSchema>;
+
+export const ShadowScoreSchema = z
+  .object({
+    profileId: z.uuid(),
+    modelId: z.uuid(),
+    modelVersion: z.number().int().nullable(),
+    probability: z.number(),
+    score: z.number().int(),
+    tier: z.string(),
+    reasons: z.array(
+      z.object({
+        feature: z.string(),
+        direction: z.enum(['positive', 'negative']),
+        contribution: z.number(),
+        text: z.object({ en: z.string(), fr: z.string() }),
+      }),
+    ),
+    computedAt: IsoDateTimeSchema,
+  })
+  .meta({ id: 'ShadowScore' });
+export type ShadowScore = z.infer<typeof ShadowScoreSchema>;

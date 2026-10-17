@@ -428,6 +428,13 @@
       "when": 1792254706466,
       "tag": "0060_scoring_models",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1792255342843,
+      "tag": "0061_scoring_shadows",
+      "breakpoints": true
     }
   ]
 }

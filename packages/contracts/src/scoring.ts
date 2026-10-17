@@ -791,8 +791,21 @@ export const ReasonTextsSchema = z.partialRecord(z.string().max(40), TextSchema)
 export const DO_NOT_CONTACT_GATE_ID = 'do_not_contact';
 
 const ProfileConfigObjectSchema = z.object({
-  /** Rule-based (this config); model-based profiles (BF-059) will be another kind. */
-  kind: z.literal('rules').default('rules'),
+  /**
+   * `rules`: the weighted sum below. `model` (BF-059): an outcome-trained model scores (`model`); the rules stay
+   * for the gates, the reason texts and a rollback.
+   */
+  kind: z.enum(['rules', 'model']).default('rules'),
+  /**
+   * A model profile's model and its tiers by calibrated probability (A from `A`, B from `B`). Optional, without a
+   * default: rules configs stay byte-identical (the built-ins' pinned digests).
+   */
+  model: z
+    .object({
+      modelId: z.uuid(),
+      tiers: z.object({ A: z.number().gt(0).max(1), B: z.number().min(0).lt(1) }),
+    })
+    .optional(),
   offer: OfferSchema,
   /** Feature → weight (negative weights lower the score). */
   weights: z.partialRecord(FeatureKeySchema, z.number().min(-100).max(100)),
@@ -823,6 +836,8 @@ export type ProblemPath = readonly (string | number)[];
 /** What is wrong (stable, for the editor's own wording; `message` is the English text). */
 export const PROFILE_PROBLEM_CODES = [
   'no_positive_weight',
+  'model_required',
+  'model_tiers_order',
   'transform_kind',
   'transform_required',
   'value_unknown',
@@ -914,6 +929,14 @@ function conditionProblems(condition: GateCondition, path: ProblemPath, problems
  */
 export function profileProblems(config: z.output<typeof ProfileConfigObjectSchema>): ProfileProblem[] {
   const problems: ProfileProblem[] = [];
+  if (config.kind === 'model' && !config.model)
+    problems.push({ path: ['model'], code: 'model_required', message: 'A model profile needs a model' });
+  if (config.model && config.model.tiers.A <= config.model.tiers.B)
+    problems.push({
+      path: ['model', 'tiers'],
+      code: 'model_tiers_order',
+      message: 'Tier A must start at a higher probability than tier B',
+    });
   if (!Object.values(config.weights).some((weight) => (weight ?? 0) > 0)) {
     problems.push({
       path: ['weights'],

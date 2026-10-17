@@ -7,14 +7,18 @@ import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { OBJECT_PRESIGNER, S3Presigner } from '../platform/storage/s3-presigner.ts';
 import { BuiltinProfilesSeeder } from './application/builtin-profiles.seeder.ts';
 import { DatasetBuilder } from './application/ml/dataset-builder.ts';
+import { ModelScoring } from './application/ml/model-scoring.ts';
 import { ModelTrainer } from './application/ml/model-trainer.ts';
 import {
   ML_REPOSITORY,
   ML_STORAGE,
   MODEL_REGISTRY,
+  MODEL_RUNTIME,
   MODEL_TRAINER_PORT,
+  SHADOW_REPOSITORY,
   TRAINING_QUEUE,
 } from './application/ml/ports.ts';
+import { ShadowService } from './application/ml/shadow.service.ts';
 import {
   FACTS_ASSEMBLER,
   RECOMPUTE_PROGRESS,
@@ -36,7 +40,9 @@ import { DrizzleScoringRepository } from './infrastructure/drizzle-scoring.repos
 import { SqlFactsAssembler } from './infrastructure/facts-assembler.sql.ts';
 import { BullmqTrainingQueue } from './infrastructure/ml/bullmq-training-queue.ts';
 import { DrizzleMlRepository } from './infrastructure/ml/drizzle-ml.repository.ts';
+import { DrizzleShadowRepository } from './infrastructure/ml/drizzle-shadow.repository.ts';
 import { IntelModelTrainer } from './infrastructure/ml/intel-model-trainer.ts';
+import { OnnxModelRuntime } from './infrastructure/ml/onnx-model-runtime.ts';
 import { RealtimeRecomputeProgress } from './infrastructure/realtime-recompute-progress.ts';
 import { ScoringMlController } from './interface/http/ml.controller.ts';
 import {
@@ -105,6 +111,10 @@ export class ScoringModule {
           useFactory: (env: AppEnv) => new S3Presigner(env as ApiEnv),
         },
         ModelTrainer,
+        { provide: SHADOW_REPOSITORY, useClass: DrizzleShadowRepository },
+        { provide: MODEL_RUNTIME, useClass: OnnxModelRuntime },
+        ModelScoring,
+        ShadowService,
         {
           provide: ML_STORAGE,
           inject: [APP_ENV],

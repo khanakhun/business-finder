@@ -1346,6 +1346,12 @@ export {
   type MlTrainResult,
   MlTrainResultSchema,
   ScoringMlTrainJob,
+  type SetShadowModelRequest,
+  SetShadowModelRequestSchema,
+  type ShadowAssignment,
+  ShadowAssignmentSchema,
+  type ShadowScore,
+  ShadowScoreSchema,
   type StartMlTrainingRequest,
   StartMlTrainingRequestSchema,
 } from './scoring-ml.ts';

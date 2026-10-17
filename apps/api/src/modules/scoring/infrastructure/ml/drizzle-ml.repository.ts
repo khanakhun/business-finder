@@ -200,6 +200,18 @@ export class DrizzleMlRepository implements MlRepository, ModelRegistry {
     return rows.map(modelRecord);
   }
 
+  async setStatus(
+    organizationId: string,
+    id: string,
+    status: MlModelRecord['status'],
+    promotion?: { by: string | null; at: Date },
+  ) {
+    await getExecutor(this.db)
+      .update(scoringModels)
+      .set({ status, ...(promotion ? { promotedBy: promotion.by, promotedAt: promotion.at } : {}) })
+      .where(and(eq(scoringModels.organizationId, organizationId), eq(scoringModels.id, id)));
+  }
+
   async insertRun(row: Parameters<ModelRegistry['insertRun']>[0]) {
     await getExecutor(this.db).insert(mlTrainingRuns).values(row);
   }

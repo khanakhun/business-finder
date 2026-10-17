@@ -117,6 +117,7 @@ catalog:
   # Better Auth CLI (schema generation); the package is named `auth`.
   auth: 1.7.8
   nodemailer: 10.1.1
+  onnxruntime-node: 1.30.0
   imapflow: 2.2.4
   # BF-054: inbound mail parsing (DSN parts, text/html bodies) and server-side HTML sanitization.
   mailparser: 3.9.33
@@ -235,3 +236,5 @@ allowBuilds:
   # ssh2/cpu-features (via testcontainers) have optional native speedups we don't need.
   cpu-features: false
   ssh2: false
+  # BF-059: the CPU binary is bundled; the install script only downloads optional GPU providers (CUDA, TensorRT).
+  onnxruntime-node: false

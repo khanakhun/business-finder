@@ -1928,7 +1928,9 @@
         "gate_id_taken": "Une autre règle (ou une règle intégrée) a déjà cet identifiant.",
         "not_a_number": "Ce critère n’est pas un nombre : il ne peut pas être comparé.",
         "tiers_order": "Le niveau A doit commencer au-dessus du niveau B.",
-        "incomplete_gate": "Une condition est incomplète ou sa valeur ne convient pas au critère."
+        "incomplete_gate": "Une condition est incomplète ou sa valeur ne convient pas au critère.",
+        "model_required": "Un profil à modèle nécessite un modèle entraîné.",
+        "model_tiers_order": "Le niveau A doit commencer à une probabilité plus élevée que le niveau B."
       },
       "bothLanguages": "Écrivez le texte dans les deux langues, ou videz les deux.",
       "range": "Une valeur sort de l’intervalle permis.",

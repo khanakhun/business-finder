@@ -64,6 +64,23 @@ export function scoreVector(config: ScoringProfileConfig, stored: FeatureVector)
   });
   const total = contributions.reduce((sum, { contribution }) => sum + contribution, 0);
   const computed = Math.round(Math.min(100, Math.max(0, total)));
+  const { score, excluded, gated } = applyGates(config, vector, computed);
+  return {
+    score,
+    tier: excluded ? 'X' : score >= config.tiers.A ? 'A' : score >= config.tiers.B ? 'B' : 'C',
+    // Kept for the snapshot either way; an excluded business is explained by its gate alone.
+    contributions,
+    reasons: excluded ? [] : selectReasons(config, contributions),
+    gated,
+  };
+}
+
+/** The profile's gates (and the engine's do-not-contact gate) on a computed score — rules or model (BF-059). */
+export function applyGates(
+  config: ScoringProfileConfig,
+  vector: FeatureVector,
+  computed: number,
+): { readonly score: number; readonly excluded: boolean; readonly gated: ScoreResult['gated'] } {
   const gate = decidingGate([DO_NOT_CONTACT_GATE, ...config.gates], vector);
   // A cap that does not lower the score still explains it, marked as not applied.
   const applied = gate !== null && (gate.effect.type === 'exclude' || gate.effect.max < computed);
@@ -71,10 +88,7 @@ export function scoreVector(config: ScoringProfileConfig, stored: FeatureVector)
   const score = excluded ? 0 : applied && gate?.effect.type === 'cap' ? gate.effect.max : computed;
   return {
     score,
-    tier: excluded ? 'X' : score >= config.tiers.A ? 'A' : score >= config.tiers.B ? 'B' : 'C',
-    // Kept for the snapshot either way; an excluded business is explained by its gate alone.
-    contributions,
-    reasons: excluded ? [] : selectReasons(config, contributions),
+    excluded,
     gated: gate ? { gate: gate.id, effect: gate.effect.type, applied, reason: gate.reason } : null,
   };
 }

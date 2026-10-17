@@ -140,6 +140,10 @@ export interface ManualLogRecord {
   readonly decisionId: string;
   readonly summary: string;
   readonly outcome: string | null;
+  /** The call assist's offline queue key (BF-057): the same outcome is logged once. */
+  readonly idempotencyKey: string | null;
+  readonly durationSec: number | null;
+  readonly callbackAt: Date | null;
   readonly createdBy: string | null;
   readonly createdAt: Date;
 }
@@ -198,6 +202,7 @@ export interface OutboundRepository {
   // Manual contact logs
   insertManualLog(row: Omit<ManualLogRecord, 'createdAt'>): Promise<ManualLogRecord>;
   manualLogs(organizationId: string, businessId: string, limit: number): Promise<ManualLogRecord[]>;
+  manualLogByKey(organizationId: string, key: string): Promise<ManualLogRecord | undefined>;
 }
 export const OUTBOUND_REPOSITORY = Symbol('OutboundRepository');
 

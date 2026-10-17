@@ -4,11 +4,16 @@ import { type ComplianceDecision, DomainError, type ProblemDetails } from '@bf/c
 export class ComplianceRefusedError extends DomainError {
   readonly code;
 
-  constructor(readonly decision: ComplianceDecision) {
+  constructor(
+    readonly decision: ComplianceDecision,
+    channel = 'email',
+  ) {
     super(
       decision.decision === 'manual_only'
         ? 'This contact may only be reached by hand: copy the email and log the contact.'
-        : 'This contact may not be emailed.',
+        : channel === 'email'
+          ? 'This contact may not be emailed.'
+          : `This contact may not be reached by ${channel}.`,
       { details: { reason: decision.decision === 'manual_only' ? 'MANUAL_ONLY' : 'BLOCKED' } },
     );
     this.code = decision.decision === 'manual_only' ? ('CONFLICT' as const) : ('VALIDATION_FAILED' as const);

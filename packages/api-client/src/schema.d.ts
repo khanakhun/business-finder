@@ -2441,6 +2441,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/outreach/assist/businesses/{businessId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The call workspace of a business: numbers, channel decisions, best time to call, history */
+        get: operations["getCallWorkspace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/assist/businesses/{businessId}/outcomes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Log a call or WhatsApp outcome (idempotent by key) and apply its CRM effects */
+        post: operations["logCallOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/assist/businesses/{businessId}/script": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The grounded call script (cached per offer, language and facts; regenerate on demand) */
+        post: operations["getCallScript"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/assist/businesses/{businessId}/whatsapp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A short WhatsApp message with the preview link and its wa.me link (refused when blocked) */
+        post: operations["draftWhatsApp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/assist/calls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Today’s call list: open call tasks and suggested businesses to call now */
+        get: operations["getCallList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/outreach/bulk": {
         parameters: {
             query?: never;
@@ -4300,6 +4385,12 @@ export type components = {
             nextCursor: string | null;
             totalEstimate?: number;
         };
+        BestTime: {
+            goodNow: boolean;
+            nextAt: string | null;
+            reason: string;
+            timeZone: string;
+        };
         BriefOverrides: {
             extraInstructions?: string;
             locales?: string[];
@@ -4686,6 +4777,115 @@ export type components = {
         BusinessWebsiteAudit: {
             audit: components["schemas"]["WebsiteAudit"] | null;
             status: ("none" | "parked" | "social_only" | "broken" | "weak" | "ok" | "strong") | null;
+        };
+        CallList: {
+            suggestions: {
+                bestTime: components["schemas"]["BestTime"];
+                /**
+                 * Format: uuid
+                 * @description BusinessId (UUID)
+                 */
+                businessId: string;
+                businessName: string;
+                dueAt: string | null;
+                phone: string;
+                previewUrl: string | null;
+                taskId: string | null;
+                taskTitle: string | null;
+                tier: string | null;
+            }[];
+            tasks: {
+                bestTime: components["schemas"]["BestTime"];
+                /**
+                 * Format: uuid
+                 * @description BusinessId (UUID)
+                 */
+                businessId: string;
+                businessName: string;
+                dueAt: string | null;
+                phone: string;
+                previewUrl: string | null;
+                taskId: string | null;
+                taskTitle: string | null;
+                tier: string | null;
+            }[];
+        };
+        CallScript: {
+            cached: boolean;
+            /** Format: date-time */
+            generatedAt: string;
+            /** @enum {string} */
+            locale: "en" | "fr";
+            nextStep: string;
+            objections: {
+                answer: string;
+                objection: string;
+            }[];
+            observations: {
+                sourceIds: string[];
+                text: string;
+            }[];
+            opener: string;
+            previewMention: string | null;
+            questions: string[];
+            reminders: string[];
+        };
+        CallScriptRequest: {
+            /** @enum {string} */
+            locale?: "en" | "fr";
+            /**
+             * @default website_redesign
+             * @enum {string}
+             */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** @default false */
+            regenerate: boolean;
+        };
+        CallWorkspace: {
+            bestTime: components["schemas"]["BestTime"];
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            businessName: string;
+            compliance: {
+                phone: {
+                    decision: string;
+                    reasons: {
+                        code: string;
+                        message: {
+                            en: string;
+                            fr: string;
+                        };
+                        ruleRef: string | null;
+                    }[];
+                };
+                whatsapp: {
+                    decision: string;
+                    reasons: {
+                        code: string;
+                        message: {
+                            en: string;
+                            fr: string;
+                        };
+                        ruleRef: string | null;
+                    }[];
+                };
+            };
+            doNotContact: boolean;
+            history: components["schemas"]["ManualContactLog"][];
+            phone: {
+                /** Format: uuid */
+                contactId: string;
+                e164: string;
+                label: string;
+            } | null;
+            previewUrl: string | null;
+            whatsapp: {
+                contactId: string | null;
+                e164: string;
+            } | null;
         };
         CategoryAttributes: {
             [key: string]: boolean;
@@ -6488,6 +6688,27 @@ export type components = {
             /** @description Set when the external geocoder could not be asked, so candidates may be incomplete. */
             notice: ("geocoder_unavailable" | "geocoder_quota") | null;
             query: string;
+        };
+        LogOutcomeRequest: {
+            /** Format: date-time */
+            callbackAt?: string;
+            /** @enum {string} */
+            channel: "phone" | "whatsapp";
+            /** @default null */
+            contactId: string | null;
+            /** @default false */
+            doNotContact: boolean;
+            durationSec?: number;
+            idempotencyKey: string;
+            /** @default  */
+            notes: string;
+            /** @enum {string} */
+            outcome?: "no_answer" | "voicemail" | "interested" | "not_interested" | "call_back" | "info_email" | "info_whatsapp" | "wrong_number" | "do_not_call";
+        };
+        LogOutcomeResult: {
+            duplicate: boolean;
+            log: components["schemas"]["ManualContactLog"];
+            next: ("compose" | "whatsapp") | null;
         };
         Mailbox: {
             /** Format: date-time */
@@ -9480,6 +9701,18 @@ export type components = {
                 valid: boolean | null;
             };
             url: string;
+        };
+        WhatsAppDraft: {
+            e164: string;
+            text: string;
+            waUrl: string;
+        };
+        WhatsAppDraftRequest: {
+            /** @enum {string} */
+            locale?: "en" | "fr";
+            text?: string;
+            /** @default false */
+            usePhone: boolean;
         };
     };
     responses: never;
@@ -20844,6 +21077,351 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getCallWorkspace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallWorkspace"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    logCallOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogOutcomeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogOutcomeResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getCallScript: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallScriptRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallScript"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    draftWhatsApp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WhatsAppDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WhatsAppDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getCallList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

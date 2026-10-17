@@ -53,7 +53,7 @@ export interface DraftActor {
   readonly locale: EmailLocale;
 }
 
-interface Grounding {
+export interface Grounding {
   readonly business: DraftBusiness;
   readonly contact: DraftContact | null;
   readonly locale: EmailLocale;
@@ -410,6 +410,11 @@ export class DraftsService {
     const draft = await this.drafts.get(actor.organizationId, id);
     if (!draft) throw new NotFoundError('EmailDraft', id);
     return draft;
+  }
+
+  /** What a call script or a WhatsApp message is grounded in (BF-057): the same facts, findings, themes, preview. */
+  grounding(actor: DraftActor, businessId: string, locale?: EmailLocale): Promise<Grounding> {
+    return this.ground(actor, { businessId, contactId: null, locale });
   }
 
   private async ground(

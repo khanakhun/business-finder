@@ -10,6 +10,8 @@ import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
 import { SitesModule } from '../sites/index.ts';
+import { CallAssist } from './application/assist/call-assist.ts';
+import { ASSIST_READER, CALL_SCRIPT_CACHE } from './application/assist/ports.ts';
 import { DeliverabilityService, DNS_LOOKUPS } from './application/deliverability/deliverability.service.ts';
 import { DeliverabilityDigest } from './application/deliverability/digest.ts';
 import { DeliverabilityHealth } from './application/deliverability/health.ts';
@@ -73,6 +75,7 @@ import { SEQUENCE_REPOSITORY } from './application/sequences/ports.ts';
 import { SequenceSubscribers } from './application/sequences/sequence-subscribers.ts';
 import { SequencesService } from './application/sequences/sequences.service.ts';
 import { SequenceStatsService } from './application/sequences/stats.ts';
+import { DrizzleAssistReader } from './infrastructure/assist/drizzle-assist.reader.ts';
 import { DrizzleDeliverabilityRepository } from './infrastructure/deliverability/drizzle-deliverability.repository.ts';
 import { DNSBL_KEY, NodeDnsLookups } from './infrastructure/deliverability/node-dns.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
@@ -112,6 +115,7 @@ import {
 } from './infrastructure/sending/outreach-processors.ts';
 import { DrizzleSequencesRepository } from './infrastructure/sequences/drizzle-sequences.repository.ts';
 import { OutboundViewAttribution } from './infrastructure/sequences/outbound-view-attribution.ts';
+import { AssistController } from './interface/http/assist.controller.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
 import { DeliverabilityController } from './interface/http/deliverability.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
@@ -160,6 +164,7 @@ export class OutreachModule {
               InboxController,
               SequencesController,
               DeliverabilityController,
+              AssistController,
             ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
@@ -316,6 +321,11 @@ export class OutreachModule {
         OutboundCommands,
         OutboundQueries,
         ManualContactLogs,
+        // BF-057: call and WhatsApp assist.
+        DrizzleAssistReader,
+        { provide: ASSIST_READER, useExisting: DrizzleAssistReader },
+        { provide: CALL_SCRIPT_CACHE, useExisting: DrizzleAssistReader },
+        CallAssist,
         OutboundPersonalData,
         OutboundSubscribers,
         ...(mode === 'worker'

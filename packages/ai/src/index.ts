@@ -95,6 +95,11 @@ export {
   SitePlanOutput,
 } from './tasks/generation-site-plan.ts';
 export {
+  CallScriptInput,
+  CallScriptOutput,
+  OutreachCallScript,
+} from './tasks/outreach-call-script.ts';
+export {
   EmailDraftInput,
   EmailDraftOutput,
   OutreachEmailDraft,
@@ -104,6 +109,11 @@ export {
   ReplyTriageInput,
   ReplyTriageOutput,
 } from './tasks/outreach-reply-triage.ts';
+export {
+  OutreachWhatsAppMessage,
+  WhatsAppMessageInput,
+  WhatsAppMessageOutput,
+} from './tasks/outreach-whatsapp-message.ts';
 export {
   QualityUnsupportedClaims,
   UnsupportedClaimsInput,

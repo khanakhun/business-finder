@@ -386,6 +386,13 @@
       "when": 1792249771015,
       "tag": "0054_deliverability_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1792250513751,
+      "tag": "0055_call_assist",
+      "breakpoints": true
     }
   ]
 }

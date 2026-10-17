@@ -1,4 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common';
+import { AnalyticsModule } from './modules/analytics/index.ts';
 import { BusinessGraphModule } from './modules/business-graph/index.ts';
 import { ComplianceModule } from './modules/compliance/index.ts';
 import { CrmModule } from './modules/crm/index.ts';
@@ -69,6 +70,7 @@ export class AppModule {
         EnrichmentModule.forRoot(mode),
         ReviewsModule.forRoot(mode),
         ScoringModule.forRoot(mode),
+        AnalyticsModule.forRoot(mode),
       ],
     };
   }

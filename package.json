@@ -49,6 +49,7 @@
     "api:codegen": "pnpm api:openapi && pnpm --filter @bf/api-client codegen",
     "gen:module": "node tools/generators/module/cli.mjs",
     "gen:module:check": "node tools/generators/module/check.mjs",
+    "analytics:backfill": "pnpm --filter @bf/api analytics:backfill",
     "geo:import": "pnpm --filter @bf/api geo:import",
     "generation:bench": "pnpm --filter @bf/api generation:bench",
     "quality:calibrate": "pnpm --filter @bf/api quality:calibrate",

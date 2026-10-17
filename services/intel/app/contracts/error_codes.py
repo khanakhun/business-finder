@@ -14,6 +14,7 @@ class ErrorCodeInfo(NamedTuple):
 
 
 ERROR_CODES: Final[dict[Code, ErrorCodeInfo]] = {
+    Code.ANALYTICS_QUERY_TOO_HEAVY: ErrorCodeInfo(422, "The analytics query took too long"),
     Code.BUDGET_EXCEEDED: ErrorCodeInfo(402, "Budget exceeded"),
     Code.CONFLICT: ErrorCodeInfo(409, "Conflict"),
     Code.DISCOVERY_PROVIDER_NOT_CONFIGURED: ErrorCodeInfo(409, "Discovery provider not configured"),

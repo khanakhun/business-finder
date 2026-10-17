@@ -1,5 +1,9 @@
 {
   "codes": {
+    "ANALYTICS_QUERY_TOO_HEAVY": {
+      "status": 422,
+      "title": "The analytics query took too long"
+    },
     "BUDGET_EXCEEDED": {
       "status": 402,
       "title": "Budget exceeded"

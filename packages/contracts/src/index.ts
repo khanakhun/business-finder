@@ -6,6 +6,24 @@ export {
   AiUsageSchema,
 } from './ai.ts';
 export {
+  ANALYTICS_FACT_TYPES,
+  type AnalyticsFactType,
+  AnalyticsFactTypeSchema,
+  type AnalyticsFreshness,
+  AnalyticsFreshnessSchema,
+  type AnalyticsQuery,
+  AnalyticsQuerySchema,
+  type AnalyticsRegistry,
+  AnalyticsRegistrySchema,
+  type AnalyticsResult,
+  AnalyticsResultSchema,
+  type DimensionDefinition,
+  DimensionDefinitionSchema,
+  METRIC_FORMATS,
+  type MetricDefinition,
+  MetricDefinitionSchema,
+} from './analytics.ts';
+export {
   type BestTime,
   BestTimeSchema,
   CALL_OUTCOMES,

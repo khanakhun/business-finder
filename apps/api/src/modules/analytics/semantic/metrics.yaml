@@ -1,0 +1,255 @@
+# Analytics metrics (BF-058): the one definition of each number every dashboard and export shows.
+# `sql` is an aggregate over the facts table (alias `f`), written here and never built from user input; a rate is
+# `numerator / denominator` of two other metrics (its sample size is the denominator). Formats: count, rate, usd,
+# duration (milliseconds), score.
+
+- id: businesses_discovered
+  format: count
+  sql: count(*) FILTER (WHERE f.event_type = 'business_tracked')
+  label: { en: Businesses discovered, fr: Entreprises découvertes }
+  description:
+    en: Businesses added to the workspace (discovery, search, import or by hand).
+    fr: Entreprises ajoutées à l’espace de travail (découverte, recherche, import ou à la main).
+
+- id: businesses_contacted
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type IN ('email_sent', 'manual_contact'))
+  label: { en: Businesses contacted, fr: Entreprises contactées }
+  description:
+    en: Distinct businesses with at least one sent email or logged manual contact (call, WhatsApp, visit, letter).
+    fr: Entreprises distinctes ayant reçu au moins un e-mail ou un contact manuel noté (appel, WhatsApp, visite, courrier).
+
+- id: emails_sent
+  format: count
+  sql: count(*) FILTER (WHERE f.event_type = 'email_sent')
+  label: { en: Emails sent, fr: E-mails envoyés }
+  description: { en: Emails that left a mailbox., fr: E-mails partis d’une boîte d’envoi. }
+
+- id: emails_bounced
+  format: count
+  sql: count(*) FILTER (WHERE f.event_type = 'email_bounced' AND f.outcome = 'hard')
+  label: { en: Hard bounces, fr: Rebonds définitifs }
+  description: { en: Emails rejected permanently by the recipient’s server., fr: E-mails refusés définitivement par le serveur du destinataire. }
+
+- id: bounce_rate
+  format: rate
+  numerator: emails_bounced
+  denominator: emails_sent
+  label: { en: Bounce rate, fr: Taux de rebond }
+  description: { en: Hard bounces per email sent., fr: Rebonds définitifs par e-mail envoyé. }
+
+- id: unsubscribes
+  format: count
+  sql: count(*) FILTER (WHERE f.event_type = 'unsubscribed')
+  label: { en: Unsubscribes, fr: Désinscriptions }
+  description: { en: Confirmed unsubscribes from an email’s link or header., fr: Désinscriptions confirmées depuis le lien ou l’en-tête d’un e-mail. }
+
+- id: unsubscribe_rate
+  format: rate
+  numerator: unsubscribes
+  denominator: emails_sent
+  label: { en: Unsubscribe rate, fr: Taux de désinscription }
+  description: { en: Unsubscribes per email sent., fr: Désinscriptions par e-mail envoyé. }
+
+- id: businesses_replied
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type = 'reply_triaged' AND f.outcome <> 'auto_reply')
+  label: { en: Businesses that replied, fr: Entreprises ayant répondu }
+  description: { en: Distinct businesses with a reply that is not an automatic one., fr: Entreprises distinctes ayant envoyé une réponse non automatique. }
+
+- id: reply_rate
+  format: rate
+  numerator: businesses_replied
+  denominator: businesses_contacted
+  label: { en: Reply rate, fr: Taux de réponse }
+  description: { en: Businesses that replied per business contacted., fr: Entreprises ayant répondu par entreprise contactée. }
+  caveats:
+    en: Replies and contacts are counted in the same period; a reply to an older email counts in its own period.
+    fr: Réponses et contacts sont comptés sur la même période ; une réponse à un e-mail plus ancien compte dans sa propre période.
+
+- id: businesses_positive
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type = 'reply_triaged' AND f.outcome IN ('interested', 'question'))
+  label: { en: Positive replies, fr: Réponses positives }
+  description: { en: Distinct businesses whose reply was triaged interested or a question., fr: Entreprises distinctes dont la réponse a été classée intéressée ou question. }
+  caveats:
+    en: The first triage counts; a later correction by a person is not reflected yet.
+    fr: Le premier tri compte ; une correction ultérieure n’est pas encore prise en compte.
+
+- id: positive_reply_rate
+  format: rate
+  numerator: businesses_positive
+  denominator: businesses_contacted
+  label: { en: Positive reply rate, fr: Taux de réponses positives }
+  description: { en: Businesses with a positive reply per business contacted., fr: Entreprises avec une réponse positive par entreprise contactée. }
+
+- id: leads
+  format: count
+  sql: count(*) FILTER (WHERE f.event_type = 'lead_captured')
+  label: { en: Leads, fr: Prospects entrants }
+  description: { en: Claims and contact requests from preview sites (spam excluded)., fr: Demandes de reprise et de contact depuis les sites d’aperçu (hors spam). }
+
+- id: previews_published
+  format: count
+  sql: count(DISTINCT f.site_id) FILTER (WHERE f.event_type = 'preview_published')
+  label: { en: Previews published, fr: Aperçus publiés }
+  description: { en: Sites published as a preview for the first time., fr: Sites publiés en aperçu pour la première fois. }
+
+- id: lead_rate
+  format: rate
+  numerator: leads
+  denominator: previews_published
+  label: { en: Lead rate, fr: Taux de prospects }
+  description: { en: Leads per preview published., fr: Prospects entrants par aperçu publié. }
+  caveats:
+    en: Uses previews published in the period as the previews shared.
+    fr: Les aperçus publiés sur la période tiennent lieu d’aperçus partagés.
+
+- id: meetings
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type = 'pipeline_changed' AND f.outcome = 'meeting')
+  label: { en: Meetings, fr: Rendez-vous }
+  description: { en: Businesses moved to the meeting stage., fr: Entreprises passées à l’étape rendez-vous. }
+
+- id: won
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type = 'pipeline_changed' AND f.outcome = 'won')
+  label: { en: Won, fr: Gagnés }
+  description: { en: Businesses moved to won., fr: Entreprises passées à gagné. }
+
+- id: win_rate
+  format: rate
+  numerator: won
+  denominator: businesses_contacted
+  label: { en: Win rate, fr: Taux de réussite }
+  description: { en: Businesses won per business contacted., fr: Entreprises gagnées par entreprise contactée. }
+
+- id: previews_viewed
+  format: count
+  sql: count(DISTINCT f.site_id) FILTER (WHERE f.event_type = 'site_viewed')
+  label: { en: Previews viewed, fr: Aperçus consultés }
+  description: { en: Distinct sites with at least one counted view., fr: Sites distincts avec au moins une visite comptée. }
+
+- id: preview_view_rate
+  format: rate
+  numerator: previews_viewed
+  denominator: previews_published
+  label: { en: Preview view rate, fr: Taux de consultation des aperçus }
+  description: { en: Previews viewed per preview published., fr: Aperçus consultés par aperçu publié. }
+  caveats:
+    en: Views in the period may be of previews published earlier.
+    fr: Les visites de la période peuvent concerner des aperçus publiés avant.
+
+- id: page_views
+  format: count
+  sql: coalesce(sum(f.count) FILTER (WHERE f.event_type = 'site_viewed'), 0)
+  label: { en: Page views, fr: Pages vues }
+  description: { en: Counted views of preview and live sites (bots excluded)., fr: Visites comptées des sites d’aperçu et en ligne (hors robots). }
+
+- id: jobs_finished
+  format: count
+  sql: count(DISTINCT f.job_id) FILTER (WHERE f.event_type = 'generation_finished')
+  label: { en: Generation jobs finished, fr: Générations terminées }
+  description: { en: Site generation jobs that reached an end state., fr: Générations de sites arrivées à un état final. }
+
+- id: jobs_with_site
+  format: count
+  sql: count(DISTINCT f.job_id) FILTER (WHERE f.event_type = 'generation_finished' AND f.outcome IN ('succeeded', 'needs_review'))
+  label: { en: Jobs that produced a site, fr: Générations ayant produit un site }
+  description: { en: Jobs that succeeded or are waiting for a review., fr: Générations réussies ou en attente de relecture. }
+
+- id: generation_success_rate
+  format: rate
+  numerator: jobs_with_site
+  denominator: jobs_finished
+  label: { en: Generation success rate, fr: Taux de réussite des générations }
+  description: { en: Jobs that produced a site per job finished., fr: Générations ayant produit un site par génération terminée. }
+
+- id: jobs_needing_review
+  format: count
+  sql: count(DISTINCT f.job_id) FILTER (WHERE f.event_type = 'generation_finished' AND f.outcome = 'needs_review')
+  label: { en: Jobs needing a review, fr: Générations à relire }
+  description: { en: Jobs the quality gates sent to a person., fr: Générations envoyées en relecture par les contrôles qualité. }
+
+- id: needs_review_rate
+  format: rate
+  numerator: jobs_needing_review
+  denominator: jobs_finished
+  label: { en: Needs-review rate, fr: Taux de relecture }
+  description: { en: Jobs needing a review per job finished., fr: Générations à relire par génération terminée. }
+
+- id: avg_quality_score
+  format: score
+  sql: avg(f.quality_score) FILTER (WHERE f.event_type = 'generation_finished' AND f.quality_score IS NOT NULL)
+  label: { en: Average quality score, fr: Score qualité moyen }
+  description: { en: The quality gates’ overall score of finished jobs., fr: Score global des contrôles qualité des générations terminées. }
+
+- id: time_selection_to_preview
+  format: duration
+  sql: avg(f.duration_ms) FILTER (WHERE f.event_type = 'generation_finished' AND f.outcome IN ('succeeded', 'needs_review'))
+  label: { en: Time to a preview, fr: Délai jusqu’à l’aperçu }
+  description: { en: Average time from a job’s start to its site., fr: Durée moyenne entre le début d’une génération et son site. }
+
+- id: time_prompt_to_list
+  format: duration
+  sql: avg(f.duration_ms) FILTER (WHERE f.event_type = 'discovery_finished')
+  label: { en: Time to a list, fr: Délai jusqu’à la liste }
+  description: { en: "Average duration of a discovery run, from the prompt to its list.", fr: "Durée moyenne d’une découverte, du prompt à sa liste." }
+
+- id: spend
+  format: usd
+  sql: coalesce(sum(f.cost_usd) FILTER (WHERE f.event_type = 'cost'), 0)
+  label: { en: Spend, fr: Dépenses }
+  description: { en: AI models and data providers., fr: Modèles d’IA et fournisseurs de données. }
+  caveats:
+    en: Sandbox compute is not metered yet; provider costs arrive the day after.
+    fr: Le calcul des sandbox n’est pas encore mesuré ; les coûts des fournisseurs arrivent le lendemain.
+
+- id: spend_llm
+  format: usd
+  sql: coalesce(sum(f.cost_usd) FILTER (WHERE f.event_type = 'cost' AND f.outcome = 'llm'), 0)
+  label: { en: AI spend, fr: Dépenses IA }
+  description: { en: "Model calls, by feature.", fr: "Appels aux modèles, par fonction." }
+
+- id: spend_providers
+  format: usd
+  sql: coalesce(sum(f.cost_usd) FILTER (WHERE f.event_type = 'cost' AND f.outcome = 'providers'), 0)
+  label: { en: Data provider spend, fr: Dépenses fournisseurs }
+  description: { en: "Places, maps and verification providers, per closed day.", fr: "Fournisseurs de lieux, cartes et vérification, par jour clos." }
+
+- id: generation_cost
+  format: usd
+  sql: coalesce(sum(f.cost_usd) FILTER (WHERE f.event_type = 'generation_finished'), 0)
+  label: { en: Generation cost, fr: Coût des générations }
+  description: { en: What finished jobs cost (their engines’ model usage)., fr: Coût des générations terminées (usage des modèles de leurs moteurs). }
+  caveats:
+    en: Part of the AI spend; not added to the total.
+    fr: Inclus dans les dépenses IA ; non ajouté au total.
+
+- id: cost_per_site
+  format: usd
+  numerator: spend
+  denominator: previews_published
+  label: { en: Cost per site, fr: Coût par site }
+  description: { en: Spend per preview published., fr: Dépenses par aperçu publié. }
+
+- id: cost_per_contact
+  format: usd
+  numerator: spend
+  denominator: businesses_contacted
+  label: { en: Cost per contact, fr: Coût par contact }
+  description: { en: Spend per business contacted., fr: Dépenses par entreprise contactée. }
+
+- id: cost_per_positive_reply
+  format: usd
+  numerator: spend
+  denominator: businesses_positive
+  label: { en: Cost per positive reply, fr: Coût par réponse positive }
+  description: { en: Spend per positive reply., fr: Dépenses par réponse positive. }
+
+- id: cost_per_lead
+  format: usd
+  numerator: spend
+  denominator: leads
+  label: { en: Cost per lead, fr: Coût par prospect }
+  description: { en: Spend per lead from a preview site., fr: Dépenses par prospect entrant d’un site d’aperçu. }

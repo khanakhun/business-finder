@@ -33,7 +33,8 @@ describe('quick actions', () => {
       ['business.whatsapp', true, 'https://wa.me/33199002700'],
       ['enrichment.enrich', true, null],
       ['sites.generate', true, '/generation/new?ids=0192a1b2-0000-7000-8000-000000000001'],
-      ['outreach.send-email', false, null],
+      // BF-051: enabled (opens the composer) unless the business is do-not-contact.
+      ['outreach.send-email', true, null],
     ]);
     const viewer = quickActionsFor({
       business: business({ websiteUrl: 'javascript:alert(1)', primaryPhone: null }),

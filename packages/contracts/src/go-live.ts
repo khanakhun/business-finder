@@ -114,3 +114,69 @@ export const PublishLiveResultSchema = z
   .object({ publicationId: z.uuid(), hostname: z.string(), readiness: GoLiveReadinessSchema })
   .meta({ id: 'PublishLiveResult' });
 export type PublishLiveResult = z.infer<typeof PublishLiveResultSchema>;
+
+// ── Custom domains ──────────────────────────────────────────────────────────────────────────────────────────────
+
+export const SITE_DOMAIN_KINDS = ['apex', 'subdomain', 'www'] as const;
+export const SITE_DOMAIN_STATUSES = [
+  'pending_dns',
+  'verifying',
+  'verified',
+  'active',
+  'failed',
+  'removed',
+] as const;
+export type SiteDomainStatus = (typeof SITE_DOMAIN_STATUSES)[number];
+
+const DnsRecordSchema = z.object({
+  type: z.enum(['A', 'AAAA', 'CNAME', 'TXT']),
+  name: z.string(),
+  value: z.string(),
+});
+
+export const SiteDomainSchema = z
+  .object({
+    id: z.uuid(),
+    hostname: z.string(),
+    kind: z.enum(SITE_DOMAIN_KINDS),
+    /** Redirects here (a `www` name to its apex). */
+    redirectTo: z.string().nullable(),
+    status: z.enum(SITE_DOMAIN_STATUSES),
+    /** The records to create at the registrar. */
+    records: z.array(DnsRecordSchema),
+    report: z
+      .object({
+        checks: z.array(
+          z.object({
+            type: z.string(),
+            name: z.string(),
+            expected: z.string(),
+            found: z.array(z.string()),
+            ok: z.boolean(),
+          }),
+        ),
+        checkedAt: IsoDateTimeSchema,
+      })
+      .nullable(),
+    lastCheckedAt: IsoDateTimeSchema.nullable(),
+    createdAt: IsoDateTimeSchema,
+  })
+  .meta({ id: 'SiteDomain' });
+export type SiteDomain = z.infer<typeof SiteDomainSchema>;
+
+export const AddSiteDomainRequestSchema = z
+  .object({
+    hostname: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(253)
+      .regex(
+        /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/,
+        'A domain name, e.g. salon.com',
+      ),
+    /** For an apex domain: also serve `www.` (redirected to the apex). */
+    includeWww: z.boolean().default(true),
+  })
+  .meta({ id: 'AddSiteDomainRequest' });
+export type AddSiteDomainRequest = z.input<typeof AddSiteDomainRequestSchema>;

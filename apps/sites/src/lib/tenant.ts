@@ -81,6 +81,7 @@ async function loadTenant(hostname: string): Promise<Tenant | null> {
   }
   return {
     hostname: row.hostname,
+    redirectTo: row.redirectTo,
     siteId: row.siteId,
     status: row.status,
     environment: row.environment,

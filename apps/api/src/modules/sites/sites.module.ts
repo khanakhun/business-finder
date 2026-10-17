@@ -19,8 +19,9 @@ import {
   OWNER_SITE_IMAGES,
   WORDMARK_MAKER,
 } from './application/asset-sourcing.ts';
+import { DOMAIN_SWEEP_AUTOSTART, DomainsService } from './application/go-live/domains.service.ts';
 import { GoLiveService } from './application/go-live/go-live.service.ts';
-import { GO_LIVE_REPOSITORY } from './application/go-live/ports.ts';
+import { DNS_RESOLVER, DOMAIN_REPOSITORY, GO_LIVE_REPOSITORY } from './application/go-live/ports.ts';
 import {
   ASSET_PROCESSING_QUEUE,
   ASSET_SOURCING_QUEUE,
@@ -96,12 +97,14 @@ import {
   SitesExpiryScheduler,
   SitesViewsFlushScheduler,
 } from './infrastructure/bullmq-site-jobs.ts';
+import { DrizzleDomainRepository } from './infrastructure/drizzle-domain.repository.ts';
 import { DrizzleGoLiveRepository } from './infrastructure/drizzle-go-live.repository.ts';
 import { DrizzleSiteAssetsRepository } from './infrastructure/drizzle-site-assets.repository.ts';
 import { DrizzleSiteThumbnailsRepository } from './infrastructure/drizzle-site-thumbnails.repository.ts';
 import { DrizzleSiteViewsRepository } from './infrastructure/drizzle-site-views.repository.ts';
 import { DrizzleSitesRepository } from './infrastructure/drizzle-sites.repository.ts';
 import { FakeSiteScreenshotter, IntelSiteScreenshotter } from './infrastructure/intel-site-screenshotter.ts';
+import { NodeDnsResolver } from './infrastructure/node-dns-resolver.ts';
 import { RendererRevalidator } from './infrastructure/renderer-revalidator.ts';
 import { SharpImageProcessor } from './infrastructure/sharp-image-processor.ts';
 import {
@@ -111,6 +114,7 @@ import {
   S3UploadSigner,
 } from './infrastructure/site-asset-storage.ts';
 import { ValkeySiteViewCounter } from './infrastructure/valkey-site-views.ts';
+import { InternalDomainsController, SiteDomainsController } from './interface/http/domains.controller.ts';
 import { GoLiveController, PublicContactRoutingController } from './interface/http/go-live.controller.ts';
 import { PublicSiteViewsController } from './interface/http/public-site-views.controller.ts';
 import { SiteAssetsController } from './interface/http/site-assets.controller.ts';
@@ -171,6 +175,8 @@ export class SitesModule {
               // BF-062: going live.
               GoLiveController,
               PublicContactRoutingController,
+              SiteDomainsController,
+              InternalDomainsController,
             ],
       providers: [
         { provide: SITES_REPOSITORY, useClass: DrizzleSitesRepository },
@@ -322,6 +328,10 @@ export class SitesModule {
         SiteCommands,
         { provide: GO_LIVE_REPOSITORY, useClass: DrizzleGoLiveRepository },
         GoLiveService,
+        { provide: DOMAIN_REPOSITORY, useClass: DrizzleDomainRepository },
+        { provide: DNS_RESOLVER, useClass: NodeDnsResolver },
+        { provide: DOMAIN_SWEEP_AUTOSTART, useValue: mode === 'worker' },
+        DomainsService,
         SiteQueries,
         SiteAssetCommands,
         SiteThumbnailCommands,

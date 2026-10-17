@@ -53,6 +53,7 @@ services:
       BASE_DOMAIN: ${BASE_DOMAIN:?}
       SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?}
       ACME_EMAIL: ${ACME_EMAIL:?}
+      DOMAIN_ASK_TOKEN: ${DOMAIN_ASK_TOKEN:?}
       ACME_DNS_PROVIDER: ${ACME_DNS_PROVIDER:-cloudflare}
       CADDY_TLS: ${CADDY_TLS:-acme}
     volumes:
@@ -130,6 +131,9 @@ services:
       SITES_ASSETS_BASE_URL: ${SITES_ASSETS_BASE_URL:?}
       SITES_REVALIDATE_SECRET: ${SITES_REVALIDATE_SECRET:?}
       SITES_VIEW_TOKEN_SECRET: ${SITES_VIEW_TOKEN_SECRET:?}
+      # BF-062: custom domains — the ingress IPs an apex points to, and the token of Caddy's on-demand TLS ask.
+      SITES_INGRESS_IPS: ${SITES_INGRESS_IPS:-}
+      DOMAIN_ASK_TOKEN: ${DOMAIN_ASK_TOKEN:?}
       # Caddy and the web server (which forwards the visitor's address on its server-side calls), by their fixed
       # addresses on the edge network: the API rate-limits and audits per real client IP.
       AUTH_TRUSTED_PROXIES: 172.30.0.10,172.30.0.11

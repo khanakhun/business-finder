@@ -781,6 +781,8 @@ export {
   ResolveLocationQuerySchema,
 } from './geo-areas.ts';
 export {
+  type AddSiteDomainRequest,
+  AddSiteDomainRequestSchema,
   ConfirmContactRoutingRequestSchema,
   GO_LIVE_CHECKS,
   type GoLiveCheck,
@@ -796,8 +798,13 @@ export {
   SaveSiteLegalProfileRequestSchema,
   type SetContactRoutingRequest,
   SetContactRoutingRequestSchema,
+  SITE_DOMAIN_KINDS,
+  SITE_DOMAIN_STATUSES,
   type SiteContactRouting,
   SiteContactRoutingSchema,
+  type SiteDomain,
+  SiteDomainSchema,
+  type SiteDomainStatus,
   type SiteLegalProfile,
   SiteLegalProfileSchema,
 } from './go-live.ts';

@@ -5,8 +5,14 @@
 #   ACME_DNS_PROVIDER  DNS module for the wildcard (cloudflare by default; the image must include it)
 #   ACME_DNS_API_TOKEN token of that provider (DNS edit on the zone only)
 #   CADDY_TLS          `acme` (default) or `internal` (local test with Caddy's own CA)
+#   DOMAIN_ASK_TOKEN   token of the on-demand TLS `ask` URL (BF-062: certificates for verified custom domains only)
 {
 	email {$ACME_EMAIL}
+	# BF-062: certificates for live sites' custom domains, issued when a visitor first arrives — and only for names
+	# the API allows (verified or active `site_domains`). Caddy sends no header, so the URL carries a token.
+	on_demand_tls {
+		ask http://api:4000/v1/internal/domains/allow?token={$DOMAIN_ASK_TOKEN}
+	}
 	# Admin API on loopback only (the healthcheck reads it).
 	admin 127.0.0.1:2019
 	# Error logs carry the request too: the same redaction as the access logs.
@@ -98,6 +104,9 @@ api.{$BASE_DOMAIN} {
 	import tls_{$CADDY_TLS:acme}
 	import security_headers
 	import access_log
+	# BF-062: internal routes (Caddy's own ask) are reached on the internal network only, never from the internet.
+	@internal path /v1/internal/*
+	respond @internal 404
 	# Never compress the realtime stream: compression buffers events (SSE, /v1/realtime).
 	@compressible not header Accept text/event-stream*
 	encode @compressible zstd gzip
@@ -148,5 +157,22 @@ u.{$BASE_DOMAIN} {
 	@internal path /api/revalidate /health/*
 	respond @internal 404
 	# apps/sites (BF-036): every hostname of the sites domain; it answers 404 for one with no publication.
+	reverse_proxy sites:3000
+}
+
+# BF-062: live sites on their own domains (any other name). The certificate is issued on demand when the API's ask
+# endpoint allows the name; anything else gets no certificate (the TLS handshake fails), so nothing is served.
+https:// {
+	tls {
+		on_demand
+	}
+	import security_headers
+	import access_log
+	encode zstd gzip
+	request_body {
+		max_size 64KB
+	}
+	@internal path /api/revalidate /health/*
+	respond @internal 404
 	reverse_proxy sites:3000
 }

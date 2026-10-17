@@ -1,5 +1,12 @@
 import { type DbClient, getExecutor } from '@bf/db';
-import { emailThreads, inboundMessages, mailboxes, mailboxSyncState, outboundMessages } from '@bf/db/schema';
+import {
+  businesses,
+  emailThreads,
+  inboundMessages,
+  mailboxes,
+  mailboxSyncState,
+  outboundMessages,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, count, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
@@ -125,6 +132,32 @@ export class DrizzleInboundRepository implements InboundRepository {
         ...(input.human ? { status: 'replied' as const } : {}),
         ...(input.triageClass !== undefined ? { latestTriageClass: input.triageClass } : {}),
       })
+      .where(eq(emailThreads.id, threadId));
+  }
+
+  async triageContext(inboundId: string) {
+    const [row] = await this.x
+      .select({
+        businessId: emailThreads.businessId,
+        businessName: businesses.displayName,
+        contactId: emailThreads.contactId,
+        ourMessage: outboundMessages.bodyText,
+        locale: outboundMessages.locale,
+      })
+      .from(inboundMessages)
+      .innerJoin(emailThreads, eq(emailThreads.id, inboundMessages.threadId))
+      .innerJoin(businesses, eq(businesses.id, emailThreads.businessId))
+      .leftJoin(outboundMessages, eq(outboundMessages.id, inboundMessages.outboundMessageId))
+      .where(eq(inboundMessages.id, inboundId));
+    return row
+      ? { ...row, ourMessage: (row.ourMessage ?? '').slice(0, 4_000), locale: row.locale ?? ('en' as const) }
+      : undefined;
+  }
+
+  async setThreadClass(threadId: string, triageClass: string | null) {
+    await this.x
+      .update(emailThreads)
+      .set({ latestTriageClass: triageClass })
       .where(eq(emailThreads.id, threadId));
   }
 

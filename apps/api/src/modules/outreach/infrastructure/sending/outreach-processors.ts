@@ -5,6 +5,7 @@ import {
   OutreachSendJob,
   OutreachSyncJob,
   OutreachTickJob,
+  OutreachTriageJob,
 } from '@bf/contracts';
 import { type JobContext, QUEUES, TypedProducer } from '@bf/queue';
 import { InjectQueue, Processor } from '@nestjs/bullmq';
@@ -21,6 +22,7 @@ import {
   type InboundRepository,
 } from '../../application/inbound/ports.ts';
 import { MailboxSync } from '../../application/inbound/sync.ts';
+import { ReplyTriageService } from '../../application/inbound/triage.ts';
 import { BulkOutreach } from '../../application/outbound/bulk.ts';
 import {
   BULK_REPOSITORY,
@@ -184,5 +186,21 @@ export class OutreachSyncProcessor extends TypedProcessor<
   async handle(payload: z.output<typeof OutreachSyncJob.schema>, context: JobContext) {
     if (!payload.orgId) return { ingested: 0, ignored: 0 };
     return this.sync.sync(payload.orgId, payload.mailboxId, context.logger);
+  }
+}
+
+@Processor(QUEUES.outreachTriage.name, { concurrency: QUEUES.outreachTriage.concurrency })
+export class OutreachTriageProcessor extends TypedProcessor<
+  typeof OutreachTriageJob,
+  { readonly outcome: string }
+> {
+  protected readonly definition = OutreachTriageJob;
+
+  constructor(private readonly triage: ReplyTriageService) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof OutreachTriageJob.schema>, context: JobContext) {
+    return { outcome: await this.triage.triage(payload.inboundId, context.logger) };
   }
 }

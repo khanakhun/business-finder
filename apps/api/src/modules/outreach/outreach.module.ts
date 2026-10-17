@@ -21,7 +21,9 @@ import {
   type InboundSettings,
   MAIL_PARSER,
 } from './application/inbound/ports.ts';
+import { ReplyActions } from './application/inbound/reply-actions.ts';
 import { MailboxSync } from './application/inbound/sync.ts';
+import { ReplyTriageService } from './application/inbound/triage.ts';
 import { MailboxCapacity } from './application/mailbox/mailbox-capacity.ts';
 import { MailboxCredentialStore } from './application/mailbox/mailbox-credentials.ts';
 import { MailboxHealthSweep } from './application/mailbox/mailbox-health.ts';
@@ -90,6 +92,7 @@ import {
   OutreachSyncProcessor,
   OutreachTickProcessor,
   OutreachTickScheduler,
+  OutreachTriageProcessor,
 } from './infrastructure/sending/outreach-processors.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
@@ -260,6 +263,8 @@ export class OutreachModule {
         },
         ReplyIngestion,
         MailboxSync,
+        ReplyTriageService,
+        ReplyActions,
         InboundPersonalData,
         OutboundCommands,
         OutboundQueries,
@@ -274,6 +279,7 @@ export class OutreachModule {
               OutreachSendProcessor,
               OutreachBulkProcessor,
               OutreachSyncProcessor,
+              OutreachTriageProcessor,
               OutreachTickScheduler,
               { provide: OUTREACH_TICK_AUTOSTART, useValue: true },
             ]

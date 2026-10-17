@@ -12,10 +12,13 @@ import {
   OrgBusinessStatusChanged,
   OrgBusinessTagsChanged,
   OutreachMessageBlocked,
+  OutreachMessageBounced,
   OutreachMessageCancelled,
   OutreachMessageFailed,
   OutreachMessageQueued,
   OutreachMessageSent,
+  OutreachReplyReceived,
+  OutreachReplyTriaged,
   ScoreUpdated,
   SiteLeadCaptured,
   SiteOptOutRequested,
@@ -78,6 +81,25 @@ const ACTIVITY_OF: Record<
     data: { messageId: p.messageId, reasons: p.reasons },
   }),
   [OutreachMessageCancelled.type]: (p) => ({ type: 'email.cancelled', data: { messageId: p.messageId } }),
+  // BF-054: replies (the inbox has the content), bounces, and the triage with its class.
+  [OutreachReplyReceived.type]: (p) => ({
+    type: 'email.replied',
+    data: { inboundId: p.inboundId, threadId: p.threadId, kind: p.kind },
+  }),
+  [OutreachReplyTriaged.type]: (p) => ({
+    type: 'reply.triaged',
+    data: {
+      inboundId: p.inboundId,
+      threadId: p.threadId,
+      class: p.class,
+      needsHuman: p.needsHuman,
+      corrected: p.corrected,
+    },
+  }),
+  [OutreachMessageBounced.type]: (p) => ({
+    type: 'email.bounced',
+    data: { messageId: p.messageId, status: p.status },
+  }),
   [ManualContactLogged.type]: (p) => ({
     type: 'contact.logged',
     data: { logId: p.logId, channel: p.channel },
@@ -114,6 +136,9 @@ export class ActivitySubscriber {
       OutreachMessageBlocked,
       OutreachMessageCancelled,
       ManualContactLogged,
+      OutreachReplyReceived,
+      OutreachReplyTriaged,
+      OutreachMessageBounced,
     ],
     { id: 'crm.activity-timeline' },
   )

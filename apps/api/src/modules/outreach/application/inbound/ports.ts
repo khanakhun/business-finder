@@ -147,8 +147,20 @@ export interface InboundRepository {
     at: Date,
     input: { readonly human: boolean; readonly triageClass?: string | null },
   ): Promise<void>;
+  setThreadClass(threadId: string, triageClass: string | null): Promise<void>;
   /** Soft bounces of an address in the workspace since `since` (three in 7 days count as a hard bounce). */
   softBounces(organizationId: string, email: string, since: Date): Promise<number>;
+  /** What triage needs besides the reply: the business's name and our message it answers. */
+  triageContext(inboundId: string): Promise<
+    | {
+        businessId: string;
+        businessName: string;
+        contactId: string | null;
+        ourMessage: string;
+        locale: 'en' | 'fr';
+      }
+    | undefined
+  >;
   // Sync state
   syncState(mailboxId: string): Promise<SyncState | undefined>;
   saveSync(

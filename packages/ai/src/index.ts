@@ -100,6 +100,11 @@ export {
   OutreachEmailDraft,
 } from './tasks/outreach-email-draft.ts';
 export {
+  OutreachReplyTriage,
+  ReplyTriageInput,
+  ReplyTriageOutput,
+} from './tasks/outreach-reply-triage.ts';
+export {
   QualityUnsupportedClaims,
   UnsupportedClaimsInput,
   UnsupportedClaimsOutput,

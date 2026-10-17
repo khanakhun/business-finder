@@ -4,15 +4,18 @@ import {
   complianceDecisions,
   compliancePolicies,
   compliancePolicyReviews,
+  lawfulBasisRecords,
   suppressionEntries,
   suppressionsCurrent,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, isNull, lt, or } from 'drizzle-orm';
+import { and, desc, eq, isNull, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   DecisionRepository,
+  LawfulBasisRepository,
   PolicyRepository,
+  StoredLawfulBasis,
   StoredPolicy,
   SuppressionRepository,
 } from '../application/ports.ts';
@@ -57,6 +60,130 @@ export class DrizzlePolicyRepository implements PolicyRepository {
 
   override(organizationId: string, jurisdiction: string, channel: OutreachChannel) {
     return this.latest(organizationId, jurisdiction, channel, 'override');
+  }
+
+  /** The newest version per (jurisdiction, channel) among the rows. */
+  private heads(rows: StoredPolicy[]): StoredPolicy[] {
+    const heads = new Map<string, StoredPolicy>();
+    for (const row of rows) {
+      const key = `${row.jurisdiction}/${row.channel}`;
+      const current = heads.get(key);
+      if (!current || row.version > current.version) heads.set(key, row);
+    }
+    return [...heads.values()];
+  }
+
+  async seeds() {
+    return this.heads(
+      (await this.x
+        .select()
+        .from(compliancePolicies)
+        .where(
+          and(isNull(compliancePolicies.organizationId), eq(compliancePolicies.kind, 'seed')),
+        )) as StoredPolicy[],
+    );
+  }
+
+  async overrides(organizationId: string) {
+    return this.heads(
+      (await this.x
+        .select()
+        .from(compliancePolicies)
+        .where(
+          and(eq(compliancePolicies.organizationId, organizationId), eq(compliancePolicies.kind, 'override')),
+        )) as StoredPolicy[],
+    );
+  }
+
+  async reviews(organizationId: string) {
+    return this.x
+      .select()
+      .from(compliancePolicyReviews)
+      .where(eq(compliancePolicyReviews.organizationId, organizationId));
+  }
+
+  async versions(organizationId: string, jurisdiction: string, channel: OutreachChannel) {
+    return (await this.x
+      .select()
+      .from(compliancePolicies)
+      .where(
+        and(
+          or(
+            isNull(compliancePolicies.organizationId),
+            eq(compliancePolicies.organizationId, organizationId),
+          ),
+          eq(compliancePolicies.jurisdiction, jurisdiction),
+          eq(compliancePolicies.channel, channel),
+        ),
+      )
+      .orderBy(desc(compliancePolicies.createdAt))) as StoredPolicy[];
+  }
+
+  async byId(organizationId: string, policyId: string) {
+    const [row] = await this.x
+      .select()
+      .from(compliancePolicies)
+      .where(
+        and(
+          eq(compliancePolicies.id, policyId),
+          or(
+            isNull(compliancePolicies.organizationId),
+            eq(compliancePolicies.organizationId, organizationId),
+          ),
+        ),
+      )
+      .limit(1);
+    return row as StoredPolicy | undefined;
+  }
+
+  async insertOverride(override: Parameters<PolicyRepository['insertOverride']>[0]) {
+    const [last] = await this.x
+      .select({ version: sql<number>`coalesce(max(${compliancePolicies.version}), 0)::int` })
+      .from(compliancePolicies)
+      .where(
+        and(
+          eq(compliancePolicies.organizationId, override.organizationId),
+          eq(compliancePolicies.jurisdiction, override.jurisdiction),
+          eq(compliancePolicies.channel, override.channel),
+          eq(compliancePolicies.kind, 'override'),
+        ),
+      );
+    const [row] = await this.x
+      .insert(compliancePolicies)
+      .values({
+        organizationId: override.organizationId,
+        jurisdiction: override.jurisdiction,
+        channel: override.channel,
+        version: (last?.version ?? 0) + 1,
+        kind: 'override',
+        rules: override.rules,
+        sources: [],
+        note: override.note,
+        // A workspace's own override is its own decision: stricter only, no review needed.
+        needsLegalReview: false,
+        createdBy: override.createdBy,
+      })
+      .returning();
+    return row as StoredPolicy;
+  }
+
+  async upsertReview(review: Parameters<PolicyRepository['upsertReview']>[0]) {
+    const [row] = await this.x
+      .insert(compliancePolicyReviews)
+      .values(review)
+      .onConflictDoUpdate({
+        target: [compliancePolicyReviews.organizationId, compliancePolicyReviews.policyId],
+        set: {
+          reviewerName: review.reviewerName,
+          notes: review.notes,
+          autoSendEnabled: review.autoSendEnabled,
+          reviewedBy: review.reviewedBy,
+          reviewedAt: new Date(),
+        },
+      })
+      .returning();
+    if (!row) throw new Error('review not stored');
+    return row;
   }
 
   async review(organizationId: string, policyId: string) {
@@ -260,5 +387,46 @@ export class DrizzleSuppressionRepository implements SuppressionRepository {
       .orderBy(desc(suppressionEntries.createdAt))
       .limit(page.limit);
     return rows.map((row) => ({ ...row, value: row.valueNormalized }));
+  }
+}
+
+@Injectable()
+export class DrizzleLawfulBasisRepository implements LawfulBasisRepository {
+  constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
+
+  private get x() {
+    return getExecutor(this.db);
+  }
+
+  async list(organizationId: string) {
+    return (await this.x
+      .select()
+      .from(lawfulBasisRecords)
+      .where(eq(lawfulBasisRecords.organizationId, organizationId))
+      .orderBy(desc(lawfulBasisRecords.updatedAt))) as StoredLawfulBasis[];
+  }
+
+  async get(organizationId: string, id: string) {
+    const [row] = await this.x
+      .select()
+      .from(lawfulBasisRecords)
+      .where(and(eq(lawfulBasisRecords.organizationId, organizationId), eq(lawfulBasisRecords.id, id)))
+      .limit(1);
+    return row as StoredLawfulBasis | undefined;
+  }
+
+  async insert(record: Parameters<LawfulBasisRepository['insert']>[0]) {
+    const [row] = await this.x.insert(lawfulBasisRecords).values(record).returning();
+    return row as StoredLawfulBasis;
+  }
+
+  async update(organizationId: string, id: string, patch: Partial<StoredLawfulBasis>) {
+    const { id: _id, organizationId: _org, createdAt: _created, ...set } = patch;
+    const [row] = await this.x
+      .update(lawfulBasisRecords)
+      .set({ ...set, updatedAt: new Date() })
+      .where(and(eq(lawfulBasisRecords.organizationId, organizationId), eq(lawfulBasisRecords.id, id)))
+      .returning();
+    return row as StoredLawfulBasis | undefined;
   }
 }

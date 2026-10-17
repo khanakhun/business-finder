@@ -44,7 +44,70 @@ export interface PolicyRepository {
     channel: OutreachChannel,
   ): Promise<StoredPolicy | undefined>;
   review(organizationId: string, policyId: string): Promise<PolicyReview | undefined>;
+  /** Every global seed head (latest version per jurisdiction and channel). */
+  seeds(): Promise<StoredPolicy[]>;
+  /** The workspace's override heads. */
+  overrides(organizationId: string): Promise<StoredPolicy[]>;
+  reviews(organizationId: string): Promise<PolicyReview[]>;
+  /** Versions of a jurisdiction and channel: the global seeds and the workspace's overrides, newest first. */
+  versions(organizationId: string, jurisdiction: string, channel: OutreachChannel): Promise<StoredPolicy[]>;
+  byId(organizationId: string, policyId: string): Promise<StoredPolicy | undefined>;
+  /** A new override version (the next number for the workspace, jurisdiction and channel). */
+  insertOverride(override: {
+    organizationId: string;
+    jurisdiction: string;
+    channel: OutreachChannel;
+    rules: PolicyDocument;
+    note: string | null;
+    createdBy: string | null;
+  }): Promise<StoredPolicy>;
+  upsertReview(review: {
+    organizationId: string;
+    policyId: string;
+    reviewerName: string;
+    notes: string;
+    autoSendEnabled: boolean;
+    reviewedBy: string | null;
+  }): Promise<PolicyReview>;
 }
+
+export interface StoredLawfulBasis {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly kind: 'legitimate_interest_assessment' | 'consent' | 'other';
+  readonly title: string;
+  readonly purpose: string;
+  readonly dataCategories: string;
+  readonly necessity: string;
+  readonly balancingTest: string;
+  readonly safeguards: string;
+  readonly retention: string;
+  readonly documentMd: string;
+  readonly version: number;
+  readonly status: 'draft' | 'approved' | 'retired';
+  readonly approvedBy: string | null;
+  readonly approvedAt: Date | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface LawfulBasisRepository {
+  list(organizationId: string): Promise<StoredLawfulBasis[]>;
+  get(organizationId: string, id: string): Promise<StoredLawfulBasis | undefined>;
+  insert(
+    record: Omit<
+      StoredLawfulBasis,
+      'id' | 'version' | 'status' | 'approvedBy' | 'approvedAt' | 'createdAt' | 'updatedAt'
+    >,
+  ): Promise<StoredLawfulBasis>;
+  /** Edits a draft (an approved record is edited by making a new draft version). */
+  update(
+    organizationId: string,
+    id: string,
+    patch: Partial<StoredLawfulBasis>,
+  ): Promise<StoredLawfulBasis | undefined>;
+}
+export const LAWFUL_BASIS_REPOSITORY = Symbol('LawfulBasisRepository');
 export const POLICY_REPOSITORY = Symbol('PolicyRepository');
 
 /** What a decision is made from, gathered from the business, its contact and the workspace. */
@@ -134,3 +197,27 @@ export interface SuppressionRepository {
   >;
 }
 export const SUPPRESSION_REPOSITORY = Symbol('SuppressionRepository');
+
+/** A business's recipient type from a company registry (cached), for the jurisdictions that have one. */
+export interface RecipientTypeResolver {
+  resolve(business: {
+    id: string;
+    name: string;
+    postalCode: string | null;
+    jurisdictions: readonly string[];
+  }): Promise<'legal_person' | 'sole_trader' | 'public_body' | 'unknown'>;
+}
+export const RECIPIENT_TYPE_RESOLVER = Symbol('RecipientTypeResolver');
+
+export interface ComplianceTelemetry {
+  decided(event: {
+    stage: string;
+    channel: string;
+    decision: string;
+    jurisdictions: readonly string[];
+    reason: string;
+    seconds: number;
+  }): void;
+  suppressed(scope: string): void;
+}
+export const COMPLIANCE_TELEMETRY = Symbol('ComplianceTelemetry');

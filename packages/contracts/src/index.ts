@@ -177,6 +177,8 @@ export {
   PolicyConditionSchema,
   type PolicyDocument,
   PolicyDocumentSchema,
+  type PolicyOverrideResult,
+  PolicyOverrideResultSchema,
   type PolicyRule,
   PolicyRuleSchema,
   type PolicySeed,
@@ -671,7 +673,18 @@ export {
   MemberRoleChanged,
   UserSignedUp,
 } from './identity-events.ts';
-export { BusinessId, EventId, type Id, idSchema, isUuidV7, newId, OrgId, SiteId, UserId } from './ids.ts';
+export {
+  BusinessId,
+  ComplianceDecisionId,
+  EventId,
+  type Id,
+  idSchema,
+  isUuidV7,
+  newId,
+  OrgId,
+  SiteId,
+  UserId,
+} from './ids.ts';
 export { type EchoRequest, EchoRequestSchema, type EchoResponse, EchoResponseSchema } from './intel.ts';
 export {
   canonicalString,

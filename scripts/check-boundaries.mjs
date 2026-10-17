@@ -153,6 +153,25 @@ export const RULES = [
     ],
     message: '@bf/site-blocks is browser-safe outside static/ and cli/: no Node API, no server package.',
   },
+  {
+    id: 'compliance-send-path',
+    // BF-049 (ADR-0012): a message leaves only through the outreach send path, which holds a compliance decision.
+    // The mailboxes' send capability (BF-050) is imported by that path alone — no script, seed or other module.
+    from: ['apps/api/src/**'],
+    except: [
+      'apps/api/src/modules/outreach/infrastructure/sending/**',
+      'apps/api/src/modules/outreach/infrastructure/mailboxes/**',
+    ],
+    disallow: [
+      {
+        paths: [
+          'apps/api/src/modules/outreach/infrastructure/mailboxes/**/send*',
+          'apps/api/src/modules/outreach/infrastructure/mailboxes/**/*-sender.ts',
+        ],
+      },
+    ],
+    message: 'Only the outreach send path (after the compliance gate) may use a mailbox’s send capability.',
+  },
 ];
 
 /** Package name → workspace directory (`@bf/web` → `apps/web`) for every apps/* and packages/* workspace. */
@@ -201,6 +220,9 @@ function violates(entry, file, imp) {
   if (entry.modules) {
     if (imp.resolvedPath) return false;
     return entry.modules.some((glob) => imp.specifier === glob || matchesGlob(imp.specifier, glob));
+  }
+  if (entry.paths && imp.resolvedPath) {
+    return entry.paths.some((glob) => matchesGlob(imp.resolvedPath, glob));
   }
   if (entry.relativeInto && imp.resolvedPath) {
     // The layer directory containing the file (…/domain) and its parent (…/<module>).

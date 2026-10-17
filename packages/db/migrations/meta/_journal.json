@@ -281,6 +281,13 @@
       "when": 1792232104904,
       "tag": "0039_compliance_seeds",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792232577134,
+      "tag": "0040_business_recipient_types",
+      "breakpoints": true
     }
   ]
 }

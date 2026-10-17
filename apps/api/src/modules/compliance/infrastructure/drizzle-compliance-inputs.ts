@@ -13,15 +13,20 @@ import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import { WorkspaceReadiness } from '../../workspace/index.ts';
-import type { ComplianceInputs, DecisionContext } from '../application/ports.ts';
+import {
+  type ComplianceInputs,
+  type DecisionContext,
+  RECIPIENT_TYPE_RESOLVER,
+  type RecipientTypeResolver,
+} from '../application/ports.ts';
 import { resolveJurisdictions } from '../domain/jurisdiction.ts';
 import { emailDomain, normalizeKey } from '../domain/normalizers.ts';
 
 // What a compliance decision is made from (BF-049), read for a business, its contact and the workspace: jurisdiction
 // signals, the contact's kind and where it was published, verification, the no-solicitation marker, do-not-contact,
 // the offer's relevance to the business's category, an approved lawful basis and the workspace's identity.
-// DECISION(BF-049): the recipient type stays `unknown` until the company-registry adapters (part 2), and
-// `designatedForSolicitation` until a person marks it — the seeded rules treat both conservatively.
+// DECISION(BF-049): the recipient type comes from a company registry where one is wired (FR, BL, MF), else `unknown`;
+// `designatedForSolicitation` stays `unknown` until a person marks it — the seeded rules treat both conservatively.
 
 const ADDRESS_TYPE: Record<string, 'generic' | 'department' | 'personal'> = {
   generic: 'generic',
@@ -34,6 +39,7 @@ export class DrizzleComplianceInputs implements ComplianceInputs {
   constructor(
     @Inject(DB_CLIENT) private readonly db: DbClient,
     private readonly readiness: WorkspaceReadiness,
+    @Inject(RECIPIENT_TYPE_RESOLVER) private readonly recipients: RecipientTypeResolver,
   ) {}
 
   private get x() {
@@ -49,6 +55,7 @@ export class DrizzleComplianceInputs implements ComplianceInputs {
   }): Promise<DecisionContext> {
     const [business] = await this.x
       .select({
+        name: businesses.displayName,
         countryCode: businesses.countryCode,
         postalCode: businesses.postalCode,
         phone: businesses.primaryPhoneE164,
@@ -126,15 +133,24 @@ export class DrizzleComplianceInputs implements ComplianceInputs {
     key('domain', email ? emailDomain(email) : null);
     key('phone', phone);
 
+    const jurisdictions = resolveJurisdictions({
+      countryCode: business?.countryCode ?? null,
+      postalCode: business?.postalCode ?? null,
+      phone,
+      email,
+    });
+    const recipientType = business
+      ? await this.recipients.resolve({
+          id: input.businessId,
+          name: business.name,
+          postalCode: business.postalCode,
+          jurisdictions,
+        })
+      : 'unknown';
     return {
-      jurisdictions: resolveJurisdictions({
-        countryCode: business?.countryCode ?? null,
-        postalCode: business?.postalCode ?? null,
-        phone,
-        email,
-      }),
+      jurisdictions,
       inputs: {
-        recipientType: 'unknown',
+        recipientType,
         addressType:
           input.channel === 'email' ? (ADDRESS_TYPE[contact?.subtype ?? ''] ?? 'unknown') : 'unknown',
         publishedContext: published

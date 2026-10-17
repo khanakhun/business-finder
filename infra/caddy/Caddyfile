@@ -1,5 +1,5 @@
 # Edge proxy for staging/production (BF-025, ADR-0014). Values come from the environment (compose passes them):
-#   BASE_DOMAIN        app.{BASE_DOMAIN} → web, api.{BASE_DOMAIN} → api
+#   BASE_DOMAIN        app.{BASE_DOMAIN} → web, api.{BASE_DOMAIN} → api, u.{BASE_DOMAIN} → the API's unsubscribe routes
 #   SITES_BASE_DOMAIN  *.{SITES_BASE_DOMAIN} → sites (apps/sites, BF-036)
 #   ACME_EMAIL         account e-mail for Let's Encrypt
 #   ACME_DNS_PROVIDER  DNS module for the wildcard (cloudflare by default; the image must include it)
@@ -108,6 +108,31 @@ api.{$BASE_DOMAIN} {
 		# Stream responses as they are written (SSE).
 		flush_interval -1
 	}
+}
+
+# Unsubscribe links (BF-055): the short host in every message footer and the RFC 8058 one-click target. Only those
+# routes reach the API; the token in the path identifies a recipient, so it is never logged.
+u.{$BASE_DOMAIN} {
+	import tls_{$CADDY_TLS:acme}
+	import security_headers
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp "^(/u/|/v1/public/unsubscribe/)[^?]*" "${1}REDACTED"
+				request>headers>Referer delete
+			}
+		}
+	}
+	request_body {
+		max_size 16KB
+	}
+	@unsubscribe path /u/* /v1/public/unsubscribe/*
+	handle @unsubscribe {
+		reverse_proxy api:4000
+	}
+	respond 404
 }
 
 *.{$SITES_BASE_DOMAIN} {

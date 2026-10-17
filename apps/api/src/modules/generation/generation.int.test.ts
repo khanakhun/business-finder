@@ -13,7 +13,7 @@ import { aBusiness } from '@bf/testing';
 import { getQueueToken } from '@nestjs/bullmq';
 import type { INestApplicationContext } from '@nestjs/common';
 import type { Queue } from 'bullmq';
-import { asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, createTestWorker, type TestApp } from '../../../test/create-test-app.ts';
 import { FakeMailer } from '../../../test/fake-mailer.ts';
@@ -463,7 +463,12 @@ describe('generation batches', () => {
     const [artifact] = await db
       .select()
       .from(generationArtifacts)
-      .where(eq(generationArtifacts.attemptId, attempt?.id as string));
+      .where(
+        and(
+          eq(generationArtifacts.attemptId, attempt?.id as string),
+          eq(generationArtifacts.kind, 'workspace_bundle'),
+        ),
+      );
     expect(artifact).toMatchObject({ kind: 'workspace_bundle', sha256: attempt?.bundleHash });
     expect(artifact?.storageKey).toMatch(/\.tar\.zst$/);
     const bundle = await artifacts.get(artifact?.storageKey as string);

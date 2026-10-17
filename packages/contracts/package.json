@@ -8,7 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./permissions": "./src/permissions.ts",
-    "./registry": "./src/registry.ts"
+    "./registry": "./src/registry.ts",
+    "./runner": "./src/runner.ts",
+    "./sandbox": "./src/sandbox.ts"
   },
   "scripts": {
     "lint": "biome check .",

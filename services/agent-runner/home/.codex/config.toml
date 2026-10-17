@@ -1,0 +1,2 @@
+# Codex in the runner (BF-043): updates are the image's business, never checked at run time.
+check_for_update_on_startup = false

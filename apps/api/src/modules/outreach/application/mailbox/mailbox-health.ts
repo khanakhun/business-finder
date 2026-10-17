@@ -1,8 +1,9 @@
 import type { Clock } from '@bf/contracts';
-import { Inject, Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, type OnModuleDestroy, type OnModuleInit, Optional } from '@nestjs/common';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../../platform/logging/logger.ts';
 import { rampComplete } from '../../domain/mailbox/capacity-policy.ts';
+import { DeliverabilityService } from '../deliverability/deliverability.service.ts';
 import { MailboxLifecycle } from './mailbox-lifecycle.ts';
 import { MailboxesService } from './mailboxes.service.ts';
 import { MAILBOX_REPOSITORY, type MailboxRepository, RUN_LOCK, type RunLock } from './ports.ts';
@@ -25,6 +26,7 @@ export class MailboxHealthSweep implements OnModuleInit, OnModuleDestroy {
     @Inject(LOGGER) private readonly logger: Logger,
     private readonly mailboxes: MailboxesService,
     private readonly lifecycle: MailboxLifecycle,
+    @Optional() private readonly deliverability?: DeliverabilityService,
   ) {}
 
   onModuleInit() {
@@ -50,6 +52,10 @@ export class MailboxHealthSweep implements OnModuleInit, OnModuleDestroy {
         checked++;
         try {
           const { mailbox: current } = await this.mailboxes.checkHealth(mailbox);
+          // BF-056: the domain's authentication, re-checked once a day.
+          await this.deliverability
+            ?.ensureFresh(current)
+            .catch((err: unknown) => this.logger.warn({ err, mailboxId: mailbox.id }, 'domain check failed'));
           if (current.status === 'warming' && rampComplete(current, this.clock.now()))
             await this.lifecycle.transition(current, 'active', {
               reason: 'ramp complete',

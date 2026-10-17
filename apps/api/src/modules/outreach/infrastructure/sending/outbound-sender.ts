@@ -8,10 +8,11 @@ import {
   OutreachMessageSent,
 } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ComplianceService } from '../../../compliance/index.ts';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { EventRecorder } from '../../../platform/events/event-recorder.ts';
+import { MAILBOX_READINESS, type MailboxReadinessGate } from '../../application/deliverability/ports.ts';
 import { MailboxCapacity } from '../../application/mailbox/mailbox-capacity.ts';
 import { MailboxesService } from '../../application/mailbox/mailboxes.service.ts';
 import {
@@ -62,6 +63,7 @@ export class OutboundSender {
     private readonly capacity: MailboxCapacity,
     private readonly compliance: ComplianceService,
     private readonly events: EventRecorder,
+    @Optional() @Inject(MAILBOX_READINESS) private readonly readiness?: MailboxReadinessGate,
   ) {}
 
   async send(messageId: string, leaseIso: string, logger: Logger): Promise<SendOutcome> {
@@ -80,6 +82,14 @@ export class OutboundSender {
         lease,
         new Date(this.clock.now().getTime() + 60 * MIN),
         'mailbox unavailable',
+      );
+    // BF-056: the domain's authentication regressed (no owner override): the message waits for the fix.
+    if (this.readiness && !(await this.readiness.isReady(mailbox.organizationId, mailbox.id, mailbox.email)))
+      return this.requeue(
+        message,
+        lease,
+        new Date(this.clock.now().getTime() + 60 * MIN),
+        'domain authentication failing',
       );
 
     // 1. Reconcile a previous attempt before anything else.

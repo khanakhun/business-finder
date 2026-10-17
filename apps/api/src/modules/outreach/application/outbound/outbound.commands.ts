@@ -12,7 +12,7 @@ import {
   SendMessageRequestSchema,
   ValidationError,
 } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ComplianceService, UnsubscribeService } from '../../../compliance/index.ts';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { Transactional } from '../../../platform/db/transactional.ts';
@@ -26,6 +26,7 @@ import {
   scheduledAt,
 } from '../../domain/outbound/outbound-message.ts';
 import { assertTransition, CANCELLABLE } from '../../domain/outbound/state-machine.ts';
+import { MAILBOX_READINESS, type MailboxReadinessGate } from '../deliverability/ports.ts';
 import { type DraftActor, DraftsService } from '../drafting/drafts.service.ts';
 import type { StoredDraft } from '../drafting/ports.ts';
 import { MailboxCapacity } from '../mailbox/mailbox-capacity.ts';
@@ -59,6 +60,7 @@ export class OutboundCommands {
     private readonly unsubscribe: UnsubscribeService,
     private readonly capacity: MailboxCapacity,
     private readonly events: EventRecorder,
+    @Optional() @Inject(MAILBOX_READINESS) private readonly readiness?: MailboxReadinessGate,
   ) {}
 
   /** Queues a draft (or returns the message an earlier call with the same key queued). */
@@ -517,6 +519,12 @@ export class OutboundCommands {
       const mailbox = await this.mailboxes.find(actor.organizationId, id);
       if (!mailbox || mailbox.disconnectedAt)
         throw new MessageNotSendableError('That mailbox is not connected.', 'MAILBOX_UNAVAILABLE');
+      // BF-056: a domain failing SPF/DKIM/DMARC does not send (the deliverability page has the fix).
+      if (this.readiness && !(await this.readiness.isReady(actor.organizationId, mailbox.id, mailbox.email)))
+        throw new MessageNotSendableError(
+          'This mailbox’s domain is not authenticated (SPF, DKIM or DMARC): fix it in Outreach → Deliverability.',
+          'MAILBOX_NOT_AUTHENTICATED',
+        );
       return { mailbox, notBefore: null };
     }
     const choice = await this.capacity.select({

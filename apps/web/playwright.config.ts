@@ -2,6 +2,11 @@ import { defineConfig, devices } from '@playwright/test';
 import { apiUrl, webUrl, workerMetricsUrl } from './e2e/env.ts';
 
 const ci = Boolean(process.env.CI);
+const GENERATION_ENV = {
+  GENERATION_FAKE_ENGINE: 'true',
+  GENERATION_BLOCKS_ENGINE: 'false',
+  GENERATION_FAKE_DURATION_MS: '2500',
+};
 
 export default defineConfig({
   testDir: './e2e',
@@ -43,6 +48,8 @@ export default defineConfig({
         GEOCODER_PROVIDER: 'none',
         // The site fixtures' image host (the site editor e2e creates sites from them, BF-037).
         SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
+        // Generation runs on the scripted fake engine only (no model, no sandbox; the generation e2e, BF-046).
+        ...GENERATION_ENV,
       },
       url: `${apiUrl}/health/live`,
       reuseExistingServer: !ci,
@@ -58,6 +65,8 @@ export default defineConfig({
         FAKE_REVIEWS: 'true',
         FAKE_WEBSITE_AUDIT: 'true',
         GEOCODER_PROVIDER: 'none',
+        SITES_ASSETS_BASE_URL: 'https://assets.bf-sites.test',
+        ...GENERATION_ENV,
       },
       url: workerMetricsUrl,
       reuseExistingServer: !ci,

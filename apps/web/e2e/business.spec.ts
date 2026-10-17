@@ -254,6 +254,14 @@ test('enriches a business: Enrich now → live status → Website tab facts (BF-
   // asked twice within 60 days either way (the verdict cache).
   await row.getByRole('button', { name: `Verify ${email}` }).click();
   await expect(page.getByText(/^(Verification started|Already verified recently)$/)).toBeVisible();
+  // The button is disabled while the request runs; axe measures contrast only once it has faded back in.
+  await expect(row.getByRole('button', { name: `Verify ${email}` })).toBeEnabled();
+  await page.waitForFunction(() =>
+    // Transitions only: a spinner's infinite animation never ends.
+    document
+      .getAnimations()
+      .every((animation) => !(animation instanceof CSSTransition) || animation.playState !== 'running'),
+  );
   const contactsA11y = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa'])
     .exclude('[data-sonner-toaster]')

@@ -890,13 +890,13 @@
       "enroll": "Écrire ou inscrire",
       "forbidden": "Vous n’avez pas l’autorisation",
       "selectFirst": "Sélectionnez d’abord des entreprises",
-      "comingSites": "Disponible avec la génération de sites",
       "comingOutreach": "Disponible avec la prospection",
       "done": "{count, plural, one {Fait pour # entreprise} other {Fait pour # entreprises}}",
       "partial": "{done} faites, {failed} inchangées",
       "exporting": "Votre export se télécharge",
       "tooMany": "Exportez au plus 200 lignes sélectionnées, ou annulez la sélection pour tout exporter",
-      "enrich": "Enrichir"
+      "enrich": "Enrichir",
+      "tooManySites": "Créez des sites pour 50 entreprises au plus à la fois"
     },
     "lists": {
       "title": "Listes",
@@ -1037,7 +1037,6 @@
       "generateSite": "Générer un site",
       "sendEmail": "Envoyer un e-mail",
       "doNotContact": "Marquée « ne pas contacter »",
-      "comingSites": "Disponible avec la génération de sites",
       "comingOutreach": "Disponible avec la prospection"
     },
     "status": {
@@ -2633,6 +2632,194 @@
       "redo": "Rétablir",
       "help": "Afficher ces raccourcis",
       "close": "Fermer une fenêtre ou un panneau"
+    }
+  },
+  "generation": {
+    "order": {
+      "picked": "{name} saisi",
+      "over": "Au-dessus de la position {position}",
+      "dropped": "{name} déplacé en position {position}",
+      "cancelled": "Déplacement annulé",
+      "up": "Monter {name}",
+      "down": "Descendre {name}"
+    },
+    "engines": {
+      "autoHint": "Le meilleur moteur disponible pour chaque entreprise",
+      "why": {
+        "off": "Non activé sur ce déploiement",
+        "unavailable": "Indisponible pour cet espace (clé de modèle ou réglages)"
+      },
+      "hint": "~{cost} · ~{minutes} min · {running} en cours · {queued} en attente",
+      "name": {
+        "auto": "Automatique",
+        "blocks": "Blocks",
+        "claude-agent-sdk": "Claude Agent SDK",
+        "claude-code": "Claude Code",
+        "codex": "Codex",
+        "fake": "Factice (tests)"
+      }
+    },
+    "brief": {
+      "error": "Le brief n'a pas pu être chargé.",
+      "plan": "Pages",
+      "pages": {
+        "home": "Accueil",
+        "menu": "Carte",
+        "services": "Services",
+        "products": "Produits",
+        "about": "À propos",
+        "contact": "Contact",
+        "booking": "Réservation",
+        "gallery": "Galerie"
+      },
+      "style": "Style",
+      "styles": {
+        "luxe": "Luxe",
+        "modern": "Moderne",
+        "warm": "Chaleureux",
+        "minimal": "Minimaliste",
+        "coastal": "Bord de mer"
+      },
+      "palette": "Palette",
+      "locales": "Langues",
+      "sellingPoints": "Points forts",
+      "evidence": "{count, plural, one {Fondé sur # information} other {Fondé sur # informations}}",
+      "warningsLabel": "Ce qui manque",
+      "warnings": {
+        "no_display_phone": "Aucun numéro de téléphone affichable sur le site",
+        "no_display_email": "Aucune adresse e-mail affichable sur le site",
+        "no_contact_channel": "Aucun moyen de contact affichable",
+        "no_hours": "Horaires d'ouverture inconnus",
+        "no_large_image": "Peu de bonnes images : des images de banque ou d'IA seront utilisées",
+        "single_locale": "Une seule langue peut être bien rédigée",
+        "no_services": "Aucun service ni produit connu",
+        "no_owner_site_facts": "Rien ne provient du site de l'entreprise",
+        "few_facts": "Peu d'informations connues : le site restera simple"
+      },
+      "overrides": "Ajustements",
+      "fromBrief": "Selon le brief ({value})",
+      "instructions": "Instructions supplémentaires",
+      "instructionsHint": "Ex. : mettre la terrasse en avant ; pas de prix"
+    },
+    "assign": {
+      "open": "Répartir les moteurs…",
+      "label": "Modèle",
+      "placeholder": "2 claude-code + 2 codex + reste blocks",
+      "help": "Par position : nombres et moteurs séparés par + ou des virgules ; « reste » pour les autres.",
+      "invalid": "Ce modèle n'est pas lisible.",
+      "apply": "Appliquer"
+    },
+    "estimate": {
+      "title": "Estimation",
+      "cost": "Coût habituel",
+      "eta": "Durée habituelle",
+      "minutes": "{minutes, plural, one {~# minute} other {~# minutes}}",
+      "queued": "{count, plural, one {# tâche attend déjà ces moteurs : cela peut prendre plus longtemps.} other {# tâches attendent déjà ces moteurs : cela peut prendre plus longtemps.}}",
+      "note": "Chiffres habituels ; les réparations et les files d'attente peuvent s'y ajouter."
+    },
+    "create": {
+      "title": "Créer des sites",
+      "forbidden": "Vous n'avez pas l'autorisation de générer des sites.",
+      "empty": "Aucune entreprise sélectionnée",
+      "emptyHint": "Sélectionnez des entreprises dans les résultats de recherche, puis choisissez Créer des sites.",
+      "toSearch": "Aller à la recherche",
+      "loadError": "Les entreprises sélectionnées n'ont pas pu être chargées.",
+      "submitError": "Le lot n'a pas pu être créé.",
+      "description": "{count, plural, one {# entreprise, dans cet ordre} other {# entreprises, dans cet ordre}}",
+      "order": "Ordre (la première commence en premier)",
+      "applyAll": "Appliquer à toutes…",
+      "orderHint": "Faites glisser une ligne, ou utilisez les flèches, pour choisir laquelle commence en premier.",
+      "runMode": "Mode d'exécution",
+      "mode": {
+        "sequential": "Une par une, dans cet ordre",
+        "parallel": "En parallèle"
+      },
+      "upTo": "jusqu'à",
+      "limitsHint": "Les limites des moteurs et de l'espace s'appliquent : les éléments attendent une place libre.",
+      "settings": "Réglages",
+      "autoPublish": "Publier un aperçu une fois prêt",
+      "name": "Nom du lot",
+      "namePlaceholder": "Généré à partir de la date",
+      "budget": "Budget par site (USD, facultatif)",
+      "budgetPlaceholder": "Par défaut du moteur",
+      "blocked": "Certains moteurs choisis sont indisponibles : choisissez-en un autre.",
+      "submit": "{count, plural, one {Créer # site} other {Créer # sites}}",
+      "regenerate": "Nouvelle version de la v{version}",
+      "newSite": "Nouveau site",
+      "engineFor": "Moteur pour {name}",
+      "remove": "Retirer {name}",
+      "brief": "Brief",
+      "overridden": "Ajusté"
+    },
+    "status": {
+      "queued": "En attente",
+      "preparing": "Préparation",
+      "running": "En cours",
+      "validating": "Vérification",
+      "repairing": "Réparation",
+      "succeeded": "Prêt",
+      "needs_review": "À relire",
+      "failed": "Échec",
+      "cancelled": "Annulé"
+    },
+    "batchStatus": {
+      "queued": "En attente",
+      "running": "En cours",
+      "completed": "Terminé",
+      "completed_with_issues": "Terminé avec des problèmes",
+      "cancelled": "Annulé"
+    },
+    "board": {
+      "title": "Lot",
+      "loadError": "Le lot n'a pas pu être chargé.",
+      "actionFailed": "Cela n'a pas fonctionné. Réessayez.",
+      "reorderHint": "Faites glisser une tâche en attente, ou utilisez les flèches, pour choisir ce qui commence ensuite.",
+      "jobs": "Tâches, par ordre de priorité",
+      "mode": "{parallel, plural, =0 {En parallèle} =1 {Une par une} other {Jusqu'à # à la fois}}",
+      "duplicate": "Dupliquer",
+      "cancelBatch": "Annuler le lot",
+      "summary": "Résumé du lot",
+      "progress": "{done} sur {total} terminées",
+      "batchCost": "Coût {cost}",
+      "elapsed": "Écoulé",
+      "counts": "Tâches par statut",
+      "announce": "{name} : {status}",
+      "copied": "Lien de l'aperçu copié",
+      "copyFailed": "Le lien n'a pas pu être copié",
+      "quality": "Qualité {score}",
+      "steps": "Progression",
+      "result": "Résultat",
+      "attempts": "Tentatives",
+      "cost": "Coût",
+      "budgetUsed": "Budget utilisé",
+      "openPreview": "Ouvrir l'aperçu",
+      "copy": "Copier le lien",
+      "startNext": "Lancer ensuite",
+      "changeEngine": "Moteur pour {name}",
+      "cancel": "Annuler",
+      "retry": "Relancer",
+      "retryWith": "Relancer avec",
+      "sameEngine": "{engine} (même moteur)",
+      "accept": "Accepter quand même",
+      "openEditor": "Ouvrir l'éditeur",
+      "cancelDialog": {
+        "title": "Annuler le site de {name} ?",
+        "description": "L'exécution s'arrête en quelques secondes. Vous pourrez la relancer.",
+        "keep": "Continuer",
+        "confirm": "Annuler"
+      },
+      "acceptDialog": {
+        "title": "Publier quand même le site de {name} ?",
+        "description": "Les contrôles de qualité demandent une relecture. La publication enregistre qui l'a faite et pourquoi.",
+        "score": "Score de qualité {score}.",
+        "issues": "{count, plural, =0 {Aucun problème.} one {# problème.} other {# problèmes.}}",
+        "blocked": "Publication impossible : les contrôles {gates} n'ont pas réussi.",
+        "noReport": "Publication impossible : aucun rapport de qualité.",
+        "reason": "Pourquoi le publier",
+        "reasonHint": "Au moins {min} caractères ; conservé dans le journal d'audit.",
+        "close": "Fermer",
+        "confirm": "Publier"
+      }
     }
   }
 }

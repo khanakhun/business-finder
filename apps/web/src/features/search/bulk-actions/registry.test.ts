@@ -43,7 +43,7 @@ describe('bulk action registry', () => {
   it('needs a selection unless the action applies to every result, and honours disabled reasons', () => {
     registerBulkAction(action({ id: 'list' }));
     registerBulkAction(action({ id: 'export', permission: 'business:read', allowEmptySelection: true }));
-    registerBulkAction(action({ id: 'status', disabledReason: () => 'search.bulk.comingSites' }));
+    registerBulkAction(action({ id: 'status', disabledReason: () => 'search.bulk.comingOutreach' }));
     const none = bulkActionsFor(context([], ['business:read', 'business:write']));
     expect(none.find((a) => a.action.id === 'list')).toMatchObject({
       enabled: false,
@@ -53,7 +53,7 @@ describe('bulk action registry', () => {
     const some = bulkActionsFor(context(['1'], ['business:read', 'business:write']));
     expect(some.find((a) => a.action.id === 'status')).toMatchObject({
       enabled: false,
-      reason: 'search.bulk.comingSites',
+      reason: 'search.bulk.comingOutreach',
     });
   });
 

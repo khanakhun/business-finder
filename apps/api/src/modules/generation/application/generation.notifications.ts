@@ -22,7 +22,7 @@ export class GenerationNotifications {
       type: 'batch_completed',
       params: { count: succeeded, total, status },
       entity: { type: 'generation_batch', id: batchId },
-      link: `/generation/${batchId}`,
+      link: `/generation/batches/${batchId}`,
       sourceEventId: event.id,
     });
   }
@@ -42,7 +42,7 @@ export class GenerationNotifications {
         reason: (job.errorCode ?? 'QUALITY_GATES').toLowerCase(),
       },
       entity: { type: 'generation_job', id: job.id },
-      link: job.siteId ? `/sites/${job.siteId}/edit` : `/generation/${job.batchId}`,
+      link: job.siteId ? `/sites/${job.siteId}/edit` : `/generation/batches/${job.batchId}`,
       sourceEventId: event.id,
     });
   }

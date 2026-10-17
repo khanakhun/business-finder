@@ -25,6 +25,7 @@ import {
   TagsIcon,
   XIcon,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { useErrorMessage } from '@/components/auth/fields.tsx';
@@ -175,6 +176,7 @@ export function BulkBar({
 }) {
   const t = useTranslations();
   const me = useSession();
+  const router = useRouter();
   const [dialog, setDialog] = React.useState<{
     id: string;
     props: Record<string, unknown>;
@@ -189,6 +191,7 @@ export function BulkBar({
         setDialog({ id, props, resolve: resolve as (value: unknown) => void }),
       ),
     download: downloadFromApi,
+    navigate: (href) => router.push(href),
   };
   const close = (value: unknown) => {
     dialog?.resolve(value);

@@ -62,6 +62,9 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
       // Operator dashboard (Bull Board): not part of the versioned REST API.
       { path: 'admin/queues', method: RequestMethod.ALL },
       { path: 'admin/queues/{*path}', method: RequestMethod.ALL },
+      // The human unsubscribe page (BF-055): short links in every message footer.
+      { path: 'u/:token', method: RequestMethod.GET },
+      { path: 'u/:token', method: RequestMethod.POST },
     ],
   });
   app.use(helmet());

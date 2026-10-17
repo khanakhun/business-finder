@@ -299,8 +299,104 @@ export const CheckSuppressionResponseSchema = z
   .meta({ id: 'CheckSuppressionResponse' });
 
 export const RevokeSuppressionRequestSchema = z
-  .object({ note: z.string().trim().min(3).max(500) })
+  .object({
+    note: z.string().trim().min(3).max(500),
+    /** Required to lift an unsubscribe or opt-out: how the person gave new consent (BF-055). */
+    consentEvidence: z.string().trim().min(10).max(1000).optional(),
+  })
   .meta({ id: 'RevokeSuppressionRequest' });
+
+// ── Suppression management (BF-055) ─────────────────────────────────────────────────────────────────────────────
+
+export const SuppressionQuerySchema = z
+  .object({
+    q: z.string().trim().max(320).optional(),
+    scope: SuppressionScopeSchema.optional(),
+    reason: SuppressionReasonSchema.optional(),
+    source: SuppressionSourceSchema.optional(),
+    /** `current` (what is suppressed now, global ones included) or `log` (every add and revoke). */
+    view: z.enum(['current', 'log']).default('current'),
+    from: z.iso.datetime().optional(),
+    to: z.iso.datetime().optional(),
+    before: z.iso.datetime().optional(),
+  })
+  .meta({ id: 'SuppressionQuery' });
+export type SuppressionQuery = z.input<typeof SuppressionQuerySchema>;
+
+export const CurrentSuppressionSchema = z
+  .object({
+    entryId: z.uuid(),
+    scope: SuppressionScopeSchema,
+    value: z.string(),
+    reason: SuppressionReasonSchema,
+    source: SuppressionSourceSchema,
+    note: z.string().nullable(),
+    /** A platform-wide suppression (read-only for workspaces). */
+    global: z.boolean(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'CurrentSuppression' });
+export type CurrentSuppression = z.infer<typeof CurrentSuppressionSchema>;
+
+export const CurrentSuppressionPageSchema = z
+  .object({ items: z.array(CurrentSuppressionSchema), nextCursor: z.string().nullable() })
+  .meta({ id: 'CurrentSuppressionPage' });
+
+export const ImportSuppressionsRequestSchema = z
+  .object({
+    /** CSV text: one value per line, or a header row with a `value` (or `email`) column. */
+    csv: z.string().min(1).max(2_000_000),
+    scope: SuppressionScopeSchema.default('email'),
+    reason: SuppressionReasonSchema.default('manual'),
+    note: z.string().trim().max(500).optional(),
+    /** Preview only: validate, normalize and count without writing. */
+    dryRun: z.boolean().default(true),
+  })
+  .meta({ id: 'ImportSuppressionsRequest' });
+export type ImportSuppressionsRequest = z.input<typeof ImportSuppressionsRequestSchema>;
+
+export const ImportSuppressionsResultSchema = z
+  .object({
+    dryRun: z.boolean(),
+    rows: z.number().int(),
+    valid: z.number().int(),
+    duplicates: z.number().int(),
+    alreadySuppressed: z.number().int(),
+    added: z.number().int(),
+    invalid: z.array(z.object({ line: z.number().int(), value: z.string(), message: z.string() })).max(50),
+    invalidCount: z.number().int(),
+    sample: z.array(z.string()).max(10),
+  })
+  .meta({ id: 'ImportSuppressionsResult' });
+export type ImportSuppressionsResult = z.infer<typeof ImportSuppressionsResultSchema>;
+
+// ── Unsubscribe (BF-055, RFC 8058) ──────────────────────────────────────────────────────────────────────────────
+
+/** What a person may choose on the unsubscribe page. */
+export const UNSUBSCRIBE_CHOICES = ['address', 'business', 'preview'] as const;
+export type UnsubscribeChoice = (typeof UNSUBSCRIBE_CHOICES)[number];
+
+export const IssueUnsubscribeRequestSchema = z.object({
+  contactId: z.uuid().nullable().default(null),
+  email: z.email().max(320),
+  businessId: BusinessId.nullable().default(null),
+  outboundMessageId: z.uuid().nullable().default(null),
+  locale: z.enum(['en', 'fr']).default('en'),
+});
+export type IssueUnsubscribeRequest = z.input<typeof IssueUnsubscribeRequestSchema>;
+
+/** A token was used: what the person chose (no address in the event). */
+export const UnsubscribeConfirmed = defineEvent(
+  'outreach.unsubscribe.confirmed',
+  1,
+  z.object({
+    tokenId: z.uuid(),
+    businessId: BusinessId.nullable(),
+    outboundMessageId: z.uuid().nullable(),
+    choices: z.array(z.enum(UNSUBSCRIBE_CHOICES)),
+    oneClick: z.boolean(),
+  }),
+);
 
 /** A suppression was added (DOMAIN §4): outreach stops, sequences end. */
 export const ContactSuppressed = defineEvent(

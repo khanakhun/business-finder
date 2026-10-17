@@ -88,6 +88,7 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 | `POST /v1/public/sites/views` | View beacon of published sites (BF-035): a token signed by the renderer, 120/min per IP; stores no IP or user agent |
 | `GET /v1/public/sites/altcha-challenge`, `POST /v1/public/sites/leads` | Lead forms of previews (BF-048): signed site and form tokens, self-hosted proof of work, honeypot, rate limits on a daily network hash, CORS to the sites domain only; always "received"; stores no IP |
 | `GET /v1/mailboxes/oauth/:provider/callback` | Google/Microsoft redirect after mailbox consent (BF-050): an HMAC-signed state pointing to a single-use, 10-minute attempt stored server-side (org, user, PKCE verifier); answers only with a redirect to Settings → Mailboxes |
+| `POST /v1/public/unsubscribe/:token`, `GET`/`POST /u/:token` | Unsubscribe (BF-055): RFC 8058 one-click (any POST to the `List-Unsubscribe` URL) and the human page (GET never acts; POST applies the choices); 128-bit tokens looked up by SHA-256; unknown or expired tokens get the same generic answer; rate-limited; no cookie |
 | `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
 ## Workspace settings, secrets and audit log (BF-011)

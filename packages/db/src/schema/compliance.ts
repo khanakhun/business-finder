@@ -200,3 +200,33 @@ export const businessRecipientTypes = pgTable('business_recipient_types', {
   source: text().notNull(),
   fetchedAt: tz().notNull(),
 });
+
+/**
+ * Unsubscribe tokens (BF-055, RFC 8058): the URL carries a random 128-bit token; only its SHA-256 is stored (the
+ * lookup is by hash, so a database read never reveals a working link). The address is envelope-encrypted (needed to
+ * suppress it) and keyed-hashed for lookups. Kept two years (at least 30 days are required by CAN-SPAM).
+ */
+export const unsubscribeTokens = pgTable(
+  'unsubscribe_tokens',
+  {
+    id: id(),
+    tokenHash: text().notNull(),
+    organizationId: uuid()
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    contactId: uuid(),
+    emailSealed: text().notNull(),
+    emailHash: text().notNull(),
+    businessId: uuid().references(() => businesses.id, { onDelete: 'set null' }),
+    outboundMessageId: uuid(),
+    locale: text().$type<'en' | 'fr'>().notNull().default('en'),
+    createdAt: tz().notNull().defaultNow(),
+    expiresAt: tz().notNull(),
+    usedAt: tz(),
+  },
+  (table) => [
+    uniqueIndex('uq_unsubscribe_tokens__hash').on(table.tokenHash),
+    index('ix_unsubscribe_tokens__org_email').on(table.organizationId, table.emailHash),
+    index('ix_unsubscribe_tokens__expires').on(table.expiresAt),
+  ],
+);

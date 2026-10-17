@@ -53,6 +53,10 @@ const ANONYMOUS = [
   'PublicLeadsController.submit',
   // BF-050: the OAuth redirect back from Google/Microsoft (signed single-use state, PKCE, server-side attempt).
   'MailboxOAuthController.callback',
+  // BF-055: RFC 8058 one-click and the human unsubscribe page (token only; same answer for unknown tokens).
+  'PublicUnsubscribeController.oneClick',
+  'UnsubscribePageController.show',
+  'UnsubscribePageController.confirm',
   'SystemController.info',
 ];
 

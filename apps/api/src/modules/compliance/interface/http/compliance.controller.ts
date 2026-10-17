@@ -5,24 +5,31 @@ import {
   ComplianceDecisionPageSchema,
   ComplianceDecisionSchema,
   CreateSuppressionRequestSchema,
+  CurrentSuppressionPageSchema,
   EvaluateComplianceRequestSchema,
+  ImportSuppressionsRequestSchema,
+  ImportSuppressionsResultSchema,
   RevokeSuppressionRequestSchema,
   SuppressionPageSchema,
+  type SuppressionQuery,
+  SuppressionQuerySchema,
 } from '@bf/contracts';
-import { Body, Controller, Get, HttpCode, Inject, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Header, HttpCode, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { ComplianceService } from '../../application/compliance.service.ts';
-import { SUPPRESSION_REPOSITORY, type SuppressionRepository } from '../../application/ports.ts';
+import { SuppressionAdmin } from '../../application/suppression-admin.ts';
 
 class EvaluateBody extends zodDto(EvaluateComplianceRequestSchema) {}
 class SuppressBody extends zodDto(CreateSuppressionRequestSchema) {}
 class CheckBody extends zodDto(CheckSuppressionRequestSchema) {}
 class RevokeBody extends zodDto(RevokeSuppressionRequestSchema) {}
+class ImportBody extends zodDto(ImportSuppressionsRequestSchema) {}
+class QueryDto extends zodDto(SuppressionQuerySchema) {}
 
 function orgOf(auth: AuthContext): string {
   if (!auth.orgId) throw new Error('Compliance route reached without a workspace');
@@ -37,7 +44,7 @@ const actorOf = (auth: AuthContext) =>
 export class ComplianceController {
   constructor(
     private readonly compliance: ComplianceService,
-    @Inject(SUPPRESSION_REPOSITORY) private readonly suppressions: SuppressionRepository,
+    private readonly admin: SuppressionAdmin,
   ) {}
 
   @Post('compliance/evaluate')
@@ -72,27 +79,65 @@ export class ComplianceController {
   }
 
   @Get('suppressions')
-  @RequirePermission('compliance:manage')
+  @RequirePermission('outreach:send')
   @ApiRoute({
-    summary: 'The workspace’s suppression log, newest first',
+    summary: 'What is suppressed now (the workspace’s entries and the global ones), newest first, filtered',
     operationId: 'listSuppressions',
-    response: { status: 200, schema: SuppressionPageSchema },
-    errors: [401, 403],
+    query: QueryDto,
+    response: { status: 200, schema: CurrentSuppressionPageSchema },
+    errors: [400, 401, 403],
   })
-  async list(@Ctx() auth: AuthContext, @Query('before') before: string | undefined) {
-    const at = before ? new Date(before) : undefined;
-    const rows = await this.suppressions.list(orgOf(auth), {
-      limit: 100,
-      ...(at && !Number.isNaN(at.getTime()) ? { before: at } : {}),
-    });
-    return {
-      items: rows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() })),
-      nextCursor: rows.length === 100 ? (rows.at(-1)?.createdAt.toISOString() ?? null) : null,
-    };
+  current(@Ctx() auth: AuthContext, @Query() query: QueryDto) {
+    return this.admin.current(orgOf(auth), query as SuppressionQuery);
+  }
+
+  @Get('suppressions/log')
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary: 'The workspace’s suppression log (every add and revoke), newest first, filtered',
+    operationId: 'listSuppressionLog',
+    query: QueryDto,
+    response: { status: 200, schema: SuppressionPageSchema },
+    errors: [400, 401, 403],
+  })
+  log(@Ctx() auth: AuthContext, @Query() query: QueryDto) {
+    return this.admin.log(orgOf(auth), query as SuppressionQuery);
+  }
+
+  @Get('suppressions/export.csv')
+  @RequirePermission('settings:manage')
+  @ApiProduces('text/csv')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="suppressions.csv"')
+  @Header('Cache-Control', 'no-store')
+  @ApiRoute({
+    summary: 'Export the current suppressions as CSV (audited)',
+    operationId: 'exportSuppressions',
+    query: QueryDto,
+    response: { status: 200, schema: null },
+    errors: [400, 401, 403],
+  })
+  exportCsv(@Ctx() auth: AuthContext, @Query() query: QueryDto): Promise<string> {
+    return this.admin.exportCsv(orgOf(auth), query as SuppressionQuery);
+  }
+
+  @Post('suppressions/import')
+  @HttpCode(200)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary: 'Import suppressions from CSV (dry run by default: preview counts, then commit)',
+    operationId: 'importSuppressions',
+    body: ImportBody,
+    response: { status: 200, schema: ImportSuppressionsResultSchema },
+    errors: [400, 401, 403, 422],
+  })
+  import(@Ctx() auth: AuthContext, @Body() body: ImportBody) {
+    return this.admin.import(orgOf(auth), actorOf(auth), body);
   }
 
   @Post('suppressions')
-  @RequirePermission('compliance:manage')
+  @RequirePermission('outreach:send')
   @ApiRoute({
     summary: 'Suppress an email, domain, phone or business for the workspace',
     operationId: 'createSuppression',
@@ -138,6 +183,8 @@ export class ComplianceController {
     errors: [400, 401, 403, 404],
   })
   async revoke(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Body() body: RevokeBody) {
-    return { revoked: await this.compliance.revoke(orgOf(auth), id, actorOf(auth), body.note) };
+    return {
+      revoked: await this.compliance.revoke(orgOf(auth), id, actorOf(auth), body.note, body.consentEvidence),
+    };
   }
 }

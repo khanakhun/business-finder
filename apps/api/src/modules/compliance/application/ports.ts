@@ -195,8 +195,46 @@ export interface SuppressionRepository {
       createdAt: Date;
     }[]
   >;
+  /** The log filtered (BF-055): newest first. */
+  searchLog(organizationId: string, filter: SuppressionFilter): Promise<SuppressionLogRow[]>;
+  /** What is suppressed now (the workspace's and global entries), newest first. */
+  searchCurrent(organizationId: string, filter: SuppressionFilter): Promise<CurrentSuppressionRow[]>;
 }
 export const SUPPRESSION_REPOSITORY = Symbol('SuppressionRepository');
+
+export interface SuppressionFilter {
+  readonly q?: string | undefined;
+  readonly scope?: SuppressionScope | undefined;
+  readonly reason?: SuppressionReason | undefined;
+  readonly source?: SuppressionSource | undefined;
+  readonly from?: Date | undefined;
+  readonly to?: Date | undefined;
+  readonly before?: Date | undefined;
+  readonly limit: number;
+}
+
+export interface SuppressionLogRow {
+  readonly id: string;
+  readonly scope: SuppressionScope;
+  readonly value: string;
+  readonly action: 'add' | 'revoke';
+  readonly reason: SuppressionReason;
+  readonly source: SuppressionSource;
+  readonly note: string | null;
+  readonly actor: { type: string; id: string | null };
+  readonly createdAt: Date;
+}
+
+export interface CurrentSuppressionRow {
+  readonly entryId: string;
+  readonly scope: SuppressionScope;
+  readonly value: string;
+  readonly reason: SuppressionReason;
+  readonly source: SuppressionSource;
+  readonly note: string | null;
+  readonly global: boolean;
+  readonly createdAt: Date;
+}
 
 /** A business's recipient type from a company registry (cached), for the jurisdictions that have one. */
 export interface RecipientTypeResolver {
@@ -221,3 +259,38 @@ export interface ComplianceTelemetry {
   suppressed(scope: string): void;
 }
 export const COMPLIANCE_TELEMETRY = Symbol('ComplianceTelemetry');
+
+// ── Unsubscribe tokens (BF-055) ─────────────────────────────────────────────────────────────────────────────────
+
+export interface UnsubscribeTokenRow {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly contactId: string | null;
+  readonly emailSealed: string;
+  readonly emailHash: string;
+  readonly businessId: string | null;
+  readonly outboundMessageId: string | null;
+  readonly locale: 'en' | 'fr';
+  readonly createdAt: Date;
+  readonly expiresAt: Date;
+  readonly usedAt: Date | null;
+}
+
+export interface UnsubscribeTokenRepository {
+  insert(
+    row: Omit<UnsubscribeTokenRow, 'id' | 'createdAt' | 'usedAt'> & { readonly tokenHash: string },
+  ): Promise<string>;
+  findByHash(tokenHash: string): Promise<UnsubscribeTokenRow | undefined>;
+  markUsed(id: string, at: Date): Promise<void>;
+  /** Expired tokens, in batches (retention). */
+  deleteExpired(before: Date, limit: number): Promise<number>;
+}
+export const UNSUBSCRIBE_TOKEN_REPOSITORY = Symbol('UnsubscribeTokenRepository');
+
+export interface UnsubscribeSettings {
+  /** Origin of the links, e.g. https://u.example.com (no trailing slash). */
+  readonly baseUrl: string;
+  /** Pepper of the privacy hashes (stable for the deployment's life). */
+  readonly pepper: string;
+}
+export const UNSUBSCRIBE_SETTINGS = Symbol('UnsubscribeSettings');

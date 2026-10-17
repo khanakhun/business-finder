@@ -18,6 +18,17 @@ export class WorkspaceDefaults {
     return settings?.defaultCountryCode ?? settings?.postalAddress?.countryCode ?? null;
   }
 
+  /** Who the workspace is, for pages shown to prospects (unsubscribe, privacy): names, address and website. */
+  async identity(organizationId: string) {
+    const settings = await this.settings.find(organizationId);
+    return {
+      agencyName: settings?.agencyName ?? null,
+      legalName: settings?.legalName ?? null,
+      postalAddress: settings?.postalAddress ?? null,
+      websiteUrl: settings?.websiteUrl ?? null,
+    };
+  }
+
   /** The workspace's time zone (due dates of automatic tasks), UTC when not set. */
   async timeZone(organizationId: string): Promise<string> {
     return (await this.settings.find(organizationId))?.timezone || 'UTC';

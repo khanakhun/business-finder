@@ -4,5 +4,6 @@ export {
   type ComplianceTarget,
   type EvaluateContext,
 } from './application/compliance.service.ts';
+export { type IssuedUnsubscribe, UnsubscribeService } from './application/unsubscribe.service.ts';
 export { ComplianceModule } from './compliance.module.ts';
 export { ComplianceEmailSuppression } from './infrastructure/compliance-email-suppression.ts';

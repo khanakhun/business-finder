@@ -2099,6 +2099,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/unsubscribe/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** RFC 8058 one-click unsubscribe (anonymous; idempotent; always 200) */
+        post: operations["oneClickUnsubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/realtime": {
         parameters: {
             query?: never;
@@ -2881,7 +2898,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** The workspace’s suppression log, newest first */
+        /** What is suppressed now (the workspace’s entries and the global ones), newest first, filtered */
         get: operations["listSuppressions"];
         put?: never;
         /** Suppress an email, domain, phone or business for the workspace */
@@ -2920,6 +2937,57 @@ export type paths = {
         put?: never;
         /** Which of these keys are suppressed for the workspace */
         post: operations["checkSuppressions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/suppressions/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export the current suppressions as CSV (audited) */
+        get: operations["exportSuppressions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/suppressions/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import suppressions from CSV (dry run by default: preview counts, then commit) */
+        post: operations["importSuppressions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/suppressions/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace’s suppression log (every add and revoke), newest first, filtered */
+        get: operations["listSuppressionLog"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4065,6 +4133,25 @@ export type components = {
             statusChangedAt: string | null;
             tags: string[];
         };
+        CurrentSuppression: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            entryId: string;
+            global: boolean;
+            note: string | null;
+            /** @enum {string} */
+            reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
+            /** @enum {string} */
+            scope: "email" | "domain" | "phone" | "business" | "org_business";
+            /** @enum {string} */
+            source: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
+            value: string;
+        };
+        CurrentSuppressionPage: {
+            items: components["schemas"]["CurrentSuppression"][];
+            nextCursor: string | null;
+        };
         DiscoveryIntent: {
             /** @default [] */
             categoryIds: string[];
@@ -4812,6 +4899,37 @@ export type components = {
         };
         ImportSiteAssetRequest: {
             candidateId: string;
+        };
+        ImportSuppressionsRequest: {
+            csv: string;
+            /** @default true */
+            dryRun: boolean;
+            note?: string;
+            /**
+             * @default manual
+             * @enum {string}
+             */
+            reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
+            /**
+             * @default email
+             * @enum {string}
+             */
+            scope: "email" | "domain" | "phone" | "business" | "org_business";
+        };
+        ImportSuppressionsResult: {
+            added: number;
+            alreadySuppressed: number;
+            dryRun: boolean;
+            duplicates: number;
+            invalid: {
+                line: number;
+                message: string;
+                value: string;
+            }[];
+            invalidCount: number;
+            rows: number;
+            sample: string[];
+            valid: number;
         };
         Invitation: {
             /** Format: date-time */
@@ -5849,6 +5967,7 @@ export type components = {
             sources: components["schemas"]["ReviewSourceGate"][];
         };
         RevokeSuppressionRequest: {
+            consentEvidence?: string;
             note: string;
         };
         RollbackSiteRequest: {
@@ -17219,6 +17338,44 @@ export interface operations {
             };
         };
     };
+    oneClickUnsubscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     streamRealtime: {
         parameters: {
             query?: never;
@@ -21258,7 +21415,16 @@ export interface operations {
     };
     listSuppressions: {
         parameters: {
-            query?: never;
+            query?: {
+                before?: string;
+                from?: string;
+                q?: string;
+                reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
+                to?: string;
+                view?: "current" | "log";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -21271,7 +21437,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuppressionPage"];
+                    "application/json": components["schemas"]["CurrentSuppressionPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Problem details (RFC 9457) */
@@ -21285,6 +21460,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21468,6 +21652,221 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckSuppressionResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    exportSuppressions: {
+        parameters: {
+            query?: {
+                before?: string;
+                from?: string;
+                q?: string;
+                reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
+                to?: string;
+                view?: "current" | "log";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    importSuppressions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportSuppressionsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportSuppressionsResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listSuppressionLog: {
+        parameters: {
+            query?: {
+                before?: string;
+                from?: string;
+                q?: string;
+                reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
+                to?: string;
+                view?: "current" | "log";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuppressionPage"];
                 };
             };
             /** @description Problem details (RFC 9457) */

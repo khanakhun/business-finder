@@ -9,7 +9,7 @@ import {
   suppressionsCurrent,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, isNull, lt, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   DecisionRepository,
@@ -17,6 +17,7 @@ import type {
   PolicyRepository,
   StoredLawfulBasis,
   StoredPolicy,
+  SuppressionFilter,
   SuppressionRepository,
 } from '../application/ports.ts';
 
@@ -388,7 +389,68 @@ export class DrizzleSuppressionRepository implements SuppressionRepository {
       .limit(page.limit);
     return rows.map((row) => ({ ...row, value: row.valueNormalized }));
   }
+
+  async searchLog(organizationId: string, filter: SuppressionFilter) {
+    const rows = await this.x
+      .select()
+      .from(suppressionEntries)
+      .where(
+        and(
+          eq(suppressionEntries.organizationId, organizationId),
+          filter.q
+            ? ilike(suppressionEntries.valueNormalized, `%${escapeLike(filter.q.toLowerCase())}%`)
+            : undefined,
+          filter.scope ? eq(suppressionEntries.scope, filter.scope) : undefined,
+          filter.reason ? eq(suppressionEntries.reason, filter.reason) : undefined,
+          filter.source ? eq(suppressionEntries.source, filter.source) : undefined,
+          filter.from ? gte(suppressionEntries.createdAt, filter.from) : undefined,
+          filter.to ? lte(suppressionEntries.createdAt, filter.to) : undefined,
+          filter.before ? lt(suppressionEntries.createdAt, filter.before) : undefined,
+        ),
+      )
+      .orderBy(desc(suppressionEntries.createdAt))
+      .limit(filter.limit);
+    return rows.map((row) => ({ ...row, value: row.valueNormalized }));
+  }
+
+  async searchCurrent(organizationId: string, filter: SuppressionFilter) {
+    const rows = await this.x
+      .select({
+        entryId: suppressionsCurrent.entryId,
+        scope: suppressionsCurrent.scope,
+        value: suppressionsCurrent.valueNormalized,
+        reason: suppressionsCurrent.reason,
+        source: suppressionEntries.source,
+        note: suppressionEntries.note,
+        organizationId: suppressionsCurrent.organizationId,
+        createdAt: suppressionsCurrent.createdAt,
+      })
+      .from(suppressionsCurrent)
+      .innerJoin(suppressionEntries, eq(suppressionEntries.id, suppressionsCurrent.entryId))
+      .where(
+        and(
+          or(
+            eq(suppressionsCurrent.organizationId, organizationId),
+            isNull(suppressionsCurrent.organizationId),
+          ),
+          filter.q
+            ? ilike(suppressionsCurrent.valueNormalized, `%${escapeLike(filter.q.toLowerCase())}%`)
+            : undefined,
+          filter.scope ? eq(suppressionsCurrent.scope, filter.scope) : undefined,
+          filter.reason ? eq(suppressionsCurrent.reason, filter.reason) : undefined,
+          filter.source ? eq(suppressionEntries.source, filter.source) : undefined,
+          filter.from ? gte(suppressionsCurrent.createdAt, filter.from) : undefined,
+          filter.to ? lte(suppressionsCurrent.createdAt, filter.to) : undefined,
+          filter.before ? lt(suppressionsCurrent.createdAt, filter.before) : undefined,
+        ),
+      )
+      .orderBy(desc(suppressionsCurrent.createdAt))
+      .limit(filter.limit);
+    return rows.map(({ organizationId: owner, ...row }) => ({ ...row, global: owner === null }));
+  }
 }
+
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 @Injectable()
 export class DrizzleLawfulBasisRepository implements LawfulBasisRepository {

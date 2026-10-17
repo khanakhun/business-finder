@@ -22,6 +22,7 @@ import {
   SITE_HAND_OFF,
   type SiteHandOff,
 } from './ports.ts';
+import { MAX_REPORTED_ISSUES, qualityReportKey } from './quality-report.ts';
 import { JobTransitions } from './transitions.ts';
 
 // After an attempt (BF-039): the quality pipeline judges its site. A pass becomes a site version (author
@@ -94,6 +95,12 @@ export class GenerationQuality {
       await this.stream?.publish(job.id, [{ seq, event: verdict }]).catch(() => undefined);
 
     if (result.outcome === 'repair') {
+      // The repair attempt reads what to fix (BF-041): the issues, next to the spec they are about.
+      await this.artifacts.put(
+        qualityReportKey(job.organizationId, job.id, attempt.attemptNo),
+        Buffer.from(JSON.stringify({ issues: result.issues.slice(0, MAX_REPORTED_ISSUES) })),
+        'application/json',
+      );
       await this.transitions.move(job.id, 'repairing', { qualityScore: result.score });
       await this.queues.run(job.engineCurrent, {
         jobId: job.id,

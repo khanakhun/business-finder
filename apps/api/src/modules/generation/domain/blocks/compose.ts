@@ -144,6 +144,8 @@ export function applyCopy(
   pageId: string,
   answer: CopyAnswer,
   knownFacts: ReadonlySet<string>,
+  /** Only these paths may change (a re-ask or a repair); every field and the SEO when absent. */
+  only?: ReadonlySet<string>,
 ): { changed: string[]; refused: string[] } {
   const changed: string[] = [];
   const refused: string[] = [];
@@ -161,6 +163,7 @@ export function applyCopy(
     const props = block.props as Record<string, unknown>;
     for (const field of blockAnswer.fields) {
       const max = editable[field.key];
+      if (only && !only.has(fieldPath(pageIndex, blockIndex, field.key))) continue;
       if (max === undefined || !isLocalized(props[field.key])) {
         refused.push(`${block.id}.${field.key}: not a rewritable field`);
         continue;
@@ -185,6 +188,7 @@ export function applyCopy(
     ['title', LIMITS.seoTitle.max],
     ['description', LIMITS.seoDescription.max],
   ] as const) {
+    if (only && !only.has(`pages[${pageIndex}].seo.${key}`)) continue;
     const texts = spec.locales.map((locale) => answer.seo[key][locale]?.trim() ?? '');
     if (texts.every((text) => text && text.length <= max)) {
       seo[key] = Object.fromEntries(spec.locales.map((locale, index) => [locale, texts[index] as string]));
@@ -232,6 +236,84 @@ export function revertFields(
     restored.push(path);
   }
   return restored;
+}
+
+/** A check's finding: where (`pages[0].blocks[1].props.title.fr`) and what to change. */
+export interface PathIssue {
+  readonly at: string;
+  readonly message: string;
+}
+
+/** An issue inside a rewritable field: the copy can fix it by writing that field again. */
+export interface FieldProblem {
+  readonly path: string;
+  readonly pageId: string;
+  readonly blockId: string;
+  readonly key: string;
+  readonly message: string;
+}
+
+const FIELD_ISSUE = /^pages\[(\d+)\]\.blocks\[(\d+)\]\.props\.(\w+)(?:$|[.[])/;
+const BLOCK_ISSUE = /^pages\[(\d+)\]\.blocks\[(\d+)\](?:$|[.[])/;
+
+/** The issues that fall inside a block's rewritable field (one problem per field, the first message kept). */
+export function fieldProblems(spec: SiteSpec, issues: readonly PathIssue[]): FieldProblem[] {
+  const problems = new Map<string, FieldProblem>();
+  for (const issue of issues) {
+    const match = FIELD_ISSUE.exec(issue.at);
+    if (!match) continue;
+    const page = spec.pages[Number(match[1])];
+    const block = page?.blocks[Number(match[2])];
+    const key = match[3] as string;
+    if (!page || !block || EDITABLE_FIELDS[block.type as BlockType]?.[key] === undefined) continue;
+    const path = fieldPath(Number(match[1]), Number(match[2]), key);
+    if (!problems.has(path))
+      problems.set(path, {
+        path,
+        pageId: page.id,
+        blockId: block.id,
+        key,
+        message: issue.message.slice(0, 400),
+      });
+  }
+  return [...problems.values()];
+}
+
+/**
+ * Puts back the starter's block (same id) wherever an issue points into a block outside its rewritable fields — a
+ * fact, a variant, an image the copy cannot fix; returns the ids restored.
+ */
+export function restoreBlocks(spec: SiteSpec, starter: SiteSpec, issues: readonly PathIssue[]): string[] {
+  const restored: string[] = [];
+  for (const issue of issues) {
+    const match = BLOCK_ISSUE.exec(issue.at);
+    if (!match) continue;
+    const page = spec.pages[Number(match[1])];
+    const block = page?.blocks[Number(match[2])];
+    if (!page || !block || restored.includes(block.id)) continue;
+    const field = FIELD_ISSUE.exec(issue.at);
+    if (field && EDITABLE_FIELDS[block.type as BlockType]?.[field[3] as string] !== undefined) continue;
+    const original = starter.pages
+      .find((candidate) => candidate.id === page.id)
+      ?.blocks.find((candidate) => candidate.id === block.id);
+    if (!original) continue;
+    page.blocks[Number(match[2])] = structuredClone(original);
+    restored.push(block.id);
+  }
+  return restored;
+}
+
+/** Every rewritable path of the site (its fields and each page's SEO): what a repair may put back. */
+export function copyPaths(spec: SiteSpec): string[] {
+  return spec.pages.flatMap((page, pageIndex) => [
+    ...page.blocks.flatMap((block, blockIndex) =>
+      Object.keys(EDITABLE_FIELDS[block.type as BlockType] ?? {})
+        .filter((key) => isLocalized((block.props as Record<string, unknown>)[key]))
+        .map((key) => fieldPath(pageIndex, blockIndex, key)),
+    ),
+    `pages[${pageIndex}].seo.title`,
+    `pages[${pageIndex}].seo.description`,
+  ]);
 }
 
 /** The catalog summary the plan sees: each block type's variants and when to use them. */

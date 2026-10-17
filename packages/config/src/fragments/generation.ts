@@ -3,8 +3,8 @@ import { booleanFlag } from '../schema.ts';
 
 /** Site generation (BF-039): engines, the sandbox pool and the fake engine for development and tests. */
 export const generationEnv = z.object({
-  GENERATION_BLOCKS_ENGINE: booleanFlag(false).describe(
-    'Register the blocks engine (BF-041): sites composed in-process by the AI gateway (needs model keys).',
+  GENERATION_BLOCKS_ENGINE: booleanFlag(true).describe(
+    'Register the blocks engine (BF-041), the default: sites composed in-process by the AI gateway (needs model keys).',
   ),
   GENERATION_FAKE_ENGINE: booleanFlag(false).describe(
     'Register the scripted fake engine (development, tests and E2E only; refused in production).',

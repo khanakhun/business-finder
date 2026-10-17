@@ -50,6 +50,7 @@ let commands: GenerationCommands;
 let runner: GenerationRunner;
 let quality: GenerationQuality;
 let queries: GenerationQueries;
+let repairs: unknown[];
 
 const business = (name: string) => {
   const id = crypto.randomUUID();
@@ -70,9 +71,14 @@ beforeEach(() => {
     publishPreview: vi.fn(async () => 'https://x.sites.test/'),
   };
   const clock = fixedClock('2026-10-16T12:00:00.000Z');
-  const engines = new StaticEngineRegistry([
-    new FakeEngine({ durationMs: 4, assetsBaseUrl: 'https://assets.bf-sites.test' }),
-  ]);
+  const fake = new FakeEngine({ durationMs: 4, assetsBaseUrl: 'https://assets.bf-sites.test' });
+  repairs = [];
+  const run = fake.run.bind(fake);
+  fake.run = (ctx, signal) => {
+    if (ctx.repair) repairs.push(ctx.repair);
+    return run(ctx, signal);
+  };
+  const engines = new StaticEngineRegistry([fake]);
   const settings = new DefaultGenerationSettings(() => engines.list().map((engine) => engine.id));
   const preparer = new FixtureWorkspacePreparer(async (key, body) => {
     store.set(key, body);
@@ -218,6 +224,18 @@ describe('generation (unit, in memory)', () => {
     const detail = await queries.batch(ORG, batch.id);
     const byName = new Map(detail.jobs.map((job) => [job.businessName, job]));
     expect(byName.get('Atelier [invalid]')).toMatchObject({ status: 'succeeded', attemptCount: 2 });
+    // The repair attempt starts from the previous spec and the issues the gate found (BF-041).
+    const atelier = byName.get('Atelier [invalid]')?.id ?? '';
+    const report = store.get(`generation/${ORG}/${atelier}/1/quality.json`);
+    expect(
+      (JSON.parse(report?.toString('utf8') ?? '{}') as { issues: unknown[] }).issues.length,
+    ).toBeGreaterThan(0);
+    expect(repairs).toEqual([
+      {
+        baseSpecRef: `generation/${ORG}/${atelier}/1/site.json`,
+        issues: expect.arrayContaining([expect.objectContaining({ severity: 'error' })]),
+      },
+    ]);
     expect(byName.get('Boutique [fail-once:TIMEOUT]')).toMatchObject({
       status: 'succeeded',
       attemptCount: 2,

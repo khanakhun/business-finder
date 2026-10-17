@@ -10,6 +10,7 @@ import { LeadsInbox } from './application/leads.inbox.ts';
 import { LEADS_RETENTION, LeadsRetention } from './application/leads.retention.ts';
 import { LEAD_GUARD, LEAD_TOKEN_SECRET, LEADS_REPOSITORY, PROOF_OF_WORK } from './application/ports.ts';
 import { PublicLeads } from './application/public-leads.ts';
+import { UnsubscribeEffects } from './application/unsubscribe-effects.ts';
 import { AltchaProofOfWork } from './infrastructure/altcha-proof-of-work.ts';
 import { DrizzleLeadsRepository } from './infrastructure/drizzle-leads.repository.ts';
 import { ValkeyLeadGuard } from './infrastructure/valkey-lead-guard.ts';
@@ -63,6 +64,7 @@ export class LeadsModule {
         PublicLeads,
         LeadsInbox,
         LeadAutomation,
+        UnsubscribeEffects,
         ...(mode === 'worker' ? [LeadsRetention] : []),
       ],
     };

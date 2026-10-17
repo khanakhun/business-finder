@@ -222,11 +222,28 @@ export class ComplianceService {
     entryId: string,
     actor: { type: string; id: string | null },
     note: string,
+    consentEvidence?: string,
   ) {
     const entry = await this.suppressions.entry(organizationId, entryId);
     if (!entry) throw new NotFoundError('SuppressionEntry', entryId);
     if (entry.organizationId === null)
       throw new ForbiddenError('A global suppression cannot be lifted by a workspace.');
+    // Lifting an unsubscribe or opt-out needs documented new consent from the person (BF-055).
+    const [current] = await this.suppressions.find(organizationId, [
+      { scope: entry.scope, value: entry.value },
+    ]);
+    if (current && (current.reason === 'unsubscribe' || current.reason === 'opt_out') && !consentEvidence)
+      throw new ValidationError(
+        'This person unsubscribed: lifting it needs a record of their new consent.',
+        [
+          {
+            path: ['consentEvidence'],
+            message: 'Describe how and when they consented again',
+            code: 'required',
+          },
+        ],
+        { details: { reason: 'CONSENT_REQUIRED' } },
+      );
     const revoked = await this.suppressions.revoke({
       organizationId,
       scope: entry.scope,
@@ -238,7 +255,11 @@ export class ComplianceService {
       action: 'compliance.suppression_revoked',
       entityType: 'suppression',
       entityId: entryId,
-      metadata: { scope: entry.scope, note: note.slice(0, 500) },
+      metadata: {
+        scope: entry.scope,
+        note: note.slice(0, 500),
+        ...(consentEvidence ? { consentEvidence: consentEvidence.slice(0, 1000) } : {}),
+      },
     });
     return revoked;
   }

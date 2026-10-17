@@ -50,4 +50,19 @@ export const outreachEnv = z.object({
     .min(1)
     .default('organizations')
     .describe('Entra ID tenant id, or `organizations` (any work account) / `common`.'),
+  UNSUBSCRIBE_BASE_URL: z
+    .url()
+    .optional()
+    .describe(
+      'Public HTTPS origin of the unsubscribe links (e.g. https://u.example.com routed to the API); defaults to API_URL.',
+    ),
+  PRIVACY_HASH_PEPPER: secret(
+    z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        'Pepper of the keyed hashes kept instead of erased addresses (BF-055). Never rotate it: hashed suppressions would stop matching. Defaults to one derived from BETTER_AUTH_SECRET.',
+      ),
+  ),
 });

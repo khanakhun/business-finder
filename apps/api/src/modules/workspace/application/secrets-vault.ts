@@ -68,6 +68,51 @@ export class SecretsVault {
     return this.delete(organizationId, ref);
   }
 
+  /**
+   * Envelope-encrypts a value another module stores in its own table (e.g. an unsubscribe token's address, BF-055),
+   * bound to the workspace and a purpose. Returns one opaque string.
+   */
+  sealValue(organizationId: string, purpose: string, value: string): string {
+    const { version, key } = this.masterKeys.current();
+    const sealed = sealSecret(value, key, {
+      orgId: organizationId,
+      name: `value:${purpose}`,
+      keyVersion: version,
+    });
+    const parts = [
+      sealed.ciphertext,
+      sealed.iv,
+      sealed.authTag,
+      sealed.wrappedDek,
+      sealed.dekIv,
+      sealed.dekTag,
+    ];
+    return `v1.${version}.${parts.map((part) => part.toString('base64url')).join('.')}`;
+  }
+
+  openValue(organizationId: string, purpose: string, sealed: string): string {
+    const [format, version, ...parts] = sealed.split('.');
+    if (format !== 'v1' || parts.length !== 6)
+      throw new SecretUnavailableError(purpose as never, 'DECRYPTION_FAILED');
+    const keyVersion = Number(version);
+    const masterKey = this.masterKeys.get(keyVersion);
+    if (!masterKey) throw new SecretUnavailableError(purpose as never, 'MASTER_KEY_MISSING');
+    const [ciphertext, iv, authTag, wrappedDek, dekIv, dekTag] = parts.map((part) =>
+      Buffer.from(part, 'base64url'),
+    ) as [Buffer, Buffer, Buffer, Buffer, Buffer, Buffer];
+    try {
+      return openSecret({ ciphertext, iv, authTag, wrappedDek, dekIv, dekTag }, masterKey, {
+        orgId: organizationId,
+        name: `value:${purpose}`,
+        keyVersion,
+      });
+    } catch (error) {
+      if (error instanceof DecryptionError)
+        throw new SecretUnavailableError(purpose as never, 'DECRYPTION_FAILED');
+      throw error;
+    }
+  }
+
   private async seal(
     organizationId: string,
     name: VaultKey,

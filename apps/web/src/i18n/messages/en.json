@@ -667,6 +667,7 @@
         "batch_completed": "Site generation finished",
         "discovery_completed": "Discovery finished",
         "mailbox_paused": "Mailbox paused",
+        "mailbox_error": "A mailbox needs reconnecting",
         "member_joined": "New members",
         "system_test": "Test notifications",
         "site_needs_review": "Sites to review",

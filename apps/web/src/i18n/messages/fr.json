@@ -667,6 +667,7 @@
         "batch_completed": "Génération de sites terminée",
         "discovery_completed": "Découverte terminée",
         "mailbox_paused": "Boîte d’envoi en pause",
+        "mailbox_error": "Une boîte d’envoi est à reconnecter",
         "member_joined": "Nouveaux membres",
         "system_test": "Notifications de test",
         "site_needs_review": "Sites à revoir",

@@ -165,6 +165,7 @@ export interface OutboundRepository {
   list(organizationId: string, filter: OutboundListFilter): Promise<OutboundListRow[]>;
   listRow(organizationId: string, id: string): Promise<OutboundListRow | undefined>;
   forBusiness(organizationId: string, businessId: string, limit: number): Promise<OutboundListRow[]>;
+  forThread(organizationId: string, threadId: string): Promise<OutboundListRow[]>;
   // The send path (worker: no workspace filter, ids come from claimed rows)
   byId(id: string): Promise<OutboundRecord | undefined>;
   /**
@@ -189,6 +190,8 @@ export interface OutboundRepository {
     businessId: string,
     contactId: string | null,
   ): Promise<ThreadRecord | undefined>;
+  /** The prospect's latest reply in the thread (a reply answers it: In-Reply-To, `Re:`). */
+  latestInbound(threadId: string): Promise<{ rfc822MessageId: string; receivedAt: Date } | undefined>;
   /** The thread's latest sent message (In-Reply-To / References of a follow-up). */
   lastSent(threadId: string): Promise<OutboundRecord | undefined>;
   touchThread(threadId: string, at: Date, providerThreadId: string | null): Promise<void>;

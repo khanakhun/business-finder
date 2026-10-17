@@ -374,8 +374,11 @@ export class OutboundCommands {
     if (blocking) throw new MessageNotSendableError(blocking.message, 'MISSING_IDENTITY');
     const messageId = rfc822MessageId(input.id, input.mailbox.email);
     const previous = await this.messages.lastSent(input.thread.id);
+    // A reply answers the prospect's latest message (BF-054); a follow-up continues our own.
+    const theirs = draft.purpose === 'reply' ? await this.messages.latestInbound(input.thread.id) : undefined;
+    const parent = theirs?.rfc822MessageId ?? previous?.rfc822MessageId;
     const root = input.thread.rootMessageId === messageId ? undefined : input.thread.rootMessageId;
-    const references = [root, previous?.rfc822MessageId].filter(
+    const references = [root, previous?.rfc822MessageId, theirs?.rfc822MessageId].filter(
       (value, index, all): value is string => !!value && all.indexOf(value) === index,
     );
     const headers: Record<string, string> = {
@@ -385,17 +388,19 @@ export class OutboundCommands {
         ? `<${unsubscribe.oneClickUrl}>, <${unsubscribe.mailtoUrl}>`
         : `<${unsubscribe.oneClickUrl}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      ...(previous ? { 'In-Reply-To': previous.rfc822MessageId } : {}),
+      ...(parent ? { 'In-Reply-To': parent } : {}),
       ...(references.length > 0 ? { References: references.join(' ') } : {}),
     };
+    // "Re:" only when truly replying in the thread (BF-052).
+    const subject = theirs ? `Re: ${input.thread.subjectRoot}`.slice(0, 200) : composed.rendered.subject;
     return {
-      subject: composed.rendered.subject,
+      subject,
       bodyText: composed.rendered.text,
       bodyHtml: composed.rendered.html,
       headers,
       unsubscribeTokenId: unsubscribe.id,
       outreachToken,
-      inReplyTo: previous?.rfc822MessageId ?? null,
+      inReplyTo: parent ?? null,
     };
   }
 

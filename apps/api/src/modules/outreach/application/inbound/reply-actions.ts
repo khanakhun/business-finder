@@ -38,7 +38,7 @@ export class ReplyActions {
       type: 'reply_received',
       params: { business: context.businessName.slice(0, 200) },
       entity: { type: 'email_thread', id: event.payload.threadId },
-      link: `/inbox?thread=${event.payload.threadId}`,
+      link: `/outreach/inbox?thread=${event.payload.threadId}`,
       sourceEventId: event.id,
     });
   }

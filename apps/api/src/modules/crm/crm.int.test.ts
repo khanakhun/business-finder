@@ -116,9 +116,9 @@ describe('pipeline status', () => {
   it('lets the system mark contacted/engaged only where it applies', async () => {
     const id = await track();
     const pipeline = t.app.get(CrmPipeline);
-    expect(await pipeline.markContacted(org, id)).toBe(false); // new → contacted is not a move
-    await owner.post(`/v1/businesses/${id}/status`, { status: 'qualified' }).expect(200);
+    // BF-052: a first contact qualifies a `new` business on the way (auto-qualify on contact).
     expect(await pipeline.markContacted(org, id)).toBe(true);
+    expect((await owner.get(`/v1/businesses/${id}/crm`).expect(200)).body.pipelineStatus).toBe('contacted');
     expect(await pipeline.markContacted(org, id)).toBe(false); // already there
     expect(await pipeline.markEngaged(org, id)).toBe(true);
     expect((await owner.get(`/v1/businesses/${id}/crm`).expect(200)).body.pipelineStatus).toBe('engaged');

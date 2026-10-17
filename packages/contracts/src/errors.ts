@@ -34,6 +34,15 @@ export const ProblemFieldErrorSchema = z.object({
 export type ProblemFieldError = z.infer<typeof ProblemFieldErrorSchema>;
 
 /** RFC 9457 problem details plus our `code`, `traceId` and field `errors`. */
+/** The compliance gate did not allow a send: reasons and what to do instead (BF-052; 409 manual-only, 422 blocked). */
+export const SendRefusalSchema = z.object({
+  decision: z.enum(['manual_only', 'blocked']),
+  decisionId: z.uuid().nullable(),
+  reasons: z.array(z.object({ code: z.string(), message: z.string() })),
+  alternatives: z.array(z.string()),
+});
+export type SendRefusal = z.infer<typeof SendRefusalSchema>;
+
 export const ProblemDetailsSchema = z
   .object({
     type: z.url(),
@@ -51,6 +60,8 @@ export const ProblemDetailsSchema = z
     errors: z.array(ProblemFieldErrorSchema).optional(),
     /** `SITE_VERSION_CONFLICT`: the site's current version, to reload before editing again. */
     currentVersionId: z.uuid().optional(),
+    /** A send the compliance gate refused (BF-052). */
+    refusal: SendRefusalSchema.optional(),
   })
   .meta({ id: 'ProblemDetails', description: 'RFC 9457 problem details (application/problem+json).' });
 export type ProblemDetails = z.infer<typeof ProblemDetailsSchema>;

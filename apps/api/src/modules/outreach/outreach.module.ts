@@ -3,6 +3,7 @@ import type { ApiEnv } from '@bf/config';
 import type { Clock } from '@bf/contracts';
 import { type DynamicModule, Module } from '@nestjs/common';
 import { ComplianceModule } from '../compliance/index.ts';
+import { CrmModule } from '../crm/index.ts';
 import { GenerationModule } from '../generation/index.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
@@ -33,6 +34,15 @@ import {
   SMTP_CONNECTION_TESTER,
 } from './application/mailbox/ports.ts';
 import { TokenRefresher } from './application/mailbox/token-refresher.ts';
+import { ManualContactLogs } from './application/outbound/manual-log.ts';
+import { OutboundCommands } from './application/outbound/outbound.commands.ts';
+import { OutboundQueries } from './application/outbound/outbound.queries.ts';
+import {
+  OUTBOUND_REPOSITORY,
+  OUTBOUND_SETTINGS,
+  OUTREACH_TOKENS,
+  type OutboundSettings,
+} from './application/outbound/ports.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
@@ -44,9 +54,13 @@ import { GraphProvider } from './infrastructure/mailboxes/providers/graph.provid
 import { SmtpImapProvider } from './infrastructure/mailboxes/providers/smtp-imap.provider.ts';
 import { ValkeyCapacityCounters } from './infrastructure/mailboxes/valkey-capacity-counters.ts';
 import { ValkeyOAuthStore } from './infrastructure/mailboxes/valkey-oauth.ts';
+import { DrizzleOutboundRepository } from './infrastructure/outbound/drizzle-outbound.repository.ts';
+import { HmacOutreachTokens } from './infrastructure/outbound/hmac-outreach-tokens.ts';
+import { OutboundPersonalData } from './infrastructure/outbound/outbound-personal-data.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
+import { MessagesController } from './interface/http/messages.controller.ts';
 import { TemplatesController } from './interface/http/templates.controller.ts';
 
 const callbackUrl = (env: ApiEnv, provider: 'google' | 'microsoft') =>
@@ -65,11 +79,22 @@ export class OutreachModule {
     if (existing) return existing;
     const module: DynamicModule = {
       module: OutreachModule,
-      imports: [RealtimeModule.forRoot(mode), ComplianceModule.forRoot(mode), GenerationModule.forRoot(mode)],
+      imports: [
+        RealtimeModule.forRoot(mode),
+        ComplianceModule.forRoot(mode),
+        GenerationModule.forRoot(mode),
+        CrmModule.forRoot(mode),
+      ],
       controllers:
         mode === 'worker'
           ? []
-          : [MailboxesController, MailboxOAuthController, TemplatesController, DraftsController],
+          : [
+              MailboxesController,
+              MailboxOAuthController,
+              TemplatesController,
+              DraftsController,
+              MessagesController,
+            ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
         ValkeyCapacityCounters,
@@ -157,6 +182,28 @@ export class OutreachModule {
         MailboxLifecycle,
         MailboxesService,
         MailboxCapacity,
+        { provide: OUTBOUND_REPOSITORY, useClass: DrizzleOutboundRepository },
+        {
+          provide: OUTREACH_TOKENS,
+          inject: [APP_ENV],
+          useFactory: (appEnv: AppEnv) =>
+            new HmacOutreachTokens(
+              createHmac('sha256', (appEnv as ApiEnv).BETTER_AUTH_SECRET)
+                .update('outreach-token')
+                .digest('hex'),
+            ),
+        },
+        {
+          provide: OUTBOUND_SETTINGS,
+          inject: [APP_ENV],
+          useFactory: (appEnv: AppEnv): OutboundSettings => ({
+            undoWindowSeconds: (appEnv as ApiEnv).OUTREACH_UNDO_WINDOW_SECONDS,
+          }),
+        },
+        OutboundCommands,
+        OutboundQueries,
+        ManualContactLogs,
+        OutboundPersonalData,
         ...(mode === 'worker' ? [MailboxHealthSweep] : []),
       ],
       exports: [

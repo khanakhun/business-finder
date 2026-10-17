@@ -33,6 +33,29 @@ class Error(BaseModel):
     path: list[str | float]
 
 
+class Decision(StrEnum):
+    manual_only = "manual_only"
+    blocked = "blocked"
+
+
+class Reason(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    code: str
+    message: str
+
+
+class Refusal(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    alternatives: list[str]
+    decision: Decision
+    decisionId: UUID | None
+    reasons: list[Reason]
+
+
 class ProblemDetails(BaseModel):
     """
     RFC 9457 problem details (application/problem+json).
@@ -47,6 +70,7 @@ class ProblemDetails(BaseModel):
     errors: list[Error] | None = None
     instance: str | None = None
     reason: Annotated[str | None, Field(pattern="^[A-Z][A-Z0-9_]*$")] = None
+    refusal: Refusal | None = None
     status: Annotated[int, Field(ge=400, le=599)]
     title: str
     traceId: str | None = None

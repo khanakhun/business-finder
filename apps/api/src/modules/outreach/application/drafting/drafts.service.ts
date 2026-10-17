@@ -1,5 +1,6 @@
 import { type AiGateway, type EmailDraftInput, type EmailDraftOutput, OutreachEmailDraft } from '@bf/ai';
 import {
+  type ComplianceDecision,
   type CreateDraftRequest,
   CreateDraftRequestSchema,
   type DraftFactRef,
@@ -70,6 +71,19 @@ const factText = (fact: RegistryFact): string => {
 };
 
 export class DraftGenerationError extends ValidationError {}
+
+export interface ComposedEmail {
+  readonly rendered: ReturnType<typeof renderEmail>;
+  readonly footer: string[];
+  /** Problems that stop a send (no postal address). */
+  readonly issues: LintIssue[];
+  readonly contact: DraftContact | null;
+  readonly mailbox: MailboxRecord | null;
+  readonly previewUrl: string | null;
+}
+
+const withParam = (url: string, name: string, value: string) =>
+  `${url}${url.includes('?') ? '&' : '?'}${name}=${encodeURIComponent(value)}`;
 
 @Injectable()
 export class DraftsService {
@@ -277,12 +291,6 @@ export class DraftsService {
   /** The message exactly as it would go out now: body, signature, footer, plus the compliance decision (preview). */
   async preview(actor: DraftActor, id: string): Promise<RenderedEmail> {
     const draft = await this.load(actor, id);
-    const ground = await this.ground(actor, {
-      businessId: draft.businessId,
-      contactId: draft.contactId,
-      locale: draft.locale,
-      mailboxId: draft.mailboxId ?? undefined,
-    });
     const decision = await this.compliance.evaluate(
       {
         organizationId: actor.organizationId,
@@ -292,6 +300,67 @@ export class DraftsService {
       'email',
       { purpose: draft.offer, stage: 'preview' },
     );
+    // A preview shows the link's shape; the real token is issued at send time (fail-closed).
+    const composed = await this.compose(actor, draft, {
+      decision,
+      unsubscribeUrl: this.unsubscribe.sampleUrl(),
+    });
+    return {
+      ...composed.rendered,
+      footer: composed.footer,
+      links: linksIn(composed.rendered.text),
+      compliance: decision as unknown as Record<string, unknown>,
+      issues: [...draft.lint, ...composed.issues],
+    };
+  }
+
+  /** A draft of the workspace (the outbound pipeline loads it before composing). */
+  draft(actor: DraftActor, id: string): Promise<StoredDraft> {
+    return this.load(actor, id);
+  }
+
+  /** Who the draft goes to: its contact, else the business's default contact. */
+  async recipient(draft: StoredDraft): Promise<DraftContact | null> {
+    const contact = draft.contactId
+      ? await this.context.contact(draft.businessId, draft.contactId)
+      : await this.context.defaultContact(draft.businessId);
+    return contact ?? null;
+  }
+
+  /** The draft became a queued message (BF-052); `reopen` when that message is cancelled. */
+  async markSent(actor: DraftActor, id: string): Promise<void> {
+    await this.drafts.update(actor.organizationId, id, { status: 'sent_as_message' });
+  }
+
+  async reopen(actor: DraftActor, id: string): Promise<void> {
+    const draft = await this.drafts.get(actor.organizationId, id);
+    if (draft?.status === 'sent_as_message')
+      await this.drafts.update(actor.organizationId, id, { status: 'draft' });
+  }
+
+  /**
+   * The final rendering, shared by the preview and the send (BF-052): the body (the preview link carrying the
+   * outreach token when sending), the mailbox signature and the deterministic footer from the decision's required
+   * elements. What the person previews is what goes out, but for the two tokens.
+   */
+  async compose(
+    actor: DraftActor,
+    draft: StoredDraft,
+    options: {
+      readonly decision: ComplianceDecision;
+      readonly unsubscribeUrl: string;
+      readonly subject?: string | undefined;
+      readonly mailboxId?: string | undefined;
+      /** Appended to the preview link as `?r=` (attribution of the visit to this message). */
+      readonly outreachToken?: string | undefined;
+    },
+  ): Promise<ComposedEmail> {
+    const ground = await this.ground(actor, {
+      businessId: draft.businessId,
+      contactId: draft.contactId,
+      locale: draft.locale,
+      mailboxId: options.mailboxId ?? draft.mailboxId ?? undefined,
+    });
     const identity = await this.workspace.identity(actor.organizationId);
     const address = identity.postalAddress
       ? [
@@ -305,22 +374,26 @@ export class DraftsService {
       : null;
     const footer = composeFooter({
       locale: draft.locale,
-      requiredElements: decision.requiredElements,
+      requiredElements: options.decision.requiredElements,
       agencyName: ground.sender.agencyName,
       legalName: identity.legalName,
       postalAddress: address,
-      // A preview shows the link's shape; the real token is issued at send time (fail-closed).
-      unsubscribeUrl: this.unsubscribe.sampleUrl(),
+      unsubscribeUrl: options.unsubscribeUrl,
       source: ground.contact?.publishedContext ?? 'unknown',
     });
+    const previewUrl = ground.preview?.url ?? null;
+    const bodyMd =
+      previewUrl && options.outreachToken
+        ? draft.bodyMd.split(previewUrl).join(withParam(previewUrl, 'r', options.outreachToken))
+        : draft.bodyMd;
     const rendered = renderEmail({
-      subject: draft.subject,
-      bodyMd: draft.bodyMd,
+      subject: options.subject ?? draft.subject,
+      bodyMd,
       signatureMd: ground.mailbox?.signatureMd ?? `${ground.sender.firstName}\n${ground.sender.agencyName}`,
       footer,
       locale: draft.locale,
     });
-    const issues: LintIssue[] = [...draft.lint];
+    const issues: LintIssue[] = [];
     if (!identity.postalAddress)
       issues.push({
         code: 'no_postal_address',
@@ -328,13 +401,7 @@ export class DraftsService {
         message: 'Add the agency’s postal address in Settings → Workspace',
         at: null,
       });
-    return {
-      ...rendered,
-      footer,
-      links: linksIn(rendered.text),
-      compliance: decision as unknown as Record<string, unknown>,
-      issues,
-    };
+    return { rendered, footer, issues, contact: ground.contact, mailbox: ground.mailbox, previewUrl };
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────────────────────────────────────────

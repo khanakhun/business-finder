@@ -20,7 +20,8 @@ const MANUAL: Record<PipelineStatus, PipelineStatus[]> = {
   disqualified: ['new'],
 };
 const AUTOMATIC: Record<PipelineStatus, PipelineStatus[]> = {
-  new: ['engaged'],
+  // BF-052: a first contact qualifies a business still `new` (auto-qualify on contact).
+  new: ['qualified', 'engaged'],
   qualified: ['contacted', 'engaged'],
   contacted: ['engaged'],
   engaged: [],

@@ -38,6 +38,8 @@ import {
 const SEAL_PURPOSE = 'unsubscribe.email';
 
 export interface IssuedUnsubscribe {
+  /** The token row (an outbound message keeps it). */
+  readonly id: string;
   readonly token: string;
   /** The human page (footer link). */
   readonly pageUrl: string;
@@ -75,7 +77,7 @@ export class UnsubscribeService {
       throw new ValidationError('Not a valid email address.', [{ path: ['email'], message: 'Invalid' }]);
     const token = newUnsubscribeToken();
     const now = this.clock.now();
-    await this.tokens.insert({
+    const id = await this.tokens.insert({
       tokenHash: hashToken(token),
       organizationId,
       contactId: request.contactId,
@@ -87,6 +89,7 @@ export class UnsubscribeService {
       expiresAt: new Date(now.getTime() + UNSUBSCRIBE_TTL_DAYS * 86_400_000),
     });
     return {
+      id,
       token,
       pageUrl: `${this.settings.baseUrl}/u/${token}`,
       oneClickUrl: `${this.settings.baseUrl}/v1/public/unsubscribe/${token}`,

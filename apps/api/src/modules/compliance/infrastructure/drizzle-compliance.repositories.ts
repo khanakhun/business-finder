@@ -9,7 +9,7 @@ import {
   suppressionsCurrent,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, gte, ilike, isNull, lt, lte, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, ilike, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   DecisionRepository,
@@ -235,22 +235,40 @@ export class DrizzleDecisionRepository implements DecisionRepository {
       )
       .orderBy(desc(complianceDecisions.evaluatedAt))
       .limit(limit);
-    return rows.map((row) => ({
-      id: row.id,
-      decision: row.decision,
-      channel: row.channel,
-      stage: row.stage,
-      jurisdictions: row.jurisdictions,
-      reasons: row.reasons,
-      requiredElements: row.requiredElements,
-      alternatives: row.alternatives as ComplianceDecision['alternatives'],
-      policyVersionIds: row.policyVersionIds,
-      autoSendPermitted: false,
-      inputs: row.inputs,
-      evaluatedAt: row.evaluatedAt.toISOString(),
-      validUntil: row.validUntil?.toISOString() ?? null,
-    }));
+    return rows.map(toDecision);
   }
+
+  async byIds(organizationId: string, ids: readonly string[]): Promise<ComplianceDecision[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.x
+      .select()
+      .from(complianceDecisions)
+      .where(
+        and(
+          eq(complianceDecisions.organizationId, organizationId),
+          inArray(complianceDecisions.id, [...ids]),
+        ),
+      );
+    return rows.map(toDecision);
+  }
+}
+
+function toDecision(row: typeof complianceDecisions.$inferSelect): ComplianceDecision {
+  return {
+    id: row.id,
+    decision: row.decision,
+    channel: row.channel,
+    stage: row.stage,
+    jurisdictions: row.jurisdictions,
+    reasons: row.reasons,
+    requiredElements: row.requiredElements,
+    alternatives: row.alternatives as ComplianceDecision['alternatives'],
+    policyVersionIds: row.policyVersionIds,
+    autoSendPermitted: false,
+    inputs: row.inputs,
+    evaluatedAt: row.evaluatedAt.toISOString(),
+    validUntil: row.validUntil?.toISOString() ?? null,
+  };
 }
 
 @Injectable()

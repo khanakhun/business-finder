@@ -19,7 +19,8 @@ const automatic = ['automatic'] as const;
 // and visit: they may make those moves by hand too. Site-lead jumps (new/qualified → engaged) stay automatic.
 export const TRANSITIONS: Readonly<Record<PipelineStatus, readonly Edge[]>> = {
   new: [
-    { to: 'qualified', by: manual },
+    // BF-052: automatic when a first message or a logged contact reaches a business still `new` (auto-qualify).
+    { to: 'qualified', by: both },
     { to: 'disqualified', by: manual },
     { to: 'engaged', by: automatic },
   ],

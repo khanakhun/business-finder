@@ -131,6 +131,11 @@ export class CrmService {
    * Moves a business through the pipeline. Automatic moves (outreach, site leads) come from later tickets through
    * {@link CrmPipeline}; they are no-ops when the business is not in a state they apply to.
    */
+  /** The business's pipeline status in the workspace (NotFoundError when it is not tracked). */
+  async statusOf(organizationId: string, businessId: string): Promise<PipelineStatus> {
+    return (await this.tracked(organizationId, businessId)).pipelineStatus;
+  }
+
   async transition(
     organizationId: string,
     businessId: string,
@@ -462,8 +467,19 @@ export class CrmService {
 export class CrmPipeline {
   constructor(private readonly crm: CrmService) {}
 
+  /**
+   * A first message went out (BF-052). A business still `new` is qualified on the way (DOMAIN §3.1 "auto-qualify on
+   * contact").
+   */
+  // DECISION(BF-052): auto-qualify on contact is always on (the ticket's default); no workspace switch yet.
   @Transactional()
   async markContacted(organizationId: string, businessId: string): Promise<boolean> {
+    await this.safely(async () => {
+      const status = await this.crm.statusOf(organizationId, businessId);
+      return status === 'new'
+        ? this.crm.transition(organizationId, businessId, 'qualified', undefined, 'automatic')
+        : false;
+    });
     return this.safely(() =>
       this.crm.transition(organizationId, businessId, 'contacted', undefined, 'automatic'),
     );

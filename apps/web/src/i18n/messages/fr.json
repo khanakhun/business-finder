@@ -3783,5 +3783,119 @@
       "rows": "{count, plural, =0 {aucune ligne} one {# ligne} other {# lignes}}"
     },
     "dataMap": "Registre des traitements (cartographie des données)"
+  },
+  "composer": {
+    "title": "E-mail à {business}",
+    "hint": "Rédigez un e-mail fondé sur ce que nous savons de l’entreprise, puis prévisualisez-le avec son pied de page.",
+    "offers": {
+      "new_website": "Nouveau site",
+      "website_redesign": "Refonte du site",
+      "ai_receptionist": "Accueil IA",
+      "booking_system": "Réservation en ligne",
+      "local_seo": "Visibilité locale"
+    },
+    "recipient": "Destinataire",
+    "noEmail": "Aucune adresse e-mail connue pour cette entreprise.",
+    "mailbox": "Envoyer depuis",
+    "autoMailbox": "Meilleure boîte disponible",
+    "language": "Langue",
+    "autoLanguage": "Langue du destinataire",
+    "locale": {
+      "fr": "Français",
+      "en": "Anglais"
+    },
+    "offer": "Offre",
+    "template": "Modèle",
+    "autoTemplate": "Le plus adapté",
+    "newDraft": "Nouveau brouillon",
+    "generate": "Rédiger avec l’IA",
+    "fromTemplate": "Utiliser le modèle",
+    "blocked": "L’e-mail n’est pas autorisé pour ce destinataire : voir les alternatives ci-dessus.",
+    "empty": "Choisissez le destinataire et l’offre, puis rédigez le brouillon.",
+    "failed": "L’opération a échoué.",
+    "verification": {
+      "unknown": "non vérifiée",
+      "valid": "vérifiée",
+      "invalid": "invalide",
+      "catch_all": "accepte tout",
+      "risky": "risquée",
+      "disposable": "jetable"
+    },
+    "saved": "Brouillon enregistré.",
+    "copied": "Copié : collez-le dans votre messagerie.",
+    "source": {
+      "ai": "Rédigé par l’IA",
+      "template": "Depuis un modèle",
+      "human": "Modifié"
+    },
+    "quick": {
+      "shorter": "Rendez-le plus court.",
+      "formal": "Rendez-le plus formel.",
+      "mentionPreview": "Mettez le site d’aperçu en premier.",
+      "booking": "Insistez sur la réservation en ligne."
+    },
+    "quickLabel": {
+      "shorter": "Plus court",
+      "formal": "Plus formel",
+      "mentionPreview": "Aperçu d’abord",
+      "booking": "Réservation"
+    },
+    "toEnglish": "En anglais",
+    "toFrench": "En français",
+    "subject": "Objet",
+    "edit": "Modifier",
+    "preview": "Aperçu",
+    "plainText": "Texte brut",
+    "body": "Message",
+    "factsUsed": "Fondé sur",
+    "noFacts": "Aucun fait précis cité.",
+    "factKind": {
+      "fact": "Fait",
+      "finding": "Audit",
+      "review_theme": "Avis",
+      "preview": "Aperçu"
+    },
+    "checks": "Vérifications",
+    "save": "Enregistrer le brouillon",
+    "copy": "Copier",
+    "send": "Envoyer",
+    "sendSoon": "L’envoi arrive avec le pipeline d’envoi."
+  },
+  "templatesPage": {
+    "title": "Modèles",
+    "description": "La bibliothèque d’e-mails : modèles FR/EN fournis et les vôtres, par usage.",
+    "loadError": "Impossible de charger les modèles.",
+    "new": "Nouveau modèle",
+    "emptyTitle": "Aucun modèle",
+    "emptyBody": "Créez-en un, ou partez de la bibliothèque.",
+    "seeded": "Bibliothèque",
+    "version": "Version {version}",
+    "editorHint": "Modifiez le modèle ; l’enregistrement crée une nouvelle version.",
+    "purposes": {
+      "first_touch": "Premier message",
+      "follow_up": "Relance",
+      "breakup": "Dernière relance",
+      "reply": "Réponses"
+    },
+    "saved": "Modèle enregistré.",
+    "failed": "L’opération a échoué.",
+    "archived": "Modèle archivé.",
+    "seedHint": "Un modèle de la bibliothèque : l’enregistrer crée la version propre à votre espace.",
+    "name": "Nom",
+    "purpose": "Usage",
+    "offer": "Offre",
+    "language": "Langue",
+    "locale": {
+      "fr": "Français",
+      "en": "Anglais"
+    },
+    "subjects": "Objets (un par ligne)",
+    "body": "Contenu (markdown)",
+    "variables": "Insérer une variable",
+    "syntaxHint": "Les variables s’écrivent entre doubles accolades. Blocs : #if (avec else), #unless et #each. Pas de lien : le lien de l’aperçu est une variable. Le pied de page et le lien de désinscription sont ajoutés automatiquement.",
+    "saveVersion": "Enregistrer une nouvelle version",
+    "create": "Créer",
+    "archive": "Archiver",
+    "versions": "Versions"
   }
 }

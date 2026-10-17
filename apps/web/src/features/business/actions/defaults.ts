@@ -7,6 +7,7 @@ import {
   SparklesIcon,
 } from 'lucide-react';
 import { enrichNow } from '@/features/enrichment/api.ts';
+import { openComposer } from '@/features/outreach/composer/store.ts';
 import { safeWebUrl } from '@/features/search/safe-url.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { quickActions } from './registry.ts';
@@ -82,7 +83,8 @@ export function registerDefaultQuickActions(): void {
     icon: MailIcon,
     order: 60,
     permission: 'outreach:send',
-    disabledReason: ({ crm }) =>
-      crm.doNotContact ? 'business.actions.doNotContact' : 'business.actions.comingOutreach',
+    // BF-051: opens the composer (sending is BF-052's).
+    disabledReason: ({ crm }) => (crm.doNotContact ? 'business.actions.doNotContact' : null),
+    run: ({ business }) => openComposer({ businessId: business.id, businessName: business.displayName }),
   });
 }

@@ -3783,5 +3783,119 @@
       "rows": "{count, plural, =0 {no rows} one {# row} other {# rows}}"
     },
     "dataMap": "Records of processing (data map)"
+  },
+  "composer": {
+    "title": "Email to {business}",
+    "hint": "Write an email grounded in what we know about the business, then preview it with its footer.",
+    "offers": {
+      "new_website": "New website",
+      "website_redesign": "Website redesign",
+      "ai_receptionist": "AI receptionist",
+      "booking_system": "Online booking",
+      "local_seo": "Local search"
+    },
+    "recipient": "Recipient",
+    "noEmail": "No email address known for this business.",
+    "mailbox": "Send from",
+    "autoMailbox": "Best available mailbox",
+    "language": "Language",
+    "autoLanguage": "Recipient’s language",
+    "locale": {
+      "fr": "French",
+      "en": "English"
+    },
+    "offer": "Offer",
+    "template": "Template",
+    "autoTemplate": "Best match",
+    "newDraft": "New draft",
+    "generate": "Write with AI",
+    "fromTemplate": "Use the template",
+    "blocked": "Email is not allowed for this recipient: see the alternatives above.",
+    "empty": "Choose the recipient and offer, then write the draft.",
+    "failed": "That did not work.",
+    "verification": {
+      "unknown": "unverified",
+      "valid": "verified",
+      "invalid": "invalid",
+      "catch_all": "catch-all",
+      "risky": "risky",
+      "disposable": "disposable"
+    },
+    "saved": "Draft saved.",
+    "copied": "Copied: paste it in your mailbox.",
+    "source": {
+      "ai": "Written by AI",
+      "template": "From a template",
+      "human": "Edited"
+    },
+    "quick": {
+      "shorter": "Make it shorter.",
+      "formal": "Make it more formal.",
+      "mentionPreview": "Put the preview website first.",
+      "booking": "Focus on online booking."
+    },
+    "quickLabel": {
+      "shorter": "Shorter",
+      "formal": "More formal",
+      "mentionPreview": "Preview first",
+      "booking": "Booking"
+    },
+    "toEnglish": "In English",
+    "toFrench": "In French",
+    "subject": "Subject",
+    "edit": "Edit",
+    "preview": "Preview",
+    "plainText": "Plain text",
+    "body": "Message",
+    "factsUsed": "Based on",
+    "noFacts": "No specific fact cited.",
+    "factKind": {
+      "fact": "Fact",
+      "finding": "Audit",
+      "review_theme": "Reviews",
+      "preview": "Preview"
+    },
+    "checks": "Checks",
+    "save": "Save draft",
+    "copy": "Copy",
+    "send": "Send",
+    "sendSoon": "Sending arrives with the outbound pipeline."
+  },
+  "templatesPage": {
+    "title": "Templates",
+    "description": "The email library: seeded EN/FR templates and your own, by purpose.",
+    "loadError": "Could not load the templates.",
+    "new": "New template",
+    "emptyTitle": "No template",
+    "emptyBody": "Create one, or start from the library.",
+    "seeded": "Library",
+    "version": "Version {version}",
+    "editorHint": "Edit the template; saving creates a new version.",
+    "purposes": {
+      "first_touch": "First message",
+      "follow_up": "Follow-up",
+      "breakup": "Last follow-up",
+      "reply": "Replies"
+    },
+    "saved": "Template saved.",
+    "failed": "That did not work.",
+    "archived": "Template archived.",
+    "seedHint": "A library template: saving creates your workspace’s own version.",
+    "name": "Name",
+    "purpose": "Purpose",
+    "offer": "Offer",
+    "language": "Language",
+    "locale": {
+      "fr": "French",
+      "en": "English"
+    },
+    "subjects": "Subjects (one per line)",
+    "body": "Body (markdown)",
+    "variables": "Insert a variable",
+    "syntaxHint": "Variables are written in double braces. Blocks: #if (with else), #unless and #each. No links: the preview link is a variable. The footer and unsubscribe link are added automatically.",
+    "saveVersion": "Save as new version",
+    "create": "Create",
+    "archive": "Archive",
+    "versions": "Versions"
   }
 }

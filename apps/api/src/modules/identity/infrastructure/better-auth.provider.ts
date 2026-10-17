@@ -41,8 +41,16 @@ function valkeySignInThrottle(valkey: Redis, logger: Logger) {
 export const BETTER_AUTH = Symbol('BETTER_AUTH');
 
 // DECISION(BF-010): invite-only by default in production (internal tool), open elsewhere.
-export const signupModeOf = (env: ApiEnv) =>
-  env.SIGNUP_MODE ?? (env.NODE_ENV === 'production' ? 'invite_only' : 'open');
+// BF-062: public sign-up in production also needs FEATURE_SELF_SERVE_SIGNUP (the SaaS readiness gaps are not
+// closed): the API refuses to start otherwise rather than quietly opening or closing sign-up.
+export const signupModeOf = (env: ApiEnv) => {
+  const mode = env.SIGNUP_MODE ?? (env.NODE_ENV === 'production' ? 'invite_only' : 'open');
+  if (mode === 'open' && env.NODE_ENV === 'production' && !env.FEATURE_SELF_SERVE_SIGNUP)
+    throw new Error(
+      'SIGNUP_MODE=open needs FEATURE_SELF_SERVE_SIGNUP=true in production (see docs/product/saas-readiness.md).',
+    );
+  return mode;
+};
 export type { Auth };
 
 /** The one Better Auth instance of the API process (identity module only; the worker has none). */

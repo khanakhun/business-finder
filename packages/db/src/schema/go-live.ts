@@ -1,12 +1,12 @@
 // Going live (BF-062): a site's legal profile (versioned by a counter; the legal pages are generated from it) and
 // where its contact form is delivered (an address confirmed by a link; only the token's hash is kept).
 
-import type { SITE_DOMAIN_KINDS, SiteDomain, SiteDomainStatus } from '@bf/contracts';
+import type { SITE_DOMAIN_KINDS, SiteDomain, SiteDomainStatus, SiteExportStatus } from '@bf/contracts';
 import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { id, orgId } from '../columns.ts';
 import { citext } from '../types/text.ts';
 import { organization, user } from './auth.ts';
-import { sites } from './sites.ts';
+import { sites, siteVersions } from './sites.ts';
 
 const tz = () => timestamp({ withTimezone: true });
 
@@ -83,4 +83,27 @@ export const siteDomains = pgTable(
     index('ix_site_domains__site').on(table.siteId),
     index('ix_site_domains__due').on(table.status, table.nextCheckAt),
   ],
+);
+
+/** Static exports of sites (BF-062): the zip is in the artifacts bucket; its link is signed for 24 hours. */
+export const siteExports = pgTable(
+  'site_exports',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    siteId: uuid()
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    versionId: uuid()
+      .notNull()
+      .references(() => siteVersions.id, { onDelete: 'cascade' }),
+    status: text().$type<SiteExportStatus>().notNull().default('queued'),
+    objectKey: text(),
+    bytes: integer(),
+    error: text(),
+    requestedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    createdAt: tz().notNull().defaultNow(),
+    finishedAt: tz(),
+  },
+  (table) => [index('ix_site_exports__site').on(table.siteId, table.createdAt)],
 );

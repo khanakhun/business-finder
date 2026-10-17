@@ -159,12 +159,14 @@ docs/product/saas-readiness.md · docs/compliance/dpa-template.md
 - **E2E:** go-live wizard end to end on a fixture site with a local Caddy (`tls internal` + a test domain via `/etc/hosts` mapping in CI); client portal login via magic link (Mailpit) → sees stats and leads → submits a change request → the agency sees a task.
 
 ## Acceptance criteria
-- [ ] Go-live wizard with readiness checks and `PublishLive`; renderer live mode with SEO, JSON-LD and legal pages.
-- [ ] Custom domains with DNS verification and Caddy on-demand TLS restricted by the `ask` endpoint; redirects.
-- [ ] Live contact routing to a verified business email; leads stored.
+- [x] Go-live wizard with readiness checks and `PublishLive`; renderer live mode with SEO, JSON-LD and legal pages.
+- [x] Custom domains with DNS verification and Caddy on-demand TLS restricted by the `ask` endpoint; redirects.
+- [x] Live contact routing to a verified business email; leads stored.
 - [ ] Client portal (scoped client role): stats, leads, change requests, approvals; isolation proven.
-- [ ] Static export zip.
-- [ ] SaaS readiness document; invite-only signup enforced.
+  (Built — per-site grants, no workspace membership; isolation was checked by a smoke run only: the
+  cross-tenant tests wait for BF-060's harness.)
+- [x] Static export zip.
+- [x] SaaS readiness document; invite-only signup enforced.
 
 ## Agent prompt
 ```text

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { defineJob } from './jobs.ts';
 import { IsoDateTimeSchema } from './time.ts';
 
 // Going live (BF-062): the legal profile the generated legal pages are built from, the verified address contact
@@ -180,3 +181,32 @@ export const AddSiteDomainRequestSchema = z
   })
   .meta({ id: 'AddSiteDomainRequest' });
 export type AddSiteDomainRequest = z.input<typeof AddSiteDomainRequestSchema>;
+
+// ── Static export ───────────────────────────────────────────────────────────────────────────────────────────────
+
+export const SITE_EXPORT_STATUSES = ['queued', 'running', 'succeeded', 'failed'] as const;
+export type SiteExportStatus = (typeof SITE_EXPORT_STATUSES)[number];
+
+/** A zip of the site as static files (every page in every language, stylesheet, fonts, self-hosted images). */
+export const SiteExportSchema = z
+  .object({
+    id: z.uuid(),
+    siteId: z.uuid(),
+    versionId: z.uuid(),
+    status: z.enum(SITE_EXPORT_STATUSES),
+    bytes: z.number().int().nullable(),
+    /** A signed download link, valid 24 hours after the export finished (null before, and after). */
+    downloadUrl: z.string().nullable(),
+    error: z.string().nullable(),
+    createdAt: IsoDateTimeSchema,
+    finishedAt: IsoDateTimeSchema.nullable(),
+  })
+  .meta({ id: 'SiteExport' });
+export type SiteExport = z.infer<typeof SiteExportSchema>;
+
+export const RequestSiteExportSchema = z
+  .object({ versionId: z.uuid().optional() })
+  .meta({ id: 'RequestSiteExport' });
+export type RequestSiteExport = z.input<typeof RequestSiteExportSchema>;
+
+export const SitesExportJob = defineJob('sites-export', 'export', { exportId: z.uuid() });

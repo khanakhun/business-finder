@@ -47,6 +47,8 @@
 | **Publication** | The pointer from a site's hostname to a version, with environment (`preview`/`live`) and expiry. |
 | **Preview** | A publication on `<slug>.<sites-domain>` with banner, `noindex`, claim form, and expiry date. |
 | **Lead** (site lead) | A submission from a preview/live site form ("I'm interested", contact request). |
+| **Portal grant** | A business owner's access to one site in the client portal (BF-062); see §5. |
+| **Static export** | A zip of a site version as static files (every page and language, styles, fonts, its own images, a README), signed for 24 hours (BF-062). |
 | **Generation batch / job** | A user request to generate sites for N businesses (batch) and one job per business, with priority, engine and status. |
 | **Engine** | A strategy that produces a SiteSpec: `blocks`, `claude-agent-sdk`, `claude-code`, `codex`. |
 | **Brief** | Generation input: facts, brand, reviews highlights, audit findings, offer, locales, page plan, constraints. Built deterministically (`GenerationBrief`, `briefVersion: 1`); every audience hint and selling point cites fact, review-theme or finding ids, and missing facts become warnings. A person may adjust it per job (`briefOverrides`: locales, page plan or custom pages, style, tone, operator instructions). |
@@ -291,4 +293,4 @@ Defined once in `@bf/contracts/permissions.ts` and used by API guards and UI.
 | `members:manage` | ✓ | ✓ | | |
 | `billing:manage` | ✓ | | | |
 
-A fifth role, **client**, is added in BF-062: a business owner invited to the client portal, scoped to specific site ids (view the site, its stats and leads; submit change requests; approve proposed versions). It has none of the permissions above.
+**Clients** (BF-062) are business owners invited to the client portal. They are not a fifth workspace role: a client holds a **portal grant** per site (`site_portal_grants`, by email, linked to their account on first sign-in) and no workspace membership, so they have none of the permissions above and every workspace route refuses them. They sign in by magic link (sent only to accounts with a grant, no membership and no 2FA) and, through `/v1/portal/*` only, see their sites' address and status, 30 days of views and leads, the contact requests, their change requests (which become tasks for the agency) and the approvals of proposed versions. Revoking a grant takes effect on the next request.

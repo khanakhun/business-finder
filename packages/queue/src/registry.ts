@@ -119,6 +119,8 @@ export const QUEUES = {
   sitesAssetAnalyze: { name: 'sites-asset-analyze', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   /** Thumbnails of published sites (services/intel takes the pictures). */
   sitesScreenshot: { name: 'sites-screenshot', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** Static exports of sites (BF-062): render every page, zip, upload; one at a time (CPU and memory). */
+  sitesExport: { name: 'sites-export', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 1 },
   /** Views flush (Valkey → site_view_daily) and the hourly `site.viewed` events, every 5 minutes. */
   sitesViews: { name: 'sites-views', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   /**

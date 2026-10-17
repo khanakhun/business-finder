@@ -6,6 +6,9 @@ export const featureFlagsEnv = z.object({
   FEATURE_MAPS_SCRAPER: booleanFlag(false).describe('Enable the self-hosted Google Maps scraper provider.'),
   FEATURE_CODING_ENGINES: booleanFlag(true).describe('Enable coding-agent site generation engines.'),
   FEATURE_AUTO_SEND: booleanFlag(false).describe('Allow sequences to send without per-message approval.'),
+  FEATURE_SELF_SERVE_SIGNUP: booleanFlag(false).describe(
+    'Public self-serve sign-up (BF-062). In production SIGNUP_MODE=open is refused at boot unless this is true; see docs/product/saas-readiness.md.',
+  ),
   FAKE_DISCOVERY_PROVIDER: booleanFlag(false).describe(
     'Register the fixture discovery provider (tests and E2E only; refused in production).',
   ),

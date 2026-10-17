@@ -18,6 +18,7 @@ import {
   type SiteApproval,
   type SiteContactRouting,
   type SiteDomain,
+  type SiteExport,
   type SiteLegalProfile,
 } from '@bf/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -206,4 +207,33 @@ export function useHandoverActions(siteId: string) {
       onSuccess: settle,
     }),
   };
+}
+
+// ── Static export ───────────────────────────────────────────────────────────────────────────────────────────────
+
+export function useSiteExports(siteId: string) {
+  return useQuery({
+    queryKey: queryKeys.goLive.exports(siteId),
+    queryFn: async () =>
+      unwrap<{ items: SiteExport[] }>(
+        await apiClient().GET('/v1/sites/{id}/exports', { params: { path: { id: siteId } } }),
+      ).items,
+    // Poll while an export is running.
+    refetchInterval: (query) =>
+      query.state.data?.some((item) => item.status === 'queued' || item.status === 'running') ? 3_000 : false,
+  });
+}
+
+export function useExportSite(siteId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (versionId: string) =>
+      unwrap<SiteExport>(
+        await apiClient().POST('/v1/sites/{id}/export', {
+          params: { path: { id: siteId } },
+          body: { versionId },
+        }),
+      ),
+    onSuccess: () => void client.invalidateQueries({ queryKey: queryKeys.goLive.exports(siteId) }),
+  });
 }

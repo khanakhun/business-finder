@@ -10,10 +10,17 @@ import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toProblemLike } from '@/components/states/problem.ts';
 import { getToast } from '@/lib/toast.tsx';
-import { useHandoverActions, usePortalGrants, useSiteApprovals, useSiteChangeRequests } from './api.ts';
+import {
+  useExportSite,
+  useHandoverActions,
+  usePortalGrants,
+  useSiteApprovals,
+  useSiteChangeRequests,
+  useSiteExports,
+} from './api.ts';
 
 // Handover (BF-062): invite the business owner to the client portal, ask them to approve a version (on the site's
-// preview), and read their change requests (also tasks on the business).
+// preview), read their change requests (also tasks on the business), and export the site as static files.
 
 export function HandoverStep({ siteId, versionId }: { readonly siteId: string; readonly versionId: string }) {
   return (
@@ -21,7 +28,54 @@ export function HandoverStep({ siteId, versionId }: { readonly siteId: string; r
       <Invites siteId={siteId} />
       <Approvals siteId={siteId} versionId={versionId} />
       <ChangeRequests siteId={siteId} />
+      <Exports siteId={siteId} versionId={versionId} />
     </div>
+  );
+}
+
+function Exports({ siteId, versionId }: { readonly siteId: string; readonly versionId: string }) {
+  const t = useTranslations('goLive.handover');
+  const format = useFormatter();
+  const exports = useSiteExports(siteId);
+  const exportSite = useExportSite(siteId);
+  return (
+    <section className="space-y-3">
+      <h3 className="font-medium">{t('exportTitle')}</h3>
+      <p className="text-sm text-muted-foreground">{t('exportHelp')}</p>
+      <Button
+        type="button"
+        variant="outline"
+        disabled={exportSite.isPending}
+        onClick={() => void attempt(() => exportSite.mutateAsync(versionId), t('exportStarted'), t('failed'))}
+      >
+        {t('export')}
+      </Button>
+      {exports.data && exports.data.length > 0 ? (
+        <ul className="divide-y rounded-lg border text-sm">
+          {exports.data.map((item) => (
+            <li key={item.id} className="flex flex-wrap items-center gap-2 p-2">
+              <span className="text-muted-foreground">
+                {format.dateTime(new Date(item.createdAt), { dateStyle: 'medium', timeStyle: 'short' })}
+              </span>
+              <Badge variant={item.status === 'failed' ? 'destructive' : 'secondary'}>
+                {t(`exportStatus.${item.status}`)}
+              </Badge>
+              {item.bytes ? (
+                <span>{format.number(item.bytes / 1_048_576, { maximumFractionDigits: 1 })} MB</span>
+              ) : null}
+              {item.downloadUrl ? (
+                <a href={item.downloadUrl} className="ml-auto text-primary underline">
+                  {t('download')}
+                </a>
+              ) : item.status === 'succeeded' ? (
+                <span className="ml-auto text-muted-foreground">{t('linkExpired')}</span>
+              ) : null}
+              {item.error ? <p className="w-full text-destructive">{item.error}</p> : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }
 

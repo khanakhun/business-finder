@@ -22,6 +22,22 @@ export const sitesApiEnv = z.object({
     .describe(
       'Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host.',
     ),
+  LEADS_RETENTION_DAYS: z.coerce
+    .number()
+    .int()
+    .min(30)
+    .max(3_650)
+    .default(730)
+    .describe(
+      'Days a preview lead (claim, contact request, opt-out) is kept (BF-048; 24 months by default).',
+    ),
+  LEADS_SPAM_RETENTION_DAYS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(365)
+    .default(30)
+    .describe('Days a lead marked as spam is kept (BF-048).'),
   SITE_CHAT_RETENTION_DAYS: z.coerce
     .number()
     .int()

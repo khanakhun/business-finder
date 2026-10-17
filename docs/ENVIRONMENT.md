@@ -129,6 +129,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `SITES_INTERNAL_URL` | Sites | api, worker | no | `http://127.0.0.1:3100` |  | Internal URL of apps/sites; the API asks it to refresh a site after a publication changes. |
 | `SITES_REVALIDATE_SECRET` | Sites | api, worker, sites | no |  | yes | Shared secret signing revalidation calls to apps/sites, ≥ 32 chars. Unset: no revalidation (refused in production). |
 | `SITES_ASSETS_BASE_URL` | Sites | api, worker, sites | no | `https://assets.sites.localhost` |  | Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host. |
+| `LEADS_RETENTION_DAYS` | Sites | api, worker | no | `730` |  | Days a preview lead (claim, contact request, opt-out) is kept (BF-048; 24 months by default). |
+| `LEADS_SPAM_RETENTION_DAYS` | Sites | api, worker | no | `30` |  | Days a lead marked as spam is kept (BF-048). |
 | `SITE_CHAT_RETENTION_DAYS` | Sites | api, worker | no | `180` |  | Days a site chat thread (messages and proposals) is kept after its last message (BF-047). |
 | `SITES_VIEW_TOKEN_SECRET` | Sites | api, worker, sites | no |  | yes | Shared with apps/sites: signs the view-beacon token of published pages and salts the daily visitor hashes, ≥ 32 chars. Unset: views are not counted (refused in production). |
 | `FEATURE_MAPS_SCRAPER` | Feature flags | api, worker | no | `false` |  | Enable the self-hosted Google Maps scraper provider. |

@@ -11,7 +11,19 @@ import { CrmController } from './interface/http/crm.controller.ts';
 /** CRM basics (BF-024): pipeline, owner, tags, do-not-contact, notes, tasks, activity timeline, board. */
 @Module({})
 export class CrmModule {
+  private static readonly built = new Map<AppMode, DynamicModule>();
+
+  /** One definition per mode: the app and the modules built on the CRM (leads) share one instance. */
   static forRoot(mode: AppMode): DynamicModule {
+    let module = CrmModule.built.get(mode);
+    if (!module) {
+      module = CrmModule.build(mode);
+      CrmModule.built.set(mode, module);
+    }
+    return module;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: CrmModule,
       imports: [RealtimeModule.forRoot(mode)],

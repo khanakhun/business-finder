@@ -642,6 +642,10 @@
       "site_needs_review": {
         "title": "A generated site needs review",
         "body": "{business}: the site was kept unpublished ({reason})."
+      },
+      "lead_opted_out": {
+        "title": "{business} asked not to be contacted",
+        "body": "Do-not-contact is set; the preview is taken down if they asked."
       }
     },
     "preferences": {
@@ -659,7 +663,8 @@
         "mailbox_paused": "Mailbox paused",
         "member_joined": "New members",
         "system_test": "Test notifications",
-        "site_needs_review": "Sites to review"
+        "site_needs_review": "Sites to review",
+        "lead_opted_out": "Opt-outs from previews"
       }
     }
   },

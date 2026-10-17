@@ -9,6 +9,8 @@ import { IsoDateTimeSchema } from './time.ts';
 export const NOTIFICATION_TYPES = {
   reply_received: { inApp: true, email: true },
   lead_captured: { inApp: true, email: true },
+  /** A business asked not to be contacted from its preview (BF-048). */
+  lead_opted_out: { inApp: true, email: false },
   batch_completed: { inApp: true, email: false },
   /** A generated site needs a person's review (BF-039). */
   site_needs_review: { inApp: true, email: false },

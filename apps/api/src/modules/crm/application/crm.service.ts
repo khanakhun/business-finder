@@ -335,6 +335,63 @@ export class CrmService {
     await this.repository.refreshCounters(workspaceOf(auth), note.businessId);
   }
 
+  // --- Automation (no user: site leads, BF-048) ---------------------------------------------------------------
+
+  /** Do-not-contact set by the system (an opt-out from a preview); false when the business is not tracked. */
+  @Transactional()
+  async systemDoNotContact(organizationId: string, businessId: string, reason: string): Promise<boolean> {
+    const record = await this.repository.get(organizationId, businessId);
+    if (!record) return false;
+    if (record.doNotContact && record.doNotContactReason === reason) return true;
+    await this.repository.setDoNotContact(organizationId, businessId, true, reason);
+    await this.events.record(DoNotContactSet, {
+      orgId: organizationId,
+      payload: { businessId: businessId as never, doNotContact: true, reason },
+    });
+    return true;
+  }
+
+  /** A task the system creates (a lead to call back); null when the business is not tracked. */
+  @Transactional()
+  async systemTask(
+    organizationId: string,
+    businessId: string,
+    task: { title: string; type: CreateTaskRequest['type']; dueAt: Date | null; assigneeId: string | null },
+  ): Promise<string | null> {
+    const record = await this.repository.get(organizationId, businessId);
+    if (!record) return null;
+    await this.repository.lock(organizationId, businessId);
+    const id = newId();
+    await this.repository.insertTask({
+      id,
+      organizationId,
+      businessId,
+      assigneeId: task.assigneeId,
+      createdBy: null,
+      type: task.type,
+      title: task.title.slice(0, 200),
+      dueAt: task.dueAt,
+      status: 'open',
+      createdAt: this.clock.now(),
+    });
+    await this.repository.refreshCounters(organizationId, businessId);
+    await this.events.record(TaskCreated, {
+      orgId: organizationId,
+      payload: {
+        businessId: businessId as never,
+        taskId: id,
+        title: task.title.slice(0, 200),
+        dueAt: task.dueAt?.toISOString() ?? null,
+      },
+    });
+    return id;
+  }
+
+  /** The business's owner in the workspace (null when unowned or untracked). */
+  async ownerOf(organizationId: string, businessId: string): Promise<string | null> {
+    return (await this.repository.get(organizationId, businessId))?.ownerUserId ?? null;
+  }
+
   // --- Tasks ----------------------------------------------------------------------------------------------------
 
   @Transactional()
@@ -417,6 +474,24 @@ export class CrmPipeline {
     return this.safely(() =>
       this.crm.transition(organizationId, businessId, 'engaged', undefined, 'automatic'),
     );
+  }
+
+  /** Do-not-contact from an opt-out (BF-048); false when the business is not tracked. */
+  doNotContact(organizationId: string, businessId: string, reason: string): Promise<boolean> {
+    return this.crm.systemDoNotContact(organizationId, businessId, reason);
+  }
+
+  /** A follow-up task created by the system; null when the business is not tracked. */
+  followUp(
+    organizationId: string,
+    businessId: string,
+    task: Parameters<CrmService['systemTask']>[2],
+  ): Promise<string | null> {
+    return this.crm.systemTask(organizationId, businessId, task);
+  }
+
+  ownerOf(organizationId: string, businessId: string): Promise<string | null> {
+    return this.crm.ownerOf(organizationId, businessId);
   }
 
   private async safely(move: () => Promise<boolean>): Promise<boolean> {

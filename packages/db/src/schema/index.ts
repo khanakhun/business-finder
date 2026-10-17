@@ -6,6 +6,7 @@ export * from './discovery.ts';
 export * from './enrichment.ts';
 export * from './generation.ts';
 export * from './geo.ts';
+export * from './leads.ts';
 export * from './platform.ts';
 export * from './realtime.ts';
 export * from './reviews.ts';

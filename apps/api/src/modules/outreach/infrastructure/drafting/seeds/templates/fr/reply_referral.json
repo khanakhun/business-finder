@@ -1,0 +1,13 @@
+{
+  "key": "reply_referral",
+  "name": "Réponse à une mise en relation",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Merci pour la mise en relation",
+    "Merci, je contacte la bonne personne",
+    "{{business.name}} : merci pour votre aide"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nMerci d’avoir pris le temps de m’indiquer la bonne personne, cela m’aide beaucoup. Je vais la contacter directement, en précisant que vous m’avez transmis son contact, et je ferai court.\n\nBonne journée à toute l’équipe de {{business.name}}.\n\nBien cordialement,"
+}

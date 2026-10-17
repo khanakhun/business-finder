@@ -1,0 +1,13 @@
+{
+  "key": "first_touch_new_website",
+  "name": "First touch, no existing website",
+  "purpose": "first_touch",
+  "offer": "new_website",
+  "locale": "en",
+  "subjectVariants": [
+    "A first website concept for {{business.name}}",
+    "{{business.name}} online: a concept to look at",
+    "An idea for {{business.name}}"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nI’m {{sender.firstName}} from {{sender.agencyName}}, a small studio working with local businesses{{#if business.locality}} in {{business.locality}}{{/if}}. I could not find a website for {{business.name}}, so we took the liberty of sketching one.\n\n{{#if reviews.topTheme}}Reading what customers say about you, one theme comes up: {{reviews.topTheme}}. A simple site could help with that.\n\n{{/if}}Here is a concept of what {{offer.label}} for {{business.name}} could look like. It is a first draft, not a finished site, and it comes with no obligation:\n\n{{preview.url}}\n\nIf you would like to see where it could go, I would be happy to have a 10-minute call. A short reply is enough.\n{{#if contact.isGeneric}}\nIf someone else handles this at {{business.name}}, please feel free to pass it along.\n{{/if}}\nBest regards,"
+}

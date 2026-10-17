@@ -1,0 +1,13 @@
+{
+  "key": "reply_more_info",
+  "name": "Reply to “tell me more”",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "More detail for {{business.name}}",
+    "What we would do for {{business.name}}",
+    "A bit more on the idea"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nThank you for getting back to me. In short: we would start from how your customers find and contact {{business.name}} today, then design a site that makes the next step obvious on a phone as much as on a laptop. We take care of the design, the wording and the technical side.\n\nTo tailor this, one question: what would you most want a new site to do for you, more bookings, fewer phone calls, or something else?\n\nBest regards,"
+}

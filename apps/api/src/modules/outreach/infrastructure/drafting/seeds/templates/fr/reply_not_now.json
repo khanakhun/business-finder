@@ -1,0 +1,13 @@
+{
+  "key": "reply_not_now",
+  "name": "Réponse à « pas maintenant »",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Bien noté, {{business.name}}",
+    "Merci pour votre réponse",
+    "Je reviens vers vous plus tard, si vous le souhaitez"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nMerci de m’avoir répondu, j’apprécie la franchise. Je comprends que ce ne soit pas le moment et je n’insisterai pas.\n\nVerriez-vous un inconvénient à ce que je reprenne contact dans quelques mois ? Si vous préférez que je n’y revienne pas, dites-le-moi simplement et j’en resterai là.\n\nBonne continuation à {{business.name}}.\n\nBien cordialement,"
+}

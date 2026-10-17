@@ -1,0 +1,13 @@
+{
+  "key": "reply_price",
+  "name": "Reply to a price question",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "Your question about pricing",
+    "Pricing for {{business.name}}’s website",
+    "{{business.name}}: getting you a clear quote"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nThanks for asking, and it is a fair question. The honest answer is that it depends on scope: how many pages, whether you need online booking or a shop, the text and photos, and the languages. A one-page site and a full rebuild are very different projects.\n\nRather than guess, could we take 15 minutes on a call? I will ask a few questions and then send you a clear written quote.\n\nBest regards,"
+}

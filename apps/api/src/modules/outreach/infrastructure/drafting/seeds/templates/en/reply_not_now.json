@@ -1,0 +1,13 @@
+{
+  "key": "reply_not_now",
+  "name": "Reply to “not now”",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "Understood, {{business.name}}",
+    "Thanks for letting me know",
+    "Checking back later, if that suits you"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nThank you for letting me know; I appreciate the straight answer. I understand this is not the moment, and I will not keep nudging.\n\nWould it be all right if I checked back in a few months? If you would rather I did not, just say so and I will leave it there.\n\nAll the best with {{business.name}}.\n\nBest regards,"
+}

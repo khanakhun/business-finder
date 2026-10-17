@@ -309,6 +309,20 @@
       "when": 1792236752949,
       "tag": "0043_dsr_and_retention",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1792239127347,
+      "tag": "0044_email_templates_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1792239167606,
+      "tag": "0045_email_template_seeds",
+      "breakpoints": true
     }
   ]
 }

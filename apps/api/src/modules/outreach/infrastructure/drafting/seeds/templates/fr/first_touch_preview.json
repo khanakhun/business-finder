@@ -1,0 +1,13 @@
+{
+  "key": "first_touch_preview",
+  "name": "Première prise de contact avec aperçu",
+  "purpose": "first_touch",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Une idée de site pour {{business.name}}",
+    "{{business.name}} : un aperçu de site à découvrir",
+    "Un concept de site pour {{business.name}}"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nJe suis {{sender.firstName}}, de {{sender.agencyName}}, un petit studio qui accompagne les commerces et entreprises locales{{#if business.locality}} à {{business.locality}}{{/if}}. En parcourant les établissements du secteur, {{business.name}} a retenu mon attention et j’ai pris le temps de regarder votre site actuel.\n\n{{#if audit.topFindings}}Quelques points ressortent :\n\n{{#each audit.topFindings}}- {{this}}\n{{/each}}\n{{/if}}Plutôt que de décrire ce que nous changerions, nous avons préparé un aperçu de ce que pourrait donner {{offer.label}} pour {{business.name}}. C’est une ébauche, pas un site terminé, et elle n’engage à rien :\n\n{{preview.url}}\n\nSi cela vous donne des idées, auriez-vous dix minutes pour en parler ? Une courte réponse me convient aussi.\n{{#if contact.isGeneric}}\nSi quelqu’un d’autre s’occupe du site chez {{business.name}}, merci d’avance de bien vouloir lui transmettre ce message.\n{{/if}}\nBien cordialement,"
+}

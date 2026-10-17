@@ -1,0 +1,13 @@
+{
+  "key": "follow_up_1",
+  "name": "Relance 1",
+  "purpose": "follow_up",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Suite à mon message sur {{business.name}}",
+    "Un détail de plus pour {{business.name}}",
+    "{{business.name}} : petite relance"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nJe vous ai écrit récemment au sujet du site de {{business.name}} et je voulais ajouter un élément.\n\n{{#if preview.url}}L’aperçu que nous avons esquissé pour {{offer.label}} est toujours là si vous avez un instant : {{preview.url}}{{else}}{{#if audit.topFindings}}Un point que je n’avais pas mentionné : {{#each audit.topFindings}}{{this}}{{/each}}. C’est un détail, vite corrigé.{{else}}J’ai quelques pistes concrètes pour {{offer.label}} que je partagerais volontiers.{{/if}}{{/if}}\n\nPas besoin d’une longue réponse : un oui, un non ou un « pas maintenant » me suffit.\n\nBien cordialement,"
+}

@@ -1,0 +1,13 @@
+{
+  "key": "follow_up_1",
+  "name": "Follow-up 1",
+  "purpose": "follow_up",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "Following up on {{business.name}}’s website",
+    "One more thought for {{business.name}}",
+    "{{business.name}}: a quick follow-up"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nI wrote recently about {{business.name}}’s website and wanted to add one thing.\n\n{{#if preview.url}}The concept we sketched for {{offer.label}} is still there if you have a moment to look: {{preview.url}}{{else}}{{#if audit.topFindings}}One detail I did not mention: {{#each audit.topFindings}}{{this}}{{/each}}. It is a small thing, and simple to fix.{{else}}I have a few concrete ideas for {{offer.label}} that I would be glad to share.{{/if}}{{/if}}\n\nNo need for a long answer: a yes, a no, or a “not now” is all I need.\n\nBest regards,"
+}

@@ -1,0 +1,13 @@
+{
+  "key": "first_touch_audit",
+  "name": "First touch, audit-led",
+  "purpose": "first_touch",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "A few notes on {{business.name}}’s website",
+    "{{business.name}}: a quick look at your website",
+    "Some ideas for {{business.name}}’s website"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nI’m {{sender.firstName}} from {{sender.agencyName}}, a small studio working with local businesses{{#if business.locality}} in {{business.locality}}{{/if}}. I recently spent some time on {{business.name}}’s website and took a few notes.\n\n{{#if audit.topFindings}}What stood out:\n\n{{#each audit.topFindings}}- {{this}}\n{{/each}}\n{{/if}}{{#if audit.mobileScore}}On a phone, the site currently scores {{audit.mobileScore}} out of 100 in our test, and phones are where many people first look.\n\n{{/if}}None of this is unusual, and all of it is fixable. If it would be useful, I can send over a few concrete ideas for {{offer.label}}, or walk you through them in a 10-minute call. Just let me know which you would prefer.\n{{#if contact.isGeneric}}\nIf someone else looks after the website at {{business.name}}, please feel free to forward this.\n{{/if}}\nBest regards,"
+}

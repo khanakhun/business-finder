@@ -9,8 +9,21 @@ export function normalizeKey(scope: SuppressionScope, value: string): string | n
   const raw = value.trim();
   switch (scope) {
     case 'email': {
+      // Split checks, no backtracking regex: one @, a local part, a dotted domain, no spaces.
       const email = raw.toLowerCase();
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
+      const at = email.indexOf('@');
+      const local = email.slice(0, at);
+      const domain = email.slice(at + 1);
+      const valid =
+        at > 0 &&
+        email.length <= 320 &&
+        !/\s/.test(email) &&
+        !domain.includes('@') &&
+        domain.includes('.') &&
+        !domain.startsWith('.') &&
+        !domain.endsWith('.') &&
+        local.length > 0;
+      return valid ? email : null;
     }
     case 'domain': {
       const host =

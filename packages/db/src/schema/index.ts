@@ -17,6 +17,7 @@ export * from './realtime.ts';
 export * from './reviews.ts';
 export * from './scoring.ts';
 export * from './search.ts';
+export * from './sequences.ts';
 export * from './site-chat.ts';
 export * from './sites.ts';
 export * from './workspace.ts';

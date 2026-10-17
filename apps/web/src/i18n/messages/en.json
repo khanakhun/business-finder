@@ -26,7 +26,8 @@
     "expand": "Expand sidebar",
     "label": "Main navigation",
     "tasks": "Tasks",
-    "leads": "Leads"
+    "leads": "Leads",
+    "compliance": "Compliance"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -3597,5 +3598,190 @@
         "reconnected": "Reconnected"
       }
     }
+  },
+  "complianceAdmin": {
+    "title": "Compliance",
+    "description": "Suppressions, data-subject requests and retention.",
+    "nav": {
+      "label": "Compliance sections",
+      "suppressions": "Suppressions",
+      "requests": "Data requests",
+      "retention": "Retention",
+      "policies": "Policies"
+    },
+    "scopes": {
+      "email": "Email",
+      "domain": "Domain",
+      "phone": "Phone",
+      "business": "Business (everywhere)",
+      "org_business": "Business",
+      "email_hash": "Erased email (hash)"
+    },
+    "reasons": {
+      "unsubscribe": "Unsubscribed",
+      "opt_out": "Opted out",
+      "complaint": "Complaint",
+      "hard_bounce": "Hard bounce",
+      "manual": "Manual",
+      "dsr_objection": "Objection (data request)",
+      "no_solicitation": "No solicitation",
+      "legal": "Legal"
+    },
+    "suppressions": {
+      "search": "Search",
+      "scope": "Type",
+      "reason": "Reason",
+      "view": "Show",
+      "all": "All",
+      "current": "Suppressed now",
+      "log": "Full log",
+      "add": "Add",
+      "import": "Import CSV",
+      "export": "Export CSV",
+      "loadError": "Could not load the suppressions.",
+      "emptyTitle": "Nothing suppressed",
+      "emptyBody": "Unsubscribes, opt-outs and manual entries appear here.",
+      "caption": "Suppressions",
+      "value": "Value",
+      "source": "Source",
+      "when": "Since",
+      "actions": "Actions",
+      "hashed": "erased (kept as a hash)",
+      "global": "Platform-wide",
+      "revoke": "Lift",
+      "sources": {
+        "link": "Unsubscribe page",
+        "one_click": "One-click unsubscribe",
+        "reply": "Reply",
+        "site_form": "Preview site form",
+        "api": "API",
+        "import": "Import",
+        "admin": "Added by a person",
+        "system": "System"
+      },
+      "action": {
+        "add": "added",
+        "revoke": "lifted"
+      },
+      "added": "Suppressed.",
+      "failed": "That did not work.",
+      "addTitle": "Suppress an address",
+      "addHint": "Nobody in the workspace will contact it again until it is lifted.",
+      "note": "Note (optional)",
+      "imported": "{added} entries suppressed.",
+      "importTitle": "Import suppressions",
+      "importHint": "A CSV with one value per line, or a header with a value or email column. Preview first: nothing is written until you confirm.",
+      "file": "CSV file",
+      "orPaste": "Or paste the values",
+      "previewSummary": "{rows} rows: {valid} valid ({duplicates} duplicates), {already} already suppressed, {invalid} invalid.",
+      "invalidLine": "Line {line}: {value}",
+      "preview": "Preview",
+      "commit": "Suppress {count}",
+      "revoked": "Suppression lifted.",
+      "revokeTitle": "Lift this suppression",
+      "consentWarning": "This person unsubscribed. Lift it only with a record of their new, explicit consent.",
+      "revokeReason": "Why it is lifted",
+      "consentEvidence": "How and when they consented again"
+    },
+    "dsrTypes": {
+      "access": "Access",
+      "erasure": "Erasure",
+      "objection": "Objection",
+      "rectification": "Rectification",
+      "restriction": "Restriction"
+    },
+    "dsrStatus": {
+      "received": "Received",
+      "verifying": "Verifying",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+    "methods": {
+      "email_reply": "Reply from the address",
+      "known_contact": "Known contact",
+      "id_document": "Identity document",
+      "other": "Other"
+    },
+    "requests": {
+      "new": "New request",
+      "loadError": "Could not load the requests.",
+      "emptyTitle": "No data request",
+      "emptyBody": "Requests from people about their data appear here, with their one-month deadline.",
+      "erasedSubject": "Identifiers erased",
+      "due": "Due {when}",
+      "detail": "Data request",
+      "detailHint": "Subject, deadline, actions and trail of this request.",
+      "newHint": "Record a request received by email, phone or letter. The deadline is one month.",
+      "type": "Type",
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name",
+      "notes": "Notes",
+      "created": "Request recorded.",
+      "failed": "That did not work.",
+      "create": "Record",
+      "source": {
+        "admin": "Recorded by the team",
+        "public": "Privacy page form"
+      },
+      "subject": "Who",
+      "verifyTitle": "Verify identity",
+      "method": "How it was verified",
+      "verifyNotes": "What was checked",
+      "verify": "Mark verified",
+      "verified": "Identity verified.",
+      "executeTitle": "Carry out",
+      "discover": "Find their data",
+      "discovered": "Search done.",
+      "records": "{count, plural, =0 {nothing} one {# record} other {# records}}",
+      "manualReview": "review by hand",
+      "mode": "Erasure mode",
+      "anonymize": "Anonymize (keep the records)",
+      "delete": "Delete the records",
+      "whatWasDone": "What was done",
+      "executed": "Request completed.",
+      "execute": {
+        "access": "Build the export",
+        "erasure": "Erase their data",
+        "objection": "Stop all prospecting",
+        "rectification": "Mark as corrected",
+        "restriction": "Restrict processing"
+      },
+      "rejectReason": "Reason for rejecting",
+      "reject": "Reject",
+      "rejected": "Request rejected.",
+      "download": "Download the export",
+      "trail": "Trail",
+      "actions": {
+        "received": "Received",
+        "verified": "Identity verified",
+        "rejected": "Rejected",
+        "discovered": "Data searched",
+        "executed": "Carried out"
+      }
+    },
+    "retention": {
+      "loadError": "Could not load the retention policies.",
+      "policies": "Policies",
+      "dryRun": "Dry run",
+      "dryRunDone": "Dry run recorded below.",
+      "failed": "That did not work.",
+      "policy": "Policy",
+      "kept": "Kept",
+      "action": "Then",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "actions": {
+        "delete": "Deleted",
+        "anonymize": "Anonymized",
+        "truncate_payload": "Payload removed"
+      },
+      "runs": "Latest runs",
+      "noRuns": "No run yet: the daily run starts in the worker.",
+      "dry": "dry run (nothing changed)",
+      "real": "daily run",
+      "rows": "{count, plural, =0 {nothing} one {# row} other {# rows}}"
+    },
+    "dataMap": "Records of processing (data map)"
   }
 }

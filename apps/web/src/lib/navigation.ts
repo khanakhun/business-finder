@@ -13,6 +13,7 @@ import {
   MailsIcon,
   SearchIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   SparklesIcon,
 } from 'lucide-react';
 
@@ -31,6 +32,7 @@ export type NavKey =
   | 'templates'
   | 'mailboxes'
   | 'analytics'
+  | 'compliance'
   | 'settings';
 
 export interface NavItem {
@@ -80,6 +82,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     key: 'workspace',
     items: [
       { key: 'analytics', href: '/analytics', icon: BarChart3Icon },
+      { key: 'compliance', href: '/compliance', icon: ShieldCheckIcon },
       { key: 'settings', href: '/settings', icon: SettingsIcon },
     ],
   },

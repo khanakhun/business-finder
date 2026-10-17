@@ -24,6 +24,9 @@ import { SequenceStatsService } from '../../application/sequences/stats.ts';
 
 class SaveBody extends zodDto(SaveSequenceRequestSchema) {}
 class EnrollBody extends zodDto(EnrollRequestSchema) {}
+class EnrollmentQuery extends zodDto(
+  z.object({ businessId: z.uuid().optional(), sequenceId: z.uuid().optional() }),
+) {}
 class StartersBody extends zodDto(
   z.object({ locale: z.enum(['en', 'fr']) }).meta({ id: 'CreateStarterSequencesRequest' }),
 ) {}
@@ -180,14 +183,12 @@ export class SequencesController {
   @ApiRoute({
     summary: 'Enrollments of a business or a sequence, newest first, with their trail',
     operationId: 'listEnrollments',
+    query: EnrollmentQuery,
     response: { status: 200, schema: EnrollmentListSchema },
     errors: [400, 401, 403],
   })
-  async enrollmentsOf(
-    @Ctx() auth: AuthContext,
-    @Query('businessId', new ParseUUIDPipe({ optional: true })) businessId: string | undefined,
-    @Query('sequenceId', new ParseUUIDPipe({ optional: true })) sequenceId: string | undefined,
-  ) {
+  async enrollmentsOf(@Ctx() auth: AuthContext, @Query() query: EnrollmentQuery) {
+    const { businessId, sequenceId } = query as { businessId?: string; sequenceId?: string };
     return { items: await this.enrollments.list(await this.actor(auth), { businessId, sequenceId }) };
   }
 

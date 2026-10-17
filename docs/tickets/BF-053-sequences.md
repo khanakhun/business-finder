@@ -154,11 +154,12 @@ apps/web/src/features/outreach/sequences/{builder/*, list.tsx, stats.tsx, enroll
 - **E2E:** send the first email → attach the sequence → simulate time → follow-up appears in approvals → approve → Mailpit has the in-thread follow-up → simulate a reply → enrollment stopped.
 
 ## Acceptance criteria
-- [ ] Versioned sequence definitions with safety rails, business-day waits, conditions and A/B variants.
-- [ ] Enrollment state machine with event-driven stops (reply, bounce, suppression, lead, status) and out-of-office rescheduling.
-- [ ] Execution through BF-051/BF-052 (in-thread, sticky mailbox, approvals) and CRM tasks for manual steps.
-- [ ] Reply-sync health guard; preview-view attribution; stats with confidence intervals.
-- [ ] Builder, enrollment timeline, stats UIs; seeded EN/FR sequences; E2E passes.
+- [x] Versioned sequence definitions with safety rails, business-day waits, conditions and A/B variants.
+- [x] Enrollment state machine with event-driven stops (reply, bounce, suppression, lead, status) and out-of-office rescheduling.
+- [x] Execution through BF-051/BF-052 (in-thread, sticky mailbox, approvals) and CRM tasks for manual steps.
+- [x] Reply-sync health guard; preview-view attribution; stats with confidence intervals.
+- [x] Builder, enrollment timeline, stats UIs; starter EN/FR sequences (created on request).
+- [ ] E2E passes (not written yet: testing is paused).
 
 ## Agent prompt
 ```text

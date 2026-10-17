@@ -27,7 +27,7 @@ import * as React from 'react';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { useDraft } from '../api.ts';
-import { useBulkActions, useBulkRun, useBulkRuns, useMessageActions } from '../outbound-api.ts';
+import { useBulkActions, useBulkRun, useBulkRuns, useMessageActions, useOutbox } from '../outbound-api.ts';
 
 // Approvals (BF-052): bulk runs and their items — each drafted for one business and judged by the compliance gate —
 // waiting for a person. Approve one, several, or all (with the count confirmed); reject; edit a draft inline. The
@@ -90,7 +90,8 @@ export function ApprovalsPage() {
           </ul>
         )}
       </aside>
-      <section className="min-w-0">
+      <section className="min-w-0 space-y-6">
+        <SequenceSteps />
         {selected ? (
           <RunDetail id={selected} />
         ) : (
@@ -98,6 +99,56 @@ export function ApprovalsPage() {
         )}
       </section>
     </div>
+  );
+}
+
+/** Sequence steps waiting for approval (BF-053): each judged again when approved; rejecting skips the step. */
+function SequenceSteps() {
+  const t = useTranslations('outbound.approvals');
+  const pending = useOutbox({ status: 'pending_approval' });
+  const actions = useMessageActions();
+  const items = (pending.data?.items ?? []).filter((item) => item.sequence !== null);
+  if (items.length === 0) return null;
+  const act = async (call: () => Promise<unknown>, done: string) => {
+    const toast = await getToast();
+    try {
+      await call();
+      toast.success(done);
+    } catch (error) {
+      const problem = toProblemLike(error, t('failed'));
+      toast.error(problem.detail ?? problem.title);
+    }
+  };
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-medium">{t('sequenceSteps', { count: items.length })}</h2>
+      <ul className="space-y-2">
+        {items.map((item) => (
+          <li key={item.id} className="flex flex-wrap items-center gap-2 rounded-lg border p-3 text-sm">
+            <span className="font-medium">{item.businessName}</span>
+            <span className="text-xs text-muted-foreground">
+              {t('sequenceStep', { step: (item.sequence?.stepIndex ?? 0) + 1 })} · {item.subject}
+            </span>
+            <div className="ml-auto flex gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => void act(() => actions.cancel.mutateAsync(item.id), t('rejectedOne'))}
+              >
+                {t('reject')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void act(() => actions.approve.mutateAsync(item.id), t('approvedOne'))}
+              >
+                {t('approve')}
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

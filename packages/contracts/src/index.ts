@@ -1261,6 +1261,7 @@ export {
   WebsiteFilterSchema,
 } from './search-intent.ts';
 export {
+  type DefinitionIssue,
   ENROLLMENT_STATUSES,
   type Enrollment,
   EnrollmentListSchema,
@@ -1272,6 +1273,7 @@ export {
   EnrollRequestSchema,
   type EnrollResult,
   EnrollResultSchema,
+  isAlternative,
   OutreachSequenceStepJob,
   type SaveSequenceRequest,
   SaveSequenceRequestSchema,
@@ -1291,6 +1293,7 @@ export {
   STOP_REASONS,
   type StopReason,
   StopReasonSchema,
+  validateDefinition,
 } from './sequences.ts';
 export {
   type ApplyProposalRequest,

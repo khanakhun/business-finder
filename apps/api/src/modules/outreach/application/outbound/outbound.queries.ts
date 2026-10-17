@@ -33,6 +33,11 @@ const summary = (row: OutboundListRow): OutboundMessageSummary => ({
   attempts: row.attempts,
   lastError: row.lastError,
   blockedReasons: row.blockedReasons,
+  sequence:
+    row.sequenceEnrollmentId !== null
+      ? { enrollmentId: row.sequenceEnrollmentId, stepIndex: row.sequenceStep ?? 0 }
+      : null,
+  bulkRunId: row.bulkRunId,
   createdAt: row.createdAt.toISOString(),
 });
 

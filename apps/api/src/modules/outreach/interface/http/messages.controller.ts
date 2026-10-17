@@ -144,6 +144,21 @@ export class MessagesController {
     return this.queries.get(actor.organizationId, id);
   }
 
+  @Post('messages/:id/approve')
+  @HttpCode(200)
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary: 'Approve a message waiting for approval: judged again, then queued (refused ones are cancelled)',
+    operationId: 'approveOutboundMessage',
+    response: { status: 200, schema: OutboundMessageSchema },
+    errors: [401, 403, 404, 409, 422],
+  })
+  async approve(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+    const actor = await this.actor(auth);
+    await this.commands.approveOne(actor, id);
+    return this.queries.get(actor.organizationId, id);
+  }
+
   @Post('messages/:id/cancel')
   @HttpCode(200)
   @RequirePermission('outreach:send')

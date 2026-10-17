@@ -2564,6 +2564,23 @@ export type paths = {
         patch: operations["editPendingMessage"];
         trace?: never;
     };
+    "/v1/outreach/messages/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve a message waiting for approval: judged again, then queued (refused ones are cancelled) */
+        post: operations["approveOutboundMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/outreach/messages/{id}/cancel": {
         parameters: {
             query?: never;
@@ -4228,6 +4245,7 @@ export type components = {
             blockedReasons: string[];
             bodyHtml: string;
             bodyText: string;
+            bulkRunId: string | null;
             /**
              * Format: uuid
              * @description BusinessId (UUID)
@@ -4263,6 +4281,11 @@ export type components = {
             /** Format: date-time */
             scheduledAt: string;
             sentAt: string | null;
+            sequence: {
+                /** Format: uuid */
+                enrollmentId: string;
+                stepIndex: number;
+            } | null;
             /** @enum {string} */
             status: "draft" | "pending_approval" | "queued" | "sending" | "sent" | "failed" | "blocked" | "cancelled" | "bounced" | "replied";
             subject: string;
@@ -6187,6 +6210,7 @@ export type components = {
                     attempts: number;
                     blockedReasons: string[];
                     bodyText: string;
+                    bulkRunId: string | null;
                     /**
                      * Format: uuid
                      * @description BusinessId (UUID)
@@ -6217,6 +6241,11 @@ export type components = {
                     /** Format: date-time */
                     scheduledAt: string;
                     sentAt: string | null;
+                    sequence: {
+                        /** Format: uuid */
+                        enrollmentId: string;
+                        stepIndex: number;
+                    } | null;
                     /** @enum {string} */
                     status: "draft" | "pending_approval" | "queued" | "sending" | "sent" | "failed" | "blocked" | "cancelled" | "bounced" | "replied";
                     subject: string;
@@ -6648,6 +6677,7 @@ export type components = {
             blockedReasons: string[];
             bodyHtml: string;
             bodyText: string;
+            bulkRunId: string | null;
             /**
              * Format: uuid
              * @description BusinessId (UUID)
@@ -6688,6 +6718,11 @@ export type components = {
             scheduledAt: string;
             sendDecision: components["schemas"]["ComplianceDecision"] | null;
             sentAt: string | null;
+            sequence: {
+                /** Format: uuid */
+                enrollmentId: string;
+                stepIndex: number;
+            } | null;
             /** @enum {string} */
             status: "draft" | "pending_approval" | "queued" | "sending" | "sent" | "failed" | "blocked" | "cancelled" | "bounced" | "replied";
             subject: string;
@@ -6709,6 +6744,7 @@ export type components = {
         OutboundMessageSummary: {
             attempts: number;
             blockedReasons: string[];
+            bulkRunId: string | null;
             /**
              * Format: uuid
              * @description BusinessId (UUID)
@@ -6739,6 +6775,11 @@ export type components = {
             /** Format: date-time */
             scheduledAt: string;
             sentAt: string | null;
+            sequence: {
+                /** Format: uuid */
+                enrollmentId: string;
+                stepIndex: number;
+            } | null;
             /** @enum {string} */
             status: "draft" | "pending_approval" | "queued" | "sending" | "sent" | "failed" | "blocked" | "cancelled" | "bounced" | "replied";
             subject: string;
@@ -15260,7 +15301,10 @@ export interface operations {
     };
     listEnrollments: {
         parameters: {
-            query?: never;
+            query?: {
+                businessId?: string;
+                sequenceId?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -15296,6 +15340,15 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -21426,6 +21479,82 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    approveOutboundMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutboundMessage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

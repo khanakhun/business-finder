@@ -293,7 +293,8 @@ export class GenerationRunner {
           organizationId: job.organizationId,
           workspace: { bundleRef: prepared.bundleRef },
           brief: prepared.summary,
-          budgetUsd: job.budgetUsd,
+          // What is left of the job's budget after its earlier attempts (BF-044: an agent's own limit).
+          budgetUsd: Math.max(0, job.budgetUsd - job.costUsd),
           deadlineAt,
           locales: settings.locales,
           ...(previous?.specRef ? { repair: { baseSpecRef: previous.specRef, issues: repairIssues } } : {}),

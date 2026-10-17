@@ -220,16 +220,17 @@ describe('Claude Code engine through the orchestrator (BF-044)', () => {
       .set('Idempotency-Key', 'batch-claude-2')
       .expect(201);
     const job = await settle(body.id);
-    expect(job).toMatchObject({ status: 'succeeded', engineCurrent: 'blocks' });
     const attempts = await db
       .select({ engine: generationAttempts.engine, exitReason: generationAttempts.exitReason })
       .from(generationAttempts)
       .where(eq(generationAttempts.jobId, job.id))
       .orderBy(asc(generationAttempts.attemptNo));
-    expect(attempts.map((a) => a.engine)).toEqual(['claude-code', 'claude-code', 'blocks']);
-    expect(attempts.slice(0, 2).map((a) => a.exitReason)).toEqual([
-      'ENGINE_INVALID_OUTPUT',
-      'ENGINE_INVALID_OUTPUT',
+    // The attempts first: on a failure they say why (engine and exit reason of each).
+    expect(attempts.map((a) => `${a.engine}:${a.exitReason ?? ''}`)).toEqual([
+      'claude-code:ENGINE_INVALID_OUTPUT',
+      'claude-code:ENGINE_INVALID_OUTPUT',
+      expect.stringMatching(/^blocks:/),
     ]);
+    expect(job).toMatchObject({ status: 'succeeded', engineCurrent: 'blocks' });
   }, 120_000);
 });

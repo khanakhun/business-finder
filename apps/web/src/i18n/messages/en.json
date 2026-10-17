@@ -4528,5 +4528,128 @@
       "suggestionsHint": "Tier A and B businesses with a phone number, not contacted in the last 14 days, open now.",
       "noSuggestions": "No suggestion right now."
     }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "description": "What works: niches, areas, offers, tiers, templates and engines, from discovery to won.",
+    "filters": "Filters",
+    "period": "Period",
+    "periods": {
+      "d30": "Last 30 days",
+      "d90": "Last 90 days",
+      "d365": "Last 12 months"
+    },
+    "offer": "Offer",
+    "allOffers": "All offers",
+    "tier": "Tier",
+    "allTiers": "All tiers",
+    "clearCategory": "Clear the category filter ({category})",
+    "tabs": {
+      "overview": "Overview",
+      "funnel": "Funnel",
+      "segments": "Segments",
+      "scoring": "Scoring",
+      "experiments": "Experiments",
+      "engines": "Engines",
+      "previews": "Previews",
+      "economics": "Costs"
+    },
+    "howCalculated": "How is {metric} calculated?",
+    "formula": "{numerator} divided by {denominator}.",
+    "smallSample": "Small sample (n={n})",
+    "smallSampleHint": "Fewer than 30 cases: this rate may change a lot with a few more.",
+    "freshness": "Data up to {when}.",
+    "showTable": "Show as a table",
+    "export": "Export CSV",
+    "exportFailed": "The export did not work.",
+    "overview": {
+      "kpis": "Key numbers",
+      "kpisHint": "Compared with the previous period of the same length.",
+      "change": "{change} vs the previous period",
+      "targetAtLeast": "Target: at least {target}",
+      "targetAtMost": "Target: under {target}",
+      "targetMet": "met",
+      "targetMissed": "not met yet",
+      "trends": "Day by day",
+      "trendsHint": "Daily totals, refreshed every 15 minutes.",
+      "trendsSummary": "Emails sent, previews published, leads and businesses discovered per day.",
+      "noTrends": "No activity in this period yet.",
+      "day": "Day"
+    },
+    "funnel": {
+      "title": "Funnel",
+      "hint": "From discovered to won, with the conversion from each step to the next.",
+      "segmentBy": "Split by",
+      "noSegment": "No split",
+      "summary": "Businesses at each step of the funnel.",
+      "businesses": "Businesses",
+      "fromPrevious": "{rate} of the step before",
+      "bySegment": "Funnel by segment",
+      "unknown": "Unknown",
+      "periodNote": "Each step counts what happened in the period; for the path of the same businesses, see the cohorts below.",
+      "cohorts": "Cohorts",
+      "cohortsHint": "Businesses by week of first contact, and what they did since.",
+      "noCohorts": "No business was contacted for the first time in this period.",
+      "cohort": {
+        "week": "Week of first contact",
+        "contacted": "Contacted",
+        "replied": "Replied",
+        "positive": "Positive",
+        "meetings": "Meetings",
+        "won": "Won"
+      }
+    },
+    "segments": {
+      "heatmap": "Category × area",
+      "heatmapHint": "Where businesses answer: the positive reply rate with the number of businesses contacted.",
+      "empty": "No business was contacted in this period.",
+      "unknown": "Unknown",
+      "cellHint": "{n} businesses contacted",
+      "mutedNote": "Cells with fewer than {min} businesses contacted are greyed out.",
+      "map": "By area",
+      "mapHint": "Darker areas reply more; grey areas have too few contacts to tell.",
+      "mapSummary": "Map of the positive reply rate by area."
+    },
+    "scoring": {
+      "intro": "Does a better score convert better? Rates use the tier and score the business had when it was contacted.",
+      "tierHint": "The positive reply rate by tier, with its 95% interval.",
+      "decileHint": "The same by score band of ten points.",
+      "empty": "No contacted business has a score in this period.",
+      "summary": "Positive reply rate by {dimension}, with intervals.",
+      "interval": "95% interval",
+      "lift": "Lift vs everyone",
+      "small": "small sample"
+    },
+    "experiments": {
+      "title": "Experiments",
+      "hint": "Templates, variants and offers compared on reply rates, with their 95% intervals.",
+      "compare": "Compare",
+      "empty": "No email was sent in this period.",
+      "worthALook": "differs from another",
+      "noWinner": "No winner is picked for you: rows whose intervals do not overlap are worth a closer look, and small samples are greyed out."
+    },
+    "engines": {
+      "title": "Engines",
+      "hint": "Each site engine's success, reviews, quality, time and cost, and the replies to emails linking to its previews.",
+      "empty": "No generation job finished in this period.",
+      "summary": "Success and review rates per engine.",
+      "acceptanceNote": "The share of previews sent without manual edits will show here once draft edits are tracked."
+    },
+    "previews": {
+      "title": "Preview engagement",
+      "hint": "Previews published and viewed, and the leads they brought.",
+      "timeToViewNote": "Time to first view after sending is not measured yet.",
+      "views": "Page views",
+      "empty": "No views in this period.",
+      "viewsSummary": "Page views per day.",
+      "day": "Day"
+    },
+    "economics": {
+      "title": "Unit economics",
+      "hint": "AI and data provider spend, and what a site, a contact, a positive reply and a lead cost.",
+      "byFeature": "Spend by feature",
+      "empty": "No spend recorded in this period.",
+      "summary": "Spend by AI task or data provider."
+    }
   }
 }

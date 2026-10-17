@@ -4528,5 +4528,128 @@
       "suggestionsHint": "Entreprises de niveau A et B avec un numéro de téléphone, non contactées depuis 14 jours, ouvertes en ce moment.",
       "noSuggestions": "Aucune suggestion pour le moment."
     }
+  },
+  "analytics": {
+    "title": "Analytique",
+    "description": "Ce qui fonctionne : niches, zones, offres, niveaux, modèles et moteurs, de la découverte jusqu’à l’affaire gagnée.",
+    "filters": "Filtres",
+    "period": "Période",
+    "periods": {
+      "d30": "30 derniers jours",
+      "d90": "90 derniers jours",
+      "d365": "12 derniers mois"
+    },
+    "offer": "Offre",
+    "allOffers": "Toutes les offres",
+    "tier": "Niveau",
+    "allTiers": "Tous les niveaux",
+    "clearCategory": "Retirer le filtre de catégorie ({category})",
+    "tabs": {
+      "overview": "Vue d’ensemble",
+      "funnel": "Entonnoir",
+      "segments": "Segments",
+      "scoring": "Score",
+      "experiments": "Expériences",
+      "engines": "Moteurs",
+      "previews": "Aperçus",
+      "economics": "Coûts"
+    },
+    "howCalculated": "Comment se calcule {metric} ?",
+    "formula": "{numerator} divisé par {denominator}.",
+    "smallSample": "Petit échantillon (n={n})",
+    "smallSampleHint": "Moins de 30 cas : ce taux peut beaucoup varier avec quelques cas de plus.",
+    "freshness": "Données à jour au {when}.",
+    "showTable": "Afficher sous forme de tableau",
+    "export": "Exporter en CSV",
+    "exportFailed": "L’export n’a pas fonctionné.",
+    "overview": {
+      "kpis": "Chiffres clés",
+      "kpisHint": "Par rapport à la période précédente de même durée.",
+      "change": "{change} vs la période précédente",
+      "targetAtLeast": "Objectif : au moins {target}",
+      "targetAtMost": "Objectif : moins de {target}",
+      "targetMet": "atteint",
+      "targetMissed": "pas encore atteint",
+      "trends": "Jour par jour",
+      "trendsHint": "Totaux quotidiens, actualisés toutes les 15 minutes.",
+      "trendsSummary": "E-mails envoyés, aperçus publiés, prospects entrants et entreprises découvertes par jour.",
+      "noTrends": "Aucune activité sur cette période pour l’instant.",
+      "day": "Jour"
+    },
+    "funnel": {
+      "title": "Entonnoir",
+      "hint": "De la découverte à l’affaire gagnée, avec la conversion de chaque étape vers la suivante.",
+      "segmentBy": "Répartir par",
+      "noSegment": "Sans répartition",
+      "summary": "Entreprises à chaque étape de l’entonnoir.",
+      "businesses": "Entreprises",
+      "fromPrevious": "{rate} de l’étape précédente",
+      "bySegment": "Entonnoir par segment",
+      "unknown": "Inconnu",
+      "periodNote": "Chaque étape compte ce qui s’est passé sur la période ; pour le parcours des mêmes entreprises, voir les cohortes ci-dessous.",
+      "cohorts": "Cohortes",
+      "cohortsHint": "Entreprises par semaine de premier contact, et ce qu’elles ont fait depuis.",
+      "noCohorts": "Aucune entreprise n’a été contactée pour la première fois sur cette période.",
+      "cohort": {
+        "week": "Semaine du premier contact",
+        "contacted": "Contactées",
+        "replied": "Ont répondu",
+        "positive": "Positives",
+        "meetings": "Rendez-vous",
+        "won": "Gagnées"
+      }
+    },
+    "segments": {
+      "heatmap": "Catégorie × zone",
+      "heatmapHint": "Où les entreprises répondent : le taux de réponse positive avec le nombre d’entreprises contactées.",
+      "empty": "Aucune entreprise n’a été contactée sur cette période.",
+      "unknown": "Inconnu",
+      "cellHint": "{n} entreprises contactées",
+      "mutedNote": "Les cases de moins de {min} entreprises contactées sont grisées.",
+      "map": "Par zone",
+      "mapHint": "Les zones plus foncées répondent davantage ; les zones grises ont trop peu de contacts pour conclure.",
+      "mapSummary": "Carte du taux de réponse positive par zone."
+    },
+    "scoring": {
+      "intro": "Un meilleur score convertit-il mieux ? Les taux utilisent le niveau et le score qu’avait l’entreprise au moment du contact.",
+      "tierHint": "Le taux de réponse positive par niveau, avec son intervalle à 95 %.",
+      "decileHint": "Le même par tranche de score de dix points.",
+      "empty": "Aucune entreprise contactée n’a de score sur cette période.",
+      "summary": "Taux de réponse positive par {dimension}, avec intervalles.",
+      "interval": "Intervalle à 95 %",
+      "lift": "Gain relatif vs l’ensemble",
+      "small": "petit échantillon"
+    },
+    "experiments": {
+      "title": "Expériences",
+      "hint": "Modèles, variantes et offres comparés sur les taux de réponse, avec leurs intervalles à 95 %.",
+      "compare": "Comparer",
+      "empty": "Aucun e-mail n’a été envoyé sur cette période.",
+      "worthALook": "diffère d’une autre",
+      "noWinner": "Aucun gagnant n’est désigné à votre place : les lignes dont les intervalles ne se chevauchent pas méritent un examen plus attentif, et les petits échantillons sont grisés."
+    },
+    "engines": {
+      "title": "Moteurs",
+      "hint": "Pour chaque moteur de site : réussite, relectures, qualité, durée et coût, ainsi que les réponses aux e-mails renvoyant vers ses aperçus.",
+      "empty": "Aucune tâche de génération ne s’est terminée sur cette période.",
+      "summary": "Taux de réussite et de relecture par moteur.",
+      "acceptanceNote": "La part des aperçus envoyés sans modification manuelle s’affichera ici une fois les modifications de brouillon suivies."
+    },
+    "previews": {
+      "title": "Engagement sur les aperçus",
+      "hint": "Aperçus publiés et consultés, et les prospects entrants qu’ils ont apportés.",
+      "timeToViewNote": "Le délai avant la première consultation après l’envoi n’est pas encore mesuré.",
+      "views": "Pages vues",
+      "empty": "Aucune consultation sur cette période.",
+      "viewsSummary": "Pages vues par jour.",
+      "day": "Jour"
+    },
+    "economics": {
+      "title": "Coûts unitaires",
+      "hint": "Dépenses en IA et en fournisseurs de données, et ce que coûtent un site, un contact, une réponse positive et un prospect entrant.",
+      "byFeature": "Dépenses par fonctionnalité",
+      "empty": "Aucune dépense enregistrée sur cette période.",
+      "summary": "Dépenses par tâche IA ou fournisseur de données."
+    }
   }
 }

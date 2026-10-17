@@ -101,6 +101,13 @@ export const queryKeys = {
     bulkRuns: () => ['outreach', 'bulk-runs'] as const,
     bulkRun: (id: string) => ['outreach', 'bulk-run', id] as const,
   }),
+  analytics: defineQueryKeys('analytics', {
+    registry: () => ['analytics', 'registry'] as const,
+    query: (query: unknown) => ['analytics', 'query', query] as const,
+    funnel: (query: unknown) => ['analytics', 'funnel', query] as const,
+    cohorts: (query: unknown) => ['analytics', 'cohorts', query] as const,
+    trends: (query: unknown) => ['analytics', 'trends', query] as const,
+  }),
   assist: defineQueryKeys('assist', {
     workspace: (businessId: string) => ['assist', 'workspace', businessId] as const,
     script: (businessId: string, offer: string, locale: string) =>

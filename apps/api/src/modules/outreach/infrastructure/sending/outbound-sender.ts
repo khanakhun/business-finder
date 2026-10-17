@@ -8,10 +8,11 @@ import {
   OutreachMessageSent,
 } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ComplianceService } from '../../../compliance/index.ts';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { EventRecorder } from '../../../platform/events/event-recorder.ts';
+import { MAILBOX_READINESS, type MailboxReadinessGate } from '../../application/deliverability/ports.ts';
 import { MailboxCapacity } from '../../application/mailbox/mailbox-capacity.ts';
 import { MailboxesService } from '../../application/mailbox/mailboxes.service.ts';
 import {
@@ -62,6 +63,7 @@ export class OutboundSender {
     private readonly capacity: MailboxCapacity,
     private readonly compliance: ComplianceService,
     private readonly events: EventRecorder,
+    @Optional() @Inject(MAILBOX_READINESS) private readonly readiness?: MailboxReadinessGate,
   ) {}
 
   async send(messageId: string, leaseIso: string, logger: Logger): Promise<SendOutcome> {

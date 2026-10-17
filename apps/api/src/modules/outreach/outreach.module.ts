@@ -10,6 +10,8 @@ import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
 import { SitesModule } from '../sites/index.ts';
+import { DeliverabilityService, DNS_LOOKUPS } from './application/deliverability/deliverability.service.ts';
+import { DELIVERABILITY_REPOSITORY, MAILBOX_READINESS } from './application/deliverability/ports.ts';
 import { DraftsService } from './application/drafting/drafts.service.ts';
 import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
 import { TemplatesService } from './application/drafting/templates.service.ts';
@@ -68,6 +70,8 @@ import { SEQUENCE_REPOSITORY } from './application/sequences/ports.ts';
 import { SequenceSubscribers } from './application/sequences/sequence-subscribers.ts';
 import { SequencesService } from './application/sequences/sequences.service.ts';
 import { SequenceStatsService } from './application/sequences/stats.ts';
+import { DrizzleDeliverabilityRepository } from './infrastructure/deliverability/drizzle-deliverability.repository.ts';
+import { NodeDnsLookups } from './infrastructure/deliverability/node-dns.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
@@ -106,6 +110,7 @@ import {
 import { DrizzleSequencesRepository } from './infrastructure/sequences/drizzle-sequences.repository.ts';
 import { OutboundViewAttribution } from './infrastructure/sequences/outbound-view-attribution.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
+import { DeliverabilityController } from './interface/http/deliverability.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { InboxController } from './interface/http/inbox.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
@@ -151,6 +156,7 @@ export class OutreachModule {
               BulkController,
               InboxController,
               SequencesController,
+              DeliverabilityController,
             ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
@@ -239,6 +245,11 @@ export class OutreachModule {
         MailboxLifecycle,
         MailboxesService,
         MailboxCapacity,
+        // BF-056: deliverability (the readiness gate the selector and the send path consult).
+        { provide: DELIVERABILITY_REPOSITORY, useClass: DrizzleDeliverabilityRepository },
+        { provide: DNS_LOOKUPS, useClass: NodeDnsLookups },
+        DeliverabilityService,
+        { provide: MAILBOX_READINESS, useExisting: DeliverabilityService },
         { provide: OUTBOUND_REPOSITORY, useClass: DrizzleOutboundRepository },
         {
           provide: OUTREACH_TOKENS,

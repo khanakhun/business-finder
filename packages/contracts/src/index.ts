@@ -292,6 +292,22 @@ export {
   UpdateTaskRequestSchema,
 } from './crm.ts';
 export {
+  CHECK_OUTCOMES,
+  type CheckOutcome,
+  CheckOutcomeSchema,
+  DNS_CHECKS,
+  type DnsCheck,
+  type DnsCheckId,
+  DnsCheckIdSchema,
+  DnsCheckSchema,
+  type DomainCheck,
+  DomainCheckSchema,
+  type MailboxReadiness,
+  MailboxReadinessSchema,
+  ReadinessListSchema,
+  ReadinessOverrideRequestSchema,
+} from './deliverability.ts';
+export {
   DEFAULT_DISCOVERY_SETTINGS,
   DISCOVERY_PROVIDER_IDS,
   type DiscoveryIntent,

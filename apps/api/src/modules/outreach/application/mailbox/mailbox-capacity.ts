@@ -1,11 +1,12 @@
 import type { Clock, Locale, MailboxSelection } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { effectiveCap } from '../../domain/mailbox/capacity-policy.ts';
 import { canSend } from '../../domain/mailbox/mailbox-state-machine.ts';
 import { type MailboxCandidate, rank } from '../../domain/mailbox/selector.ts';
 import { nextSendSlot } from '../../domain/mailbox/window-policy.ts';
 import { addDays } from '../../domain/mailbox/zoned-time.ts';
+import { MAILBOX_READINESS, type MailboxReadinessGate } from '../deliverability/ports.ts';
 import { mailboxDay } from './mailbox-view.ts';
 import {
   CAPACITY_COUNTERS,
@@ -39,7 +40,13 @@ export class MailboxCapacity {
     @Inject(CAPACITY_COUNTERS) private readonly counters: CapacityCounters,
     @Inject(MAILBOX_LIMITS) private readonly limits: MailboxLimits,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Optional() @Inject(MAILBOX_READINESS) private readonly readiness?: MailboxReadinessGate,
   ) {}
+
+  /** BF-056: a mailbox whose domain fails authentication (without an owner's override) does not send. */
+  private async ready(mailbox: MailboxRecord) {
+    return this.readiness ? this.readiness.isReady(mailbox.organizationId, mailbox.id, mailbox.email) : true;
+  }
 
   async select(input: SelectInput, random: () => number = Math.random): Promise<MailboxSelection> {
     const now = this.clock.now();
@@ -49,7 +56,7 @@ export class MailboxCapacity {
     if (input.stickyMailboxId) {
       const sticky = mailboxes.find((mailbox) => mailbox.id === input.stickyMailboxId);
       // A paused or failed sender: the thread waits (or a person reassigns it); never a silent switch.
-      if (!sticky || !canSend(sticky.status))
+      if (!sticky || !canSend(sticky.status) || !(await this.ready(sticky)))
         return { ok: false, reason: 'STICKY_UNAVAILABLE', nextAvailableAt: null };
       const slot = await this.slot(sticky, input, now, random);
       return slot
@@ -78,7 +85,7 @@ export class MailboxCapacity {
     const ranked = rank(candidates, input.recipientLocale, now);
     for (const candidate of ranked) {
       const mailbox = mailboxes.find((m) => m.id === candidate.id);
-      if (!mailbox) continue;
+      if (!mailbox || !(await this.ready(mailbox))) continue;
       const slot = await this.slot(mailbox, input, now, random);
       if (!slot) continue;
       await this.repository.update(input.organizationId, mailbox.id, { lastSelectedAt: now });

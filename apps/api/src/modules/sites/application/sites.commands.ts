@@ -272,6 +272,40 @@ export class SiteCommands {
     return publication;
   }
 
+  /**
+   * Publishes a version live (BF-062): validated for a live site, served without expiry at the site's own hostname
+   * (the preview's, until a custom domain is attached), replacing the preview and any earlier live version there.
+   * Readiness is checked by the go-live service before it calls this.
+   */
+  @Transactional()
+  async publishLive(actor: SiteActor, siteId: string, versionId: string): Promise<StoredPublication> {
+    const site = await this.lock(actor, siteId);
+    if (site.status === 'archived') throw new SiteArchivedError(site.id, 'go live');
+    const version = await this.repository.version(site.id, versionId);
+    if (!version) throw new NotFoundError('SiteVersion', versionId);
+    checkSpec(version.spec, this.hosting, 'publish', 'live');
+    const now = this.clock.now();
+    const hostname = previewHostname(site.slug, this.hosting.baseDomain);
+    const active = await this.repository.activePublications(site.id);
+    for (const publication of active.filter((p) => p.hostname === hostname))
+      await this.repository.endPublication(publication.id, 'unpublished', now);
+    const publication = await this.repository.insertPublication({
+      siteId: site.id,
+      versionId: version.id,
+      environment: 'live',
+      hostname,
+      publishedBy: actor.userId,
+      publishedAt: now,
+      expiresAt: null,
+    });
+    await this.setStatus(site, [...active.filter((p) => p.hostname !== hostname), publication]);
+    await this.events.record(SitePublished, {
+      orgId: actor.organizationId,
+      payload: { ...this.publicationPayload(site, publication), expiresAt: null },
+    });
+    return publication;
+  }
+
   /** Moves the active preview's expiry later (from its current expiry, at most 90 days ahead). */
   @Transactional()
   async extendPreview(actor: SiteActor, siteId: string, days: number): Promise<StoredPublication> {

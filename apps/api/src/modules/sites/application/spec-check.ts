@@ -52,6 +52,7 @@ export function checkSpec(
   input: unknown,
   hosting: SiteHosting,
   purpose: 'draft' | 'publish' = 'publish',
+  environment: 'preview' | 'live' = 'preview',
 ): { spec: SiteSpec; issues: SiteIssue[] } {
   if (Buffer.byteLength(JSON.stringify(input ?? null), 'utf8') > MAX_SPEC_BYTES) {
     throw new SiteSpecInvalidError([
@@ -87,6 +88,8 @@ export function checkSpec(
     assetHosts: hosting.assetHosts,
     hotlinkHosts: hosting.hotlinkHosts ?? [],
     mode: 'published',
+    // BF-062: a live site refuses images still limited to previews.
+    environment,
   });
   const errors = issues.filter(
     (issue) => issue.severity === 'error' && !(purpose === 'draft' && DRAFT_ERRORS.has(issue.code)),

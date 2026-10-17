@@ -781,6 +781,27 @@ export {
   ResolveLocationQuerySchema,
 } from './geo-areas.ts';
 export {
+  ConfirmContactRoutingRequestSchema,
+  GO_LIVE_CHECKS,
+  type GoLiveCheck,
+  type GoLiveCheckId,
+  GoLiveCheckSchema,
+  type GoLiveReadiness,
+  GoLiveReadinessSchema,
+  type PublishLiveRequest,
+  PublishLiveRequestSchema,
+  type PublishLiveResult,
+  PublishLiveResultSchema,
+  type SaveSiteLegalProfileRequest,
+  SaveSiteLegalProfileRequestSchema,
+  type SetContactRoutingRequest,
+  SetContactRoutingRequestSchema,
+  type SiteContactRouting,
+  SiteContactRoutingSchema,
+  type SiteLegalProfile,
+  SiteLegalProfileSchema,
+} from './go-live.ts';
+export {
   LOCALES,
   type Locale,
   LocaleSchema,

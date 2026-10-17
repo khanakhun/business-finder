@@ -64,7 +64,11 @@ export function claudeCodeArgv(plan: AgentRunPlan, access: SitekitAccess = 'bash
   ];
 }
 
-/** Telemetry, updates, memory and history off; the key stripped from the agent's own subprocesses (sitekit). */
+/**
+ * Telemetry, updates, memory and history off. DECISION(BF-044): not `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` — it needs
+ * bubblewrap, which cannot run under the sandbox's seccomp profile (2.1.288 refuses to start a subprocess); the
+ * only subprocess the agent may start is sitekit, our own code, in a container that has nothing else to give away.
+ */
 export const CLAUDE_CODE_ENV: Readonly<Record<string, string>> = {
   CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
   DISABLE_TELEMETRY: '1',
@@ -76,6 +80,5 @@ export const CLAUDE_CODE_ENV: Readonly<Record<string, string>> = {
   CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1',
   CLAUDE_CODE_SKIP_PROMPT_HISTORY: '1',
   CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: '1',
-  CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1',
   DO_NOT_TRACK: '1',
 };

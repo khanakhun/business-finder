@@ -115,9 +115,11 @@ export class GenerationController {
           event: event.type,
           data: event.payload,
         }));
-        // Already settled: the replay is the whole story.
-        if (SETTLED.has(job.status)) {
-          replayed.push({ id: '', event: 'job', data: { status: job.status } } as never);
+        // Already settled: the replay is the whole story. The status is read again here, after the live
+        // subscription started: a job that settled since the first read sent its last status before we listened.
+        const { status } = await this.queries.job(organizationId, job.id);
+        if (SETTLED.has(status)) {
+          replayed.push({ id: '', event: 'job', data: { status } } as never);
           setImmediate(() => res.end());
         }
         return replayed;

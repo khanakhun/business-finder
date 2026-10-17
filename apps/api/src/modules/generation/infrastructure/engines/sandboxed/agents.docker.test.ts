@@ -4,6 +4,7 @@ import type { EngineRunContext } from '../../../application/ports.ts';
 import { HttpDockerApi } from '../../sandbox/docker-engine.ts';
 import { DockerSandboxProvider } from '../../sandbox/docker-sandbox.ts';
 import { evalWorkspace, loadBusinesses } from '../blocks/eval/harness.ts';
+import { ClaudeAgentSdkEngine } from '../claude-agent-sdk/claude-agent-sdk.engine.ts';
 import { claudeCodeArgv } from '../claude-code/argv.ts';
 import { ClaudeCodeEngine } from '../claude-code/claude-code.engine.ts';
 import { codexArgv } from '../codex/argv.ts';
@@ -54,7 +55,7 @@ describe.runIf(Boolean(image))('coding-agent engines on a real sandbox', () => {
   const business = loadBusinesses().find((candidate) => candidate.id === 'salon-corail-gustavia-fr-rich');
   if (!business) throw new Error('missing eval business');
   const workspace = evalWorkspace(business);
-  const deps = (model: string): SandboxedEngineDeps => ({
+  const deps = (model: string, wallTimeSec = 180): SandboxedEngineDeps => ({
     sandbox: new DockerSandboxProvider(new HttpDockerApi(host), { network: 'none', killGraceMs: 2000 }),
     artifacts: {
       get: async (key) => (key === 'bundle' ? Buffer.from(workspace.bundle) : undefined),
@@ -67,14 +68,14 @@ describe.runIf(Boolean(image))('coding-agent engines on a real sandbox', () => {
       cpus: 2,
       memoryMb: 2048,
       pidsLimit: 512,
-      wallTimeSec: 180,
+      wallTimeSec,
       maxTurns: 10,
       budgetMargin: 0.15,
       model,
     },
   });
 
-  async function run(engine: ClaudeCodeEngine | CodexEngine, name: string) {
+  async function run(engine: ClaudeCodeEngine | CodexEngine | ClaudeAgentSdkEngine, name: string) {
     const specs: unknown[] = [];
     const ctx = {
       jobId: `docker-${name}-${Date.now()}`,
@@ -132,5 +133,49 @@ describe.runIf(Boolean(image))('coding-agent engines on a real sandbox', () => {
     );
     expect(events.at(-1)).toMatchObject({ type: 'error', code: 'ENGINE_INCOMPLETE', retryable: true });
     expect(specs).toEqual([]);
+  }, 240_000);
+
+  // The real CLIs, offline (no network, a fake key): they must accept our exact argv and env and start with the tools
+  // we allow — then they wait for the model API until the wall time ends the run. Found this way: Claude Code's
+  // subprocess env scrub needs bubblewrap, which the sandbox cannot run.
+  const agentStarted = (events: EngineEvent[]) =>
+    events.find((e) => e.type === 'log' && e.message.startsWith('Agent started:'));
+
+  it('real Claude Code accepts the argv and env and starts with exactly its tools', async () => {
+    const { events } = await run(
+      new ClaudeCodeEngine(deps('claude-opus-5-5', 20), { pricing: {} }),
+      'real-claude',
+    );
+    expect(agentStarted(events)).toMatchObject({
+      message: 'Agent started: claude-opus-5-5; tools Bash, Edit, Glob, Grep, Read, StructuredOutput, Write.',
+    });
+    expect(events.at(-1)).toMatchObject({ type: 'error', code: 'TIMEOUT' });
+  }, 120_000);
+
+  it('the real Agent SDK runner starts the image’s CLI with file tools and sitekit over MCP, no shell', async () => {
+    const { events } = await run(
+      new ClaudeAgentSdkEngine(deps('claude-opus-5-5', 30), { pricing: {} }),
+      'real-sdk',
+    );
+    const started = agentStarted(events);
+    expect(started?.type === 'log' && started.message).toMatch(
+      /tools Edit, Glob, Grep, Read, StructuredOutput, Write, mcp__sitekit__/,
+    );
+    expect(started?.type === 'log' && started.message).not.toMatch(/\bBash\b|WebFetch|WebSearch/);
+    expect(events.some((e) => e.type === 'log' && /claude 2\.1\.288/.test(e.message))).toBe(true);
+    expect(events.at(-1)).toMatchObject({ type: 'error' });
+  }, 120_000);
+
+  it('real Codex accepts the argv and ends its turn as failed without the API', async () => {
+    const { events } = await run(
+      new CodexEngine(deps('gpt-6.1-sol', 120), { pricing: {}, reasoningEffort: 'low' }),
+      'real-codex',
+    );
+    expect(agentStarted(events)).toBeDefined();
+    expect(events.some((e) => e.type === 'log' && e.level === 'warn' && /Reconnecting/.test(e.message))).toBe(
+      true,
+    );
+    expect(events.at(-1)).toMatchObject({ type: 'error', retryable: true });
+    expect(JSON.stringify(events)).not.toContain(KEY);
   }, 240_000);
 });

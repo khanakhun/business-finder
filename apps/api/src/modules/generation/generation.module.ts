@@ -77,6 +77,7 @@ import {
 } from './infrastructure/drizzle-facts.repository.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
 import { BlocksEngine } from './infrastructure/engines/blocks/blocks.engine.ts';
+import { ClaudeAgentSdkEngine } from './infrastructure/engines/claude-agent-sdk/claude-agent-sdk.engine.ts';
 import { ClaudeCodeEngine } from './infrastructure/engines/claude-code/claude-code.engine.ts';
 import { CodexEngine } from './infrastructure/engines/codex/codex.engine.ts';
 import type { SandboxedEngineDeps } from './infrastructure/engines/sandboxed/sandboxed-agent.engine.ts';
@@ -145,6 +146,10 @@ function engines(
         pricing: env.AI_PRICING,
         sitekit: env.GENERATION_CLAUDE_CODE_SITEKIT,
       }),
+    );
+  if (env.GENERATION_CLAUDE_AGENT_SDK_ENGINE)
+    registered.push(
+      new ClaudeAgentSdkEngine(sandboxed('anthropic', env.AI_MODEL_AGENT), { pricing: env.AI_PRICING }),
     );
   if (env.GENERATION_CODEX_ENGINE)
     registered.push(

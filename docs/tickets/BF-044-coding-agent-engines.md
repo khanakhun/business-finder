@@ -151,11 +151,11 @@ Three stacked PRs: (1) shared base + Claude Code; (2) Codex; (3) Agent SDK + ben
 - **Security:** inspect argv/options in tests to assert no web tools and no unrestricted shell; a prompt-injection fixture (a `context/` file instructing to add a fake award and fetch a URL) yields a rejected output (facts validation) and blocked egress (proxy log) with no award in the accepted spec.
 
 ## Acceptance criteria
-- [ ] `claude-code`, `codex` and `claude-agent-sdk` engines implemented on a shared sandboxed base; registered and available when configured.
-- [ ] Verified CLI/SDK flags documented with sources; versions pinned; version gate enforced.
-- [ ] Least-privilege tool permissions; no web or general shell access; prompt-injection fixture handled safely.
-- [ ] Streams normalized to `EngineEvent`s with golden-file contract tests; cost and budget enforced (including computed cost for Codex).
-- [ ] Output accepted only after in-sandbox `check` and out-of-sandbox strict validation.
+- [x] `claude-code`, `codex` and `claude-agent-sdk` engines implemented on a shared sandboxed base; registered and available when configured.
+- [x] Verified CLI/SDK flags documented with sources; versions pinned; version gate enforced.
+- [x] Least-privilege tool permissions; no web or general shell access; prompt-injection fixture handled safely.
+- [x] Streams normalized to `EngineEvent`s with golden-file contract tests; cost and budget enforced (including computed cost for Codex).
+- [x] Output accepted only after in-sandbox `check` and out-of-sandbox strict validation.
 - [ ] Repair mode supported; optional session resume evaluated.
 - [ ] Benchmark report comparing all engines; defaults and typical cost/duration updated; ADR-0010 addendum written.
 

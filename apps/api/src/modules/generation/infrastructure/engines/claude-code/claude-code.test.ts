@@ -69,13 +69,13 @@ describe('Claude Code argv', () => {
     });
   });
 
-  it('turns telemetry, updates and memory off, and scrubs the key from subprocesses', () => {
+  it('turns telemetry, updates and memory off (no subprocess scrub: it needs bubblewrap)', () => {
     expect(CLAUDE_CODE_ENV).toMatchObject({
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
       DISABLE_TELEMETRY: '1',
       DISABLE_AUTOUPDATER: '1',
-      CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1',
     });
+    expect(Object.keys(CLAUDE_CODE_ENV)).not.toContain('CLAUDE_CODE_SUBPROCESS_ENV_SCRUB');
     expect(Object.keys(CLAUDE_CODE_ENV)).not.toContain('ANTHROPIC_API_KEY');
   });
 });

@@ -11,6 +11,8 @@ import {
   OrgBusinessStatusChanged,
   OrgBusinessTagsChanged,
   ScoreUpdated,
+  SiteLeadCaptured,
+  SiteOptOutRequested,
   TaskCompleted,
   TaskCreated,
 } from '@bf/contracts';
@@ -46,6 +48,15 @@ const ACTIVITY_OF: Record<
   }),
   [TaskCompleted.type]: (p) => ({ type: 'task.completed', data: { taskId: p.taskId, title: p.title } }),
   [BusinessCreated.type]: (p) => ({ type: 'business.tracked', data: { source: p.source } }),
+  // BF-048: a lead from the preview (no contact details on the timeline: they stay in the lead).
+  [SiteLeadCaptured.type]: (p) => ({
+    type: 'lead.captured',
+    data: { leadId: p.leadId, siteId: p.siteId, kind: p.kind, channel: p.channel },
+  }),
+  [SiteOptOutRequested.type]: (p) => ({
+    type: 'lead.opted_out',
+    data: { leadId: p.leadId, siteId: p.siteId, removePreview: p.removePreview },
+  }),
 };
 
 /**
@@ -70,6 +81,8 @@ export class ActivitySubscriber {
       TaskCreated,
       TaskCompleted,
       BusinessCreated,
+      SiteLeadCaptured,
+      SiteOptOutRequested,
     ],
     { id: 'crm.activity-timeline' },
   )

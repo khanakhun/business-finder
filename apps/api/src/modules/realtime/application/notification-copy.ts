@@ -9,6 +9,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
   en: {
     reply_received: { title: 'New reply from {business}', body: 'A prospect answered your email.' },
     lead_captured: { title: 'New lead on {site}', body: 'Someone left their details on a preview site.' },
+    lead_opted_out: {
+      title: '{business} asked not to be contacted',
+      body: 'Do-not-contact is set; the preview is taken down if they asked.',
+    },
     batch_completed: {
       title: 'Site generation finished',
       body: '{count} preview sites are ready to review.',
@@ -33,6 +37,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
     lead_captured: {
       title: 'Nouveau contact sur {site}',
       body: 'Quelqu’un a laissé ses coordonnées sur un site d’aperçu.',
+    },
+    lead_opted_out: {
+      title: '{business} ne souhaite pas être contactée',
+      body: 'Ne pas contacter est activé ; l’aperçu est retiré si demandé.',
     },
     batch_completed: { title: 'Génération de sites terminée', body: '{count} sites d’aperçu sont prêts.' },
     site_needs_review: {

@@ -642,6 +642,10 @@
       "site_needs_review": {
         "title": "Un site généré est à revoir",
         "body": "{business} : le site n’a pas été publié ({reason})."
+      },
+      "lead_opted_out": {
+        "title": "{business} ne souhaite pas être contactée",
+        "body": "Ne pas contacter est activé ; l’aperçu est retiré si demandé."
       }
     },
     "preferences": {
@@ -659,7 +663,8 @@
         "mailbox_paused": "Boîte d’envoi en pause",
         "member_joined": "Nouveaux membres",
         "system_test": "Notifications de test",
-        "site_needs_review": "Sites à revoir"
+        "site_needs_review": "Sites à revoir",
+        "lead_opted_out": "Refus de contact depuis un aperçu"
       }
     }
   },

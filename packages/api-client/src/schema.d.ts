@@ -1391,6 +1391,75 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace’s leads, newest first (spam only when filtered on) */
+        get: operations["listLeads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/leads/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One lead */
+        get: operations["getLead"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change a lead’s status or assignee, or add a note */
+        patch: operations["updateLead"];
+        trace?: never;
+    };
+    "/v1/leads/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Leads waiting (the navigation badge) */
+        get: operations["getLeadCounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/leads/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export the leads matching the filters as CSV (audited) */
+        get: operations["exportLeads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/lists": {
         parameters: {
             query?: never;
@@ -1646,6 +1715,40 @@ export type paths = {
         get: operations["getPipelineBoard"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/sites/altcha-challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A proof-of-work challenge for a preview site’s form (ALTCHA, self-hosted) */
+        get: operations["getLeadChallenge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/sites/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A claim, contact request or opt-out from a preview site (anonymous; anti-spam; no IP stored) */
+        post: operations["submitSiteLead"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4139,6 +4242,9 @@ export type components = {
             lat: number;
             lng: number;
         };
+        LeadCounts: {
+            new: number;
+        };
         ListItemsResult: {
             /** @description Added (or removed) by this call. */
             changed: number;
@@ -4262,7 +4368,7 @@ export type components = {
             /** @description Message key the dashboard translates, e.g. `notifications.types.member_joined.title`. */
             titleKey: string;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
         };
         NotificationPage: {
             items: components["schemas"]["Notification"][];
@@ -4274,7 +4380,7 @@ export type components = {
             email: boolean;
             inApp: boolean;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
         };
         NotificationPreferences: {
             items: components["schemas"]["NotificationPreference"][];
@@ -4563,6 +4669,43 @@ export type components = {
                 performance: number | null;
                 seo: number | null;
             };
+        };
+        PublicLeadRequest: {
+            altcha?: string;
+            c?: string;
+            /** @default false */
+            consent: unknown;
+            /** @default  */
+            consentVersion: string;
+            /** Format: email */
+            email?: string;
+            formToken: string;
+            hp?: string;
+            /** @enum {string} */
+            kind: "claim_interest" | "contact_request" | "opt_out";
+            /** @default en */
+            locale: string;
+            message?: unknown;
+            name?: unknown;
+            next?: string;
+            phone?: unknown;
+            preferredChannel?: ("phone" | "whatsapp" | "email") | unknown;
+            preferredTime?: unknown;
+            r?: string;
+            reason?: unknown;
+            removePreview?: unknown;
+            siteToken: string;
+            /** @enum {string} */
+            source: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+            /** Format: uuid */
+            submissionId: string;
+            whatsapp?: unknown;
+        };
+        PublicLeadResponse: {
+            /** @enum {string} */
+            messageKey: "lead.received" | "optout.received";
+            /** @constant */
+            status: "received";
         };
         PublishedContext: {
             foundAs: ("mailto" | "text" | "jsonld" | "cfemail" | "obfuscated") | null;
@@ -5666,6 +5809,63 @@ export type components = {
             /** @enum {string} */
             severity: "error" | "warning";
         };
+        SiteLead: {
+            attribution: {
+                campaignRef: string | null;
+                engine: string | null;
+                generationJobId: string | null;
+                outreachRef: string | null;
+                siteVersionId: string | null;
+            };
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            businessName: string;
+            consent: {
+                /** Format: date-time */
+                at: string;
+                checked: boolean;
+                textVersion: string;
+            };
+            /** Format: date-time */
+            createdAt: string;
+            email: string | null;
+            handledBy: string | null;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "claim_interest" | "contact_request" | "opt_out";
+            locale: string;
+            message: string | null;
+            name: string | null;
+            phone: string | null;
+            preferredChannel: ("phone" | "whatsapp" | "email") | null;
+            preferredTime: string | null;
+            /**
+             * Format: uuid
+             * @description SiteId (UUID)
+             */
+            siteId: string;
+            siteName: string;
+            /** @enum {string} */
+            source: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+            spam: {
+                score: number;
+                signals: string[];
+            } | null;
+            /** @enum {string} */
+            status: "new" | "in_progress" | "qualified" | "discarded" | "spam";
+            /** Format: date-time */
+            updatedAt: string;
+            whatsapp: string | null;
+        };
+        SiteLeadPage: {
+            items: components["schemas"]["SiteLead"][];
+            nextCursor: string | null;
+            totalEstimate?: number;
+        };
         SitePage: {
             items: components["schemas"]["SiteSummary"][];
             nextCursor: string | null;
@@ -6000,6 +6200,12 @@ export type components = {
             priority?: number;
         };
         UpdateGenerationSettingsRequest: components["schemas"]["GenerationWorkspaceSettings"];
+        UpdateLeadRequest: {
+            handledBy?: string | null;
+            note?: string;
+            /** @enum {string} */
+            status?: "new" | "in_progress" | "qualified" | "discarded";
+        };
         UpdateNotificationPreferencesRequest: {
             items: components["schemas"]["NotificationPreference"][];
         };
@@ -12844,6 +13050,339 @@ export interface operations {
             };
         };
     };
+    listLeads: {
+        parameters: {
+            query?: {
+                businessId?: string;
+                campaign?: string;
+                cursor?: string;
+                from?: string;
+                kind?: "claim_interest" | "contact_request" | "opt_out";
+                limit?: number;
+                siteId?: string;
+                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+                status?: "new" | "in_progress" | "qualified" | "discarded" | "spam";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteLeadPage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getLead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteLead"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateLead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLeadRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteLead"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getLeadCounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadCounts"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    exportLeads: {
+        parameters: {
+            query?: {
+                businessId?: string;
+                campaign?: string;
+                cursor?: string;
+                from?: string;
+                kind?: "claim_interest" | "contact_request" | "opt_out";
+                limit?: number;
+                siteId?: string;
+                source?: "banner" | "claim_page" | "contact_block" | "opt_out_link";
+                status?: "new" | "in_progress" | "qualified" | "discarded" | "spam";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     listLists: {
         parameters: {
             query?: {
@@ -14194,6 +14733,120 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getLeadChallenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    submitSiteLead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicLeadRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicLeadResponse"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

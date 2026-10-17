@@ -4,10 +4,11 @@ import { LOGO_MAX_BYTES, SITE_SPEC_MAX_BYTES } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 import type { INestApplication } from '@nestjs/common';
 import { RequestMethod } from '@nestjs/common';
-import { json, type NextFunction, type Request, type Response, raw } from 'express';
+import { json, type NextFunction, type Request, type Response, raw, urlencoded } from 'express';
 import helmet from 'helmet';
 import { type Auth, BETTER_AUTH } from './modules/identity/infrastructure/better-auth.provider.ts';
 import { betterAuthMiddleware } from './modules/identity/infrastructure/better-auth-http.ts';
+import { siteOrigin } from './modules/leads/interface/sites-origin.ts';
 import type { AppEnv } from './modules/platform/config/app-env.ts';
 import { LOGGER } from './modules/platform/logging/logger.ts';
 import {
@@ -64,7 +65,28 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
     ],
   });
   app.use(helmet());
-  app.enableCors({ origin: [env.APP_URL], credentials: true });
+  // The dashboard is the only browser origin with credentials. Preview sites (BF-048) may call the two anonymous lead
+  // routes from `<slug>.<SITES_BASE_DOMAIN>`, without credentials.
+  const sitesDomain = (env as Partial<ApiEnv>).SITES_BASE_DOMAIN;
+  app.enableCors(
+    (req: Request, callback: (error: Error | null, options: Record<string, unknown>) => void) => {
+      const path = req.url ?? '';
+      if (
+        sitesDomain &&
+        (path.startsWith('/v1/public/sites/leads') || path.startsWith('/v1/public/sites/altcha-challenge'))
+      ) {
+        callback(null, {
+          origin: siteOrigin(req.headers.origin, sitesDomain) !== null,
+          credentials: false,
+          methods: ['GET', 'POST'],
+          allowedHeaders: ['Content-Type'],
+          maxAge: 600,
+        });
+        return;
+      }
+      callback(null, { origin: [env.APP_URL], credentials: true });
+    },
+  );
   // Registered before app.init(), so these run ahead of Nest's body parsers: Better Auth reads the raw body.
   const auth = optional<Auth>(app, BETTER_AUTH);
   if (auth) app.use(betterAuthMiddleware(auth, (env as Partial<ApiEnv>).AUTH_TRUSTED_PROXIES ?? []));
@@ -83,6 +105,12 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   const beaconBody = json({ type: ['application/json', 'text/plain'], limit: '2kb' });
   app.use('/v1/public/sites/views', (req: Request, res: Response, next: NextFunction) =>
     beaconBody(req, res, next),
+  );
+  // Lead forms of preview sites (BF-048): JSON from the enhanced form, or a plain form post without JavaScript; small.
+  const leadJson = json({ limit: '16kb' });
+  const leadForm = urlencoded({ extended: false, limit: '16kb' });
+  app.use('/v1/public/sites/leads', (req: Request, res: Response, next: NextFunction) =>
+    leadJson(req, res, (error?: unknown) => (error ? next(error) : leadForm(req, res, next))),
   );
   // Site specs are larger than Nest's 100 kB JSON default: the sites routes take a whole spec (the use case refuses
   // one over the cap with a 422 at its path); an authenticated request only, parsed once (Nest's parser skips it).

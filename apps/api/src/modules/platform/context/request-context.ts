@@ -26,6 +26,17 @@ export function getRequestContext(): RequestContext | undefined {
   return storage.getStore();
 }
 
+/**
+ * Runs `fn` with this request's context minus the client's address and user agent: an anonymous public write whose
+ * records (events, audit) must never keep them (BF-048 leads).
+ */
+export function withoutClientDetails<T>(fn: () => T): T {
+  const current = storage.getStore();
+  if (!current) return fn();
+  const { ip: _ip, userAgent: _userAgent, ...rest } = current;
+  return storage.run(rest, fn);
+}
+
 export const REQUEST_ID_HEADER = 'x-request-id';
 // Accept a caller's id only if it is short and safe to echo into logs and headers.
 const SAFE_REQUEST_ID = /^[A-Za-z0-9._:-]{1,128}$/;

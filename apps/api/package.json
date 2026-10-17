@@ -70,6 +70,7 @@
     "@turf/intersect": "catalog:",
     "@turf/union": "catalog:",
     "@turf/voronoi": "catalog:",
+    "altcha-lib": "catalog:",
     "better-auth": "catalog:",
     "bullmq": "catalog:",
     "cockatiel": "catalog:",

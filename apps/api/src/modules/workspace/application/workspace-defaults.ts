@@ -18,6 +18,11 @@ export class WorkspaceDefaults {
     return settings?.defaultCountryCode ?? settings?.postalAddress?.countryCode ?? null;
   }
 
+  /** The workspace's time zone (due dates of automatic tasks), UTC when not set. */
+  async timeZone(organizationId: string): Promise<string> {
+    return (await this.settings.find(organizationId))?.timezone || 'UTC';
+  }
+
   /** Discovery choices (provider order, disabled providers, Google field tier, monthly budget) over defaults. */
   async discoverySettings(organizationId: string): Promise<DiscoverySettings> {
     return resolveDiscoverySettings((await this.settings.find(organizationId))?.discovery);

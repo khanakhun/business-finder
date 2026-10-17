@@ -1,0 +1,178 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Spa Oasis",
+      "category": "Spa"
+    },
+    "facts": [
+      {
+        "id": "fact_name_d875fe9f488e",
+        "kind": "name",
+        "value": "Spa Oasis"
+      },
+      {
+        "id": "fact_address_1af0803dcdf3",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_3baf8981874a",
+        "kind": "phone",
+        "value": "+590 590 00 05 11"
+      },
+      {
+        "id": "fact_service_b71992967e7a",
+        "kind": "service",
+        "value": "Massages, soins du visage"
+      },
+      {
+        "id": "fact_price_70e994825ee2",
+        "kind": "price",
+        "value": "110 EUR — Massage 60 min"
+      },
+      {
+        "id": "fact_hours_cc4b8f56db78",
+        "kind": "hours",
+        "value": "mon–sun 10:00–19:00"
+      },
+      {
+        "id": "fact_award_db1c53fcfa01",
+        "kind": "award",
+        "value": "Spa Awards Caraïbes 2023 — Coup de cœur"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Spa Oasis, une parenthèse de détente"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Spa Oasis, a relaxing escape"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Coup de cœur des Spa Awards Caraïbes 2023. Massage 60 minutes 110 EUR, ouvert tous les jours."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Spa Awards Caraïbes 2023 favourite. 60-minute massage 110 EUR, open every day."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Huiles bio et praticiennes formées en Thaïlande."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Organic oils and therapists trained in Thailand."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Réservez votre soin."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book your treatment."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "une parenthèse de détente",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "a relaxing escape",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Coup de cœur des Spa Awards Caraïbes 2023",
+        "status": "supported",
+        "factIds": ["fact_award_db1c53fcfa01"],
+        "reason": "Stated by fact fact_award_db1c53fcfa01."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "110 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_70e994825ee2"],
+        "reason": "Stated by fact fact_price_70e994825ee2."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "ouvert tous les jours",
+        "status": "supported",
+        "factIds": ["fact_hours_cc4b8f56db78"],
+        "reason": "Stated by fact fact_hours_cc4b8f56db78."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Spa Awards Caraïbes 2023 favourite",
+        "status": "supported",
+        "factIds": ["fact_award_db1c53fcfa01"],
+        "reason": "Stated by fact fact_award_db1c53fcfa01."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "110 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_70e994825ee2"],
+        "reason": "Stated by fact fact_price_70e994825ee2."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "open every day",
+        "status": "supported",
+        "factIds": ["fact_hours_cc4b8f56db78"],
+        "reason": "Stated by fact fact_hours_cc4b8f56db78."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Huiles bio",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "praticiennes formées en Thaïlande",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No training fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Organic oils",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "therapists trained in Thailand",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No training fact."
+      }
+    ],
+    "warnings": []
+  }
+}

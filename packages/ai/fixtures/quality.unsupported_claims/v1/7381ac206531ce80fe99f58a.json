@@ -1,0 +1,171 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Coiffure Océane",
+      "category": "Salon de coiffure"
+    },
+    "facts": [
+      {
+        "id": "fact_name_aeb1f3d4b632",
+        "kind": "name",
+        "value": "Coiffure Océane"
+      },
+      {
+        "id": "fact_address_2d2bc2c17862",
+        "kind": "address",
+        "value": "Grand Cul-de-Sac, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_d7deeb0494e8",
+        "kind": "phone",
+        "value": "+590 590 00 05 16"
+      },
+      {
+        "id": "fact_year_founded_bf54b4d99205",
+        "kind": "year_founded",
+        "value": "2015"
+      },
+      {
+        "id": "fact_service_afe2cc60664b",
+        "kind": "service",
+        "value": "Coupes, couleurs, soins"
+      },
+      {
+        "id": "fact_price_3a01e0a59f35",
+        "kind": "price",
+        "value": "40 EUR — Coupe femme"
+      },
+      {
+        "id": "fact_hours_cc22c4a8151b",
+        "kind": "hours",
+        "value": "tue–sat 09:00–17:30"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Coiffure Océane, depuis 2015"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Coiffure Océane, since 2015"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Coupe femme 40 EUR, couleurs et soins aux produits végétaux. Plus de 2 000 clientes fidèles."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Women’s cut 40 EUR, colours and treatments with plant-based products. Over 2,000 loyal clients."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Du mardi au samedi, un accueil chaleureux."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Tuesday to Saturday, a warm welcome."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Prenez rendez-vous."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book an appointment."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2015",
+        "status": "supported",
+        "factIds": ["fact_year_founded_bf54b4d99205"],
+        "reason": "Stated by fact fact_year_founded_bf54b4d99205."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2015",
+        "status": "supported",
+        "factIds": ["fact_year_founded_bf54b4d99205"],
+        "reason": "Stated by fact fact_year_founded_bf54b4d99205."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "40 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_3a01e0a59f35"],
+        "reason": "Stated by fact fact_price_3a01e0a59f35."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "aux produits végétaux",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Plus de 2 000 clientes fidèles",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "40 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_3a01e0a59f35"],
+        "reason": "Stated by fact fact_price_3a01e0a59f35."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "with plant-based products",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Over 2,000 loyal clients",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Du mardi au samedi",
+        "status": "supported",
+        "factIds": ["fact_hours_cc22c4a8151b"],
+        "reason": "Stated by fact fact_hours_cc22c4a8151b."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Tuesday to Saturday",
+        "status": "supported",
+        "factIds": ["fact_hours_cc22c4a8151b"],
+        "reason": "Stated by fact fact_hours_cc22c4a8151b."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "a warm welcome",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Windward Sailing Charters",
+      "category": "Boat charter"
+    },
+    "facts": [
+      {
+        "id": "fact_name_d3a9b44c7b68",
+        "kind": "name",
+        "value": "Windward Sailing Charters"
+      },
+      {
+        "id": "fact_address_af6e7ef51c3b",
+        "kind": "address",
+        "value": "Gustavia harbour, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_b328bda8e3ae",
+        "kind": "phone",
+        "value": "+590 590 00 04 06"
+      },
+      {
+        "id": "fact_service_9aef837c99f0",
+        "kind": "service",
+        "value": "Day sails and sunset cruises"
+      },
+      {
+        "id": "fact_price_653276ca99f7",
+        "kind": "price",
+        "value": "720 EUR — Private day charter"
+      },
+      {
+        "id": "fact_team_member_a5f70744bfd3",
+        "kind": "team_member",
+        "value": "Captain Sam Aubert"
+      },
+      {
+        "id": "fact_amenity_ba0359a8f637",
+        "kind": "amenity",
+        "value": "Snorkeling gear on board"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Windward Sailing Charters"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Sail with Captain Sam Aubert, a former America’s Cup crew member, on a private day charter for 720 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Snorkeling gear on board, lunch and drinks included, memories for a lifetime."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Set sail with us."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Day sails and sunset cruises from Gustavia, turtles guaranteed."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Captain Sam Aubert",
+        "status": "supported",
+        "factIds": ["fact_team_member_a5f70744bfd3"],
+        "reason": "Stated by fact fact_team_member_a5f70744bfd3."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "a former America’s Cup crew member",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about the captain’s past."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "720 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_653276ca99f7"],
+        "reason": "Stated by fact fact_price_653276ca99f7."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Snorkeling gear on board",
+        "status": "supported",
+        "factIds": ["fact_amenity_ba0359a8f637"],
+        "reason": "Stated by fact fact_amenity_ba0359a8f637."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "lunch and drinks included",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact mentions lunch."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "memories for a lifetime",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Set sail with us",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "turtles guaranteed",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      }
+    ],
+    "warnings": []
+  }
+}

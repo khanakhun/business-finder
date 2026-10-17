@@ -1,0 +1,178 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Studio Yoga Lorient",
+      "category": "Studio de yoga"
+    },
+    "facts": [
+      {
+        "id": "fact_name_7c8f74358f7e",
+        "kind": "name",
+        "value": "Studio Yoga Lorient"
+      },
+      {
+        "id": "fact_address_3f7f3177d4a3",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_8c9864ddeefc",
+        "kind": "phone",
+        "value": "+590 590 00 05 15"
+      },
+      {
+        "id": "fact_service_e2b8c88df166",
+        "kind": "service",
+        "value": "Yoga vinyasa, yin, méditation"
+      },
+      {
+        "id": "fact_price_e03dd2950ec9",
+        "kind": "price",
+        "value": "25 EUR — Cours collectif"
+      },
+      {
+        "id": "fact_team_member_d058b61b0062",
+        "kind": "team_member",
+        "value": "Léa Morin — Professeure de yoga"
+      },
+      {
+        "id": "fact_hours_604b7f657de2",
+        "kind": "hours",
+        "value": "mon–sat 07:00–19:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Studio Yoga Lorient"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Studio Yoga Lorient"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Léa Morin, certifiée 500 h, propose vinyasa, yin et méditation à 25 EUR dans un espace apaisant."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Léa Morin, 500-hour certified, teaches vinyasa, yin and meditation for 25 EUR in a calming space."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Cours le dimanche matin. Respirez."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Sunday morning classes. Breathe."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Yoga à Lorient, le studio le plus ancien de l’île."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Yoga in Lorient, the island’s oldest studio."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Léa Morin",
+        "status": "supported",
+        "factIds": ["fact_team_member_d058b61b0062"],
+        "reason": "Stated by fact fact_team_member_d058b61b0062."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "certifiée 500 h",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "25 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_e03dd2950ec9"],
+        "reason": "Stated by fact fact_price_e03dd2950ec9."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Léa Morin",
+        "status": "supported",
+        "factIds": ["fact_team_member_d058b61b0062"],
+        "reason": "Stated by fact fact_team_member_d058b61b0062."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "500-hour certified",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "25 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_e03dd2950ec9"],
+        "reason": "Stated by fact fact_price_e03dd2950ec9."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Cours le dimanche matin",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–sat."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Respirez",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Sunday morning classes",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–sat."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Breathe",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "le studio le plus ancien de l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No history fact."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "the island’s oldest studio",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No history fact."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -23,6 +23,10 @@ export interface GateContext {
   readonly assetHosts: readonly string[];
   readonly hotlinkHosts: readonly string[];
   readonly thresholds: QualityThresholds;
+  /** The job's workspace (AI gates bill their calls to it). */
+  readonly organizationId?: string;
+  /** The brief's design direction (the visual critic grades against it). */
+  readonly direction?: { readonly market: string; readonly tone: string };
 }
 
 export type GateOutcome = Omit<QualityGateResult, 'id' | 'durationMs'>;

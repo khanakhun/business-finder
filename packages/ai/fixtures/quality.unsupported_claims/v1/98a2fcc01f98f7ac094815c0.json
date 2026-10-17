@@ -1,0 +1,100 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Island Loaf Bakery",
+      "category": "Bakery"
+    },
+    "facts": [
+      {
+        "id": "fact_name_8886f6f265b8",
+        "kind": "name",
+        "value": "Island Loaf Bakery"
+      },
+      {
+        "id": "fact_address_ff07d6cd314b",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_de58fa1dd26c",
+        "kind": "phone",
+        "value": "+590 590 00 04 04"
+      },
+      {
+        "id": "fact_year_founded_f2a2cb3e70bf",
+        "kind": "year_founded",
+        "value": "2017"
+      },
+      {
+        "id": "fact_service_ed9433e12371",
+        "kind": "service",
+        "value": "Sourdough, pastries, sandwiches"
+      },
+      {
+        "id": "fact_hours_7b9d18791039",
+        "kind": "hours",
+        "value": "tue–sun 06:30–13:00"
+      },
+      {
+        "id": "fact_price_bf8bb2604aa6",
+        "kind": "price",
+        "value": "4,50 EUR — Sourdough loaf"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Island Loaf Bakery, Lorient"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Sourdough, pastries and sandwiches since 2017, baked with care every morning."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Sourdough loaf 4,50 EUR. Open Tuesday to Sunday from 6:30am."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Come and see us in Lorient."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Bakery in Lorient, Saint-Barthélemy: sourdough, pastries, sandwiches."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "since 2017",
+        "status": "supported",
+        "factIds": ["fact_year_founded_f2a2cb3e70bf"],
+        "reason": "Stated by fact fact_year_founded_f2a2cb3e70bf."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "4,50 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_bf8bb2604aa6"],
+        "reason": "Stated by fact fact_price_bf8bb2604aa6."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Open Tuesday to Sunday from 6:30am",
+        "status": "supported",
+        "factIds": ["fact_hours_7b9d18791039"],
+        "reason": "Stated by fact fact_hours_7b9d18791039."
+      }
+    ],
+    "warnings": []
+  }
+}

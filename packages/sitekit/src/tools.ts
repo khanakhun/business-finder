@@ -209,6 +209,10 @@ export const SITEKIT_TOOLS = [
         .optional(),
       axe: z.boolean().default(true),
       lighthouse: z.boolean().default(true),
+      screenshots: z
+        .boolean()
+        .default(false)
+        .describe('Also the visual critic’s screenshots, in .sitekit/audit/.'),
     },
     annotations: { readOnlyHint: false, idempotentHint: true },
     async run({ workspace }, args) {
@@ -225,6 +229,7 @@ export const SITEKIT_TOOLS = [
         ...(args.viewports ? { viewports: args.viewports } : {}),
         axe: args.axe,
         lighthouse: args.lighthouse,
+        ...(args.screenshots ? { screenshotsDir: '.sitekit/audit' } : {}),
       });
       return { data: report, isError: false };
     },

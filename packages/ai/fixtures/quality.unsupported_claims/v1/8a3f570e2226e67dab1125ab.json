@@ -1,0 +1,116 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Au Pain des Îles",
+      "category": "Boulangerie"
+    },
+    "facts": [
+      {
+        "id": "fact_name_63da848fb584",
+        "kind": "name",
+        "value": "Au Pain des Îles"
+      },
+      {
+        "id": "fact_address_a6bd46c8905c",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_3cc0da585d11",
+        "kind": "phone",
+        "value": "+590 590 00 03 04"
+      },
+      {
+        "id": "fact_year_founded_7827b6be2e1e",
+        "kind": "year_founded",
+        "value": "2016"
+      },
+      {
+        "id": "fact_service_1c4d83695e54",
+        "kind": "service",
+        "value": "Pains au levain, viennoiseries, sandwichs"
+      },
+      {
+        "id": "fact_hours_002f45278fa6",
+        "kind": "hours",
+        "value": "mon–sat 06:00–13:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Au Pain des Îles, boulangerie artisanale à Lorient"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 1985, nous pétrissons chaque nuit des pains au levain et des viennoiseries à la farine bio. Le goût du vrai pain, tout simplement."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert du lundi au samedi dès 6h. Sandwichs frais chaque midi."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Venez goûter nos viennoiseries, élues meilleures de Saint-Barthélemy."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Boulangerie à Lorient : pains au levain, viennoiseries et sandwichs, depuis 2016."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 1985",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The year_founded fact says 2016."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "à la farine bio",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact says the flour is organic."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Le goût du vrai pain",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert du lundi au samedi dès 6h",
+        "status": "supported",
+        "factIds": ["fact_hours_002f45278fa6"],
+        "reason": "Stated by fact fact_hours_002f45278fa6."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "élues meilleures de Saint-Barthélemy",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "depuis 2016",
+        "status": "supported",
+        "factIds": ["fact_year_founded_7827b6be2e1e"],
+        "reason": "Stated by fact fact_year_founded_7827b6be2e1e."
+      }
+    ],
+    "warnings": []
+  }
+}

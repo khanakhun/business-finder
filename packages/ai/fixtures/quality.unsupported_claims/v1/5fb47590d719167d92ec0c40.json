@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Les Bains de Toiny",
+      "category": "Spa"
+    },
+    "facts": [
+      {
+        "id": "fact_name_ac07cd56cd28",
+        "kind": "name",
+        "value": "Les Bains de Toiny"
+      },
+      {
+        "id": "fact_address_2a33622fa284",
+        "kind": "address",
+        "value": "Toiny, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_0eb3b81a1b69",
+        "kind": "phone",
+        "value": "+590 590 00 03 23"
+      },
+      {
+        "id": "fact_service_8acec1a89805",
+        "kind": "service",
+        "value": "Massages, soins du corps, rituels en duo"
+      },
+      {
+        "id": "fact_price_b8335c7527dc",
+        "kind": "price",
+        "value": "140 EUR — Rituel duo 60 min"
+      },
+      {
+        "id": "fact_hours_f7b909b1a371",
+        "kind": "hours",
+        "value": "mon–sun 09:00–19:00"
+      },
+      {
+        "id": "fact_award_6a85ad6ab27e",
+        "kind": "award",
+        "value": "Prix du spa de l’année 2021 — Caraïbes Bien-Être"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Les Bains de Toiny, spa face à l’océan"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Prix du spa de l’année 2021, Les Bains de Toiny proposent massages et rituels en duo à 140 EUR pour un moment de détente."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Nos praticiennes, formées à Bali, utilisent des produits 100 % naturels."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Ouvert tous les jours, réservez votre instant de sérénité."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Spa à Toiny : massages, rituels en duo, accès piscine inclus."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Prix du spa de l’année 2021",
+        "status": "supported",
+        "factIds": ["fact_award_6a85ad6ab27e"],
+        "reason": "Stated by fact fact_award_6a85ad6ab27e."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "140 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_b8335c7527dc"],
+        "reason": "Stated by fact fact_price_b8335c7527dc."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un moment de détente",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "formées à Bali",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about training."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "produits 100 % naturels",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about product composition."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Ouvert tous les jours",
+        "status": "supported",
+        "factIds": ["fact_hours_f7b909b1a371"],
+        "reason": "Stated by fact fact_hours_f7b909b1a371."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "votre instant de sérénité",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "accès piscine inclus",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No amenity fact about a pool."
+      }
+    ],
+    "warnings": []
+  }
+}

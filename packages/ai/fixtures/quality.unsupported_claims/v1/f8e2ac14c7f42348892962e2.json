@@ -1,0 +1,133 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Spa Lumière",
+      "category": "Spa"
+    },
+    "facts": [
+      {
+        "id": "fact_name_cdfa9e99a04f",
+        "kind": "name",
+        "value": "Spa Lumière"
+      },
+      {
+        "id": "fact_address_3ed807717342",
+        "kind": "address",
+        "value": "18 rue des Remparts-d’Ainay, 69002 Lyon"
+      },
+      {
+        "id": "fact_phone_83bab8e88c78",
+        "kind": "phone",
+        "value": "+33 4 00 00 03 32"
+      },
+      {
+        "id": "fact_service_dbdc1078172c",
+        "kind": "service",
+        "value": "Massages, sauna, soins du visage"
+      },
+      {
+        "id": "fact_price_83503f147433",
+        "kind": "price",
+        "value": "75 EUR — Massage 45 min"
+      },
+      {
+        "id": "fact_hours_f6533daa8e36",
+        "kind": "hours",
+        "value": "tue–sun 10:00–21:00"
+      },
+      {
+        "id": "fact_amenity_07c2fd61697f",
+        "kind": "amenity",
+        "value": "Sauna"
+      },
+      {
+        "id": "fact_year_founded_b7ac6f7a8631",
+        "kind": "year_founded",
+        "value": "2018"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Spa Lumière, une bulle de calme à Lyon"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 2018, massages, sauna et soins du visage. Massage 45 minutes à 65 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "À 2 minutes de la place Bellecour, ouvert 7j/7."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Offrez-vous une pause bien méritée."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Spa à Lyon Presqu’île : massages, sauna, soins du visage, meilleur spa de Lyon 2023."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 2018",
+        "status": "supported",
+        "factIds": ["fact_year_founded_b7ac6f7a8631"],
+        "reason": "Stated by fact fact_year_founded_b7ac6f7a8631."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "sauna",
+        "status": "supported",
+        "factIds": ["fact_amenity_07c2fd61697f"],
+        "reason": "Stated by fact fact_amenity_07c2fd61697f."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "65 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The price fact says 75 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "À 2 minutes de la place Bellecour",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "ouvert 7j/7",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says tue–sun."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "une pause bien méritée",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "meilleur spa de Lyon 2023",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      }
+    ],
+    "warnings": []
+  }
+}

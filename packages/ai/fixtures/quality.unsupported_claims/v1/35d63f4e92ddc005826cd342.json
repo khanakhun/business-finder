@@ -1,0 +1,114 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Forme Tropicale",
+      "category": "Salle de sport"
+    },
+    "facts": [
+      {
+        "id": "fact_name_2b08f2bec5f0",
+        "kind": "name",
+        "value": "Forme Tropicale"
+      },
+      {
+        "id": "fact_address_70d48f47031b",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_315960bf96f1",
+        "kind": "phone",
+        "value": "+590 590 00 03 07"
+      },
+      {
+        "id": "fact_year_founded_0e088c19ff96",
+        "kind": "year_founded",
+        "value": "2019"
+      },
+      {
+        "id": "fact_price_202b9eea587e",
+        "kind": "price",
+        "value": "89 EUR — Abonnement mensuel"
+      },
+      {
+        "id": "fact_hours_554c8007436c",
+        "kind": "hours",
+        "value": "mon–sun 06:00–22:00"
+      },
+      {
+        "id": "fact_service_4f0e87041256",
+        "kind": "service",
+        "value": "Musculation, cours collectifs, coaching"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Forme Tropicale, votre salle de sport à Saint-Jean"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 2019, Forme Tropicale propose musculation, cours collectifs et coaching dans une ambiance motivante."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Abonnement mensuel à 89 EUR, salle ouverte tous les jours de 6h à 22h."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Venez essayer, la première séance se réserve par téléphone."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Salle de sport à Saint-Jean : musculation, cours collectifs, coaching, ouverte 7j/7."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 2019",
+        "status": "supported",
+        "factIds": ["fact_year_founded_0e088c19ff96"],
+        "reason": "Stated by fact fact_year_founded_0e088c19ff96."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "une ambiance motivante",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "89 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_202b9eea587e"],
+        "reason": "Stated by fact fact_price_202b9eea587e."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "ouverte tous les jours de 6h à 22h",
+        "status": "supported",
+        "factIds": ["fact_hours_554c8007436c"],
+        "reason": "Stated by fact fact_hours_554c8007436c."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Venez essayer",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

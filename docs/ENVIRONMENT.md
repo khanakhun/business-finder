@@ -169,6 +169,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `GENERATION_AGENT_MAX_TURNS` | App-specific | api, worker | no | `60` |  | Turns a coding agent may take in one run (BF-044). |
 | `GENERATION_AGENT_BUDGET_MARGIN` | App-specific | api, worker | no | `0.15` |  | Share of an attempt's budget kept back from the agent's own limit (it can overshoot by a turn). |
 | `GENERATION_QUALITY_AUDITS` | App-specific | api, worker | no | `false` |  | Run the render-based quality gates (BF-045: axe-core accessibility, Lighthouse) in a no-network sandbox; needs SANDBOX_ENABLED. On in production. |
+| `GENERATION_QUALITY_AI_GATES` | App-specific | api, worker | no | `false` |  | Run the AI quality gates (BF-045: unsupported claims; the visual critic with the audits): model calls billed to the workspace. On in production. |
 | `GENERATION_QUALITY_AUDIT_WALL_TIME_SEC` | App-specific | api, worker | no | `180` |  | Wall time of one sandboxed quality audit (BF-045; the target is under 90 s for 4 pages × 2 locales). |
 | `GENERATION_FAKE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the scripted fake engine (development, tests and E2E only; refused in production). |
 | `GENERATION_MAX_SANDBOXES` | App-specific | api, worker | no | `4` |  | Sandboxed engine runs at once across the deployment (Claude Code, Codex, …). |

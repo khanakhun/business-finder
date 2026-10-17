@@ -1,0 +1,147 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "The Reef Kitchen",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_e24d5ed4f8e9",
+        "kind": "name",
+        "value": "The Reef Kitchen"
+      },
+      {
+        "id": "fact_address_a6f8f906f18f",
+        "kind": "address",
+        "value": "Grand Cul-de-Sac, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_5544740cd7a4",
+        "kind": "phone",
+        "value": "+590 590 00 04 03"
+      },
+      {
+        "id": "fact_service_50d157a7f8f0",
+        "kind": "service",
+        "value": "Seafood and Caribbean fusion"
+      },
+      {
+        "id": "fact_hours_bff791c6e376",
+        "kind": "hours",
+        "value": "tue–sun 18:00–22:30"
+      },
+      {
+        "id": "fact_price_661f4efc81fe",
+        "kind": "price",
+        "value": "38 EUR — Three-course menu"
+      },
+      {
+        "id": "fact_testimonial_bb4a49841965",
+        "kind": "testimonial",
+        "value": "“Best lobster of our trip.” — Anna K."
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "The Reef Kitchen, seafood on the lagoon"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Caribbean fusion with the freshest flavours, caught daily by local fishermen. Three-course menu 38 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.quote.en",
+        "locale": "en",
+        "text": "“Best lobster of our trip.” — Anna K."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.en",
+        "locale": "en",
+        "text": "Open since 1999, awarded two Caribbean Dining Stars. Closed on Mondays."
+      },
+      {
+        "path": "pages[0].blocks[4].props.cta.en",
+        "locale": "en",
+        "text": "Book a table, we can’t wait to host you."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Seafood restaurant in Grand Cul-de-Sac, Saint-Barthélemy, open seven nights a week."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "the freshest flavours",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Implies a quality the facts do not state."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "caught daily by local fishermen",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "38 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_661f4efc81fe"],
+        "reason": "Stated by fact fact_price_661f4efc81fe."
+      },
+      {
+        "path": "pages[0].blocks[2].props.quote.en",
+        "quote": "“Best lobster of our trip.” — Anna K.",
+        "status": "supported",
+        "factIds": ["fact_testimonial_bb4a49841965"],
+        "reason": "Stated by fact fact_testimonial_bb4a49841965."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.en",
+        "quote": "Open since 1999",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.en",
+        "quote": "awarded two Caribbean Dining Stars",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.en",
+        "quote": "Closed on Mondays",
+        "status": "supported",
+        "factIds": ["fact_hours_bff791c6e376"],
+        "reason": "Stated by fact fact_hours_bff791c6e376."
+      },
+      {
+        "path": "pages[0].blocks[4].props.cta.en",
+        "quote": "we can’t wait to host you",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "open seven nights a week",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says tue–sun."
+      }
+    ],
+    "warnings": []
+  }
+}

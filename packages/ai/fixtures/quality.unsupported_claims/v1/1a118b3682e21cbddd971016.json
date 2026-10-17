@@ -1,0 +1,123 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Garage de la Pointe",
+      "category": "Garage automobile"
+    },
+    "facts": [
+      {
+        "id": "fact_name_97eb3f9a047f",
+        "kind": "name",
+        "value": "Garage de la Pointe"
+      },
+      {
+        "id": "fact_address_417e6d3ea105",
+        "kind": "address",
+        "value": "La Pointe, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_f2a06a262b94",
+        "kind": "phone",
+        "value": "+590 590 00 03 09"
+      },
+      {
+        "id": "fact_year_founded_16fcfe25bf8a",
+        "kind": "year_founded",
+        "value": "2004"
+      },
+      {
+        "id": "fact_service_3bb8f6308ce2",
+        "kind": "service",
+        "value": "Entretien, pneus, climatisation auto"
+      },
+      {
+        "id": "fact_hours_c264e9a267ff",
+        "kind": "hours",
+        "value": "mon–fri 07:30–17:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Garage de la Pointe, depuis 2004 à Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Entretien, pneus et climatisation : un travail soigné par une équipe de six mécaniciens certifiés."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Garage agréé toutes marques, véhicule de courtoisie offert."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Appelez-nous pour un devis, nous répondons rapidement."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Garage automobile à Gustavia ouvert du lundi au vendredi : entretien, pneus, climatisation."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2004",
+        "status": "supported",
+        "factIds": ["fact_year_founded_16fcfe25bf8a"],
+        "reason": "Stated by fact fact_year_founded_16fcfe25bf8a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un travail soigné",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "de six mécaniciens certifiés",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about team size or certification."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Garage agréé toutes marques",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about brand approvals."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "véhicule de courtoisie offert",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No such service fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "nous répondons rapidement",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "ouvert du lundi au vendredi",
+        "status": "supported",
+        "factIds": ["fact_hours_c264e9a267ff"],
+        "reason": "Stated by fact fact_hours_c264e9a267ff."
+      }
+    ],
+    "warnings": []
+  }
+}

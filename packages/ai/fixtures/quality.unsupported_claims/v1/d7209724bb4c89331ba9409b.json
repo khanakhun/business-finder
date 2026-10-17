@@ -1,0 +1,128 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Pêche & Voile SBH",
+      "category": "Excursions en mer"
+    },
+    "facts": [
+      {
+        "id": "fact_name_2fe21565797c",
+        "kind": "name",
+        "value": "Pêche & Voile SBH"
+      },
+      {
+        "id": "fact_address_0277ce43b640",
+        "kind": "address",
+        "value": "Corossol, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_ce1697044fa4",
+        "kind": "phone",
+        "value": "+590 590 00 03 30"
+      },
+      {
+        "id": "fact_service_1a4511eb4ab8",
+        "kind": "service",
+        "value": "Pêche au gros et sorties voile"
+      },
+      {
+        "id": "fact_price_76affb32cbda",
+        "kind": "price",
+        "value": "480 EUR — Demi-journée pêche (4 pers.)"
+      },
+      {
+        "id": "fact_team_member_b8de69bef88d",
+        "kind": "team_member",
+        "value": "Capitaine Marc Questel"
+      },
+      {
+        "id": "fact_year_founded_90dc499cf0c9",
+        "kind": "year_founded",
+        "value": "2015"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Pêche & Voile SBH, depuis 2015"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Le capitaine Marc Questel vous emmène pêcher au gros : demi-journée à 480 EUR pour quatre, poisson garanti ou sortie remboursée."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Bateau de 12 mètres, des sensations fortes et plus de 1 000 sorties réalisées."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Larguez les amarres avec nous."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Pêche au gros et voile depuis Corossol, Saint-Barthélemy."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2015",
+        "status": "supported",
+        "factIds": ["fact_year_founded_90dc499cf0c9"],
+        "reason": "Stated by fact fact_year_founded_90dc499cf0c9."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "capitaine Marc Questel",
+        "status": "supported",
+        "factIds": ["fact_team_member_b8de69bef88d"],
+        "reason": "Stated by fact fact_team_member_b8de69bef88d."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "480 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_76affb32cbda"],
+        "reason": "Stated by fact fact_price_76affb32cbda."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "poisson garanti ou sortie remboursée",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Bateau de 12 mètres",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about the boat."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "plus de 1 000 sorties réalisées",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact gives a count."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Larguez les amarres",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Le Bistrot d’Anna",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_ac5888eae5cf",
+        "kind": "name",
+        "value": "Le Bistrot d’Anna"
+      },
+      {
+        "id": "fact_address_85fe05b2486c",
+        "kind": "address",
+        "value": "7 rue Saint-Rémi, 33000 Bordeaux"
+      },
+      {
+        "id": "fact_phone_fb193d4f41b5",
+        "kind": "phone",
+        "value": "+33 5 00 00 05 13"
+      },
+      {
+        "id": "fact_year_founded_c5fa4b92aac0",
+        "kind": "year_founded",
+        "value": "2016"
+      },
+      {
+        "id": "fact_service_086dd15ee82e",
+        "kind": "service",
+        "value": "Cuisine de bistrot"
+      },
+      {
+        "id": "fact_hours_6947ae110c93",
+        "kind": "hours",
+        "value": "tue–sat 12:00–14:00, 19:30–22:00"
+      },
+      {
+        "id": "fact_price_967dadcbc975",
+        "kind": "price",
+        "value": "21 EUR — Formule déjeuner"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Le Bistrot d’Anna, Bordeaux"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Le Bistrot d’Anna, Bordeaux"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Cuisine de bistrot depuis 2016, formule déjeuner 21 EUR. Élu bistrot de l’année 2022."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Bistro cooking since 2016, lunch menu 21 EUR. Voted bistro of the year 2022."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Produits 100 % locaux, fermé dimanche et lundi, une ambiance chaleureuse."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "100 % local produce, closed Sunday and Monday, a warm atmosphere."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Réservez votre table."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book your table."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "depuis 2016",
+        "status": "supported",
+        "factIds": ["fact_year_founded_c5fa4b92aac0"],
+        "reason": "Stated by fact fact_year_founded_c5fa4b92aac0."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "21 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_967dadcbc975"],
+        "reason": "Stated by fact fact_price_967dadcbc975."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Élu bistrot de l’année 2022",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "since 2016",
+        "status": "supported",
+        "factIds": ["fact_year_founded_c5fa4b92aac0"],
+        "reason": "Stated by fact fact_year_founded_c5fa4b92aac0."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "21 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_967dadcbc975"],
+        "reason": "Stated by fact fact_price_967dadcbc975."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Voted bistro of the year 2022",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Produits 100 % locaux",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "fermé dimanche et lundi",
+        "status": "supported",
+        "factIds": ["fact_hours_6947ae110c93"],
+        "reason": "Stated by fact fact_hours_6947ae110c93."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "100 % local produce",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "closed Sunday and Monday",
+        "status": "supported",
+        "factIds": ["fact_hours_6947ae110c93"],
+        "reason": "Stated by fact fact_hours_6947ae110c93."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "a warm atmosphere",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Boutique Frangipane",
+      "category": "Boutique de cadeaux"
+    },
+    "facts": [
+      {
+        "id": "fact_name_b17a76b6b347",
+        "kind": "name",
+        "value": "Boutique Frangipane"
+      },
+      {
+        "id": "fact_address_47e523828ad9",
+        "kind": "address",
+        "value": "Gustavia, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_bc9edbc2b0f1",
+        "kind": "phone",
+        "value": "+590 590 00 05 10"
+      },
+      {
+        "id": "fact_service_8a25a1f1fc2b",
+        "kind": "service",
+        "value": "Cadeaux, bijoux, décoration"
+      },
+      {
+        "id": "fact_hours_cb962c9bd77a",
+        "kind": "hours",
+        "value": "mon–sat 10:00–18:00"
+      },
+      {
+        "id": "fact_payment_method_04766ed67fd2",
+        "kind": "payment_method",
+        "value": "Carte bancaire"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Boutique Frangipane, cadeaux à Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Boutique Frangipane, gifts in Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Cadeaux, bijoux et décoration, ouvert du lundi au samedi. Fabrication locale uniquement."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Gifts, jewellery and decor, open Monday to Saturday. Locally made only."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Boutique familiale depuis 1990, un accueil chaleureux."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Family-run since 1990, a warm welcome."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Venez découvrir nos nouveautés."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Come and discover our new arrivals."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "ouvert du lundi au samedi",
+        "status": "supported",
+        "factIds": ["fact_hours_cb962c9bd77a"],
+        "reason": "Stated by fact fact_hours_cb962c9bd77a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "open Monday to Saturday",
+        "status": "supported",
+        "factIds": ["fact_hours_cb962c9bd77a"],
+        "reason": "Stated by fact fact_hours_cb962c9bd77a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Locally made only",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No origin fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Boutique familiale depuis 1990",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No family or year fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Family-run since 1990",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No family or year fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "a warm welcome",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Come and discover",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

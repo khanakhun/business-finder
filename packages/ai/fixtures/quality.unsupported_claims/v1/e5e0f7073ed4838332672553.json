@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Serenity Spa Toiny",
+      "category": "Spa"
+    },
+    "facts": [
+      {
+        "id": "fact_name_4c26a69a1996",
+        "kind": "name",
+        "value": "Serenity Spa Toiny"
+      },
+      {
+        "id": "fact_address_d1c348ea490e",
+        "kind": "address",
+        "value": "Toiny, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_09f333eded85",
+        "kind": "phone",
+        "value": "+590 590 00 04 11"
+      },
+      {
+        "id": "fact_service_63466e2c2217",
+        "kind": "service",
+        "value": "Massages, facials, body wraps"
+      },
+      {
+        "id": "fact_price_f76db693dab8",
+        "kind": "price",
+        "value": "130 EUR — 60-minute massage"
+      },
+      {
+        "id": "fact_hours_ceba7a2c269d",
+        "kind": "hours",
+        "value": "mon–sun 09:00–19:00"
+      },
+      {
+        "id": "fact_award_9a65ccbc28c6",
+        "kind": "award",
+        "value": "Caribbean Spa Awards 2022 — Best Boutique Spa"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Serenity Spa Toiny, a relaxing moment by the sea"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Best Boutique Spa at the Caribbean Spa Awards 2022. Massages, facials and body wraps, 60-minute massage 110 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Our therapists are trained in Thailand and use 100 % organic oils."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Open daily, book your escape."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Spa in Toiny, Saint-Barthélemy: massages, facials, body wraps, complimentary pool access."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "a relaxing moment",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Best Boutique Spa at the Caribbean Spa Awards 2022",
+        "status": "supported",
+        "factIds": ["fact_award_9a65ccbc28c6"],
+        "reason": "Stated by fact fact_award_9a65ccbc28c6."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "110 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The price fact says 130 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "trained in Thailand",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No training fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "100 % organic oils",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Open daily",
+        "status": "supported",
+        "factIds": ["fact_hours_ceba7a2c269d"],
+        "reason": "Stated by fact fact_hours_ceba7a2c269d."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "your escape",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "complimentary pool access",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No pool amenity fact."
+      }
+    ],
+    "warnings": []
+  }
+}

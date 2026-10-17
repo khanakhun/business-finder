@@ -1,0 +1,173 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Café Colibri",
+      "category": "Café"
+    },
+    "facts": [
+      {
+        "id": "fact_name_83b3c97710cd",
+        "kind": "name",
+        "value": "Café Colibri"
+      },
+      {
+        "id": "fact_address_9a64f8b3fe2c",
+        "kind": "address",
+        "value": "Gustavia, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_afe74c7e7834",
+        "kind": "phone",
+        "value": "+590 590 00 05 02"
+      },
+      {
+        "id": "fact_service_1361b1fbfdfb",
+        "kind": "service",
+        "value": "Café, brunch, jus frais"
+      },
+      {
+        "id": "fact_hours_add1c6543ac9",
+        "kind": "hours",
+        "value": "mon–sun 07:30–15:00"
+      },
+      {
+        "id": "fact_amenity_1551c5e29fea",
+        "kind": "amenity",
+        "value": "Terrasse"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Café Colibri, brunch à Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Café Colibri, brunch in Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Café, brunch et jus frais sur notre terrasse, tous les jours dès 7h30. Café torréfié sur l’île."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Coffee, brunch and fresh juices on our terrace, every day from 7:30am. Coffee roasted on the island."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 2003, un moment de douceur face au port."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Since 2003, a sweet moment facing the harbour."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Café et brunch à Gustavia, le brunch préféré des insulaires."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Café and brunch in Gustavia, the islanders’ favourite brunch."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "terrasse",
+        "status": "supported",
+        "factIds": ["fact_amenity_1551c5e29fea"],
+        "reason": "Stated by fact fact_amenity_1551c5e29fea."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "tous les jours dès 7h30",
+        "status": "supported",
+        "factIds": ["fact_hours_add1c6543ac9"],
+        "reason": "Stated by fact fact_hours_add1c6543ac9."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Café torréfié sur l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No roasting fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "terrace",
+        "status": "supported",
+        "factIds": ["fact_amenity_1551c5e29fea"],
+        "reason": "Stated by fact fact_amenity_1551c5e29fea."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "every day from 7:30am",
+        "status": "supported",
+        "factIds": ["fact_hours_add1c6543ac9"],
+        "reason": "Stated by fact fact_hours_add1c6543ac9."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Coffee roasted on the island",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No roasting fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Depuis 2003",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "un moment de douceur",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Since 2003",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "a sweet moment",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "le brunch préféré des insulaires",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "the islanders’ favourite brunch",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Shell Beach Coffee",
+      "category": "Coffee shop"
+    },
+    "facts": [
+      {
+        "id": "fact_name_44274b0286d8",
+        "kind": "name",
+        "value": "Shell Beach Coffee"
+      },
+      {
+        "id": "fact_address_67c49f37dfad",
+        "kind": "address",
+        "value": "Shell Beach, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_a74d919442a4",
+        "kind": "phone",
+        "value": "+590 590 00 04 02"
+      },
+      {
+        "id": "fact_service_d34270db21cf",
+        "kind": "service",
+        "value": "Specialty coffee, smoothies, bagels"
+      },
+      {
+        "id": "fact_hours_bf3a9430c982",
+        "kind": "hours",
+        "value": "mon–sun 07:00–16:00"
+      },
+      {
+        "id": "fact_amenity_a93765cd919c",
+        "kind": "amenity",
+        "value": "Free Wi-Fi"
+      },
+      {
+        "id": "fact_payment_method_e280a294e386",
+        "kind": "payment_method",
+        "value": "Cards and contactless"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Shell Beach Coffee"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Specialty coffee, smoothies and bagels every day from 7am, with free Wi-Fi and a laid-back vibe."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Our beans are roasted in-house and our bagels are baked fresh every hour. Rated the #1 café in St Barths."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Come and see us, your table is waiting."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Coffee shop at Shell Beach, Gustavia: specialty coffee, smoothies, bagels, cards accepted."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "every day from 7am",
+        "status": "supported",
+        "factIds": ["fact_hours_bf3a9430c982"],
+        "reason": "Stated by fact fact_hours_bf3a9430c982."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "free Wi-Fi",
+        "status": "supported",
+        "factIds": ["fact_amenity_a93765cd919c"],
+        "reason": "Stated by fact fact_amenity_a93765cd919c."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "a laid-back vibe",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "roasted in-house",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No roasting fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "baked fresh every hour",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about baking."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Rated the #1 café in St Barths",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Ranking with no fact."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "cards accepted",
+        "status": "supported",
+        "factIds": ["fact_payment_method_e280a294e386"],
+        "reason": "Stated by fact fact_payment_method_e280a294e386."
+      }
+    ],
+    "warnings": []
+  }
+}

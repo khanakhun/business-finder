@@ -1,0 +1,130 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Harbour Cuts Barbershop",
+      "category": "Barbershop"
+    },
+    "facts": [
+      {
+        "id": "fact_name_26da770321cd",
+        "kind": "name",
+        "value": "Harbour Cuts Barbershop"
+      },
+      {
+        "id": "fact_address_aa3da74e94c0",
+        "kind": "address",
+        "value": "Rue de la Paix, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_0ec9b7086fe8",
+        "kind": "phone",
+        "value": "+590 590 00 04 01"
+      },
+      {
+        "id": "fact_price_5564f8e40787",
+        "kind": "price",
+        "value": "35 EUR — Men’s cut"
+      },
+      {
+        "id": "fact_hours_bdd4d59ae989",
+        "kind": "hours",
+        "value": "mon–sat 09:00–18:00"
+      },
+      {
+        "id": "fact_year_founded_44da7f1eb522",
+        "kind": "year_founded",
+        "value": "2014"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Harbour Cuts, Gustavia’s barbershop since 2014"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Voted best barber on the island by our clients, we offer classic cuts at 35 EUR and a friendly welcome."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Family-run for two generations, with organic grooming products only."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Walk in Monday to Saturday, we look forward to seeing you."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Barbershop in Gustavia: men’s cuts, beard trims, two minutes from the ferry."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2014",
+        "status": "supported",
+        "factIds": ["fact_year_founded_44da7f1eb522"],
+        "reason": "Stated by fact fact_year_founded_44da7f1eb522."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Voted best barber on the island",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "35 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_5564f8e40787"],
+        "reason": "Stated by fact fact_price_5564f8e40787."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Family-run for two generations",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No family fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "organic grooming products only",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Monday to Saturday",
+        "status": "supported",
+        "factIds": ["fact_hours_bdd4d59ae989"],
+        "reason": "Stated by fact fact_hours_bdd4d59ae989."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "we look forward to seeing you",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "two minutes from the ferry",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      }
+    ],
+    "warnings": []
+  }
+}

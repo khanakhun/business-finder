@@ -91,6 +91,19 @@ export {
   SitePlanOutput,
 } from './tasks/generation-site-plan.ts';
 export {
+  QualityUnsupportedClaims,
+  UnsupportedClaimsInput,
+  UnsupportedClaimsOutput,
+} from './tasks/quality-unsupported-claims.ts';
+export {
+  QualityVisualCritic,
+  VISUAL_CRITERIA,
+  VISUAL_FIXES,
+  type VisualCriterion,
+  VisualCriticInput,
+  VisualCriticOutput,
+} from './tasks/quality-visual-critic.ts';
+export {
   ExtractPainSignalsInput,
   ExtractPainSignalsOutput,
   REVIEW_TEXT_BUDGET,

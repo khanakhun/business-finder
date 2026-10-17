@@ -25,7 +25,8 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "label": "Main navigation",
-    "tasks": "Tasks"
+    "tasks": "Tasks",
+    "leads": "Leads"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -1255,7 +1256,11 @@
       "empty": "Nothing has happened yet.",
       "more": "Show older",
       "updated": "Updated {count, plural, one {# detail} other {# details}} of the business",
-      "scoreUpdated": "Tier moved from {from} to {to}"
+      "scoreUpdated": "Tier moved from {from} to {to}",
+      "leadClaim": "Said “this is my business” on the preview",
+      "leadContact": "Sent a contact request from the preview",
+      "leadOptedOut": "Asked not to be contacted, from the preview",
+      "leadOptedOutRemoved": "Asked not to be contacted and to remove the preview"
     },
     "duplicates": {
       "label": "Possible duplicates",
@@ -2196,8 +2201,7 @@
     "panels": {
       "site": "Site",
       "pages": "Pages",
-      "issues": "Issues",
-      "chat": "Chat"
+      "issues": "Issues"
     },
     "ops": {
       "addPage": "Add a page",
@@ -3108,68 +3112,76 @@
       "openJob": "Open"
     }
   },
-  "siteChat": {
-    "readOnly": "You can read this site; editing with the assistant needs permission to generate sites.",
-    "newThread": "New chat",
-    "empty": "Ask for a change: “make the hero shorter”, “add a breakfast menu page”, “use a calmer palette”.",
-    "thinking": "Working…",
-    "failed": "The assistant could not answer. Try again.",
-    "placeholder": "Describe a change…",
-    "send": "Send",
-    "loadingProposal": "Loading the proposal…",
-    "context": {
-      "block": "Editing: {page} › {block} ({locale})",
-      "page": "Editing: {page} ({locale})"
+  "leads": {
+    "title": "Leads",
+    "description": "Claims, contact requests and opt-outs from preview sites.",
+    "export": "Export CSV",
+    "loadError": "The leads could not be loaded.",
+    "empty": "No leads yet",
+    "emptyHint": "When a business answers from its preview, it shows up here.",
+    "more": "Show more",
+    "noDetails": "No contact details",
+    "waiting": "{count, plural, one {# lead waiting} other {# leads waiting}}",
+    "lead": "Lead",
+    "leadHint": "What was sent, consent and attribution, and what to do next.",
+    "saved": "Lead updated",
+    "saveError": "The lead could not be updated.",
+    "filters": {
+      "status": "Status",
+      "kind": "Kind",
+      "allStatuses": "All statuses (no spam)",
+      "allKinds": "All kinds"
     },
-    "suggestions": {
-      "shorter": "Make it shorter",
-      "premium": "A more premium tone",
-      "split": "Try a split layout",
-      "tropical": "More tropical photos",
-      "fewerPhotos": "Keep the best 6 photos",
-      "clearer": "Make it clearer",
-      "prices": "Show the prices we have",
-      "breakfast": "Add our breakfast items",
-      "realReviews": "Invite real reviews instead",
-      "whatsapp": "Add a WhatsApp button",
-      "hours": "Show the opening hours",
-      "warmer": "Make the site warmer",
-      "calmerPalette": "Use a calmer palette",
-      "translateEn": "Write the missing English texts",
-      "menuPage": "Add a menu page"
+    "status": {
+      "new": "New",
+      "in_progress": "In progress",
+      "qualified": "Qualified",
+      "discarded": "Discarded",
+      "spam": "Spam"
     },
-    "proposal": {
-      "label": "Proposed change",
-      "failed": "That did not work.",
-      "previewFailed": "This proposal cannot be shown on the current version.",
-      "previewBanner": "Previewing the proposed change",
-      "preview": "Preview",
-      "before": "Show before",
-      "apply": "Apply",
-      "discard": "Discard",
-      "undo": "Undo",
-      "undone": "Change undone",
-      "applied": "Applied as version {version}",
-      "version": "Version {version}",
-      "saveFirst": "Save your edits before applying a proposal.",
-      "olderVersion": "Made on an older version",
-      "facts": "Facts to confirm (only the ones you tick are kept)",
-      "status": {
-        "proposed": "Proposed",
-        "applied": "Applied",
-        "discarded": "Discarded",
-        "superseded": "Superseded",
-        "failed": "Failed"
-      },
-      "changes": {
-        "pageAdded": "New page {page}",
-        "pageRemoved": "Page {page} removed",
-        "blockAdded": "New {type} section on {page}",
-        "blockRemoved": "{type} section removed from {page}",
-        "blockMoved": "{type} section moved on {page}",
-        "blockChanged": "{type} on {page}: {fields}",
-        "section": "Site {section} changed"
-      }
-    }
+    "kind": {
+      "claim_interest": "Claim",
+      "contact_request": "Contact request",
+      "opt_out": "Opt-out"
+    },
+    "source": {
+      "banner": "Preview banner",
+      "claim_page": "Claim page",
+      "contact_block": "Contact form",
+      "opt_out_link": "Opt-out link"
+    },
+    "channel": {
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "email": "Email"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "preferredChannel": "Preferred channel",
+      "preferredTime": "Best time",
+      "source": "From",
+      "locale": "Language"
+    },
+    "call": "Call",
+    "email": "Email",
+    "openBusiness": "Open business",
+    "openSite": "Open site",
+    "consentTitle": "Consent",
+    "consentGiven": "Given (privacy text {version})",
+    "consentNone": "No consent checkbox (an opt-out or a demo contact form).",
+    "attributionTitle": "Attribution",
+    "attribution": {
+      "campaign": "Campaign",
+      "engine": "Engine",
+      "version": "Site version"
+    },
+    "spamTitle": "Spam check",
+    "spamScore": "Score {score}:",
+    "changeStatus": "Status",
+    "note": "Note (kept in the audit log)",
+    "addNote": "Add note"
   }
 }

@@ -5,6 +5,7 @@ import { PanelLeftCloseIcon, PanelLeftOpenIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { LeadsBadge } from '@/features/leads/nav-badge.tsx';
 import { activeNavItem, NAVIGATION } from '@/lib/navigation.ts';
 import { BrandMark } from './brand-mark.tsx';
 
@@ -60,6 +61,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps) {
                     ) : (
                       <span className="truncate">{label}</span>
                     )}
+                    {item.badge === 'leads' ? <LeadsBadge collapsed={collapsed} /> : null}
                   </Link>
                 );
                 return <li key={item.key}>{link}</li>;

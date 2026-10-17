@@ -25,7 +25,8 @@
     "collapse": "Réduire la barre latérale",
     "expand": "Déployer la barre latérale",
     "label": "Navigation principale",
-    "tasks": "Tâches"
+    "tasks": "Tâches",
+    "leads": "Contacts entrants"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -1255,7 +1256,11 @@
       "empty": "Rien ne s’est encore passé.",
       "more": "Afficher plus ancien",
       "updated": "{count, plural, one {# information mise} other {# informations mises}} à jour sur l’entreprise",
-      "scoreUpdated": "Niveau passé de {from} à {to}"
+      "scoreUpdated": "Niveau passé de {from} à {to}",
+      "leadClaim": "A indiqué « c’est mon entreprise » sur l’aperçu",
+      "leadContact": "A envoyé une demande de contact depuis l’aperçu",
+      "leadOptedOut": "A demandé à ne plus être contacté, depuis l’aperçu",
+      "leadOptedOutRemoved": "A demandé à ne plus être contacté et le retrait de l’aperçu"
     },
     "duplicates": {
       "label": "Doublons possibles",
@@ -2196,8 +2201,7 @@
     "panels": {
       "site": "Site",
       "pages": "Pages",
-      "issues": "Problèmes",
-      "chat": "Discussion"
+      "issues": "Problèmes"
     },
     "ops": {
       "addPage": "Ajouter une page",
@@ -3108,68 +3112,76 @@
       "openJob": "Ouvrir"
     }
   },
-  "siteChat": {
-    "readOnly": "Vous pouvez lire ce site ; modifier avec l'assistant demande le droit de générer des sites.",
-    "newThread": "Nouvelle discussion",
-    "empty": "Demandez une modification : « raccourcis le haut de page », « ajoute une page petit-déjeuner », « une palette plus calme ».",
-    "thinking": "En cours…",
-    "failed": "L'assistant n'a pas pu répondre. Réessayez.",
-    "placeholder": "Décrivez une modification…",
-    "send": "Envoyer",
-    "loadingProposal": "Chargement de la proposition…",
-    "context": {
-      "block": "Modification : {page} › {block} ({locale})",
-      "page": "Modification : {page} ({locale})"
+  "leads": {
+    "title": "Contacts entrants",
+    "description": "Revendications, demandes de contact et refus venus des sites d’aperçu.",
+    "export": "Exporter en CSV",
+    "loadError": "Les contacts n’ont pas pu être chargés.",
+    "empty": "Aucun contact pour le moment",
+    "emptyHint": "Quand une entreprise répond depuis son aperçu, elle apparaît ici.",
+    "more": "Voir plus",
+    "noDetails": "Pas de coordonnées",
+    "waiting": "{count, plural, one {# contact en attente} other {# contacts en attente}}",
+    "lead": "Contact",
+    "leadHint": "Ce qui a été envoyé, le consentement, l’attribution et la suite.",
+    "saved": "Contact mis à jour",
+    "saveError": "Le contact n’a pas pu être mis à jour.",
+    "filters": {
+      "status": "Statut",
+      "kind": "Type",
+      "allStatuses": "Tous les statuts (sans spam)",
+      "allKinds": "Tous les types"
     },
-    "suggestions": {
-      "shorter": "Plus court",
-      "premium": "Un ton plus haut de gamme",
-      "split": "Essayer une mise en page en deux colonnes",
-      "tropical": "Des photos plus tropicales",
-      "fewerPhotos": "Garder les 6 meilleures photos",
-      "clearer": "Plus clair",
-      "prices": "Afficher nos prix",
-      "breakfast": "Ajouter nos formules petit-déjeuner",
-      "realReviews": "Inviter à laisser de vrais avis",
-      "whatsapp": "Ajouter un bouton WhatsApp",
-      "hours": "Afficher les horaires",
-      "warmer": "Rendre le site plus chaleureux",
-      "calmerPalette": "Une palette plus calme",
-      "translateEn": "Écrire les textes anglais manquants",
-      "menuPage": "Ajouter une page Carte"
+    "status": {
+      "new": "Nouveau",
+      "in_progress": "En cours",
+      "qualified": "Qualifié",
+      "discarded": "Écarté",
+      "spam": "Spam"
     },
-    "proposal": {
-      "label": "Modification proposée",
-      "failed": "Cela n'a pas fonctionné.",
-      "previewFailed": "Cette proposition ne peut pas être affichée sur la version actuelle.",
-      "previewBanner": "Aperçu de la modification proposée",
-      "preview": "Aperçu",
-      "before": "Voir avant",
-      "apply": "Appliquer",
-      "discard": "Écarter",
-      "undo": "Annuler",
-      "undone": "Modification annulée",
-      "applied": "Appliquée comme version {version}",
-      "version": "Version {version}",
-      "saveFirst": "Enregistrez vos modifications avant d'appliquer une proposition.",
-      "olderVersion": "Faite sur une version antérieure",
-      "facts": "Informations à confirmer (seules celles cochées sont conservées)",
-      "status": {
-        "proposed": "Proposée",
-        "applied": "Appliquée",
-        "discarded": "Écartée",
-        "superseded": "Remplacée",
-        "failed": "Échec"
-      },
-      "changes": {
-        "pageAdded": "Nouvelle page {page}",
-        "pageRemoved": "Page {page} supprimée",
-        "blockAdded": "Nouvelle section {type} sur {page}",
-        "blockRemoved": "Section {type} supprimée de {page}",
-        "blockMoved": "Section {type} déplacée sur {page}",
-        "blockChanged": "{type} sur {page} : {fields}",
-        "section": "{section} du site modifié"
-      }
-    }
+    "kind": {
+      "claim_interest": "Revendication",
+      "contact_request": "Demande de contact",
+      "opt_out": "Refus de contact"
+    },
+    "source": {
+      "banner": "Bandeau de l’aperçu",
+      "claim_page": "Page de revendication",
+      "contact_block": "Formulaire de contact",
+      "opt_out_link": "Lien de refus"
+    },
+    "channel": {
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail"
+    },
+    "fields": {
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "preferredChannel": "Canal préféré",
+      "preferredTime": "Meilleur moment",
+      "source": "Origine",
+      "locale": "Langue"
+    },
+    "call": "Appeler",
+    "email": "E-mail",
+    "openBusiness": "Ouvrir l’entreprise",
+    "openSite": "Ouvrir le site",
+    "consentTitle": "Consentement",
+    "consentGiven": "Donné (texte de confidentialité {version})",
+    "consentNone": "Pas de case de consentement (un refus ou un formulaire de démonstration).",
+    "attributionTitle": "Attribution",
+    "attribution": {
+      "campaign": "Campagne",
+      "engine": "Moteur",
+      "version": "Version du site"
+    },
+    "spamTitle": "Contrôle anti-spam",
+    "spamScore": "Score {score} :",
+    "changeStatus": "Statut",
+    "note": "Note (conservée dans le journal d’audit)",
+    "addNote": "Ajouter la note"
   }
 }

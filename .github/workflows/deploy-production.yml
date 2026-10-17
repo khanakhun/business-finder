@@ -1,0 +1,122 @@
+# Deploys a release to production (BF-061, docs/runbooks/deploy.md): manual, and approved by a required reviewer of
+# the `production` environment. The release's release.env pins every application image by digest; the server
+# pulls them, runs the migrations, rolls the API and the site renderer out side by side, and keeps the release only
+# when the health gate (through Caddy) passes. Then the smoke test runs from outside; if it fails, the server rolls
+# back to the previous release and the job fails.
+#
+# Trust: as for staging — the scripts and compose file come from main (this checkout), the version must be a tag on
+# main, and the SSH key can only run the forced command infra/deploy/ssh-command.sh.
+#
+# Repository configuration (Settings → Environments → production: required reviewers, deployment branches main):
+#   secrets  PRODUCTION_HOST, PRODUCTION_USER, PRODUCTION_SSH_KEY, PRODUCTION_KNOWN_HOSTS (verified out of band)
+#   vars     PRODUCTION_BASE_DOMAIN, PRODUCTION_CANARY_URL (optional: a preview site kept for the smoke test)
+name: deploy-production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release to deploy (vX.Y.Z)
+        required: true
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    name: deploy (production)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://app.${{ vars.PRODUCTION_BASE_DOMAIN }}
+    env:
+      VERSION: ${{ inputs.version }}
+      BASE_DOMAIN: ${{ vars.PRODUCTION_BASE_DOMAIN }}
+      CANARY_URL: ${{ vars.PRODUCTION_CANARY_URL }}
+    steps:
+      - name: Validate the version
+        run: |
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "version must be vX.Y.Z"; exit 1; }
+          [ -n "$BASE_DOMAIN" ] || { echo "vars.PRODUCTION_BASE_DOMAIN is not set"; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: The version must be a tag on main
+        run: |
+          git rev-parse --verify --quiet "refs/tags/$VERSION" >/dev/null || { echo "no tag $VERSION"; exit 1; }
+          git merge-base --is-ancestor "$VERSION" HEAD || { echo "$VERSION is not on main"; exit 1; }
+
+      - name: The release's pinned images
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          gh release download "$VERSION" --pattern release.env --dir release
+          # Same rule as the server's: digest references only.
+          grep -Ev '^(#|$)' release/release.env | grep -Evq '^BF_[A-Z_]+_IMAGE=[a-z0-9./_-]+@sha256:[0-9a-f]{64}$' \
+            && { echo "release.env holds unexpected lines"; exit 1; }
+          cat release/release.env
+
+      - name: SSH key and pinned host key
+        env:
+          PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          PRODUCTION_KNOWN_HOSTS: ${{ secrets.PRODUCTION_KNOWN_HOSTS }}
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$PRODUCTION_SSH_KEY" > ~/.ssh/production
+          printf '%s\n' "$PRODUCTION_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/production ~/.ssh/known_hosts
+          {
+            echo "Host production"
+            echo "  HostName $PRODUCTION_HOST"
+            echo "  User $PRODUCTION_USER"
+            echo "  IdentityFile ~/.ssh/production"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+            echo "  UserKnownHostsFile ~/.ssh/known_hosts"
+            echo "  ConnectTimeout 15"
+            echo "  ServerAliveInterval 30"
+          } > ~/.ssh/config
+
+      - name: Upload the compose file, deploy script and release.env (from main and the release)
+        run: |
+          cp infra/compose/docker-compose.prod.yml infra/compose/seccomp-chromium.json infra/deploy/deploy.sh release/
+          tar -C release -cf - docker-compose.prod.yml seccomp-chromium.json deploy.sh release.env \
+            | ssh production upload "$VERSION"
+
+      - name: Pull access to GHCR on the server (this job's token)
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+        run: printf '%s' "$REGISTRY_TOKEN" | ssh production login "$REGISTRY_USER"
+
+      - name: Deploy (migrate, side-by-side rollout, health gate, automatic rollback)
+        run: ssh production deploy "$VERSION"
+
+      - id: smoke
+        name: Smoke test from outside
+        run: node scripts/smoke-prod.mjs "$BASE_DOMAIN" "$VERSION" ${CANARY_URL:+"$CANARY_URL"}
+
+      - name: Roll back after a failed smoke test
+        if: failure() && steps.smoke.outcome == 'failure'
+        run: |
+          echo "::error::the smoke test failed: rolling back to $(ssh production previous)"
+          ssh production rollback
+
+      - name: Forget the registry token and the SSH key
+        if: always()
+        run: |
+          [ -f ~/.ssh/production ] && { ssh production logout || true; }
+          rm -f ~/.ssh/production ~/.ssh/config

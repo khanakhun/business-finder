@@ -56,6 +56,35 @@
 }
 
 # Headers the apps may already set win (`?` only fills in what is missing): the dashboard sets its own CSP.
+# Side-by-side rollouts (BF-061): during a deploy the API and the renderer briefly run two replicas. Their upstreams
+# are the services' Docker DNS records, re-resolved every 2 s; a replica gets traffic once its liveness check passes,
+# a stopped one leaves the record, and a request that cannot reach a replica is retried on another for 10 s.
+(api_upstreams) {
+	dynamic a api 4000 {
+		refresh 2s
+		versions ipv4
+	}
+	lb_policy round_robin
+	lb_try_duration 10s
+	health_uri /health/live
+	health_interval 2s
+	health_timeout 2s
+	fail_duration 10s
+}
+
+(sites_upstreams) {
+	dynamic a sites 3000 {
+		refresh 2s
+		versions ipv4
+	}
+	lb_policy round_robin
+	lb_try_duration 10s
+	health_uri /health/live
+	health_interval 2s
+	health_timeout 2s
+	fail_duration 10s
+}
+
 (security_headers) {
 	header {
 		?Strict-Transport-Security "max-age=63072000; includeSubDomains"
@@ -113,7 +142,8 @@ api.{$BASE_DOMAIN} {
 	request_body {
 		max_size 25MB
 	}
-	reverse_proxy api:4000 {
+	reverse_proxy {
+		import api_upstreams
 		# Stream responses as they are written (SSE).
 		flush_interval -1
 	}
@@ -139,7 +169,9 @@ u.{$BASE_DOMAIN} {
 	}
 	@unsubscribe path /u/* /v1/public/unsubscribe/*
 	handle @unsubscribe {
-		reverse_proxy api:4000
+		reverse_proxy {
+			import api_upstreams
+		}
 	}
 	respond 404
 }
@@ -157,7 +189,9 @@ u.{$BASE_DOMAIN} {
 	@internal path /api/revalidate /health/*
 	respond @internal 404
 	# apps/sites (BF-036): every hostname of the sites domain; it answers 404 for one with no publication.
-	reverse_proxy sites:3000
+	reverse_proxy {
+		import sites_upstreams
+	}
 }
 
 # BF-062: live sites on their own domains (any other name). The certificate is issued on demand when the API's ask
@@ -174,5 +208,7 @@ https:// {
 	}
 	@internal path /api/revalidate /health/*
 	respond @internal 404
-	reverse_proxy sites:3000
+	reverse_proxy {
+		import sites_upstreams
+	}
 }

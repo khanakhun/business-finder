@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Deploys one image tag on the server (BF-025): pull → migrate → start → health gate through Caddy → keep, or roll
 # back to the previous tag and fail. Run from the deploy directory (default /opt/bf) as the deploy user:
-#   ./deploy.sh <image-tag>
+#   ./deploy.sh <image-tag>      a full git sha (staging), or a release version vX.Y.Z (production, BF-061)
+# A release directory may hold release.env: the application images pinned by digest (BF_<NAME>_IMAGE=…@sha256:…),
+# written by the release workflow; it is read as data and every line is checked. With a running stack, the API and
+# the site renderer are rolled out side by side (BF-061): a new replica starts next to the old one, Caddy sends it
+# traffic once healthy, then the old one is stopped gracefully. Set BF_ROLLOUT=in-place to skip that.
 # Expects .env (mode 600) next to it, with IMAGE_REGISTRY and the infrastructure image tags. Each release brings its
 # own compose file in releases/<tag>/ (uploaded by CI); a rollback starts the previous tag with *its* file. Without a
 # release directory (local rehearsal, manual run), ./docker-compose.prod.yml is used.
@@ -10,8 +14,8 @@ set -euo pipefail
 
 new_tag="${1:?usage: deploy.sh <image-tag>}"
 # Image tags are full git shas (CI); a local rehearsal with its own images (BF_SKIP_PULL=1) may use any word.
-if [ "${BF_SKIP_PULL:-}" != 1 ] && ! [[ "$new_tag" =~ ^[0-9a-f]{40}$ ]]; then
-  echo "image tag must be a full git sha" >&2
+if [ "${BF_SKIP_PULL:-}" != 1 ] && ! [[ "$new_tag" =~ ^([0-9a-f]{40}|v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)$ ]]; then
+  echo "image tag must be a full git sha or a release version (vX.Y.Z)" >&2
   exit 64
 fi
 deploy_dir="${BF_DEPLOY_DIR:-/opt/bf}"
@@ -61,11 +65,55 @@ compose_file() {
 # The deploy directory stays the project directory wherever the release's file lives: .env and the env files
 # (app.env, caddy.env, backup.env) are read from there. Files shipped with the compose file (the Chromium seccomp
 # profile) are found through RELEASE_DIR, the compose file's own directory.
+# A release's pinned images (releases/<tag>/release.env), as `NAME=value` words for env(1). Only BF_<NAME>_IMAGE
+# variables with a digest reference are accepted: anything else stops the deploy.
+release_images() {
+  local file="releases/$1/release.env" line
+  [ -f "$file" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    if ! [[ "$line" =~ ^BF_[A-Z_]+_IMAGE=[a-z0-9./_-]+@sha256:[0-9a-f]{64}$ ]]; then
+      echo "refusing $file: unexpected line" >&2
+      return 1
+    fi
+    printf '%s\n' "$line"
+  done < "$file"
+}
 compose() {
-  local file
+  local file images
   file="$(compose_file "$1")"
-  IMAGE_TAG="$1" RELEASE_DIR="$deploy_dir/$(dirname "$file")" docker compose --project-name "$project" \
+  images="$(release_images "$1")" || exit 1
+  # shellcheck disable=SC2086 # one NAME=value word per line, validated above
+  env $images IMAGE_TAG="$1" RELEASE_DIR="$deploy_dir/$(dirname "$file")" docker compose --project-name "$project" \
     --project-directory "$deploy_dir" --env-file "$deploy_dir/.env" --file "$file" "${@:2}"
+}
+
+# Side by side (BF-061): double the service's replicas with the new configuration, wait until the new ones are
+# healthy, stop the old ones (SIGTERM, their grace period), then settle back to the original count. Caddy resolves
+# the service name on each connection and retries another replica, so requests keep flowing.
+container_healthy() {
+  [ "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$1" \
+    2>/dev/null)" = healthy ]
+}
+rollout() {
+  local service="$1" tag="$2" old new count id deadline
+  old="$(compose "$tag" ps --quiet "$service")"
+  count="$(printf '%s\n' "$old" | grep -c . || true)"
+  [ "$count" -gt 0 ] || return 0
+  log "rolling out ${service} side by side (${count} replica(s))"
+  compose "$tag" up --detach --no-deps --no-recreate --scale "${service}=$((count * 2))" "$service"
+  new="$(compose "$tag" ps --quiet "$service" | grep -vxF "$old" || true)"
+  [ -n "$new" ] || { log "no new ${service} replica started"; return 1; }
+  deadline=$((SECONDS + health_timeout))
+  for id in $new; do
+    until container_healthy "$id"; do
+      [ "$SECONDS" -lt "$deadline" ] || { log "new ${service} replica not healthy"; docker rm --force $new >/dev/null; return 1; }
+      sleep 2
+    done
+  done
+  # shellcheck disable=SC2086 # container ids
+  docker stop --time 35 $old >/dev/null && docker rm $old >/dev/null
+  compose "$tag" up --detach --no-deps --no-recreate --scale "${service}=${count}" "$service"
 }
 
 # The site renderer answers through Caddy: a hostname with no publication is its own 404 (a 502 or 503 is not).
@@ -102,14 +150,24 @@ if grep -q 'seccomp-chromium.json' "$(compose_file "$new_tag")" && [ ! -f "$rele
   log "missing $release_dir/seccomp-chromium.json: reinstall the forced command (runbook §4.1), then deploy again"
   exit 1
 fi
+# A release's pinned images are checked before anything changes (compose() runs inside command substitutions too).
+release_images "$new_tag" >/dev/null || exit 1
 # BF_SKIP_PULL=1: images built on this machine (local rehearsal of a deploy, docs/runbooks/staging-setup.md).
 [ "${BF_SKIP_PULL:-}" = 1 ] || compose "$new_tag" pull --quiet
 log "running migrations"
 compose "$new_tag" run --rm migrate
 log "starting containers"
-if compose "$new_tag" up --detach --remove-orphans --wait --wait-timeout "$health_timeout" && healthy; then
-  # Redeploying the same tag keeps the real previous one (a manual rollback must not become a no-op).
-  if [ -n "$current_tag" ] && [ "$current_tag" != "$new_tag" ]; then echo "$current_tag" > IMAGE_TAG.previous; fi
+rolled=true
+if [ "${BF_ROLLOUT:-side-by-side}" = side-by-side ] && [ -n "$current_tag" ]; then
+  for service in api sites; do rollout "$service" "$new_tag" || { rolled=false; break; }; done
+fi
+if $rolled && compose "$new_tag" up --detach --remove-orphans --wait --wait-timeout "$health_timeout" && healthy; then
+  # Redeploying the same tag keeps the real previous one (a manual rollback must not become a no-op). A rollback
+  # (BF_ROLLBACK=1, the forced command's `rollback`) does not record the release it left: a failed release never
+  # becomes the next rollback target.
+  if [ "${BF_ROLLBACK:-}" != 1 ] && [ -n "$current_tag" ] && [ "$current_tag" != "$new_tag" ]; then
+    echo "$current_tag" > IMAGE_TAG.previous
+  fi
   echo "$new_tag" > IMAGE_TAG
   # Keep the current and previous releases (files and images); everything older goes.
   previous_tag="$(cat IMAGE_TAG.previous 2>/dev/null || true)"
@@ -122,6 +180,8 @@ if compose "$new_tag" up --detach --remove-orphans --wait --wait-timeout "$healt
   docker image ls --format '{{.Repository}}:{{.Tag}}' "${IMAGE_REGISTRY}/bf-*" \
     | grep -Ev ":(${new_tag}|${previous_tag:-none})$" | grep -E ':[0-9a-f]{40}$' \
     | xargs -r docker image rm >/dev/null 2>&1 || true
+  # Images pulled by digest carry no tag: unused ones older than a month go (the previous release's stay a while).
+  docker image prune --force --filter 'until=720h' >/dev/null 2>&1 || true
   log "deployed ${new_tag}"
   exit 0
 fi

@@ -1,0 +1,107 @@
+# Releases (BF-061, docs/runbooks/deploy.md). release-please keeps a release PR open on main (changelog from the
+# Conventional Commits, next version); merging it tags vX.Y.Z and creates the GitHub Release. This workflow then pins
+# that commit's images: CI already built and pushed them for the commit (tag = its sha, with SBOM and provenance), so
+# a release never rebuilds — it resolves each application image's digest, tags it with the version, and attaches
+# release.env (BF_<NAME>_IMAGE=ghcr.io/…@sha256:…) to the Release. Production deploys that file, so a release always
+# runs exactly the bytes CI tested.
+#
+# DECISION(BF-061): image signing (cosign) is BF-060's, deferred with the rest of the security work; the digests
+# already make the release immutable. When BF-060 lands, sign here and verify in deploy-production.yml.
+name: release
+
+# The tag release-please creates (with this job's token) starts no other workflow, so the pinning runs here, after it;
+# a tag pushed by hand (a hotfix release) runs the pinning alone.
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: release PR / tag
+    if: github.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  pin-images:
+    name: pin images by digest
+    needs: release-please
+    if: >-
+      always() && (github.ref_type == 'tag' || needs.release-please.outputs.created == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+    env:
+      VERSION: ${{ github.ref_type == 'tag' && github.ref_name || needs.release-please.outputs.tag }}
+      RELEASE_SHA: ${{ github.ref_type == 'tag' && github.sha || needs.release-please.outputs.sha }}
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      # The images a release deploys (infrastructure images — postgres, caddy, backup — move on their own).
+      IMAGES: api web sites intel agent-runner egress-proxy
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: The tag must be a commit of main
+        run: |
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "not a release version"; exit 1; }
+          git merge-base --is-ancestor "$RELEASE_SHA" origin/main || { echo "$VERSION is not on main"; exit 1; }
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # CI's publish job pushes the commit's images; a tag created right after the merge may get here first.
+      - name: Wait for the commit's images
+        run: |
+          for name in $IMAGES; do
+            for attempt in $(seq 1 60); do
+              docker buildx imagetools inspect "$REGISTRY/bf-$name:$RELEASE_SHA" >/dev/null 2>&1 && break
+              [ "$attempt" -lt 60 ] || { echo "bf-$name:$RELEASE_SHA was never published"; exit 1; }
+              sleep 30
+            done
+          done
+
+      - name: Resolve digests, tag the version, write release.env
+        run: |
+          {
+            echo "# $VERSION ($RELEASE_SHA): application images pinned by digest (BF-061)."
+            for name in $IMAGES; do
+              digest="$(docker buildx imagetools inspect "$REGISTRY/bf-$name:$RELEASE_SHA" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+              [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "no digest for bf-$name" >&2; exit 1; }
+              docker buildx imagetools create --tag "$REGISTRY/bf-$name:$VERSION" "$REGISTRY/bf-$name@$digest" >&2
+              var="BF_$(echo "$name" | tr 'a-z-' 'A-Z_')_IMAGE"
+              echo "$var=$REGISTRY/bf-$name@$digest"
+            done
+          } > release.env
+          cat release.env
+
+      - name: Attach release.env to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$VERSION" >/dev/null 2>&1 \
+            || gh release create "$VERSION" --verify-tag --generate-notes --title "$VERSION"
+          gh release upload "$VERSION" release.env --clobber

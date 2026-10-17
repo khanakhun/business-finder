@@ -16,6 +16,7 @@
     "test": "turbo run test",
     "test:root": "node --test 'scripts/**/*.test.mjs' 'tools/**/*.test.mjs'",
     "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:migrations": "node scripts/ci/check-migrations.mjs",
     "test:int": "turbo run test:int",
     "e2e": "turbo run e2e",
     "verify": "turbo run lint typecheck test",

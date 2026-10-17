@@ -4,6 +4,8 @@
 #   IMAGE_REGISTRY  ghcr.io/<owner>          IMAGE_TAG  the git sha CI built (set by the deploy script)
 #   POSTGRES_IMAGE_TAG, CADDY_IMAGE_TAG, BACKUP_IMAGE_TAG (in .env): infrastructure images move only when bumped on
 #   purpose, never with each release (no database restart on deploys, no binary swap on rollbacks).
+#   BF_<NAME>_IMAGE  production (BF-061): each application image pinned by digest (`…/bf-api@sha256:…`), from the
+#   release's release.env (written by .github/workflows/release.yml); unset on staging, where IMAGE_TAG is used.
 #
 # Each service receives only the secrets it needs (files in /opt/bf, mode 600; docs/runbooks/staging-setup.md):
 #   .env        compose variables: domains, registry, Postgres owner and role passwords, tuning (never sent whole)
@@ -73,7 +75,7 @@ services:
   # The public face: no secrets at all, only where things are.
   web:
     <<: *hardened
-    image: ${IMAGE_REGISTRY:?}/bf-web:${IMAGE_TAG:?}
+    image: ${BF_WEB_IMAGE:-${IMAGE_REGISTRY:?}/bf-web:${IMAGE_TAG:?}}
     environment:
       PORT: '3000'
       API_INTERNAL_URL: http://api:4000
@@ -90,7 +92,9 @@ services:
   # and holds only the two secrets it shares with the API: no object storage, no API or provider keys.
   sites:
     <<: *hardened
-    image: ${IMAGE_REGISTRY:?}/bf-sites:${IMAGE_TAG:?}
+    image: ${BF_SITES_IMAGE:-${IMAGE_REGISTRY:?}/bf-sites:${IMAGE_TAG:?}}
+    # Side-by-side rollouts (BF-061): the old replica finishes its requests before it goes.
+    stop_grace_period: 35s
     environment:
       NODE_ENV: production
       PORT: '3000'
@@ -117,7 +121,9 @@ services:
 
   api:
     <<: *app
-    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    image: ${BF_API_IMAGE:-${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}}
+    # Side-by-side rollouts (BF-061): the old replica finishes its requests before it goes.
+    stop_grace_period: 35s
     command: [http]
     environment: &app-env
       APP_VERSION: ${IMAGE_TAG:?}
@@ -146,7 +152,7 @@ services:
 
   worker:
     <<: *app
-    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    image: ${BF_API_IMAGE:-${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}}
     command: [worker]
     # docker-api: sandboxes through the socket proxy (BF-043); the worker never mounts the Docker socket.
     networks: [edge, data, sites-api, docker-api]
@@ -154,7 +160,7 @@ services:
       <<: *app-env
       WORKER_METRICS_PORT: '9464'
       SANDBOX_DOCKER_HOST: tcp://docker-socket-proxy:2375
-      SANDBOX_RUNNER_IMAGE: ${IMAGE_REGISTRY:?}/bf-agent-runner:${IMAGE_TAG:?}
+      SANDBOX_RUNNER_IMAGE: ${BF_AGENT_RUNNER_IMAGE:-${IMAGE_REGISTRY:?}/bf-agent-runner:${IMAGE_TAG:?}}
       SANDBOX_NETWORK: bf-sandbox
       SANDBOX_EGRESS_PROXY_URL: http://egress-proxy:4750
     healthcheck:
@@ -175,7 +181,7 @@ services:
   # Renders untrusted pages in Chromium: its shared secret and its own storage key, nothing of the application's.
   intel:
     <<: *hardened
-    image: ${IMAGE_REGISTRY:?}/bf-intel:${IMAGE_TAG:?}
+    image: ${BF_INTEL_IMAGE:-${IMAGE_REGISTRY:?}/bf-intel:${IMAGE_TAG:?}}
     # Chromium keeps its own sandbox: Docker's default seccomp profile plus the user-namespace syscalls it needs
     # (scripts/infra/seccomp-chromium.mjs), shipped next to this file.
     security_opt:
@@ -196,7 +202,7 @@ services:
 
   # One-shot: forward-only migrations, run by the deploy script before the app containers change.
   migrate:
-    image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
+    image: ${BF_API_IMAGE:-${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}}
     command: [migrate]
     <<: *hardened
     restart: 'no'
@@ -332,7 +338,7 @@ services:
   # The only way out of the sandbox network: HTTPS CONNECT to the model APIs (EGRESS_PROFILE), nothing else.
   egress-proxy:
     <<: *hardened
-    image: ${IMAGE_REGISTRY:?}/bf-egress-proxy:${IMAGE_TAG:?}
+    image: ${BF_EGRESS_PROXY_IMAGE:-${IMAGE_REGISTRY:?}/bf-egress-proxy:${IMAGE_TAG:?}}
     read_only: true
     environment:
       EGRESS_PROFILE: ${EGRESS_PROFILE:-models}

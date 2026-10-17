@@ -1,0 +1,233 @@
+{
+  "$id": "https://schemas.business-finder.dev/MlPreprocessingSpec.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "How a feature vector becomes the model input, shared by intel (writes) and the API (scores).",
+  "properties": {
+    "calibration": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "const": "none",
+              "type": "string"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "b": {
+              "type": "number"
+            },
+            "method": {
+              "const": "platt",
+              "type": "string"
+            }
+          },
+          "required": [
+            "method",
+            "a",
+            "b"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "const": "isotonic",
+              "type": "string"
+            },
+            "x": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "y": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "method",
+            "x",
+            "y"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "columns": {
+      "items": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "fill": {
+                "type": "number"
+              },
+              "kind": {
+                "const": "numeric",
+                "type": "string"
+              },
+              "mean": {
+                "type": "number"
+              },
+              "source": {
+                "type": "string"
+              },
+              "std": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "kind",
+              "source",
+              "fill",
+              "mean",
+              "std"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "missing",
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "source"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "boolean",
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "source"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "category",
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "source",
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "type": "array"
+    },
+    "kind": {
+      "enum": [
+        "logreg",
+        "hgb"
+      ],
+      "type": "string"
+    },
+    "linear": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "coefficients": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "intercept": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "intercept",
+            "coefficients"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "onnx": {
+      "additionalProperties": false,
+      "properties": {
+        "inputName": {
+          "type": "string"
+        },
+        "outputName": {
+          "type": "string"
+        },
+        "positiveIndex": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inputName",
+        "outputName",
+        "positiveIndex"
+      ],
+      "type": "object"
+    },
+    "version": {
+      "const": 1,
+      "type": "number"
+    }
+  },
+  "required": [
+    "version",
+    "kind",
+    "columns",
+    "onnx",
+    "calibration",
+    "linear"
+  ],
+  "title": "MlPreprocessingSpec",
+  "type": "object"
+}

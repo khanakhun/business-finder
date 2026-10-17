@@ -1,10 +1,17 @@
 import type { FeatureVector } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
-import { mlDatasets } from '@bf/db/schema';
+import { mlDatasets, mlTrainingRuns, scoringModels } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
-import type { ContactRow, MlDatasetRecord, MlRepository } from '../../application/ml/ports.ts';
+import type {
+  ContactRow,
+  MlDatasetRecord,
+  MlModelRecord,
+  MlRepository,
+  MlTrainingRunRecord,
+  ModelRegistry,
+} from '../../application/ml/ports.ts';
 import { LABEL_DEFINITIONS } from '../../domain/ml/label-definition.ts';
 
 // The dataset's source (BF-059): first contacts from the analytics facts (BF-058) — the first email for the offer
@@ -28,7 +35,7 @@ type RawRow = {
 };
 
 @Injectable()
-export class DrizzleMlRepository implements MlRepository {
+export class DrizzleMlRepository implements MlRepository, ModelRegistry {
   constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
 
   async contacts(organizationId: string, offer: string, from: Date, to: Date, horizonDays: number) {
@@ -125,25 +132,146 @@ export class DrizzleMlRepository implements MlRepository {
     const rows = await getExecutor(this.db)
       .select()
       .from(mlDatasets)
-      .where(and(eq(mlDatasets.organizationId, organizationId)))
+      .where(eq(mlDatasets.organizationId, organizationId))
       .orderBy(desc(mlDatasets.createdAt))
       .limit(limit);
-    return rows.map(
-      (row): MlDatasetRecord => ({
+    return rows.map(datasetRecord);
+  }
+
+  async dataset(organizationId: string, id: string) {
+    const [row] = await getExecutor(this.db)
+      .select()
+      .from(mlDatasets)
+      .where(and(eq(mlDatasets.organizationId, organizationId), eq(mlDatasets.id, id)));
+    return row ? datasetRecord(row) : undefined;
+  }
+
+  // ── Registry ──────────────────────────────────────────────────────────────────────────────────────────────
+
+  async nextVersion(organizationId: string, offer: string) {
+    const [row] = await getExecutor(this.db)
+      .select({ max: sql<number | null>`max(${scoringModels.version})` })
+      .from(scoringModels)
+      .where(and(eq(scoringModels.organizationId, organizationId), eq(scoringModels.offer, offer)));
+    return Number(row?.max ?? 0) + 1;
+  }
+
+  async insertModel(row: Parameters<ModelRegistry['insertModel']>[0]) {
+    const [stored] = await getExecutor(this.db)
+      .insert(scoringModels)
+      .values({
         id: row.id,
         organizationId: row.organizationId,
-        offer: row.offer as MlDatasetRecord['offer'],
+        offer: row.offer,
+        version: row.version,
+        kind: row.kind,
+        status: row.status,
+        datasetId: row.datasetId,
         labelVersion: row.labelVersion,
-        horizonDays: LABEL_DEFINITIONS[row.labelVersion]?.horizonDays ?? 0,
-        from: row.windowFrom,
-        to: row.windowTo,
-        counts: row.counts,
-        features: row.features,
-        sha256: row.sha256,
-        storageKey: row.storageKey,
-        createdBy: row.createdBy,
-        createdAt: row.createdAt,
-      }),
-    );
+        artifactKeys: row.artifactKeys,
+        artifactHashes: row.artifactHashes,
+        modelCard: row.modelCard,
+        metrics: row.metrics,
+        baselineMetrics: row.baselineMetrics,
+        spearman: row.spearman,
+        warnings: row.warnings,
+        trainedBy: row.trainedBy,
+      })
+      .returning();
+    if (!stored) throw new Error('model not stored');
+    return modelRecord(stored);
+  }
+
+  async model(organizationId: string, id: string) {
+    const [row] = await getExecutor(this.db)
+      .select()
+      .from(scoringModels)
+      .where(and(eq(scoringModels.organizationId, organizationId), eq(scoringModels.id, id)));
+    return row ? modelRecord(row) : undefined;
+  }
+
+  async models(organizationId: string) {
+    const rows = await getExecutor(this.db)
+      .select()
+      .from(scoringModels)
+      .where(eq(scoringModels.organizationId, organizationId))
+      .orderBy(desc(scoringModels.trainedAt))
+      .limit(100);
+    return rows.map(modelRecord);
+  }
+
+  async insertRun(row: Parameters<ModelRegistry['insertRun']>[0]) {
+    await getExecutor(this.db).insert(mlTrainingRuns).values(row);
+  }
+
+  async run(id: string) {
+    const [row] = await getExecutor(this.db).select().from(mlTrainingRuns).where(eq(mlTrainingRuns.id, id));
+    return row ? runRecord(row) : undefined;
+  }
+
+  async updateRun(id: string, patch: Parameters<ModelRegistry['updateRun']>[1]) {
+    await getExecutor(this.db).update(mlTrainingRuns).set(patch).where(eq(mlTrainingRuns.id, id));
+  }
+
+  async runs(organizationId: string, limit: number) {
+    const rows = await getExecutor(this.db)
+      .select({ run: mlTrainingRuns, offer: mlDatasets.offer })
+      .from(mlTrainingRuns)
+      .innerJoin(mlDatasets, eq(mlDatasets.id, mlTrainingRuns.datasetId))
+      .where(eq(mlTrainingRuns.organizationId, organizationId))
+      .orderBy(desc(mlTrainingRuns.createdAt))
+      .limit(limit);
+    return rows.map((row) => ({ ...runRecord(row.run), offer: row.offer }));
   }
 }
+
+const runRecord = (row: typeof mlTrainingRuns.$inferSelect): MlTrainingRunRecord => ({
+  id: row.id,
+  organizationId: row.organizationId,
+  datasetId: row.datasetId,
+  status: row.status,
+  considerGbm: row.considerGbm,
+  error: row.error,
+  modelId: row.modelId,
+  createdBy: row.createdBy,
+  createdAt: row.createdAt,
+  finishedAt: row.finishedAt,
+});
+
+const modelRecord = (row: typeof scoringModels.$inferSelect): MlModelRecord => ({
+  id: row.id,
+  organizationId: row.organizationId,
+  offer: row.offer as MlModelRecord['offer'],
+  version: row.version,
+  kind: row.kind,
+  status: row.status,
+  datasetId: row.datasetId,
+  labelVersion: row.labelVersion,
+  artifactKeys: row.artifactKeys,
+  artifactHashes: row.artifactHashes,
+  modelCard: row.modelCard,
+  metrics: row.metrics,
+  baselineMetrics: row.baselineMetrics,
+  spearman: row.spearman,
+  warnings: row.warnings,
+  trainedBy: row.trainedBy,
+  trainedAt: row.trainedAt,
+  promotedBy: row.promotedBy,
+  promotedAt: row.promotedAt,
+});
+
+const datasetRecord = (row: typeof mlDatasets.$inferSelect): MlDatasetRecord => ({
+  id: row.id,
+  organizationId: row.organizationId,
+  offer: row.offer as MlDatasetRecord['offer'],
+  labelVersion: row.labelVersion,
+  horizonDays: LABEL_DEFINITIONS[row.labelVersion]?.horizonDays ?? 0,
+  from: row.windowFrom,
+  to: row.windowTo,
+  counts: row.counts,
+  features: row.features,
+  sha256: row.sha256,
+  storageKey: row.storageKey,
+  createdBy: row.createdBy,
+  createdAt: row.createdAt,
+});

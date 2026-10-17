@@ -29,6 +29,11 @@ dependencies = [
   "boto3==1.43.106",
   "regex==2026.9.29",
   "protego==0.7.0",
+  "scikit-learn==1.9.1",
+  "numpy==2.5.3",
+  "skl2onnx==1.20.0",
+  "onnx==1.23.1",
+  "onnxruntime==1.30.0",
 ]
 
 [dependency-groups]
@@ -51,6 +56,8 @@ dev = [
 
 [tool.uv]
 package = false
+# Transitive pins: releases at least two weeks old when added (BF-059: scikit-learn pulls narwhals).
+constraint-dependencies = ["narwhals==2.26.0"]
 
 [tool.taskipy.tasks]
 dev = { cmd = "python -m app.serve --reload", help = "uvicorn with reload on INTEL_PORT" }
@@ -87,6 +94,11 @@ python_version = "3.13"
 files = ["app", "tests", "scripts"]
 exclude = ["app/contracts/"]
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+# BF-059: the ML stack ships without type information.
+module = ["sklearn.*", "skl2onnx.*", "onnxruntime.*", "scipy.*"]
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 # Generated models are type-checked where they are used, not linted as source.

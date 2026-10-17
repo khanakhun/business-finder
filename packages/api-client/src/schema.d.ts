@@ -3183,6 +3183,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/scoring/ml/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Trained model versions with their metrics and model cards */
+        get: operations["listScoringMlModels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/ml/models/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One model version */
+        get: operations["getScoringMlModel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/scoring/ml/readiness": {
         parameters: {
             query?: never;
@@ -3194,6 +3228,24 @@ export type paths = {
         get: operations["getScoringMlReadiness"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/ml/training-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Training runs, newest first, with their status */
+        get: operations["listScoringMlTrainingRuns"];
+        put?: never;
+        /** Train a model on a dataset (queued; intel trains, the API registers the version) */
+        post: operations["startScoringMlTraining"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7271,6 +7323,57 @@ export type components = {
         MlDatasetList: {
             items: components["schemas"]["MlDataset"][];
         };
+        MlModel: {
+            baselineMetrics: {
+                brier: number | null;
+                calibration: {
+                    n: number;
+                    observed: number;
+                    predicted: number;
+                }[];
+                liftTop10: number | null;
+                liftTop20: number | null;
+                prAuc: number | null;
+                rocAuc: number | null;
+            };
+            /** Format: uuid */
+            datasetId: string;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "logreg" | "hgb";
+            labelVersion: number;
+            metrics: {
+                brier: number | null;
+                calibration: {
+                    n: number;
+                    observed: number;
+                    predicted: number;
+                }[];
+                liftTop10: number | null;
+                liftTop20: number | null;
+                prAuc: number | null;
+                rocAuc: number | null;
+            };
+            modelCard: {
+                [key: string]: unknown;
+            };
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            promotedAt: string | null;
+            promotedBy: string | null;
+            spearman: number | null;
+            /** @enum {string} */
+            status: "trained" | "shadow" | "active" | "retired" | "rejected";
+            /** Format: date-time */
+            trainedAt: string;
+            trainedBy: string | null;
+            version: number;
+            warnings: string[];
+        };
+        MlModelList: {
+            items: components["schemas"]["MlModel"][];
+        };
         MlReadiness: {
             censored: number;
             excluded: number;
@@ -7285,6 +7388,25 @@ export type components = {
                 labelled: number;
                 positives: number;
             };
+        };
+        MlTrainingRun: {
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            /** Format: uuid */
+            datasetId: string;
+            error: string | null;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            modelId: string | null;
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** @enum {string} */
+            status: "queued" | "running" | "succeeded" | "failed";
+        };
+        MlTrainingRunList: {
+            items: components["schemas"]["MlTrainingRun"][];
         };
         Note: {
             authorId: string | null;
@@ -9513,6 +9635,12 @@ export type components = {
             templateId?: string;
         };
         StartDiscoveryRunRequest: components["schemas"]["EstimateDiscoveryRunRequest"];
+        StartMlTrainingRequest: {
+            /** @default true */
+            considerGbm: boolean;
+            /** Format: uuid */
+            datasetId: string;
+        };
         StoredScoringProfileConfig: {
             /** @default [] */
             gates: components["schemas"]["ScoringGate"][];
@@ -25003,6 +25131,111 @@ export interface operations {
             };
         };
     };
+    listScoringMlModels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MlModelList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getScoringMlModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MlModel"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     getScoringMlReadiness: {
         parameters: {
             query?: {
@@ -25043,6 +25276,131 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listScoringMlTrainingRuns: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MlTrainingRunList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    startScoringMlTraining: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartMlTrainingRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MlTrainingRun"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

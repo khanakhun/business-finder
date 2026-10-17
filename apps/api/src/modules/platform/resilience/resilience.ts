@@ -81,6 +81,18 @@ export const RESILIENCE_POLICIES = {
     breakerThreshold: 5,
     halfOpenAfterMs: 60_000,
   },
+  /**
+   * Outcome-model training in intel (BF-059): minutes on large datasets (intel's own budget is the CPU pool);
+   * no retry — the training run is re-started by a person, never twice by the client.
+   */
+  'intel-ml': {
+    timeoutMs: 600_000,
+    maxRetries: 0,
+    initialDelayMs: 1_000,
+    maxDelayMs: 5_000,
+    breakerThreshold: 3,
+    halfOpenAfterMs: 120_000,
+  },
   /** Stock photo APIs (BF-038: Unsplash, Pexels): quick searches, one retry; their quotas are guarded apart. */
   stock: {
     timeoutMs: 10_000,

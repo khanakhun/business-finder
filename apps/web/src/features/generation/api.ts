@@ -3,16 +3,19 @@
 import type {
   BusinessSearchPage,
   CreateGenerationBatchRequest,
+  GenerationArtifactList,
   GenerationBatchDetail,
   GenerationBatchPage,
   GenerationBriefPreview,
   GenerationEngineListing,
   GenerationJob,
   GenerationJobDetail,
+  GenerationJobPage,
   GenerationJobQuality,
+  GenerationJobWorkspace,
   SitePage,
 } from '@bf/contracts';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient, queryKeys } from '@/lib/api.ts';
 import { useRealtimeEvent } from '@/lib/realtime/provider.tsx';
 
@@ -34,11 +37,19 @@ export function useEngines() {
 }
 
 export function useBatches(filters: Readonly<Record<string, string>> = {}) {
-  return useQuery({
-    queryKey: queryKeys.generation.batches(filters),
-    queryFn: async () =>
-      (await apiClient().GET('/v1/generation-batches', { params: { query: { limit: 25, ...filters } } }))
-        .data as GenerationBatchPage,
+  const client = useQueryClient();
+  const key = queryKeys.generation.batches(filters);
+  useRealtimeEvent(BATCH_UPDATED, () => void client.invalidateQueries({ queryKey: key }));
+  return useInfiniteQuery({
+    queryKey: key,
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) =>
+      (
+        await apiClient().GET('/v1/generation-batches', {
+          params: { query: { limit: 25, ...filters, ...(pageParam ? { cursor: pageParam } : {}) } as never },
+        })
+      ).data as GenerationBatchPage,
+    getNextPageParam: (page) => page.nextCursor,
   });
 }
 
@@ -69,6 +80,48 @@ export function useBatch(id: string) {
     queryFn: async () =>
       (await apiClient().GET('/v1/generation-batches/{id}', { params: { path: { id } } }))
         .data as GenerationBatchDetail,
+  });
+}
+
+/** The workspace's jobs, newest first (`status`, `businessId`); refreshed when any job moves. */
+export function useJobs(filters: Readonly<Record<string, string>>, enabled = true) {
+  const client = useQueryClient();
+  const key = queryKeys.generation.jobs(filters);
+  useRealtimeEvent(JOB_UPDATED, () => void client.invalidateQueries({ queryKey: key }));
+  return useInfiniteQuery({
+    queryKey: key,
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) =>
+      (
+        await apiClient().GET('/v1/generation-jobs', {
+          params: { query: { limit: 25, ...filters, ...(pageParam ? { cursor: pageParam } : {}) } as never },
+        })
+      ).data as GenerationJobPage,
+    getNextPageParam: (page) => page.nextCursor,
+    enabled,
+  });
+}
+
+/** What a job's engine was given: brief, facts, assets (its latest workspace bundle). */
+export function useJobWorkspace(jobId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.generation.workspace(jobId),
+    queryFn: async () =>
+      (await apiClient().GET('/v1/generation-jobs/{id}/workspace', { params: { path: { id: jobId } } }))
+        .data as GenerationJobWorkspace,
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+/** A job's stored artifacts (`sites:admin`). */
+export function useJobArtifacts(jobId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.generation.artifacts(jobId),
+    queryFn: async () =>
+      (await apiClient().GET('/v1/generation-jobs/{id}/artifacts', { params: { path: { id: jobId } } }))
+        .data as GenerationArtifactList,
+    enabled,
   });
 }
 

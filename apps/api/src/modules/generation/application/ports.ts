@@ -220,6 +220,19 @@ export interface GenerationRepository {
     filter: { readonly status?: GenerationBatchStatus; readonly before?: Date; readonly limit: number },
   ): Promise<StoredBatch[]>;
   jobs(batchId: string): Promise<StoredJob[]>;
+  /** The workspace's jobs, newest first (BF-046: the review queue, a business's Sites tab). */
+  listJobs(
+    organizationId: string,
+    filter: {
+      readonly status?: GenerationJobStatus;
+      readonly businessId?: string;
+      /** Keyset: strictly after this job in the order (created at, then id, both descending). */
+      readonly after?: { readonly createdAt: Date; readonly id: string };
+      readonly limit: number;
+    },
+  ): Promise<StoredJob[]>;
+  /** A job's stored artifacts, newest first, with their attempt's number. */
+  jobArtifacts(jobId: string): Promise<StoredArtifact[]>;
   job(organizationId: string, jobId: string): Promise<StoredJob | undefined>;
   jobById(jobId: string): Promise<StoredJob | undefined>;
   /** Locks the job row until the transaction ends (transitions are serialized). */
@@ -415,6 +428,20 @@ export interface GenerationLimits {
 export const GENERATION_LIMITS = Symbol('GenerationLimits');
 
 /** The workspace's generation settings (BF-039 defaults; a settings screen comes with BF-046). */
+export interface StoredArtifact {
+  readonly id: string;
+  readonly kind: string;
+  readonly attemptNo: number | null;
+  readonly storageKey: string;
+  readonly sha256: string;
+  readonly bytes: number;
+  readonly createdAt: Date;
+}
+
+/** Reads a workspace bundle's files (the infrastructure's zstd-compressed tar). */
+export type BundleUnpacker = (bundle: Buffer) => Map<string, Buffer>;
+export const BUNDLE_UNPACKER = Symbol('BundleUnpacker');
+
 export interface GenerationSettingsReader {
   resolve(organizationId: string): Promise<GenerationSettings>;
 }

@@ -78,6 +78,9 @@ export const queryKeys = {
     quality: (jobId: string) => ['generation', 'quality', jobId] as const,
     selection: (ids: readonly string[]) => ['generation', 'selection', ids] as const,
     businessSite: (businessId: string) => ['generation', 'business-site', businessId] as const,
+    jobs: (filters: Readonly<Record<string, string>>) => ['generation', 'jobs', filters] as const,
+    workspace: (jobId: string) => ['generation', 'workspace', jobId] as const,
+    artifacts: (jobId: string) => ['generation', 'artifacts', jobId] as const,
   }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,

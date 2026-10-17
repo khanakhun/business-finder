@@ -28,6 +28,7 @@ import {
 } from './application/facts.ports.ts';
 import { FactRegistryService } from './application/facts.service.ts';
 import { GenerationCommands } from './application/generation.commands.ts';
+import { GenerationFiles } from './application/generation.files.ts';
 import { GenerationNotifications } from './application/generation.notifications.ts';
 import { GenerationQuality } from './application/generation.quality.ts';
 import { GenerationQueries } from './application/generation.queries.ts';
@@ -36,6 +37,7 @@ import { GenerationRunner } from './application/generation.runner.ts';
 import {
   type AgentEngine,
   type ArtifactStore,
+  BUNDLE_UNPACKER,
   CANCEL_SIGNALS,
   ENGINE_REGISTRY,
   type EngineRegistry,
@@ -105,9 +107,11 @@ import {
   ValkeyLeaseSemaphore,
 } from './infrastructure/valkey-adapters.ts';
 import { LibrarySiteImages } from './infrastructure/workspace/library-images.ts';
+import { unpackBundle } from './infrastructure/workspace/tar.ts';
 import { BundleWorkspacePreparer } from './infrastructure/workspace/workspace-builder.ts';
 import { FactsController } from './interface/http/facts.controller.ts';
 import { GenerationController } from './interface/http/generation.controller.ts';
+import { JobFilesController } from './interface/http/job-files.controller.ts';
 import { QualityController } from './interface/http/quality.controller.ts';
 import {
   GenerationBlocksProcessor,
@@ -203,7 +207,10 @@ export class GenerationModule {
     return {
       module: GenerationModule,
       imports: [SitesModule.forRoot(mode), RealtimeModule.forRoot(mode)],
-      controllers: mode === 'worker' ? [] : [GenerationController, FactsController, QualityController],
+      controllers:
+        mode === 'worker'
+          ? []
+          : [GenerationController, FactsController, QualityController, JobFilesController],
       providers: [
         { provide: GENERATION_REPOSITORY, useClass: DrizzleGenerationRepository },
         { provide: FACT_SOURCES_READER, useClass: DrizzleFactSources },
@@ -226,6 +233,7 @@ export class GenerationModule {
           useFactory: (db: DbClient) => new DrizzleSiteFactExtractions(db),
         },
         { provide: SITE_FACT_TELEMETRY, useValue: PROMETHEUS_SITE_FACT_TELEMETRY },
+        { provide: BUNDLE_UNPACKER, useValue: unpackBundle },
         SiteFactExtraction,
         { provide: BRIEF_SOURCES_READER, useClass: DrizzleBriefSources },
         { provide: PAGE_PLAN_TEMPLATES, useFactory: () => pagePlans() },
@@ -422,6 +430,7 @@ export class GenerationModule {
         GenerationCommands,
         GenerationReview,
         GenerationQueries,
+        GenerationFiles,
         GenerationRunner,
         GenerationQuality,
         ...(mode === 'worker'

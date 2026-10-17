@@ -245,6 +245,72 @@ export const GenerationBatchListQuerySchema = CursorPageRequestSchema.extend({
 }).meta({ id: 'GenerationBatchListQuery' });
 export type GenerationBatchListQuery = z.infer<typeof GenerationBatchListQuerySchema>;
 
+/** `GET /v1/generation-jobs` (BF-046): the workspace's jobs, newest first — the review queue, a business's jobs. */
+export const GenerationJobListQuerySchema = CursorPageRequestSchema.extend({
+  status: GenerationJobStatusSchema.optional(),
+  businessId: BusinessId.optional(),
+}).meta({ id: 'GenerationJobListQuery' });
+export type GenerationJobListQuery = z.infer<typeof GenerationJobListQuerySchema>;
+
+export const GenerationJobPageSchema = cursorPage(GenerationJobSchema).meta({ id: 'GenerationJobPage' });
+export type GenerationJobPage = z.infer<typeof GenerationJobPageSchema>;
+
+/**
+ * What a job's engine was given (BF-046 console, Brief tab): the brief, the facts it may state and the assets it may
+ * use, as written into its latest workspace bundle. Shapes are the bundle's (BF-040/BF-042), kept open here.
+ */
+export const GenerationJobWorkspaceSchema = z
+  .object({
+    brief: z.record(z.string(), z.unknown()),
+    facts: z.array(
+      z
+        .object({
+          id: z.string(),
+          kind: z.string(),
+          value: z.unknown(),
+          display: z.boolean().optional(),
+          sourceRef: z.string().optional(),
+          observedAt: z.string().optional(),
+        })
+        .loose(),
+    ),
+    assets: z.array(z.object({ id: z.string() }).loose()),
+    bundle: z.object({
+      sha256: z.string(),
+      bytes: z.number().int().nonnegative(),
+      attemptNo: z.number().int().positive().nullable(),
+      createdAt: z.iso.datetime(),
+    }),
+  })
+  .meta({ id: 'GenerationJobWorkspace' });
+export type GenerationJobWorkspace = z.infer<typeof GenerationJobWorkspaceSchema>;
+
+export const GENERATION_ARTIFACT_KINDS = [
+  'workspace_bundle',
+  'site_spec',
+  'screenshot',
+  'transcript',
+  'log_bundle',
+] as const;
+
+/** A stored file of a job (BF-046 console, Artifacts tab; `sites:admin`). */
+export const GenerationArtifactSchema = z
+  .object({
+    id: z.uuid(),
+    kind: z.enum(GENERATION_ARTIFACT_KINDS),
+    attemptNo: z.number().int().positive().nullable(),
+    sha256: z.string(),
+    bytes: z.number().int().nonnegative(),
+    createdAt: z.iso.datetime(),
+  })
+  .meta({ id: 'GenerationArtifact' });
+export type GenerationArtifact = z.infer<typeof GenerationArtifactSchema>;
+
+export const GenerationArtifactListSchema = z
+  .object({ items: z.array(GenerationArtifactSchema) })
+  .meta({ id: 'GenerationArtifactList' });
+export type GenerationArtifactList = z.infer<typeof GenerationArtifactListSchema>;
+
 export const UpdateGenerationJobRequestSchema = z
   .object({ priority: priority.optional(), engine: EngineRequestSchema.optional() })
   .refine((body) => body.priority !== undefined || body.engine !== undefined, 'Nothing to change')

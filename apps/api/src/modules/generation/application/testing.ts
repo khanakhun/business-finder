@@ -78,6 +78,34 @@ export class InMemoryGenerationRepository implements GenerationRepository {
       .filter((b) => b.organizationId === organizationId && (!filter.status || b.status === filter.status))
       .slice(0, filter.limit);
   }
+  async listJobs(organizationId: string, filter: Parameters<GenerationRepository['listJobs']>[1]) {
+    const { after } = filter;
+    return [...this.jobRows.values()]
+      .filter(
+        (job) =>
+          job.organizationId === organizationId &&
+          (!filter.status || job.status === filter.status) &&
+          (!filter.businessId || job.businessId === filter.businessId) &&
+          (!after ||
+            job.createdAt < after.createdAt ||
+            (job.createdAt.getTime() === after.createdAt.getTime() && job.id < after.id)),
+      )
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id))
+      .slice(0, filter.limit);
+  }
+  async jobArtifacts(jobId: string) {
+    return this.artifacts
+      .filter((artifact) => artifact.jobId === jobId)
+      .map((artifact, index) => ({
+        id: `artifact-${index}`,
+        kind: artifact.kind,
+        attemptNo: null,
+        storageKey: artifact.storageKey,
+        sha256: '',
+        bytes: 0,
+        createdAt: new Date(0),
+      }));
+  }
   async jobs(batchId: string) {
     return [...this.jobRows.values()]
       .filter((job) => job.batchId === batchId)

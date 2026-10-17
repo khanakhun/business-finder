@@ -165,12 +165,13 @@ apps/web/src/features/inbox/{inbox-page.tsx, thread-list.tsx, thread-view.tsx, m
 - **Evals:** report attached (macro-F1, unsubscribe recall, injection behaviour).
 
 ## Acceptance criteria
-- [ ] Push/poll sync per mailbox with cursors and health; privacy filter stores only outreach-related messages.
-- [ ] Deterministic DSN (hard/soft) and auto-reply parsing with suppression and rescheduling effects.
-- [ ] AI triage with confidence, entities, summary and injection awareness; evals meet thresholds.
-- [ ] Deterministic action policy (stop, pipeline, tasks, suppression, notifications) with correction feedback.
-- [ ] Unified inbox with sanitized sandboxed rendering, suggested replies sent through BF-052, keyboard workflow.
-- [ ] DSR provider registered; metrics for sync lag, triage latency and classes.
+- [x] Poll sync per mailbox with cursors and health; privacy filter stores only outreach-related messages (push endpoints for Gmail Pub/Sub and Graph notifications are a follow-up).
+- [x] Deterministic DSN (hard/soft) and auto-reply parsing with suppression; the auto-reply return date rides on `outreach.reply.received` for BF-053's rescheduling.
+- [x] AI triage with confidence, entities, summary and injection awareness.
+- [ ] Evals meet thresholds (not done: the ≥ 120-reply eval set is not written yet, testing is paused).
+- [x] Deterministic action policy (stop, pipeline, tasks, suppression, notifications) with correction feedback.
+- [x] Unified inbox with sanitized sandboxed rendering, suggested replies sent through BF-052, keyboard workflow.
+- [x] DSR provider registered; metrics for sync lag, triage latency and classes.
 
 ## Agent prompt
 ```text

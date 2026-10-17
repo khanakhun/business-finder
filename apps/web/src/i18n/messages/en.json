@@ -1287,7 +1287,13 @@
       "emailFailed": "An email failed and will be retried",
       "emailFailedFinal": "An email could not be sent",
       "contactLogged": "Logged a contact by {channel}",
-      "openEmail": "Open the email"
+      "openEmail": "Open the email",
+      "replyReceived": "Replied to an email",
+      "replyAuto": "Sent an automatic reply",
+      "replyTriaged": "Reply read as “{class}”",
+      "replyCorrected": "Reply corrected to “{class}”",
+      "emailBounced": "An email bounced ({status})",
+      "openThread": "Open the conversation"
     },
     "duplicates": {
       "label": "Possible duplicates",
@@ -4073,6 +4079,80 @@
       "body": "Message",
       "save": "Save",
       "saved": "Email updated."
+    }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "description": "Replies to your outreach only: the rest of your mailboxes is never read into the app.",
+    "search": "Search businesses and subjects",
+    "class": "Class",
+    "allClasses": "All classes",
+    "mailbox": "Mailbox",
+    "allMailboxes": "All mailboxes",
+    "unread": "Unread",
+    "needsHuman": "Needs you",
+    "mine": "Assigned to me",
+    "threads": "Conversations",
+    "loadError": "The inbox could not be loaded.",
+    "emptyTitle": "No replies yet",
+    "emptyBody": "Replies to your emails appear here within a few minutes.",
+    "pickTitle": "Pick a conversation",
+    "pickBody": "Choose a thread on the left (j and k move through the list).",
+    "keys": "Keys: j/k move · e handled · a assign to me · s snooze a day",
+    "failed": "That did not work.",
+    "handled": "Marked handled.",
+    "assigned": "Assigned to you.",
+    "snoozed": "Snoozed until tomorrow.",
+    "assignMe": "Assign to me",
+    "snooze": "Snooze",
+    "markHandled": "Mark handled",
+    "weWrote": "We wrote · {when}",
+    "theyWrote": "{who} wrote · {when}",
+    "classes": {
+      "interested": "Interested",
+      "question": "Question",
+      "not_now": "Not now",
+      "referral": "Referral",
+      "unsubscribe": "Unsubscribe",
+      "negative": "Not interested",
+      "auto_reply": "Automatic reply"
+    },
+    "triage": {
+      "pending": "Being read",
+      "confidence": "{value}% sure",
+      "needsHuman": "Needs you",
+      "injection": "Suspicious content",
+      "correctedBadge": "Corrected",
+      "correct": "Correct the class",
+      "corrected": "Class corrected. The follow-up actions were updated.",
+      "failed": "The class could not be changed.",
+      "phone": "Phone: {value}",
+      "preferredTime": "Best time: {value}",
+      "followUpOn": "Follow up on {value}",
+      "referral": "Referral: {value}",
+      "priceQuestion": "Asks about the price",
+      "meetingRequest": "Wants to meet",
+      "next": "Next: {value}",
+      "unsubscribed": "They asked to stop: the address is suppressed.",
+      "kinds": {
+        "human": "Reply",
+        "auto_reply": "Automatic reply",
+        "bounce": "Bounce",
+        "unsubscribe_mailto": "Unsubscribe by email"
+      }
+    },
+    "message": {
+      "showImages": "Show images",
+      "frame": "Message content"
+    },
+    "reply": {
+      "title": "Your reply",
+      "suggest": "Suggest a reply",
+      "writing": "Writing…",
+      "body": "Reply",
+      "save": "Save",
+      "saved": "Reply saved.",
+      "failed": "The reply could not be drafted."
     }
   }
 }

@@ -101,6 +101,10 @@ export const queryKeys = {
     bulkRuns: () => ['outreach', 'bulk-runs'] as const,
     bulkRun: (id: string) => ['outreach', 'bulk-run', id] as const,
   }),
+  inbox: defineQueryKeys('inbox', {
+    list: (filters: Record<string, string>) => ['inbox', 'list', filters] as const,
+    thread: (id: string) => ['inbox', 'thread', id] as const,
+  }),
   mailboxes: defineQueryKeys('mailboxes', {
     list: () => ['mailboxes', 'list'] as const,
     detail: (id: string) => ['mailboxes', 'detail', id] as const,

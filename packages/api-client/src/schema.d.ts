@@ -5895,6 +5895,7 @@ export type components = {
             triage: components["schemas"]["ReplyTriage"] | null;
             /** @enum {string} */
             triageStatus: "pending" | "done" | "needs_human" | "corrected";
+            unsubscribeDetected: boolean;
         };
         InboxThread: {
             assignedTo: string | null;

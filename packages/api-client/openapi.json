@@ -10750,6 +10750,9 @@
               "corrected"
             ],
             "type": "string"
+          },
+          "unsubscribeDetected": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -10768,6 +10771,7 @@
           "kind",
           "dsn",
           "autoReplyUntil",
+          "unsubscribeDetected",
           "triage",
           "triageStatus",
           "correctedClass",

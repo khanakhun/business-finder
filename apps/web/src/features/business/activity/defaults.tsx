@@ -11,10 +11,13 @@ import {
   GitMergeIcon,
   HandshakeIcon,
   ListTodoIcon,
+  MailWarningIcon,
   PhoneIcon,
   RefreshCwIcon,
+  ReplyIcon,
   SendIcon,
   StickyNoteIcon,
+  TagIcon,
   TagsIcon,
   TriangleAlertIcon,
   UndoIcon,
@@ -150,6 +153,39 @@ function EmailLine({ activity }: ActivityRendererProps) {
   );
 }
 
+/** A reply (BF-054): received, triaged (class), or a bounce; linking to the inbox thread. */
+function ReplyLine({ activity }: ActivityRendererProps) {
+  const t = useTranslations('business.activity');
+  const classes = useTranslations('inbox.classes');
+  const threadId = text(activity.data.threadId);
+  const line =
+    activity.type === 'email.bounced'
+      ? t('emailBounced', { status: text(activity.data.status) || '—' })
+      : activity.type === 'reply.triaged'
+        ? t(activity.data.corrected === true ? 'replyCorrected' : 'replyTriaged', {
+            class: classes(text(activity.data.class) as 'interested'),
+          })
+        : activity.data.kind === 'auto_reply'
+          ? t('replyAuto')
+          : t('replyReceived');
+  return (
+    <>
+      {line}
+      {threadId ? (
+        <>
+          {' '}
+          <Link
+            className="text-primary underline-offset-2 hover:underline"
+            href={`/outreach/inbox?thread=${threadId}`}
+          >
+            {t('openThread')}
+          </Link>
+        </>
+      ) : null}
+    </>
+  );
+}
+
 function Updated({ activity }: ActivityRendererProps) {
   const t = useTranslations('business.activity');
   return <>{t('updated', { count: list(activity.data.fields).length })}</>;
@@ -181,6 +217,9 @@ export function registerDefaultActivityRenderers(): void {
     { id: 'email.blocked', icon: BanIcon, component: EmailLine },
     { id: 'email.failed', icon: TriangleAlertIcon, component: EmailLine },
     { id: 'contact.logged', icon: PhoneIcon, component: EmailLine },
+    { id: 'email.replied', icon: ReplyIcon, component: ReplyLine },
+    { id: 'reply.triaged', icon: TagIcon, component: ReplyLine },
+    { id: 'email.bounced', icon: MailWarningIcon, component: ReplyLine },
   ];
   for (const [order, entry] of entries.entries()) activityRenderers.register({ ...entry, order });
 }

@@ -36,6 +36,7 @@ export interface EnrollmentRecord {
   readonly waitingMessageId: string | null;
   readonly leaseUntil: Date | null;
   readonly variantAssignments: Record<string, string>;
+  readonly autoSend: boolean;
   readonly stopReason: string | null;
   readonly pauseReason: string | null;
   readonly stoppedAt: Date | null;
@@ -127,5 +128,31 @@ export interface SequenceRepository {
   ): Promise<EnrollmentRecord | undefined>;
   addEvent(event: Omit<EnrollmentEventRecord, 'at'> & { readonly at?: Date }): Promise<void>;
   events(enrollmentIds: readonly string[]): Promise<EnrollmentEventRecord[]>;
+  // Execution
+  /** Due active enrollments (not waiting for a message) get a lease (`FOR UPDATE SKIP LOCKED`). */
+  claimDue(now: Date, leaseUntil: Date, limit: number): Promise<EnrollmentRecord[]>;
+  /** Updates a running enrollment only while it holds this lease. */
+  updateLeased(id: string, lease: Date, patch: EnrollmentPatch): Promise<EnrollmentRecord | undefined>;
+  updateEnrollment(id: string, patch: EnrollmentPatch): Promise<EnrollmentRecord | undefined>;
+  /** The enrollment whose current step waits for this message. */
+  byWaitingMessage(messageId: string): Promise<EnrollmentRecord | undefined>;
+  /** Facts for the stop policy and conditions. */
+  hasHumanReplySince(organizationId: string, businessId: string, since: Date): Promise<boolean>;
+  previewViewedSince(enrollmentId: string, since: Date): Promise<boolean>;
+  businessName(businessId: string): Promise<string | null>;
+  /** Mailbox reply-sync health: the last successful sync (null: never). */
+  lastSyncSuccess(mailboxId: string): Promise<Date | null>;
+  /** Stats rows: per enrollment step message, its variant and outcomes. */
+  statsRows(sequenceId: string): Promise<
+    {
+      readonly stepId: string;
+      readonly variantId: string;
+      readonly status: string;
+      readonly replied: boolean;
+      readonly positive: boolean;
+      readonly unsubscribed: boolean;
+      readonly viewed: boolean;
+    }[]
+  >;
 }
 export const SEQUENCE_REPOSITORY = Symbol('SequenceRepository');

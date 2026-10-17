@@ -16,6 +16,8 @@ export const NOTIFICATION_TYPES = {
   site_needs_review: { inApp: true, email: false },
   discovery_completed: { inApp: true, email: false },
   mailbox_paused: { inApp: true, email: true },
+  /** A sequence enrollment paused itself (reply sync unhealthy, a send failed) (BF-053). */
+  sequence_paused: { inApp: true, email: false },
   /** A mailbox lost its connection (revoked consent, failed authentication) (BF-050). */
   mailbox_error: { inApp: true, email: true },
   /** A data-subject request is due soon (BF-055). */

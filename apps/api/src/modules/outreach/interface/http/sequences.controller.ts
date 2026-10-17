@@ -6,10 +6,12 @@ import {
   SaveSequenceRequestSchema,
   SequenceListSchema,
   SequenceSchema,
+  SequenceStatsSchema,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { z } from 'zod';
 import { MemberDirectory } from '../../../identity/index.ts';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
@@ -18,9 +20,13 @@ import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import type { DraftActor } from '../../application/drafting/drafts.service.ts';
 import { EnrollmentsService } from '../../application/sequences/enrollments.service.ts';
 import { SequencesService } from '../../application/sequences/sequences.service.ts';
+import { SequenceStatsService } from '../../application/sequences/stats.ts';
 
 class SaveBody extends zodDto(SaveSequenceRequestSchema) {}
 class EnrollBody extends zodDto(EnrollRequestSchema) {}
+class StartersBody extends zodDto(
+  z.object({ locale: z.enum(['en', 'fr']) }).meta({ id: 'CreateStarterSequencesRequest' }),
+) {}
 
 /**
  * Sequences (BF-053): versioned follow-up definitions (managing them needs `templates:manage`), enrollments of
@@ -32,6 +38,7 @@ export class SequencesController {
   constructor(
     private readonly sequences: SequencesService,
     private readonly enrollments: EnrollmentsService,
+    private readonly statistics: SequenceStatsService,
     private readonly members: MemberDirectory,
   ) {}
 
@@ -68,6 +75,33 @@ export class SequencesController {
   })
   async create(@Ctx() auth: AuthContext, @Body() body: SaveBody) {
     return this.sequences.create(await this.actor(auth), body);
+  }
+
+  @Post('sequences/starters')
+  @RequirePermission('templates:manage')
+  @ApiRoute({
+    summary:
+      'Create the starter sequences (preview follow-up, audit-led) in the workspace, in the given language',
+    operationId: 'createStarterSequences',
+    body: StartersBody,
+    response: { status: 201, schema: SequenceListSchema },
+    errors: [400, 401, 403],
+  })
+  async starters(@Ctx() auth: AuthContext, @Body() body: StartersBody) {
+    return { items: await this.sequences.createStarters(await this.actor(auth), body.locale) };
+  }
+
+  @Get('sequences/:id/stats')
+  @RequirePermission('analytics:read')
+  @ApiRoute({
+    summary:
+      'Per step and variant: sent, replies, positive replies, bounces, unsubscribes, preview views (Wilson 95%)',
+    operationId: 'getSequenceStats',
+    response: { status: 200, schema: SequenceStatsSchema },
+    errors: [401, 403, 404],
+  })
+  async stats(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+    return this.statistics.stats(await this.actor(auth), id);
   }
 
   @Get('sequences/:id')
@@ -133,7 +167,12 @@ export class SequencesController {
     errors: [400, 401, 403, 404, 422],
   })
   async enroll(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Body() body: EnrollBody) {
-    return this.enrollments.enroll(await this.actor(auth), id, body);
+    return this.enrollments.enroll(
+      await this.actor(auth),
+      id,
+      body,
+      auth.permissions.has('outreach:auto_send'),
+    );
   }
 
   @Get('enrollments')

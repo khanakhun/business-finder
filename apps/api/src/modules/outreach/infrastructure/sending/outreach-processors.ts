@@ -3,6 +3,7 @@ import {
   type OrgId,
   OutreachBulkDraftJob,
   OutreachSendJob,
+  OutreachSequenceStepJob,
   OutreachSyncJob,
   OutreachTickJob,
   OutreachTriageJob,
@@ -31,6 +32,8 @@ import {
   type OutboundRecord,
   type OutboundRepository,
 } from '../../application/outbound/ports.ts';
+import { SequenceExecutor } from '../../application/sequences/executor.ts';
+import { SEQUENCE_REPOSITORY, type SequenceRepository } from '../../application/sequences/ports.ts';
 import { MAX_SEND_ATTEMPTS } from '../../domain/outbound/outbound-message.ts';
 import { outboundMetrics } from './outbound-metrics.ts';
 import { OutboundSender } from './outbound-sender.ts';
@@ -89,6 +92,7 @@ export class OutreachTickProcessor extends TypedProcessor<
 > {
   protected readonly definition = OutreachTickJob;
   private readonly sends: TypedProducer<typeof OutreachSendJob>;
+  private readonly steps: TypedProducer<typeof OutreachSequenceStepJob>;
 
   constructor(
     @Inject(OUTBOUND_REPOSITORY) private readonly messages: OutboundRepository,
@@ -96,10 +100,13 @@ export class OutreachTickProcessor extends TypedProcessor<
     @Inject(INBOUND_REPOSITORY) private readonly inbound: InboundRepository,
     @Inject(INBOUND_QUEUES) private readonly inboundQueues: InboundQueues,
     @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(SEQUENCE_REPOSITORY) private readonly sequences: SequenceRepository,
     @InjectQueue(QUEUES.outreachSend.name) sendQueue: Queue,
+    @InjectQueue(QUEUES.outreachSequence.name) sequenceQueue: Queue,
   ) {
     super();
     this.sends = new TypedProducer(sendQueue, OutreachSendJob);
+    this.steps = new TypedProducer(sequenceQueue, OutreachSequenceStepJob);
   }
 
   async handle(_payload: z.output<typeof OutreachTickJob.schema>, context: JobContext) {
@@ -117,6 +124,14 @@ export class OutreachTickProcessor extends TypedProcessor<
     }
     outboundMetrics.stuck().set(await this.messages.countStuck(new Date(now.getTime() - STUCK_AFTER_MS)));
     outboundMetrics.approvalsPending().set(await this.bulk.countPendingApprovals());
+    // Sequences (BF-053): due steps, each leased to one job.
+    for (const enrollment of await this.sequences.claimDue(now, lease, BATCH * 4))
+      await this.steps.add({
+        orgId: enrollment.organizationId as OrgId,
+        idempotencyKey: `step:${enrollment.id}:${lease.toISOString()}`,
+        enrollmentId: enrollment.id,
+        lease: lease.toISOString(),
+      });
     // Replies (BF-054): mailboxes whose next poll is due.
     const minute = now.toISOString().slice(0, 16);
     for (const mailbox of await this.inbound.dueMailboxes(now, 200))
@@ -202,5 +217,24 @@ export class OutreachTriageProcessor extends TypedProcessor<
 
   async handle(payload: z.output<typeof OutreachTriageJob.schema>, context: JobContext) {
     return { outcome: await this.triage.triage(payload.inboundId, context.logger) };
+  }
+}
+
+@Processor(QUEUES.outreachSequence.name, { concurrency: QUEUES.outreachSequence.concurrency })
+export class OutreachSequenceProcessor extends TypedProcessor<
+  typeof OutreachSequenceStepJob,
+  { readonly outcome: string }
+> {
+  protected readonly definition = OutreachSequenceStepJob;
+
+  constructor(private readonly executor: SequenceExecutor) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof OutreachSequenceStepJob.schema>, context: JobContext) {
+    const outcome = await this.executor.run(payload.enrollmentId, payload.lease, context.logger);
+    if (outcome !== 'stale')
+      context.logger.info({ enrollmentId: payload.enrollmentId, outcome }, 'sequence step');
+    return { outcome };
   }
 }

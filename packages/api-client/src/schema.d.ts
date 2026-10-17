@@ -3100,6 +3100,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sequences/{id}/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per step and variant: sent, replies, positive replies, bounces, unsubscribes, preview views (Wilson 95%) */
+        get: operations["getSequenceStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sequences/starters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the starter sequences (preview follow-up, audit-led) in the workspace, in the given language */
+        post: operations["createStarterSequences"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites": {
         parameters: {
             query?: never;
@@ -5014,6 +5048,10 @@ export type components = {
             changeSummary?: string;
             spec: components["schemas"]["SiteSpecDocument"];
         };
+        CreateStarterSequencesRequest: {
+            /** @enum {string} */
+            locale: "en" | "fr";
+        };
         CreateSuppressionRequest: {
             note?: string;
             /**
@@ -6529,7 +6567,7 @@ export type components = {
             /** @description Message key the dashboard translates, e.g. `notifications.types.member_joined.title`. */
             titleKey: string;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPage: {
             items: components["schemas"]["Notification"][];
@@ -6541,7 +6579,7 @@ export type components = {
             email: boolean;
             inApp: boolean;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPreferences: {
             items: components["schemas"]["NotificationPreference"][];
@@ -8084,6 +8122,52 @@ export type components = {
         SequenceList: {
             items: components["schemas"]["Sequence"][];
         };
+        SequenceStats: {
+            /** Format: uuid */
+            sequenceId: string;
+            steps: {
+                stepId: string;
+                variants: {
+                    bounces: {
+                        high: number | null;
+                        insufficient: boolean;
+                        low: number | null;
+                        n: number;
+                        rate: number | null;
+                    };
+                    positive: {
+                        high: number | null;
+                        insufficient: boolean;
+                        low: number | null;
+                        n: number;
+                        rate: number | null;
+                    };
+                    previewViews: {
+                        high: number | null;
+                        insufficient: boolean;
+                        low: number | null;
+                        n: number;
+                        rate: number | null;
+                    };
+                    replies: {
+                        high: number | null;
+                        insufficient: boolean;
+                        low: number | null;
+                        n: number;
+                        rate: number | null;
+                    };
+                    sent: number;
+                    unsubscribes: {
+                        high: number | null;
+                        insufficient: boolean;
+                        low: number | null;
+                        n: number;
+                        rate: number | null;
+                    };
+                    variantId: string;
+                }[];
+            }[];
+        };
         SetPrimaryScoringProfileRequest: {
             /** Format: uuid */
             profileId: string;
@@ -8594,6 +8678,7 @@ export type components = {
             c?: string;
             locale: string;
             pageId: string;
+            r?: string;
             token: string;
         };
         SiteViewStats: {
@@ -24074,6 +24159,133 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getSequenceStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SequenceStats"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createStarterSequences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStarterSequencesRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SequenceList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

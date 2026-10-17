@@ -131,6 +131,9 @@ export const outboundMessages = pgTable(
     index('ix_outbound_messages__org_status').on(table.organizationId, table.status, table.scheduledAt),
     index('ix_outbound_messages__thread').on(table.threadId, table.createdAt),
     index('ix_outbound_messages__rfc822').on(table.rfc822MessageId),
+    // BF-053: a preview visit (`?r=`) is attributed by its token.
+    index('ix_outbound_messages__outreach_token').on(table.outreachToken),
+    index('ix_outbound_messages__enrollment').on(table.sequenceEnrollmentId),
     check(
       'ck_outbound_messages__enqueue_decision',
       sql.raw(`status NOT IN (${DECIDED}) OR enqueue_decision_id IS NOT NULL`),

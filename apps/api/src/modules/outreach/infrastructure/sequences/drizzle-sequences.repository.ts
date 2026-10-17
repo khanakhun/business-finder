@@ -1,7 +1,18 @@
 import { type DbClient, getExecutor } from '@bf/db';
-import { enrollmentEvents, sequenceEnrollments, sequences, sequenceVersions } from '@bf/db/schema';
+import {
+  businesses,
+  emailThreads,
+  enrollmentEvents,
+  inboundMessages,
+  mailboxSyncState,
+  outboundMessages,
+  outboundMessageViews,
+  sequenceEnrollments,
+  sequences,
+  sequenceVersions,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type {
   EnrollmentEventRecord,
@@ -176,5 +187,149 @@ export class DrizzleSequencesRepository implements SequenceRepository {
       .from(enrollmentEvents)
       .where(inArray(enrollmentEvents.enrollmentId, [...enrollmentIds]))
       .orderBy(enrollmentEvents.at)) as EnrollmentEventRecord[];
+  }
+
+  async claimDue(now: Date, leaseUntil: Date, limit: number) {
+    const due = this.x
+      .select({ id: sequenceEnrollments.id })
+      .from(sequenceEnrollments)
+      .where(
+        and(
+          eq(sequenceEnrollments.status, 'active'),
+          lte(sequenceEnrollments.nextRunAt, now),
+          isNull(sequenceEnrollments.waitingMessageId),
+          or(isNull(sequenceEnrollments.leaseUntil), lt(sequenceEnrollments.leaseUntil, now)),
+        ),
+      )
+      .orderBy(sequenceEnrollments.nextRunAt)
+      .limit(limit)
+      .for('update', { skipLocked: true });
+    return (await this.x
+      .update(sequenceEnrollments)
+      .set({ leaseUntil })
+      .where(inArray(sequenceEnrollments.id, due))
+      .returning()) as EnrollmentRecord[];
+  }
+
+  async updateLeased(id: string, lease: Date, patch: Parameters<SequenceRepository['updateLeased']>[2]) {
+    const [row] = await this.x
+      .update(sequenceEnrollments)
+      .set(patch)
+      .where(
+        and(
+          eq(sequenceEnrollments.id, id),
+          eq(sequenceEnrollments.leaseUntil, lease),
+          inArray(sequenceEnrollments.status, ['active', 'paused']),
+        ),
+      )
+      .returning();
+    return row as EnrollmentRecord | undefined;
+  }
+
+  async updateEnrollment(id: string, patch: Parameters<SequenceRepository['updateEnrollment']>[1]) {
+    const [row] = await this.x
+      .update(sequenceEnrollments)
+      .set(patch)
+      .where(eq(sequenceEnrollments.id, id))
+      .returning();
+    return row as EnrollmentRecord | undefined;
+  }
+
+  async byWaitingMessage(messageId: string) {
+    const [row] = await this.x
+      .select()
+      .from(sequenceEnrollments)
+      .where(eq(sequenceEnrollments.waitingMessageId, messageId))
+      .limit(1);
+    return row as EnrollmentRecord | undefined;
+  }
+
+  async hasHumanReplySince(organizationId: string, businessId: string, since: Date) {
+    const [row] = await this.x
+      .select({ id: inboundMessages.id })
+      .from(inboundMessages)
+      .innerJoin(emailThreads, eq(emailThreads.id, inboundMessages.threadId))
+      .where(
+        and(
+          eq(inboundMessages.organizationId, organizationId),
+          eq(emailThreads.businessId, businessId),
+          eq(inboundMessages.kind, 'human'),
+          gte(inboundMessages.receivedAt, since),
+        ),
+      )
+      .limit(1);
+    return !!row;
+  }
+
+  async previewViewedSince(enrollmentId: string, since: Date) {
+    const [row] = await this.x
+      .select({ id: outboundMessageViews.outboundMessageId })
+      .from(outboundMessageViews)
+      .innerJoin(outboundMessages, eq(outboundMessages.id, outboundMessageViews.outboundMessageId))
+      .where(
+        and(
+          eq(outboundMessages.sequenceEnrollmentId, enrollmentId),
+          gte(outboundMessageViews.lastViewedAt, since),
+        ),
+      )
+      .limit(1);
+    return !!row;
+  }
+
+  async businessName(businessId: string) {
+    const [row] = await this.x
+      .select({ name: businesses.displayName })
+      .from(businesses)
+      .where(eq(businesses.id, businessId));
+    return row?.name ?? null;
+  }
+
+  async lastSyncSuccess(mailboxId: string) {
+    const [row] = await this.x
+      .select({ at: mailboxSyncState.lastSuccessAt })
+      .from(mailboxSyncState)
+      .where(eq(mailboxSyncState.mailboxId, mailboxId));
+    return row?.at ?? null;
+  }
+
+  async statsRows(sequenceId: string) {
+    const replies = this.x
+      .select({
+        outboundMessageId: inboundMessages.outboundMessageId,
+        triageClass: sql<
+          string | null
+        >`coalesce(${inboundMessages.correctedClass}, ${inboundMessages.triage} ->> 'class')`.as(
+          'triage_class',
+        ),
+        unsubscribe: inboundMessages.unsubscribeDetected,
+      })
+      .from(inboundMessages)
+      .where(eq(inboundMessages.kind, 'human'))
+      .as('replies');
+    const rows = await this.x
+      .select({
+        stepId: enrollmentEvents.stepId,
+        variantId: enrollmentEvents.variantId,
+        status: outboundMessages.status,
+        triageClass: replies.triageClass,
+        unsubscribe: replies.unsubscribe,
+        views: outboundMessageViews.views,
+      })
+      .from(enrollmentEvents)
+      .innerJoin(sequenceEnrollments, eq(sequenceEnrollments.id, enrollmentEvents.enrollmentId))
+      .innerJoin(sequenceVersions, eq(sequenceVersions.id, sequenceEnrollments.sequenceVersionId))
+      .innerJoin(outboundMessages, eq(outboundMessages.id, enrollmentEvents.messageId))
+      .leftJoin(replies, eq(replies.outboundMessageId, outboundMessages.id))
+      .leftJoin(outboundMessageViews, eq(outboundMessageViews.outboundMessageId, outboundMessages.id))
+      .where(and(eq(sequenceVersions.sequenceId, sequenceId), eq(enrollmentEvents.kind, 'executed')));
+    return rows.map((row) => ({
+      stepId: row.stepId ?? '',
+      variantId: row.variantId ?? 'default',
+      status: row.status,
+      replied: row.triageClass !== null || row.unsubscribe === true,
+      positive: row.triageClass === 'interested' || row.triageClass === 'question',
+      unsubscribed: row.unsubscribe === true || row.triageClass === 'unsubscribe',
+      viewed: (row.views ?? 0) > 0,
+    }));
   }
 }

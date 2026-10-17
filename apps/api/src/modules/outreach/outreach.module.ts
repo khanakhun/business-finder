@@ -9,6 +9,7 @@ import { GenerationModule } from '../generation/index.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
+import { SitesModule } from '../sites/index.ts';
 import { DraftsService } from './application/drafting/drafts.service.ts';
 import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
 import { TemplatesService } from './application/drafting/templates.service.ts';
@@ -62,8 +63,11 @@ import {
   type OutboundSettings,
 } from './application/outbound/ports.ts';
 import { EnrollmentsService } from './application/sequences/enrollments.service.ts';
+import { SequenceExecutor } from './application/sequences/executor.ts';
 import { SEQUENCE_REPOSITORY } from './application/sequences/ports.ts';
+import { SequenceSubscribers } from './application/sequences/sequence-subscribers.ts';
 import { SequencesService } from './application/sequences/sequences.service.ts';
+import { SequenceStatsService } from './application/sequences/stats.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
@@ -93,12 +97,14 @@ import {
   OUTREACH_TICK_AUTOSTART,
   OutreachBulkProcessor,
   OutreachSendProcessor,
+  OutreachSequenceProcessor,
   OutreachSyncProcessor,
   OutreachTickProcessor,
   OutreachTickScheduler,
   OutreachTriageProcessor,
 } from './infrastructure/sending/outreach-processors.ts';
 import { DrizzleSequencesRepository } from './infrastructure/sequences/drizzle-sequences.repository.ts';
+import { OutboundViewAttribution } from './infrastructure/sequences/outbound-view-attribution.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { InboxController } from './interface/http/inbox.controller.ts';
@@ -131,6 +137,7 @@ export class OutreachModule {
         GenerationModule.forRoot(mode),
         CrmModule.forRoot(mode),
         BusinessGraphModule.forRoot(mode),
+        SitesModule.forRoot(mode),
       ],
       controllers:
         mode === 'worker'
@@ -279,6 +286,10 @@ export class OutreachModule {
         { provide: SEQUENCE_REPOSITORY, useClass: DrizzleSequencesRepository },
         SequencesService,
         EnrollmentsService,
+        SequenceExecutor,
+        SequenceSubscribers,
+        SequenceStatsService,
+        OutboundViewAttribution,
         InboundPersonalData,
         OutboundCommands,
         OutboundQueries,
@@ -294,6 +305,7 @@ export class OutreachModule {
               OutreachBulkProcessor,
               OutreachSyncProcessor,
               OutreachTriageProcessor,
+              OutreachSequenceProcessor,
               OutreachTickScheduler,
               { provide: OUTREACH_TICK_AUTOSTART, useValue: true },
             ]

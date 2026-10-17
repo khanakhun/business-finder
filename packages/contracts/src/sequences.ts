@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineEvent } from './events.ts';
 import { BusinessId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import { HolidayCalendarSchema } from './mailbox.ts';
 import { OfferSchema } from './taxonomy.ts';
 import { IsoDateTimeSchema } from './time.ts';
@@ -217,3 +218,9 @@ export const EnrollmentStopped = defineEvent(
   1,
   z.object({ enrollmentId: z.uuid(), businessId: BusinessId, reason: StopReasonSchema }),
 );
+
+/** One due step of an enrollment (claimed by the outreach tick with a lease). */
+export const OutreachSequenceStepJob = defineJob('outreach-sequence', 'step', {
+  enrollmentId: z.uuid(),
+  lease: IsoDateTimeSchema,
+});

@@ -5248,6 +5248,22 @@
         ],
         "type": "object"
       },
+      "CreateStarterSequencesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "locale": {
+            "enum": [
+              "en",
+              "fr"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "locale"
+        ],
+        "type": "object"
+      },
       "CreateSuppressionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -13057,6 +13073,7 @@
               "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
+              "sequence_paused",
               "mailbox_error",
               "dsr_due",
               "member_joined",
@@ -13130,6 +13147,7 @@
               "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
+              "sequence_paused",
               "mailbox_error",
               "dsr_due",
               "member_joined",
@@ -20884,6 +20902,258 @@
         ],
         "type": "object"
       },
+      "SequenceStats": {
+        "additionalProperties": false,
+        "properties": {
+          "sequenceId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "stepId": {
+                  "type": "string"
+                },
+                "variants": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "bounces": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "high": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "insufficient": {
+                            "type": "boolean"
+                          },
+                          "low": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "n": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "rate",
+                          "low",
+                          "high",
+                          "insufficient"
+                        ],
+                        "type": "object"
+                      },
+                      "positive": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "high": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "insufficient": {
+                            "type": "boolean"
+                          },
+                          "low": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "n": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "rate",
+                          "low",
+                          "high",
+                          "insufficient"
+                        ],
+                        "type": "object"
+                      },
+                      "previewViews": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "high": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "insufficient": {
+                            "type": "boolean"
+                          },
+                          "low": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "n": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "rate",
+                          "low",
+                          "high",
+                          "insufficient"
+                        ],
+                        "type": "object"
+                      },
+                      "replies": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "high": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "insufficient": {
+                            "type": "boolean"
+                          },
+                          "low": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "n": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "rate",
+                          "low",
+                          "high",
+                          "insufficient"
+                        ],
+                        "type": "object"
+                      },
+                      "sent": {
+                        "maximum": 9007199254740991,
+                        "minimum": -9007199254740991,
+                        "type": "integer"
+                      },
+                      "unsubscribes": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "high": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "insufficient": {
+                            "type": "boolean"
+                          },
+                          "low": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "n": {
+                            "maximum": 9007199254740991,
+                            "minimum": -9007199254740991,
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "n",
+                          "rate",
+                          "low",
+                          "high",
+                          "insufficient"
+                        ],
+                        "type": "object"
+                      },
+                      "variantId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "variantId",
+                      "sent",
+                      "replies",
+                      "positive",
+                      "bounces",
+                      "unsubscribes",
+                      "previewViews"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "stepId",
+                "variants"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sequenceId",
+          "steps"
+        ],
+        "type": "object"
+      },
       "SetPrimaryScoringProfileRequest": {
         "additionalProperties": false,
         "properties": {
@@ -23352,6 +23622,10 @@
             "pattern": "^[a-z][a-z0-9-]{1,31}$",
             "type": "string"
           },
+          "r": {
+            "pattern": "^[A-Za-z0-9_-]{16}$",
+            "type": "string"
+          },
           "token": {
             "maxLength": 200,
             "minLength": 10,
@@ -24608,7 +24882,7 @@
             "items": {
               "$ref": "#/components/schemas/NotificationPreference"
             },
-            "maxItems": 11,
+            "maxItems": 12,
             "minItems": 1,
             "type": "array"
           }
@@ -46100,6 +46374,88 @@
         ]
       }
     },
+    "/v1/sequences/starters": {
+      "post": {
+        "operationId": "createStarterSequences",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStarterSequencesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Create the starter sequences (preview follow-up, audit-led) in the workspace, in the given language",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
     "/v1/sequences/{id}": {
       "get": {
         "operationId": "getSequence",
@@ -46518,6 +46874,77 @@
           }
         },
         "summary": "Enroll businesses (≤ 100) or attach after a first email; blocked ones are reported, not enrolled",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/v1/sequences/{id}/stats": {
+      "get": {
+        "operationId": "getSequenceStats",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SequenceStats"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Per step and variant: sent, replies, positive replies, bounces, unsubscribes, preview views (Wilson 95%)",
         "tags": [
           "outreach"
         ]

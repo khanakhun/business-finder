@@ -10,12 +10,35 @@ export interface DefinitionIssue {
   readonly message: string;
 }
 
+const COMPLEMENT = {
+  previewViewed: 'previewNotViewed',
+  previewNotViewed: 'previewViewed',
+  always: null,
+} as const;
+
+/**
+ * An email that is the other branch of the email just before it (preview viewed / not viewed, no wait between): only
+ * one of the two is sent, so it counts once and shares its partner's gap.
+ */
+export function isAlternative(steps: readonly SequenceStep[], index: number): boolean {
+  const step = steps[index];
+  const previous = steps[index - 1];
+  return (
+    !!step &&
+    !!previous &&
+    step.kind === 'email' &&
+    previous.kind === 'email' &&
+    step.wait.businessDays === 0 &&
+    COMPLEMENT[step.condition] === previous.condition
+  );
+}
+
 export function validateDefinition(
   settings: SequenceSettings,
   steps: readonly SequenceStep[],
 ): DefinitionIssue[] {
   const issues: DefinitionIssue[] = [];
-  const emails = steps.filter((step) => step.kind === 'email');
+  const emails = steps.filter((step, index) => step.kind === 'email' && !isAlternative(steps, index));
   if (emails.length === 0)
     issues.push({ path: 'steps', code: 'no_email', message: 'A sequence needs at least one email step.' });
   if (emails.length > settings.maxEmails)
@@ -32,9 +55,10 @@ export function validateDefinition(
       issues.push({ path: `${path}.id`, code: 'duplicate_id', message: 'Step ids must be unique.' });
     ids.add(step.id);
     if (sinceEmail !== null) sinceEmail += step.wait.businessDays;
+    const alternative = isAlternative(steps, index);
     if (step.kind === 'email') {
       // The first email may go at once (day 0); every later one waits the minimum gap after the previous email.
-      if (sinceEmail !== null && sinceEmail < settings.minGapBusinessDays)
+      if (!alternative && sinceEmail !== null && sinceEmail < settings.minGapBusinessDays)
         issues.push({
           path: `${path}.wait`,
           code: 'gap_too_short',

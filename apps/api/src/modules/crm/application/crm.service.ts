@@ -136,6 +136,11 @@ export class CrmService {
     return (await this.tracked(organizationId, businessId)).pipelineStatus;
   }
 
+  async stateOf(organizationId: string, businessId: string) {
+    const record = await this.tracked(organizationId, businessId);
+    return { status: record.pipelineStatus, doNotContact: record.doNotContact };
+  }
+
   async transition(
     organizationId: string,
     businessId: string,
@@ -508,6 +513,19 @@ export class CrmPipeline {
 
   ownerOf(organizationId: string, businessId: string): Promise<string | null> {
     return this.crm.ownerOf(organizationId, businessId);
+  }
+
+  /** The business's pipeline status and do-not-contact flag in the workspace; null when it is not tracked. */
+  async stateOf(
+    organizationId: string,
+    businessId: string,
+  ): Promise<{ status: string; doNotContact: boolean } | null> {
+    try {
+      return await this.crm.stateOf(organizationId, businessId);
+    } catch (error) {
+      if (error instanceof NotFoundError) return null;
+      throw error;
+    }
   }
 
   private async safely(move: () => Promise<boolean>): Promise<boolean> {

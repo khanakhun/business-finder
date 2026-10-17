@@ -1272,6 +1272,7 @@ export {
   EnrollRequestSchema,
   type EnrollResult,
   EnrollResultSchema,
+  OutreachSequenceStepJob,
   type SaveSequenceRequest,
   SaveSequenceRequestSchema,
   SEQUENCE_STATUSES,

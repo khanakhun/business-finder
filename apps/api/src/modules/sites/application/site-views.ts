@@ -15,6 +15,7 @@ import {
   type SiteViewCounter,
   type SiteViewsRepository,
 } from './ports.ts';
+import { SiteViewAttribution } from './site-view-attribution.ts';
 
 /** How many (day, site) pairs and hours one batch handles, and how many batches one flush runs. */
 const FLUSH_BATCH = 1_000;
@@ -77,6 +78,7 @@ export class SiteViewRecorder {
     @Inject(SITE_VIEW_SECRET) private readonly secret: string | undefined,
     @Inject(CLOCK) private readonly clock: Clock,
     @Inject(SITE_HOSTING) private readonly hosting: SiteHosting,
+    private readonly attribution: SiteViewAttribution,
   ) {}
 
   /** Counts a view; returns whether it was counted (an invalid token, no configuration or a capped visitor: not). */
@@ -96,7 +98,7 @@ export class SiteViewRecorder {
       .update(`${this.salt.value}|${networkOf(visitor.ip)}`)
       .digest('hex')
       .slice(0, 32);
-    return this.counter.record({
+    const counted = await this.counter.record({
       siteId,
       day,
       hour: hourOf(now),
@@ -104,6 +106,9 @@ export class SiteViewRecorder {
       locale: beacon.locale,
       campaign: beacon.c,
     });
+    // BF-053: which email the visit came from (only when the view counted: a capped visitor attributes nothing).
+    if (counted && beacon.r) await this.attribution.attribute({ outreachToken: beacon.r, siteId, at: now });
+    return counted;
   }
 }
 

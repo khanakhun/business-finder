@@ -11,6 +11,7 @@ import { Transactional } from '../../../platform/db/transactional.ts';
 import { validateDefinition } from '../../domain/sequences/sequence-definition.ts';
 import type { DraftActor } from '../drafting/drafts.service.ts';
 import { SEQUENCE_REPOSITORY, type SequenceRecord, type SequenceRepository } from './ports.ts';
+import { starterSequences } from './starters.ts';
 
 // Sequence definitions (BF-053): created as drafts, activated when the safety rails hold, archived when no longer
 // used. Saving a sequence writes its next immutable version; running enrollments stay on theirs.
@@ -67,6 +68,13 @@ export class SequencesService {
       headVersion: version,
     });
     return this.get(actor, id);
+  }
+
+  /** The starter sequences in the workspace (created as drafts; activate them when ready). */
+  async createStarters(actor: DraftActor, locale: 'en' | 'fr'): Promise<Sequence[]> {
+    const created: Sequence[] = [];
+    for (const definition of starterSequences(locale)) created.push(await this.create(actor, definition));
+    return created;
   }
 
   async activate(actor: DraftActor, id: string): Promise<Sequence> {

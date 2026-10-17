@@ -26,6 +26,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Mailbox paused: {mailbox}',
       body: 'Sending stopped to protect deliverability.',
     },
+    sequence_paused: {
+      title: 'Follow-ups paused for {business}',
+      body: '{reason}',
+    },
     mailbox_error: {
       title: 'Mailbox needs reconnecting: {mailbox}',
       body: 'Sending from it stopped: {reason}.',
@@ -56,6 +60,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       body: '{business} : le site n’a pas été publié ({reason}).',
     },
     discovery_completed: { title: 'Découverte terminée', body: '{count} entreprises trouvées.' },
+    sequence_paused: {
+      title: 'Relances en pause pour {business}',
+      body: '{reason}',
+    },
     mailbox_paused: {
       title: 'Boîte d’envoi en pause : {mailbox}',
       body: 'Les envois sont suspendus pour protéger la délivrabilité.',

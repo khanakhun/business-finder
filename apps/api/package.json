@@ -35,6 +35,7 @@
     "@bf/observability": "workspace:*",
     "@bf/queue": "workspace:*",
     "@bf/site-schema": "workspace:*",
+    "@bf/sitekit": "workspace:*",
     "@bf/tsconfig": "workspace:*",
     "@bull-board/api": "catalog:",
     "@bull-board/express": "catalog:",

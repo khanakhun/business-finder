@@ -544,6 +544,9 @@ importers:
       '@bf/site-schema':
         specifier: workspace:*
         version: link:../../packages/site-schema
+      '@bf/sitekit':
+        specifier: workspace:*
+        version: link:../../packages/sitekit
       '@bf/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig

@@ -74,6 +74,7 @@ import {
   DrizzleFactSources,
 } from './infrastructure/drizzle-facts.repository.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
+import { BlocksEngine } from './infrastructure/engines/blocks/blocks.engine.ts';
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
@@ -108,12 +109,20 @@ import {
 } from './interface/processors/generation.processors.ts';
 
 /** The engines registered here: the fake one in development and tests (real engines arrive with BF-041/BF-044). */
-function engines(env: ApiEnv): AgentEngine[] {
-  if (!env.GENERATION_FAKE_ENGINE) return [];
-  if (env.NODE_ENV === 'production') throw new Error('GENERATION_FAKE_ENGINE is refused in production');
-  return [
-    new FakeEngine({ durationMs: env.GENERATION_FAKE_DURATION_MS, assetsBaseUrl: env.SITES_ASSETS_BASE_URL }),
-  ];
+function engines(env: ApiEnv, deps: { gateway: AiGateway; artifacts: ArtifactStore }): AgentEngine[] {
+  const registered: AgentEngine[] = [];
+  // The blocks engine (BF-041): in-process, model calls through the AI gateway.
+  if (env.GENERATION_BLOCKS_ENGINE) registered.push(new BlocksEngine(deps.gateway, deps.artifacts));
+  if (env.GENERATION_FAKE_ENGINE) {
+    if (env.NODE_ENV === 'production') throw new Error('GENERATION_FAKE_ENGINE is refused in production');
+    registered.push(
+      new FakeEngine({
+        durationMs: env.GENERATION_FAKE_DURATION_MS,
+        assetsBaseUrl: env.SITES_ASSETS_BASE_URL,
+      }),
+    );
+  }
+  return registered;
 }
 
 /**
@@ -155,8 +164,9 @@ export class GenerationModule {
         BriefService,
         {
           provide: ENGINE_REGISTRY,
-          inject: [APP_ENV],
-          useFactory: (env: AppEnv) => new StaticEngineRegistry(engines(env as ApiEnv)),
+          inject: [APP_ENV, AI_GATEWAY, GENERATION_ARTIFACTS],
+          useFactory: (env: AppEnv, gateway: AiGateway, artifacts: ArtifactStore) =>
+            new StaticEngineRegistry(engines(env as ApiEnv, { gateway, artifacts })),
         },
         {
           provide: GENERATION_SETTINGS,

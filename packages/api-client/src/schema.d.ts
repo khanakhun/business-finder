@@ -2185,6 +2185,93 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/outreach/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The latest drafts for a business */
+        get: operations["listEmailDrafts"];
+        put?: never;
+        /** Draft an email to a business (AI, grounded in its facts and findings, or from a template) */
+        post: operations["createEmailDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/drafts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One draft */
+        get: operations["getEmailDraft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a draft (revalidated: the link policy blocks, other checks warn) */
+        patch: operations["updateEmailDraft"];
+        trace?: never;
+    };
+    "/v1/outreach/drafts/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The final message (signature and compliance footer included) and today’s compliance decision */
+        get: operations["previewEmailDraft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/drafts/{id}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Write the draft again (optionally with instructions) */
+        post: operations["regenerateEmailDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/outreach/drafts/{id}/translate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The same draft in the other language (facts kept) */
+        post: operations["translateEmailDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/pipeline": {
         parameters: {
             query?: never;
@@ -4251,6 +4338,34 @@ export type components = {
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
         };
+        CreateDraftRequest: {
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            /** @default null */
+            contactId: string | null;
+            instructions?: string;
+            /** @enum {string} */
+            locale?: "en" | "fr";
+            /** Format: uuid */
+            mailboxId?: string;
+            /**
+             * @default ai
+             * @enum {string}
+             */
+            mode: "ai" | "template";
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /**
+             * @default first_touch
+             * @enum {string}
+             */
+            purpose: "first_touch" | "follow_up" | "breakup" | "reply";
+            /** Format: uuid */
+            templateId?: string;
+        };
         CreateDsrRequest: {
             notes?: string;
             subject: components["schemas"]["DataSubject"];
@@ -4660,6 +4775,59 @@ export type components = {
         };
         EffectiveCompliancePolicyList: {
             items: components["schemas"]["EffectiveCompliancePolicy"][];
+        };
+        EmailDraft: {
+            aiMeta: {
+                [key: string]: unknown;
+            } | null;
+            bodyMd: string;
+            /** Format: uuid */
+            businessId: string;
+            claims: {
+                supported: boolean;
+                supportedBy: string[];
+                text: string;
+            }[];
+            contactId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            factsUsed: {
+                id: string;
+                /** @enum {string} */
+                kind: "fact" | "finding" | "review_theme" | "preview";
+                label: string;
+            }[];
+            /** @enum {string} */
+            generatedBy: "ai" | "template" | "human";
+            /** Format: uuid */
+            id: string;
+            lint: {
+                at: string | null;
+                code: string;
+                message: string;
+                /** @enum {string} */
+                severity: "error" | "warning";
+            }[];
+            /** @enum {string} */
+            locale: "en" | "fr";
+            mailboxId: string | null;
+            /** @enum {string} */
+            offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+            /** @enum {string} */
+            purpose: "first_touch" | "follow_up" | "breakup" | "reply";
+            siteId: string | null;
+            /** @enum {string} */
+            status: "draft" | "discarded" | "sent_as_message";
+            subject: string;
+            subjectVariants: string[];
+            templateId: string | null;
+            templateVersion: number | null;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        EmailDraftList: {
+            items: components["schemas"]["EmailDraft"][];
         };
         EmailTemplate: {
             bodyMd: string;
@@ -6023,6 +6191,9 @@ export type components = {
                 viewport: string;
             }[];
         };
+        RegenerateDraftRequest: {
+            instructions?: string;
+        };
         RegenerateSiteRequest: {
             /** @default auto */
             engine: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
@@ -6233,6 +6404,23 @@ export type components = {
         };
         RejectDsrRequest: {
             reason: string;
+        };
+        RenderedEmail: {
+            compliance: {
+                [key: string]: unknown;
+            } | null;
+            footer: string[];
+            html: string;
+            issues: {
+                at: string | null;
+                code: string;
+                message: string;
+                /** @enum {string} */
+                severity: "error" | "warning";
+            }[];
+            links: string[];
+            subject: string;
+            text: string;
         };
         ReorderGenerationJobsRequest: {
             /** Format: uuid */
@@ -7527,6 +7715,10 @@ export type components = {
              */
             memberId: string;
         };
+        TranslateDraftRequest: {
+            /** @enum {string} */
+            locale: "en" | "fr";
+        };
         TranslateSiteRequest: {
             locale: string;
             /**
@@ -7544,6 +7736,16 @@ export type components = {
         UnpublishSiteRequest: {
             /** @enum {string} */
             environment: "preview" | "live";
+        };
+        UpdateDraftRequest: {
+            bodyMd?: string;
+            /** @enum {string} */
+            locale?: "en" | "fr";
+            mailboxId?: string | null;
+            /** @enum {string} */
+            status?: "draft" | "discarded";
+            subject?: string;
+            subjectVariants?: string[];
         };
         UpdateGenerationJobRequest: {
             engine?: "auto" | ("blocks" | "claude-agent-sdk" | "claude-code" | "codex" | "fake");
@@ -18170,6 +18372,498 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listEmailDrafts: {
+        parameters: {
+            query: {
+                businessId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraftList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    previewEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RenderedEmail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    regenerateEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegenerateDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    translateEmailDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranslateDraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

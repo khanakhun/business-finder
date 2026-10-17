@@ -67,7 +67,9 @@ export class OutreachModule {
       module: OutreachModule,
       imports: [RealtimeModule.forRoot(mode), ComplianceModule.forRoot(mode), GenerationModule.forRoot(mode)],
       controllers:
-        mode === 'worker' ? [] : [MailboxesController, MailboxOAuthController, TemplatesController],
+        mode === 'worker'
+          ? []
+          : [MailboxesController, MailboxOAuthController, TemplatesController, DraftsController],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
         ValkeyCapacityCounters,

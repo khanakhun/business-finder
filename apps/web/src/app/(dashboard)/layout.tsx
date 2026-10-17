@@ -4,7 +4,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type * as React from 'react';
 import { AppShell } from '@/components/shell/app-shell.tsx';
 import { WorkspaceGate } from '@/components/shell/workspace-gate.tsx';
-import { ComposerHost } from '@/features/outreach/composer/composer-drawer.tsx';
+import { ComposerHost } from '@/features/outreach/composer/composer-host.tsx';
 import { RealtimeProvider } from '@/lib/realtime/provider.tsx';
 import { getSession } from '@/lib/server-session.ts';
 import { SessionProvider } from '@/lib/session.tsx';

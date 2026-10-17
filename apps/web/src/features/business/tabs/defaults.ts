@@ -60,6 +60,18 @@ export function registerDefaultTabs(): void {
     ),
   });
   businessTabs.register({
+    // BF-049.
+    id: 'compliance',
+    labelKey: 'business.tabs.compliance',
+    order: 29.5,
+    component: dynamic(
+      () => import('@/features/compliance/compliance-tab.tsx').then((m) => m.ComplianceTab),
+      {
+        loading: TabSkeleton,
+      },
+    ),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

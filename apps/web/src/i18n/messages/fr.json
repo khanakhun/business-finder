@@ -234,7 +234,8 @@
     "notifications": "Notifications",
     "taxonomy": "Catégories",
     "scoring": "Scoring",
-    "generation": "Génération"
+    "generation": "Génération",
+    "compliance": "Conformité"
   },
   "account": {
     "title": "Compte",
@@ -1034,7 +1035,8 @@
       "website": "Site web",
       "reviews": "Avis",
       "scores": "Scores",
-      "sites": "Sites"
+      "sites": "Sites",
+      "compliance": "Conformité"
     },
     "actions": {
       "label": "Actions rapides",
@@ -3246,6 +3248,162 @@
         "blockMoved": "Section {type} déplacée sur {page}",
         "blockChanged": "{type} sur {page} : {fields}",
         "section": "{section} du site modifié"
+      }
+    }
+  },
+  "compliance": {
+    "decision": {
+      "allowed": "Autorisé",
+      "allowed_with_conditions": "Autorisé sous conditions",
+      "manual_only": "Manuel uniquement",
+      "blocked": "Bloqué"
+    },
+    "channels": {
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "letter": "Courrier"
+    },
+    "panel": {
+      "jurisdictions": "Juridictions : {list}",
+      "autoSend": "Envoi automatique permis",
+      "required": "Chaque message doit contenir",
+      "alternatives": "À la place, vous pouvez"
+    },
+    "elements": {
+      "sender_identity": "L'identité de l'expéditeur",
+      "postal_address": "Une adresse postale",
+      "opt_out_link": "Un lien de désinscription fonctionnel",
+      "unsubscribe_headers": "Les en-têtes de désinscription en un clic",
+      "source_disclosure": "L'origine de l'adresse",
+      "relevance": "Pourquoi l'offre les concerne",
+      "recipient_language": "La langue du destinataire",
+      "honest_subject": "Un objet honnête",
+      "identify_on_call": "Se présenter lors de l'appel",
+      "stop_on_request": "Arrêter sur demande"
+    },
+    "rules": {
+      "condition": "{field} est {values}",
+      "fields": {
+        "recipientType": "le destinataire",
+        "addressType": "l'adresse",
+        "publishedContext": "l'adresse publiée",
+        "designatedForSolicitation": "l'adresse destinée aux offres",
+        "relevance": "l'offre",
+        "previousContact": "le contact précédent"
+      },
+      "or": " ou ",
+      "and": " et ",
+      "always": "Dans tous les cas",
+      "if": "Si {condition}",
+      "otherwise": "Sinon"
+    },
+    "values": {
+      "legal_person": "une société",
+      "sole_trader": "un entrepreneur individuel",
+      "public_body": "un organisme public",
+      "unknown": "inconnu",
+      "generic": "générique",
+      "department": "un service",
+      "personal": "personnelle",
+      "own_contact_page": "sur sa page contact",
+      "own_site_other": "ailleurs sur son site",
+      "directory": "dans un annuaire",
+      "relevant": "pertinente",
+      "not_relevant": "non pertinente",
+      "none": "aucun",
+      "replied": "une réponse",
+      "bounced": "un rejet",
+      "yes": "oui",
+      "no": "non"
+    },
+    "policies": {
+      "loadError": "Impossible de charger les politiques.",
+      "notLegalAdvice": "Ces politiques sont un point de départ, pas un conseil juridique. Faites-les relire par un juriste avant d'activer l'envoi automatique.",
+      "caption": "Politique de prospection par juridiction et canal",
+      "jurisdiction": "Juridiction",
+      "anyOther": "Toute autre",
+      "open": "Ouvrir la politique {channel} pour {jurisdiction}",
+      "needsReview": "Relecture juridique requise",
+      "reviewed": "Relue",
+      "autoSend": "envoi auto",
+      "overridden": "surchargée",
+      "policy": "Politique",
+      "policyHint": "Règles, sources, relecture et versions de cette politique.",
+      "reviewSaved": "Relecture enregistrée.",
+      "saveError": "Enregistrement impossible.",
+      "overrideInvalid": "La surcharge n'est pas une politique valide.",
+      "overrideSaved": "Surcharge enregistrée : {stricter} situations sur {total} deviennent plus strictes.",
+      "version": "Version {version} ({kind})",
+      "kind": {
+        "seed": "initiale",
+        "override": "surcharge"
+      },
+      "reviewedBy": "Relue par {name} le {when}",
+      "rules": "Règles",
+      "sources": "Sources",
+      "reviewTitle": "Relecture juridique",
+      "reviewHint": "Indiquez qui a relu cette politique. L'envoi automatique reste désactivé tant qu'aucune relecture n'est enregistrée.",
+      "reviewer": "Nom du relecteur",
+      "notes": "Notes",
+      "confirm": "Je confirme que cette politique a été relue par une personne qualifiée.",
+      "enableAutoSend": "Activer l'envoi automatique pour cette juridiction et ce canal",
+      "ownerOnly": "Seuls les propriétaires peuvent activer l'envoi automatique.",
+      "saveReview": "Enregistrer la relecture",
+      "overrideTitle": "Surcharge plus stricte",
+      "overrideHint": "Modifiez la politique en JSON. Une surcharge ne peut que rendre les décisions plus strictes ; les règles plus souples sont refusées.",
+      "saveOverride": "Enregistrer la surcharge",
+      "versions": "Versions"
+    },
+    "lia": {
+      "saveError": "Enregistrement impossible.",
+      "loadError": "Impossible de charger les évaluations.",
+      "hint": "La prospection fondée sur l'intérêt légitime exige une évaluation approuvée.",
+      "fromTemplate": "Nouvelle depuis le modèle",
+      "emptyTitle": "Aucune évaluation",
+      "emptyBody": "Partez du modèle et adaptez-le à votre activité.",
+      "version": "v{version}",
+      "status": {
+        "draft": "Brouillon",
+        "approved": "Approuvée",
+        "retired": "Retirée"
+      },
+      "approvedBy": "Approuvée par {name} le {when}",
+      "fields": {
+        "title": "Titre",
+        "purpose": "Finalité",
+        "dataCategories": "Données utilisées",
+        "necessity": "Nécessité",
+        "balancingTest": "Mise en balance",
+        "safeguards": "Garanties",
+        "retention": "Conservation"
+      },
+      "saved": "Enregistré.",
+      "save": "Enregistrer le brouillon",
+      "approve": "Approuver",
+      "approved": "Approuvée.",
+      "retire": "Retirer",
+      "retired": "Retirée."
+    },
+    "settings": {
+      "title": "Conformité",
+      "description": "Politiques de prospection par juridiction et canal, leur relecture juridique et vos évaluations de base légale.",
+      "policies": "Politiques",
+      "lawfulBasis": "Base légale"
+    },
+    "tab": {
+      "today": "Si vous les contactiez aujourd'hui",
+      "todayHint": "Ce que la vérification de conformité déciderait pour une offre de nouveau site. Aperçu uniquement, rien n'est enregistré.",
+      "noPermission": "Il faut la permission de prospection pour prévisualiser les décisions.",
+      "loadError": "Impossible d'évaluer ce canal.",
+      "history": "Décisions enregistrées",
+      "noHistory": "Aucune décision enregistrée.",
+      "stage": {
+        "preview": "Aperçu",
+        "enqueue": "En file",
+        "send": "Envoi",
+        "manual_log": "Journal manuel"
       }
     }
   }

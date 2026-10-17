@@ -1,0 +1,1 @@
+ALTER TABLE "outbound_messages" ADD COLUMN "last_attempt_at" timestamp with time zone;

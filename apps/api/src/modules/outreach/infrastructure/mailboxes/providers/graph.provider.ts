@@ -5,6 +5,7 @@ import type {
   MailboxProvider,
   RawInbound,
   SendResult,
+  SentProbe,
   SyncCursor,
 } from '../../../application/mailbox/ports.ts';
 import { MailboxProviderError } from '../../../domain/mailbox/errors.ts';
@@ -51,6 +52,51 @@ export class GraphProvider implements MailboxProvider {
       rfc822MessageId,
       ...(draft.conversationId ? { providerThreadId: draft.conversationId } : {}),
     };
+  }
+
+  /**
+   * By `internetMessageId` in Sent Items, else the recent sent messages to the recipient, confirmed by our
+   * `X-BF-Outbound-Id` header (or, when Graph returns no headers, by the exact subject).
+   */
+  async findSent(mailbox: MailboxCtx, probe: SentProbe, signal: AbortSignal): Promise<SendResult | null> {
+    type Item = {
+      id: string;
+      conversationId?: string;
+      internetMessageId?: string;
+      subject?: string;
+      toRecipients?: { emailAddress?: { address?: string } }[];
+      internetMessageHeaders?: { name?: string; value?: string }[];
+    };
+    const base = `${API}/mailFolders/sentitems/messages`;
+    const list = async (query: string) => {
+      const { body } = await providerFetch('graph', 'mailbox-api', `${base}?${query}`, {
+        headers: await auth(mailbox),
+        signal,
+      });
+      return (body as { value?: Item[] }).value ?? [];
+    };
+    const found = (item: Item): SendResult => ({
+      providerMessageId: item.id,
+      rfc822MessageId: item.internetMessageId ?? probe.rfc822MessageId,
+      ...(item.conversationId ? { providerThreadId: item.conversationId } : {}),
+    });
+    const quoted = probe.rfc822MessageId.replace(/'/g, "''");
+    const [exact] = await list(
+      `$filter=${encodeURIComponent(`internetMessageId eq '${quoted}'`)}&$select=id,conversationId,internetMessageId`,
+    );
+    if (exact) return found(exact);
+    const since = new Date(probe.since.getTime() - 60_000).toISOString();
+    const recent = await list(
+      `$filter=${encodeURIComponent(`sentDateTime ge ${since}`)}&$top=25&$select=id,conversationId,internetMessageId,subject,toRecipients,internetMessageHeaders`,
+    );
+    const to = probe.to.toLowerCase();
+    for (const item of recent) {
+      if (!item.toRecipients?.some((r) => r.emailAddress?.address?.toLowerCase() === to)) continue;
+      const header = item.internetMessageHeaders?.find((h) => h.name?.toLowerCase() === 'x-bf-outbound-id');
+      if (header ? header.value?.trim() === probe.outboundId : item.subject === probe.subject)
+        return found(item);
+    }
+    return null;
   }
 
   /** Follows a delta chain to its end; returns the ids added and the new delta link. */

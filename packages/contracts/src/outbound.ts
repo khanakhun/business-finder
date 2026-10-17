@@ -3,6 +3,7 @@ import { ComplianceDecisionSchema } from './compliance.ts';
 import { EmailLocaleSchema, EmailPurposeSchema } from './drafting.ts';
 import { defineEvent } from './events.ts';
 import { BusinessId } from './ids.ts';
+import { defineJob } from './jobs.ts';
 import { cursorPage } from './pagination.ts';
 import { OfferSchema } from './taxonomy.ts';
 import { IsoDateTimeSchema } from './time.ts';
@@ -205,3 +206,14 @@ export const ManualContactLogged = defineEvent(
     channel: ManualContactChannelSchema,
   }),
 );
+
+// ── Jobs ────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** Every minute: due messages are claimed (`SKIP LOCKED`), leased and handed to the send queue. */
+export const OutreachTickJob = defineJob('outreach-tick', 'tick', {});
+
+/** One send attempt of a leased message; `lease` is the claim it belongs to (a stale job does nothing). */
+export const OutreachSendJob = defineJob('outreach-send', 'send', {
+  messageId: z.uuid(),
+  lease: IsoDateTimeSchema,
+});

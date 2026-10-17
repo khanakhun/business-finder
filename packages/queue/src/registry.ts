@@ -9,10 +9,11 @@ export const DEFAULT_JOB_OPTIONS: DefaultJobOptions = {
 };
 
 /**
- * Generation runs are attempted once by BullMQ: retries and failover are the orchestrator's (they are new attempts,
- * often on another engine), never BullMQ's.
+ * Jobs BullMQ attempts once because their domain owns retries: generation runs (retries and failover are the
+ * orchestrator's, often on another engine) and outbound sends (reconciled before any new attempt, BF-052).
  */
-export const GENERATION_JOB_OPTIONS: DefaultJobOptions = { ...DEFAULT_JOB_OPTIONS, attempts: 1 };
+export const SINGLE_ATTEMPT_JOB_OPTIONS: DefaultJobOptions = { ...DEFAULT_JOB_OPTIONS, attempts: 1 };
+export const GENERATION_JOB_OPTIONS = SINGLE_ATTEMPT_JOB_OPTIONS;
 
 export interface QueueDefinition {
   readonly name: string;
@@ -118,6 +119,12 @@ export const QUEUES = {
   sitesScreenshot: { name: 'sites-screenshot', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** Views flush (Valkey → site_view_daily) and the hourly `site.viewed` events, every 5 minutes. */
   sitesViews: { name: 'sites-views', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  /**
+   * Outbound email (BF-052): the minute tick claims due messages; one send job per claimed message. Attempts are
+   * the pipeline's (reconciled before any resend), never BullMQ's.
+   */
+  outreachTick: { name: 'outreach-tick', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  outreachSend: { name: 'outreach-send', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 4 },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

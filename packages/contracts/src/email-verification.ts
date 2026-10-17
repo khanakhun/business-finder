@@ -9,7 +9,7 @@ export const EmailVerifierIdSchema = z.enum(EMAIL_VERIFIERS);
 export type EmailVerifierId = z.infer<typeof EmailVerifierIdSchema>;
 export const DEFAULT_EMAIL_VERIFIERS: readonly EmailVerifierId[] = ['reacher', 'zerobounce', 'dns'];
 /** What produced a verdict: a verifier, or the address alone (a disposable domain needs no mailbox check). */
-export const EMAIL_CHECK_SOURCES = [...EMAIL_VERIFIERS, 'classification'] as const;
+export const EMAIL_CHECK_SOURCES = [...EMAIL_VERIFIERS, 'classification', 'bounce'] as const;
 
 /** Where on its own site a business published an address (compliance: "published for that purpose"). */
 export const PUBLISHED_PAGE_KINDS = ['contact', 'home', 'footer', 'legal', 'other'] as const;

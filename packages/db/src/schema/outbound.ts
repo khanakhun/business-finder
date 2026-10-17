@@ -48,6 +48,10 @@ export const emailThreads = pgTable(
     rootMessageId: text().notNull(),
     status: text().$type<'open' | 'replied' | 'closed'>().notNull().default('open'),
     lastMessageAt: tz().notNull().defaultNow(),
+    // BF-054: the inbox's view of the thread.
+    lastInboundAt: tz(),
+    unreadCount: integer().notNull().default(0),
+    latestTriageClass: text(),
     ...timestamps(),
   },
   (table) => [

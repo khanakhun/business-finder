@@ -5159,7 +5159,7 @@ export type components = {
         };
         EmailVerificationDetails: {
             /** @enum {string} */
-            checkedVia: "reacher" | "zerobounce" | "dns" | "classification";
+            checkedVia: "reacher" | "zerobounce" | "dns" | "classification" | "bounce";
             isCatchAll: boolean | null;
             isDisposable: boolean | null;
             isRoleAccount: boolean | null;

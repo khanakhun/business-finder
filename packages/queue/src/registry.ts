@@ -127,6 +127,17 @@ export const QUEUES = {
   outreachBulk: { name: 'outreach-bulk', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   outreachTick: { name: 'outreach-tick', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   outreachSend: { name: 'outreach-send', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 4 },
+  /** Replies (BF-054): one sync per mailbox and poll (or push); one triage per human reply (a model call). */
+  outreachSync: { name: 'outreach-sync', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
+  outreachTriage: {
+    name: 'outreach-triage',
+    defaultJobOptions: {
+      ...DEFAULT_JOB_OPTIONS,
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 5_000 },
+    },
+    concurrency: 4,
+  },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

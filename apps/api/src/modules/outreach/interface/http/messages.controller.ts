@@ -1,4 +1,5 @@
 import {
+  EditPendingMessageRequestSchema,
   type ListOutboundMessagesQuery,
   ListOutboundMessagesQuerySchema,
   ManualContactLogSchema,
@@ -19,6 +20,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Res,
@@ -33,6 +35,7 @@ import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import type { DraftActor } from '../../application/drafting/drafts.service.ts';
+import { BulkOutreach } from '../../application/outbound/bulk.ts';
 import { ManualContactLogs } from '../../application/outbound/manual-log.ts';
 import { OutboundCommands } from '../../application/outbound/outbound.commands.ts';
 import { OutboundQueries } from '../../application/outbound/outbound.queries.ts';
@@ -41,6 +44,7 @@ class SendBody extends zodDto(SendMessageRequestSchema) {}
 class RescheduleBody extends zodDto(RescheduleMessageRequestSchema) {}
 class ManualLogBody extends zodDto(ManualLogRequestSchema) {}
 class ListQuery extends zodDto(ListOutboundMessagesQuerySchema) {}
+class EditBody extends zodDto(EditPendingMessageRequestSchema) {}
 
 const IDEMPOTENCY_KEY = /^[A-Za-z0-9_.:-]{8,200}$/;
 
@@ -59,6 +63,7 @@ export class MessagesController {
     private readonly commands: OutboundCommands,
     private readonly queries: OutboundQueries,
     private readonly manual: ManualContactLogs,
+    private readonly bulk: BulkOutreach,
     private readonly members: MemberDirectory,
   ) {}
 
@@ -122,6 +127,21 @@ export class MessagesController {
   })
   async get(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
     return this.queries.get((await this.actor(auth)).organizationId, id);
+  }
+
+  @Patch('messages/:id')
+  @RequirePermission('outreach:send')
+  @ApiRoute({
+    summary: 'Edit a message waiting for approval (its draft changes and the preview is rendered again)',
+    operationId: 'editPendingMessage',
+    body: EditBody,
+    response: { status: 200, schema: OutboundMessageSchema },
+    errors: [400, 401, 403, 404, 422],
+  })
+  async edit(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Body() body: EditBody) {
+    const actor = await this.actor(auth);
+    await this.bulk.edit(actor, id, body);
+    return this.queries.get(actor.organizationId, id);
   }
 
   @Post('messages/:id/cancel')

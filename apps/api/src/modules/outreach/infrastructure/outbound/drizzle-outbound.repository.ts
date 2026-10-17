@@ -144,6 +144,11 @@ export class DrizzleOutboundRepository implements OutboundRepository {
     return stored as ThreadRecord;
   }
 
+  async thread(threadId: string) {
+    const [row] = await this.x.select().from(emailThreads).where(eq(emailThreads.id, threadId));
+    return row as ThreadRecord | undefined;
+  }
+
   async openThread(organizationId: string, businessId: string, contactId: string | null) {
     const [row] = await this.x
       .select()

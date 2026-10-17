@@ -624,6 +624,27 @@
         ],
         "type": "object"
       },
+      "ApproveBulkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "expectedCount": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "messageIds": {
+            "items": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "AreaCandidate": {
         "additionalProperties": false,
         "properties": {
@@ -931,6 +952,54 @@
         },
         "type": "object"
       },
+      "BulkActionResult": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "failed": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "messageId": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "messageId",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "refused": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "rejected": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "approved",
+          "rejected",
+          "refused",
+          "failed"
+        ],
+        "type": "object"
+      },
       "BulkEnrichRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1031,6 +1100,239 @@
         ],
         "type": "object"
       },
+      "BulkItem": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "blockedReasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "bodyHtml": {
+            "type": "string"
+          },
+          "bodyText": {
+            "type": "string"
+          },
+          "businessId": {
+            "description": "BusinessId (UUID)",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "compliance": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "reasons": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "decision",
+                  "reasons"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "contactId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "draftId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "lastError": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "at": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "code": {
+                    "maxLength": 60,
+                    "type": "string"
+                  },
+                  "message": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "retryable": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "retryable",
+                  "at"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locale": {
+            "enum": [
+              "en",
+              "fr"
+            ],
+            "type": "string"
+          },
+          "mailboxEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mailboxId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "first_touch",
+              "follow_up",
+              "breakup",
+              "reply"
+            ],
+            "type": "string"
+          },
+          "recipient": {
+            "type": "string"
+          },
+          "scheduledAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "sentAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "pending_approval",
+              "queued",
+              "sending",
+              "sent",
+              "failed",
+              "blocked",
+              "cancelled",
+              "bounced",
+              "replied"
+            ],
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "businessName",
+          "contactId",
+          "recipient",
+          "mailboxId",
+          "mailboxEmail",
+          "subject",
+          "purpose",
+          "offer",
+          "locale",
+          "status",
+          "scheduledAt",
+          "sentAt",
+          "attempts",
+          "lastError",
+          "blockedReasons",
+          "createdAt",
+          "draftId",
+          "bodyText",
+          "bodyHtml",
+          "compliance"
+        ],
+        "type": "object"
+      },
       "BulkResult": {
         "additionalProperties": false,
         "properties": {
@@ -1070,6 +1372,190 @@
           "changed",
           "unchanged",
           "failed"
+        ],
+        "type": "object"
+      },
+      "BulkRun": {
+        "additionalProperties": false,
+        "properties": {
+          "autoApprove": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drafted": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "ai",
+              "template"
+            ],
+            "type": "string"
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "pending": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "purpose": {
+            "enum": [
+              "first_touch",
+              "follow_up",
+              "breakup",
+              "reply"
+            ],
+            "type": "string"
+          },
+          "queued": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "skipped": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "drafting",
+              "ready",
+              "completed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "total": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "offer",
+          "purpose",
+          "mode",
+          "status",
+          "autoApprove",
+          "total",
+          "drafted",
+          "skipped",
+          "pending",
+          "queued",
+          "createdBy",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "BulkRunDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BulkItem"
+            },
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/BulkRun"
+          },
+          "skipped": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "alternatives": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "businessId": {
+                  "description": "BusinessId (UUID)",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "businessName": {
+                  "type": "string"
+                },
+                "decision": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "reasons": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "businessId",
+                "businessName",
+                "decision",
+                "reasons",
+                "alternatives"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "run",
+          "items",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "BulkRunList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BulkRun"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
         ],
         "type": "object"
       },
@@ -6237,6 +6723,22 @@
         "required": [
           "items"
         ],
+        "type": "object"
+      },
+      "EditPendingMessageRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "bodyMd": {
+            "maxLength": 5000,
+            "minLength": 10,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "EffectiveCompliancePolicy": {
@@ -15292,6 +15794,25 @@
           }
         ]
       },
+      "RejectBulkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "messageIds": {
+            "items": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "messageIds"
+        ],
+        "type": "object"
+      },
       "RejectDsrRequest": {
         "additionalProperties": false,
         "properties": {
@@ -21337,6 +21858,68 @@
           "businessId",
           "newBusinessId",
           "sourcesMoved"
+        ],
+        "type": "object"
+      },
+      "StartBulkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "businessIds": {
+            "items": {
+              "description": "BusinessId (UUID)",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          },
+          "mailboxStrategy": {
+            "const": "auto",
+            "default": "auto",
+            "type": "string"
+          },
+          "mode": {
+            "default": "ai",
+            "enum": [
+              "ai",
+              "template"
+            ],
+            "type": "string"
+          },
+          "offer": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          },
+          "purpose": {
+            "default": "first_touch",
+            "enum": [
+              "first_touch",
+              "follow_up",
+              "breakup",
+              "reply"
+            ],
+            "type": "string"
+          },
+          "templateId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "businessIds",
+          "offer",
+          "purpose",
+          "mode",
+          "mailboxStrategy"
         ],
         "type": "object"
       },
@@ -38465,6 +39048,421 @@
         ]
       }
     },
+    "/v1/outreach/bulk": {
+      "get": {
+        "operationId": "listBulkRuns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkRunList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace’s bulk runs, newest first",
+        "tags": [
+          "outreach"
+        ]
+      },
+      "post": {
+        "operationId": "startBulkOutreach",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkRun"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Draft emails for up to 100 businesses into the approval queue",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/v1/outreach/bulk/{id}": {
+      "get": {
+        "operationId": "getBulkRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkRunDetail"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A bulk run: its items (rendered previews, compliance) and the businesses it skipped, with reasons",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/v1/outreach/bulk/{id}/approve": {
+      "post": {
+        "operationId": "approveBulkItems",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Approve items (or all pending, with the confirmed count): each is judged again, then queued",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
+    "/v1/outreach/bulk/{id}/reject": {
+      "post": {
+        "operationId": "rejectBulkItems",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Reject items: they are cancelled and never sent",
+        "tags": [
+          "outreach"
+        ]
+      }
+    },
     "/v1/outreach/drafts": {
       "get": {
         "operationId": "listEmailDrafts",
@@ -39540,6 +40538,105 @@
           }
         },
         "summary": "One message: its content, headers, compliance decisions and timeline",
+        "tags": [
+          "outreach"
+        ]
+      },
+      "patch": {
+        "operationId": "editPendingMessage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditPendingMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundMessage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Edit a message waiting for approval (its draft changes and the preview is rendered again)",
         "tags": [
           "outreach"
         ]

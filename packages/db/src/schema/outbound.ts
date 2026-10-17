@@ -12,6 +12,7 @@ import type {
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
   index,
   integer,
@@ -74,7 +75,7 @@ export const outboundMessages = pgTable(
     draftId: uuid().references(() => emailDrafts.id, { onDelete: 'set null' }),
     sequenceEnrollmentId: uuid(),
     sequenceStep: integer(),
-    bulkRunId: uuid(),
+    bulkRunId: uuid().references(() => outreachBulkRuns.id, { onDelete: 'set null' }),
     // Content
     purpose: text().$type<EmailPurpose>().notNull(),
     offer: text().$type<Offer>().notNull(),
@@ -135,6 +136,34 @@ export const outboundMessages = pgTable(
       sql.raw(`status NOT IN ('sent','bounced','replied') OR send_decision_id IS NOT NULL`),
     ),
   ],
+);
+
+/** A bulk run (BF-052): drafts for up to 100 businesses land in an approval queue; refused ones are listed. */
+export const outreachBulkRuns = pgTable(
+  'outreach_bulk_runs',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    offer: text().$type<Offer>().notNull(),
+    purpose: text().$type<EmailPurpose>().notNull(),
+    mode: text().$type<'ai' | 'template'>().notNull(),
+    templateId: uuid(),
+    locale: text().$type<EmailLocale>().notNull(),
+    /** Every auto-send condition held when the run started (permission, workspace flag); per item the policy too. */
+    autoApprove: boolean().notNull().default(false),
+    status: text().$type<'drafting' | 'ready' | 'completed' | 'cancelled'>().notNull().default('drafting'),
+    businessIds: uuid().array().notNull(),
+    drafted: integer().notNull().default(0),
+    skipped: jsonb()
+      .$type<
+        { businessId: string; decision: string; reasons: string[]; alternatives: string[]; error?: string }[]
+      >()
+      .notNull()
+      .default([]),
+    ...timestamps(),
+  },
+  (table) => [index('ix_outreach_bulk_runs__org_created').on(table.organizationId, table.createdAt)],
 );
 
 export const manualContactLogs = pgTable(

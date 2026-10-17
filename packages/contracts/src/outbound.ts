@@ -154,6 +154,99 @@ export const ManualContactLogSchema = z
   .meta({ id: 'ManualContactLog' });
 export type ManualContactLog = z.infer<typeof ManualContactLogSchema>;
 
+// ── Bulk runs and approvals ──────────────────────────────────────────────────────────────────────────────────────
+
+export const BULK_RUN_STATUSES = ['drafting', 'ready', 'completed', 'cancelled'] as const;
+
+export const StartBulkRequestSchema = z
+  .object({
+    businessIds: z.array(BusinessId).min(1).max(100),
+    offer: OfferSchema,
+    purpose: EmailPurposeSchema.default('first_touch'),
+    templateId: z.uuid().optional(),
+    mode: z.enum(['ai', 'template']).default('ai'),
+    mailboxStrategy: z.literal('auto').default('auto'),
+  })
+  .meta({ id: 'StartBulkRequest' });
+export type StartBulkRequest = z.input<typeof StartBulkRequestSchema>;
+
+export const BulkSkippedSchema = z.object({
+  businessId: BusinessId,
+  businessName: z.string(),
+  /** `manual_only` or `blocked` (the gate), or `error` (no address, no draft). */
+  decision: z.string(),
+  reasons: z.array(z.string()),
+  alternatives: z.array(z.string()),
+  error: z.string().optional(),
+});
+
+export const BulkRunSchema = z
+  .object({
+    id: z.uuid(),
+    offer: OfferSchema,
+    purpose: EmailPurposeSchema,
+    mode: z.enum(['ai', 'template']),
+    status: z.enum(BULK_RUN_STATUSES),
+    autoApprove: z.boolean(),
+    total: z.number().int(),
+    drafted: z.number().int(),
+    skipped: z.number().int(),
+    pending: z.number().int(),
+    queued: z.number().int(),
+    createdBy: z.uuid().nullable(),
+    createdAt: IsoDateTimeSchema,
+  })
+  .meta({ id: 'BulkRun' });
+export type BulkRun = z.infer<typeof BulkRunSchema>;
+
+export const BulkItemSchema = OutboundMessageSummarySchema.extend({
+  draftId: z.uuid().nullable(),
+  bodyText: z.string(),
+  bodyHtml: z.string(),
+  /** The decision the item was drafted under (approval judges it again). */
+  compliance: z.object({ decision: z.string(), reasons: z.array(z.string()) }).nullable(),
+}).meta({ id: 'BulkItem' });
+
+export const BulkRunDetailSchema = z
+  .object({ run: BulkRunSchema, items: z.array(BulkItemSchema), skipped: z.array(BulkSkippedSchema) })
+  .meta({ id: 'BulkRunDetail' });
+export type BulkRunDetail = z.infer<typeof BulkRunDetailSchema>;
+
+export const BulkRunListSchema = z.object({ items: z.array(BulkRunSchema) }).meta({ id: 'BulkRunList' });
+
+export const ApproveBulkRequestSchema = z
+  .object({
+    /** The items to approve; omitted: every pending item of the run. */
+    messageIds: z.array(z.uuid()).min(1).max(100).optional(),
+    /** "Approve all": the count the person confirmed (refused when the queue changed meanwhile). */
+    expectedCount: z.number().int().min(1).max(100).optional(),
+  })
+  .meta({ id: 'ApproveBulkRequest' });
+export type ApproveBulkRequest = z.input<typeof ApproveBulkRequestSchema>;
+
+export const RejectBulkRequestSchema = z
+  .object({ messageIds: z.array(z.uuid()).min(1).max(100) })
+  .meta({ id: 'RejectBulkRequest' });
+
+export const BulkActionResultSchema = z
+  .object({
+    approved: z.number().int(),
+    rejected: z.number().int(),
+    /** Refused when judged again at approval (cancelled with their reasons). */
+    refused: z.number().int(),
+    failed: z.array(z.object({ messageId: z.uuid(), reason: z.string() })),
+  })
+  .meta({ id: 'BulkActionResult' });
+export type BulkActionResult = z.infer<typeof BulkActionResultSchema>;
+
+/** Inline edit of a message waiting for approval (its draft changes; the preview is rendered again). */
+export const EditPendingMessageRequestSchema = z
+  .object({
+    subject: z.string().trim().min(1).max(150).optional(),
+    bodyMd: z.string().trim().min(10).max(5000).optional(),
+  })
+  .meta({ id: 'EditPendingMessageRequest' });
+
 // ── Events ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
 const messageRef = {
@@ -211,6 +304,12 @@ export const ManualContactLogged = defineEvent(
 
 /** Every minute: due messages are claimed (`SKIP LOCKED`), leased and handed to the send queue. */
 export const OutreachTickJob = defineJob('outreach-tick', 'tick', {});
+
+/** One business of a bulk run: compliance first, then its draft and a message waiting for approval. */
+export const OutreachBulkDraftJob = defineJob('outreach-bulk', 'draft', {
+  runId: z.uuid(),
+  businessId: z.uuid(),
+});
 
 /** One send attempt of a leased message; `lease` is the claim it belongs to (a stale job does nothing). */
 export const OutreachSendJob = defineJob('outreach-send', 'send', {

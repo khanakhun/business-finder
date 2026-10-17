@@ -140,6 +140,9 @@ export interface SequenceRepository {
   hasHumanReplySince(organizationId: string, businessId: string, since: Date): Promise<boolean>;
   previewViewedSince(enrollmentId: string, since: Date): Promise<boolean>;
   businessName(businessId: string): Promise<string | null>;
+  /** The kill switch (BF-056): every active enrollment of the workspace paused with this reason / resumed. */
+  pauseAll(organizationId: string, reason: string): Promise<number>;
+  resumeAll(organizationId: string, reason: string): Promise<number>;
   /** Mailbox reply-sync health: the last successful sync (null: never). */
   lastSyncSuccess(mailboxId: string): Promise<Date | null>;
   /** Stats rows: per enrollment step message, its variant and outcomes. */

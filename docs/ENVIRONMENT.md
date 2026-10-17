@@ -217,6 +217,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `MICROSOFT_OAUTH_CLIENT_SECRET` | App-specific | api, worker | no |  | yes | Client secret of MICROSOFT_OAUTH_CLIENT_ID. |
 | `MICROSOFT_OAUTH_TENANT` | App-specific | api, worker | no | `organizations` |  | Entra ID tenant id, or `organizations` (any work account) / `common`. |
 | `UNSUBSCRIBE_BASE_URL` | App-specific | api, worker | no |  |  | Public HTTPS origin of the unsubscribe links (e.g. https://u.example.com routed to the API); defaults to API_URL. |
+| `SPAMHAUS_DQS_KEY` | App-specific | api, worker | no |  | yes | Spamhaus Data Query Service key for the optional blocklist checks (BF-056). Unset: blocklist checks are off. Spamhaus forbids queries through public resolvers and limits free use to low-volume, non-commercial users; commercial use needs a subscription (spamhaus.com/data-access). |
 | `PRIVACY_HASH_PEPPER` | App-specific | api, worker | no |  | yes | Pepper of the keyed hashes kept instead of erased addresses (BF-055). Never rotate it: hashed suppressions would stop matching. Defaults to one derived from BETTER_AUTH_SECRET. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |

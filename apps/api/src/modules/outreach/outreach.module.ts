@@ -11,6 +11,8 @@ import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.t
 import { RealtimeModule } from '../realtime/index.ts';
 import { SitesModule } from '../sites/index.ts';
 import { DeliverabilityService, DNS_LOOKUPS } from './application/deliverability/deliverability.service.ts';
+import { DeliverabilityHealth } from './application/deliverability/health.ts';
+import { KillSwitchService } from './application/deliverability/kill-switch.ts';
 import { DELIVERABILITY_REPOSITORY, MAILBOX_READINESS } from './application/deliverability/ports.ts';
 import { DraftsService } from './application/drafting/drafts.service.ts';
 import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
@@ -71,7 +73,7 @@ import { SequenceSubscribers } from './application/sequences/sequence-subscriber
 import { SequencesService } from './application/sequences/sequences.service.ts';
 import { SequenceStatsService } from './application/sequences/stats.ts';
 import { DrizzleDeliverabilityRepository } from './infrastructure/deliverability/drizzle-deliverability.repository.ts';
-import { NodeDnsLookups } from './infrastructure/deliverability/node-dns.ts';
+import { DNSBL_KEY, NodeDnsLookups } from './infrastructure/deliverability/node-dns.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
@@ -247,8 +249,15 @@ export class OutreachModule {
         MailboxCapacity,
         // BF-056: deliverability (the readiness gate the selector and the send path consult).
         { provide: DELIVERABILITY_REPOSITORY, useClass: DrizzleDeliverabilityRepository },
+        {
+          provide: DNSBL_KEY,
+          inject: [APP_ENV],
+          useFactory: (appEnv: AppEnv) => (appEnv as ApiEnv).SPAMHAUS_DQS_KEY ?? null,
+        },
         { provide: DNS_LOOKUPS, useClass: NodeDnsLookups },
         DeliverabilityService,
+        DeliverabilityHealth,
+        KillSwitchService,
         { provide: MAILBOX_READINESS, useExisting: DeliverabilityService },
         { provide: OUTBOUND_REPOSITORY, useClass: DrizzleOutboundRepository },
         {

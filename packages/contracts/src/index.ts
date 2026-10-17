@@ -302,10 +302,17 @@ export {
   DnsCheckSchema,
   type DomainCheck,
   DomainCheckSchema,
+  type KillSwitch,
+  KillSwitchSchema,
+  MailboxHealthListSchema,
+  type MailboxHealthStats,
+  MailboxHealthStatsSchema,
   type MailboxReadiness,
   MailboxReadinessSchema,
   ReadinessListSchema,
   ReadinessOverrideRequestSchema,
+  type SetKillSwitchRequest,
+  SetKillSwitchRequestSchema,
 } from './deliverability.ts';
 export {
   DEFAULT_DISCOVERY_SETTINGS,

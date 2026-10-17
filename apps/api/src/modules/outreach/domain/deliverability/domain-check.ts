@@ -9,6 +9,8 @@ import { presetFor } from './presets.ts';
 export interface DnsLookups {
   readonly txt: TxtLookup;
   readonly mx: (domain: string) => Promise<string[] | null>;
+  /** A domain blocklist (configured only): listed, not listed, or null when it did not answer. */
+  readonly listed?: ((domain: string) => Promise<boolean | null>) | undefined;
 }
 
 type Text = { readonly en: string; readonly fr: string };
@@ -286,6 +288,38 @@ export async function checkDomain(
   await info('mta_sts', `_mta-sts.${domain}`, /^v=STSv1/i, { en: 'MTA-STS policy', fr: 'politique MTA-STS' });
   await info('tls_rpt', `_smtp._tls.${domain}`, /^v=TLSRPTv1/i, { en: 'TLS reporting', fr: 'rapports TLS' });
   await info('bimi', `default._bimi.${domain}`, /^v=BIMI1/i, { en: 'BIMI logo', fr: 'logo BIMI' });
+
+  // Optional: a domain blocklist (Spamhaus DBL through its Data Query Service, when a key is configured).
+  if (dns.listed) {
+    const listed = await dns.listed(domain);
+    checks.push(
+      listed === null
+        ? check('blocklist', 'unknown', null, UNKNOWN, null, true)
+        : listed
+          ? check(
+              'blocklist',
+              'fail',
+              'Spamhaus DBL',
+              {
+                en: 'The domain is on a blocklist: mail from it will be rejected.',
+                fr: 'Le domaine figure sur une liste de blocage : ses e-mails seront rejetés.',
+              },
+              {
+                en: 'Stop sending, find the cause, then request delisting at check.spamhaus.org.',
+                fr: 'Arrêtez les envois, trouvez la cause, puis demandez le retrait sur check.spamhaus.org.',
+              },
+              true,
+            )
+          : check(
+              'blocklist',
+              'pass',
+              null,
+              { en: 'Not on the blocklist.', fr: 'Absent de la liste de blocage.' },
+              null,
+              true,
+            ),
+    );
+  }
 
   const blocking = checks.filter((item) => !item.informational);
   const outcome: CheckOutcome =

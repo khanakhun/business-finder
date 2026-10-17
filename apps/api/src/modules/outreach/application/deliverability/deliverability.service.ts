@@ -89,6 +89,12 @@ export class DeliverabilityService implements MailboxReadinessGate {
     );
   }
 
+  /** The preview sites' domain on the blocklist (every email links to it): null when off or unanswered. */
+  async sitesDomainListed(sitesDomain: string): Promise<{ enabled: boolean; listed: boolean | null }> {
+    if (!this.dns.listed) return { enabled: false, listed: null };
+    return { enabled: true, listed: await this.dns.listed(sitesDomain) };
+  }
+
   async recheck(organizationId: string, mailboxId: string): Promise<DomainCheck> {
     return this.check(await this.load(organizationId, mailboxId), true);
   }

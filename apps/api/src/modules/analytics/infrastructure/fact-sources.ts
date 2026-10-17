@@ -66,6 +66,12 @@ const where = (scope: Scope, columns: { org: SQL; id: SQL; at: SQL }, base: SQL[
   return conditions.length ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``;
 };
 
+/** The engine of the business's latest generated site (for emails `m`: which engine's preview it links to). */
+const LATEST_ENGINE = sql`(SELECT j.engine_current FROM generation_jobs j
+  WHERE j.organization_id = m.organization_id AND j.business_id = m.business_id
+    AND j.status IN ('succeeded', 'needs_review')
+  ORDER BY j.finished_at DESC NULLS LAST LIMIT 1)`;
+
 const ms = (to: SQL, from: SQL) => sql`(extract(epoch FROM (${to} - ${from})) * 1000)::int`;
 
 export const SOURCES = {
@@ -189,6 +195,7 @@ export const SOURCES = {
         template_version: sql`d.template_version`,
         variant_id: sql`(SELECT e.variant_id FROM enrollment_events e
           WHERE e.message_id = m.id AND e.variant_id IS NOT NULL LIMIT 1)`,
+        engine: LATEST_ENGINE,
         mailbox_id: sql`m.mailbox_id`,
         locale: sql`m.locale`,
         creator_id: sql`coalesce(m.approved_by, m.created_by)`,
@@ -228,14 +235,25 @@ export const SOURCES = {
         source_key: sql`'reply_triaged:' || i.id`,
         business_id: sql`t.business_id`,
         message_id: sql`i.outbound_message_id`,
+        enrollment_id: sql`m.sequence_enrollment_id`,
+        // What the reply answers: the email's offer, template, variant and the engine of its preview.
+        offer: sql`m.offer`,
+        template_id: sql`d.template_id`,
+        template_version: sql`d.template_version`,
+        variant_id: sql`(SELECT e.variant_id FROM enrollment_events e
+          WHERE e.message_id = m.id AND e.variant_id IS NOT NULL LIMIT 1)`,
+        engine: LATEST_ENGINE,
         mailbox_id: sql`i.mailbox_id`,
+        locale: sql`m.locale`,
         outcome: sql`coalesce(i.corrected_class, i.triage ->> 'class')`,
       },
-      sql`FROM inbound_messages i JOIN email_threads t ON t.id = i.thread_id ${where(
-        scope,
-        { org: sql`i.organization_id`, id: sql`i.id`, at: sql`i.received_at` },
-        [sql`(i.triage IS NOT NULL OR i.corrected_class IS NOT NULL)`, sql`t.business_id IS NOT NULL`],
-      )}`,
+      sql`FROM inbound_messages i JOIN email_threads t ON t.id = i.thread_id
+        LEFT JOIN outbound_messages m ON m.id = i.outbound_message_id
+        LEFT JOIN email_drafts d ON d.id = m.draft_id ${where(
+          scope,
+          { org: sql`i.organization_id`, id: sql`i.id`, at: sql`i.received_at` },
+          [sql`(i.triage IS NOT NULL OR i.corrected_class IS NOT NULL)`, sql`t.business_id IS NOT NULL`],
+        )}`,
     ),
 
   /** Pipeline moves recorded on the timeline (the backfill; live moves come from the event, same key). */

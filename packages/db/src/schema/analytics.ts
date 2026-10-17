@@ -6,6 +6,8 @@
 
 import { newId } from '@bf/contracts';
 import {
+  bigint,
+  date,
   doublePrecision,
   index,
   integer,
@@ -80,3 +82,43 @@ export const analyticsWatermarks = pgTable('analytics_watermarks', {
   watermark: tz().notNull(),
   updatedAt: tz().notNull().defaultNow(),
 });
+
+/**
+ * Daily rollup of the facts (BF-058) for the dashboards' trends: additive measures per day and the dimensions the
+ * overview splits by (empty string for none). Refreshed every 15 minutes for the days touched since the last run.
+ * Distinct counts (businesses contacted…) are not additive and stay on the facts.
+ */
+export const analyticsDaily = pgTable(
+  'analytics_daily',
+  {
+    organizationId: uuid().notNull(),
+    day: date({ mode: 'string' }).notNull(),
+    eventType: text().notNull(),
+    outcome: text().notNull().default(''),
+    category: text().notNull().default(''),
+    scoreTier: text().notNull().default(''),
+    engine: text().notNull().default(''),
+    offer: text().notNull().default(''),
+    facts: integer().notNull(),
+    units: bigint({ mode: 'number' }).notNull(),
+    costUsd: numeric({ precision: 16, scale: 6, mode: 'number' }).notNull().default(0),
+    durationMsSum: bigint({ mode: 'number' }).notNull().default(0),
+    qualitySum: doublePrecision().notNull().default(0),
+    qualityN: integer().notNull().default(0),
+  },
+  (table) => [
+    primaryKey({
+      name: 'analytics_daily_pkey',
+      columns: [
+        table.organizationId,
+        table.day,
+        table.eventType,
+        table.outcome,
+        table.category,
+        table.scoreTier,
+        table.engine,
+        table.offer,
+      ],
+    }),
+  ],
+);

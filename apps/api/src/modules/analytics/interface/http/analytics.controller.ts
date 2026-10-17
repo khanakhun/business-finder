@@ -1,5 +1,13 @@
-import { AnalyticsQuerySchema, AnalyticsRegistrySchema, AnalyticsResultSchema } from '@bf/contracts';
-import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
+import {
+  AnalyticsCohortsSchema,
+  AnalyticsFunnelSchema,
+  AnalyticsPeriodQuerySchema,
+  AnalyticsQuerySchema,
+  AnalyticsRegistrySchema,
+  AnalyticsResultSchema,
+  AnalyticsTrendsSchema,
+} from '@bf/contracts';
+import { Body, Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
 import { ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
@@ -11,6 +19,7 @@ import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { type AnalyticsActor, AnalyticsQueries } from '../../application/analytics.queries.ts';
 
 class QueryBody extends zodDto(AnalyticsQuerySchema) {}
+class PeriodQuery extends zodDto(AnalyticsPeriodQuerySchema) {}
 
 /**
  * Analytics (BF-058): the metric and dimension definitions, one query contract (validated against them, answered
@@ -55,6 +64,45 @@ export class AnalyticsController {
   })
   async query(@Ctx() auth: AuthContext, @Body() body: QueryBody) {
     return this.queries.query(await this.actor(auth), body);
+  }
+
+  @Get('funnel')
+  @RequirePermission('analytics:read')
+  @ApiRoute({
+    summary: 'The funnel from discovered to won over a period, optionally by one dimension',
+    operationId: 'getAnalyticsFunnel',
+    query: PeriodQuery,
+    response: { status: 200, schema: AnalyticsFunnelSchema },
+    errors: [400, 401, 403, 422],
+  })
+  async funnel(@Ctx() auth: AuthContext, @Query() query: PeriodQuery) {
+    return this.queries.funnel(await this.actor(auth), query);
+  }
+
+  @Get('cohorts')
+  @RequirePermission('analytics:read')
+  @ApiRoute({
+    summary: 'Businesses by week of first contact, and what they did since',
+    operationId: 'getAnalyticsCohorts',
+    query: PeriodQuery,
+    response: { status: 200, schema: AnalyticsCohortsSchema },
+    errors: [400, 401, 403, 422],
+  })
+  async cohorts(@Ctx() auth: AuthContext, @Query() query: PeriodQuery) {
+    return this.queries.cohorts(await this.actor(auth), query);
+  }
+
+  @Get('trends')
+  @RequirePermission('analytics:read')
+  @ApiRoute({
+    summary: 'Daily totals from the rollup (refreshed every 15 minutes)',
+    operationId: 'getAnalyticsTrends',
+    query: PeriodQuery,
+    response: { status: 200, schema: AnalyticsTrendsSchema },
+    errors: [400, 401, 403],
+  })
+  async trends(@Ctx() auth: AuthContext, @Query() query: PeriodQuery) {
+    return this.queries.trends(await this.actor(auth), query);
   }
 
   @Post('export.csv')

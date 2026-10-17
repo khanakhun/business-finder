@@ -407,6 +407,13 @@
       "when": 1792252166659,
       "tag": "0057_analytics_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1792252996368,
+      "tag": "0058_analytics_daily",
+      "breakpoints": true
     }
   ]
 }

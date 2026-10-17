@@ -1,0 +1,34 @@
+# Prometheus alerting rules for analytics (BF-058). Load them in the deployment's Prometheus (`rule_files:`); the
+# series come from the API worker's /metrics (bf_analytics_*).
+groups:
+  - name: analytics
+    rules:
+      - alert: AnalyticsFactsDrift
+        # The nightly reconciliation found facts that differ from their source table by more than 1% (sent emails,
+        # leads or finished jobs over the last week): an event was lost or a fact source misses rows.
+        expr: max(bf_analytics_reconcile_max_drift_ratio) > 0.01
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: Analytics facts drift from their source tables
+          description: Check the worker's "analytics facts drift" logs for the workspace and metric, then run `pnpm analytics:backfill --since <date> --org <id>`.
+      - alert: AnalyticsIngestLagging
+        # Facts should follow their events within two minutes.
+        expr: |
+          histogram_quantile(0.95, sum(rate(bf_analytics_ingest_lag_seconds_bucket[10m])) by (le)) > 120
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: Analytics facts lag their events by more than two minutes
+          description: The outbox relay or the analytics subscribers fall behind. Check the worker and the outbox backlog.
+      - alert: AnalyticsRefreshStale
+        # The 15-minute refresh (cost ledgers, daily rollup, partitions) has not succeeded for an hour.
+        expr: time() - max(bf_analytics_refresh_last_success_timestamp_seconds) > 3600
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: The analytics refresh has not run for an hour
+          description: Spend and daily trends are stale, and the next months' partitions may be missing. Check the worker logs for "analytics refresh failed".

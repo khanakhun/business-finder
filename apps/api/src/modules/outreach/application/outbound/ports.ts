@@ -95,6 +95,10 @@ export type OutboundPatch = Partial<
     | 'headers'
     | 'approvedBy'
     | 'approvedAt'
+    | 'enqueueDecisionId'
+    | 'unsubscribeTokenId'
+    | 'outreachToken'
+    | 'inReplyTo'
   >
 >;
 
@@ -178,6 +182,7 @@ export interface OutboundRepository {
   countStuck(before: Date): Promise<number>;
   // Threads
   insertThread(row: Omit<ThreadRecord, 'lastMessageAt' | 'status'>): Promise<ThreadRecord>;
+  thread(threadId: string): Promise<ThreadRecord | undefined>;
   /** The latest open thread with the business (and contact), for a follow-up. */
   openThread(
     organizationId: string,
@@ -204,3 +209,51 @@ export interface OutboundSettings {
   readonly undoWindowSeconds: number;
 }
 export const OUTBOUND_SETTINGS = Symbol('OutboundSettings');
+
+// ── Bulk runs ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+export interface BulkSkip {
+  readonly businessId: string;
+  readonly decision: string;
+  readonly reasons: string[];
+  readonly alternatives: string[];
+  readonly error?: string;
+}
+
+export interface BulkRunRecord {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly createdBy: string | null;
+  readonly offer: Offer;
+  readonly purpose: EmailPurpose;
+  readonly mode: 'ai' | 'template';
+  readonly templateId: string | null;
+  readonly locale: EmailLocale;
+  readonly autoApprove: boolean;
+  readonly status: 'drafting' | 'ready' | 'completed' | 'cancelled';
+  readonly businessIds: string[];
+  readonly drafted: number;
+  readonly skipped: BulkSkip[];
+  readonly createdAt: Date;
+}
+
+export interface BulkRepository {
+  insertRun(row: Omit<BulkRunRecord, 'createdAt' | 'drafted' | 'skipped' | 'status'>): Promise<BulkRunRecord>;
+  run(organizationId: string | null, id: string): Promise<BulkRunRecord | undefined>;
+  runs(organizationId: string, limit: number): Promise<BulkRunRecord[]>;
+  /** One business done (drafted or skipped); the run is `ready` when every business is. */
+  settle(id: string, outcome: { readonly drafted: true } | { readonly skipped: BulkSkip }): Promise<void>;
+  setStatus(id: string, status: BulkRunRecord['status']): Promise<void>;
+  /** Message counts per status for these runs. */
+  counts(runIds: readonly string[]): Promise<Map<string, Partial<Record<OutboundStatus, number>>>>;
+  messages(organizationId: string, runId: string): Promise<OutboundListRow[]>;
+  businessNames(ids: readonly string[]): Promise<Map<string, string>>;
+  countPendingApprovals(): Promise<number>;
+}
+export const BULK_REPOSITORY = Symbol('BulkRepository');
+
+/** Enqueues the drafting of one business of a run. */
+export interface BulkQueue {
+  draft(organizationId: string, runId: string, businessId: string): Promise<void>;
+}
+export const BULK_QUEUE = Symbol('BulkQueue');

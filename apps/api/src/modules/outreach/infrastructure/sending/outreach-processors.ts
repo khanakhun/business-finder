@@ -1,4 +1,10 @@
-import { type Clock, type OrgId, OutreachSendJob, OutreachTickJob } from '@bf/contracts';
+import {
+  type Clock,
+  type OrgId,
+  OutreachBulkDraftJob,
+  OutreachSendJob,
+  OutreachTickJob,
+} from '@bf/contracts';
 import { type JobContext, QUEUES, TypedProducer } from '@bf/queue';
 import { InjectQueue, Processor } from '@nestjs/bullmq';
 import { Inject, Injectable, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
@@ -7,7 +13,10 @@ import type { z } from 'zod';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../../platform/logging/logger.ts';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
+import { BulkOutreach } from '../../application/outbound/bulk.ts';
 import {
+  BULK_REPOSITORY,
+  type BulkRepository,
   OUTBOUND_REPOSITORY,
   type OutboundRecord,
   type OutboundRepository,
@@ -73,6 +82,7 @@ export class OutreachTickProcessor extends TypedProcessor<
 
   constructor(
     @Inject(OUTBOUND_REPOSITORY) private readonly messages: OutboundRepository,
+    @Inject(BULK_REPOSITORY) private readonly bulk: BulkRepository,
     @Inject(CLOCK) private readonly clock: Clock,
     @InjectQueue(QUEUES.outreachSend.name) sendQueue: Queue,
   ) {
@@ -94,6 +104,7 @@ export class OutreachTickProcessor extends TypedProcessor<
       if (rows.length < BATCH) break;
     }
     outboundMetrics.stuck().set(await this.messages.countStuck(new Date(now.getTime() - STUCK_AFTER_MS)));
+    outboundMetrics.approvalsPending().set(await this.bulk.countPendingApprovals());
     if (claimed + released.length + retried > 0)
       context.logger.info({ claimed, released: released.length, retried }, 'outreach tick');
     return { claimed, released: released.length, retried };
@@ -124,6 +135,23 @@ export class OutreachSendProcessor extends TypedProcessor<
   async handle(payload: z.output<typeof OutreachSendJob.schema>, context: JobContext) {
     const outcome = await this.sender.send(payload.messageId, payload.lease, context.logger);
     context.logger.info({ messageId: payload.messageId, outcome }, 'outreach send');
+    return { outcome };
+  }
+}
+
+@Processor(QUEUES.outreachBulk.name, { concurrency: QUEUES.outreachBulk.concurrency })
+export class OutreachBulkProcessor extends TypedProcessor<
+  typeof OutreachBulkDraftJob,
+  { readonly outcome: string }
+> {
+  protected readonly definition = OutreachBulkDraftJob;
+
+  constructor(private readonly bulk: BulkOutreach) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof OutreachBulkDraftJob.schema>, context: JobContext) {
+    const outcome = await this.bulk.draftOne(payload.runId, payload.businessId, context.logger);
     return { outcome };
   }
 }

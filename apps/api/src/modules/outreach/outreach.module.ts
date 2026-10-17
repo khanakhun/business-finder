@@ -34,11 +34,14 @@ import {
   SMTP_CONNECTION_TESTER,
 } from './application/mailbox/ports.ts';
 import { TokenRefresher } from './application/mailbox/token-refresher.ts';
+import { BulkOutreach } from './application/outbound/bulk.ts';
 import { ManualContactLogs } from './application/outbound/manual-log.ts';
 import { OutboundCommands } from './application/outbound/outbound.commands.ts';
 import { OutboundQueries } from './application/outbound/outbound.queries.ts';
 import { OutboundSubscribers } from './application/outbound/outbound.subscribers.ts';
 import {
+  BULK_QUEUE,
+  BULK_REPOSITORY,
   OUTBOUND_REPOSITORY,
   OUTBOUND_SETTINGS,
   OUTREACH_TOKENS,
@@ -55,16 +58,20 @@ import { GraphProvider } from './infrastructure/mailboxes/providers/graph.provid
 import { SmtpImapProvider } from './infrastructure/mailboxes/providers/smtp-imap.provider.ts';
 import { ValkeyCapacityCounters } from './infrastructure/mailboxes/valkey-capacity-counters.ts';
 import { ValkeyOAuthStore } from './infrastructure/mailboxes/valkey-oauth.ts';
+import { BullmqBulkQueue, OPENAPI_BULK_QUEUE } from './infrastructure/outbound/bullmq-bulk-queue.ts';
+import { DrizzleBulkRepository } from './infrastructure/outbound/drizzle-bulk.repository.ts';
 import { DrizzleOutboundRepository } from './infrastructure/outbound/drizzle-outbound.repository.ts';
 import { HmacOutreachTokens } from './infrastructure/outbound/hmac-outreach-tokens.ts';
 import { OutboundPersonalData } from './infrastructure/outbound/outbound-personal-data.ts';
 import { OutboundSender } from './infrastructure/sending/outbound-sender.ts';
 import {
   OUTREACH_TICK_AUTOSTART,
+  OutreachBulkProcessor,
   OutreachSendProcessor,
   OutreachTickProcessor,
   OutreachTickScheduler,
 } from './infrastructure/sending/outreach-processors.ts';
+import { BulkController } from './interface/http/bulk.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
@@ -103,6 +110,7 @@ export class OutreachModule {
               TemplatesController,
               DraftsController,
               MessagesController,
+              BulkController,
             ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
@@ -209,6 +217,11 @@ export class OutreachModule {
             undoWindowSeconds: (appEnv as ApiEnv).OUTREACH_UNDO_WINDOW_SECONDS,
           }),
         },
+        { provide: BULK_REPOSITORY, useClass: DrizzleBulkRepository },
+        mode === 'openapi'
+          ? { provide: BULK_QUEUE, useValue: OPENAPI_BULK_QUEUE }
+          : { provide: BULK_QUEUE, useClass: BullmqBulkQueue },
+        BulkOutreach,
         OutboundCommands,
         OutboundQueries,
         ManualContactLogs,
@@ -220,6 +233,7 @@ export class OutreachModule {
               OutboundSender,
               OutreachTickProcessor,
               OutreachSendProcessor,
+              OutreachBulkProcessor,
               OutreachTickScheduler,
               { provide: OUTREACH_TICK_AUTOSTART, useValue: true },
             ]

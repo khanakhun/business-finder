@@ -123,6 +123,8 @@ export const QUEUES = {
    * Outbound email (BF-052): the minute tick claims due messages; one send job per claimed message. Attempts are
    * the pipeline's (reconciled before any resend), never BullMQ's.
    */
+  /** Bulk runs: one job per business (compliance, then an AI or template draft): a few at a time. */
+  outreachBulk: { name: 'outreach-bulk', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   outreachTick: { name: 'outreach-tick', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
   outreachSend: { name: 'outreach-send', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 4 },
 } as const satisfies Record<string, QueueDefinition>;

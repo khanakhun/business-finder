@@ -1,5 +1,6 @@
 import {
   type Clock,
+  type ComplianceDecision,
   ConflictError,
   NotFoundError,
   newId,
@@ -114,17 +115,22 @@ export class OutboundCommands {
     });
   }
 
+  /**
+   * A draft becomes a message: queued now (one-click send), or `pending_approval` (bulk runs) with a preview of its
+   * content — the unsubscribe token, the outreach token and the final content are made when it is approved.
+   */
   @Transactional()
-  private async enqueue(
+  async enqueue(
     actor: DraftActor,
     draft: StoredDraft,
     input: {
       readonly decisionId: AllowedDecisionId;
-      readonly decision: Parameters<DraftsService['compose']>[2]['decision'];
+      readonly decision: ComplianceDecision;
       readonly subject: string;
       readonly mailboxId: string | undefined;
       readonly requestedAt: Date | null;
       readonly idempotencyKey: string;
+      readonly pending?: { readonly bulkRunId: string } | undefined;
     },
   ): Promise<{ message: OutboundRecord; created: boolean }> {
     const now = this.clock.now();
@@ -134,43 +140,10 @@ export class OutboundCommands {
         ? undefined
         : await this.messages.openThread(actor.organizationId, draft.businessId, draft.contactId);
     const { mailbox, notBefore } = await this.mailboxFor(actor, draft, input.mailboxId ?? thread?.mailboxId);
-    const outreachToken = this.tokens.sign(id);
     const contact = await this.drafts.recipient(draft);
     if (!contact)
       throw new MessageNotSendableError('The business has no email address to send to.', 'NO_RECIPIENT');
-    // Fail closed: `issue` throws when the token cannot be stored, and nothing is queued.
-    const unsubscribe = await this.unsubscribe.issue(actor.organizationId, {
-      contactId: contact.id,
-      email: contact.email,
-      businessId: draft.businessId,
-      outboundMessageId: id,
-      locale: draft.locale,
-    });
-    const composed = await this.drafts.compose(actor, draft, {
-      decision: input.decision,
-      unsubscribeUrl: unsubscribe.pageUrl,
-      subject: input.subject,
-      mailboxId: mailbox.id,
-      outreachToken,
-    });
-    // Rolls the token back with the transaction.
-    const blocking = composed.issues.find((issue) => issue.severity === 'error');
-    if (blocking) throw new MessageNotSendableError(blocking.message, 'MISSING_IDENTITY');
     const messageId = rfc822MessageId(id, mailbox.email);
-    const previous = thread ? await this.messages.lastSent(thread.id) : undefined;
-    const references = [thread?.rootMessageId, previous?.rfc822MessageId].filter(
-      (value, index, all): value is string => !!value && all.indexOf(value) === index,
-    );
-    const headers: Record<string, string> = {
-      'Message-ID': messageId,
-      'X-BF-Outbound-Id': id,
-      'List-Unsubscribe': unsubscribe.mailtoUrl
-        ? `<${unsubscribe.oneClickUrl}>, <${unsubscribe.mailtoUrl}>`
-        : `<${unsubscribe.oneClickUrl}>`,
-      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      ...(previous ? { 'In-Reply-To': previous.rfc822MessageId } : {}),
-      ...(references.length > 0 ? { References: references.join(' ') } : {}),
-    };
     const threadRow: ThreadRecord =
       thread ??
       (await this.messages.insertThread({
@@ -183,6 +156,16 @@ export class OutboundCommands {
         rootMessageId: messageId,
         providerThreadId: null,
       }));
+    const content = input.pending
+      ? await this.previewContent(actor, draft, { decision: input.decision, subject: input.subject, mailbox })
+      : await this.finalContent(actor, draft, {
+          id,
+          mailbox,
+          contact,
+          thread: threadRow,
+          decision: input.decision,
+          subject: input.subject,
+        });
     const when = scheduledAt(
       now,
       this.settings.undoWindowSeconds,
@@ -191,7 +174,7 @@ export class OutboundCommands {
         null,
       ),
     );
-    const status: OutboundStatus = 'queued';
+    const status: OutboundStatus = input.pending ? 'pending_approval' : 'queued';
     assertTransition('draft', status);
     const message = await this.messages.insert({
       id,
@@ -203,17 +186,13 @@ export class OutboundCommands {
       draftId: draft.id,
       sequenceEnrollmentId: null,
       sequenceStep: null,
-      bulkRunId: null,
+      bulkRunId: input.pending?.bulkRunId ?? null,
       purpose: draft.purpose,
       offer: draft.offer,
       locale: draft.locale,
       toEmail: contact.email,
-      subject: composed.rendered.subject,
-      bodyText: composed.rendered.text,
-      bodyHtml: composed.rendered.html,
-      headers,
-      unsubscribeTokenId: unsubscribe.id,
-      outreachToken,
+      ...content,
+      rfc822MessageId: messageId,
       enqueueDecisionId: input.decisionId,
       sendDecisionId: null,
       lawfulBasisId: null,
@@ -221,29 +200,203 @@ export class OutboundCommands {
       blockedReasons: [],
       status,
       scheduledAt: when,
-      rfc822MessageId: messageId,
       providerThreadId: thread?.providerThreadId ?? null,
-      inReplyTo: previous?.rfc822MessageId ?? null,
       statusHistory: [{ at: now.toISOString(), status, detail: null }],
       idempotencyKey: input.idempotencyKey,
       createdBy: actor.userId,
       approvedBy: null,
       approvedAt: null,
     });
+    if (!input.pending) {
+      await this.drafts.markSent(actor, draft.id);
+      await this.recordQueued(message, input.decisionId);
+    }
+    return { message, created: true };
+  }
+
+  /**
+   * An approved bulk message (BF-052): judged again at the enqueue stage — refused → cancelled with the reasons —
+   * then given its unsubscribe token and final content, and queued after the undo window.
+   */
+  @Transactional()
+  async approve(
+    actor: DraftActor,
+    message: OutboundRecord,
+    decision: ComplianceDecision,
+    approvedBy: string | null,
+  ): Promise<OutboundRecord | undefined> {
+    const now = this.clock.now();
+    if (decision.decision !== 'allowed' && decision.decision !== 'allowed_with_conditions') {
+      const reasons = decision.reasons.map((reason) => reason.code);
+      return this.messages.transition(
+        actor.organizationId,
+        message.id,
+        ['pending_approval'],
+        'cancelled',
+        { blockedReasons: reasons },
+        { at: now.toISOString(), status: 'cancelled', detail: `refused at approval: ${reasons.join(', ')}` },
+      );
+    }
+    const decisionId = allowedDecision(decision);
+    if (!message.draftId || !message.mailboxId)
+      throw new MessageNotSendableError('This message lost its draft or mailbox.', 'NOT_SENDABLE');
+    const draft = await this.drafts.draft(actor, message.draftId);
+    const mailbox = await this.mailboxes.find(actor.organizationId, message.mailboxId);
+    const contact = await this.drafts.recipient(draft);
+    if (!mailbox || mailbox.disconnectedAt)
+      throw new MessageNotSendableError('That mailbox is not connected.', 'MAILBOX_UNAVAILABLE');
+    if (!contact)
+      throw new MessageNotSendableError('The business has no email address to send to.', 'NO_RECIPIENT');
+    const thread = await this.messages.thread(message.threadId);
+    if (!thread) throw new MessageNotSendableError('The message lost its thread.', 'NOT_SENDABLE');
+    const content = await this.finalContent(actor, draft, {
+      id: message.id,
+      mailbox,
+      contact,
+      thread,
+      decision,
+      subject: draft.subject,
+    });
+    const when = scheduledAt(now, this.settings.undoWindowSeconds, message.scheduledAt);
+    const moved = await this.messages.transition(
+      actor.organizationId,
+      message.id,
+      ['pending_approval'],
+      'queued',
+      {
+        ...content,
+        enqueueDecisionId: decisionId,
+        scheduledAt: when,
+        approvedBy,
+        approvedAt: now,
+      },
+      { at: now.toISOString(), status: 'queued', detail: approvedBy ? 'approved' : 'approved automatically' },
+    );
+    if (!moved) return undefined;
     await this.drafts.markSent(actor, draft.id);
+    await this.recordQueued(moved, decisionId);
+    return moved;
+  }
+
+  /** A pending message's preview after its draft was edited (bulk approvals, inline edit). */
+  async refreshPreview(actor: DraftActor, message: OutboundRecord): Promise<OutboundRecord | undefined> {
+    if (message.status !== 'pending_approval' || !message.draftId || !message.mailboxId) return message;
+    const draft = await this.drafts.draft(actor, message.draftId);
+    const mailbox = await this.mailboxes.find(actor.organizationId, message.mailboxId);
+    if (!mailbox) return message;
+    const [decision] = message.enqueueDecisionId
+      ? await this.compliance.decisionsById(actor.organizationId, [message.enqueueDecisionId])
+      : [];
+    if (!decision) return message;
+    const content = await this.previewContent(actor, draft, { decision, subject: draft.subject, mailbox });
+    return this.messages.transition(
+      actor.organizationId,
+      message.id,
+      ['pending_approval'],
+      'pending_approval',
+      content,
+      { at: this.clock.now().toISOString(), status: 'pending_approval', detail: 'edited' },
+    );
+  }
+
+  private async recordQueued(message: OutboundRecord, decisionId: string) {
     await this.events.record(OutreachMessageQueued, {
-      orgId: actor.organizationId,
+      orgId: message.organizationId,
       payload: {
-        messageId: id,
-        businessId: draft.businessId,
-        contactId: contact.id,
-        threadId: threadRow.id,
-        mailboxId: mailbox.id,
-        scheduledAt: when.toISOString(),
-        decisionId: input.decisionId,
+        messageId: message.id,
+        businessId: message.businessId,
+        contactId: message.contactId,
+        threadId: message.threadId,
+        mailboxId: message.mailboxId,
+        scheduledAt: message.scheduledAt.toISOString(),
+        decisionId,
       },
     });
-    return { message, created: true };
+  }
+
+  /** What an approver reviews: the final rendering with the link's shape instead of real tokens. */
+  private async previewContent(
+    actor: DraftActor,
+    draft: StoredDraft,
+    input: { decision: ComplianceDecision; subject: string; mailbox: MailboxRecord },
+  ) {
+    const composed = await this.drafts.compose(actor, draft, {
+      decision: input.decision,
+      unsubscribeUrl: this.unsubscribe.sampleUrl(),
+      subject: input.subject,
+      mailboxId: input.mailbox.id,
+    });
+    return {
+      subject: composed.rendered.subject,
+      bodyText: composed.rendered.text,
+      bodyHtml: composed.rendered.html,
+      headers: {} as Record<string, string>,
+      unsubscribeTokenId: null,
+      outreachToken: null,
+      inReplyTo: null,
+    };
+  }
+
+  /**
+   * The content that goes out: a real unsubscribe token (fail closed: `issue` throws and nothing is queued), the
+   * outreach token on the preview link, the shared footer, and the headers (Message-ID, `X-BF-Outbound-Id`,
+   * threading, RFC 8058 one-click).
+   */
+  private async finalContent(
+    actor: DraftActor,
+    draft: StoredDraft,
+    input: {
+      readonly id: string;
+      readonly mailbox: MailboxRecord;
+      readonly contact: { readonly id: string; readonly email: string };
+      readonly thread: ThreadRecord;
+      readonly decision: ComplianceDecision;
+      readonly subject: string;
+    },
+  ) {
+    const outreachToken = this.tokens.sign(input.id);
+    const unsubscribe = await this.unsubscribe.issue(actor.organizationId, {
+      contactId: input.contact.id,
+      email: input.contact.email,
+      businessId: draft.businessId,
+      outboundMessageId: input.id,
+      locale: draft.locale,
+    });
+    const composed = await this.drafts.compose(actor, draft, {
+      decision: input.decision,
+      unsubscribeUrl: unsubscribe.pageUrl,
+      subject: input.subject,
+      mailboxId: input.mailbox.id,
+      outreachToken,
+    });
+    // Rolls the token back with the transaction.
+    const blocking = composed.issues.find((issue) => issue.severity === 'error');
+    if (blocking) throw new MessageNotSendableError(blocking.message, 'MISSING_IDENTITY');
+    const messageId = rfc822MessageId(input.id, input.mailbox.email);
+    const previous = await this.messages.lastSent(input.thread.id);
+    const root = input.thread.rootMessageId === messageId ? undefined : input.thread.rootMessageId;
+    const references = [root, previous?.rfc822MessageId].filter(
+      (value, index, all): value is string => !!value && all.indexOf(value) === index,
+    );
+    const headers: Record<string, string> = {
+      'Message-ID': messageId,
+      'X-BF-Outbound-Id': input.id,
+      'List-Unsubscribe': unsubscribe.mailtoUrl
+        ? `<${unsubscribe.oneClickUrl}>, <${unsubscribe.mailtoUrl}>`
+        : `<${unsubscribe.oneClickUrl}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      ...(previous ? { 'In-Reply-To': previous.rfc822MessageId } : {}),
+      ...(references.length > 0 ? { References: references.join(' ') } : {}),
+    };
+    return {
+      subject: composed.rendered.subject,
+      bodyText: composed.rendered.text,
+      bodyHtml: composed.rendered.html,
+      headers,
+      unsubscribeTokenId: unsubscribe.id,
+      outreachToken,
+      inReplyTo: previous?.rfc822MessageId ?? null,
+    };
   }
 
   /** The undo toast and the outbox: stops a message before it is sent. */

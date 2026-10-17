@@ -2171,6 +2171,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/chat/threads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The site’s chat threads, most recent first */
+        get: operations["listSiteChatThreads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/chat/threads/{threadId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A chat thread with its messages and proposals */
+        get: operations["getSiteChatThread"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/diff": {
         parameters: {
             query?: never;
@@ -2233,6 +2267,40 @@ export type paths = {
         put?: never;
         /** Extend the active preview (from its expiry, at most 90 days ahead) */
         post: operations["extendSitePreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/proposals/{proposalId}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply a proposal as a new version (confirmed facts are stored first; never published) */
+        post: operations["applySiteChangeProposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/proposals/{proposalId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard a proposal (nothing changes) */
+        post: operations["discardSiteChangeProposal"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2648,6 +2716,17 @@ export type components = {
             revokedAt: string | null;
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
+        };
+        ApplyProposalRequest: {
+            /** @default [] */
+            confirmFacts: string[];
+        };
+        ApplyProposalResult: {
+            proposal: components["schemas"]["SiteChangeProposal"];
+            rebased: boolean;
+            /** Format: uuid */
+            versionId: string;
+            versionNumber: number;
         };
         ApplySiteOperationsRequest: {
             /** Format: uuid */
@@ -5375,6 +5454,132 @@ export type components = {
             method: "PUT";
             /** Format: uri */
             uploadUrl: string;
+        };
+        SiteChangeProposal: {
+            appliedVersionId: string | null;
+            /** Format: uuid */
+            baseVersionId: string;
+            /** Format: date-time */
+            createdAt: string;
+            diff: {
+                [key: string]: unknown;
+            };
+            factsToAssert: {
+                id: string;
+                /** @enum {string} */
+                kind: "name" | "tagline" | "about_summary" | "address" | "geo" | "phone" | "email" | "whatsapp" | "website" | "social" | "hours" | "service" | "price" | "menu_section" | "menu_item" | "testimonial" | "team_member" | "year_founded" | "award" | "language_spoken" | "amenity" | "payment_method" | "booking_provider" | "area_served" | "category" | "brand_color" | "logo";
+                locale?: string;
+                note?: string;
+                value: unknown;
+            }[];
+            /** Format: uuid */
+            id: string;
+            issues: {
+                code: string;
+                message: string;
+                path: (string | number)[];
+                /** @enum {string} */
+                severity: "error" | "warning";
+            }[];
+            messageId: string | null;
+            operations: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Format: uuid
+             * @description SiteId (UUID)
+             */
+            siteId: string;
+            /** @enum {string} */
+            status: "proposed" | "applied" | "discarded" | "superseded" | "failed";
+            statusReason: string | null;
+            summary: string;
+            /** Format: uuid */
+            threadId: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SiteChatContext: {
+            /** Format: uuid */
+            baseVersionId?: string;
+            blockId?: string;
+            locale?: string;
+            pageId?: string;
+            /** @enum {string} */
+            viewport?: "desktop" | "tablet" | "mobile";
+        };
+        SiteChatMessage: {
+            context: components["schemas"]["SiteChatContext"];
+            costUsd: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            parts: components["schemas"]["SiteChatPart"][];
+            /** @enum {string} */
+            role: "user" | "assistant";
+            /** Format: uuid */
+            threadId: string;
+        };
+        SiteChatPart: {
+            text: string;
+            /** @constant */
+            type: "text";
+        } | {
+            summary: string;
+            tool: string;
+            /** @constant */
+            type: "tool";
+        } | {
+            /** Format: uuid */
+            proposalId: string;
+            /** @constant */
+            type: "proposal";
+        } | {
+            options: string[];
+            question: string;
+            /** @constant */
+            type: "clarification";
+        } | {
+            alternatives: string[];
+            reason: string;
+            /** @constant */
+            type: "refusal";
+        };
+        SiteChatThread: {
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description SiteId (UUID)
+             */
+            siteId: string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SiteChatThreadDetail: {
+            /** Format: date-time */
+            createdAt: string;
+            createdBy: string | null;
+            /** Format: uuid */
+            id: string;
+            messages: components["schemas"]["SiteChatMessage"][];
+            proposals: components["schemas"]["SiteChangeProposal"][];
+            /**
+             * Format: uuid
+             * @description SiteId (UUID)
+             */
+            siteId: string;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SiteChatThreadList: {
+            items: components["schemas"]["SiteChatThread"][];
         };
         SiteDetail: {
             /**
@@ -16719,6 +16924,123 @@ export interface operations {
             };
         };
     };
+    listSiteChatThreads: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteChatThreadList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getSiteChatThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                threadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteChatThreadDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     diffSiteVersions: {
         parameters: {
             query: {
@@ -17047,6 +17369,164 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    applySiteChangeProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyProposalResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    discardSiteChangeProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteChangeProposal"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

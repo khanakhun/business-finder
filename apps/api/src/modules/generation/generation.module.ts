@@ -210,7 +210,19 @@ function engines(
  */
 @Module({})
 export class GenerationModule {
+  private static readonly built = new Map<AppMode, DynamicModule>();
+
+  /** One definition per mode: the app and the modules built on generation (site chat) share one instance. */
   static forRoot(mode: AppMode): DynamicModule {
+    let module = GenerationModule.built.get(mode);
+    if (!module) {
+      module = GenerationModule.build(mode);
+      GenerationModule.built.set(mode, module);
+    }
+    return module;
+  }
+
+  private static build(mode: AppMode): DynamicModule {
     return {
       module: GenerationModule,
       imports: [SitesModule.forRoot(mode), RealtimeModule.forRoot(mode)],

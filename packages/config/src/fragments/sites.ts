@@ -22,6 +22,13 @@ export const sitesApiEnv = z.object({
     .describe(
       'Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host.',
     ),
+  SITE_CHAT_RETENTION_DAYS: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(3_650)
+    .default(180)
+    .describe('Days a site chat thread (messages and proposals) is kept after its last message (BF-047).'),
   SITES_VIEW_TOKEN_SECRET: secret(
     z
       .string()

@@ -25,7 +25,8 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "label": "Main navigation",
-    "tasks": "Tasks"
+    "tasks": "Tasks",
+    "leads": "Leads"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -1255,7 +1256,11 @@
       "empty": "Nothing has happened yet.",
       "more": "Show older",
       "updated": "Updated {count, plural, one {# detail} other {# details}} of the business",
-      "scoreUpdated": "Tier moved from {from} to {to}"
+      "scoreUpdated": "Tier moved from {from} to {to}",
+      "leadClaim": "Said “this is my business” on the preview",
+      "leadContact": "Sent a contact request from the preview",
+      "leadOptedOut": "Asked not to be contacted, from the preview",
+      "leadOptedOutRemoved": "Asked not to be contacted and to remove the preview"
     },
     "duplicates": {
       "label": "Possible duplicates",
@@ -3107,6 +3112,78 @@
       "quality": "Quality {score}",
       "openJob": "Open"
     }
+  },
+  "leads": {
+    "title": "Leads",
+    "description": "Claims, contact requests and opt-outs from preview sites.",
+    "export": "Export CSV",
+    "loadError": "The leads could not be loaded.",
+    "empty": "No leads yet",
+    "emptyHint": "When a business answers from its preview, it shows up here.",
+    "more": "Show more",
+    "noDetails": "No contact details",
+    "waiting": "{count, plural, one {# lead waiting} other {# leads waiting}}",
+    "lead": "Lead",
+    "leadHint": "What was sent, consent and attribution, and what to do next.",
+    "saved": "Lead updated",
+    "saveError": "The lead could not be updated.",
+    "filters": {
+      "status": "Status",
+      "kind": "Kind",
+      "allStatuses": "All statuses (no spam)",
+      "allKinds": "All kinds"
+    },
+    "status": {
+      "new": "New",
+      "in_progress": "In progress",
+      "qualified": "Qualified",
+      "discarded": "Discarded",
+      "spam": "Spam"
+    },
+    "kind": {
+      "claim_interest": "Claim",
+      "contact_request": "Contact request",
+      "opt_out": "Opt-out"
+    },
+    "source": {
+      "banner": "Preview banner",
+      "claim_page": "Claim page",
+      "contact_block": "Contact form",
+      "opt_out_link": "Opt-out link"
+    },
+    "channel": {
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "email": "Email"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "preferredChannel": "Preferred channel",
+      "preferredTime": "Best time",
+      "source": "From",
+      "locale": "Language"
+    },
+    "call": "Call",
+    "email": "Email",
+    "openBusiness": "Open business",
+    "openSite": "Open site",
+    "consentTitle": "Consent",
+    "consentGiven": "Given (privacy text {version})",
+    "consentNone": "No consent checkbox (an opt-out or a demo contact form).",
+    "attributionTitle": "Attribution",
+    "attribution": {
+      "campaign": "Campaign",
+      "engine": "Engine",
+      "version": "Site version"
+    },
+    "spamTitle": "Spam check",
+    "spamScore": "Score {score}:",
+    "changeStatus": "Status",
+    "note": "Note (kept in the audit log)",
+    "addNote": "Add note"
   },
   "siteChat": {
     "readOnly": "You can read this site; editing with the assistant needs permission to generate sites.",

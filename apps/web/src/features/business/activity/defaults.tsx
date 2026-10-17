@@ -8,6 +8,7 @@ import {
   CirclePlusIcon,
   GaugeIcon,
   GitMergeIcon,
+  HandshakeIcon,
   ListTodoIcon,
   RefreshCwIcon,
   StickyNoteIcon,
@@ -88,6 +89,14 @@ function ScoreUpdated({ activity }: ActivityRendererProps) {
   return <>{t('scoreUpdated', { from: text(activity.data.from), to: text(activity.data.to) })}</>;
 }
 
+/** A lead from the preview (BF-048): a claim, a contact request, or an opt-out. */
+function LeadLine({ activity }: ActivityRendererProps) {
+  const t = useTranslations('business.activity');
+  if (activity.type === 'lead.opted_out')
+    return <>{activity.data.removePreview === true ? t('leadOptedOutRemoved') : t('leadOptedOut')}</>;
+  return <>{activity.data.kind === 'contact_request' ? t('leadContact') : t('leadClaim')}</>;
+}
+
 function Updated({ activity }: ActivityRendererProps) {
   const t = useTranslations('business.activity');
   return <>{t('updated', { count: list(activity.data.fields).length })}</>;
@@ -111,6 +120,8 @@ export function registerDefaultActivityRenderers(): void {
     { id: 'business.merged', icon: GitMergeIcon, component: Merged },
     { id: 'business.updated', icon: RefreshCwIcon, component: Updated },
     { id: 'score.updated', icon: GaugeIcon, component: ScoreUpdated },
+    { id: 'lead.captured', icon: HandshakeIcon, component: LeadLine },
+    { id: 'lead.opted_out', icon: BanIcon, component: LeadLine },
   ];
   for (const [order, entry] of entries.entries()) activityRenderers.register({ ...entry, order });
 }

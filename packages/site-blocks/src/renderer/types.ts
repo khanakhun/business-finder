@@ -94,6 +94,15 @@ export interface RenderOptions {
   readonly previewActions?: ReactNode;
   /** Where the contact form posts (BF-048); without it (or on a preview) the form is shown disabled. */
   readonly contactFormAction?: string;
+  /**
+   * A preview's contact form (BF-048): it posts to the agency's lead endpoint with these hidden fields, under a
+   * notice saying messages go to the agency, not the business. Without it a preview's form is disabled.
+   */
+  readonly previewLeadForm?: {
+    readonly action: string;
+    readonly hidden: Readonly<Record<string, string>>;
+    readonly notice: string;
+  };
   /** A static map image of the location on our storage (BF-036); without one a link to the map is shown. */
   readonly mapImage?: (geo: {
     lat: number;

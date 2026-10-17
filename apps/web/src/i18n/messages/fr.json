@@ -25,7 +25,8 @@
     "collapse": "Réduire la barre latérale",
     "expand": "Déployer la barre latérale",
     "label": "Navigation principale",
-    "tasks": "Tâches"
+    "tasks": "Tâches",
+    "leads": "Contacts entrants"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -1255,7 +1256,11 @@
       "empty": "Rien ne s’est encore passé.",
       "more": "Afficher plus ancien",
       "updated": "{count, plural, one {# information mise} other {# informations mises}} à jour sur l’entreprise",
-      "scoreUpdated": "Niveau passé de {from} à {to}"
+      "scoreUpdated": "Niveau passé de {from} à {to}",
+      "leadClaim": "A indiqué « c’est mon entreprise » sur l’aperçu",
+      "leadContact": "A envoyé une demande de contact depuis l’aperçu",
+      "leadOptedOut": "A demandé à ne plus être contacté, depuis l’aperçu",
+      "leadOptedOutRemoved": "A demandé à ne plus être contacté et le retrait de l’aperçu"
     },
     "duplicates": {
       "label": "Doublons possibles",
@@ -3107,6 +3112,78 @@
       "quality": "Qualité {score}",
       "openJob": "Ouvrir"
     }
+  },
+  "leads": {
+    "title": "Contacts entrants",
+    "description": "Revendications, demandes de contact et refus venus des sites d’aperçu.",
+    "export": "Exporter en CSV",
+    "loadError": "Les contacts n’ont pas pu être chargés.",
+    "empty": "Aucun contact pour le moment",
+    "emptyHint": "Quand une entreprise répond depuis son aperçu, elle apparaît ici.",
+    "more": "Voir plus",
+    "noDetails": "Pas de coordonnées",
+    "waiting": "{count, plural, one {# contact en attente} other {# contacts en attente}}",
+    "lead": "Contact",
+    "leadHint": "Ce qui a été envoyé, le consentement, l’attribution et la suite.",
+    "saved": "Contact mis à jour",
+    "saveError": "Le contact n’a pas pu être mis à jour.",
+    "filters": {
+      "status": "Statut",
+      "kind": "Type",
+      "allStatuses": "Tous les statuts (sans spam)",
+      "allKinds": "Tous les types"
+    },
+    "status": {
+      "new": "Nouveau",
+      "in_progress": "En cours",
+      "qualified": "Qualifié",
+      "discarded": "Écarté",
+      "spam": "Spam"
+    },
+    "kind": {
+      "claim_interest": "Revendication",
+      "contact_request": "Demande de contact",
+      "opt_out": "Refus de contact"
+    },
+    "source": {
+      "banner": "Bandeau de l’aperçu",
+      "claim_page": "Page de revendication",
+      "contact_block": "Formulaire de contact",
+      "opt_out_link": "Lien de refus"
+    },
+    "channel": {
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail"
+    },
+    "fields": {
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "preferredChannel": "Canal préféré",
+      "preferredTime": "Meilleur moment",
+      "source": "Origine",
+      "locale": "Langue"
+    },
+    "call": "Appeler",
+    "email": "E-mail",
+    "openBusiness": "Ouvrir l’entreprise",
+    "openSite": "Ouvrir le site",
+    "consentTitle": "Consentement",
+    "consentGiven": "Donné (texte de confidentialité {version})",
+    "consentNone": "Pas de case de consentement (un refus ou un formulaire de démonstration).",
+    "attributionTitle": "Attribution",
+    "attribution": {
+      "campaign": "Campagne",
+      "engine": "Moteur",
+      "version": "Version du site"
+    },
+    "spamTitle": "Contrôle anti-spam",
+    "spamScore": "Score {score} :",
+    "changeStatus": "Statut",
+    "note": "Note (conservée dans le journal d’audit)",
+    "addNote": "Ajouter la note"
   },
   "siteChat": {
     "readOnly": "Vous pouvez lire ce site ; modifier avec l'assistant demande le droit de générer des sites.",

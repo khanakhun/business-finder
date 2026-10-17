@@ -86,6 +86,7 @@ Reviewed list (kept in sync with `src/routes.test.ts`):
 | `GET /v1/system/info` | Version and environment for the dashboard's connection card and deploy checks |
 | `GET /v1/identity/config` | Which sign-in/sign-up options the auth pages may show (sign-up mode, Google) |
 | `POST /v1/public/sites/views` | View beacon of published sites (BF-035): a token signed by the renderer, 120/min per IP; stores no IP or user agent |
+| `GET /v1/public/sites/altcha-challenge`, `POST /v1/public/sites/leads` | Lead forms of previews (BF-048): signed site and form tokens, self-hosted proof of work, honeypot, rate limits on a daily network hash, CORS to the sites domain only; always "received"; stores no IP |
 | `/api/auth/*` (allowlisted) | Sign-up, sign-in, verification, password reset, 2FA — Better Auth enforces its own rules |
 
 ## Workspace settings, secrets and audit log (BF-011)

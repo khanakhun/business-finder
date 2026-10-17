@@ -48,6 +48,9 @@ const ANONYMOUS = [
   'HealthController.ready',
   'MetricsController.scrape',
   'PublicSiteViewsController.record',
+  // BF-048: preview lead forms (proof of work, anti-spam, CORS to the sites domain, no IP stored).
+  'PublicLeadsController.challenge',
+  'PublicLeadsController.submit',
   'SystemController.info',
 ];
 

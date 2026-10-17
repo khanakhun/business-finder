@@ -166,7 +166,7 @@ export class PublicLeads {
       await this.events.record(SiteOptOutRequested, {
         orgId: site.organizationId,
         actor: { type: 'system', id: null },
-        payload: { ...payload, removePreview: lead.removePreview ?? true, outreachRef: lead.r ?? null },
+        payload: { ...payload, removePreview: lead.removePreview ?? false, outreachRef: lead.r ?? null },
       });
     } else if (!spammy) {
       await this.events.record(SiteLeadCaptured, {

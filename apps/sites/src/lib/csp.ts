@@ -2,7 +2,7 @@ export interface SiteCspOptions {
   readonly dev: boolean;
   /** Served over https (production): ask browsers to upgrade any http subresource. */
   readonly https: boolean;
-  /** The API, which receives the view beacon. */
+  /** The API, which receives the view beacon and the lead forms (BF-048). */
   readonly apiOrigin: string;
   /** The CDN of site images (`SITES_ASSETS_BASE_URL`): the only image host besides the page itself. */
   readonly assetsOrigin: string;
@@ -35,7 +35,8 @@ export function buildSiteCsp(nonce: string, options: SiteCspOptions): string {
     `frame-src ${options.frameOrigins.length > 0 ? options.frameOrigins.join(' ') : "'none'"}`,
     "object-src 'none'",
     "base-uri 'none'",
-    "form-action 'self'",
+    // Lead forms of previews post to the API (BF-048), which redirects back here after a plain post.
+    `form-action 'self' ${options.apiOrigin}`,
     "frame-ancestors 'none'",
     ...(options.https ? ['upgrade-insecure-requests'] : []),
   ].join('; ');

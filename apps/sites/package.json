@@ -22,6 +22,7 @@
     "@bf/db": "workspace:*",
     "@bf/site-blocks": "workspace:*",
     "@bf/site-schema": "workspace:*",
+    "altcha-lib": "catalog:",
     "drizzle-orm": "catalog:",
     "next": "catalog:",
     "react": "catalog:",

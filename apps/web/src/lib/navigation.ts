@@ -1,6 +1,7 @@
 import {
   BarChart3Icon,
   GlobeIcon,
+  HandshakeIcon,
   InboxIcon,
   KanbanSquareIcon,
   LayoutDashboardIcon,
@@ -24,6 +25,7 @@ export type NavKey =
   | 'tasks'
   | 'sites'
   | 'generation'
+  | 'leads'
   | 'inbox'
   | 'sequences'
   | 'templates'
@@ -35,6 +37,8 @@ export interface NavItem {
   readonly key: NavKey;
   readonly href: string;
   readonly icon: LucideIcon;
+  /** A count shown next to the label (the leads waiting, BF-048). */
+  readonly badge?: 'leads';
 }
 
 export interface NavGroup {
@@ -60,6 +64,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     items: [
       { key: 'sites', href: '/sites', icon: GlobeIcon },
       { key: 'generation', href: '/generation', icon: SparklesIcon },
+      { key: 'leads', href: '/leads', icon: HandshakeIcon, badge: 'leads' },
     ],
   },
   {

@@ -1,0 +1,219 @@
+{
+  "$id": "https://schemas.business-finder.dev/MlTrainResult.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/ml/train response: the chosen model, its metrics against the rule baseline, artifact hashes.",
+  "properties": {
+    "artifactHashes": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "modelCardJson": {
+          "type": "string"
+        },
+        "modelCardMd": {
+          "type": "string"
+        },
+        "preprocessing": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "preprocessing",
+        "modelCardJson",
+        "modelCardMd"
+      ],
+      "type": "object"
+    },
+    "baselineMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "brier": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "calibration": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "n": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "observed": {
+                "type": "number"
+              },
+              "predicted": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "predicted",
+              "observed",
+              "n"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "liftTop10": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "liftTop20": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "prAuc": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rocAuc": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "rocAuc",
+        "prAuc",
+        "brier",
+        "liftTop10",
+        "liftTop20",
+        "calibration"
+      ],
+      "type": "object"
+    },
+    "kind": {
+      "enum": [
+        "logreg",
+        "hgb"
+      ],
+      "type": "string"
+    },
+    "metrics": {
+      "additionalProperties": false,
+      "properties": {
+        "brier": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "calibration": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "n": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "observed": {
+                "type": "number"
+              },
+              "predicted": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "predicted",
+              "observed",
+              "n"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "liftTop10": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "liftTop20": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "prAuc": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rocAuc": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "rocAuc",
+        "prAuc",
+        "brier",
+        "liftTop10",
+        "liftTop20",
+        "calibration"
+      ],
+      "type": "object"
+    },
+    "modelCard": {
+      "additionalProperties": {},
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object"
+    },
+    "spearman": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "trainRows": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+    },
+    "validationRows": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "kind",
+    "metrics",
+    "baselineMetrics",
+    "spearman",
+    "trainRows",
+    "validationRows",
+    "artifactHashes",
+    "modelCard",
+    "warnings"
+  ],
+  "title": "MlTrainResult",
+  "type": "object"
+}

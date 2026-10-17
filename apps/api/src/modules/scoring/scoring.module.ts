@@ -2,10 +2,19 @@ import type { ApiEnv } from '@bf/config';
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { AppMode } from '../platform/config/app-env.ts';
 import { APP_ENV, type AppEnv } from '../platform/config/app-env.ts';
+import { IntelClient } from '../platform/intel/intel-client.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
+import { OBJECT_PRESIGNER, S3Presigner } from '../platform/storage/s3-presigner.ts';
 import { BuiltinProfilesSeeder } from './application/builtin-profiles.seeder.ts';
 import { DatasetBuilder } from './application/ml/dataset-builder.ts';
-import { ML_REPOSITORY, ML_STORAGE } from './application/ml/ports.ts';
+import { ModelTrainer } from './application/ml/model-trainer.ts';
+import {
+  ML_REPOSITORY,
+  ML_STORAGE,
+  MODEL_REGISTRY,
+  MODEL_TRAINER_PORT,
+  TRAINING_QUEUE,
+} from './application/ml/ports.ts';
 import {
   FACTS_ASSEMBLER,
   RECOMPUTE_PROGRESS,
@@ -25,7 +34,9 @@ import {
 import { BullmqScoringQueue, OPENAPI_SCORING_QUEUE } from './infrastructure/bullmq-scoring-queue.ts';
 import { DrizzleScoringRepository } from './infrastructure/drizzle-scoring.repository.ts';
 import { SqlFactsAssembler } from './infrastructure/facts-assembler.sql.ts';
+import { BullmqTrainingQueue } from './infrastructure/ml/bullmq-training-queue.ts';
 import { DrizzleMlRepository } from './infrastructure/ml/drizzle-ml.repository.ts';
+import { IntelModelTrainer } from './infrastructure/ml/intel-model-trainer.ts';
 import { RealtimeRecomputeProgress } from './infrastructure/realtime-recompute-progress.ts';
 import { ScoringMlController } from './interface/http/ml.controller.ts';
 import {
@@ -33,6 +44,7 @@ import {
   ScoringController,
   ScoringProfilesController,
 } from './interface/http/scoring.controller.ts';
+import { ScoringMlTrainProcessor } from './interface/processors/ml-train.processor.ts';
 import {
   ScoringComputeProcessor,
   ScoringRecomputeProcessor,
@@ -79,7 +91,20 @@ export class ScoringModule {
         ScoringEditorQueries,
         ScoringSubscribers,
         // BF-059: outcome-trained scoring.
-        { provide: ML_REPOSITORY, useClass: DrizzleMlRepository },
+        DrizzleMlRepository,
+        { provide: ML_REPOSITORY, useExisting: DrizzleMlRepository },
+        { provide: MODEL_REGISTRY, useExisting: DrizzleMlRepository },
+        IntelClient,
+        { provide: MODEL_TRAINER_PORT, useClass: IntelModelTrainer },
+        mode === 'openapi'
+          ? { provide: TRAINING_QUEUE, useValue: { enqueue: async () => {} } }
+          : { provide: TRAINING_QUEUE, useClass: BullmqTrainingQueue },
+        {
+          provide: OBJECT_PRESIGNER,
+          inject: [APP_ENV],
+          useFactory: (env: AppEnv) => new S3Presigner(env as ApiEnv),
+        },
+        ModelTrainer,
         {
           provide: ML_STORAGE,
           inject: [APP_ENV],
@@ -89,7 +114,9 @@ export class ScoringModule {
         DatasetBuilder,
         // OpenAPI generation has no database.
         ...(mode === 'openapi' ? [] : [BuiltinProfilesSeeder]),
-        ...(mode === 'worker' ? [ScoringComputeProcessor, ScoringRecomputeProcessor] : []),
+        ...(mode === 'worker'
+          ? [ScoringComputeProcessor, ScoringRecomputeProcessor, ScoringMlTrainProcessor]
+          : []),
       ],
       exports: [ScoringService],
     };

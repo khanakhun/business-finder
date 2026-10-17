@@ -15,7 +15,7 @@ from app.logging import configure_logging
 from app.metrics import Metrics
 from app.middleware import RequestContextMiddleware
 from app.net.safe_fetch import FetchPolicy, SafeFetcher, strip_query_from_span
-from app.routers import echo, health, image_fetch, open_data, site_intel
+from app.routers import echo, health, image_fetch, ml, open_data, site_intel
 from app.security.internal_auth import InternalAuthenticator, InternalAuthMiddleware
 from app.services.open_data.releases import ReleaseResolver
 from app.services.open_data.service import OpenDataService
@@ -106,7 +106,14 @@ def create_app(
     )
 
     install_error_handlers(app)
-    for router in (health.router, echo.router, open_data.router, site_intel.router, image_fetch.router):
+    for router in (
+        health.router,
+        echo.router,
+        open_data.router,
+        site_intel.router,
+        image_fetch.router,
+        ml.router,
+    ):
         app.include_router(router)
     # Last added = outermost: tracing → request context (id, log, metrics) → internal auth → routing.
     app.add_middleware(

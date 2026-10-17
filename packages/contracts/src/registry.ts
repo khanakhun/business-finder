@@ -7,6 +7,7 @@ import {
   OpenDataSearchRequestSchema,
   OpenDataSearchResponseSchema,
 } from './open-data.ts';
+import { MlPreprocessingSpecSchema, MlTrainRequestSchema, MlTrainResultSchema } from './scoring-ml.ts';
 import { ImageFetchRequestSchema, SiteIntelRequestSchema, SiteIntelSchema } from './site-intel.ts';
 
 /** Languages schemas can be exported to. `python` → services/intel Pydantic models (BF-008). */
@@ -83,6 +84,24 @@ exportSchema(SiteIntelSchema, {
   id: 'SiteIntel',
   exportTo: ['python'],
   description: 'POST /v1/site-intel response: what a business website says about it.',
+});
+
+exportSchema(MlTrainRequestSchema, {
+  id: 'MlTrainRequest',
+  exportTo: ['python'],
+  description:
+    'POST /v1/ml/train request on services/intel (BF-059): dataset and artifact URLs, training config.',
+});
+exportSchema(MlTrainResultSchema, {
+  id: 'MlTrainResult',
+  exportTo: ['python'],
+  description:
+    'POST /v1/ml/train response: the chosen model, its metrics against the rule baseline, artifact hashes.',
+});
+exportSchema(MlPreprocessingSpecSchema, {
+  id: 'MlPreprocessingSpec',
+  exportTo: ['python'],
+  description: 'How a feature vector becomes the model input, shared by intel (writes) and the API (scores).',
 });
 
 export const JSON_SCHEMA_BASE = 'https://schemas.business-finder.dev/';

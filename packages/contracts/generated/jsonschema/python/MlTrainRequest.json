@@ -1,0 +1,120 @@
+{
+  "$id": "https://schemas.business-finder.dev/MlTrainRequest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "POST /v1/ml/train request on services/intel (BF-059): dataset and artifact URLs, training config.",
+  "properties": {
+    "artifactUrls": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "modelCardJson": {
+          "type": "string"
+        },
+        "modelCardMd": {
+          "type": "string"
+        },
+        "preprocessing": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "preprocessing",
+        "modelCardJson",
+        "modelCardMd"
+      ],
+      "type": "object"
+    },
+    "considerGbm": {
+      "default": true,
+      "type": "boolean"
+    },
+    "datasetId": {
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string"
+    },
+    "datasetSha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "datasetUrl": {
+      "format": "uri",
+      "type": "string"
+    },
+    "features": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "numeric",
+              "categorical",
+              "boolean"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "gbmMinAucGain": {
+      "default": 0.03,
+      "maximum": 0.5,
+      "minimum": 0,
+      "type": "number"
+    },
+    "horizonDays": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+    },
+    "labelVersion": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+    },
+    "offer": {
+      "type": "string"
+    },
+    "seed": {
+      "default": 42,
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "type": "integer"
+    },
+    "validationShare": {
+      "default": 0.25,
+      "maximum": 0.5,
+      "minimum": 0.1,
+      "type": "number"
+    }
+  },
+  "required": [
+    "datasetId",
+    "datasetUrl",
+    "datasetSha256",
+    "artifactUrls",
+    "offer",
+    "labelVersion",
+    "horizonDays",
+    "features",
+    "seed",
+    "validationShare",
+    "considerGbm",
+    "gbmMinAucGain"
+  ],
+  "title": "MlTrainRequest",
+  "type": "object"
+}

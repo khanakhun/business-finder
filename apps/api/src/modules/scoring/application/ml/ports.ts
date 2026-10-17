@@ -1,4 +1,11 @@
-import type { FeatureVector, MlDataset } from '@bf/contracts';
+import type {
+  FeatureVector,
+  MlDataset,
+  MlModel,
+  MlTrainingRun,
+  MlTrainRequest,
+  MlTrainResult,
+} from '@bf/contracts';
 
 // Ports of the outcome-trained scoring (BF-059).
 
@@ -41,7 +48,54 @@ export interface MlRepository {
   ): Promise<ContactRow[]>;
   insertDataset(row: Omit<MlDatasetRecord, 'createdAt'>): Promise<MlDatasetRecord>;
   datasets(organizationId: string, limit: number): Promise<MlDatasetRecord[]>;
+  dataset(organizationId: string, id: string): Promise<MlDatasetRecord | undefined>;
 }
+
+export type ArtifactName = 'model' | 'preprocessing' | 'modelCardJson' | 'modelCardMd';
+
+export interface MlModelRecord extends Omit<MlModel, 'trainedAt' | 'promotedAt'> {
+  readonly organizationId: string;
+  readonly artifactKeys: Readonly<Record<ArtifactName, string>>;
+  readonly artifactHashes: Readonly<Record<ArtifactName, string>>;
+  readonly trainedAt: Date;
+  readonly promotedAt: Date | null;
+}
+
+export interface MlTrainingRunRecord extends Omit<MlTrainingRun, 'createdAt' | 'finishedAt' | 'offer'> {
+  readonly organizationId: string;
+  readonly considerGbm: boolean;
+  readonly createdAt: Date;
+  readonly finishedAt: Date | null;
+}
+
+/** The model registry (immutable models) and their training runs. */
+export interface ModelRegistry {
+  nextVersion(organizationId: string, offer: string): Promise<number>;
+  insertModel(row: Omit<MlModelRecord, 'trainedAt' | 'promotedAt' | 'promotedBy'>): Promise<MlModelRecord>;
+  model(organizationId: string, id: string): Promise<MlModelRecord | undefined>;
+  models(organizationId: string): Promise<MlModelRecord[]>;
+  insertRun(
+    row: Pick<MlTrainingRunRecord, 'id' | 'organizationId' | 'datasetId' | 'considerGbm' | 'createdBy'>,
+  ): Promise<void>;
+  run(id: string): Promise<MlTrainingRunRecord | undefined>;
+  updateRun(
+    id: string,
+    patch: Partial<Pick<MlTrainingRunRecord, 'status' | 'error' | 'modelId' | 'finishedAt'>>,
+  ): Promise<void>;
+  runs(organizationId: string, limit: number): Promise<(MlTrainingRunRecord & { offer: string })[]>;
+}
+export const MODEL_REGISTRY = Symbol('ModelRegistry');
+
+/** Training in intel (POST /v1/ml/train). */
+export interface ModelTrainerPort {
+  train(request: MlTrainRequest): Promise<MlTrainResult>;
+}
+export const MODEL_TRAINER_PORT = Symbol('ModelTrainerPort');
+
+export interface TrainingQueue {
+  enqueue(organizationId: string, runId: string): Promise<void>;
+}
+export const TRAINING_QUEUE = Symbol('TrainingQueue');
 export const ML_REPOSITORY = Symbol('MlRepository');
 
 /** Private storage of datasets and model artifacts. */

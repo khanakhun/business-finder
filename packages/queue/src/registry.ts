@@ -71,6 +71,8 @@ export const QUEUES = {
   scoring: { name: 'scoring', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 4 },
   /** Bulk recomputes of a profile version for a workspace (long: one or two at a time). */
   scoringRecompute: { name: 'scoring-recompute', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
+  /** Outcome-model training in intel (BF-059): minutes each, one at a time, never retried (a run is re-started). */
+  scoringMlTrain: { name: 'scoring-ml-train', defaultJobOptions: SINGLE_ATTEMPT_JOB_OPTIONS, concurrency: 1 },
   /**
    * Sites (BF-035): renderer revalidation after a publication changed (more attempts: the renderer may be
    * restarting), and the hourly preview expiry (one job per hour).

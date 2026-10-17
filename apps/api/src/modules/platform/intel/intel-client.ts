@@ -103,8 +103,17 @@ export class IntelClient {
     if (!response.ok) {
       const code =
         typeof json === 'object' && json && 'code' in json ? String(json.code) : `HTTP_${response.status}`;
+      // A 4xx's detail is intel's own sentence (e.g. why a model cannot be trained): kept, bounded.
+      const detail =
+        response.status < 500 &&
+        typeof json === 'object' &&
+        json &&
+        'detail' in json &&
+        typeof json.detail === 'string'
+          ? `: ${json.detail.slice(0, 300)}`
+          : '';
       // 4xx: our request is wrong (or unauthorized) — retrying cannot help.
-      throw new ExternalServiceError('intel', `${path} answered ${response.status}`, {
+      throw new ExternalServiceError('intel', `${path} answered ${response.status}${detail}`, {
         details: { reason: code.replace(/[^A-Z0-9_]/g, '_').slice(0, 60), retryable: response.status >= 500 },
       });
     }

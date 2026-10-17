@@ -78,6 +78,7 @@ import {
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
 import { BlocksEngine } from './infrastructure/engines/blocks/blocks.engine.ts';
 import { ClaudeCodeEngine } from './infrastructure/engines/claude-code/claude-code.engine.ts';
+import { CodexEngine } from './infrastructure/engines/codex/codex.engine.ts';
 import type { SandboxedEngineDeps } from './infrastructure/engines/sandboxed/sandboxed-agent.engine.ts';
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
@@ -122,10 +123,10 @@ function engines(
   if (env.GENERATION_BLOCKS_ENGINE) registered.push(new BlocksEngine(deps.gateway, deps.artifacts));
   // The coding agents (BF-044): each run in a sandbox with the workspace's own key.
   const keys = vaultKeyResolver(deps.secrets);
-  const sandboxed = (model: string): SandboxedEngineDeps => ({
+  const sandboxed = (provider: 'anthropic' | 'openai', model: string): SandboxedEngineDeps => ({
     sandbox: deps.sandbox,
     artifacts: deps.artifacts,
-    keys: { resolve: (organizationId) => keys.resolve(organizationId, 'anthropic') },
+    keys: { resolve: (organizationId) => keys.resolve(organizationId, provider) },
     settings: {
       enabled: env.SANDBOX_ENABLED,
       image: env.SANDBOX_RUNNER_IMAGE,
@@ -140,9 +141,16 @@ function engines(
   });
   if (env.GENERATION_CLAUDE_CODE_ENGINE)
     registered.push(
-      new ClaudeCodeEngine(sandboxed(env.AI_MODEL_AGENT), {
+      new ClaudeCodeEngine(sandboxed('anthropic', env.AI_MODEL_AGENT), {
         pricing: env.AI_PRICING,
         sitekit: env.GENERATION_CLAUDE_CODE_SITEKIT,
+      }),
+    );
+  if (env.GENERATION_CODEX_ENGINE)
+    registered.push(
+      new CodexEngine(sandboxed('openai', env.GENERATION_CODEX_MODEL), {
+        pricing: env.AI_PRICING,
+        reasoningEffort: env.GENERATION_CODEX_REASONING_EFFORT,
       }),
     );
   if (env.GENERATION_FAKE_ENGINE) {

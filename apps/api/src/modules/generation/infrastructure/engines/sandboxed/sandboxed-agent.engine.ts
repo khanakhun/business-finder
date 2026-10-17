@@ -258,6 +258,12 @@ export abstract class SandboxedAgentEngine implements AgentEngine {
         outputTokens: tokens.output,
         costUsd: parser.costUsd() ?? 0,
       };
+      if (parser.costUsd() === null)
+        yield {
+          type: 'log',
+          level: 'warn',
+          message: `${settings.model} has no price in AI_PRICING: this run's spend was not tracked against the budget.`,
+        };
       if (unsupported)
         throw fail(
           'ENGINE_VERSION_UNSUPPORTED',

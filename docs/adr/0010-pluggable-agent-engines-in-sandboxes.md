@@ -97,3 +97,24 @@ The user wants to select several businesses and have sites generated automatical
 - **Codex's own sandbox does not run in ours.** Its bubblewrap sandbox cannot create user namespaces under Docker's
   default seccomp profile, and the Landlock fallback panics in 0.160.0 (observed in the runner image). Part 2 decides
   between Codex's documented flag for externally sandboxed environments and a custom seccomp profile, with evidence.
+
+## Addendum (BF-044 part 2, 2026-10-17): Codex runs without its own sandbox, inside ours
+
+- **Evidence** (observed in the runner image with Codex CLI 0.160.0, offline): `codex sandbox` with `workspace-write`
+  fails with bubblewrap's "No permissions to create a new namespace" under Docker's default seccomp profile. The
+  legacy Landlock fallback panics ("filesystem-restricted execution requires bubblewrap"). With
+  `--security-opt seccomp=unconfined`, the inner sandbox works.
+- **Decision.** Run `codex exec --dangerously-bypass-approvals-and-sandbox`, the flag Codex documents for
+  "environments that are externally sandboxed". Claude Code already runs this way, with no inner sandbox. Our
+  container is the sandbox: no capabilities, read-only root, `noexec` tmpfs, no network but the models-only egress
+  proxy, a per-run key and a wall time.
+- **Rejected:** a custom seccomp profile that allows unprivileged user namespaces, so Codex's bubblewrap could add a
+  second layer. User namespaces are a recurring kernel privilege-escalation surface. Opening them for every sandbox
+  to gain an inner layer that does not restrict the network further (ours already does) trades a broad risk for a
+  narrow benefit. Revisit if Codex's sandbox can run without user namespaces.
+- **Codex specifics:**
+  - Usage arrives only with `turn.completed`, as cumulative totals, and Codex reports no USD.
+  - The worker prices the tokens (`AI_PRICING` must carry `GENERATION_CODEX_MODEL`) and refuses a run past the
+    budget (`ENGINE_BUDGET_EXCEEDED`). `exec` is one turn, so within the turn the wall time bounds the spend.
+  - Top-level `error` events are reconnects, logged and not fatal.
+  - `shell_environment_policy.inherit = "core"` keeps `CODEX_API_KEY` out of the commands it runs.

@@ -9,6 +9,7 @@ import { SandboxError, type SandboxProvider } from '../../../application/sandbox
 import { unpackBundle } from '../../workspace/tar.ts';
 import { evalWorkspace, loadBusinesses } from '../blocks/eval/harness.ts';
 import { ClaudeCodeEngine } from '../claude-code/claude-code.engine.ts';
+import { CodexEngine } from '../codex/codex.engine.ts';
 import type { SandboxedEngineSettings } from './sandboxed-agent.engine.ts';
 
 // The sandboxed base (BF-044) through the Claude Code engine, on a real workspace (an eval business) and a scripted
@@ -80,7 +81,7 @@ class ScriptedSandbox implements SandboxProvider {
     yield {
       t: 'versions',
       protocol: 1,
-      versions: { claude: this.script.version ?? '2.1.288 (Claude Code)' },
+      versions: { claude: this.script.version ?? '2.1.288 (Claude Code)', codex: 'codex-cli 0.160.0' },
     } as RunnerFrame;
     if (signal.aborted) return;
     for (const line of this.script.lines ?? stream('success')) {
@@ -322,5 +323,54 @@ describe('SandboxedAgentEngine (Claude Code)', () => {
       { pricing: {} },
     );
     expect(await off.available('org-1')).toBe(false);
+  });
+
+  it('Codex: prices its tokens at the end of the turn and refuses a run that spent the budget', async () => {
+    const codexStream = readFileSync(
+      new URL('../__fixtures__/streams/codex/success.jsonl', import.meta.url),
+      'utf8',
+    )
+      .split('\n')
+      .filter(Boolean);
+    const runCodex = async (inputPerMTok: number) => {
+      const sandbox = new ScriptedSandbox({ lines: codexStream });
+      const engine = new CodexEngine(
+        {
+          sandbox,
+          artifacts: { get: async () => Buffer.from(workspace.bundle), put: async () => undefined },
+          keys: { resolve: async () => KEY },
+          settings: { ...SETTINGS, model: 'gpt-6.1-sol' },
+        },
+        {
+          pricing: { 'gpt-6.1-sol': { inputPerMTok, outputPerMTok: 12, cachedInputPerMTok: 0.2 } },
+          reasoningEffort: 'high',
+        },
+      );
+      const ctx = {
+        jobId: 'job-c',
+        attemptNo: 1,
+        mode: 'create',
+        organizationId: 'org-1',
+        workspace: { bundleRef: 'bundle' },
+        brief: {},
+        budgetUsd: 2,
+        deadlineAt: new Date(Date.now() + 60_000),
+        locales: workspace.starter.locales,
+        logger: { info() {}, warn() {}, error() {}, debug() {} },
+        writeSpec: async () => 'spec-ref',
+      } as unknown as EngineRunContext;
+      const events: EngineEvent[] = [];
+      for await (const event of engine.run(ctx, new AbortController().signal)) events.push(event);
+      return { events, sandbox };
+    };
+    const cheap = await runCodex(2);
+    expect(last(cheap.events)?.type).toBe('done');
+    expect(cheap.sandbox.input?.env?.CODEX_API_KEY).toBe(KEY);
+    expect(cheap.sandbox.input?.command.slice(0, 2)).toEqual(['codex', 'exec']);
+    const usage = cheap.events.find((e) => e.type === 'usage');
+    expect(usage?.type === 'usage' && usage.costUsd).toBeGreaterThan(0.1);
+    // 34k uncached input tokens at $100/M: past the $2 budget when the turn ends.
+    const dear = await runCodex(100);
+    expect(last(dear.events)).toMatchObject({ code: 'ENGINE_BUDGET_EXCEEDED', retryable: false });
   });
 });

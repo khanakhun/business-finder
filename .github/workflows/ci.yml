@@ -378,8 +378,8 @@ jobs:
         run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/sandbox/docker-sandbox.docker.test.ts
         env:
           DOCKER_SANDBOX_IMAGE: bf-agent-runner:ci
-      - name: Coding-agent engines in the image (Claude Code argv and stream, check, validation outside; BF-044)
-        run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/engines/claude-code/claude-code.docker.test.ts
+      - name: Coding-agent engines in the image (Claude Code and Codex argv and streams, check, validation outside; BF-044)
+        run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/engines/sandboxed/agents.docker.test.ts
         env:
           DOCKER_SANDBOX_IMAGE: bf-agent-runner:ci
 

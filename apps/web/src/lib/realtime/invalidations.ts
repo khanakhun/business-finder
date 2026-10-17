@@ -11,6 +11,7 @@ export const REALTIME_EVENTS = {
   enrichmentRunProgressed: 'enrichment.run.progressed',
   scoringScoresUpdated: 'scoring.scores.updated',
   scoringRecomputeProgressed: 'scoring.recompute.progressed',
+  outreachMessageStatus: 'outreach.message.status',
 } as const;
 
 const FINISHED_RUN = new Set(['completed', 'partially_completed', 'failed', 'cancelled']);
@@ -49,6 +50,17 @@ export const realtimeInvalidations: Readonly<Record<string, (event: RealtimeEven
       (event.payload as { finished?: boolean } | null)?.finished
         ? [['business'], ['search', 'listing'], ['scoring']]
         : [],
+    // An outbound message changed status (BF-052): the outbox, the message, bulk runs and the business's history.
+    [REALTIME_EVENTS.outreachMessageStatus]: (event) => {
+      const businessId = (event.payload as { businessId?: string } | null)?.businessId;
+      return [
+        ['outreach', 'messages'],
+        ['outreach', 'message', event.entityId],
+        ['outreach', 'bulk-runs'],
+        ['outreach', 'bulk-run'],
+        ...(businessId ? [['outreach', 'history', businessId]] : []),
+      ];
+    },
   };
 
 /** Sent by the server when the client may have missed events (slow connection, retention): refetch everything. */

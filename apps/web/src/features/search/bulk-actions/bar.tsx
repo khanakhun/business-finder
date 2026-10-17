@@ -20,6 +20,7 @@ import {
   LayoutTemplateIcon,
   ListPlusIcon,
   type LucideIcon,
+  MailIcon,
   SendIcon,
   SparklesIcon,
   TagsIcon,
@@ -48,6 +49,7 @@ const ICONS: Record<string, LucideIcon> = {
   tags: TagsIcon,
   kanban: KanbanIcon,
   'layout-template': LayoutTemplateIcon,
+  mail: MailIcon,
   send: SendIcon,
   sparkles: SparklesIcon,
 };

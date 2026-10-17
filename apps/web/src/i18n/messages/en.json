@@ -27,7 +27,9 @@
     "label": "Main navigation",
     "tasks": "Tasks",
     "leads": "Leads",
-    "compliance": "Compliance"
+    "compliance": "Compliance",
+    "outbox": "Outbox",
+    "approvals": "Approvals"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -916,7 +918,9 @@
       "exporting": "Your export is downloading",
       "tooMany": "Export up to 200 selected rows, or clear the selection to export all results",
       "enrich": "Enrich",
-      "tooManySites": "Create sites for up to 50 businesses at a time"
+      "tooManySites": "Create sites for up to 50 businesses at a time",
+      "bulkEmail": "Email (approval queue)",
+      "tooManyEmails": "Select at most 100 businesses for one email run."
     },
     "lists": {
       "title": "Lists",
@@ -1274,7 +1278,15 @@
       "leadClaim": "Said “this is my business” on the preview",
       "leadContact": "Sent a contact request from the preview",
       "leadOptedOut": "Asked not to be contacted, from the preview",
-      "leadOptedOutRemoved": "Asked not to be contacted and to remove the preview"
+      "leadOptedOutRemoved": "Asked not to be contacted and to remove the preview",
+      "emailQueued": "Queued an email",
+      "emailSent": "Sent an email",
+      "emailCancelled": "Cancelled an email before it was sent",
+      "emailBlocked": "An email was stopped by the compliance check ({reasons})",
+      "emailFailed": "An email failed and will be retried",
+      "emailFailedFinal": "An email could not be sent",
+      "contactLogged": "Logged a contact by {channel}",
+      "openEmail": "Open the email"
     },
     "duplicates": {
       "label": "Possible duplicates",
@@ -3897,5 +3909,169 @@
     "create": "Create",
     "archive": "Archive",
     "versions": "Versions"
+  },
+  "outbound": {
+    "status": {
+      "draft": "Draft",
+      "pending_approval": "Awaiting approval",
+      "queued": "Queued",
+      "sending": "Sending",
+      "sent": "Sent",
+      "failed": "Failed",
+      "blocked": "Blocked",
+      "cancelled": "Cancelled",
+      "bounced": "Bounced",
+      "replied": "Replied"
+    },
+    "send": {
+      "send": "Send",
+      "copyAndLog": "Copy & log",
+      "copied": "Email copied: send it from your own mailbox, then log it.",
+      "queued": "Email queued. It goes out in {seconds} seconds.",
+      "undo": "Undo",
+      "undone": "Email cancelled: nothing was sent.",
+      "tooLate": "Too late to undo: the email is already on its way.",
+      "failed": "The email could not be queued.",
+      "manualOnly": "This contact may only be reached by hand.",
+      "manualSummary": "Sent by hand: “{subject}”"
+    },
+    "manual": {
+      "title": "Log a contact",
+      "description": "Record a contact made outside the app. It is checked against suppressions and do-not-contact first.",
+      "channel": "Channel",
+      "channels": {
+        "email": "email",
+        "phone": "phone",
+        "whatsapp": "WhatsApp",
+        "letter": "letter",
+        "in_person": "in person"
+      },
+      "summary": "What happened",
+      "outcome": "Outcome (optional)",
+      "save": "Log contact",
+      "cancel": "Cancel",
+      "logged": "Contact logged.",
+      "failed": "The contact could not be logged."
+    },
+    "outbox": {
+      "title": "Outbox",
+      "description": "Every email on its way, sent, or stopped, with the reasons.",
+      "mailbox": "Mailbox",
+      "allMailboxes": "All mailboxes",
+      "loadError": "The outbox could not be loaded.",
+      "emptyTitle": "Nothing here",
+      "emptyBody": "Emails you send appear here while they wait, and once they are sent or stopped.",
+      "caption": "Outbound emails",
+      "business": "Business",
+      "subject": "Subject",
+      "when": "When",
+      "state": "Status",
+      "actions": "Actions",
+      "scheduled": "Scheduled",
+      "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+      "cancel": "Cancel",
+      "cancelled": "Email cancelled.",
+      "retry": "Retry",
+      "retried": "Email queued again.",
+      "open": "Open",
+      "failed": "That did not work."
+    },
+    "message": {
+      "title": "Email",
+      "description": "The email as sent, its headers, compliance decisions and history.",
+      "status": "Status",
+      "to": "To",
+      "from": "From",
+      "sentAt": "Sent",
+      "scheduledAt": "Scheduled for",
+      "reschedule": "Send at another time",
+      "move": "Reschedule",
+      "rescheduled": "Email rescheduled.",
+      "failed": "That did not work.",
+      "preview": "Preview",
+      "text": "Plain text",
+      "decisions": "Compliance",
+      "headers": "Headers",
+      "enqueueDecision": "When it was queued",
+      "sendDecision": "When it was sent",
+      "none": "No decision recorded.",
+      "notYet": "Checked again just before sending.",
+      "timeline": "History"
+    },
+    "approvals": {
+      "title": "Approvals",
+      "description": "Emails drafted in bulk wait here. Nothing is sent until you approve it.",
+      "runs": "Bulk runs",
+      "loadError": "The approvals could not be loaded.",
+      "noRuns": "No bulk run yet. Select businesses in Search and choose “Email (approval queue)”.",
+      "emptyTitle": "Nothing to approve",
+      "emptyBody": "Select businesses in Search and choose “Email (approval queue)” to draft emails for them.",
+      "counts": "{pending} to approve · {queued} queued · {skipped} skipped",
+      "runStatus": {
+        "drafting": "Drafting",
+        "ready": "Ready for review",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "startTitle": "Draft emails for {count, plural, one {# business} other {# businesses}}",
+      "startHint": "Each business is checked for compliance first. Drafts wait here for your approval.",
+      "offer": "Offer",
+      "purpose": "Purpose",
+      "purposes": {
+        "first_touch": "First email",
+        "follow_up": "Follow-up"
+      },
+      "mode": "Written by",
+      "modes": {
+        "ai": "AI, from the facts",
+        "template": "Template"
+      },
+      "tooMany": "One run takes at most 100 businesses.",
+      "start": "Draft {count, plural, one {# email} other {# emails}}",
+      "started": "Drafting {count, plural, one {# email} other {# emails}} in the background.",
+      "failed": "That did not work.",
+      "result": "{approved} approved, {rejected} rejected, {refused} refused by the compliance check",
+      "autoApprove": "Approved automatically",
+      "progress": "{done} of {total} businesses processed",
+      "rejectSelected": "Reject ({count})",
+      "approveSelected": "Approve ({count})",
+      "approveAll": "Approve all ({count})",
+      "select": "Select the email to {business}",
+      "decision": {
+        "allowed": "Allowed",
+        "allowed_with_conditions": "Allowed with conditions",
+        "manual_only": "Manual only",
+        "blocked": "Blocked",
+        "error": "Could not draft"
+      },
+      "itemStatus": {
+        "draft": "Draft",
+        "pending_approval": "Awaiting approval",
+        "queued": "Queued",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed",
+        "blocked": "Blocked",
+        "cancelled": "Rejected",
+        "bounced": "Bounced",
+        "replied": "Replied"
+      },
+      "showPreview": "Show the email",
+      "previewOf": "Email to {business}",
+      "edit": "Edit",
+      "reject": "Reject",
+      "approve": "Approve",
+      "skippedTitle": "Skipped ({count})",
+      "alternatives": "Instead: {list}",
+      "confirmTitle": "Approve {count, plural, one {# email} other {# emails}}?",
+      "confirmBody": "Each email is checked for compliance again, then queued and sent within its mailbox’s limits.",
+      "cancel": "Cancel",
+      "editTitle": "Edit the email to {business}",
+      "editHint": "Your changes update the draft; the preview is rendered again.",
+      "subject": "Subject",
+      "body": "Message",
+      "save": "Save",
+      "saved": "Email updated."
+    }
   }
 }

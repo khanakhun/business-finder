@@ -9,9 +9,8 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@bf/ui/compon
 import { Skeleton } from '@bf/ui/components/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@bf/ui/components/tabs';
 import { Textarea } from '@bf/ui/components/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@bf/ui/components/tooltip';
 import { cn } from '@bf/ui/lib/utils';
-import { CopyIcon, LanguagesIcon, SendIcon, SparklesIcon, WandIcon } from 'lucide-react';
+import { CopyIcon, LanguagesIcon, SparklesIcon, WandIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toProblemLike } from '@/components/states/problem.ts';
@@ -21,12 +20,13 @@ import { CompliancePanel } from '@/features/compliance/compliance-panel.tsx';
 import { useMailboxes } from '@/features/mailboxes/api.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { useDraftActions, useDraftPreview, useTemplates } from '../api.ts';
+import { SendButton } from '../send/send-button.tsx';
 import { closeComposer, useComposerTarget } from './store.ts';
 
 // The email composer (BF-051): pick the recipient (with its verification and today's compliance decision — a
 // blocked contact is not selectable and its alternatives are shown), the mailbox, the language, the offer and a
 // template; generate (AI, grounded) or fill the template; pick a subject; edit with the cited facts and lint
-// beside; preview the final message (signature and footer included). Sending arrives with BF-052.
+// beside; preview the final message (signature and footer included); send it with an undo window (BF-052).
 
 const QUICK = ['shorter', 'formal', 'mentionPreview', 'booking'] as const;
 const AUTO = 'auto';
@@ -213,7 +213,7 @@ function Composer({
       <section className="min-w-0 space-y-3">
         {busy && !draft ? <Skeleton className="h-80 w-full" /> : null}
         {draft ? (
-          <DraftEditor draft={draft} onChange={setDraft} busy={busy} />
+          <DraftEditor draft={draft} onChange={setDraft} busy={busy} decision={evaluation.data?.decision} />
         ) : !busy ? (
           <p className="text-sm text-muted-foreground">{t('empty')}</p>
         ) : null}
@@ -240,10 +240,13 @@ function DraftEditor({
   draft,
   onChange,
   busy,
+  decision,
 }: {
   readonly draft: EmailDraft;
   readonly onChange: (draft: EmailDraft) => void;
   readonly busy: boolean;
+  /** Today's compliance decision for the recipient (the Send button adapts to it). */
+  readonly decision: string | undefined;
 }) {
   const t = useTranslations('composer');
   const actions = useDraftActions();
@@ -430,17 +433,12 @@ function DraftEditor({
           <CopyIcon aria-hidden />
           {t('copy')}
         </Button>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <Button size="sm" disabled>
-                <SendIcon aria-hidden />
-                {t('send')}
-              </Button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{t('sendSoon')}</TooltipContent>
-        </Tooltip>
+        <SendButton
+          draft={draft}
+          decision={decision}
+          disabled={dirty || errors.length > 0 || busy}
+          copyText={() => `${preview.data?.subject ?? subject}\n\n${preview.data?.text ?? body}`}
+        />
       </div>
     </div>
   );

@@ -930,6 +930,7 @@ export {
   type ManualLogRequest,
   ManualLogRequestSchema,
   OUTBOUND_STATUSES,
+  OUTREACH_MESSAGE_STATUS,
   type OutboundError,
   OutboundErrorSchema,
   type OutboundMessage,

@@ -174,15 +174,23 @@ stateDiagram-v2
   draft --> queued : allowed decision + user send
   pending_approval --> queued : approved
   pending_approval --> cancelled
-  queued --> sending
+  queued --> queued : rescheduled
+  queued --> sending : claimed by the tick (lease)
   queued --> blocked : re-check at send fails
   queued --> cancelled
   sending --> sent
-  sending --> failed : retryable error
+  sending --> blocked : re-check at send fails
+  sending --> queued : no capacity / window closed / mailbox unavailable (not an attempt)
+  sending --> failed : error (retryable: backoff; else final)
   failed --> queued : retry
   sent --> bounced
   sent --> replied
 ```
+
+BF-052: a message enters `queued` only with a persisted allowing enqueue decision, and `sent` only with a send-stage
+decision (check constraints). A message `sending` past its lease is leased again and reconciled against the mailbox's
+sent items before any new attempt (exactly-once effect). Bulk items wait in `pending_approval`; approval judges them
+again.
 
 ### 3.6 Sequence enrollment
 

@@ -13,6 +13,13 @@ export interface Problem {
     readonly path: ReadonlyArray<string | number>;
     readonly message: string;
   }>;
+  /** A send the compliance gate refused (BF-052): manual only (409) or blocked (422), with reasons. */
+  readonly refusal?: {
+    readonly decision: 'manual_only' | 'blocked';
+    readonly decisionId: string | null;
+    readonly reasons: ReadonlyArray<{ readonly code: string; readonly message: string }>;
+    readonly alternatives: readonly string[];
+  };
 }
 
 /** Thrown by the client for every non-2xx response; `problem` is always populated (synthesised if needed). */

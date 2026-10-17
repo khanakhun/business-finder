@@ -31,6 +31,7 @@ import { GenerationCommands } from './application/generation.commands.ts';
 import { GenerationNotifications } from './application/generation.notifications.ts';
 import { GenerationQuality } from './application/generation.quality.ts';
 import { GenerationQueries } from './application/generation.queries.ts';
+import { GenerationReview } from './application/generation.review.ts';
 import { GenerationRunner } from './application/generation.runner.ts';
 import {
   type AgentEngine,
@@ -50,6 +51,7 @@ import {
   LEASE_SEMAPHORE,
   LIVE_UPDATES,
   QUALITY_PIPELINE,
+  QUALITY_TELEMETRY,
   SITE_HAND_OFF,
   WORKSPACE_BUDGET,
   WORKSPACE_PREPARER,
@@ -79,7 +81,11 @@ import { CodexEngine } from './infrastructure/engines/codex/codex.engine.ts';
 import type { SandboxedEngineDeps } from './infrastructure/engines/sandboxed/sandboxed-agent.engine.ts';
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
-import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
+import {
+  PROMETHEUS_QUALITY_TELEMETRY,
+  PROMETHEUS_SANDBOX_TELEMETRY,
+  PROMETHEUS_TELEMETRY,
+} from './infrastructure/metrics.ts';
 import { pagePlans } from './infrastructure/page-plans.ts';
 import { FullQualityPipeline } from './infrastructure/quality/full-quality.pipeline.ts';
 import { type AuditAssets, SandboxAuditClient } from './infrastructure/quality/sandbox-audit.client.ts';
@@ -102,6 +108,7 @@ import { LibrarySiteImages } from './infrastructure/workspace/library-images.ts'
 import { BundleWorkspacePreparer } from './infrastructure/workspace/workspace-builder.ts';
 import { FactsController } from './interface/http/facts.controller.ts';
 import { GenerationController } from './interface/http/generation.controller.ts';
+import { QualityController } from './interface/http/quality.controller.ts';
 import {
   GenerationBlocksProcessor,
   GenerationClaudeAgentSdkProcessor,
@@ -196,7 +203,7 @@ export class GenerationModule {
     return {
       module: GenerationModule,
       imports: [SitesModule.forRoot(mode), RealtimeModule.forRoot(mode)],
-      controllers: mode === 'worker' ? [] : [GenerationController, FactsController],
+      controllers: mode === 'worker' ? [] : [GenerationController, FactsController, QualityController],
       providers: [
         { provide: GENERATION_REPOSITORY, useClass: DrizzleGenerationRepository },
         { provide: FACT_SOURCES_READER, useClass: DrizzleFactSources },
@@ -374,6 +381,7 @@ export class GenerationModule {
               },
             ]),
         { provide: GENERATION_TELEMETRY, useValue: PROMETHEUS_TELEMETRY },
+        { provide: QUALITY_TELEMETRY, useValue: PROMETHEUS_QUALITY_TELEMETRY },
         {
           provide: SANDBOX_JANITOR,
           inject: [APP_ENV],
@@ -412,6 +420,7 @@ export class GenerationModule {
         GenerationNotifications,
         JobTransitions,
         GenerationCommands,
+        GenerationReview,
         GenerationQueries,
         GenerationRunner,
         GenerationQuality,

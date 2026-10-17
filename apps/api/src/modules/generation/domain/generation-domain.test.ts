@@ -14,7 +14,7 @@ const ALLOWED: Record<GenerationJobStatus, GenerationJobStatus[]> = {
   repairing: ['validating', 'failed', 'cancelled'],
   failed: ['queued'],
   cancelled: ['queued'],
-  needs_review: ['queued'],
+  needs_review: ['queued', 'succeeded', 'repairing'],
   succeeded: [],
 };
 

@@ -70,6 +70,7 @@ beforeEach(() => {
     createVersion: vi.fn(async () => ({ siteId: 'site-1', versionId: 'version-1' })),
     publishPreview: vi.fn(async () => 'https://x.sites.test/'),
     recordQuality: vi.fn(async () => undefined),
+    versionQuality: vi.fn(async () => null),
   };
   const clock = fixedClock('2026-10-16T12:00:00.000Z');
   const fake = new FakeEngine({ durationMs: 4, assetsBaseUrl: 'https://assets.bf-sites.test' });

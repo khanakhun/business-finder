@@ -153,11 +153,11 @@ docs/quality/visual-rubric.md
 - **Evals:** claims recall/precision; critic agreement on the golden set (report attached).
 
 ## Acceptance criteria
-- [ ] Full gate chain implemented as the BF-039 `QualityPipeline` with auto-fix, caching and infra-error safety.
+- [x] Full gate chain implemented as the BF-039 `QualityPipeline` with auto-fix, caching and infra-error safety.
 - [x] `sitekit audit` (axe + Lighthouse + screenshots) runs in a no-egress sandbox profile. (Screenshots for the critic come with part 3.)
 - [ ] Claims gate and visual critic with anchored rubric, evals and calibration (agreement report, thresholds documented).
-- [ ] Quality report stored per version; decisions drive repair (≤ 2) or `needs_review`; review APIs with safe "accept anyway".
-- [ ] Metrics and alerts for gate outcomes, costs and platform regressions.
+- [x] Quality report stored per version; decisions drive repair (≤ 2) or `needs_review`; review APIs with safe "accept anyway".
+- [x] Metrics and alerts for gate outcomes, costs and platform regressions.
 
 ## Agent prompt
 ```text

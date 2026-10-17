@@ -2,7 +2,7 @@ import { type GenerationJobStatus, InvalidStateTransitionError } from '@bf/contr
 
 // The generation job lifecycle (DOMAIN §3.3), as a typed transition table. A repair attempt runs while the job is
 // `repairing` and ends in `validating` again. A person may retry a failed, cancelled or needs-review job (a new
-// attempt, `queued` again); succeeded is final.
+// attempt, `queued` again), and accept or repair a needs-review one (BF-045); succeeded is final.
 
 const TRANSITIONS: Readonly<Record<GenerationJobStatus, readonly GenerationJobStatus[]>> = {
   queued: ['preparing', 'cancelled', 'failed'],
@@ -12,7 +12,8 @@ const TRANSITIONS: Readonly<Record<GenerationJobStatus, readonly GenerationJobSt
   repairing: ['validating', 'failed', 'cancelled'],
   failed: ['queued'],
   cancelled: ['queued'],
-  needs_review: ['queued'],
+  // A person retries it (queued), publishes it anyway (succeeded) or asks for a repair (repairing, BF-045).
+  needs_review: ['queued', 'succeeded', 'repairing'],
   succeeded: [],
 };
 

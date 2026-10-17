@@ -11,7 +11,7 @@ export class SitesModuleHandOff implements SiteHandOff {
       SiteCommands,
       'create' | 'createVersion' | 'publishPreview' | 'recordQuality'
     >,
-    private readonly queries: Pick<SiteQueries, 'get'>,
+    private readonly queries: Pick<SiteQueries, 'get' | 'version'>,
   ) {}
 
   async createVersion(input: Parameters<SiteHandOff['createVersion']>[0]) {
@@ -30,6 +30,10 @@ export class SitesModuleHandOff implements SiteHandOff {
       { type: 'generation_job', id: input.jobId },
     );
     return { siteId, versionId: version.id };
+  }
+
+  async versionQuality(organizationId: string, siteId: string, versionId: string) {
+    return (await this.queries.version(organizationId, siteId, versionId)).quality ?? null;
   }
 
   async recordQuality(input: Parameters<SiteHandOff['recordQuality']>[0]) {

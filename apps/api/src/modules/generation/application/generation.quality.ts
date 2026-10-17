@@ -18,7 +18,9 @@ import {
   type GenerationQueues,
   type GenerationRepository,
   QUALITY_PIPELINE,
+  QUALITY_TELEMETRY,
   type QualityPipeline,
+  type QualityTelemetry,
   SITE_HAND_OFF,
   type SiteHandOff,
 } from './ports.ts';
@@ -49,6 +51,7 @@ export class GenerationQuality {
     private readonly transitions: JobTransitions,
     private readonly runner: GenerationRunner,
     @Optional() @Inject(EVENT_STREAM) private readonly stream?: EventStream | null,
+    @Optional() @Inject(QUALITY_TELEMETRY) private readonly telemetry?: QualityTelemetry | null,
   ) {}
 
   async evaluate(
@@ -85,6 +88,7 @@ export class GenerationQuality {
       supportsRepair: engine?.capabilities.supportsRepair ?? false,
       attemptId: attempt.id,
     });
+    if (result.report) this.telemetry?.evaluated(job.engineCurrent, result.report);
     // The candidate the gates passed: the engine's spec with the safe auto-fixes applied (BF-045).
     const candidate = (result.spec ?? spec) as Record<string, unknown>;
     const verdict = {

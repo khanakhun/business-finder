@@ -1,0 +1,42 @@
+# Prometheus alerting rules for the generation quality gates (BF-045). Load them in the deployment's Prometheus
+# (`rule_files:`); the series come from the API worker's /metrics (bf_generation_quality_*).
+groups:
+  - name: generation-quality
+    rules:
+      - alert: GenerationQualityPlatformRegression
+        # Platform-caused issues (renderer, fonts, scripts) suddenly above their usual rate: a deploy broke the sites,
+        # not the engines. No repair loop runs on them; a person must look.
+        expr: |
+          sum(increase(bf_generation_quality_platform_issues_total[1h])) > 5
+          and
+          sum(increase(bf_generation_quality_platform_issues_total[1h]))
+            > 3 * (sum(increase(bf_generation_quality_platform_issues_total[1d] offset 1h)) / 24 + 1)
+        for: 15m
+        labels:
+          severity: page
+        annotations:
+          summary: Platform-caused quality failures spiked
+          description: More than three times the usual hourly rate of platform-tagged issues (performance or accessibility).
+          runbook: docs/runbooks/generation-quality.md#platform-regression
+      - alert: GenerationQualityGatesErroring
+        # Gates that could not run (sandbox, model API): versions go to review instead of passing.
+        expr: |
+          sum(rate(bf_generation_quality_gates_total{status="error"}[30m]))
+            / clamp_min(sum(rate(bf_generation_quality_gates_total[30m])), 1e-9) > 0.1
+        for: 30m
+        labels:
+          severity: warn
+        annotations:
+          summary: Over 10% of quality gate runs fail to run
+          runbook: docs/runbooks/generation-quality.md#gates-erroring
+      - alert: GenerationNeedsReviewSpike
+        expr: |
+          sum(increase(bf_generation_quality_decisions_total{decision="needs_review"}[6h]))
+            / clamp_min(sum(increase(bf_generation_quality_decisions_total[6h])), 1) > 0.3
+          and sum(increase(bf_generation_quality_decisions_total[6h])) > 20
+        for: 1h
+        labels:
+          severity: warn
+        annotations:
+          summary: Over 30% of generated versions need a review
+          runbook: docs/runbooks/generation-quality.md#needs-review

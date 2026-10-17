@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "AcceptGenerationJobRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
       "AcknowledgeGoogleReviewsRequest": {
         "additionalProperties": false,
         "properties": {
@@ -6755,6 +6769,25 @@
         ],
         "type": "object"
       },
+      "GenerationJobQuality": {
+        "additionalProperties": false,
+        "properties": {
+          "report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QualityReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "report"
+        ],
+        "type": "object"
+      },
       "GeoAreaFeature": {
         "additionalProperties": false,
         "properties": {
@@ -9436,6 +9469,284 @@
         ],
         "type": "object"
       },
+      "QualityGateResult": {
+        "additionalProperties": false,
+        "properties": {
+          "costUsd": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "durationMs": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "id": {
+            "enum": [
+              "schema",
+              "facts",
+              "claims",
+              "copy",
+              "autofix",
+              "a11y",
+              "performance",
+              "visual"
+            ],
+            "type": "string"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/QualityIssue"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "model": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "promptVersion": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "rubric": {
+            "additionalProperties": {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "number"
+            },
+            "propertyNames": {
+              "maxLength": 40,
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "score": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "skipped",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "durationMs",
+          "costUsd",
+          "issues"
+        ],
+        "type": "object"
+      },
+      "QualityIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "autoFixable": {
+            "type": "boolean"
+          },
+          "code": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "evidence": {
+            "maxLength": 600,
+            "type": "string"
+          },
+          "gate": {
+            "enum": [
+              "schema",
+              "facts",
+              "claims",
+              "copy",
+              "autofix",
+              "a11y",
+              "performance",
+              "visual"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 600,
+            "type": "string"
+          },
+          "platform": {
+            "type": "boolean"
+          },
+          "repairable": {
+            "type": "boolean"
+          },
+          "severity": {
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ],
+            "type": "string"
+          },
+          "suggestedFix": {
+            "maxLength": 400,
+            "type": "string"
+          },
+          "target": {
+            "additionalProperties": false,
+            "properties": {
+              "blockId": {
+                "maxLength": 80,
+                "type": "string"
+              },
+              "locale": {
+                "maxLength": 5,
+                "type": "string"
+              },
+              "pageId": {
+                "maxLength": 80,
+                "type": "string"
+              },
+              "path": {
+                "maxLength": 300,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "gate",
+          "code",
+          "severity",
+          "message",
+          "repairable",
+          "autoFixable"
+        ],
+        "type": "object"
+      },
+      "QualityReport": {
+        "additionalProperties": false,
+        "properties": {
+          "autoFixes": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "after": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "before": {
+                  "maxLength": 2000,
+                  "type": "string"
+                },
+                "path": {
+                  "maxLength": 300,
+                  "type": "string"
+                },
+                "rule": {
+                  "maxLength": 80,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "path"
+              ],
+              "type": "object"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "candidateHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "pass",
+              "repair",
+              "needs_review"
+            ],
+            "type": "string"
+          },
+          "gates": {
+            "items": {
+              "$ref": "#/components/schemas/QualityGateResult"
+            },
+            "maxItems": 8,
+            "type": "array"
+          },
+          "infraError": {
+            "type": "boolean"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/QualityIssue"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "pipelineVersion": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "score": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "screenshots": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "page": {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                "ref": {
+                  "maxLength": 500,
+                  "type": "string"
+                },
+                "viewport": {
+                  "maxLength": 20,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "page",
+                "viewport",
+                "ref"
+              ],
+              "type": "object"
+            },
+            "maxItems": 40,
+            "type": "array"
+          }
+        },
+        "required": [
+          "pipelineVersion",
+          "candidateHash",
+          "score",
+          "decision",
+          "infraError",
+          "gates",
+          "autoFixes",
+          "issues",
+          "screenshots",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "RegenerateSiteRequest": {
         "additionalProperties": false,
         "properties": {
@@ -10516,6 +10827,22 @@
           "batchId",
           "jobIds"
         ],
+        "type": "object"
+      },
+      "RepairGenerationJobRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "engine": {
+            "enum": [
+              "blocks",
+              "claude-agent-sdk",
+              "claude-code",
+              "codex",
+              "fake"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "ReplayEventAccepted": {
@@ -25333,6 +25660,107 @@
         ]
       }
     },
+    "/v1/generation-jobs/{id}/accept": {
+      "post": {
+        "operationId": "acceptGenerationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptGenerationJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJob"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Publish a version the gates sent to review, with a reason (never when its schema or facts failed)",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
     "/v1/generation-jobs/{id}/cancel": {
       "post": {
         "operationId": "cancelGenerationJob",
@@ -25473,6 +25901,260 @@
           }
         },
         "summary": "A job’s events as server-sent events: replayed after `Last-Event-ID` (or `?after=`), then live",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/generation-jobs/{id}/quality": {
+      "get": {
+        "operationId": "getGenerationJobQuality",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJobQuality"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The quality report of the job’s latest version (gates, score, decision, issues, screenshots)",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/generation-jobs/{id}/quality/screenshots/{index}": {
+      "get": {
+        "operationId": "getGenerationJobQualityScreenshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "One of the screenshots the visual critic graded",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/generation-jobs/{id}/repair": {
+      "post": {
+        "operationId": "repairGenerationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairGenerationJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationJob"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Ask for a repair of a reviewed version on its report’s issues (on another engine if given)",
         "tags": [
           "generation"
         ]

@@ -35,6 +35,10 @@ import { GenerationQueries } from './application/generation.queries.ts';
 import { GenerationReview } from './application/generation.review.ts';
 import { GenerationRunner } from './application/generation.runner.ts';
 import {
+  GENERATION_SETTINGS_DEFAULTS,
+  GenerationSettingsService,
+} from './application/generation.settings.ts';
+import {
   type AgentEngine,
   type ArtifactStore,
   BUNDLE_UNPACKER,
@@ -47,6 +51,7 @@ import {
   GENERATION_QUEUES,
   GENERATION_REPOSITORY,
   GENERATION_SETTINGS,
+  GENERATION_SETTINGS_STORE,
   GENERATION_TELEMETRY,
   type GenerationLimits,
   type GenerationRepository,
@@ -76,6 +81,7 @@ import {
   DrizzleFactSources,
 } from './infrastructure/drizzle-facts.repository.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
+import { DrizzleGenerationSettingsStore } from './infrastructure/drizzle-generation-settings.ts';
 import { BlocksEngine } from './infrastructure/engines/blocks/blocks.engine.ts';
 import { ClaudeAgentSdkEngine } from './infrastructure/engines/claude-agent-sdk/claude-agent-sdk.engine.ts';
 import { ClaudeCodeEngine } from './infrastructure/engines/claude-code/claude-code.engine.ts';
@@ -113,6 +119,7 @@ import { FactsController } from './interface/http/facts.controller.ts';
 import { GenerationController } from './interface/http/generation.controller.ts';
 import { JobFilesController } from './interface/http/job-files.controller.ts';
 import { QualityController } from './interface/http/quality.controller.ts';
+import { GenerationSettingsController } from './interface/http/settings.controller.ts';
 import {
   GenerationBlocksProcessor,
   GenerationClaudeAgentSdkProcessor,
@@ -210,7 +217,13 @@ export class GenerationModule {
       controllers:
         mode === 'worker'
           ? []
-          : [GenerationController, FactsController, QualityController, JobFilesController],
+          : [
+              GenerationController,
+              FactsController,
+              QualityController,
+              JobFilesController,
+              GenerationSettingsController,
+            ],
       providers: [
         { provide: GENERATION_REPOSITORY, useClass: DrizzleGenerationRepository },
         { provide: FACT_SOURCES_READER, useClass: DrizzleFactSources },
@@ -250,11 +263,15 @@ export class GenerationModule {
           ) => new StaticEngineRegistry(engines(env as ApiEnv, { gateway, artifacts, sandbox, secrets })),
         },
         {
-          provide: GENERATION_SETTINGS,
+          provide: GENERATION_SETTINGS_DEFAULTS,
           inject: [ENGINE_REGISTRY],
           useFactory: (registry: EngineRegistry) =>
             new DefaultGenerationSettings(() => registry.list().map((engine) => engine.id)),
         },
+        // A workspace's stored settings over those defaults (BF-046).
+        { provide: GENERATION_SETTINGS_STORE, useClass: DrizzleGenerationSettingsStore },
+        GenerationSettingsService,
+        { provide: GENERATION_SETTINGS, useExisting: GenerationSettingsService },
         {
           provide: GENERATION_LIMITS,
           inject: [APP_ENV],

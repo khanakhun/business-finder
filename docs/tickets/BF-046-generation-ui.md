@@ -156,11 +156,11 @@ apps/web/src/app/(dashboard)/generation/{page.tsx, batches/[batchId]/page.tsx, j
 - **Accessibility:** axe on sheet, board and console; keyboard-only reorder and actions; live region announcements.
 
 ## Acceptance criteria
-- [ ] "Create sites" from selection with per-item order (priority), engine choice (availability/cost/time/load), assignment presets, one-by-one vs parallel, brief preview/overrides and estimate.
-- [ ] Live batch board with reorder, start next, cancel, retry, accept anyway, results (preview URL, screenshot, quality).
-- [ ] Job console streaming agent activity with resume; quality, brief and artifacts tabs.
-- [ ] Generation home with engines panel and needs-review queue; generation settings; business Sites tab.
-- [ ] E2E, accessibility and performance checks pass; EN/FR.
+- [x] "Create sites" from selection with per-item order (priority), engine choice (availability/cost/time/load), assignment presets, one-by-one vs parallel, brief preview/overrides and estimate.
+- [x] Live batch board with reorder, start next, cancel, retry, accept anyway, results (preview URL, screenshot, quality).
+- [x] Job console streaming agent activity with resume; quality, brief and artifacts tabs.
+- [x] Generation home with engines panel and needs-review queue; generation settings; business Sites tab.
+- [ ] E2E, accessibility and performance checks pass; EN/FR. *(EN/FR done; tests paused 2026-10-17, see QUESTIONS.md "Testing paused")*
 
 ## Agent prompt
 ```text

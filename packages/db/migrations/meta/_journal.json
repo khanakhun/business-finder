@@ -246,6 +246,13 @@
       "when": 1792190321610,
       "tag": "0034_generation_brief_overrides",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792227103183,
+      "tag": "0035_generation_workspace_settings",
+      "breakpoints": true
     }
   ]
 }

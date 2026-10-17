@@ -47,6 +47,19 @@ export function registerDefaultTabs(): void {
     }),
   });
   businessTabs.register({
+    // BF-046.
+    id: 'sites',
+    labelKey: 'business.tabs.sites',
+    order: 29,
+    permission: 'sites:read',
+    component: dynamic(
+      () => import('@/features/generation/business-tab/sites-tab.tsx').then((m) => m.SitesTab),
+      {
+        loading: TabSkeleton,
+      },
+    ),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

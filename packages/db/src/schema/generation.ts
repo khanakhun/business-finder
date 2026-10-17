@@ -11,6 +11,7 @@ import {
   type GenerationBatchStatus,
   type GenerationJobStatus,
   type GenerationSettings,
+  type GenerationWorkspaceSettings,
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
@@ -28,7 +29,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { id, orgId } from '../columns.ts';
+import { id, orgId, timestamps } from '../columns.ts';
 import { organization, user } from './auth.ts';
 import { businesses } from './business-graph.ts';
 import { websiteSnapshots } from './enrichment.ts';
@@ -288,3 +289,16 @@ export const siteFactExtractions = pgTable(
     index('idx_site_fact_extractions__business_id_created_at').on(table.businessId, table.createdAt.desc()),
   ],
 );
+
+/**
+ * A workspace's generation settings (BF-046 Settings → Generation): engines allowed, concurrency, failover, budgets,
+ * defaults and engine assignment presets. No row = the deployment's defaults.
+ */
+export const generationWorkspaceSettings = pgTable('generation_workspace_settings', {
+  organizationId: uuid()
+    .primaryKey()
+    .references(() => organization.id, { onDelete: 'cascade' }),
+  settings: jsonb().$type<GenerationWorkspaceSettings>().notNull(),
+  updatedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+  ...timestamps(),
+});

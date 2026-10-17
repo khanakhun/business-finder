@@ -232,7 +232,8 @@
     "audit": "Journal d'audit",
     "notifications": "Notifications",
     "taxonomy": "Catégories",
-    "scoring": "Scoring"
+    "scoring": "Scoring",
+    "generation": "Génération"
   },
   "account": {
     "title": "Compte",
@@ -1026,7 +1027,8 @@
       "activity": "Activité",
       "website": "Site web",
       "reviews": "Avis",
-      "scores": "Scores"
+      "scores": "Scores",
+      "sites": "Sites"
     },
     "actions": {
       "label": "Actions rapides",
@@ -2707,7 +2709,8 @@
       "placeholder": "2 claude-code + 2 codex + reste blocks",
       "help": "Par position : nombres et moteurs séparés par + ou des virgules ; « reste » pour les autres.",
       "invalid": "Ce modèle n'est pas lisible.",
-      "apply": "Appliquer"
+      "apply": "Appliquer",
+      "presets": "Modèles enregistrés"
     },
     "estimate": {
       "title": "Estimation",
@@ -3036,6 +3039,67 @@
         "open": "Relire",
         "more": "Voir plus"
       }
+    },
+    "settings": {
+      "title": "Génération",
+      "description": "Moteurs, limites, relais, budgets et réglages par défaut des sites d'aperçu.",
+      "loadError": "Les réglages de génération n'ont pas pu être chargés.",
+      "saved": "Réglages de génération enregistrés",
+      "saveError": "Les réglages n'ont pas pu être enregistrés.",
+      "save": "Enregistrer",
+      "reset": "Annuler les modifications",
+      "readOnly": "Seuls les administrateurs de l'espace peuvent modifier ces réglages.",
+      "defaultEngine": "Moteur par défaut",
+      "engines": {
+        "title": "Moteurs",
+        "description": "Les moteurs que cet espace peut utiliser, combien de chacun en même temps, et le budget par défaut d'un site.",
+        "concurrency": "En même temps",
+        "noLimit": "Sans limite",
+        "budget": "Budget (USD)"
+      },
+      "failover": {
+        "title": "Relais",
+        "description": "Quand un moteur échoue définitivement, la tâche passe au moteur suivant dans cet ordre.",
+        "order": "Ordre de relais",
+        "none": "Pas de relais : une tâche qui échoue sur son moteur reste en échec."
+      },
+      "defaults": {
+        "title": "Par défaut",
+        "autoPublish": "Publier un aperçu quand un site est prêt",
+        "attempts": "Tentatives par moteur",
+        "locales": "Langues des sites",
+        "runMode": "Mode d'exécution dans Créer des sites",
+        "mode": {
+          "parallel": "En parallèle",
+          "sequential": "Une par une"
+        }
+      },
+      "presets": {
+        "title": "Modèles de moteurs",
+        "description": "Modèles enregistrés pour « Répartir les moteurs… » dans Créer des sites.",
+        "none": "Aucun modèle pour le moment.",
+        "name": "Nom",
+        "pattern": "Modèle",
+        "add": "Ajouter le modèle",
+        "remove": "Retirer {name}"
+      }
+    },
+    "businessTab": {
+      "title": "Sites",
+      "generate": "Générer un site",
+      "regenerate": "Régénérer",
+      "error": "Les sites n'ont pas pu être chargés.",
+      "none": "Pas encore de site pour cette entreprise.",
+      "version": "Version {version}",
+      "noVersion": "Pas encore de version",
+      "updated": "modifié le {when}",
+      "preview": "Aperçu",
+      "expires": "expire le {when}",
+      "edit": "Modifier",
+      "jobs": "Dernières générations",
+      "noJobs": "Aucune génération pour le moment.",
+      "quality": "Qualité {score}",
+      "openJob": "Ouvrir"
     }
   }
 }

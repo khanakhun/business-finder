@@ -23,7 +23,7 @@ import { ScoreBadge } from '@/features/scoring/score-badge.tsx';
 import { useCategories } from '@/features/search/hooks.tsx';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
-import { useBusinessSite, useCreateBatch, useEngines, useSelection } from '../api.ts';
+import { useBusinessSite, useCreateBatch, useEngines, useGenerationSettings, useSelection } from '../api.ts';
 import { defaultParallel, type PickableEngine, unavailableReason } from '../engines.ts';
 import { move } from '../reorder.ts';
 import { SortableList } from '../sortable-list.tsx';
@@ -58,28 +58,31 @@ export function CreateSitesPage() {
   const selection = useSelection(selected);
   const engines = useEngines();
   const create = useCreateBatch();
+  const settings = useGenerationSettings();
   const [idempotencyKey] = React.useState(() => crypto.randomUUID());
   const [items, setItems] = React.useState<Item[] | null>(null);
   const [expanded, setExpanded] = React.useState<string | null>(null);
-  const [mode, setMode] = React.useState<RunMode>('parallel');
+  const [mode, setMode] = React.useState<RunMode | null>(null);
   const [parallel, setParallel] = React.useState<number | null>(null);
   const [autoPublish, setAutoPublish] = React.useState(true);
   const [name, setName] = React.useState('');
   const [budget, setBudget] = React.useState('');
 
   // The selection arrives once; from then on the page owns the order and the choices.
+  // Each item starts on the workspace's default engine (Settings → Generation).
+  const defaultEngine = settings.data?.settings.defaultEngine ?? 'auto';
   React.useEffect(() => {
-    if (items || !selection.data) return;
+    if (items || !selection.data || settings.isLoading) return;
     setItems(
       selection.data.map((business) => ({
         id: business.id,
         label: business.displayName,
         business,
-        engine: 'auto',
+        engine: defaultEngine,
         overrides: {},
       })),
     );
-  }, [items, selection.data]);
+  }, [items, selection.data, settings.isLoading, defaultEngine]);
 
   if (!canGenerate) return <EmptyState title={t('forbidden')} />;
   if (selected.length === 0) {
@@ -119,9 +122,11 @@ export function CreateSitesPage() {
     );
   }
 
+  // The workspace's default run mode until the person picks one (Settings → Generation).
+  const runMode: RunMode = mode ?? settings.data?.settings.defaultRunMode ?? 'parallel';
   const chosen = items.map((item) => item.engine);
   const slots = defaultParallel(chosen, engines.data);
-  const maxParallel = mode === 'sequential' ? 1 : Math.min(items.length, parallel ?? slots);
+  const maxParallel = runMode === 'sequential' ? 1 : Math.min(items.length, parallel ?? slots);
   const blocked = items.some((item) => unavailableReason(item.engine, engines.data) !== null);
   const update = (id: string, patch: Partial<Item>) =>
     setItems((current) => current?.map((item) => (item.id === id ? { ...item, ...patch } : item)) ?? null);
@@ -182,6 +187,7 @@ export function CreateSitesPage() {
               </Select>
               <AssignEngines
                 count={items.length}
+                presets={settings.data?.settings.presets ?? []}
                 onApply={(assigned) =>
                   setItems(
                     (current) =>
@@ -228,13 +234,13 @@ export function CreateSitesPage() {
                   type="radio"
                   name="run-mode"
                   value={value}
-                  checked={mode === value}
+                  checked={runMode === value}
                   onChange={() => setMode(value)}
                   className="mt-1"
                 />
                 <span>
                   {t(`mode.${value}`)}
-                  {value === 'parallel' && mode === 'parallel' ? (
+                  {value === 'parallel' && runMode === 'parallel' ? (
                     <span className="mt-1 flex items-center gap-2">
                       <Label htmlFor="max-parallel" className="text-xs font-normal">
                         {t('upTo')}

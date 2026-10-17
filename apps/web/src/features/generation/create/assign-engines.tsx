@@ -1,5 +1,6 @@
 'use client';
 
+import type { EngineAssignmentPreset } from '@bf/contracts';
 import { Button } from '@bf/ui/components/button';
 import { Input } from '@bf/ui/components/input';
 import { Label } from '@bf/ui/components/label';
@@ -15,9 +16,12 @@ import { assignEngines, type PickableEngine, parsePattern } from '../engines.ts'
 export function AssignEngines({
   count,
   onApply,
+  presets = [],
 }: {
   readonly count: number;
   readonly onApply: (engines: PickableEngine[]) => void;
+  /** The workspace's saved patterns (Settings → Generation). */
+  readonly presets?: readonly EngineAssignmentPreset[];
 }) {
   const t = useTranslations('generation.assign');
   const engines = useTranslations('generation.engines.name');
@@ -39,6 +43,25 @@ export function AssignEngines({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 space-y-2">
+        {presets.length > 0 ? (
+          <div className="space-y-1">
+            <p className="text-xs font-medium">{t('presets')}</p>
+            <div className="flex flex-wrap gap-1">
+              {presets.map((preset) => (
+                <Button
+                  key={preset.id}
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  title={preset.pattern}
+                  onClick={() => setText(preset.pattern)}
+                >
+                  {preset.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <form
           className="space-y-2"
           onSubmit={(event) => {

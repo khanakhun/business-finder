@@ -6985,6 +6985,203 @@
         ],
         "type": "object"
       },
+      "GenerationSettingsView": {
+        "additionalProperties": false,
+        "properties": {
+          "engines": {
+            "items": {
+              "enum": [
+                "blocks",
+                "claude-agent-sdk",
+                "claude-code",
+                "codex",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxConcurrency": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/GenerationWorkspaceSettings"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "settings",
+          "engines",
+          "maxConcurrency",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "GenerationWorkspaceSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedEngines": {
+            "items": {
+              "enum": [
+                "blocks",
+                "claude-agent-sdk",
+                "claude-code",
+                "codex",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "autoPublishPreview": {
+            "type": "boolean"
+          },
+          "defaultEngine": {
+            "anyOf": [
+              {
+                "const": "auto",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "blocks",
+                  "claude-agent-sdk",
+                  "claude-code",
+                  "codex",
+                  "fake"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "defaultRunMode": {
+            "enum": [
+              "parallel",
+              "sequential"
+            ],
+            "type": "string"
+          },
+          "engineBudgetsUsd": {
+            "additionalProperties": {
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "blocks",
+                "claude-agent-sdk",
+                "claude-code",
+                "codex",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "engineConcurrency": {
+            "additionalProperties": {
+              "maximum": 20,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "blocks",
+                "claude-agent-sdk",
+                "claude-code",
+                "codex",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "failoverChain": {
+            "items": {
+              "enum": [
+                "blocks",
+                "claude-agent-sdk",
+                "claude-code",
+                "codex",
+                "fake"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "locales": {
+            "items": {
+              "pattern": "^[a-z]{2}$",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "maxAttemptsPerEngine": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "presets": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "pattern": "^[a-z0-9-]{1,40}$",
+                  "type": "string"
+                },
+                "name": {
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "pattern": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "pattern"
+              ],
+              "type": "object"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "required": [
+          "allowedEngines",
+          "defaultEngine",
+          "engineConcurrency",
+          "failoverChain",
+          "engineBudgetsUsd",
+          "maxAttemptsPerEngine",
+          "autoPublishPreview",
+          "locales",
+          "defaultRunMode",
+          "presets"
+        ],
+        "type": "object"
+      },
       "GeoAreaFeature": {
         "additionalProperties": false,
         "properties": {
@@ -16340,6 +16537,9 @@
           }
         },
         "type": "object"
+      },
+      "UpdateGenerationSettingsRequest": {
+        "$ref": "#/components/schemas/GenerationWorkspaceSettings"
       },
       "UpdateNotificationPreferencesRequest": {
         "additionalProperties": false,
@@ -26852,6 +27052,138 @@
           }
         },
         "summary": "The engines, their capabilities, availability and load",
+        "tags": [
+          "generation"
+        ]
+      }
+    },
+    "/v1/generation/settings": {
+      "get": {
+        "operationId": "getGenerationSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationSettingsView"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace’s generation settings, and the engines this deployment offers",
+        "tags": [
+          "generation"
+        ]
+      },
+      "put": {
+        "operationId": "updateGenerationSettings",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGenerationSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationSettingsView"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Replace the workspace’s generation settings",
         "tags": [
           "generation"
         ]

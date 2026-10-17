@@ -232,7 +232,8 @@
     "audit": "Audit log",
     "notifications": "Notifications",
     "taxonomy": "Categories",
-    "scoring": "Scoring"
+    "scoring": "Scoring",
+    "generation": "Generation"
   },
   "account": {
     "title": "Account",
@@ -1026,7 +1027,8 @@
       "activity": "Activity",
       "website": "Website",
       "reviews": "Reviews",
-      "scores": "Scores"
+      "scores": "Scores",
+      "sites": "Sites"
     },
     "actions": {
       "label": "Quick actions",
@@ -2707,7 +2709,8 @@
       "placeholder": "2 claude-code + 2 codex + rest blocks",
       "help": "By position: counts and engines separated by + or commas; “rest” for the others.",
       "invalid": "This pattern cannot be read.",
-      "apply": "Apply"
+      "apply": "Apply",
+      "presets": "Saved presets"
     },
     "estimate": {
       "title": "Estimate",
@@ -3036,6 +3039,67 @@
         "open": "Review",
         "more": "Show more"
       }
+    },
+    "settings": {
+      "title": "Generation",
+      "description": "Engines, limits, failover, budgets and defaults for preview sites.",
+      "loadError": "The generation settings could not be loaded.",
+      "saved": "Generation settings saved",
+      "saveError": "The settings could not be saved.",
+      "save": "Save",
+      "reset": "Undo changes",
+      "readOnly": "Only workspace admins can change these settings.",
+      "defaultEngine": "Default engine",
+      "engines": {
+        "title": "Engines",
+        "description": "The engines this workspace may use, how many of each run at once, and each site's default budget.",
+        "concurrency": "At once",
+        "noLimit": "No limit",
+        "budget": "Budget (USD)"
+      },
+      "failover": {
+        "title": "Failover",
+        "description": "When an engine fails for good, the job moves to the next engine in this order.",
+        "order": "Failover order",
+        "none": "No failover: a job that fails on its engine stays failed."
+      },
+      "defaults": {
+        "title": "Defaults",
+        "autoPublish": "Publish a preview when a site is ready",
+        "attempts": "Attempts per engine",
+        "locales": "Site languages",
+        "runMode": "Run mode in Create sites",
+        "mode": {
+          "parallel": "In parallel",
+          "sequential": "One by one"
+        }
+      },
+      "presets": {
+        "title": "Engine presets",
+        "description": "Saved patterns for “Assign engines…” in Create sites.",
+        "none": "No presets yet.",
+        "name": "Name",
+        "pattern": "Pattern",
+        "add": "Add preset",
+        "remove": "Remove {name}"
+      }
+    },
+    "businessTab": {
+      "title": "Sites",
+      "generate": "Generate site",
+      "regenerate": "Regenerate",
+      "error": "The sites could not be loaded.",
+      "none": "No site for this business yet.",
+      "version": "Version {version}",
+      "noVersion": "No version yet",
+      "updated": "updated {when}",
+      "preview": "Preview",
+      "expires": "expires {when}",
+      "edit": "Edit",
+      "jobs": "Latest generations",
+      "noJobs": "No generation yet.",
+      "quality": "Quality {score}",
+      "openJob": "Open"
     }
   }
 }

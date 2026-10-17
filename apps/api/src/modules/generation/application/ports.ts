@@ -7,6 +7,7 @@ import type {
   GenerationBatchStatus,
   GenerationJobStatus,
   GenerationSettings,
+  GenerationWorkspaceSettings,
   QualityReport,
 } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
@@ -441,6 +442,15 @@ export interface StoredArtifact {
 /** Reads a workspace bundle's files (the infrastructure's zstd-compressed tar). */
 export type BundleUnpacker = (bundle: Buffer) => Map<string, Buffer>;
 export const BUNDLE_UNPACKER = Symbol('BundleUnpacker');
+
+/** A workspace's stored generation settings (BF-046); undefined while it runs on the defaults. */
+export interface GenerationSettingsStore {
+  get(
+    organizationId: string,
+  ): Promise<{ readonly settings: GenerationWorkspaceSettings; readonly updatedAt: Date } | undefined>;
+  put(organizationId: string, userId: string, settings: GenerationWorkspaceSettings): Promise<Date>;
+}
+export const GENERATION_SETTINGS_STORE = Symbol('GenerationSettingsStore');
 
 export interface GenerationSettingsReader {
   resolve(organizationId: string): Promise<GenerationSettings>;

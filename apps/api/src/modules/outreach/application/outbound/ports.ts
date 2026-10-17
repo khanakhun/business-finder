@@ -51,6 +51,7 @@ export interface OutboundRecord {
   readonly providerThreadId: string | null;
   readonly inReplyTo: string | null;
   readonly attempts: number;
+  readonly lastAttemptAt: Date | null;
   readonly lastError: OutboundError | null;
   readonly statusHistory: StatusEntry[];
   readonly idempotencyKey: string;
@@ -63,7 +64,14 @@ export interface OutboundRecord {
 
 export type NewOutbound = Omit<
   OutboundRecord,
-  'createdAt' | 'updatedAt' | 'attempts' | 'lastError' | 'leaseUntil' | 'sentAt' | 'providerMessageId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'attempts'
+  | 'lastAttemptAt'
+  | 'lastError'
+  | 'leaseUntil'
+  | 'sentAt'
+  | 'providerMessageId'
 >;
 
 export type OutboundPatch = Partial<
@@ -79,6 +87,7 @@ export type OutboundPatch = Partial<
     | 'sendDecisionId'
     | 'blockedReasons'
     | 'attempts'
+    | 'lastAttemptAt'
     | 'lastError'
     | 'subject'
     | 'bodyText'
@@ -146,10 +155,27 @@ export interface OutboundRepository {
     to: OutboundStatus,
     patch: OutboundPatch,
     entry: StatusEntry,
+    /** Also require this lease (the send worker). */
+    lease?: Date,
   ): Promise<OutboundRecord | undefined>;
   list(organizationId: string, filter: OutboundListFilter): Promise<OutboundListRow[]>;
   listRow(organizationId: string, id: string): Promise<OutboundListRow | undefined>;
   forBusiness(organizationId: string, businessId: string, limit: number): Promise<OutboundListRow[]>;
+  // The send path (worker: no workspace filter, ids come from claimed rows)
+  byId(id: string): Promise<OutboundRecord | undefined>;
+  /**
+   * Due `queued` messages move to `sending` with a lease (`FOR UPDATE SKIP LOCKED`: concurrent ticks never claim
+   * the same row).
+   */
+  claimDue(now: Date, leaseUntil: Date, limit: number): Promise<OutboundRecord[]>;
+  /** `sending` messages whose lease ran out (a worker died, a send hung) get a new lease to be reconciled. */
+  releaseExpired(now: Date, leaseUntil: Date, limit: number): Promise<OutboundRecord[]>;
+  /** Failed messages due for an automatic retry go back to `queued`. */
+  requeueRetries(now: Date, maxAttempts: number, limit: number): Promise<number>;
+  /** Updates a message only while it is still `sending` under this lease. */
+  updateLeased(id: string, lease: Date, patch: OutboundPatch): Promise<OutboundRecord | undefined>;
+  /** Messages still `sending` though their lease ended before `before` (the stuck-send alert). */
+  countStuck(before: Date): Promise<number>;
   // Threads
   insertThread(row: Omit<ThreadRecord, 'lastMessageAt' | 'status'>): Promise<ThreadRecord>;
   /** The latest open thread with the business (and contact), for a follow-up. */
@@ -160,7 +186,7 @@ export interface OutboundRepository {
   ): Promise<ThreadRecord | undefined>;
   /** The thread's latest sent message (In-Reply-To / References of a follow-up). */
   lastSent(threadId: string): Promise<OutboundRecord | undefined>;
-  touchThread(threadId: string, at: Date): Promise<void>;
+  touchThread(threadId: string, at: Date, providerThreadId: string | null): Promise<void>;
   // Manual contact logs
   insertManualLog(row: Omit<ManualLogRecord, 'createdAt'>): Promise<ManualLogRecord>;
   manualLogs(organizationId: string, businessId: string, limit: number): Promise<ManualLogRecord[]>;

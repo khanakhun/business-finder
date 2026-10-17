@@ -11,6 +11,7 @@ import {
   type MailboxProvider,
   type RawInbound,
   type SendResult,
+  type SentProbe,
   type SmtpConnectionTester,
   type SyncCursor,
 } from '../../../application/mailbox/ports.ts';
@@ -182,6 +183,39 @@ export class SmtpImapProvider implements MailboxProvider, SmtpConnectionTester {
       options.signal.removeEventListener('abort', abort);
       transport.close();
     }
+  }
+
+  /**
+   * `SEARCH HEADER` in the Sent folder: our Message-ID, else our `X-BF-Outbound-Id`. Without IMAP (or without the copy
+   * in Sent) the outcome cannot be known: that throws, and the pipeline does not resend.
+   */
+  async findSent(mailbox: MailboxCtx, probe: SentProbe, signal: AbortSignal): Promise<SendResult | null> {
+    const { imap, user, pass } = await this.account(mailbox);
+    if (!imap || !mailbox.providerState.appendToSent)
+      throw new MailboxProviderError('smtp_imap', 'unknown', 'No Sent folder to check the send against', {
+        retryable: false,
+      });
+    if (signal.aborted) throw new MailboxProviderError('smtp_imap', 'unreachable', 'Reconciliation aborted');
+    const folder = mailbox.providerState.sentFolder ?? 'Sent';
+    return this.withImap(imap, user, pass, async (client) => {
+      const lock = await client.getMailboxLock(folder);
+      try {
+        for (const header of [
+          { 'message-id': probe.rfc822MessageId },
+          { 'x-bf-outbound-id': probe.outboundId },
+        ]) {
+          const uids = await client.search(
+            { header, since: new Date(probe.since.getTime() - 86_400_000) },
+            { uid: true },
+          );
+          if (uids && uids.length > 0)
+            return { providerMessageId: probe.rfc822MessageId, rfc822MessageId: probe.rfc822MessageId };
+        }
+        return null;
+      } finally {
+        lock.release();
+      }
+    });
   }
 
   async syncChanges(mailbox: MailboxCtx, cursor: SyncCursor | null) {

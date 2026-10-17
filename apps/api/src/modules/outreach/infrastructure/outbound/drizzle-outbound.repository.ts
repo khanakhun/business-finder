@@ -1,7 +1,8 @@
+import type { OutboundStatus } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { businesses, emailThreads, mailboxes, manualContactLogs, outboundMessages } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, gte, inArray, isNull, lt, lte, or, type SQL, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNull, lt, lte, or, type SQL, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type {
   ManualLogRecord,
@@ -67,6 +68,7 @@ export class DrizzleOutboundRepository implements OutboundRepository {
     to: Parameters<OutboundRepository['transition']>[3],
     patch: Parameters<OutboundRepository['transition']>[4],
     entry: Parameters<OutboundRepository['transition']>[5],
+    lease?: Date,
   ) {
     const [row] = await this.x
       .update(outboundMessages)
@@ -80,6 +82,7 @@ export class DrizzleOutboundRepository implements OutboundRepository {
           eq(outboundMessages.organizationId, organizationId),
           eq(outboundMessages.id, id),
           inArray(outboundMessages.status, [...from]),
+          lease ? eq(outboundMessages.leaseUntil, lease) : undefined,
         ),
       )
       .returning();
@@ -168,8 +171,95 @@ export class DrizzleOutboundRepository implements OutboundRepository {
     return row as OutboundRecord | undefined;
   }
 
-  async touchThread(threadId: string, at: Date) {
-    await this.x.update(emailThreads).set({ lastMessageAt: at }).where(eq(emailThreads.id, threadId));
+  async touchThread(threadId: string, at: Date, providerThreadId: string | null) {
+    await this.x
+      .update(emailThreads)
+      .set({ lastMessageAt: at, ...(providerThreadId ? { providerThreadId } : {}) })
+      .where(eq(emailThreads.id, threadId));
+  }
+
+  async byId(id: string) {
+    const [row] = await this.x.select().from(outboundMessages).where(eq(outboundMessages.id, id));
+    return row as OutboundRecord | undefined;
+  }
+
+  private history(status: OutboundStatus, at: Date, detail: string | null) {
+    return sql`${outboundMessages.statusHistory} || ${JSON.stringify([{ at: at.toISOString(), status, detail }])}::jsonb`;
+  }
+
+  async claimDue(now: Date, leaseUntil: Date, limit: number) {
+    const due = this.x
+      .select({ id: outboundMessages.id })
+      .from(outboundMessages)
+      .where(and(eq(outboundMessages.status, 'queued'), lte(outboundMessages.scheduledAt, now)))
+      .orderBy(outboundMessages.scheduledAt)
+      .limit(limit)
+      .for('update', { skipLocked: true });
+    return (await this.x
+      .update(outboundMessages)
+      .set({ status: 'sending', leaseUntil, statusHistory: this.history('sending', now, null) })
+      .where(and(inArray(outboundMessages.id, due), eq(outboundMessages.status, 'queued')))
+      .returning()) as OutboundRecord[];
+  }
+
+  async releaseExpired(now: Date, leaseUntil: Date, limit: number) {
+    const expired = this.x
+      .select({ id: outboundMessages.id })
+      .from(outboundMessages)
+      .where(and(eq(outboundMessages.status, 'sending'), lt(outboundMessages.leaseUntil, now)))
+      .orderBy(outboundMessages.leaseUntil)
+      .limit(limit)
+      .for('update', { skipLocked: true });
+    return (await this.x
+      .update(outboundMessages)
+      .set({ leaseUntil, statusHistory: this.history('sending', now, 'lease expired: reconcile') })
+      .where(and(inArray(outboundMessages.id, expired), eq(outboundMessages.status, 'sending')))
+      .returning()) as OutboundRecord[];
+  }
+
+  async requeueRetries(now: Date, maxAttempts: number, limit: number) {
+    const due = this.x
+      .select({ id: outboundMessages.id })
+      .from(outboundMessages)
+      .where(
+        and(
+          eq(outboundMessages.status, 'failed'),
+          lte(outboundMessages.scheduledAt, now),
+          lt(outboundMessages.attempts, maxAttempts),
+          sql`(${outboundMessages.lastError} ->> 'retryable') = 'true'`,
+        ),
+      )
+      .limit(limit)
+      .for('update', { skipLocked: true });
+    const rows = await this.x
+      .update(outboundMessages)
+      .set({ status: 'queued', statusHistory: this.history('queued', now, 'automatic retry') })
+      .where(and(inArray(outboundMessages.id, due), eq(outboundMessages.status, 'failed')))
+      .returning({ id: outboundMessages.id });
+    return rows.length;
+  }
+
+  async updateLeased(id: string, lease: Date, patch: Parameters<OutboundRepository['updateLeased']>[2]) {
+    const [row] = await this.x
+      .update(outboundMessages)
+      .set(patch)
+      .where(
+        and(
+          eq(outboundMessages.id, id),
+          eq(outboundMessages.status, 'sending'),
+          eq(outboundMessages.leaseUntil, lease),
+        ),
+      )
+      .returning();
+    return row as OutboundRecord | undefined;
+  }
+
+  async countStuck(before: Date) {
+    const [row] = await this.x
+      .select({ n: count() })
+      .from(outboundMessages)
+      .where(and(eq(outboundMessages.status, 'sending'), lt(outboundMessages.leaseUntil, before)));
+    return Number(row?.n ?? 0);
   }
 
   async insertManualLog(row: Parameters<OutboundRepository['insertManualLog']>[0]) {

@@ -330,6 +330,20 @@
       "when": 1792243510225,
       "tag": "0046_outbound_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1792244350172,
+      "tag": "0047_outbound_send_decision",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1792244545510,
+      "tag": "0048_outbound_last_attempt",
+      "breakpoints": true
     }
   ]
 }

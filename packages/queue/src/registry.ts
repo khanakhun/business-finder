@@ -118,6 +118,16 @@ export const QUEUES = {
   sitesScreenshot: { name: 'sites-screenshot', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 2 },
   /** Views flush (Valkey → site_view_daily) and the hourly `site.viewed` events, every 5 minutes. */
   sitesViews: { name: 'sites-views', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  /**
+   * Outbound email (BF-052): the minute tick claims due messages; one send job per claimed message. Attempts are
+   * the pipeline's (reconciled before any resend), never BullMQ's.
+   */
+  outreachTick: { name: 'outreach-tick', defaultJobOptions: DEFAULT_JOB_OPTIONS, concurrency: 1 },
+  outreachSend: {
+    name: 'outreach-send',
+    defaultJobOptions: { ...DEFAULT_JOB_OPTIONS, attempts: 1 },
+    concurrency: 4,
+  },
 } as const satisfies Record<string, QueueDefinition>;
 
 export type QueueName = keyof typeof QUEUES;

@@ -5,6 +5,7 @@ import type {
   MailboxProvider,
   RawInbound,
   SendResult,
+  SentProbe,
   SyncCursor,
 } from '../../../application/mailbox/ports.ts';
 import { MailboxProviderError } from '../../../domain/mailbox/errors.ts';
@@ -64,6 +65,43 @@ export class GmailProvider implements MailboxProvider {
       rfc822MessageId,
       ...(sent.threadId ? { providerThreadId: sent.threadId } : {}),
     };
+  }
+
+  /** By our Message-ID (`rfc822msgid:`), else recent sent mail to the recipient confirmed by `X-BF-Outbound-Id`. */
+  async findSent(mailbox: MailboxCtx, probe: SentProbe, signal: AbortSignal): Promise<SendResult | null> {
+    const search = async (q: string) => {
+      const { body } = await providerFetch(
+        'gmail',
+        'mailbox-api',
+        `${API}/messages?maxResults=10&q=${encodeURIComponent(q)}`,
+        { headers: await auth(mailbox), signal },
+      );
+      return (body as { messages?: { id: string; threadId?: string }[] }).messages ?? [];
+    };
+    const byId = await search(`in:sent rfc822msgid:${probe.rfc822MessageId.replace(/[<>]/g, '')}`);
+    const candidates =
+      byId.length > 0
+        ? byId
+        : await search(`in:sent to:${probe.to} after:${Math.floor(probe.since.getTime() / 1000) - 60}`);
+    for (const candidate of candidates) {
+      const { body } = await providerFetch(
+        'gmail',
+        'mailbox-api',
+        `${API}/messages/${encodeURIComponent(candidate.id)}?format=metadata&metadataHeaders=Message-ID&metadataHeaders=X-BF-Outbound-Id`,
+        { headers: await auth(mailbox), signal },
+      );
+      const headers = (body as { payload?: { headers?: { name?: string; value?: string }[] } }).payload
+        ?.headers;
+      const header = (name: string) => headers?.find((h) => h.name?.toLowerCase() === name)?.value?.trim();
+      const messageId = header('message-id');
+      if (messageId === probe.rfc822MessageId || header('x-bf-outbound-id') === probe.outboundId)
+        return {
+          providerMessageId: candidate.id,
+          rfc822MessageId: messageId ?? probe.rfc822MessageId,
+          ...(candidate.threadId ? { providerThreadId: candidate.threadId } : {}),
+        };
+    }
+    return null;
   }
 
   private async historyId(mailbox: MailboxCtx): Promise<string> {

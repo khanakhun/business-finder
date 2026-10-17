@@ -932,6 +932,8 @@ export {
   OutreachMessageFailed,
   OutreachMessageQueued,
   OutreachMessageSent,
+  OutreachSendJob,
+  OutreachTickJob,
   RescheduleMessageRequestSchema,
   type SendMessageRequest,
   SendMessageRequestSchema,

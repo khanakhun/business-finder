@@ -187,6 +187,18 @@ export interface SendResult {
   readonly providerThreadId?: string;
 }
 
+/** What the outbound reconciler (BF-052) looks for in the mailbox's sent items after an unknown send outcome. */
+export interface SentProbe {
+  /** The Message-ID we put in the message (providers may have replaced it). */
+  readonly rfc822MessageId: string;
+  /** Our `X-BF-Outbound-Id` header: confirms a candidate found by recipient and time. */
+  readonly outboundId: string;
+  readonly to: string;
+  readonly subject: string;
+  /** The attempt started then (candidates sent earlier are not ours). */
+  readonly since: Date;
+}
+
 export interface MailboxProvider {
   readonly kind: MailboxProviderKind;
   readonly capabilities: { readonly push: boolean; readonly threads: boolean; readonly rawMime: boolean };
@@ -195,6 +207,11 @@ export interface MailboxProvider {
     mime: Buffer,
     options: { readonly threadHint?: string; readonly signal: AbortSignal },
   ): Promise<SendResult>;
+  /**
+   * The message in the sent items, or null when it is not there. Throws when the provider cannot tell (then the
+   * pipeline must not resend).
+   */
+  findSent(mailbox: MailboxCtx, probe: SentProbe, signal: AbortSignal): Promise<SendResult | null>;
   syncChanges(
     mailbox: MailboxCtx,
     cursor: SyncCursor | null,

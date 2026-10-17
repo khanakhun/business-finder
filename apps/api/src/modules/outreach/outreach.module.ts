@@ -37,6 +37,7 @@ import { TokenRefresher } from './application/mailbox/token-refresher.ts';
 import { ManualContactLogs } from './application/outbound/manual-log.ts';
 import { OutboundCommands } from './application/outbound/outbound.commands.ts';
 import { OutboundQueries } from './application/outbound/outbound.queries.ts';
+import { OutboundSubscribers } from './application/outbound/outbound.subscribers.ts';
 import {
   OUTBOUND_REPOSITORY,
   OUTBOUND_SETTINGS,
@@ -57,6 +58,13 @@ import { ValkeyOAuthStore } from './infrastructure/mailboxes/valkey-oauth.ts';
 import { DrizzleOutboundRepository } from './infrastructure/outbound/drizzle-outbound.repository.ts';
 import { HmacOutreachTokens } from './infrastructure/outbound/hmac-outreach-tokens.ts';
 import { OutboundPersonalData } from './infrastructure/outbound/outbound-personal-data.ts';
+import { OutboundSender } from './infrastructure/sending/outbound-sender.ts';
+import {
+  OUTREACH_TICK_AUTOSTART,
+  OutreachSendProcessor,
+  OutreachTickProcessor,
+  OutreachTickScheduler,
+} from './infrastructure/sending/outreach-processors.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
@@ -70,7 +78,8 @@ const instances = new Map<AppMode, DynamicModule>();
 
 /**
  * Outreach (ARCHITECTURE §12). BF-050: mailboxes — providers behind one port, the lifecycle, capacity with an
- * atomic reservation, sending windows, rotation, and the hourly health sweep (worker).
+ * atomic reservation, sending windows, rotation, and the hourly health sweep (worker). BF-051: templates and
+ * drafts. BF-052: the outbound pipeline — one-click send, the minute tick and the send worker (worker only).
  */
 @Module({})
 export class OutreachModule {
@@ -204,7 +213,17 @@ export class OutreachModule {
         OutboundQueries,
         ManualContactLogs,
         OutboundPersonalData,
-        ...(mode === 'worker' ? [MailboxHealthSweep] : []),
+        OutboundSubscribers,
+        ...(mode === 'worker'
+          ? [
+              MailboxHealthSweep,
+              OutboundSender,
+              OutreachTickProcessor,
+              OutreachSendProcessor,
+              OutreachTickScheduler,
+              { provide: OUTREACH_TICK_AUTOSTART, useValue: true },
+            ]
+          : []),
       ],
       exports: [
         MailboxCapacity,

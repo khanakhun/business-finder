@@ -103,6 +103,8 @@ export const outboundMessages = pgTable(
     providerThreadId: text(),
     inReplyTo: text(),
     attempts: integer().notNull().default(0),
+    /** When the last attempt reached for the provider (reconciliation searches from there). */
+    lastAttemptAt: tz(),
     lastError: jsonb().$type<OutboundError>(),
     statusHistory: jsonb()
       .$type<{ at: string; status: OutboundStatus; detail: string | null }[]>()

@@ -5,11 +5,17 @@ import {
   CRM_ACTIVITY_CREATED,
   type DomainEvent,
   DoNotContactSet,
+  ManualContactLogged,
   NoteAdded,
   newId,
   OrgBusinessOwnerChanged,
   OrgBusinessStatusChanged,
   OrgBusinessTagsChanged,
+  OutreachMessageBlocked,
+  OutreachMessageCancelled,
+  OutreachMessageFailed,
+  OutreachMessageQueued,
+  OutreachMessageSent,
   ScoreUpdated,
   SiteLeadCaptured,
   SiteOptOutRequested,
@@ -57,6 +63,25 @@ const ACTIVITY_OF: Record<
     type: 'lead.opted_out',
     data: { leadId: p.leadId, siteId: p.siteId, removePreview: p.removePreview },
   }),
+  // BF-052: the message's status; the timeline opens the message for its content and decisions.
+  [OutreachMessageQueued.type]: (p) => ({
+    type: 'email.queued',
+    data: { messageId: p.messageId, scheduledAt: p.scheduledAt },
+  }),
+  [OutreachMessageSent.type]: (p) => ({ type: 'email.sent', data: { messageId: p.messageId } }),
+  [OutreachMessageFailed.type]: (p) => ({
+    type: 'email.failed',
+    data: { messageId: p.messageId, code: p.code, final: p.final },
+  }),
+  [OutreachMessageBlocked.type]: (p) => ({
+    type: 'email.blocked',
+    data: { messageId: p.messageId, reasons: p.reasons },
+  }),
+  [OutreachMessageCancelled.type]: (p) => ({ type: 'email.cancelled', data: { messageId: p.messageId } }),
+  [ManualContactLogged.type]: (p) => ({
+    type: 'contact.logged',
+    data: { logId: p.logId, channel: p.channel },
+  }),
 };
 
 /**
@@ -83,6 +108,12 @@ export class ActivitySubscriber {
       BusinessCreated,
       SiteLeadCaptured,
       SiteOptOutRequested,
+      OutreachMessageQueued,
+      OutreachMessageSent,
+      OutreachMessageFailed,
+      OutreachMessageBlocked,
+      OutreachMessageCancelled,
+      ManualContactLogged,
     ],
     { id: 'crm.activity-timeline' },
   )

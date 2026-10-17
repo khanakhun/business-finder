@@ -19,9 +19,11 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
+    "@axe-core/playwright": "catalog:",
     "@bf/site-blocks": "workspace:*",
     "@bf/site-schema": "workspace:*",
     "@modelcontextprotocol/sdk": "catalog:",
+    "lighthouse": "13.5.0",
     "playwright": "catalog:",
     "yaml": "catalog:",
     "zod": "catalog:"

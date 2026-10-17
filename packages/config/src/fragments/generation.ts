@@ -54,6 +54,18 @@ export const generationEnv = z.object({
     .describe(
       "Share of an attempt's budget kept back from the agent's own limit (it can overshoot by a turn).",
     ),
+  GENERATION_QUALITY_AUDITS: booleanFlag(false).describe(
+    'Run the render-based quality gates (BF-045: axe-core accessibility, Lighthouse) in a no-network sandbox; needs SANDBOX_ENABLED. On in production.',
+  ),
+  GENERATION_QUALITY_AUDIT_WALL_TIME_SEC: z.coerce
+    .number()
+    .int()
+    .min(30)
+    .max(900)
+    .default(180)
+    .describe(
+      'Wall time of one sandboxed quality audit (BF-045; the target is under 90 s for 4 pages × 2 locales).',
+    ),
   GENERATION_FAKE_ENGINE: booleanFlag(false).describe(
     'Register the scripted fake engine (development, tests and E2E only; refused in production).',
   ),

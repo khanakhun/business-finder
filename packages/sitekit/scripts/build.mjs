@@ -1,6 +1,6 @@
 // Bundles the sitekit CLI into one Node 24 file (dist/sitekit.mjs) for the agent runner image (BF-042 → BF-043),
-// with the copy lint rules and the block library's stylesheet and fonts next to it. Playwright stays external: the
-// runner image installs it with its Chromium.
+// with the copy lint rules and the block library's stylesheet and fonts next to it. Playwright, Lighthouse and axe stay
+// external: the runner image installs them, with Playwright's Chromium.
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
@@ -21,7 +21,7 @@ await build({
   target: 'node24',
   jsx: 'automatic',
   legalComments: 'none',
-  external: ['playwright', 'playwright-core'],
+  external: ['playwright', 'playwright-core', 'lighthouse', '@axe-core/playwright', 'axe-core'],
   // CommonJS dependencies inside an ES module bundle need `require`.
   banner: {
     js: "import { createRequire as __sitekitRequire } from 'node:module';\nconst require = __sitekitRequire(import.meta.url);",

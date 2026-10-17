@@ -10,6 +10,8 @@ ARG TURBO_VERSION=2.11.8
 ARG CLAUDE_CODE_VERSION=2.1.288
 ARG CODEX_VERSION=0.160.0
 ARG PLAYWRIGHT_VERSION=1.64.1
+ARG LIGHTHOUSE_VERSION=13.5.0
+ARG AXE_PLAYWRIGHT_VERSION=4.13.0
 
 FROM ${NODE_IMAGE} AS base
 ENV PNPM_HOME=/pnpm \
@@ -37,6 +39,8 @@ FROM ${NODE_IMAGE} AS runtime
 ARG CLAUDE_CODE_VERSION
 ARG CODEX_VERSION
 ARG PLAYWRIGHT_VERSION
+ARG LIGHTHOUSE_VERSION
+ARG AXE_PLAYWRIGHT_VERSION
 ARG RUNNER_VERSION=dev
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
@@ -53,7 +57,9 @@ RUN npm install --global --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VER
  && npm cache clean --force
 WORKDIR /opt/sitekit
 COPY --from=build /repo/packages/sitekit/dist/ ./
+# sitekit's browser and its audits (BF-045: axe-core and Lighthouse, external to the bundle), pinned.
 RUN npm install --no-audit --no-save "playwright@${PLAYWRIGHT_VERSION}" \
+      "lighthouse@${LIGHTHOUSE_VERSION}" "@axe-core/playwright@${AXE_PLAYWRIGHT_VERSION}" \
  && npx playwright install --with-deps chromium \
  && rm -rf /var/lib/apt/lists/* \
  && npm cache clean --force \
@@ -86,7 +92,7 @@ LABEL org.opencontainers.image.title="bf-agent-runner" \
       org.opencontainers.image.description="Business Finder agent runner: supervisor, Claude Code, Codex, sitekit, Chromium" \
       org.opencontainers.image.source="https://github.com/khanakhun/business-finder" \
       org.opencontainers.image.licenses="UNLICENSED" \
-      bf.runner.versions="{\"claude-code\":\"${CLAUDE_CODE_VERSION}\",\"codex\":\"${CODEX_VERSION}\",\"playwright\":\"${PLAYWRIGHT_VERSION}\",\"runner\":\"${RUNNER_VERSION}\"}"
+      bf.runner.versions="{\"claude-code\":\"${CLAUDE_CODE_VERSION}\",\"codex\":\"${CODEX_VERSION}\",\"playwright\":\"${PLAYWRIGHT_VERSION}\",\"lighthouse\":\"${LIGHTHOUSE_VERSION}\",\"runner\":\"${RUNNER_VERSION}\"}"
 
 USER 10001:10001
 WORKDIR /workspace

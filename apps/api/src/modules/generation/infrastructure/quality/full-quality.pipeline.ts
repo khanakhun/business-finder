@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { QualityAutoFix, QualityGateResult, QualityIssue, QualityReport } from '@bf/contracts';
 import type { FactRegistry } from '@bf/site-schema';
-import { parseFacts, type SitekitConfig, SitekitConfigSchema } from '@bf/sitekit';
+import { type AuditReport, parseFacts, type SitekitConfig, SitekitConfigSchema } from '@bf/sitekit';
 import type {
   ArtifactStore,
   GenerationRepository,
@@ -12,7 +12,9 @@ import { decide } from '../../domain/quality/decision-policy.ts';
 import { qualityScore } from '../../domain/quality/scorer.ts';
 import { PLATFORM_MINIMUMS, type QualityThresholds } from '../../domain/quality/thresholds.ts';
 import { unpackBundle } from '../workspace/tar.ts';
+import { a11yGate, performanceGate } from './audit-gates.ts';
 import { autoFix, copyGate, factsGate, type GateContext, type QualityGate, schemaGate } from './gates.ts';
+import type { SandboxAuditClient } from './sandbox-audit.client.ts';
 
 // The quality pipeline (BF-045) as BF-039's port: the gates in order — schema and facts short-circuit on an error —
 // then the safe auto-fixes and one more pass on the fixed candidate, the score and the decision. A gate that throws
@@ -22,6 +24,8 @@ import { autoFix, copyGate, factsGate, type GateContext, type QualityGate, schem
 export const PIPELINE_VERSION = 1;
 /** Gates whose errors stop the chain: what comes after assumes a valid, factual site. */
 const SHORT_CIRCUIT = new Set(['schema', 'facts']);
+/** Gates that render the site (the sandboxed audit): they run once, after the fixes. */
+const RENDERED = new Set(['a11y', 'performance', 'visual']);
 const CACHE_SIZE = 200;
 
 export interface FullQualityPipelineDeps {
@@ -31,12 +35,16 @@ export interface FullQualityPipelineDeps {
   readonly hotlinkHosts?: readonly string[];
   readonly thresholds?: QualityThresholds;
   readonly gates?: readonly QualityGate[];
+  /** The sandboxed audits (axe, Lighthouse): with it, the accessibility and performance gates run. */
+  readonly audits?: Pick<SandboxAuditClient, 'audit'>;
   readonly now?: () => Date;
 }
 
 interface Registry {
   readonly facts: FactRegistry;
   readonly config: SitekitConfig;
+  /** The workspace's files: the audit renders the candidate in them. */
+  readonly files: ReadonlyMap<string, Buffer>;
 }
 
 /** A report's issue as engines read it (BF-041/BF-044 repair): `at` next to the target. */
@@ -54,7 +62,14 @@ export class FullQualityPipeline implements QualityPipeline {
   constructor(private readonly deps: FullQualityPipelineDeps) {}
 
   private get gates(): readonly QualityGate[] {
-    return this.deps.gates ?? [schemaGate, factsGate, copyGate];
+    return (
+      this.deps.gates ?? [
+        schemaGate,
+        factsGate,
+        copyGate,
+        ...(this.deps.audits ? [a11yGate, performanceGate] : []),
+      ]
+    );
   }
 
   /** The job's registry snapshot from the attempt's workspace bundle (undefined when it cannot be read). */
@@ -69,6 +84,7 @@ export class FullQualityPipeline implements QualityPipeline {
       return {
         facts: parseFacts(json('facts.json')),
         config: SitekitConfigSchema.parse(files.has('.sitekit.json') ? json('.sitekit.json') : {}),
+        files,
       };
     } catch {
       return undefined;
@@ -109,10 +125,13 @@ export class FullQualityPipeline implements QualityPipeline {
   }
 
   /** The gates in order on one candidate; schema and facts errors skip the rest. */
-  private async chain(ctx: GateContext): Promise<QualityGateResult[]> {
+  private async chain(
+    ctx: GateContext,
+    gates: readonly QualityGate[],
+    stopped = false,
+  ): Promise<QualityGateResult[]> {
     const results: QualityGateResult[] = [];
-    let stopped = false;
-    for (const gate of this.gates) {
+    for (const gate of gates) {
       if (stopped) {
         results.push({ id: gate.id, status: 'skipped', durationMs: 0, costUsd: 0, issues: [] });
         continue;
@@ -139,8 +158,12 @@ export class FullQualityPipeline implements QualityPipeline {
         hotlinkHosts: this.deps.hotlinkHosts ?? [],
         thresholds,
       } satisfies Omit<GateContext, 'spec'>;
+      // The deterministic gates first (and again after the fixes), then the rendered ones once, on the final
+      // candidate: one audit run serves accessibility and performance.
+      const deterministic = this.gates.filter((gate) => !RENDERED.has(gate.id));
+      const rendered = this.gates.filter((gate) => RENDERED.has(gate.id));
       let spec = input.spec;
-      let gates = await this.chain({ ...base, spec });
+      let gates = await this.chain({ ...base, spec }, deterministic);
       let autoFixes: QualityAutoFix[] = [];
       const fixable = gates.some(
         (gate) => gate.status !== 'skipped' && gate.issues.some((issue) => issue.autoFixable),
@@ -150,7 +173,7 @@ export class FullQualityPipeline implements QualityPipeline {
         if (fixed.fixes.length > 0) {
           autoFixes = fixed.fixes;
           spec = fixed.spec;
-          gates = await this.chain({ ...base, spec });
+          gates = await this.chain({ ...base, spec }, deterministic);
         }
         gates.push({
           id: 'autofix',
@@ -167,6 +190,35 @@ export class FullQualityPipeline implements QualityPipeline {
             autoFixable: true,
           })),
         });
+      }
+      if (rendered.length > 0) {
+        let audit: Promise<AuditReport> | undefined;
+        const candidate = spec;
+        const auditOnce = () => {
+          if (!this.deps.audits) throw new Error('No audit sandbox is configured.');
+          if (!registry) throw new Error("The job's workspace could not be read: nothing to render.");
+          // Memoized for this candidate; a failure is forgotten, so the gate's retry runs the audit again.
+          audit ??= this.deps.audits
+            .audit(registry.files, candidate, {
+              jobId: input.job.id,
+              organizationId: input.job.organizationId,
+            })
+            .catch((error: unknown) => {
+              audit = undefined;
+              throw error;
+            });
+          return audit;
+        };
+        const stopped = gates.some(
+          (gate) => gate.status === 'error' || (gate.status === 'fail' && SHORT_CIRCUIT.has(gate.id)),
+        );
+        gates.push(
+          ...(await this.chain(
+            { ...base, spec: candidate, audit: auditOnce } as GateContext,
+            rendered,
+            stopped,
+          )),
+        );
       }
       if (!registry) {
         // Without the job's registry no fact can be checked: a person looks (never a silent pass).

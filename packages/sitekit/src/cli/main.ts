@@ -60,6 +60,8 @@ export const HELP: Record<string, string> = {
   render:
     'sitekit render [--page <id>]… [--locale <xx>]…\n  Static HTML in .sitekit/render/ with a review index.',
   screenshot: 'sitekit screenshot --page <id> [--locale fr] [--viewport mobile|tablet|desktop] [--full]',
+  audit:
+    'sitekit audit [--page <id>]… [--viewport mobile|desktop]… [--skip axe|lighthouse] [--out <file>] [--json]\n  axe-core and Lighthouse on the rendered site (slow; the quality gates run it).',
   catalog: 'sitekit catalog [block]\n  The block catalog (markdown and JSON Schema).',
   facts: 'sitekit facts [--kind phone] [--search gustavia]',
   assets: 'sitekit assets [--role logo|image]',
@@ -210,6 +212,22 @@ export async function run(argv: readonly string[]): Promise<Outcome> {
         });
         // The PNG is on disk (its path is in the output); a terminal does not need its bytes.
         result = { data: result.data, isError: result.isError };
+        break;
+      }
+      case 'audit': {
+        const skip = new Set(parsed.flags.get('skip') ?? []);
+        result = await runTool(context, 'audit_site', {
+          ...(parsed.flags.get('page') ? { pages: parsed.flags.get('page') } : {}),
+          ...(parsed.flags.get('viewport') ? { viewports: parsed.flags.get('viewport') } : {}),
+          axe: !skip.has('axe'),
+          lighthouse: !skip.has('lighthouse'),
+        });
+        // The report can be large: `--out` writes it to a workspace file (the sandbox sends it back as an artifact).
+        const out = one(parsed, 'out');
+        if (out && !result.isError) {
+          await workspace.writeText(out, `${JSON.stringify(result.data)}\n`);
+          result = { data: { written: out }, isError: false };
+        }
         break;
       }
       case 'catalog':

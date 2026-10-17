@@ -94,6 +94,11 @@ export class UnsubscribeService {
     };
   }
 
+  /** What a link looks like (draft previews: the real token is issued when the message is sent). */
+  sampleUrl(): string {
+    return `${this.settings.baseUrl}/u/preview-link`;
+  }
+
   /** The valid token's row (unexpired), or null — callers answer the same either way. */
   private async lookup(token: string): Promise<UnsubscribeTokenRow | null> {
     const row = await this.tokens.findByHash(hashToken(isTokenShaped(token) ? token : `invalid:${token}`));

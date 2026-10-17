@@ -95,6 +95,11 @@ export {
   SitePlanOutput,
 } from './tasks/generation-site-plan.ts';
 export {
+  EmailDraftInput,
+  EmailDraftOutput,
+  OutreachEmailDraft,
+} from './tasks/outreach-email-draft.ts';
+export {
   QualityUnsupportedClaims,
   UnsupportedClaimsInput,
   UnsupportedClaimsOutput,

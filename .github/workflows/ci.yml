@@ -77,7 +77,7 @@ jobs:
               - '!**/*.md'
             # What goes into the agent runner image (BF-043).
             runner:
-              - '{services/agent-runner/**,packages/sitekit/**,packages/site-blocks/**,packages/site-schema/**,packages/contracts/**,pnpm-lock.yaml,pnpm-workspace.yaml,.github/workflows/ci.yml}'
+              - '{services/agent-runner/**,apps/api/src/modules/generation/infrastructure/sandbox/**,packages/sitekit/**,packages/site-blocks/**,packages/site-schema/**,packages/contracts/**,pnpm-lock.yaml,pnpm-workspace.yaml,.github/workflows/ci.yml}'
               - '!**/*.md'
 
   quality:
@@ -361,6 +361,10 @@ jobs:
           output-format: table
       - name: Smoke test (fake agent edits a site through sitekit; check is done)
         run: node services/agent-runner/scripts/smoke.ts bf-agent-runner:ci
+      - name: Docker sandbox provider against the image (frames, OOM, abort, cleanup)
+        run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/sandbox/docker-sandbox.docker.test.ts
+        env:
+          DOCKER_SANDBOX_IMAGE: bf-agent-runner:ci
 
   security:
     name: security

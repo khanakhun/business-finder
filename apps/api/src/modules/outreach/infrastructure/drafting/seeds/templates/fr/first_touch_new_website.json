@@ -1,0 +1,13 @@
+{
+  "key": "first_touch_new_website",
+  "name": "Première prise de contact, sans site existant",
+  "purpose": "first_touch",
+  "offer": "new_website",
+  "locale": "fr",
+  "subjectVariants": [
+    "Un premier site pour {{business.name}} ?",
+    "Une ébauche de site pour {{business.name}}",
+    "{{business.name}} en ligne : une idée à découvrir"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nJe suis {{sender.firstName}}, de {{sender.agencyName}}, un petit studio qui accompagne les commerces et entreprises locales{{#if business.locality}} à {{business.locality}}{{/if}}. Je n’ai pas trouvé de site internet pour {{business.name}}, alors nous nous sommes permis d’en esquisser un.\n\n{{#if reviews.topTheme}}En lisant ce que vos clients disent de vous, un thème revient : {{reviews.topTheme}}. Un site simple peut y répondre en partie.\n\n{{/if}}Voici un aperçu de ce que pourrait donner {{offer.label}} pour {{business.name}}. C’est une première ébauche, pas un site terminé, et elle n’engage à rien :\n\n{{preview.url}}\n\nSi vous souhaitez voir où cela pourrait mener, dix minutes au téléphone suffisent. Une courte réponse me convient aussi.\n{{#if contact.isGeneric}}\nSi quelqu’un d’autre s’en occupe chez {{business.name}}, merci d’avance de bien vouloir lui transmettre ce message.\n{{/if}}\nBien cordialement,"
+}

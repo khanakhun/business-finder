@@ -1,0 +1,13 @@
+{
+  "key": "reply_price",
+  "name": "Réponse à une question de prix",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Votre question sur le tarif",
+    "Tarif pour le site de {{business.name}}",
+    "{{business.name}} : vers un devis clair"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nMerci pour votre réponse, la question est légitime. Honnêtement, cela dépend du périmètre : le nombre de pages, la présence d’une réservation en ligne ou d’une boutique, les textes, les photos et les langues. Un site d’une page et une refonte complète sont deux projets très différents.\n\nPlutôt que d’avancer un chiffre, pourrions-nous prendre quinze minutes au téléphone ? Je vous poserai quelques questions et vous enverrai ensuite un devis clair par écrit.\n\nBien cordialement,"
+}

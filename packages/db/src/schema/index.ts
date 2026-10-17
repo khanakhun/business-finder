@@ -4,6 +4,7 @@ export * from './business-graph.ts';
 export * from './compliance.ts';
 export * from './crm.ts';
 export * from './discovery.ts';
+export * from './drafting.ts';
 export * from './enrichment.ts';
 export * from './generation.ts';
 export * from './geo.ts';

@@ -5,6 +5,8 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
+import { TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
+import { TemplatesService } from './application/drafting/templates.service.ts';
 import { MailboxCapacity } from './application/mailbox/mailbox-capacity.ts';
 import { MailboxCredentialStore } from './application/mailbox/mailbox-credentials.ts';
 import { MailboxHealthSweep } from './application/mailbox/mailbox-health.ts';
@@ -28,6 +30,7 @@ import {
   SMTP_CONNECTION_TESTER,
 } from './application/mailbox/ports.ts';
 import { TokenRefresher } from './application/mailbox/token-refresher.ts';
+import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
 import { DrizzleMailboxesRepository } from './infrastructure/mailboxes/drizzle-mailboxes.repository.ts';
 import { GoogleOAuthClient } from './infrastructure/mailboxes/oauth/google.oauth.ts';
 import { MicrosoftOAuthClient } from './infrastructure/mailboxes/oauth/microsoft.oauth.ts';
@@ -38,6 +41,7 @@ import { ValkeyCapacityCounters } from './infrastructure/mailboxes/valkey-capaci
 import { ValkeyOAuthStore } from './infrastructure/mailboxes/valkey-oauth.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
+import { TemplatesController } from './interface/http/templates.controller.ts';
 
 const callbackUrl = (env: ApiEnv, provider: 'google' | 'microsoft') =>
   `${env.API_URL.replace(/\/$/, '')}/v1/mailboxes/oauth/${provider}/callback`;
@@ -56,7 +60,8 @@ export class OutreachModule {
     const module: DynamicModule = {
       module: OutreachModule,
       imports: [RealtimeModule.forRoot(mode)],
-      controllers: mode === 'worker' ? [] : [MailboxesController, MailboxOAuthController],
+      controllers:
+        mode === 'worker' ? [] : [MailboxesController, MailboxOAuthController, TemplatesController],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
         ValkeyCapacityCounters,
@@ -135,6 +140,8 @@ export class OutreachModule {
         },
         TokenRefresher,
         MailboxOAuth,
+        { provide: TEMPLATE_REPOSITORY, useClass: DrizzleTemplateRepository },
+        TemplatesService,
         MailboxCredentialStore,
         MailboxLifecycle,
         MailboxesService,

@@ -1,0 +1,13 @@
+{
+  "key": "reply_referral",
+  "name": "Reply to a referral",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "Thank you for the introduction",
+    "Thanks, I’ll reach out to them",
+    "{{business.name}}: thank you for your help"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nThank you for taking the time to point me to the right person; that helps a great deal. I will get in touch with them directly, mention that you passed my note along, and keep it short.\n\nHave a good day, and my best to the team at {{business.name}}.\n\nBest regards,"
+}

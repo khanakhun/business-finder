@@ -1,0 +1,13 @@
+{
+  "key": "first_touch_preview",
+  "name": "First touch with preview",
+  "purpose": "first_touch",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "A website concept for {{business.name}}",
+    "An idea for {{business.name}}’s website",
+    "{{business.name}}: a quick concept to look at"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nI’m {{sender.firstName}} from {{sender.agencyName}}, a small studio working with local businesses{{#if business.locality}} in {{business.locality}}{{/if}}. {{business.name}} caught my eye while I was looking at businesses in the area, and I spent some time on your current website.\n\n{{#if audit.topFindings}}A few things stood out:\n\n{{#each audit.topFindings}}- {{this}}\n{{/each}}\n{{/if}}Rather than describe what we would change, we put together a concept of what {{offer.label}} for {{business.name}} could look like. It is a rough draft, not a finished site, with no obligation attached:\n\n{{preview.url}}\n\nIf it sparks any ideas, would you be open to a 10-minute call to talk it through? A short reply works too.\n{{#if contact.isGeneric}}\nIf someone else looks after the website at {{business.name}}, please feel free to pass this along.\n{{/if}}\nBest regards,"
+}

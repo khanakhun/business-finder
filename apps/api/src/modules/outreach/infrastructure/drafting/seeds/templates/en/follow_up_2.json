@@ -1,0 +1,13 @@
+{
+  "key": "follow_up_2",
+  "name": "Follow-up 2, closing the loop",
+  "purpose": "breakup",
+  "offer": "website_redesign",
+  "locale": "en",
+  "subjectVariants": [
+    "Closing the loop on {{business.name}}",
+    "Last note from me, {{business.name}}",
+    "{{business.name}}: I’ll leave it here"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Hello {{contact.firstName}},{{else}}Hello,{{/if}}\n\nI have not heard back, which usually means the timing is not right, and that is completely fine. I will not follow up again after this.\n\n{{#if preview.url}}The concept we prepared for {{business.name}} stays online{{#if preview.expiresAt}} until {{preview.expiresAt}}{{/if}} should you want to look later: {{preview.url}}\n\n{{/if}}If {{offer.label}} becomes a priority down the road, my door is open. All the best with {{business.name}}.\n\nBest regards,"
+}

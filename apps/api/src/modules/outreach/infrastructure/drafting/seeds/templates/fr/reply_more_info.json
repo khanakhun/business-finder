@@ -1,0 +1,13 @@
+{
+  "key": "reply_more_info",
+  "name": "Réponse à « en savoir plus »",
+  "purpose": "reply",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Plus de détails pour {{business.name}}",
+    "Ce que nous ferions pour {{business.name}}",
+    "Quelques précisions sur l’idée"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nMerci de votre retour. En résumé : nous partons de la façon dont vos clients trouvent et contactent {{business.name}} aujourd’hui, puis nous concevons un site qui rend l’étape suivante évidente, sur téléphone comme sur ordinateur. Nous prenons en charge la conception, les textes et la partie technique.\n\nPour ajuster tout cela, une question : qu’attendriez-vous en priorité d’un nouveau site, davantage de réservations, moins d’appels à gérer, ou autre chose ?\n\nBien cordialement,"
+}

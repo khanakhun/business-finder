@@ -1,0 +1,13 @@
+{
+  "key": "follow_up_2",
+  "name": "Relance 2, dernier message",
+  "purpose": "breakup",
+  "offer": "website_redesign",
+  "locale": "fr",
+  "subjectVariants": [
+    "Je clos le sujet, {{business.name}}",
+    "Dernier message de ma part",
+    "{{business.name}} : je n’insiste pas"
+  ],
+  "bodyMd": "{{#if contact.firstName}}Bonjour {{contact.firstName}},{{else}}Bonjour,{{/if}}\n\nSans réponse de votre part, j’en déduis que le moment n’est pas le bon, et c’est tout à fait compréhensible. Je ne vous relancerai pas après ce message.\n\n{{#if preview.url}}L’aperçu préparé pour {{business.name}} reste en ligne{{#if preview.expiresAt}} jusqu’au {{preview.expiresAt}}{{/if}} si vous souhaitez y jeter un œil plus tard : {{preview.url}}\n\n{{/if}}Si {{offer.label}} redevient une priorité un jour, ma porte reste ouverte. Je vous souhaite une belle saison.\n\nBien cordialement,"
+}

@@ -40,7 +40,7 @@ async function finished(client: Browser, runId: string) {
 }
 
 beforeAll(async () => {
-  t = await createTestApp({ mailer, valkeyDb: 11 });
+  t = await createTestApp({ mailer, valkeyDb: 28 });
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, { mailer });
   await runInTransaction(db, (tx) => seedTaxonomy(tx, loadTaxonomy()));

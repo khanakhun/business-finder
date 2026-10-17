@@ -45,7 +45,7 @@ async function finished(id: string, timeout = 60_000) {
 }
 
 beforeAll(async () => {
-  t = await createTestApp({ mailer, valkeyDb: 13, env: SYNTHETIC });
+  t = await createTestApp({ mailer, valkeyDb: 27, env: SYNTHETIC });
   db = t.app.get(DB_CLIENT);
   worker = await createTestWorker(t, { mailer, env: SYNTHETIC });
   await runInTransaction(db, (tx) => seedTaxonomy(tx, loadTaxonomy()));

@@ -2,10 +2,13 @@ import { createHmac } from 'node:crypto';
 import type { ApiEnv } from '@bf/config';
 import type { Clock } from '@bf/contracts';
 import { type DynamicModule, Module } from '@nestjs/common';
+import { ComplianceModule } from '../compliance/index.ts';
+import { GenerationModule } from '../generation/index.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { RealtimeModule } from '../realtime/index.ts';
-import { TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
+import { DraftsService } from './application/drafting/drafts.service.ts';
+import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
 import { TemplatesService } from './application/drafting/templates.service.ts';
 import { MailboxCapacity } from './application/mailbox/mailbox-capacity.ts';
 import { MailboxCredentialStore } from './application/mailbox/mailbox-credentials.ts';
@@ -30,6 +33,8 @@ import {
   SMTP_CONNECTION_TESTER,
 } from './application/mailbox/ports.ts';
 import { TokenRefresher } from './application/mailbox/token-refresher.ts';
+import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
+import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
 import { DrizzleMailboxesRepository } from './infrastructure/mailboxes/drizzle-mailboxes.repository.ts';
 import { GoogleOAuthClient } from './infrastructure/mailboxes/oauth/google.oauth.ts';
@@ -39,6 +44,7 @@ import { GraphProvider } from './infrastructure/mailboxes/providers/graph.provid
 import { SmtpImapProvider } from './infrastructure/mailboxes/providers/smtp-imap.provider.ts';
 import { ValkeyCapacityCounters } from './infrastructure/mailboxes/valkey-capacity-counters.ts';
 import { ValkeyOAuthStore } from './infrastructure/mailboxes/valkey-oauth.ts';
+import { DraftsController } from './interface/http/drafts.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
 import { TemplatesController } from './interface/http/templates.controller.ts';
@@ -59,7 +65,7 @@ export class OutreachModule {
     if (existing) return existing;
     const module: DynamicModule = {
       module: OutreachModule,
-      imports: [RealtimeModule.forRoot(mode)],
+      imports: [RealtimeModule.forRoot(mode), ComplianceModule.forRoot(mode), GenerationModule.forRoot(mode)],
       controllers:
         mode === 'worker' ? [] : [MailboxesController, MailboxOAuthController, TemplatesController],
       providers: [
@@ -142,13 +148,23 @@ export class OutreachModule {
         MailboxOAuth,
         { provide: TEMPLATE_REPOSITORY, useClass: DrizzleTemplateRepository },
         TemplatesService,
+        { provide: DRAFT_REPOSITORY, useClass: DrizzleDraftRepository },
+        { provide: DRAFT_CONTEXT, useClass: DrizzleDraftContext },
+        DraftsService,
         MailboxCredentialStore,
         MailboxLifecycle,
         MailboxesService,
         MailboxCapacity,
         ...(mode === 'worker' ? [MailboxHealthSweep] : []),
       ],
-      exports: [MailboxCapacity, MailboxesService, MAILBOX_REPOSITORY, MAILBOX_PROVIDERS],
+      exports: [
+        MailboxCapacity,
+        MailboxesService,
+        MAILBOX_REPOSITORY,
+        MAILBOX_PROVIDERS,
+        DraftsService,
+        TemplatesService,
+      ],
     };
     instances.set(mode, module);
     return module;

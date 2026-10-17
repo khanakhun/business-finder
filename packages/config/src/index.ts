@@ -7,6 +7,7 @@ export { authEnv } from './fragments/auth.ts';
 export { coreEnv } from './fragments/core.ts';
 export { dbEnv, sitesDbEnv } from './fragments/db.ts';
 export { featureFlagsEnv } from './fragments/features.ts';
+export { generationEnv } from './fragments/generation.ts';
 export { intelEnv } from './fragments/intel.ts';
 export { mailEnv } from './fragments/mail.ts';
 export { providersEnv } from './fragments/providers.ts';

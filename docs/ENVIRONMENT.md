@@ -161,6 +161,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `GENERATION_BLOCKS_ENGINE` | App-specific | api, worker | no | `true` |  | Register the blocks engine (BF-041), the default: sites composed in-process by the AI gateway (needs model keys). |
 | `GENERATION_CLAUDE_CODE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the Claude Code engine (BF-044): `claude -p` in a sandbox; needs SANDBOX_ENABLED and an Anthropic key per workspace. |
 | `GENERATION_CLAUDE_CODE_SITEKIT` | App-specific | api, worker | no | `bash` |  | How Claude Code reaches sitekit: `Bash(sitekit *)` only (bash) or the `sitekit mcp` server with no shell (mcp). |
+| `GENERATION_CLAUDE_AGENT_SDK_ENGINE` | App-specific | api, worker | no | `false` |  | Register the Claude Agent SDK engine (BF-044): `query()` in a sandbox, sitekit over MCP, no shell; needs SANDBOX_ENABLED and an Anthropic key per workspace. |
 | `GENERATION_CODEX_ENGINE` | App-specific | api, worker | no | `false` |  | Register the Codex engine (BF-044): `codex exec` in a sandbox; needs SANDBOX_ENABLED and an OpenAI key per workspace. |
 | `GENERATION_CODEX_MODEL` | App-specific | api, worker | no | `gpt-6.1-sol` |  | Codex's model (OpenAI's recommendation for agentic coding, October 2026); price it in AI_PRICING. |
 | `GENERATION_CODEX_REASONING_EFFORT` | App-specific | api, worker | no | `high` |  | Codex's reasoning effort (`model_reasoning_effort`). |

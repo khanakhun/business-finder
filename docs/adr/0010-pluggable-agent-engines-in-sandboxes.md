@@ -120,3 +120,27 @@ The user wants to select several businesses and have sites generated automatical
     budget (`ENGINE_BUDGET_EXCEEDED`). `exec` is one turn, so within the turn the wall time bounds the spend.
   - Top-level `error` events are reconnects, logged and not fatal.
   - `shell_environment_policy.inherit = "core"` keeps `CODEX_API_KEY` out of the commands it runs.
+
+## Addendum (BF-044 part 3, 2026-10-17): the Agent SDK engine, and what running the real CLIs showed
+
+- **Agent SDK.** `@anthropic-ai/claude-agent-sdk` 0.3.288 (published with Claude Code 2.1.288) is bundled into the
+  runner image as `/opt/runner/agent-sdk-runner.mjs`, with `pathToClaudeCodeExecutable` set to the image's pinned
+  CLI. Its `query()` options:
+  - the `claude_code` system prompt preset with our rules appended;
+  - tools `Read, Edit, Write, Glob, Grep` plus `mcp__sitekit__*`, with Bash, web, sub-agents and skills disallowed;
+  - `permissionMode: dontAsk` and `permissionPrompts: none`;
+  - `settingSources: []` and `strictMcpConfig`;
+  - `outputFormat` set to the report schema, with `maxTurns`, `maxBudgetUsd` and `persistSession: false`;
+  - SIGTERM wired to its abort controller.
+- **Workspace hook.** A `PreToolUse` hook refuses any tool path outside the workspace. `canUseTool` is never
+  called under `dontAsk`, so the hook is the only in-process policy point. It only denies; it never allows.
+- **sitekit over stdio.** sitekit is the image's stdio `sitekit mcp` server, not an in-process
+  `createSdkMcpServer`. The latter would bundle sitekit, and with it Playwright, into the runner.
+- **One parser.** The SDK's messages are Claude Code's stream format, so the engine reuses Claude Code's parser.
+- **Real CLIs, offline, in CI.** The runner job runs each real CLI (Claude Code, the SDK runner, Codex) with our exact
+  argv and env, no network and a fake key, and checks the tools each one starts with. This is how we found that
+  `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` needs bubblewrap: with it, Claude Code 2.1.288 refuses to start any
+  subprocess in our sandbox. It is now off.
+- **Benchmark.** `pnpm generation:bench` runs each engine on the same synthetic businesses with real models and
+  sandboxes. It needs keys and has not been run. Defaults (Bash vs MCP sitekit for Claude Code, fresh vs resumed
+  repair) and the typical cost and duration stay provisional until it is.

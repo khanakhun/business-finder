@@ -343,6 +343,12 @@ export interface GenerationTelemetry {
   settled(job: StoredJob, outcome: GenerationJobStatus): void;
 }
 export const GENERATION_TELEMETRY = Symbol('GenerationTelemetry');
+
+/** The quality gates' measures (BF-045): gate outcomes, decisions, scores, costs and platform problems. */
+export interface QualityTelemetry {
+  evaluated(engine: EngineId, report: QualityReport): void;
+}
+export const QUALITY_TELEMETRY = Symbol('QualityTelemetry');
 export const EVENT_STREAM = Symbol('EventStream');
 
 /** Private storage of attempts' artifacts (specs, workspace bundles). */
@@ -370,6 +376,8 @@ export interface SiteHandOff {
     readonly jobId: string;
     readonly changeSummary: string;
   }): Promise<{ readonly siteId: string; readonly versionId: string }>;
+  /** A version's stored quality report (null when it has none; BF-045). */
+  versionQuality(organizationId: string, siteId: string, versionId: string): Promise<unknown>;
   /** Stores the quality report on the version (set once; BF-045). */
   recordQuality(input: {
     readonly organizationId: string;

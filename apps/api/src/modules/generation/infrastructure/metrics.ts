@@ -1,6 +1,6 @@
 import type { EngineId, GenerationJobStatus } from '@bf/contracts';
 import { metrics } from '@bf/observability';
-import type { GenerationTelemetry, StoredJob } from '../application/ports.ts';
+import type { GenerationTelemetry, QualityTelemetry, StoredJob } from '../application/ports.ts';
 import type { SandboxTelemetry } from '../application/sandbox.ports.ts';
 
 // Generation metrics (BF-039): outcomes per engine, phase durations, queue waits, cost per job, sandboxes in use and
@@ -90,4 +90,63 @@ export const PROMETHEUS_SANDBOX_TELEMETRY: SandboxTelemetry = {
     sandboxSeconds().observe({ outcome }, seconds);
   },
   frameError: () => sandboxFrameErrors().inc(),
+};
+
+export const qualityGatesTotal = () =>
+  metrics.counter({
+    name: 'bf_generation_quality_gates_total',
+    help: 'Quality gate outcomes (BF-045), by engine, gate and status (pass, fail, skipped, error)',
+    labelNames: ['engine', 'gate', 'status'],
+  });
+
+export const qualityDecisionsTotal = () =>
+  metrics.counter({
+    name: 'bf_generation_quality_decisions_total',
+    help: 'Quality decisions (pass, repair, needs_review) by engine',
+    labelNames: ['engine', 'decision'],
+  });
+
+export const qualityScore = () =>
+  metrics.histogram({
+    name: 'bf_generation_quality_score',
+    help: 'Quality score (0–100) of an evaluated version, by engine',
+    labelNames: ['engine'],
+    buckets: [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100],
+  });
+
+export const qualityCostUsd = () =>
+  metrics.counter({
+    name: 'bf_generation_quality_cost_usd_total',
+    help: 'Cost of the AI quality gates (claims, visual critic)',
+    labelNames: ['gate'],
+  });
+
+export const qualityPlatformIssues = () =>
+  metrics.counter({
+    name: 'bf_generation_quality_platform_issues_total',
+    help: 'Issues the platform causes (renderer, fonts, scripts), by gate: a spike is a platform regression',
+    labelNames: ['gate'],
+  });
+
+export const qualityGateScore = () =>
+  metrics.histogram({
+    name: 'bf_generation_quality_gate_score',
+    help: 'Score of a scored gate (copy, a11y, performance: Lighthouse, visual), by gate',
+    labelNames: ['gate'],
+    buckets: [10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100],
+  });
+
+/** The quality pipeline's metrics on the shared registry. */
+export const PROMETHEUS_QUALITY_TELEMETRY: QualityTelemetry = {
+  evaluated(engine, report) {
+    qualityDecisionsTotal().inc({ engine, decision: report.decision });
+    qualityScore().observe({ engine }, report.score);
+    for (const gate of report.gates) {
+      qualityGatesTotal().inc({ engine, gate: gate.id, status: gate.status });
+      if (gate.score !== undefined) qualityGateScore().observe({ gate: gate.id }, gate.score);
+      if (gate.costUsd > 0) qualityCostUsd().inc({ gate: gate.id }, gate.costUsd);
+      const platform = gate.issues.filter((issue) => issue.platform).length;
+      if (platform > 0) qualityPlatformIssues().inc({ gate: gate.id }, platform);
+    }
+  },
 };

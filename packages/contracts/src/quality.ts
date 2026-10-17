@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EngineIdSchema } from './generation.ts';
 
 // The quality gates' language (BF-045): every gate reports issues in one shape — where (a page, a block, a path, a
 // locale), how bad, whether an engine can repair it or a deterministic fix applies — and the pipeline's report keeps
@@ -95,3 +96,21 @@ export const QualityReportSchema = z
   })
   .meta({ id: 'QualityReport' });
 export type QualityReport = z.infer<typeof QualityReportSchema>;
+
+/** Publish a version the gates sent to review (BF-045): who decided is recorded, and why. */
+export const AcceptGenerationJobRequestSchema = z
+  .object({ reason: z.string().trim().min(10).max(500) })
+  .meta({ id: 'AcceptGenerationJobRequest' });
+export type AcceptGenerationJobRequest = z.infer<typeof AcceptGenerationJobRequestSchema>;
+
+/** A repair attempt asked by a person, on the report's issues (on another engine if given). */
+export const RepairGenerationJobRequestSchema = z
+  .object({ engine: EngineIdSchema.optional() })
+  .meta({ id: 'RepairGenerationJobRequest' });
+export type RepairGenerationJobRequest = z.infer<typeof RepairGenerationJobRequestSchema>;
+
+/** A job's quality report (BF-045): null until the gates have produced one. */
+export const GenerationJobQualitySchema = z
+  .object({ report: QualityReportSchema.nullable() })
+  .meta({ id: 'GenerationJobQuality' });
+export type GenerationJobQuality = z.infer<typeof GenerationJobQualitySchema>;

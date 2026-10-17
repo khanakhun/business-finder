@@ -63,3 +63,6 @@ apps/web/public/_bf/
 
 # sitekit renders and screenshots inside workspaces (BF-042)
 .sitekit/
+
+# The visual critic's golden screenshots (BF-045): reproducible with `pnpm quality:calibrate golden`.
+apps/api/evals/quality-golden/**/*.png

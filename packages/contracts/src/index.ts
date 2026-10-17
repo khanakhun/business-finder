@@ -641,6 +641,10 @@ export {
   RoleSchema,
 } from './permissions.ts';
 export {
+  type AcceptGenerationJobRequest,
+  AcceptGenerationJobRequestSchema,
+  type GenerationJobQuality,
+  GenerationJobQualitySchema,
   QUALITY_DECISIONS,
   QUALITY_GATES,
   type QualityAutoFix,
@@ -654,6 +658,8 @@ export {
   QualityIssueSchema,
   type QualityReport,
   QualityReportSchema,
+  type RepairGenerationJobRequest,
+  RepairGenerationJobRequestSchema,
 } from './quality.ts';
 export { type RealtimeEvent, RealtimeEventSchema } from './realtime.ts';
 export {

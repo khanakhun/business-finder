@@ -173,11 +173,11 @@ docs/compliance/data-map.md
 - **Security:** timing test on token lookup (no measurable difference between valid and invalid tokens beyond noise); rate limits.
 
 ## Acceptance criteria
-- [ ] Unsubscribe token service (fail-closed) + RFC 8058 one-click endpoint + scanner-safe localized confirmation page with preview-removal option.
-- [ ] Suppression management (search, add, import, export, revoke with reason) with immediate cross-mailbox effects.
-- [ ] DSR framework with providers for existing modules, workflow, deadlines and audited exports and erasure; hashed suppression after erasure.
-- [ ] Retention registry, default policies, daily job with dry-run and reports.
-- [ ] `docs/compliance/data-map.md` written and linked.
+- [x] Unsubscribe token service (fail-closed) + RFC 8058 one-click endpoint + scanner-safe localized confirmation page with preview-removal option.
+- [x] Suppression management (search, add, import, export, revoke with reason) with immediate cross-mailbox effects.
+- [x] DSR framework with providers for existing modules, workflow, deadlines and audited exports and erasure; hashed suppression after erasure.
+- [x] Retention registry, default policies, daily job with dry-run and reports.
+- [x] `docs/compliance/data-map.md` written and linked.
 
 ## Agent prompt
 ```text

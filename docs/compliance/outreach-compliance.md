@@ -41,7 +41,12 @@ GDPR-grade handling applies to **all** jurisdictions because the operator is EU-
 | Every message stores: decision id, policy version, lawful-basis record id, footer version | `outbound_messages` |
 | Prospect data purged after configurable inactivity (default 36 months) | retention job |
 
-## 4. Sources (for the reviewer)
+## 4. Records of processing
+
+The personal data the system keeps, why, where, who receives it and for how long: [data-map.md](data-map.md)
+(BF-055).
+
+## 5. Sources (for the reviewer)
 
 - ACM — spam rules (NL): https://www.acm.nl/nl/onderwerpen/telecommunicatie/internet/spam
 - Overloop — Dutch/Belgian cold-acquisition law overview (Sep 2026): https://overloop.com/nl/blog/koude-acquisitie-wetgeving

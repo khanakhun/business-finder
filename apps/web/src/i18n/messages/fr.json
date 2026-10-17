@@ -26,7 +26,8 @@
     "expand": "Déployer la barre latérale",
     "label": "Navigation principale",
     "tasks": "Tâches",
-    "leads": "Contacts entrants"
+    "leads": "Contacts entrants",
+    "compliance": "Conformité"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -3597,5 +3598,190 @@
         "reconnected": "Reconnectée"
       }
     }
+  },
+  "complianceAdmin": {
+    "title": "Conformité",
+    "description": "Suppressions, demandes des personnes sur leurs données et conservation.",
+    "nav": {
+      "label": "Sections de conformité",
+      "suppressions": "Suppressions",
+      "requests": "Demandes sur les données",
+      "retention": "Conservation",
+      "policies": "Politiques"
+    },
+    "scopes": {
+      "email": "E-mail",
+      "domain": "Domaine",
+      "phone": "Téléphone",
+      "business": "Entreprise (partout)",
+      "org_business": "Entreprise",
+      "email_hash": "E-mail effacé (empreinte)"
+    },
+    "reasons": {
+      "unsubscribe": "Désinscription",
+      "opt_out": "Opposition",
+      "complaint": "Plainte",
+      "hard_bounce": "Adresse invalide",
+      "manual": "Manuel",
+      "dsr_objection": "Opposition (demande)",
+      "no_solicitation": "Pas de sollicitation",
+      "legal": "Légal"
+    },
+    "suppressions": {
+      "search": "Rechercher",
+      "scope": "Type",
+      "reason": "Motif",
+      "view": "Afficher",
+      "all": "Tous",
+      "current": "Supprimés actuellement",
+      "log": "Journal complet",
+      "add": "Ajouter",
+      "import": "Importer un CSV",
+      "export": "Exporter en CSV",
+      "loadError": "Impossible de charger les suppressions.",
+      "emptyTitle": "Aucune suppression",
+      "emptyBody": "Les désinscriptions, oppositions et ajouts manuels apparaissent ici.",
+      "caption": "Suppressions",
+      "value": "Valeur",
+      "source": "Origine",
+      "when": "Depuis",
+      "actions": "Actions",
+      "hashed": "effacé (conservé sous forme d’empreinte)",
+      "global": "Toute la plateforme",
+      "revoke": "Lever",
+      "sources": {
+        "link": "Page de désinscription",
+        "one_click": "Désinscription en un clic",
+        "reply": "Réponse",
+        "site_form": "Formulaire du site d’aperçu",
+        "api": "API",
+        "import": "Import",
+        "admin": "Ajouté par une personne",
+        "system": "Système"
+      },
+      "action": {
+        "add": "ajouté",
+        "revoke": "levé"
+      },
+      "added": "Ajouté aux suppressions.",
+      "failed": "L’opération a échoué.",
+      "addTitle": "Supprimer une adresse",
+      "addHint": "Plus personne dans l’espace ne la contactera tant que la suppression n’est pas levée.",
+      "note": "Note (facultative)",
+      "imported": "{added} entrées ajoutées.",
+      "importTitle": "Importer des suppressions",
+      "importHint": "Un CSV avec une valeur par ligne, ou un en-tête avec une colonne value ou email. Prévisualisez d’abord : rien n’est enregistré avant votre confirmation.",
+      "file": "Fichier CSV",
+      "orPaste": "Ou collez les valeurs",
+      "previewSummary": "{rows} lignes : {valid} valides ({duplicates} doublons), {already} déjà supprimées, {invalid} invalides.",
+      "invalidLine": "Ligne {line} : {value}",
+      "preview": "Prévisualiser",
+      "commit": "Supprimer {count}",
+      "revoked": "Suppression levée.",
+      "revokeTitle": "Lever cette suppression",
+      "consentWarning": "Cette personne s’est désinscrite. Ne levez la suppression qu’avec la preuve d’un nouveau consentement explicite.",
+      "revokeReason": "Pourquoi elle est levée",
+      "consentEvidence": "Comment et quand elle a de nouveau consenti"
+    },
+    "dsrTypes": {
+      "access": "Accès",
+      "erasure": "Effacement",
+      "objection": "Opposition",
+      "rectification": "Rectification",
+      "restriction": "Limitation"
+    },
+    "dsrStatus": {
+      "received": "Reçue",
+      "verifying": "Vérification",
+      "in_progress": "En cours",
+      "completed": "Traitée",
+      "rejected": "Refusée"
+    },
+    "methods": {
+      "email_reply": "Réponse depuis l’adresse",
+      "known_contact": "Contact connu",
+      "id_document": "Pièce d’identité",
+      "other": "Autre"
+    },
+    "requests": {
+      "new": "Nouvelle demande",
+      "loadError": "Impossible de charger les demandes.",
+      "emptyTitle": "Aucune demande",
+      "emptyBody": "Les demandes des personnes sur leurs données apparaissent ici, avec leur échéance d’un mois.",
+      "erasedSubject": "Identifiants effacés",
+      "due": "Échéance {when}",
+      "detail": "Demande sur les données",
+      "detailHint": "Personne, échéance, actions et historique de la demande.",
+      "newHint": "Enregistrez une demande reçue par e-mail, téléphone ou courrier. L’échéance est d’un mois.",
+      "type": "Type",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "name": "Nom",
+      "notes": "Notes",
+      "created": "Demande enregistrée.",
+      "failed": "L’opération a échoué.",
+      "create": "Enregistrer",
+      "source": {
+        "admin": "Saisie par l’équipe",
+        "public": "Formulaire de la page confidentialité"
+      },
+      "subject": "Personne",
+      "verifyTitle": "Vérifier l’identité",
+      "method": "Méthode de vérification",
+      "verifyNotes": "Ce qui a été vérifié",
+      "verify": "Marquer comme vérifiée",
+      "verified": "Identité vérifiée.",
+      "executeTitle": "Traiter",
+      "discover": "Trouver ses données",
+      "discovered": "Recherche effectuée.",
+      "records": "{count, plural, =0 {aucun élément} one {# élément} other {# éléments}}",
+      "manualReview": "à revoir à la main",
+      "mode": "Mode d’effacement",
+      "anonymize": "Anonymiser (garder les enregistrements)",
+      "delete": "Supprimer les enregistrements",
+      "whatWasDone": "Ce qui a été fait",
+      "executed": "Demande traitée.",
+      "execute": {
+        "access": "Préparer l’export",
+        "erasure": "Effacer ses données",
+        "objection": "Arrêter toute prospection",
+        "rectification": "Marquer comme corrigée",
+        "restriction": "Limiter le traitement"
+      },
+      "rejectReason": "Motif du refus",
+      "reject": "Refuser",
+      "rejected": "Demande refusée.",
+      "download": "Télécharger l’export",
+      "trail": "Historique",
+      "actions": {
+        "received": "Reçue",
+        "verified": "Identité vérifiée",
+        "rejected": "Refusée",
+        "discovered": "Données recherchées",
+        "executed": "Traitée"
+      }
+    },
+    "retention": {
+      "loadError": "Impossible de charger les politiques de conservation.",
+      "policies": "Politiques",
+      "dryRun": "Simulation",
+      "dryRunDone": "Simulation enregistrée ci-dessous.",
+      "failed": "L’opération a échoué.",
+      "policy": "Politique",
+      "kept": "Conservé",
+      "action": "Ensuite",
+      "days": "{count, plural, one {# jour} other {# jours}}",
+      "actions": {
+        "delete": "Supprimé",
+        "anonymize": "Anonymisé",
+        "truncate_payload": "Contenu retiré"
+      },
+      "runs": "Dernières exécutions",
+      "noRuns": "Aucune exécution : l’exécution quotidienne démarre dans le worker.",
+      "dry": "simulation (rien n’a changé)",
+      "real": "exécution quotidienne",
+      "rows": "{count, plural, =0 {aucune ligne} one {# ligne} other {# lignes}}"
+    },
+    "dataMap": "Registre des traitements (cartographie des données)"
   }
 }

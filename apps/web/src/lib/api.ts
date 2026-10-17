@@ -101,6 +101,11 @@ export const queryKeys = {
     evaluation: (businessId: string, channel: string, purpose: string) =>
       ['compliance', 'evaluation', businessId, channel, purpose] as const,
     decisions: (businessId: string) => ['compliance', 'decisions', businessId] as const,
+    suppressions: (filters: Record<string, string | undefined>) =>
+      ['compliance', 'suppressions', filters] as const,
+    requests: () => ['compliance', 'requests'] as const,
+    request: (id: string) => ['compliance', 'requests', id] as const,
+    retention: () => ['compliance', 'retention'] as const,
   }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,

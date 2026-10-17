@@ -13,6 +13,7 @@ export const REALTIME_EVENTS = {
   scoringRecomputeProgressed: 'scoring.recompute.progressed',
   outreachMessageStatus: 'outreach.message.status',
   outreachInboxChanged: 'outreach.inbox.changed',
+  killSwitchChanged: 'outreach.kill_switch.changed',
 } as const;
 
 const FINISHED_RUN = new Set(['completed', 'partially_completed', 'failed', 'cancelled']);
@@ -62,6 +63,8 @@ export const realtimeInvalidations: Readonly<Record<string, (event: RealtimeEven
         ...(businessId ? [['outreach', 'history', businessId]] : []),
       ];
     },
+    // The workspace's kill switch moved (BF-056): the banner and the deliverability page.
+    [REALTIME_EVENTS.killSwitchChanged]: () => [['deliverability']],
     // A reply arrived or changed (BF-054): the inbox list and that thread.
     [REALTIME_EVENTS.outreachInboxChanged]: (event) => [
       ['inbox', 'list'],

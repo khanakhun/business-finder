@@ -30,6 +30,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Follow-ups paused for {business}',
       body: '{reason}',
     },
+    deliverability_digest: {
+      title: 'Deliverability this week: {sent} emails, {bounceRate} bounced',
+      body: '{summary}',
+    },
     mailbox_error: {
       title: 'Mailbox needs reconnecting: {mailbox}',
       body: 'Sending from it stopped: {reason}.',
@@ -63,6 +67,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
     sequence_paused: {
       title: 'Relances en pause pour {business}',
       body: '{reason}',
+    },
+    deliverability_digest: {
+      title: 'Délivrabilité de la semaine : {sent} e-mails, {bounceRate} en erreur',
+      body: '{summary}',
     },
     mailbox_paused: {
       title: 'Boîte d’envoi en pause : {mailbox}',

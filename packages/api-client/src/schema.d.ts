@@ -6803,7 +6803,7 @@ export type components = {
             /** @description Message key the dashboard translates, e.g. `notifications.types.member_joined.title`. */
             titleKey: string;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "deliverability_digest" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPage: {
             items: components["schemas"]["Notification"][];
@@ -6815,7 +6815,7 @@ export type components = {
             email: boolean;
             inApp: boolean;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "sequence_paused" | "deliverability_digest" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPreferences: {
             items: components["schemas"]["NotificationPreference"][];

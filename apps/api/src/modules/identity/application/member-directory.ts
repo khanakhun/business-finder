@@ -19,6 +19,13 @@ export class MemberDirectory {
     return (await this.members.listMembers(organizationId)).map((member) => member.userId);
   }
 
+  /** Owners and admins of a workspace (who receive operational digests and alerts). */
+  async ownerIds(organizationId: string): Promise<string[]> {
+    return (await this.members.listMembers(organizationId))
+      .filter((member) => member.role === 'owner' || member.role === 'admin')
+      .map((member) => member.userId);
+  }
+
   async isMember(organizationId: string, userId: string): Promise<boolean> {
     return (await this.members.roleOf(userId, organizationId)) !== undefined;
   }

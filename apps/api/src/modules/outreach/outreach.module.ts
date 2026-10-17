@@ -11,6 +11,7 @@ import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.t
 import { RealtimeModule } from '../realtime/index.ts';
 import { SitesModule } from '../sites/index.ts';
 import { DeliverabilityService, DNS_LOOKUPS } from './application/deliverability/deliverability.service.ts';
+import { DeliverabilityDigest } from './application/deliverability/digest.ts';
 import { DeliverabilityHealth } from './application/deliverability/health.ts';
 import { KillSwitchService } from './application/deliverability/kill-switch.ts';
 import { DELIVERABILITY_REPOSITORY, MAILBOX_READINESS } from './application/deliverability/ports.ts';
@@ -258,6 +259,7 @@ export class OutreachModule {
         DeliverabilityService,
         DeliverabilityHealth,
         KillSwitchService,
+        DeliverabilityDigest,
         { provide: MAILBOX_READINESS, useExisting: DeliverabilityService },
         { provide: OUTBOUND_REPOSITORY, useClass: DrizzleOutboundRepository },
         {

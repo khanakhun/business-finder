@@ -1,0 +1,263 @@
+[
+  {
+    "offer": "new_website",
+    "taxonomyPrefix": "",
+    "relevant": true,
+    "rationale": {
+      "en": "Every customer-facing local business benefits from a website that presents its activity, hours and contact details.",
+      "fr": "Toute entreprise locale recevant du public bénéficie d'un site qui présente son activité, ses horaires et ses coordonnées."
+    }
+  },
+  {
+    "offer": "website_redesign",
+    "taxonomyPrefix": "",
+    "relevant": true,
+    "rationale": {
+      "en": "A redesign relates to the activity of any business that already has a website, whatever its category.",
+      "fr": "Une refonte concerne l'activité de toute entreprise qui possède déjà un site, quelle que soit sa catégorie."
+    }
+  },
+  {
+    "offer": "local_seo",
+    "taxonomyPrefix": "",
+    "relevant": true,
+    "rationale": {
+      "en": "Local search visibility is relevant to any business serving customers in a given area.",
+      "fr": "La visibilité dans la recherche locale concerne toute entreprise qui sert une clientèle sur un territoire donné."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "food_drink",
+    "relevant": true,
+    "rationale": {
+      "en": "Restaurants, cafés and bars receive reservation and opening-hours calls throughout service.",
+      "fr": "Restaurants, cafés et bars reçoivent des appels de réservation et d'horaires pendant tout le service."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "lodging",
+    "relevant": true,
+    "rationale": {
+      "en": "Hotels, guest houses and rental agencies handle availability and booking calls at all hours.",
+      "fr": "Hôtels, maisons d'hôtes et agences de location gèrent des appels de disponibilité et de réservation à toute heure."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "beauty_wellness",
+    "relevant": true,
+    "rationale": {
+      "en": "Salons and wellness studios take appointment calls while practitioners are with clients.",
+      "fr": "Salons et studios de bien-être reçoivent des appels de rendez-vous pendant que les praticiens sont en prestation."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "health_medical",
+    "relevant": true,
+    "rationale": {
+      "en": "Clinics, dental and paramedical practices spend significant time answering appointment calls.",
+      "fr": "Cabinets médicaux, dentaires et paramédicaux consacrent un temps important aux appels de rendez-vous."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "sports_fitness",
+    "relevant": true,
+    "rationale": {
+      "en": "Gyms, studios and clubs field calls about classes, trials and schedules.",
+      "fr": "Salles, studios et clubs reçoivent des appels sur les cours, les essais et les plannings."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "home_services",
+    "relevant": true,
+    "rationale": {
+      "en": "Pool, garden, cleaning and repair services receive calls while their staff are on site.",
+      "fr": "Les services de piscine, jardin, nettoyage et dépannage reçoivent des appels pendant que leurs équipes sont sur le terrain."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "automotive_transport",
+    "relevant": true,
+    "rationale": {
+      "en": "Garages, vehicle rental and passenger transport take booking and quote calls during working hours.",
+      "fr": "Garages, loueurs de véhicules et transporteurs de passagers reçoivent des appels de réservation et de devis en journée."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "marine_nautical",
+    "relevant": true,
+    "rationale": {
+      "en": "Charter, excursion and water-taxi operators handle booking calls while at sea.",
+      "fr": "Les opérateurs de charter, d'excursions et de taxis nautiques gèrent des appels de réservation lorsqu'ils sont en mer."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "tourism_leisure",
+    "relevant": true,
+    "rationale": {
+      "en": "Travel services and attractions answer availability and booking questions by phone.",
+      "fr": "Les services de voyage et les attractions répondent par téléphone aux questions de disponibilité et de réservation."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "real_estate",
+    "relevant": true,
+    "rationale": {
+      "en": "Agencies and property managers receive viewing and rental inquiries by phone.",
+      "fr": "Agences et gestionnaires immobiliers reçoivent des demandes de visite et de location par téléphone."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "pets_animals",
+    "relevant": true,
+    "rationale": {
+      "en": "Veterinarians, groomers and boarding services take appointment calls during consultations.",
+      "fr": "Vétérinaires, toiletteurs et pensions reçoivent des appels de rendez-vous pendant les consultations."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "professional_services",
+    "relevant": true,
+    "rationale": {
+      "en": "Law, accounting and business-services firms qualify and schedule client calls.",
+      "fr": "Cabinets juridiques, comptables et de services aux entreprises qualifient et planifient les appels clients."
+    }
+  },
+  {
+    "offer": "ai_receptionist",
+    "taxonomyPrefix": "",
+    "relevant": false,
+    "rationale": {
+      "en": "Other categories do not rely on inbound calls or appointments, so an AI receptionist does not relate to their activity.",
+      "fr": "Les autres catégories ne reposent pas sur des appels entrants ou des rendez-vous ; un standard IA ne concerne pas leur activité."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "food_drink",
+    "relevant": true,
+    "rationale": {
+      "en": "Restaurants, bars and caterers take table and event reservations.",
+      "fr": "Restaurants, bars et traiteurs prennent des réservations de tables et d'événements."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "lodging",
+    "relevant": true,
+    "rationale": {
+      "en": "Accommodation providers sell stays by date and need availability management.",
+      "fr": "Les hébergeurs vendent des séjours à la date et ont besoin de gérer leurs disponibilités."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "beauty_wellness",
+    "relevant": true,
+    "rationale": {
+      "en": "Salons, spas and tattoo studios work by appointment.",
+      "fr": "Salons, spas et studios de tatouage travaillent sur rendez-vous."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "health_medical",
+    "relevant": true,
+    "rationale": {
+      "en": "Medical, dental and paramedical practices schedule consultations.",
+      "fr": "Les cabinets médicaux, dentaires et paramédicaux planifient des consultations."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "sports_fitness",
+    "relevant": true,
+    "rationale": {
+      "en": "Classes, courts, lessons and sessions are booked by time slot.",
+      "fr": "Cours, terrains, leçons et séances se réservent par créneau horaire."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "home_services",
+    "relevant": true,
+    "rationale": {
+      "en": "Cleaning, maintenance and personal services schedule visits with customers.",
+      "fr": "Les services de nettoyage, d'entretien et à la personne planifient des interventions chez leurs clients."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "automotive_transport",
+    "relevant": true,
+    "rationale": {
+      "en": "Vehicle rental, transfers and workshop appointments are booked in advance.",
+      "fr": "Locations de véhicules, transferts et rendez-vous d'atelier se réservent à l'avance."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "marine_nautical",
+    "relevant": true,
+    "rationale": {
+      "en": "Charters, excursions, water sports and fishing trips are sold by date and seat.",
+      "fr": "Charters, excursions, sports nautiques et sorties de pêche se vendent à la date et à la place."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "tourism_leisure",
+    "relevant": true,
+    "rationale": {
+      "en": "Tours, activities and attractions sell timed tickets and reservations.",
+      "fr": "Visites, activités et attractions vendent des billets horodatés et des réservations."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "events_creative",
+    "relevant": true,
+    "rationale": {
+      "en": "Event, photo and video providers book dates and sessions with clients.",
+      "fr": "Les prestataires d'événementiel, de photo et de vidéo réservent des dates et des séances avec leurs clients."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "education",
+    "relevant": true,
+    "rationale": {
+      "en": "Schools, tutors and course providers enrol students in dated lessons.",
+      "fr": "Écoles, tuteurs et organismes de formation inscrivent des élèves à des cours datés."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "pets_animals",
+    "relevant": true,
+    "rationale": {
+      "en": "Veterinary, grooming, boarding and training services work by appointment.",
+      "fr": "Les services vétérinaires, de toilettage, de pension et de dressage travaillent sur rendez-vous."
+    }
+  },
+  {
+    "offer": "booking_system",
+    "taxonomyPrefix": "",
+    "relevant": false,
+    "rationale": {
+      "en": "Other categories do not sell time slots or reservations, so a booking system does not relate to their activity.",
+      "fr": "Les autres catégories ne vendent ni créneaux ni réservations ; un système de réservation ne concerne pas leur activité."
+    }
+  }
+]

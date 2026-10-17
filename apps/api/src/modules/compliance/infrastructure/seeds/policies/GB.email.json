@@ -1,0 +1,77 @@
+{
+  "jurisdiction": "GB",
+  "channel": "email",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "PECR distinguishes corporate subscribers from individuals; when the recipient type cannot be established, the message must be reviewed by a person.",
+      "fr": "Le PECR distingue les abonnés « corporate » des particuliers ; lorsque le type de destinataire ne peut pas être établi, le message doit être relu par une personne."
+    },
+    "rules": [
+      {
+        "id": "offer-not-relevant",
+        "when": {
+          "relevance": ["not_relevant"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "The offer does not relate to the recipient's business activity, so the message cannot be justified as professional prospecting.",
+          "fr": "L'offre ne concerne pas l'activité professionnelle du destinataire : le message ne peut pas être justifié comme une prospection professionnelle."
+        }
+      },
+      {
+        "id": "corporate-subscriber",
+        "when": {
+          "recipientType": ["legal_person"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "Corporate subscribers (Ltd, LLP, PLC) may be emailed without prior consent under PECR, provided the sender is identified and an opt-out is offered.",
+          "fr": "Les abonnés « corporate » (Ltd, LLP, PLC) peuvent être contactés par email sans consentement préalable selon le PECR, à condition d'identifier l'expéditeur et de proposer un désabonnement."
+        }
+      },
+      {
+        "id": "sole-trader-or-partnership",
+        "when": {
+          "recipientType": ["sole_trader"]
+        },
+        "decision": "manual_only",
+        "explain": {
+          "en": "Sole traders and partnerships are treated as individual subscribers under PECR and require consent; only a manual, consent-confirmed send is possible.",
+          "fr": "Les indépendants et partnerships sont traités comme des abonnés individuels par le PECR et requièrent un consentement ; seul un envoi manuel après confirmation du consentement est possible."
+        }
+      },
+      {
+        "id": "recipient-type-unknown",
+        "when": {
+          "recipientType": ["unknown"]
+        },
+        "decision": "manual_only",
+        "explain": {
+          "en": "It is not known whether the recipient is a corporate subscriber or a sole trader; a person must check the legal form before sending.",
+          "fr": "On ignore si le destinataire est une société ou un indépendant ; une personne doit vérifier la forme juridique avant l'envoi."
+        }
+      }
+    ],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "ICO — Direct marketing and privacy and electronic communications (PECR)",
+      "url": "https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/"
+    },
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

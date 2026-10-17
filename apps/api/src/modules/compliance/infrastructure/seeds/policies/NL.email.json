@@ -1,0 +1,59 @@
+{
+  "jurisdiction": "NL",
+  "channel": "email",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "The Netherlands requires prior consent for unsolicited email, including to businesses (Telecommunicatiewet art. 11.7); without a designated address the message can only be sent manually after confirming consent.",
+      "fr": "Les Pays-Bas exigent un consentement préalable pour les emails non sollicités, y compris envers les entreprises (Telecommunicatiewet art. 11.7) ; sans adresse désignée, le message ne peut être envoyé que manuellement après confirmation du consentement."
+    },
+    "rules": [
+      {
+        "id": "designated-address",
+        "when": {
+          "designatedForSolicitation": ["yes"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "The business published this address specifically to receive commercial offers, which is the exception to the consent requirement; identify the sender and offer an opt-out.",
+          "fr": "L'entreprise a publié cette adresse spécifiquement pour recevoir des offres commerciales, ce qui constitue l'exception à l'exigence de consentement ; identifiez l'expéditeur et proposez un désabonnement."
+        }
+      },
+      {
+        "id": "not-designated",
+        "when": {
+          "designatedForSolicitation": ["no", "unknown"]
+        },
+        "decision": "manual_only",
+        "explain": {
+          "en": "An info@ address on a contact page is not proof that it was designated for solicitation; consent is required, so only a manual, consent-confirmed send is possible.",
+          "fr": "Une adresse info@ sur une page de contact ne prouve pas qu'elle a été désignée pour la prospection ; le consentement est requis, seul un envoi manuel après confirmation du consentement est possible."
+        }
+      }
+    ],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "ACM — Spam rules (Netherlands)",
+      "url": "https://www.acm.nl/nl/onderwerpen/telecommunicatie/internet/spam"
+    },
+    {
+      "title": "Overloop — Dutch and Belgian cold-acquisition law overview (Sep 2026)",
+      "url": "https://overloop.com/nl/blog/koude-acquisitie-wetgeving"
+    },
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

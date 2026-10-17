@@ -1,0 +1,264 @@
+import type { ComplianceDecision, OutreachChannel } from '@bf/contracts';
+import { type DbClient, getExecutor } from '@bf/db';
+import {
+  complianceDecisions,
+  compliancePolicies,
+  compliancePolicyReviews,
+  suppressionEntries,
+  suppressionsCurrent,
+} from '@bf/db/schema';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, desc, eq, isNull, lt, or } from 'drizzle-orm';
+import { DB_CLIENT } from '../../platform/db/db.module.ts';
+import type {
+  DecisionRepository,
+  PolicyRepository,
+  StoredPolicy,
+  SuppressionRepository,
+} from '../application/ports.ts';
+
+// Compliance storage (BF-049). Policy versions are immutable, so a version read once is cached in memory by id.
+
+@Injectable()
+export class DrizzlePolicyRepository implements PolicyRepository {
+  constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
+
+  private get x() {
+    return getExecutor(this.db);
+  }
+
+  private async latest(
+    organizationId: string | null,
+    jurisdiction: string,
+    channel: OutreachChannel,
+    kind: 'seed' | 'override',
+  ) {
+    const [row] = await this.x
+      .select()
+      .from(compliancePolicies)
+      .where(
+        and(
+          organizationId
+            ? eq(compliancePolicies.organizationId, organizationId)
+            : isNull(compliancePolicies.organizationId),
+          eq(compliancePolicies.jurisdiction, jurisdiction),
+          eq(compliancePolicies.channel, channel),
+          eq(compliancePolicies.kind, kind),
+        ),
+      )
+      .orderBy(desc(compliancePolicies.version))
+      .limit(1);
+    return row as StoredPolicy | undefined;
+  }
+
+  seed(jurisdiction: string, channel: OutreachChannel) {
+    return this.latest(null, jurisdiction, channel, 'seed');
+  }
+
+  override(organizationId: string, jurisdiction: string, channel: OutreachChannel) {
+    return this.latest(organizationId, jurisdiction, channel, 'override');
+  }
+
+  async review(organizationId: string, policyId: string) {
+    const [row] = await this.x
+      .select()
+      .from(compliancePolicyReviews)
+      .where(
+        and(
+          eq(compliancePolicyReviews.organizationId, organizationId),
+          eq(compliancePolicyReviews.policyId, policyId),
+        ),
+      )
+      .limit(1);
+    return row;
+  }
+}
+
+@Injectable()
+export class DrizzleDecisionRepository implements DecisionRepository {
+  constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
+
+  private get x() {
+    return getExecutor(this.db);
+  }
+
+  async insert(decision: Parameters<DecisionRepository['insert']>[0]) {
+    const [row] = await this.x
+      .insert(complianceDecisions)
+      .values({ ...decision, alternatives: decision.alternatives as unknown[] })
+      .returning({ id: complianceDecisions.id, evaluatedAt: complianceDecisions.evaluatedAt });
+    if (!row) throw new Error('compliance decision not stored');
+    return row;
+  }
+
+  async forBusiness(
+    organizationId: string,
+    businessId: string,
+    limit: number,
+  ): Promise<ComplianceDecision[]> {
+    const rows = await this.x
+      .select()
+      .from(complianceDecisions)
+      .where(
+        and(
+          eq(complianceDecisions.organizationId, organizationId),
+          eq(complianceDecisions.businessId, businessId),
+        ),
+      )
+      .orderBy(desc(complianceDecisions.evaluatedAt))
+      .limit(limit);
+    return rows.map((row) => ({
+      id: row.id,
+      decision: row.decision,
+      channel: row.channel,
+      stage: row.stage,
+      jurisdictions: row.jurisdictions,
+      reasons: row.reasons,
+      requiredElements: row.requiredElements,
+      alternatives: row.alternatives as ComplianceDecision['alternatives'],
+      policyVersionIds: row.policyVersionIds,
+      autoSendPermitted: false,
+      inputs: row.inputs,
+      evaluatedAt: row.evaluatedAt.toISOString(),
+      validUntil: row.validUntil?.toISOString() ?? null,
+    }));
+  }
+}
+
+@Injectable()
+export class DrizzleSuppressionRepository implements SuppressionRepository {
+  constructor(@Inject(DB_CLIENT) private readonly db: DbClient) {}
+
+  private get x() {
+    return getExecutor(this.db);
+  }
+
+  private keyMatch(organizationId: string | null, scope: string, value: string) {
+    return and(
+      organizationId
+        ? eq(suppressionsCurrent.organizationId, organizationId)
+        : isNull(suppressionsCurrent.organizationId),
+      eq(suppressionsCurrent.scope, scope as never),
+      eq(suppressionsCurrent.valueNormalized, value),
+    );
+  }
+
+  async add(entry: Parameters<SuppressionRepository['add']>[0]) {
+    const [existing] = await this.x
+      .select({ entryId: suppressionsCurrent.entryId })
+      .from(suppressionsCurrent)
+      .where(this.keyMatch(entry.organizationId, entry.scope, entry.value))
+      .limit(1);
+    if (existing) return { id: existing.entryId, created: false };
+    const [row] = await this.x
+      .insert(suppressionEntries)
+      .values({
+        organizationId: entry.organizationId,
+        scope: entry.scope,
+        valueNormalized: entry.value,
+        action: 'add',
+        reason: entry.reason,
+        source: entry.source,
+        actor: entry.actor,
+        note: entry.note,
+      })
+      .returning({ id: suppressionEntries.id, createdAt: suppressionEntries.createdAt });
+    if (!row) throw new Error('suppression not stored');
+    await this.x
+      .insert(suppressionsCurrent)
+      .values({
+        organizationId: entry.organizationId,
+        scope: entry.scope,
+        valueNormalized: entry.value,
+        entryId: row.id,
+        reason: entry.reason,
+        createdAt: row.createdAt,
+      })
+      .onConflictDoNothing();
+    return { id: row.id, created: true };
+  }
+
+  async revoke(entry: Parameters<SuppressionRepository['revoke']>[0]) {
+    const removed = await this.x
+      .delete(suppressionsCurrent)
+      .where(this.keyMatch(entry.organizationId, entry.scope, entry.value))
+      .returning({ entryId: suppressionsCurrent.entryId, reason: suppressionsCurrent.reason });
+    if (removed.length === 0) return false;
+    await this.x.insert(suppressionEntries).values({
+      organizationId: entry.organizationId,
+      scope: entry.scope,
+      valueNormalized: entry.value,
+      action: 'revoke',
+      reason: removed[0]?.reason ?? 'manual',
+      source: 'admin',
+      actor: entry.actor,
+      note: entry.note,
+    });
+    return true;
+  }
+
+  async find(organizationId: string, keys: Parameters<SuppressionRepository['find']>[1]) {
+    if (keys.length === 0) return [];
+    const rows = await this.x
+      .select({
+        scope: suppressionsCurrent.scope,
+        value: suppressionsCurrent.valueNormalized,
+        reason: suppressionsCurrent.reason,
+        entryId: suppressionsCurrent.entryId,
+      })
+      .from(suppressionsCurrent)
+      .where(
+        and(
+          or(
+            eq(suppressionsCurrent.organizationId, organizationId),
+            isNull(suppressionsCurrent.organizationId),
+          ),
+          or(
+            ...keys.map((key) =>
+              and(
+                eq(suppressionsCurrent.scope, key.scope),
+                eq(suppressionsCurrent.valueNormalized, key.value),
+              ),
+            ),
+          ),
+        ),
+      );
+    return rows;
+  }
+
+  async entry(organizationId: string, id: string) {
+    const [row] = await this.x
+      .select({
+        scope: suppressionEntries.scope,
+        value: suppressionEntries.valueNormalized,
+        organizationId: suppressionEntries.organizationId,
+      })
+      .from(suppressionEntries)
+      .where(
+        and(
+          eq(suppressionEntries.id, id),
+          or(
+            eq(suppressionEntries.organizationId, organizationId),
+            isNull(suppressionEntries.organizationId),
+          ),
+        ),
+      )
+      .limit(1);
+    return row;
+  }
+
+  async list(organizationId: string, page: { limit: number; before?: Date }) {
+    const rows = await this.x
+      .select()
+      .from(suppressionEntries)
+      .where(
+        and(
+          eq(suppressionEntries.organizationId, organizationId),
+          page.before ? lt(suppressionEntries.createdAt, page.before) : undefined,
+        ),
+      )
+      .orderBy(desc(suppressionEntries.createdAt))
+      .limit(page.limit);
+    return rows.map((row) => ({ ...row, value: row.valueNormalized }));
+  }
+}

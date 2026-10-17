@@ -1,0 +1,19 @@
+{
+  "jurisdiction": "FR",
+  "channel": "whatsapp",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "Only human-initiated click-to-chat conversations are supported: a person opens the chat, identifies themselves and the agency, and stops on request. Automated business-initiated messaging is not used.",
+      "fr": "Seules les conversations « click-to-chat » ouvertes par une personne sont prises en charge : elle se présente, nomme l'agence et cesse sur demande. Aucun envoi automatisé à l'initiative de l'entreprise n'est utilisé."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [
+    {
+      "title": "Legiscope — RGPD, prospection par email et SMS en B2B (summary)",
+      "url": "https://www.legiscope.com/blog/rgpd-marketing-email-sms.html"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "jurisdiction": "DE",
+  "channel": "whatsapp",
+  "policy": {
+    "default": "blocked",
+    "defaultExplain": {
+      "en": "Electronic advertising messages in Germany require prior express consent (UWG §7), which also covers WhatsApp; the channel is blocked for prospecting.",
+      "fr": "En Allemagne, les messages publicitaires électroniques requièrent un consentement exprès préalable (UWG §7), ce qui couvre aussi WhatsApp ; le canal est bloqué pour la prospection."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [],
+  "note": "No primary German source is listed in docs/compliance/outreach-compliance.md yet; add one (UWG §7) during legal review."
+}

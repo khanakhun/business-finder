@@ -1,0 +1,29 @@
+{
+  "jurisdiction": "DE",
+  "channel": "email",
+  "policy": {
+    "default": "blocked",
+    "defaultExplain": {
+      "en": "Germany requires prior express consent for email advertising, including to businesses (UWG §7); automated cold email is blocked and contact must be made manually by other means.",
+      "fr": "L'Allemagne exige un consentement exprès préalable pour la publicité par email, y compris envers les entreprises (UWG §7) ; l'emailing à froid automatisé est bloqué et le contact doit se faire manuellement par d'autres moyens."
+    },
+    "rules": [],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ],
+  "note": "No primary German source is listed in docs/compliance/outreach-compliance.md yet; add one (UWG §7) during legal review."
+}

@@ -1,0 +1,15 @@
+{
+  "jurisdiction": "US",
+  "channel": "phone",
+  "policy": {
+    "default": "allowed_with_conditions",
+    "defaultExplain": {
+      "en": "Calls to businesses are allowed with a right to object (federal and state telemarketing rules mainly target consumers); the caller identifies themselves and the agency at the start and stops immediately on request. Calls are always placed by a person.",
+      "fr": "Les appels aux entreprises sont autorisés avec droit d'opposition (les règles fédérales et des États sur le télémarketing visent surtout les consommateurs) ; l'appelant se présente et nomme l'agence dès le début et met fin à la démarche immédiatement sur demande. Les appels sont toujours passés par une personne."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [],
+  "note": "B2B calls are generally allowed (manual); check state-level rules during legal review."
+}

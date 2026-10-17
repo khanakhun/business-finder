@@ -1,0 +1,15 @@
+{
+  "jurisdiction": "DE",
+  "channel": "phone",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "B2B calls in Germany need at least presumed consent (UWG §7): a person must document why this business would plausibly welcome the call before placing it.",
+      "fr": "En Allemagne, les appels B2B nécessitent au moins un consentement présumé (UWG §7) : une personne doit documenter pourquoi cette entreprise accueillerait vraisemblablement l'appel avant de le passer."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [],
+  "note": "No primary German source is listed in docs/compliance/outreach-compliance.md yet; add one (UWG §7) during legal review."
+}

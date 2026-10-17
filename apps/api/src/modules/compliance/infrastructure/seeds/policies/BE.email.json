@@ -1,0 +1,82 @@
+{
+  "jurisdiction": "BE",
+  "channel": "email",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "Belgium requires prior consent except for impersonal addresses of legal persons; when the address or recipient type is unknown the message must be handled by a person.",
+      "fr": "La Belgique exige un consentement préalable sauf pour les adresses impersonnelles de personnes morales ; lorsque le type d'adresse ou de destinataire est inconnu, le message doit être traité par une personne."
+    },
+    "rules": [
+      {
+        "id": "offer-not-relevant",
+        "when": {
+          "relevance": ["not_relevant"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "The offer does not relate to the recipient's business activity, so the message cannot be justified as professional prospecting.",
+          "fr": "L'offre ne concerne pas l'activité professionnelle du destinataire : le message ne peut pas être justifié comme une prospection professionnelle."
+        }
+      },
+      {
+        "id": "personal-address",
+        "when": {
+          "addressType": ["personal"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "A personal address at a company domain identifies a natural person and requires prior consent in Belgium.",
+          "fr": "Une adresse nominative sur un domaine d'entreprise identifie une personne physique et requiert un consentement préalable en Belgique."
+        }
+      },
+      {
+        "id": "sole-trader",
+        "when": {
+          "recipientType": ["sole_trader"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "The exception for impersonal addresses only applies to offers aimed at legal persons; a sole trader is a natural person and must consent first.",
+          "fr": "L'exception pour les adresses impersonnelles ne vaut que pour les offres destinées aux personnes morales ; un indépendant est une personne physique et doit consentir au préalable."
+        }
+      },
+      {
+        "id": "impersonal-legal-person",
+        "when": {
+          "addressType": ["generic", "department"],
+          "recipientType": ["legal_person"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "An impersonal address (info@, sales@) of a legal person may receive offers aimed at the legal person without prior consent, with sender identification and an opt-out.",
+          "fr": "Une adresse impersonnelle (info@, sales@) d'une personne morale peut recevoir des offres destinées à cette personne morale sans consentement préalable, avec identification de l'expéditeur et désabonnement."
+        }
+      }
+    ],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "Overloop — Dutch and Belgian cold-acquisition law overview (Sep 2026)",
+      "url": "https://overloop.com/nl/blog/koude-acquisitie-wetgeving"
+    },
+    {
+      "title": "Legiscope — RGPD, prospection par email et SMS en B2B (summary)",
+      "url": "https://www.legiscope.com/blog/rgpd-marketing-email-sms.html"
+    },
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

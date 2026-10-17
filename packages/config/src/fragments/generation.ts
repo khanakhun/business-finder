@@ -15,6 +15,9 @@ export const generationEnv = z.object({
     .describe(
       'How Claude Code reaches sitekit: `Bash(sitekit *)` only (bash) or the `sitekit mcp` server with no shell (mcp).',
     ),
+  GENERATION_CLAUDE_AGENT_SDK_ENGINE: booleanFlag(false).describe(
+    'Register the Claude Agent SDK engine (BF-044): `query()` in a sandbox, sitekit over MCP, no shell; needs SANDBOX_ENABLED and an Anthropic key per workspace.',
+  ),
   GENERATION_CODEX_ENGINE: booleanFlag(false).describe(
     'Register the Codex engine (BF-044): `codex exec` in a sandbox; needs SANDBOX_ENABLED and an OpenAI key per workspace.',
   ),

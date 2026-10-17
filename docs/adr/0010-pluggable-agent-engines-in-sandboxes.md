@@ -91,7 +91,9 @@ The user wants to select several businesses and have sites generated automatical
   - `--append-system-prompt-file` with our rules, which are also the workspace's `AGENTS.md`.
   - `--json-schema` with the final report schema inline (the flag does not take a file).
   - `--max-turns`, `--max-budget-usd` and `--no-session-persistence`.
-  - Env: telemetry, updates and memory off, and `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1`, so sitekit never sees the key.
+  - Env: telemetry, updates and memory off. `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` is not set. It needs bubblewrap, which
+    cannot run under the sandbox's seccomp profile, and with it 2.1.288 refuses to start any subprocess (found in part
+    3 by running the real CLI). The agent's only subprocess is sitekit, our own code.
   - The sitekit-over-MCP variant (`--mcp-config` with `sitekit mcp`, no Bash at all) is behind
     `GENERATION_CLAUDE_CODE_SITEKIT=mcp`. The default (`bash`) is provisional until the benchmark runs with keys.
 - **Codex's own sandbox does not run in ours.** Its bubblewrap sandbox cannot create user namespaces under Docker's

@@ -276,10 +276,11 @@ export abstract class SandboxedAgentEngine implements AgentEngine {
           `The agent spent the attempt's $${ctx.budgetUsd.toFixed(2)}.`,
           false,
         );
+      // A run stopped at its wall time has no result of its own: the timeout is the reason.
+      if (exit?.reason === 'timeout') throw fail('TIMEOUT', 'The agent ran out of wall time.', true);
       const outcome = parser.outcome();
       if (outcome.failure) throw new RunFailure(outcome.failure);
       if (!exit) throw fail('SANDBOX_PROTOCOL_ERROR', 'The sandbox ended without an exit frame.', true);
-      if (exit.reason === 'timeout') throw fail('TIMEOUT', 'The agent ran out of wall time.', true);
       if (exit.reason !== 'completed')
         throw fail(
           exit.reason === 'failed' ? 'ENGINE_INCOMPLETE' : 'ENGINE_ERROR',

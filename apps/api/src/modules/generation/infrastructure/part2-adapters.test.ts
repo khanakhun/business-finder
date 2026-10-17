@@ -81,7 +81,19 @@ describe('job event tail', () => {
         [
           'gen:job:j',
           [
-            ['1-0', ['seq', '1', 'event', JSON.stringify({ type: 'heartbeat' })]],
+            [
+              '1-0',
+              [
+                'seq',
+                '1',
+                'attempt',
+                '2',
+                'at',
+                '2026-10-17T08:00:00.000Z',
+                'event',
+                JSON.stringify({ type: 'heartbeat' }),
+              ],
+            ],
             ['2-0', ['status', 'succeeded']],
           ],
         ],
@@ -101,7 +113,7 @@ describe('job event tail', () => {
     const stop = await tail.follow('j', (entry) => seen.push(entry));
     await vi.waitFor(() => expect(seen).toHaveLength(2));
     expect(seen).toEqual([
-      { kind: 'event', seq: 1, event: { type: 'heartbeat' } },
+      { kind: 'event', seq: 1, event: { type: 'heartbeat' }, attempt: 2, at: '2026-10-17T08:00:00.000Z' },
       { kind: 'status', status: 'succeeded' },
     ]);
     stop();

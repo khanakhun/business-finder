@@ -241,7 +241,7 @@ export class GenerationRunner {
         await this.stream
           .publish(
             job.id,
-            batch.map((event, index) => ({ seq: seqs[index] ?? 0, event })),
+            batch.map((event, index) => ({ seq: seqs[index] ?? 0, event, attempt: attemptNo })),
           )
           .catch(() => undefined);
       });

@@ -8,6 +8,7 @@ import type {
   GenerationBriefPreview,
   GenerationEngineListing,
   GenerationJob,
+  GenerationJobDetail,
   GenerationJobQuality,
   SitePage,
 } from '@bf/contracts';
@@ -68,6 +69,30 @@ export function useBatch(id: string) {
     queryFn: async () =>
       (await apiClient().GET('/v1/generation-batches/{id}', { params: { path: { id } } }))
         .data as GenerationBatchDetail,
+  });
+}
+
+/** One job with its attempts, kept current by the workspace's realtime channel (its new state, no refetch). */
+export function useJob(id: string) {
+  const client = useQueryClient();
+  const key = queryKeys.generation.job(id);
+  useRealtimeEvent(JOB_UPDATED, (event) => {
+    const job = event.payload as GenerationJob | null;
+    if (!job || job.id !== id) return;
+    const current = client.getQueryData<GenerationJobDetail>(key);
+    // A new attempt started: its row comes from the API.
+    if (!current || current.attemptCount !== job.attemptCount)
+      void client.invalidateQueries({ queryKey: key });
+    else client.setQueryData<GenerationJobDetail>(key, { ...current, ...job });
+    // The report is written once the gates ran.
+    if (job.qualityScore !== current?.qualityScore)
+      void client.invalidateQueries({ queryKey: queryKeys.generation.quality(id) });
+  });
+  return useQuery({
+    queryKey: key,
+    queryFn: async () =>
+      (await apiClient().GET('/v1/generation-jobs/{id}', { params: { path: { id } } }))
+        .data as GenerationJobDetail,
   });
 }
 

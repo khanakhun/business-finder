@@ -30,6 +30,7 @@
     "@dnd-kit/core": "catalog:",
     "@puckeditor/core": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "@tanstack/react-virtual": "catalog:",
     "lucide-react": "catalog:",
     "maplibre-gl": "catalog:",
     "next": "catalog:",

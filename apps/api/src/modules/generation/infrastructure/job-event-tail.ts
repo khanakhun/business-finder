@@ -5,7 +5,13 @@ import type { Redis } from 'ioredis';
 // status changes, read with a blocking XREAD on a connection of its own (one per client, closed on stop).
 
 export type TailEntry =
-  | { readonly kind: 'event'; readonly seq: number; readonly event: EngineEvent }
+  | {
+      readonly kind: 'event';
+      readonly seq: number;
+      readonly event: EngineEvent;
+      readonly attempt: number | null;
+      readonly at: string;
+    }
   | { readonly kind: 'status'; readonly status: GenerationJobStatus };
 
 export class JobEventTail {
@@ -36,6 +42,8 @@ export class JobEventTail {
                   kind: 'event',
                   seq: Number(map.get('seq') ?? '0'),
                   event: JSON.parse(event) as EngineEvent,
+                  attempt: map.get('attempt') ? Number(map.get('attempt')) : null,
+                  at: map.get('at') || new Date().toISOString(),
                 });
             }
           }

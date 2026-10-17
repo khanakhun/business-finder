@@ -256,11 +256,12 @@ export interface GenerationRepository {
   staleAttempts(before: Date, limit: number): Promise<StoredAttempt[]>;
   /** Appends events with the next sequence numbers of the job (gapless); returns the numbers given. */
   appendEvents(jobId: string, attemptId: string | null, events: readonly EngineEvent[]): Promise<number[]>;
+  /** A job's events after `afterSeq`, with the attempt each belongs to (null: not an attempt's, e.g. a review). */
   events(
     jobId: string,
     afterSeq: number,
     limit: number,
-  ): Promise<{ seq: number; type: string; payload: unknown; createdAt: Date }[]>;
+  ): Promise<{ seq: number; type: string; payload: unknown; attemptNo: number | null; createdAt: Date }[]>;
   insertArtifact(artifact: {
     jobId: string;
     attemptId: string | null;
@@ -322,7 +323,11 @@ export const CANCEL_SIGNALS = Symbol('CancelSignals');
 
 /** Live events for the dashboard (Valkey stream per job; the SSE endpoint tails it in part 2). */
 export interface EventStream {
-  publish(jobId: string, entries: readonly { seq: number; event: EngineEvent }[]): Promise<void>;
+  /** `attempt`: the attempt the events belong to (BF-046 groups the console by attempt). */
+  publish(
+    jobId: string,
+    entries: readonly { seq: number; event: EngineEvent; attempt: number | null }[],
+  ): Promise<void>;
   /** The job's new status on its stream (the SSE endpoint closes once it is settled). */
   status(jobId: string, status: GenerationJobStatus): Promise<void>;
 }

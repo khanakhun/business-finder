@@ -42,7 +42,8 @@ export class GenerationNotifications {
         reason: (job.errorCode ?? 'QUALITY_GATES').toLowerCase(),
       },
       entity: { type: 'generation_job', id: job.id },
-      link: job.siteId ? `/sites/${job.siteId}/edit` : `/generation/batches/${job.batchId}`,
+      // The board with the job's console open on its quality report, where it can be accepted or retried (BF-046).
+      link: `/generation/batches/${job.batchId}?job=${job.id}&tab=quality`,
       sourceEventId: event.id,
     });
   }

@@ -349,6 +349,8 @@ describe('generation batches', () => {
     expect(ids.length).toBeGreaterThan(5);
     expect(ids).toEqual(ids.map((_, index) => index + 1));
     expect(text).toContain('event: done');
+    // Each event says which attempt it belongs to and when (the console groups by attempt, BF-046).
+    expect(text).toMatch(/"attempt":1,"at":"\d{4}-\d{2}-\d{2}T/);
     expect(text).toMatch(/event: job\ndata: \{"status":"succeeded"\}/);
 
     // Reconnecting after the fourth event: only the rest, then the end.

@@ -2819,6 +2819,148 @@
         "reasonHint": "At least {min} characters; kept in the audit log.",
         "close": "Close",
         "confirm": "Publish"
+      },
+      "console": "Job console",
+      "consoleHint": "The job's live activity and quality report",
+      "openConsole": "Console"
+    },
+    "console": {
+      "title": "Job console",
+      "loadError": "The job could not be loaded.",
+      "toBatch": "Back to the batch",
+      "openPreview": "Open preview",
+      "attempts": "Attempts",
+      "attemptSummary": "#{attempt} {engine} · {mode} · {status} · {cost}",
+      "mode": {
+        "create": "create",
+        "repair": "repair"
+      },
+      "attemptStatus": {
+        "running": "running",
+        "succeeded": "done",
+        "failed": "failed",
+        "cancelled": "cancelled"
+      },
+      "tabs": {
+        "activity": "Activity",
+        "quality": "Quality"
+      },
+      "filter": "Show",
+      "filters": {
+        "all": "All",
+        "tools": "Tools",
+        "logs": "Logs",
+        "errors": "Problems"
+      },
+      "search": "Search the activity",
+      "usage": "{cost} of {budget} · {tokens} tokens",
+      "stream": {
+        "connecting": "Connecting…",
+        "live": "Live",
+        "reconnecting": "Reconnecting…",
+        "ended": "Finished"
+      },
+      "activity": "Activity",
+      "loading": "Loading the activity…",
+      "empty": "No activity yet.",
+      "review": "Review",
+      "attempt": "Attempt {attempt}",
+      "jumpToLatest": "Jump to latest",
+      "events": {
+        "phase": {
+          "preparing": "Preparing the workspace",
+          "running": "Running",
+          "validating": "Checking the site"
+        },
+        "usage": "{tokens} tokens · {cost}",
+        "artifact": {
+          "site_spec": "Site saved",
+          "screenshot": "Screenshot taken"
+        },
+        "errors": {
+          "TIMEOUT": "The run took longer than its time limit.",
+          "ENGINE_BUDGET_EXCEEDED": "The run reached its budget.",
+          "BUDGET_EXCEEDED": "The run reached its budget.",
+          "ENGINE_INCOMPLETE": "The engine stopped before finishing the site.",
+          "ENGINE_INVALID_OUTPUT": "The engine's site did not validate.",
+          "INVALID_OUTPUT": "The engine's site did not validate.",
+          "ENGINE_ERROR": "The engine failed.",
+          "PROVIDER_ERROR": "The model provider returned an error.",
+          "ENGINE_UNAVAILABLE": "The engine is not available now.",
+          "ENGINE_VERSION_UNSUPPORTED": "The engine's version is not supported.",
+          "SANDBOX_UNAVAILABLE": "No sandbox was available.",
+          "SANDBOX_TIMEOUT": "The sandbox ran out of time.",
+          "SANDBOX_OOM": "The sandbox ran out of memory.",
+          "SANDBOX_CRASHED": "The sandbox stopped unexpectedly.",
+          "SANDBOX_PROTOCOL_ERROR": "The sandbox sent something unreadable.",
+          "INVALID_BRIEF": "The brief could not be built.",
+          "HEARTBEAT_LOST": "The worker running it stopped answering.",
+          "CANCELLED": "Cancelled."
+        },
+        "retryable": "It will be retried.",
+        "notRetryable": "It will not be retried.",
+        "done": "Site ready"
+      },
+      "quality": {
+        "error": "The quality report could not be loaded.",
+        "none": "No quality report yet: it is written once the site has been checked.",
+        "decision": {
+          "pass": "Passed",
+          "repair": "Sent for repair",
+          "needs_review": "Needs review"
+        },
+        "infraError": "A check could not run",
+        "gatesTitle": "Checks",
+        "gate": "Check",
+        "result": "Result",
+        "score": "Score",
+        "issueCount": "Issues",
+        "time": "Time",
+        "gates": {
+          "schema": "Schema",
+          "facts": "Facts",
+          "claims": "Claims",
+          "copy": "Copy",
+          "autofix": "Auto-fixes",
+          "a11y": "Accessibility",
+          "performance": "Performance",
+          "visual": "Visual"
+        },
+        "status": {
+          "pass": "Passed",
+          "fail": "Failed",
+          "skipped": "Skipped",
+          "error": "Could not run"
+        },
+        "issuesTitle": "{count, plural, one {# issue} other {# issues}}",
+        "siteWide": "Whole site",
+        "pageBlock": "Page {page} › section {block}",
+        "page": "Page {page}",
+        "openInEditor": "Open in the editor",
+        "severity": {
+          "error": "Error",
+          "warning": "Warning",
+          "info": "Note"
+        },
+        "rubricTitle": "Visual review",
+        "criterion": "Criterion",
+        "rubricScore": "Score",
+        "criteria": {
+          "hierarchy": "Hierarchy",
+          "typography": "Typography",
+          "spacing": "Spacing",
+          "imagery": "Imagery",
+          "color": "Colour",
+          "cta": "Calls to action",
+          "mobile": "Mobile",
+          "brand_fit": "Brand fit",
+          "originality": "Originality"
+        },
+        "screenshotsTitle": "Screenshots",
+        "screenshot": "{page}, {viewport}",
+        "autoFixesTitle": "{count, plural, one {# automatic fix} other {# automatic fixes}}",
+        "screenshotMissing": "Screenshot unavailable",
+        "enlarge": "Enlarge {label}"
       }
     }
   }

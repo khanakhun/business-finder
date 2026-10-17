@@ -213,6 +213,11 @@ describe('Claude Code engine through the orchestrator (BF-044)', () => {
       .get(`/v1/sites/${detail.siteId}/versions/${site.currentVersion.id}`)
       .expect(200);
     expect(JSON.stringify(version.spec)).toContain('Salon Turquoise, sur le port');
+    // The quality gates' report, stored once on the version (BF-045).
+    expect(version.quality).toMatchObject({ decision: 'pass', pipelineVersion: 1, infraError: false });
+    expect((version.quality as { gates: { id: string }[] }).gates.map((gate) => gate.id).slice(0, 3)).toEqual(
+      ['schema', 'facts', 'copy'],
+    );
     // The key never reaches the persisted events.
     const events = await db.select().from(generationEvents).where(eq(generationEvents.jobId, job.id));
     expect(events.length).toBeGreaterThan(5);

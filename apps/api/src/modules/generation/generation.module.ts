@@ -63,11 +63,7 @@ import {
   GenerationReaperScheduler,
   OPENAPI_GENERATION_QUEUES,
 } from './infrastructure/bullmq-generation-queues.ts';
-import {
-  DefaultGenerationSettings,
-  SchemaOnlyQualityPipeline,
-  StaticEngineRegistry,
-} from './infrastructure/defaults/defaults.ts';
+import { DefaultGenerationSettings, StaticEngineRegistry } from './infrastructure/defaults/defaults.ts';
 import { FakeEngine } from './infrastructure/defaults/fake.engine.ts';
 import { DrizzleBriefSources } from './infrastructure/drizzle-brief-sources.ts';
 import {
@@ -85,6 +81,7 @@ import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
 import { pagePlans } from './infrastructure/page-plans.ts';
+import { FullQualityPipeline } from './infrastructure/quality/full-quality.pipeline.ts';
 import { HttpDockerApi } from './infrastructure/sandbox/docker-engine.ts';
 import { DockerSandboxProvider } from './infrastructure/sandbox/docker-sandbox.ts';
 import { SandboxJanitor } from './infrastructure/sandbox/janitor.ts';
@@ -164,6 +161,7 @@ function engines(
       new FakeEngine({
         durationMs: env.GENERATION_FAKE_DURATION_MS,
         assetsBaseUrl: env.SITES_ASSETS_BASE_URL,
+        artifacts: deps.artifacts,
       }),
     );
   }
@@ -288,12 +286,14 @@ export class GenerationModule {
         },
         {
           provide: QUALITY_PIPELINE,
-          inject: [APP_ENV],
-          useFactory: (env: AppEnv) =>
-            new SchemaOnlyQualityPipeline(
-              [new URL((env as ApiEnv).SITES_ASSETS_BASE_URL).hostname],
-              HOTLINK_HOSTS,
-            ),
+          inject: [APP_ENV, GENERATION_ARTIFACTS, GENERATION_REPOSITORY],
+          useFactory: (env: AppEnv, artifacts: ArtifactStore, repository: GenerationRepository) =>
+            new FullQualityPipeline({
+              artifacts,
+              repository,
+              assetHosts: [new URL((env as ApiEnv).SITES_ASSETS_BASE_URL).hostname],
+              hotlinkHosts: HOTLINK_HOSTS,
+            }),
         },
         { provide: WORKSPACE_BUDGET, useExisting: AI_BUDGET_GUARD },
         {

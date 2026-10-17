@@ -190,6 +190,17 @@ export class DrizzleSitesRepository implements SitesRepository {
     return { ...toVersionSummary(row), spec: row.spec };
   }
 
+  async setVersionQuality(siteId: string, versionId: string, quality: Record<string, unknown>) {
+    const rows = await getExecutor(this.db)
+      .update(siteVersions)
+      .set({ quality })
+      .where(
+        and(eq(siteVersions.id, versionId), eq(siteVersions.siteId, siteId), isNull(siteVersions.quality)),
+      )
+      .returning({ id: siteVersions.id });
+    return rows.length > 0;
+  }
+
   async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string, expected: string | null) {
     const moved = await getExecutor(this.db)
       .update(sites)

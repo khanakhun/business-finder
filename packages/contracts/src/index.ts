@@ -640,6 +640,21 @@ export {
   type Role,
   RoleSchema,
 } from './permissions.ts';
+export {
+  QUALITY_DECISIONS,
+  QUALITY_GATES,
+  type QualityAutoFix,
+  QualityAutoFixSchema,
+  type QualityDecision,
+  type QualityGateId,
+  QualityGateIdSchema,
+  type QualityGateResult,
+  QualityGateResultSchema,
+  type QualityIssue,
+  QualityIssueSchema,
+  type QualityReport,
+  QualityReportSchema,
+} from './quality.ts';
 export { type RealtimeEvent, RealtimeEventSchema } from './realtime.ts';
 export {
   andThen,

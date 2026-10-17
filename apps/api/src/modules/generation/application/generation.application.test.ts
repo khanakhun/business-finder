@@ -69,6 +69,7 @@ beforeEach(() => {
   handOff = {
     createVersion: vi.fn(async () => ({ siteId: 'site-1', versionId: 'version-1' })),
     publishPreview: vi.fn(async () => 'https://x.sites.test/'),
+    recordQuality: vi.fn(async () => undefined),
   };
   const clock = fixedClock('2026-10-16T12:00:00.000Z');
   const fake = new FakeEngine({ durationMs: 4, assetsBaseUrl: 'https://assets.bf-sites.test' });
@@ -214,7 +215,7 @@ describe('generation (unit, in memory)', () => {
     const { batch } = await commands.createBatch(
       actor,
       {
-        items: ['Atelier [invalid]', 'Boutique [fail-once:TIMEOUT]', 'Garage [fail:POLICY_VIOLATION]'].map(
+        items: ['Atelier (invalid)', 'Boutique (fail-once:TIMEOUT)', 'Garage (fail:POLICY_VIOLATION)'].map(
           (name) => ({ businessId: business(name) as never, engine: 'fake' as const }),
         ),
       },
@@ -223,9 +224,9 @@ describe('generation (unit, in memory)', () => {
     await drain(40);
     const detail = await queries.batch(ORG, batch.id);
     const byName = new Map(detail.jobs.map((job) => [job.businessName, job]));
-    expect(byName.get('Atelier [invalid]')).toMatchObject({ status: 'succeeded', attemptCount: 2 });
+    expect(byName.get('Atelier (invalid)')).toMatchObject({ status: 'succeeded', attemptCount: 2 });
     // The repair attempt starts from the previous spec and the issues the gate found (BF-041).
-    const atelier = byName.get('Atelier [invalid]')?.id ?? '';
+    const atelier = byName.get('Atelier (invalid)')?.id ?? '';
     const report = store.get(`generation/${ORG}/${atelier}/1/quality.json`);
     expect(
       (JSON.parse(report?.toString('utf8') ?? '{}') as { issues: unknown[] }).issues.length,
@@ -236,20 +237,20 @@ describe('generation (unit, in memory)', () => {
         issues: expect.arrayContaining([expect.objectContaining({ severity: 'error' })]),
       },
     ]);
-    expect(byName.get('Boutique [fail-once:TIMEOUT]')).toMatchObject({
+    expect(byName.get('Boutique (fail-once:TIMEOUT)')).toMatchObject({
       status: 'succeeded',
       attemptCount: 2,
     });
-    expect(byName.get('Garage [fail:POLICY_VIOLATION]')).toMatchObject({
+    expect(byName.get('Garage (fail:POLICY_VIOLATION)')).toMatchObject({
       status: 'failed',
       errorCode: 'POLICY_VIOLATION',
     });
     expect(detail.status).toBe('completed_with_issues');
     // A retry queues a new attempt.
-    const garage = byName.get('Garage [fail:POLICY_VIOLATION]');
+    const garage = byName.get('Garage (fail:POLICY_VIOLATION)');
     const retried = await commands.retry(actor, garage?.id ?? '');
     expect(retried.status).toBe('queued');
-    await expect(commands.retry(actor, byName.get('Atelier [invalid]')?.id ?? '')).rejects.toThrow(/retried/);
+    await expect(commands.retry(actor, byName.get('Atelier (invalid)')?.id ?? '')).rejects.toThrow(/retried/);
   });
 
   it('defers a run without a sandbox, releases a sequential batch in priority order, and cancels', async () => {

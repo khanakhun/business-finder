@@ -106,6 +106,8 @@ export interface SitesRepository {
   setSiteStatus(siteId: string, status: SiteStatus): Promise<void>;
   /** Inserts the next version (number = the site's highest + 1), its hash computed from the spec. */
   insertVersion(version: NewVersion): Promise<StoredVersion>;
+  /** Sets a version's quality report once (BF-045: the only change a version allows); false when it had one. */
+  setVersionQuality(siteId: string, versionId: string, quality: Record<string, unknown>): Promise<boolean>;
   /** Moves the current version if it is still `expected` (compare-and-set); false when it moved meanwhile. */
   setCurrentVersion(
     siteId: string,

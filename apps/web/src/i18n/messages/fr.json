@@ -2201,7 +2201,8 @@
     "panels": {
       "site": "Site",
       "pages": "Pages",
-      "issues": "Problèmes"
+      "issues": "Problèmes",
+      "chat": "Discussion"
     },
     "ops": {
       "addPage": "Ajouter une page",
@@ -3183,5 +3184,69 @@
     "changeStatus": "Statut",
     "note": "Note (conservée dans le journal d’audit)",
     "addNote": "Ajouter la note"
+  },
+  "siteChat": {
+    "readOnly": "Vous pouvez lire ce site ; modifier avec l'assistant demande le droit de générer des sites.",
+    "newThread": "Nouvelle discussion",
+    "empty": "Demandez une modification : « raccourcis le haut de page », « ajoute une page petit-déjeuner », « une palette plus calme ».",
+    "thinking": "En cours…",
+    "failed": "L'assistant n'a pas pu répondre. Réessayez.",
+    "placeholder": "Décrivez une modification…",
+    "send": "Envoyer",
+    "loadingProposal": "Chargement de la proposition…",
+    "context": {
+      "block": "Modification : {page} › {block} ({locale})",
+      "page": "Modification : {page} ({locale})"
+    },
+    "suggestions": {
+      "shorter": "Plus court",
+      "premium": "Un ton plus haut de gamme",
+      "split": "Essayer une mise en page en deux colonnes",
+      "tropical": "Des photos plus tropicales",
+      "fewerPhotos": "Garder les 6 meilleures photos",
+      "clearer": "Plus clair",
+      "prices": "Afficher nos prix",
+      "breakfast": "Ajouter nos formules petit-déjeuner",
+      "realReviews": "Inviter à laisser de vrais avis",
+      "whatsapp": "Ajouter un bouton WhatsApp",
+      "hours": "Afficher les horaires",
+      "warmer": "Rendre le site plus chaleureux",
+      "calmerPalette": "Une palette plus calme",
+      "translateEn": "Écrire les textes anglais manquants",
+      "menuPage": "Ajouter une page Carte"
+    },
+    "proposal": {
+      "label": "Modification proposée",
+      "failed": "Cela n'a pas fonctionné.",
+      "previewFailed": "Cette proposition ne peut pas être affichée sur la version actuelle.",
+      "previewBanner": "Aperçu de la modification proposée",
+      "preview": "Aperçu",
+      "before": "Voir avant",
+      "apply": "Appliquer",
+      "discard": "Écarter",
+      "undo": "Annuler",
+      "undone": "Modification annulée",
+      "applied": "Appliquée comme version {version}",
+      "version": "Version {version}",
+      "saveFirst": "Enregistrez vos modifications avant d'appliquer une proposition.",
+      "olderVersion": "Faite sur une version antérieure",
+      "facts": "Informations à confirmer (seules celles cochées sont conservées)",
+      "status": {
+        "proposed": "Proposée",
+        "applied": "Appliquée",
+        "discarded": "Écartée",
+        "superseded": "Remplacée",
+        "failed": "Échec"
+      },
+      "changes": {
+        "pageAdded": "Nouvelle page {page}",
+        "pageRemoved": "Page {page} supprimée",
+        "blockAdded": "Nouvelle section {type} sur {page}",
+        "blockRemoved": "Section {type} supprimée de {page}",
+        "blockMoved": "Section {type} déplacée sur {page}",
+        "blockChanged": "{type} sur {page} : {fields}",
+        "section": "{section} du site modifié"
+      }
+    }
   }
 }

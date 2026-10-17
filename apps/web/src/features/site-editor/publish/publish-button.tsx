@@ -5,7 +5,8 @@ import type { SiteDetail } from '@bf/contracts';
 import { Badge } from '@bf/ui/components/badge';
 import { Button } from '@bf/ui/components/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@bf/ui/components/popover';
-import { ExternalLinkIcon, GlobeIcon } from 'lucide-react';
+import { ExternalLinkIcon, GlobeIcon, RocketIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { getToast } from '@/lib/toast.tsx';
@@ -196,6 +197,14 @@ export function PublishButton({
         ) : (
           <p className="text-muted-foreground text-xs">{t('noPermission')}</p>
         )}
+        {canPublish ? (
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/sites/${siteId}/go-live`}>
+              <RocketIcon aria-hidden />
+              {t('goLive')}
+            </Link>
+          </Button>
+        ) : null}
       </PopoverContent>
     </Popover>
   );

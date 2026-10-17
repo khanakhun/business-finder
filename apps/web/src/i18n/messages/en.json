@@ -2678,7 +2678,8 @@
       "blockedUnsaved": "Save your changes before publishing.",
       "noPermission": "Your role cannot publish sites.",
       "failed": "That did not work. Try again.",
-      "failedWith": "That did not work: {reason}"
+      "failedWith": "That did not work: {reason}",
+      "goLive": "Go live…"
     },
     "json": {
       "button": "JSON",
@@ -4764,6 +4765,135 @@
       "rollback": "Roll back",
       "done": "Rolled back to the previous version.",
       "failed": "The rollback did not work."
+    }
+  },
+  "goLive": {
+    "title": "Go live",
+    "description": "Check that the site is ready, complete its legal details, choose where contact requests go, connect a domain, then publish it live.",
+    "loadError": "Could not load the go-live checks",
+    "stepLabel": "{n}. {label}",
+    "steps": {
+      "readiness": "Checks",
+      "legal": "Legal",
+      "routing": "Contact form",
+      "domains": "Domains",
+      "publish": "Publish"
+    },
+    "continue": "Continue to publish",
+    "readyTitle": "Ready to go live",
+    "notReadyTitle": "Not ready yet",
+    "summary": "{failing, plural, =0 {No blocking check} one {# blocking check} other {# blocking checks}} · {warnings, plural, =0 {no warning} one {# warning} other {# warnings}}",
+    "checks": {
+      "deal": "Deal agreed",
+      "assets": "Images and media",
+      "legal": "Legal notice",
+      "privacy": "Privacy notice",
+      "routing": "Contact form delivery",
+      "content": "Content",
+      "quality": "Quality checks",
+      "confirmation": "Client confirmation",
+      "seo": "Search engine basics",
+      "fix": "Fix",
+      "status": {
+        "pass": "Passed",
+        "warn": "Warning",
+        "fail": "Failing"
+      }
+    },
+    "legal": {
+      "help": "The legal notice and privacy pages are generated from these details. Each save keeps the previous version.",
+      "fields": {
+        "businessLegalName": "Legal business name",
+        "legalForm": "Legal form",
+        "registration": "Registration number (SIRET, RCS…)",
+        "vatNumber": "VAT number",
+        "address": "Registered address",
+        "phone": "Phone",
+        "email": "Contact email",
+        "publicationDirector": "Publication director",
+        "dpoContact": "Data protection contact"
+      },
+      "privacyTitle": "Privacy notice",
+      "privacyDone": "Read and accepted on {date}.",
+      "privacyAcknowledge": "I have read the generated privacy notice and it matches how this business handles personal data.",
+      "confirmTitle": "Client confirmation",
+      "confirmDone": "Content confirmed by {name} on {date}.",
+      "confirmBy": "Name of the client who reviewed the content (leave empty if they have not yet)",
+      "save": "Save legal details",
+      "saved": "Legal details saved",
+      "failed": "Could not save the legal details"
+    },
+    "routing": {
+      "help": "Messages sent from the live site's contact form go to this address. It receives nothing until its owner confirms it from the link we email them.",
+      "current": "Delivered to {email}",
+      "verified": "Confirmed {date}",
+      "none": "No confirmed address yet.",
+      "pending": "Waiting for {email} to confirm.",
+      "email": "Delivery address",
+      "cc": "Copy to (optional)",
+      "send": "Send confirmation link",
+      "sent": "Confirmation link sent to {email}",
+      "failed": "Could not set the delivery address"
+    },
+    "domains": {
+      "help": "Create these records at the domain's registrar, then check them. A verified domain is served once the site is live; its certificate is issued on the first visit.",
+      "hostname": "Domain",
+      "includeWww": "Also serve the www address (redirected)",
+      "add": "Add domain",
+      "added": "{hostname} added",
+      "failed": "The domain action failed",
+      "emptyTitle": "No custom domain",
+      "emptyBody": "Without one, the live site is served on its default address.",
+      "status": {
+        "pending_dns": "Waiting for DNS",
+        "verifying": "Verifying",
+        "verified": "Verified",
+        "active": "Active",
+        "failed": "Failed",
+        "removed": "Removed"
+      },
+      "redirects": "redirects to {target}",
+      "check": "Check now",
+      "checked": "DNS checked",
+      "remove": "Remove",
+      "removeConfirm": "Confirm removal",
+      "removed": "Domain removed",
+      "recordsCaption": "DNS records to create for {hostname}",
+      "type": "Type",
+      "name": "Name",
+      "value": "Value",
+      "copy": "Copy",
+      "copyValue": "Copy {value}",
+      "copied": "Copied",
+      "copyFailed": "Could not copy",
+      "lastCheck": "Last checked {date}",
+      "ok": "Found",
+      "missing": "Missing",
+      "found": "found {values}",
+      "foundNothing": "nothing found yet"
+    },
+    "publish": {
+      "help": "Publishing makes this version the live site, indexed by search engines, with its legal pages and contact form.",
+      "blockedTitle": "Some checks are failing",
+      "blocked": "{count, plural, one {# check must pass} other {# checks must pass}} before the site can go live.",
+      "review": "Review the checks",
+      "overrideLabel": "No deal is recorded yet. Why should this site go live anyway?",
+      "overrideHelp": "At least 10 characters. The reason is kept in the audit log.",
+      "overrideNoPermission": "No deal is recorded yet. Only someone who manages the workspace can publish without one.",
+      "button": "Publish live",
+      "published": "Live on {hostname}",
+      "failed": "Could not publish the site live",
+      "liveTitle": "The site is live",
+      "liveHelp": "Custom domains start serving it as soon as their DNS is verified.",
+      "opensNewTab": "(opens in a new tab)"
+    },
+    "confirmContact": {
+      "title": "Confirm the contact address",
+      "body": "Confirm that this address should receive the messages sent from the website's contact form.",
+      "submit": "Confirm this address",
+      "confirmed": "Thank you, the address is confirmed. Contact requests from the website will now reach it.",
+      "invalid": "This link is invalid or has expired. Ask for a new confirmation link.",
+      "error": "Something went wrong. Please try again."
     }
   }
 }

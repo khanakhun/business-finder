@@ -237,9 +237,21 @@ services:
       - maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM:-256MB}
       - -c
       - max_connections=${PG_MAX_CONNECTIONS:-100}
+      # PITR (BF-061; production: PG_ARCHIVE_MODE=on and the `pitr` profile). Postgres keeps no route out and no
+      # storage key: each finished WAL segment is copied (atomically, never overwritten) into a spool the `pgbackrest`
+      # service pushes to the repositories every 10 s. A segment closes at least every minute: RPO ≈ 1–2 min.
+      - -c
+      - archive_mode=${PG_ARCHIVE_MODE:-off}
+      - -c
+      - archive_command=pgbackrest-spool %p %f
+      - -c
+      - archive_timeout=60
     shm_size: 1g
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # The socket the `pgbackrest` service connects through (local trust, no TCP superuser login), and the WAL spool.
+      - pg-socket:/var/run/postgresql
+      - wal-spool:/wal-spool
     networks: [data, sites-db]
     deploy:
       resources:
@@ -288,6 +300,37 @@ services:
     deploy:
       resources:
         limits: { cpus: '0.5', memory: 256M }
+
+  # PITR backups (BF-061, docs/runbooks/restore.md): pgBackRest full and incremental backups, expiry and metrics, on
+  # the Postgres image (same pgBackRest build as the archiver). Reads the data directory, never writes it.
+  pgbackrest:
+    image: ${IMAGE_REGISTRY:?}/bf-postgres:${POSTGRES_IMAGE_TAG:?}
+    profiles: [pitr]
+    restart: unless-stopped
+    logging: *logging
+    init: true
+    # The postgres user of the Alpine image (owner of the data directory).
+    user: '70:70'
+    entrypoint: [bf-pgbackrest]
+    command: [schedule]
+    env_file: pgbackrest.env
+    environment:
+      PGBACKREST_PG1_PATH: /var/lib/postgresql/data
+      PGBACKREST_PG1_SOCKET_PATH: /var/run/postgresql
+      PGBACKREST_PG1_USER: ${POSTGRES_USER:?}
+      TEXTFILE_DIR: /textfile
+    volumes:
+      - postgres-data:/var/lib/postgresql/data:ro
+      - pg-socket:/var/run/postgresql
+      - wal-spool:/wal-spool
+      - metrics-textfile:/textfile
+    depends_on:
+      postgres: { condition: service_healthy }
+    # Object storage only (the repositories): the edge network is the way out.
+    networks: [edge]
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 512M }
 
   # Optional: Google Maps scraper provider (BF-019), `docker compose --profile scraper up -d`.
   gmaps-scraper:
@@ -378,5 +421,9 @@ volumes:
   caddy-data: {}
   caddy-config: {}
   postgres-data: {}
+  # BF-061: Postgres's socket (shared with the pgbackrest service), the WAL spool, node_exporter's textfiles.
+  pg-socket: {}
+  wal-spool: {}
+  metrics-textfile: {}
   valkey-data: {}
   gmaps-data: {}

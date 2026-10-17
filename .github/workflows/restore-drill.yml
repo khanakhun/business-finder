@@ -1,0 +1,95 @@
+# Monthly restore drill (BF-061, docs/runbooks/restore.md): restores production's latest backup from the pgBackRest
+# repository into a throwaway server on this runner, replays the WAL, checks the result, and records it. Backups are
+# only real if restores are tested: a failed run fails this workflow, and the `RestoreDrillStale` alert fires when no
+# drill has succeeded for 35 days (the result is read back by the pgbackrest service, `drills/latest.json`).
+#
+# Repository configuration (Settings → Environments → restore-drill):
+#   secrets  DRILL_S3_KEY, DRILL_S3_KEY_SECRET (read the repository, write only `<repo path>/drills/`),
+#            DRILL_CIPHER_PASS (repo1's pgBackRest cipher passphrase)
+#   vars     DRILL_S3_BUCKET, DRILL_S3_ENDPOINT (host, no scheme), DRILL_S3_REGION, DRILL_REPO_PATH,
+#            PRODUCTION_POSTGRES_IMAGE (ghcr.io/<owner>/bf-postgres:<tag>), PRODUCTION_POSTGRES_USER, PRODUCTION_POSTGRES_DB
+name: restore-drill
+
+on:
+  schedule:
+    - cron: '17 6 3 * *'
+  workflow_dispatch:
+    inputs:
+      target_time:
+        description: Point in time to restore to (e.g. 2026-10-17 09:30:00+00); empty = the latest state
+        required: false
+
+concurrency:
+  group: restore-drill
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  drill:
+    name: restore drill
+    runs-on: ubuntu-latest
+    # The RTO target is 2 hours; the job's own limit leaves room for the image pull and the report.
+    timeout-minutes: 150
+    environment: restore-drill
+    env:
+      IMAGE: ${{ vars.PRODUCTION_POSTGRES_IMAGE }}
+      POSTGRES_USER: ${{ vars.PRODUCTION_POSTGRES_USER }}
+      POSTGRES_DB: ${{ vars.PRODUCTION_POSTGRES_DB }}
+      TARGET_TIME: ${{ inputs.target_time }}
+      PGBACKREST_STANZA: bf
+      PGBACKREST_REPO1_TYPE: s3
+      PGBACKREST_REPO1_PATH: ${{ vars.DRILL_REPO_PATH }}
+      PGBACKREST_REPO1_S3_BUCKET: ${{ vars.DRILL_S3_BUCKET }}
+      PGBACKREST_REPO1_S3_ENDPOINT: ${{ vars.DRILL_S3_ENDPOINT }}
+      PGBACKREST_REPO1_S3_REGION: ${{ vars.DRILL_S3_REGION }}
+      PGBACKREST_REPO1_S3_URI_STYLE: path
+      PGBACKREST_REPO1_CIPHER_TYPE: aes-256-cbc
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore, replay, check
+        env:
+          PGBACKREST_REPO1_S3_KEY: ${{ secrets.DRILL_S3_KEY }}
+          PGBACKREST_REPO1_S3_KEY_SECRET: ${{ secrets.DRILL_S3_KEY_SECRET }}
+          PGBACKREST_REPO1_CIPHER_PASS: ${{ secrets.DRILL_CIPHER_PASS }}
+        run: |
+          EXPECTED_MIGRATIONS="$(node -e "console.log(require('./packages/db/migrations/meta/_journal.json').entries.length)")"
+          export EXPECTED_MIGRATIONS
+          infra/backup/drill/restore-drill.sh drill-report.json
+
+      - name: Record the result (read back by the pgbackrest service for the RestoreDrillStale alert)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DRILL_S3_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DRILL_S3_KEY_SECRET }}
+          AWS_DEFAULT_REGION: ${{ vars.DRILL_S3_REGION }}
+        run: |
+          aws s3 cp drill-report.json \
+            "s3://${PGBACKREST_REPO1_S3_BUCKET}/${PGBACKREST_REPO1_PATH#/}/drills/latest.json" \
+            --endpoint-url "https://${PGBACKREST_REPO1_S3_ENDPOINT}"
+          aws s3 cp drill-report.json \
+            "s3://${PGBACKREST_REPO1_S3_BUCKET}/${PGBACKREST_REPO1_PATH#/}/drills/$(date -u +%Y-%m-%d).json" \
+            --endpoint-url "https://${PGBACKREST_REPO1_S3_ENDPOINT}"
+
+      - name: Report
+        if: always()
+        run: |
+          {
+            echo "## Restore drill"
+            if [ -f drill-report.json ]; then
+              echo '```json'; cat drill-report.json; echo '```'
+              echo "Targets: RTO ≤ 7200 s, RPO ≤ 300 s (docs/runbooks/restore.md)."
+            else
+              echo "**Failed** before the checks: see the log."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

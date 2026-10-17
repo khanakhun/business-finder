@@ -15,6 +15,20 @@ export const generationEnv = z.object({
     .describe(
       'How Claude Code reaches sitekit: `Bash(sitekit *)` only (bash) or the `sitekit mcp` server with no shell (mcp).',
     ),
+  GENERATION_CODEX_ENGINE: booleanFlag(false).describe(
+    'Register the Codex engine (BF-044): `codex exec` in a sandbox; needs SANDBOX_ENABLED and an OpenAI key per workspace.',
+  ),
+  GENERATION_CODEX_MODEL: z
+    .string()
+    .min(1)
+    .default('gpt-6.1-sol')
+    .describe(
+      "Codex's model (OpenAI's recommendation for agentic coding, October 2026); price it in AI_PRICING.",
+    ),
+  GENERATION_CODEX_REASONING_EFFORT: z
+    .enum(['low', 'medium', 'high', 'xhigh'])
+    .default('high')
+    .describe("Codex's reasoning effort (`model_reasoning_effort`)."),
   GENERATION_AGENT_WALL_TIME_SEC: z.coerce
     .number()
     .int()

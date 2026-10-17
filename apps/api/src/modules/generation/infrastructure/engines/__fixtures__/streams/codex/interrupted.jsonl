@@ -1,0 +1,8 @@
+{"type": "thread.started", "thread_id": "01a147a8-158d-70f2-8966-2d592c3dfc88"}
+{"type": "turn.started"}
+{"type": "error", "message": "Reconnecting... 1/5 (stream disconnected before completion)"}
+{"type": "item.completed", "item": {"id": "item_0", "type": "reasoning", "text": "Reading the brief."}}
+{"type": "item.started", "item": {"id": "item_1", "type": "command_execution", "command": "bash -lc 'sitekit validate --json'", "aggregated_output": "", "exit_code": null, "status": "in_progress"}}
+{"type": "item.completed", "item": {"id": "item_1", "type": "command_execution", "command": "bash -lc 'sitekit validate --json'", "aggregated_output": "{\"ok\":true}\n", "exit_code": 0, "status": "completed"}}
+{"type": "item.started", "item": {"id": "item_2", "type": "todo_list", "items": [{"text": "Rewrite the hero", "completed": false}]}}
+{"type": "item.completed", "item": {"id": "item_3", "type": "file_change", "changes": [{"path": "/workspace/site.json", "kind": "update"}], "status": "completed"}}

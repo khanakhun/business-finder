@@ -131,10 +131,11 @@ apps/web/src/features/analytics/{overview.tsx, funnel.tsx, cohorts.tsx, segments
 - **E2E:** dashboards render with filters; the export CSV matches the on-screen table; metric info tooltips show definitions.
 
 ## Acceptance criteria
-- [ ] Append-only facts with event-time dimension snapshots, backfill and reconciliation.
-- [ ] Semantic layer with documented metrics/dimensions compiled to safe SQL; single source of truth.
-- [ ] Dashboards: overview, funnel/cohorts, segments (heatmap + map), scoring validation, experiments, engines, preview engagement, unit economics.
-- [ ] Query and export APIs with freshness; performance targets met.
+- [x] Append-only facts with event-time dimension snapshots, backfill and reconciliation.
+- [x] Semantic layer with documented metrics/dimensions compiled to safe SQL; single source of truth.
+- [x] Dashboards: overview, funnel/cohorts, segments (heatmap + map), scoring validation, experiments, engines, preview engagement, unit economics.
+- [ ] Query and export APIs with freshness; performance targets met. (APIs and freshness done; the performance
+  benchmark was not run while testing is paused.)
 
 ## Agent prompt
 ```text

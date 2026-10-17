@@ -123,10 +123,11 @@ apps/web/src/features/assist/{call-tab.tsx, script-view.tsx, outcome-form.tsx, w
 - **Evals:** reports attached.
 
 ## Acceptance criteria
-- [ ] Grounded FR/EN call scripts and WhatsApp drafts with validators and evals.
-- [ ] Best-time-to-call from opening hours and category rush windows.
-- [ ] Compliance-aware click-to-call and `wa.me` with outcome logging driving CRM, tasks and suppression.
-- [ ] Mobile-first call list with offline outcome queue; business Call tab.
+- [ ] Grounded FR/EN call scripts and WhatsApp drafts with validators and evals. (Scripts, drafts and validators
+  done; the evals were not written or run while testing is paused.)
+- [x] Best-time-to-call from opening hours and category rush windows.
+- [x] Compliance-aware click-to-call and `wa.me` with outcome logging driving CRM, tasks and suppression.
+- [x] Mobile-first call list with offline outcome queue; business Call tab.
 
 ## Agent prompt
 ```text

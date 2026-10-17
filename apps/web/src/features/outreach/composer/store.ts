@@ -9,6 +9,8 @@ export interface ComposerTarget {
   readonly businessId: string;
   readonly businessName?: string;
   readonly contactId?: string;
+  /** Context for the AI draft (BF-057: "they asked for the information on the phone today"). */
+  readonly instructions?: string;
 }
 
 let current: ComposerTarget | null = null;

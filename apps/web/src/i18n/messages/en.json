@@ -30,7 +30,8 @@
     "compliance": "Compliance",
     "outbox": "Outbox",
     "approvals": "Approvals",
-    "deliverability": "Deliverability"
+    "deliverability": "Deliverability",
+    "calls": "Calls"
   },
   "topbar": {
     "workspace": "My workspace",
@@ -1064,7 +1065,8 @@
       "scores": "Scores",
       "sites": "Sites",
       "compliance": "Compliance",
-      "sequences": "Sequences"
+      "sequences": "Sequences",
+      "call": "Call assist"
     },
     "actions": {
       "label": "Quick actions",
@@ -4408,6 +4410,123 @@
     "banner": {
       "active": "All sending is stopped (kill switch): {reason}",
       "open": "Deliverability"
+    }
+  },
+  "assist": {
+    "call": "Call {number}",
+    "loadError": "The call details could not be loaded.",
+    "doNotContact": "This business is marked do not contact: no calls or messages.",
+    "noPhone": "No phone number is known for this business.",
+    "phoneBlocked": "Calling this business is not allowed (see the reasons above).",
+    "endCall": "End the call ({duration})",
+    "logOutcome": "Log an outcome",
+    "openPreview": "Open the preview site",
+    "history": "Calls and messages",
+    "noHistory": "No call or message has been logged yet.",
+    "channels": {
+      "email": "Email",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "letter": "Letter",
+      "in_person": "In person"
+    },
+    "decision": {
+      "allowed": "Allowed",
+      "allowed_with_conditions": "Allowed with conditions",
+      "manual_only": "By hand only",
+      "blocked": "Not allowed"
+    },
+    "bestTime": {
+      "now": "Good time to call now",
+      "unknown": "No good time found in the coming week.",
+      "rush": "Busy hours right now.",
+      "closed": "Closed right now.",
+      "next": "Next good time: {there}",
+      "yours": "({here} your time)"
+    },
+    "outcomes": {
+      "no_answer": "No answer",
+      "voicemail": "Left a voicemail",
+      "interested": "Spoke: interested",
+      "not_interested": "Spoke: not interested",
+      "call_back": "Spoke: call back later",
+      "info_email": "Spoke: send info by email",
+      "info_whatsapp": "Spoke: send info by WhatsApp",
+      "wrong_number": "Wrong number",
+      "do_not_call": "Do not call again"
+    },
+    "outcome": {
+      "title": "How did the call with {business} go?",
+      "duration": "Call length: {duration}",
+      "hint": "Log what happened on the call.",
+      "what": "Outcome",
+      "callbackAt": "Call back on",
+      "doNotContact": "Also mark the business do not contact (no emails or messages either)",
+      "minutes": "Duration (minutes)",
+      "notes": "Notes",
+      "cancel": "Cancel",
+      "save": "Save the outcome",
+      "queued": "Saved offline: it will be sent when you are back online.",
+      "logged": "Outcome logged.",
+      "failed": "The outcome could not be logged."
+    },
+    "script": {
+      "title": "Call script",
+      "offer": "Offer",
+      "language": "Language",
+      "auto": "The business’s language",
+      "regenerate": "Write it again",
+      "writing": "Writing the script…",
+      "failed": "The script could not be written.",
+      "retry": "Try again",
+      "cached": "Saved script. Write it again for a fresh one.",
+      "opener": "Opening",
+      "observations": "What we noticed",
+      "preview": "The preview site",
+      "questions": "Questions to ask",
+      "objections": "If they say…",
+      "nextStep": "Next step",
+      "reminders": "Remember"
+    },
+    "whatsapp": {
+      "action": "WhatsApp",
+      "noNumber": "No WhatsApp or phone number is known.",
+      "blocked": "WhatsApp messages to this business are not allowed.",
+      "title": "WhatsApp message to {business}",
+      "hint": "Write a short message, open it in WhatsApp, send it yourself, then confirm here.",
+      "channel": "WhatsApp",
+      "doNotContact": "This business is marked do not contact.",
+      "number": "WhatsApp number: {number}",
+      "usePhone": "{number} is on WhatsApp",
+      "message": "Message",
+      "count": "{count} of 600 characters",
+      "write": "Write the message",
+      "writing": "Writing the message…",
+      "replies": "The app does not read WhatsApp replies: log them here as outcomes.",
+      "open": "Open WhatsApp",
+      "sent": "I sent it",
+      "logged": "Message logged.",
+      "queued": "Saved offline: it will be logged when you are back online.",
+      "failed": "That did not work."
+    },
+    "list": {
+      "title": "Calls",
+      "description": "Today’s calls, and businesses worth calling now.",
+      "tier": "Tier {tier}",
+      "showScript": "Show the script",
+      "hideScript": "Hide the script",
+      "waitingOnline": "{count, plural, =0 {Sending the outcomes saved offline…} one {Sending # outcome saved offline…} other {Sending # outcomes saved offline…}}",
+      "offline": "{count, plural, =0 {You are offline: outcomes will be saved and sent later.} one {You are offline: # outcome is waiting to be sent.} other {You are offline: # outcomes are waiting to be sent.}}",
+      "synced": "{count, plural, one {# saved outcome sent.} other {# saved outcomes sent.}}",
+      "loadError": "The call list could not be loaded.",
+      "emptyTitle": "Nobody to call right now",
+      "emptyBody": "Call tasks due today and A or B businesses with a phone number show up here at a good time to call.",
+      "refresh": "Refresh",
+      "tasks": "{count, plural, =0 {Today’s calls} one {Today’s call (#)} other {Today’s calls (#)}}",
+      "noTasks": "No call task due today.",
+      "suggestions": "Good time to call",
+      "suggestionsHint": "Tier A and B businesses with a phone number, not contacted in the last 14 days, open now.",
+      "noSuggestions": "No suggestion right now."
     }
   }
 }

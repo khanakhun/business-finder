@@ -47,6 +47,7 @@ export function ComposerHost() {
             key={target.businessId}
             businessId={target.businessId}
             initialContactId={target.contactId}
+            initialInstructions={target.instructions}
           />
         ) : null}
       </SheetContent>
@@ -57,9 +58,11 @@ export function ComposerHost() {
 function Composer({
   businessId,
   initialContactId,
+  initialInstructions,
 }: {
   readonly businessId: string;
   readonly initialContactId?: string | undefined;
+  readonly initialInstructions?: string | undefined;
 }) {
   const t = useTranslations('composer');
   const offerName = useTranslations('composer.offers');
@@ -87,7 +90,7 @@ function Composer({
       toast.error(problem.detail ?? problem.title);
     }
   };
-  const create = (mode: 'ai' | 'template', instructions?: string) =>
+  const create = (mode: 'ai' | 'template', instructions = initialInstructions) =>
     run(() =>
       actions.create.mutateAsync({
         businessId: businessId as never,

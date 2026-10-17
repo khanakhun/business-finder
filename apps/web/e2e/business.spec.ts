@@ -61,7 +61,10 @@ test('works a business: search → page → status → note → task → /tasks'
   await page.getByRole('link', { name: 'Open business page' }).click();
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Overview', selected: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Call' })).toHaveAttribute('href', 'tel:+33199001122');
+  await expect(page.getByRole('link', { name: 'Call', exact: true })).toHaveAttribute(
+    'href',
+    'tel:+33199001122',
+  );
 
   // Status: only the allowed moves are offered.
   await page.getByRole('button', { name: new RegExp(`Pipeline status of ${name}: New`) }).click();

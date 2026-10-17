@@ -410,4 +410,21 @@ describe('BlocksEngine', () => {
     expect(events.some((event) => event.type === 'log' && /No previous site/.test(event.message))).toBe(true);
     expect(events.at(-1)?.type).toBe('done');
   });
+
+  it('fixes French punctuation spacing in the texts it writes, without asking again', async () => {
+    const { bundle } = workspace();
+    const { api, inputs } = gateway({
+      copy: goodCopy((_blockId, key) =>
+        key === 'heading' ? 'Nos prestations : sur rendez-vous' : undefined,
+      ),
+    });
+    const { events, spec } = await run(engineWith(bundle, api), bundle);
+    expect(events.at(-1)?.type).toBe('done');
+    const text = JSON.stringify(spec);
+    expect(text).toContain('Nos prestations\u00a0: sur rendez-vous');
+    expect(inputs.filter(isCopyInput).some((input) => input.blocks.some((b) => b.problems))).toBe(false);
+    expect(
+      events.some((event) => event.type === 'log' && /[1-9]\d* typography fix/.test(event.message)),
+    ).toBe(true);
+  });
 });

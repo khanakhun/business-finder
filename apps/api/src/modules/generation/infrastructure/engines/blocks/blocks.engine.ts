@@ -56,6 +56,8 @@ const PAGE_CONCURRENCY = 3;
 /** Rounds of asking again for the texts that failed the checks, before putting back the starter's. */
 const MAX_REASKS = 2;
 const REASK_BUDGET_SHARE = 0.8;
+/** The lint rules whose fix is safe to apply without asking (punctuation and spacing only). */
+const FIXED_RULES = new Set(['copy.fr_typography', 'copy.whitespace']);
 
 interface Workspace {
   readonly brief: GenerationBrief;
@@ -150,6 +152,29 @@ export class BlocksEngine implements AgentEngine {
       (issue) => issue.severity === 'error',
     );
     return [...issues, ...lint].map((issue) => ({ at: issue.at, message: issue.message }));
+  }
+
+  /**
+   * The deterministic fixers (BF-041): French punctuation spacing and stray whitespace, as copy lint corrects them,
+   * on the rewritable texts only (fact values stay verbatim). Returns the number of texts fixed.
+   */
+  private fixTypography(spec: SiteSpec, workspace: Workspace): number {
+    const rewritable = copyPaths(spec);
+    let fixed = 0;
+    for (const issue of lintCopy(spec, { config: workspace.config, facts: workspace.facts })) {
+      if (issue.fix === undefined || !FIXED_RULES.has(issue.rule)) continue;
+      if (!rewritable.some((path) => issue.at.startsWith(`${path}.`))) continue;
+      const locale = issue.path.at(-1);
+      let parent: unknown = spec;
+      for (const part of issue.path.slice(0, -1))
+        parent = (parent as Record<string | number, unknown>)?.[part];
+      if (typeof locale !== 'string' || !parent || typeof parent !== 'object') continue;
+      const texts = parent as Record<string, unknown>;
+      if (typeof texts[locale] !== 'string' || texts[locale] === issue.fix) continue;
+      texts[locale] = issue.fix;
+      fixed++;
+    }
+    return fixed;
   }
 
   /** The previous attempt's site, to repair (absent or unreadable: the engine writes a new one). */
@@ -378,10 +403,12 @@ export class BlocksEngine implements AgentEngine {
       // 3. Self-check: a text that fails is asked again with what was wrong (while the budget allows), then put back
       // to the starter's.
       yield { type: 'status', phase: 'validating' };
+      let fixed = this.fixTypography(spec, workspace);
       let issues = this.check(spec, workspace);
       let reasked = 0;
       for (let round = 0; round < MAX_REASKS && issues.length > 0; round++) {
-        const problems = fieldProblems(spec, issues).filter((problem) => changed.has(problem.path));
+        // Any rewritable text that fails — the model's, or a starter text drawn from a fact (an about summary…).
+        const problems = fieldProblems(spec, issues);
         if (problems.length === 0 || nearBudget()) break;
         reasked += problems.length;
         yield {
@@ -391,6 +418,7 @@ export class BlocksEngine implements AgentEngine {
         };
         const copies = await this.writeCopy(ctx, signal, workspace, spec, intents, problems);
         yield* apply(spec, copies, 80 + round * 5, 85 + round * 5);
+        fixed += this.fixTypography(spec, workspace);
         issues = this.check(spec, workspace);
       }
       let restored: string[] = [];
@@ -416,7 +444,7 @@ export class BlocksEngine implements AgentEngine {
       yield {
         type: 'log',
         level: 'info',
-        message: `Wrote ${changed.size - restored.length} text(s); ${reasked} asked again, ${restored.length} restored to the starter's, ${refusedCopy} refused.`,
+        message: `Wrote ${changed.size - restored.length} text(s); ${reasked} asked again, ${restored.length} restored to the starter's, ${refusedCopy} refused, ${fixed} typography fix(es).`,
       };
       yield { type: 'progress', pct: 95, label: 'Checked the site' };
       const ref = await ctx.writeSpec(result);

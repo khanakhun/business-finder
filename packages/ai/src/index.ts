@@ -80,6 +80,12 @@ export {
   SiteCopyOutput,
 } from './tasks/generation-site-copy.ts';
 export {
+  GenerationSiteJudge,
+  SITE_JUDGE_CRITERIA,
+  SiteJudgeInput,
+  SiteJudgeOutput,
+} from './tasks/generation-site-judge.ts';
+export {
   GenerationSitePlan,
   SitePlanInput,
   SitePlanOutput,

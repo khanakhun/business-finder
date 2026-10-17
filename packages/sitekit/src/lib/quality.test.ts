@@ -92,6 +92,20 @@ describe('lintCopy', () => {
     expect(issues.find((i) => i.rule === 'copy.cliche')?.severity).toBe('error');
   });
 
+  it('leaves a testimonial’s verbatim quote out of the superlative rule (a customer’s words, a fact)', async () => {
+    const { spec, config, facts } = await copy('salon');
+    const next = structuredClone(spec) as unknown as {
+      pages: { blocks: { props: Record<string, unknown> }[] }[];
+    };
+    const block = next.pages[0]?.blocks[0];
+    if (!block) throw new Error('no block');
+    block.props.items = [
+      { quote: { fr: 'Le meilleur salon de l’île.', en: 'The best salon.' }, author: 'C. D.' },
+    ];
+    const issues = lintCopy(next as unknown as typeof spec, { config, ...(facts ? { facts } : {}) });
+    expect(issues.filter((i) => i.rule === 'copy.superlative' && i.at.includes('quote'))).toEqual([]);
+  });
+
   it('checks CTA verbs, SEO lengths, alt texts, long sentences and duplicates', async () => {
     const { spec, config, facts } = await copy('salon');
     const next = structuredClone(spec);

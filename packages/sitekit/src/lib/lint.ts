@@ -292,7 +292,8 @@ export function lintCopy(spec: SiteSpec, input: LintInput): LintIssue[] {
             `Cliché: "${cliche}".`,
             'Say something specific to the business instead (a fact from facts.json).',
           );
-      if (!hasAward)
+      // A testimonial's quote is a customer's words, kept verbatim from its source page (a fact): not the site's claim.
+      if (!hasAward && field.path.at(-2) !== 'quote')
         for (const pattern of localeRules.superlatives) {
           const match = text.match(new RegExp(pattern, 'iu'));
           if (match)

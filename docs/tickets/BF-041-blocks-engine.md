@@ -138,9 +138,9 @@ packages/ai/evals/{site-plan, site-copy, blocks-engine-e2e}/*
 - **Evals:** real-model runs via `pnpm eval` (manual or nightly), report attached to the PR.
 
 ## Acceptance criteria
-- [ ] `blocks` engine implements `AgentEngine` with plan → theme → copy → assemble → self-check and repair mode.
+- [x] `blocks` engine implements `AgentEngine` with plan → theme → copy → assemble → self-check and repair mode. (The theme comes from the starter: brand colour and style with contrast checks; no theme task.)
 - [ ] Copy is locale-native, fact-grounded (`factsUsed`), lint-clean and within limits; sparse-facts sites stay honest.
-- [ ] Events, cost accounting, budget guard and abort behaviour verified by tests.
+- [x] Events, cost accounting, budget guard and abort behaviour verified by tests.
 - [ ] Eval suites with thresholds; report shows 100% validity, 0 fact violations, judged average ≥ 4.0.
 - [ ] Registered as the default engine with measured typical cost and duration.
 

@@ -61,6 +61,9 @@ import {
   OUTREACH_TOKENS,
   type OutboundSettings,
 } from './application/outbound/ports.ts';
+import { EnrollmentsService } from './application/sequences/enrollments.service.ts';
+import { SEQUENCE_REPOSITORY } from './application/sequences/ports.ts';
+import { SequencesService } from './application/sequences/sequences.service.ts';
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
@@ -95,12 +98,14 @@ import {
   OutreachTickScheduler,
   OutreachTriageProcessor,
 } from './infrastructure/sending/outreach-processors.ts';
+import { DrizzleSequencesRepository } from './infrastructure/sequences/drizzle-sequences.repository.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
 import { InboxController } from './interface/http/inbox.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
 import { MessagesController } from './interface/http/messages.controller.ts';
+import { SequencesController } from './interface/http/sequences.controller.ts';
 import { TemplatesController } from './interface/http/templates.controller.ts';
 
 const callbackUrl = (env: ApiEnv, provider: 'google' | 'microsoft') =>
@@ -138,6 +143,7 @@ export class OutreachModule {
               MessagesController,
               BulkController,
               InboxController,
+              SequencesController,
             ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
@@ -269,6 +275,10 @@ export class OutreachModule {
         ReplyTriageService,
         ReplyActions,
         InboxService,
+        // BF-053: sequences.
+        { provide: SEQUENCE_REPOSITORY, useClass: DrizzleSequencesRepository },
+        SequencesService,
+        EnrollmentsService,
         InboundPersonalData,
         OutboundCommands,
         OutboundQueries,

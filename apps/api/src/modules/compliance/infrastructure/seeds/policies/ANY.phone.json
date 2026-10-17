@@ -1,0 +1,14 @@
+{
+  "jurisdiction": "*",
+  "channel": "phone",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "No policy is seeded for this jurisdiction; a person must check the local telemarketing rules before calling.",
+      "fr": "Aucune politique n'est définie pour ce territoire ; une personne doit vérifier les règles locales de démarchage téléphonique avant d'appeler."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": []
+}

@@ -25,7 +25,8 @@
     "quality:calibrate": "node --import @swc-node/register/esm-register src/cli/quality-calibrate.ts",
     "geo:import": "node --import @swc-node/register/esm-register src/cli/geo-import.ts",
     "search:bench-seed": "node --import @swc-node/register/esm-register src/cli/search-bench-seed.ts",
-    "search:reindex": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/cli/search-reindex.ts"
+    "search:reindex": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/cli/search-reindex.ts",
+    "compliance:seeds": "node src/cli/compliance-seeds.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "catalog:",

@@ -1,0 +1,83 @@
+{
+  "jurisdiction": "FR",
+  "channel": "email",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "The address type or the relevance of the offer could not be established, so the message must be reviewed and sent by a person.",
+      "fr": "Le type d'adresse ou la pertinence de l'offre n'a pas pu être établi : le message doit être relu et envoyé par une personne."
+    },
+    "rules": [
+      {
+        "id": "offer-not-relevant",
+        "when": {
+          "relevance": ["not_relevant"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "The offer does not relate to the recipient's business activity, so the message cannot be justified as professional prospecting.",
+          "fr": "L'offre ne concerne pas l'activité professionnelle du destinataire : le message ne peut pas être justifié comme une prospection professionnelle."
+        }
+      },
+      {
+        "id": "generic-address-relevant",
+        "when": {
+          "addressType": ["generic", "department"],
+          "relevance": ["relevant"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "A generic business address (contact@, info@) is not personal data; a professional offer may be sent provided the sender is identified and an opt-out is offered from the first message.",
+          "fr": "Une adresse générique (contact@, info@) n'est pas une donnée personnelle ; une offre professionnelle peut être envoyée à condition d'identifier l'expéditeur et de proposer un désabonnement dès le premier message."
+        }
+      },
+      {
+        "id": "personal-professional-relevant",
+        "when": {
+          "addressType": ["personal"],
+          "relevance": ["relevant"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "A personal professional address follows the opt-out regime (CPCE L.34-5): the offer relates to the recipient's profession, the recipient is informed of the source and can object from the first message.",
+          "fr": "Une adresse professionnelle nominative relève du régime d'opposition (CPCE L.34-5) : l'offre concerne la profession du destinataire, qui est informé de la source et peut s'opposer dès le premier message."
+        }
+      },
+      {
+        "id": "relevance-unknown",
+        "when": {
+          "relevance": ["unknown"]
+        },
+        "decision": "manual_only",
+        "explain": {
+          "en": "The link between the offer and the recipient's profession has not been established, so a person must confirm it before sending.",
+          "fr": "Le lien entre l'offre et la profession du destinataire n'est pas établi : une personne doit le confirmer avant l'envoi."
+        }
+      }
+    ],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "CNIL — Les règles d'or de la prospection par courrier électronique",
+      "url": "https://www.cnil.fr/fr/les-regles-dor-de-la-prospection-par-courrier-electronique-0"
+    },
+    {
+      "title": "Legiscope — RGPD, prospection par email et SMS en B2B (summary)",
+      "url": "https://www.legiscope.com/blog/rgpd-marketing-email-sms.html"
+    },
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

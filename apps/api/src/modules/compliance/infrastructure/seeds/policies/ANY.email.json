@@ -1,0 +1,28 @@
+{
+  "jurisdiction": "*",
+  "channel": "email",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "No policy is seeded for this jurisdiction, so the applicable rules are unknown; the message can only be sent manually after a person checks the local requirements.",
+      "fr": "Aucune politique n'est définie pour ce territoire, les règles applicables sont donc inconnues ; le message ne peut être envoyé que manuellement après vérification des exigences locales par une personne."
+    },
+    "rules": [],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

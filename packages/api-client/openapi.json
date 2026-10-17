@@ -2708,6 +2708,94 @@
         ],
         "type": "object"
       },
+      "CheckSuppressionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "keys": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "scope": {
+                  "enum": [
+                    "email",
+                    "domain",
+                    "phone",
+                    "business",
+                    "org_business"
+                  ],
+                  "type": "string"
+                },
+                "value": {
+                  "maxLength": 320,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "scope",
+                "value"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "type": "object"
+      },
+      "CheckSuppressionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "suppressed": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "unsubscribe",
+                    "opt_out",
+                    "complaint",
+                    "hard_bounce",
+                    "manual",
+                    "dsr_objection",
+                    "no_solicitation",
+                    "legal"
+                  ],
+                  "type": "string"
+                },
+                "scope": {
+                  "enum": [
+                    "email",
+                    "domain",
+                    "phone",
+                    "business",
+                    "org_business"
+                  ],
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "scope",
+                "value",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "suppressed"
+        ],
+        "type": "object"
+      },
       "CircleGeometry": {
         "additionalProperties": false,
         "properties": {
@@ -2728,6 +2816,335 @@
           "type",
           "center",
           "radiusM"
+        ],
+        "type": "object"
+      },
+      "ComplianceDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "enum": [
+                    "manual_call",
+                    "manual_email",
+                    "letter",
+                    "manual_whatsapp"
+                  ],
+                  "type": "string"
+                },
+                "label": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "en": {
+                      "maxLength": 600,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "fr": {
+                      "maxLength": 600,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "en",
+                    "fr"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "code",
+                "label"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "autoSendPermitted": {
+            "type": "boolean"
+          },
+          "channel": {
+            "enum": [
+              "email",
+              "phone",
+              "whatsapp",
+              "sms",
+              "letter"
+            ],
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "allowed",
+              "allowed_with_conditions",
+              "manual_only",
+              "blocked"
+            ],
+            "type": "string"
+          },
+          "evaluatedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inputs": {
+            "additionalProperties": false,
+            "properties": {
+              "addressInvalid": {
+                "type": "boolean"
+              },
+              "addressType": {
+                "enum": [
+                  "generic",
+                  "department",
+                  "personal",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "channel": {
+                "enum": [
+                  "email",
+                  "phone",
+                  "whatsapp",
+                  "sms",
+                  "letter"
+                ],
+                "type": "string"
+              },
+              "designatedForSolicitation": {
+                "enum": [
+                  "yes",
+                  "no",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "doNotContact": {
+                "type": "boolean"
+              },
+              "jurisdictions": {
+                "items": {
+                  "pattern": "^([A-Z]{2}|\\*)$",
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "lawfulBasisApproved": {
+                "type": "boolean"
+              },
+              "noSolicitationMarker": {
+                "type": "boolean"
+              },
+              "previousContact": {
+                "enum": [
+                  "none",
+                  "replied",
+                  "bounced"
+                ],
+                "type": "string"
+              },
+              "publishedContext": {
+                "enum": [
+                  "own_contact_page",
+                  "own_site_other",
+                  "directory",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "recipientType": {
+                "enum": [
+                  "legal_person",
+                  "sole_trader",
+                  "public_body",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "relevance": {
+                "enum": [
+                  "relevant",
+                  "not_relevant",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              "suppressed": {
+                "type": "boolean"
+              },
+              "workspaceReady": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "jurisdictions",
+              "channel",
+              "recipientType",
+              "addressType",
+              "publishedContext",
+              "designatedForSolicitation",
+              "relevance",
+              "previousContact",
+              "suppressed",
+              "doNotContact",
+              "noSolicitationMarker",
+              "addressInvalid",
+              "workspaceReady",
+              "lawfulBasisApproved"
+            ],
+            "type": "object"
+          },
+          "jurisdictions": {
+            "items": {
+              "pattern": "^([A-Z]{2}|\\*)$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "policyVersionIds": {
+            "items": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reasons": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                "message": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "en": {
+                      "maxLength": 600,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "fr": {
+                      "maxLength": 600,
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "en",
+                    "fr"
+                  ],
+                  "type": "object"
+                },
+                "ruleRef": {
+                  "anyOf": [
+                    {
+                      "maxLength": 120,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "ruleRef"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "requiredElements": {
+            "items": {
+              "enum": [
+                "sender_identity",
+                "postal_address",
+                "opt_out_link",
+                "unsubscribe_headers",
+                "source_disclosure",
+                "relevance",
+                "recipient_language",
+                "honest_subject",
+                "identify_on_call",
+                "stop_on_request"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "stage": {
+            "enum": [
+              "preview",
+              "enqueue",
+              "send",
+              "manual_log"
+            ],
+            "type": "string"
+          },
+          "validUntil": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "decision",
+          "channel",
+          "stage",
+          "jurisdictions",
+          "reasons",
+          "requiredElements",
+          "alternatives",
+          "policyVersionIds",
+          "autoSendPermitted",
+          "inputs",
+          "evaluatedAt",
+          "validUntil"
+        ],
+        "type": "object"
+      },
+      "ComplianceDecisionList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceDecision"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
         ],
         "type": "object"
       },
@@ -3521,6 +3938,50 @@
         "required": [
           "spec",
           "baseVersionId"
+        ],
+        "type": "object"
+      },
+      "CreateSuppressionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "reason": {
+            "default": "manual",
+            "enum": [
+              "unsubscribe",
+              "opt_out",
+              "complaint",
+              "hard_bounce",
+              "manual",
+              "dsr_objection",
+              "no_solicitation",
+              "legal"
+            ],
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "email",
+              "domain",
+              "phone",
+              "business",
+              "org_business"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 320,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "value",
+          "reason"
         ],
         "type": "object"
       },
@@ -5205,6 +5666,48 @@
           "intent",
           "area",
           "options"
+        ],
+        "type": "object"
+      },
+      "EvaluateComplianceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "businessId": {
+            "description": "BusinessId (UUID)",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "channel": {
+            "enum": [
+              "email",
+              "phone",
+              "whatsapp",
+              "sms",
+              "letter"
+            ],
+            "type": "string"
+          },
+          "contactId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "new_website",
+              "website_redesign",
+              "ai_receptionist",
+              "booking_system",
+              "local_seo"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "businessId",
+          "channel",
+          "purpose"
         ],
         "type": "object"
       },
@@ -11905,6 +12408,20 @@
         ],
         "type": "object"
       },
+      "RevokeSuppressionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "type": "object"
+      },
       "RollbackSiteRequest": {
         "additionalProperties": false,
         "properties": {
@@ -17273,6 +17790,126 @@
           "tiers",
           "normalization",
           "reasonTemplates"
+        ],
+        "type": "object"
+      },
+      "SuppressionEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "add",
+              "revoke"
+            ],
+            "type": "string"
+          },
+          "actor": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "type": "object"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reason": {
+            "enum": [
+              "unsubscribe",
+              "opt_out",
+              "complaint",
+              "hard_bounce",
+              "manual",
+              "dsr_objection",
+              "no_solicitation",
+              "legal"
+            ],
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "email",
+              "domain",
+              "phone",
+              "business",
+              "org_business"
+            ],
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "link",
+              "one_click",
+              "reply",
+              "site_form",
+              "api",
+              "import",
+              "admin",
+              "system"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "scope",
+          "value",
+          "action",
+          "reason",
+          "source",
+          "note",
+          "actor",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "SuppressionPage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SuppressionEntry"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
         ],
         "type": "object"
       },
@@ -25076,6 +25713,169 @@
         "summary": "Typeahead over category labels and synonyms (EN/FR, accent-insensitive)",
         "tags": [
           "categories"
+        ]
+      }
+    },
+    "/v1/compliance/decisions": {
+      "get": {
+        "operationId": "listComplianceDecisions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "businessId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceDecisionList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A business’s persisted compliance decisions, newest first, with their inputs",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/evaluate": {
+      "post": {
+        "operationId": "evaluateCompliance",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateComplianceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceDecision"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Preview the compliance decision for a business, contact, channel and offer (not persisted)",
+        "tags": [
+          "compliance"
         ]
       }
     },
@@ -36550,6 +37350,307 @@
         "summary": "A version with its spec and issues (errors a draft keeps block publishing)",
         "tags": [
           "sites"
+        ]
+      }
+    },
+    "/v1/suppressions": {
+      "get": {
+        "operationId": "listSuppressions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuppressionPage"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace’s suppression log, newest first",
+        "tags": [
+          "compliance"
+        ]
+      },
+      "post": {
+        "operationId": "createSuppression",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSuppressionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Suppress an email, domain, phone or business for the workspace",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/suppressions/check": {
+      "post": {
+        "operationId": "checkSuppressions",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckSuppressionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckSuppressionResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Which of these keys are suppressed for the workspace",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/suppressions/{id}/revoke": {
+      "post": {
+        "operationId": "revokeSuppression",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeSuppressionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Lift a workspace suppression (audited)",
+        "tags": [
+          "compliance"
         ]
       }
     },

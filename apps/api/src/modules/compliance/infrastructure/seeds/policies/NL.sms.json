@@ -1,0 +1,23 @@
+{
+  "jurisdiction": "NL",
+  "channel": "sms",
+  "policy": {
+    "default": "blocked",
+    "defaultExplain": {
+      "en": "Unsolicited SMS requires prior consent in the Netherlands, including to businesses (Telecommunicatiewet art. 11.7); the channel is blocked for prospecting.",
+      "fr": "Les SMS non sollicités requièrent un consentement préalable aux Pays-Bas, y compris envers les entreprises (Telecommunicatiewet art. 11.7) ; le canal est bloqué pour la prospection."
+    },
+    "rules": [],
+    "requiredElements": ["sender_identity", "opt_out_link", "stop_on_request"]
+  },
+  "sources": [
+    {
+      "title": "ACM — Spam rules (Netherlands)",
+      "url": "https://www.acm.nl/nl/onderwerpen/telecommunicatie/internet/spam"
+    },
+    {
+      "title": "Overloop — Dutch and Belgian cold-acquisition law overview (Sep 2026)",
+      "url": "https://overloop.com/nl/blog/koude-acquisitie-wetgeving"
+    }
+  ]
+}

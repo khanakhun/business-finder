@@ -10,6 +10,7 @@ import {
   RecordEmailVerificationCommand,
   ReplaceWebsiteMediaCommand,
 } from '../business-graph/index.ts';
+import { ComplianceEmailSuppression, ComplianceModule } from '../compliance/index.ts';
 import { AI_GATEWAY } from '../platform/ai/ai.module.ts';
 import { CLOCK } from '../platform/clock/clock.module.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
@@ -42,7 +43,6 @@ import {
   EMAIL_VERDICT_CACHE,
   EMAIL_VERIFIER_LIST,
   type EmailSuppressionCheck,
-  type EmailVerdictCache,
   type EmailVerifier,
   ENRICHMENT_QUEUE,
   ENRICHMENT_REPOSITORY,
@@ -210,7 +210,11 @@ export class EnrichmentModule implements OnModuleInit {
   private static build(mode: AppMode): DynamicModule {
     return {
       module: EnrichmentModule,
-      imports: [BusinessGraphModule.forRoot(mode), RealtimeModule.forRoot(mode)],
+      imports: [
+        BusinessGraphModule.forRoot(mode),
+        RealtimeModule.forRoot(mode),
+        ComplianceModule.forRoot(mode),
+      ],
       controllers:
         mode === 'worker'
           ? []
@@ -251,7 +255,8 @@ export class EnrichmentModule implements OnModuleInit {
         },
         { provide: EMAIL_VERDICT_CACHE, useClass: DrizzleEmailVerdictCache },
         // DECISION(BF-028): no suppression lists and no personal-address policy before BF-049 (deny-all).
-        { provide: EMAIL_SUPPRESSION, useClass: NoSuppression },
+        // BF-049: the compliance module's suppression list (BF-028's pre-check port).
+        { provide: EMAIL_SUPPRESSION, useExisting: ComplianceEmailSuppression },
         { provide: PERSONAL_ADDRESS_POLICY, useClass: NoPersonalAddresses },
         {
           provide: SMTP_PORT_PROBE,

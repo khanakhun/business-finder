@@ -1,0 +1,20 @@
+{
+  "jurisdiction": "MF",
+  "channel": "phone",
+  "policy": {
+    "default": "allowed_with_conditions",
+    "defaultExplain": {
+      "en": "Calls to businesses are allowed with a right to object (B2B prospecting); the caller identifies themselves and the agency at the start and stops immediately on request. Calls are always placed by a person.",
+      "fr": "Les appels aux entreprises sont autorisés avec droit d'opposition (prospection B2B) ; l'appelant se présente et nomme l'agence dès le début et met fin à la démarche immédiatement sur demande. Les appels sont toujours passés par une personne."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [
+    {
+      "title": "Legiscope — RGPD, prospection par email et SMS en B2B (summary)",
+      "url": "https://www.legiscope.com/blog/rgpd-marketing-email-sms.html"
+    }
+  ],
+  "note": "EU outermost region; seeded to mirror FR."
+}

@@ -1,0 +1,15 @@
+{
+  "jurisdiction": "DE",
+  "channel": "sms",
+  "policy": {
+    "default": "blocked",
+    "defaultExplain": {
+      "en": "Electronic advertising messages in Germany require prior express consent (UWG §7); SMS prospecting is blocked.",
+      "fr": "En Allemagne, les messages publicitaires électroniques requièrent un consentement exprès préalable (UWG §7) ; la prospection par SMS est bloquée."
+    },
+    "rules": [],
+    "requiredElements": ["sender_identity", "opt_out_link", "stop_on_request"]
+  },
+  "sources": [],
+  "note": "No primary German source is listed in docs/compliance/outreach-compliance.md yet; add one (UWG §7) during legal review."
+}

@@ -1,0 +1,57 @@
+{
+  "jurisdiction": "NL",
+  "channel": "phone",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "Dutch cold-calling rules differ by legal form; when the recipient type is unknown a person must check it before calling.",
+      "fr": "Les règles néerlandaises sur le démarchage téléphonique dépendent de la forme juridique ; lorsque le type de destinataire est inconnu, une personne doit le vérifier avant d'appeler."
+    },
+    "rules": [
+      {
+        "id": "legal-person",
+        "when": {
+          "recipientType": ["legal_person"]
+        },
+        "decision": "allowed_with_conditions",
+        "explain": {
+          "en": "Cold calls to legal persons (BV, NV) are allowed with a right to object; identify yourself and stop on request.",
+          "fr": "Les appels à froid aux personnes morales (BV, NV) sont autorisés avec droit d'opposition ; présentez-vous et cessez sur demande."
+        }
+      },
+      {
+        "id": "sole-trader",
+        "when": {
+          "recipientType": ["sole_trader"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "Sole traders, vof and maatschap are protected like consumers: prior consent is required for cold calls.",
+          "fr": "Les indépendants, vof et maatschap sont protégés comme des consommateurs : un consentement préalable est requis pour les appels à froid."
+        }
+      },
+      {
+        "id": "recipient-type-unknown",
+        "when": {
+          "recipientType": ["unknown"]
+        },
+        "decision": "manual_only",
+        "explain": {
+          "en": "It is not known whether the business is a legal person or a sole trader; a person must check the KvK register before calling.",
+          "fr": "On ignore si l'entreprise est une personne morale ou un indépendant ; une personne doit vérifier le registre KvK avant d'appeler."
+        }
+      }
+    ],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [
+    {
+      "title": "ACM — Spam rules (Netherlands)",
+      "url": "https://www.acm.nl/nl/onderwerpen/telecommunicatie/internet/spam"
+    },
+    {
+      "title": "Overloop — Dutch and Belgian cold-acquisition law overview (Sep 2026)",
+      "url": "https://overloop.com/nl/blog/koude-acquisitie-wetgeving"
+    }
+  ]
+}

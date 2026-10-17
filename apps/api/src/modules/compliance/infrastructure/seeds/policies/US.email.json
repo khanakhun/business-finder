@@ -1,0 +1,44 @@
+{
+  "jurisdiction": "US",
+  "channel": "email",
+  "policy": {
+    "default": "allowed_with_conditions",
+    "defaultExplain": {
+      "en": "CAN-SPAM is an opt-out regime: no prior consent is needed, but the sender must be identified, the headers and subject truthful, a postal address included and the opt-out honoured within 10 business days.",
+      "fr": "Le CAN-SPAM est un régime d'opposition : aucun consentement préalable n'est requis, mais l'expéditeur doit être identifié, l'objet et les en-têtes sincères, une adresse postale indiquée et le désabonnement traité sous 10 jours ouvrés."
+    },
+    "rules": [
+      {
+        "id": "offer-not-relevant",
+        "when": {
+          "relevance": ["not_relevant"]
+        },
+        "decision": "blocked",
+        "explain": {
+          "en": "The offer does not relate to the recipient's business activity, so the message cannot be justified as professional prospecting.",
+          "fr": "L'offre ne concerne pas l'activité professionnelle du destinataire : le message ne peut pas être justifié comme une prospection professionnelle."
+        }
+      }
+    ],
+    "requiredElements": [
+      "sender_identity",
+      "postal_address",
+      "opt_out_link",
+      "unsubscribe_headers",
+      "source_disclosure",
+      "relevance",
+      "recipient_language",
+      "honest_subject"
+    ]
+  },
+  "sources": [
+    {
+      "title": "FTC — CAN-SPAM Act: a compliance guide for business",
+      "url": "https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business"
+    },
+    {
+      "title": "RFC 8058 — Signaling one-click functionality for List-Unsubscribe",
+      "url": "https://www.rfc-editor.org/rfc/rfc8058"
+    }
+  ]
+}

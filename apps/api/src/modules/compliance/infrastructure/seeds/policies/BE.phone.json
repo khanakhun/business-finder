@@ -1,0 +1,19 @@
+{
+  "jurisdiction": "BE",
+  "channel": "phone",
+  "policy": {
+    "default": "manual_only",
+    "defaultExplain": {
+      "en": "Belgium has separate rules for telephone prospecting (including the Do Not Call Me list); calls must be prepared and placed by a person who checks them first.",
+      "fr": "La Belgique applique des règles distinctes au démarchage téléphonique (dont la liste « Ne m'appelez plus ») ; les appels doivent être préparés et passés par une personne qui les vérifie au préalable."
+    },
+    "rules": [],
+    "requiredElements": ["identify_on_call", "stop_on_request"]
+  },
+  "sources": [
+    {
+      "title": "Overloop — Dutch and Belgian cold-acquisition law overview (Sep 2026)",
+      "url": "https://overloop.com/nl/blog/koude-acquisitie-wetgeving"
+    }
+  ]
+}

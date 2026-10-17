@@ -75,6 +75,16 @@ export {
   type SiteFactCandidate,
 } from './tasks/generation-extract-site-facts.ts';
 export {
+  GenerationSiteCopy,
+  SiteCopyInput,
+  SiteCopyOutput,
+} from './tasks/generation-site-copy.ts';
+export {
+  GenerationSitePlan,
+  SitePlanInput,
+  SitePlanOutput,
+} from './tasks/generation-site-plan.ts';
+export {
   ExtractPainSignalsInput,
   ExtractPainSignalsOutput,
   REVIEW_TEXT_BUDGET,

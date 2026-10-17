@@ -1,5 +1,6 @@
 import {
   type DomainEvent,
+  OUTREACH_MESSAGE_STATUS,
   OutreachMessageBlocked,
   OutreachMessageCancelled,
   OutreachMessageFailed,
@@ -56,7 +57,7 @@ export class OutboundSubscribers {
     if (!event.orgId) return;
     const payload = event.payload as { messageId: string; businessId: string };
     await this.realtime.publish(event.orgId, {
-      type: 'outreach.message.status',
+      type: OUTREACH_MESSAGE_STATUS,
       entity: 'outbound_message',
       entityId: payload.messageId,
       payload: { status: STATUS_OF[event.type], businessId: payload.businessId },

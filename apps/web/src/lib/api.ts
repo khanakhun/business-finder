@@ -94,6 +94,12 @@ export const queryKeys = {
     preview: (id: string, updatedAt: string) => ['outreach', 'preview', id, updatedAt] as const,
     templates: (archived: boolean) => ['outreach', 'templates', archived] as const,
     templateVersions: (id: string) => ['outreach', 'template-versions', id] as const,
+    // BF-052: the outbox, one message, a business's history, bulk runs.
+    messages: (filters: Record<string, string>) => ['outreach', 'messages', filters] as const,
+    message: (id: string) => ['outreach', 'message', id] as const,
+    history: (businessId: string) => ['outreach', 'history', businessId] as const,
+    bulkRuns: () => ['outreach', 'bulk-runs'] as const,
+    bulkRun: (id: string) => ['outreach', 'bulk-run', id] as const,
   }),
   mailboxes: defineQueryKeys('mailboxes', {
     list: () => ['mailboxes', 'list'] as const,

@@ -247,6 +247,9 @@ export const EditPendingMessageRequestSchema = z
   })
   .meta({ id: 'EditPendingMessageRequest' });
 
+/** Realtime event type of an outbound message's status change (payload: `{ status, businessId }`). */
+export const OUTREACH_MESSAGE_STATUS = 'outreach.message.status';
+
 // ── Events ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
 const messageRef = {

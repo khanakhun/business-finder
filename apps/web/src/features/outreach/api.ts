@@ -30,6 +30,17 @@ export function useBusinessDrafts(businessId: string | null) {
   });
 }
 
+export function useDraft(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.outreach.draft(id ?? ''),
+    queryFn: async () =>
+      unwrap<EmailDraft>(
+        await apiClient().GET('/v1/outreach/drafts/{id}', { params: { path: { id: id ?? '' } } }),
+      ),
+    enabled: id !== null,
+  });
+}
+
 export function useDraftPreview(draft: EmailDraft | null) {
   return useQuery({
     queryKey: queryKeys.outreach.preview(draft?.id ?? '', draft?.updatedAt ?? ''),

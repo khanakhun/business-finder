@@ -8,6 +8,8 @@ export const ADD_TO_LIST_DIALOG = 'search.add-to-list';
 export const MAX_EXPORT_IDS = 200;
 /** A generation batch holds at most 50 items (BF-039). */
 export const MAX_SITE_IDS = 50;
+/** A bulk outreach run drafts for at most 100 businesses (BF-052). */
+export const MAX_EMAIL_IDS = 100;
 
 const actions: BulkAction[] = [
   {
@@ -45,6 +47,20 @@ const actions: BulkAction[] = [
     // The create flow (BF-046) with the selection, in the listing's order.
     run: async (context, ui) => {
       ui.navigate(`/generation/new?ids=${context.selection.ids.join(',')}`);
+      return null;
+    },
+  },
+  {
+    id: 'outreach.bulk-email',
+    labelKey: 'search.bulk.bulkEmail',
+    icon: 'mail',
+    permission: 'outreach:send',
+    order: 55,
+    disabledReason: (context) =>
+      context.selection.ids.length > MAX_EMAIL_IDS ? 'search.bulk.tooManyEmails' : null,
+    // Drafts land in the approval queue (BF-052): the person picks the offer there and starts the run.
+    run: async (context, ui) => {
+      ui.navigate(`/outreach/approvals?ids=${context.selection.ids.join(',')}`);
       return null;
     },
   },

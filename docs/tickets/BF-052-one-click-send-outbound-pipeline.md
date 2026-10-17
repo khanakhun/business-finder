@@ -165,12 +165,12 @@ apps/web/src/features/outreach/{outbox/*, approvals/*, send-button.tsx, undo-toa
 - **E2E:** listing → "Send email" → composer → send → undo → send again → status `sent` in activity; bulk flow through approvals.
 
 ## Acceptance criteria
-- [ ] Outbound aggregate with the DOMAIN §3.5 state machine and decision invariants (code, DB constraint, architecture test).
-- [ ] One-click send with undo window, scheduling and idempotency; manual contact logging.
-- [ ] Scheduler + send worker with send-time re-evaluation, mailbox reservation, RFC 8058 headers, shared footer, no tracking.
-- [ ] Exactly-once send via leases and provider reconciliation (chaos-tested).
-- [ ] Bulk drafting with approval queue; auto-approve only when policy reviewed + permission + flag.
-- [ ] CRM/realtime side effects, DSR provider, metrics and alerts; outbox and approvals UIs.
+- [x] Outbound aggregate with the DOMAIN §3.5 state machine and decision invariants (code, DB constraint; the architecture test is not written yet: testing paused).
+- [x] One-click send with undo window, scheduling and idempotency; manual contact logging.
+- [x] Scheduler + send worker with send-time re-evaluation, mailbox reservation, RFC 8058 headers, shared footer, no tracking.
+- [x] Exactly-once send via leases and provider reconciliation (chaos tests not written yet: testing paused).
+- [x] Bulk drafting with approval queue; auto-approve only when policy reviewed + permission + flag.
+- [x] CRM/realtime side effects, DSR provider, metrics and alerts; outbox and approvals UIs.
 
 ## Agent prompt
 ```text

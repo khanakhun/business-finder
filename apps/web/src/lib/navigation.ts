@@ -1,5 +1,6 @@
 import {
   BarChart3Icon,
+  CheckCheckIcon,
   GlobeIcon,
   HandshakeIcon,
   InboxIcon,
@@ -12,6 +13,7 @@ import {
   MailIcon,
   MailsIcon,
   SearchIcon,
+  SendIcon,
   SettingsIcon,
   ShieldCheckIcon,
   SparklesIcon,
@@ -28,6 +30,8 @@ export type NavKey =
   | 'generation'
   | 'leads'
   | 'inbox'
+  | 'outbox'
+  | 'approvals'
   | 'sequences'
   | 'templates'
   | 'mailboxes'
@@ -73,6 +77,8 @@ export const NAVIGATION: readonly NavGroup[] = [
     key: 'outreach',
     items: [
       { key: 'inbox', href: '/outreach/inbox', icon: InboxIcon },
+      { key: 'outbox', href: '/outreach/outbox', icon: SendIcon },
+      { key: 'approvals', href: '/outreach/approvals', icon: CheckCheckIcon },
       { key: 'sequences', href: '/outreach/sequences', icon: ListOrderedIcon },
       { key: 'templates', href: '/outreach/templates', icon: MailIcon },
       { key: 'mailboxes', href: '/outreach/mailboxes', icon: MailsIcon },

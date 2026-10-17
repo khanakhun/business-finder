@@ -27,7 +27,9 @@
     "label": "Navigation principale",
     "tasks": "Tâches",
     "leads": "Contacts entrants",
-    "compliance": "Conformité"
+    "compliance": "Conformité",
+    "outbox": "Boîte d’envoi",
+    "approvals": "Validations"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -916,7 +918,9 @@
       "exporting": "Votre export se télécharge",
       "tooMany": "Exportez au plus 200 lignes sélectionnées, ou annulez la sélection pour tout exporter",
       "enrich": "Enrichir",
-      "tooManySites": "Créez des sites pour 50 entreprises au plus à la fois"
+      "tooManySites": "Créez des sites pour 50 entreprises au plus à la fois",
+      "bulkEmail": "E-mail (file de validation)",
+      "tooManyEmails": "Sélectionnez au plus 100 entreprises pour un envoi groupé."
     },
     "lists": {
       "title": "Listes",
@@ -1274,7 +1278,15 @@
       "leadClaim": "A indiqué « c’est mon entreprise » sur l’aperçu",
       "leadContact": "A envoyé une demande de contact depuis l’aperçu",
       "leadOptedOut": "A demandé à ne plus être contacté, depuis l’aperçu",
-      "leadOptedOutRemoved": "A demandé à ne plus être contacté et le retrait de l’aperçu"
+      "leadOptedOutRemoved": "A demandé à ne plus être contacté et le retrait de l’aperçu",
+      "emailQueued": "E-mail mis en file d’attente",
+      "emailSent": "E-mail envoyé",
+      "emailCancelled": "E-mail annulé avant son envoi",
+      "emailBlocked": "Un e-mail a été bloqué par le contrôle de conformité ({reasons})",
+      "emailFailed": "L’envoi d’un e-mail a échoué et sera retenté",
+      "emailFailedFinal": "Un e-mail n’a pas pu être envoyé",
+      "contactLogged": "Contact consigné ({channel})",
+      "openEmail": "Ouvrir l’e-mail"
     },
     "duplicates": {
       "label": "Doublons possibles",
@@ -3897,5 +3909,169 @@
     "create": "Créer",
     "archive": "Archiver",
     "versions": "Versions"
+  },
+  "outbound": {
+    "status": {
+      "draft": "Brouillon",
+      "pending_approval": "En attente de validation",
+      "queued": "En file d’attente",
+      "sending": "Envoi en cours",
+      "sent": "Envoyé",
+      "failed": "Échec",
+      "blocked": "Bloqué",
+      "cancelled": "Annulé",
+      "bounced": "Non remis",
+      "replied": "Répondu"
+    },
+    "send": {
+      "send": "Envoyer",
+      "copyAndLog": "Copier et consigner",
+      "copied": "E-mail copié : envoyez-le depuis votre propre messagerie, puis consignez-le.",
+      "queued": "E-mail mis en file d’attente. Il partira dans {seconds} secondes.",
+      "undo": "Annuler",
+      "undone": "E-mail annulé : rien n’a été envoyé.",
+      "tooLate": "Trop tard pour annuler : l’e-mail est déjà en route.",
+      "failed": "L’e-mail n’a pas pu être mis en file d’attente.",
+      "manualOnly": "Ce contact ne peut être joint que manuellement.",
+      "manualSummary": "Envoyé manuellement : « {subject} »"
+    },
+    "manual": {
+      "title": "Consigner un contact",
+      "description": "Enregistrez un contact effectué hors de l’application. Il est d’abord contrôlé au regard des exclusions et des mentions « ne pas contacter ».",
+      "channel": "Canal",
+      "channels": {
+        "email": "e-mail",
+        "phone": "téléphone",
+        "whatsapp": "WhatsApp",
+        "letter": "courrier",
+        "in_person": "en personne"
+      },
+      "summary": "Ce qui s’est passé",
+      "outcome": "Résultat (facultatif)",
+      "save": "Consigner le contact",
+      "cancel": "Annuler",
+      "logged": "Contact consigné.",
+      "failed": "Le contact n’a pas pu être consigné."
+    },
+    "outbox": {
+      "title": "Boîte d’envoi",
+      "description": "Tous les e-mails en route, envoyés ou bloqués, avec les raisons.",
+      "mailbox": "Messagerie",
+      "allMailboxes": "Toutes les messageries",
+      "loadError": "La boîte d’envoi n’a pas pu être chargée.",
+      "emptyTitle": "Rien pour le moment",
+      "emptyBody": "Les e-mails que vous envoyez apparaissent ici pendant leur attente, puis une fois envoyés ou bloqués.",
+      "caption": "E-mails sortants",
+      "business": "Entreprise",
+      "subject": "Objet",
+      "when": "Quand",
+      "state": "Statut",
+      "actions": "Actions",
+      "scheduled": "Planifié",
+      "attempts": "{count, plural, one {# tentative} other {# tentatives}}",
+      "cancel": "Annuler",
+      "cancelled": "E-mail annulé.",
+      "retry": "Réessayer",
+      "retried": "E-mail remis en file d’attente.",
+      "open": "Ouvrir",
+      "failed": "Cela n’a pas fonctionné."
+    },
+    "message": {
+      "title": "E-mail",
+      "description": "L’e-mail tel qu’il a été envoyé, ses en-têtes, les décisions de conformité et son historique.",
+      "status": "Statut",
+      "to": "À",
+      "from": "De",
+      "sentAt": "Envoyé",
+      "scheduledAt": "Planifié pour",
+      "reschedule": "Envoyer à un autre moment",
+      "move": "Replanifier",
+      "rescheduled": "E-mail replanifié.",
+      "failed": "Cela n’a pas fonctionné.",
+      "preview": "Aperçu",
+      "text": "Texte brut",
+      "decisions": "Conformité",
+      "headers": "En-têtes",
+      "enqueueDecision": "À la mise en file d’attente",
+      "sendDecision": "À l’envoi",
+      "none": "Aucune décision enregistrée.",
+      "notYet": "Nouveau contrôle juste avant l’envoi.",
+      "timeline": "Historique"
+    },
+    "approvals": {
+      "title": "Validations",
+      "description": "Les e-mails rédigés en lot attendent ici. Rien n’est envoyé sans votre validation.",
+      "runs": "Envois groupés",
+      "loadError": "Les validations n’ont pas pu être chargées.",
+      "noRuns": "Aucun envoi groupé pour le moment. Sélectionnez des entreprises dans Recherche et choisissez « E-mail (file de validation) ».",
+      "emptyTitle": "Rien à valider",
+      "emptyBody": "Sélectionnez des entreprises dans Recherche et choisissez « E-mail (file de validation) » pour rédiger leurs e-mails.",
+      "counts": "{pending} à valider · {queued} en file d’attente · {skipped} ignorés",
+      "runStatus": {
+        "drafting": "Rédaction en cours",
+        "ready": "Prêt pour relecture",
+        "completed": "Terminé",
+        "cancelled": "Annulé"
+      },
+      "startTitle": "Rédiger des e-mails pour {count, plural, one {# entreprise} other {# entreprises}}",
+      "startHint": "La conformité de chaque entreprise est d’abord vérifiée. Les brouillons attendent ici votre validation.",
+      "offer": "Offre",
+      "purpose": "Objectif",
+      "purposes": {
+        "first_touch": "Premier e-mail",
+        "follow_up": "Relance"
+      },
+      "mode": "Rédigé par",
+      "modes": {
+        "ai": "IA, à partir des faits",
+        "template": "Modèle"
+      },
+      "tooMany": "Un envoi groupé porte sur 100 entreprises au maximum.",
+      "start": "Rédiger {count, plural, one {# e-mail} other {# e-mails}}",
+      "started": "Rédaction de {count, plural, one {# e-mail} other {# e-mails}} en arrière-plan.",
+      "failed": "Cela n’a pas fonctionné.",
+      "result": "{approved} validés, {rejected} rejetés, {refused} refusés par le contrôle de conformité",
+      "autoApprove": "Validé automatiquement",
+      "progress": "{done} entreprises traitées sur {total}",
+      "rejectSelected": "Rejeter ({count})",
+      "approveSelected": "Valider ({count})",
+      "approveAll": "Tout valider ({count})",
+      "select": "Sélectionner l’e-mail pour {business}",
+      "decision": {
+        "allowed": "Autorisé",
+        "allowed_with_conditions": "Autorisé sous conditions",
+        "manual_only": "Manuel uniquement",
+        "blocked": "Bloqué",
+        "error": "Rédaction impossible"
+      },
+      "itemStatus": {
+        "draft": "Brouillon",
+        "pending_approval": "En attente de validation",
+        "queued": "En file d’attente",
+        "sending": "Envoi en cours",
+        "sent": "Envoyé",
+        "failed": "Échec",
+        "blocked": "Bloqué",
+        "cancelled": "Rejeté",
+        "bounced": "Non remis",
+        "replied": "Répondu"
+      },
+      "showPreview": "Afficher l’e-mail",
+      "previewOf": "E-mail pour {business}",
+      "edit": "Modifier",
+      "reject": "Rejeter",
+      "approve": "Valider",
+      "skippedTitle": "Ignorés ({count})",
+      "alternatives": "À la place : {list}",
+      "confirmTitle": "Valider {count, plural, one {# e-mail} other {# e-mails}} ?",
+      "confirmBody": "La conformité de chaque e-mail est vérifiée à nouveau, puis il est mis en file d’attente et envoyé dans les limites de sa messagerie.",
+      "cancel": "Annuler",
+      "editTitle": "Modifier l’e-mail pour {business}",
+      "editHint": "Vos modifications mettent à jour le brouillon ; l’aperçu est régénéré.",
+      "subject": "Objet",
+      "body": "Message",
+      "save": "Enregistrer",
+      "saved": "E-mail mis à jour."
+    }
   }
 }

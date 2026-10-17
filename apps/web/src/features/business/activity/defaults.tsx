@@ -6,15 +6,21 @@ import {
   BanIcon,
   CircleCheckIcon,
   CirclePlusIcon,
+  ClockIcon,
   GaugeIcon,
   GitMergeIcon,
   HandshakeIcon,
   ListTodoIcon,
+  PhoneIcon,
   RefreshCwIcon,
+  SendIcon,
   StickyNoteIcon,
   TagsIcon,
+  TriangleAlertIcon,
+  UndoIcon,
   UserRoundIcon,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useTeammates } from '../api.ts';
 import { type ActivityRendererProps, activityRenderers } from './registry.ts';
@@ -97,6 +103,53 @@ function LeadLine({ activity }: ActivityRendererProps) {
   return <>{activity.data.kind === 'contact_request' ? t('leadContact') : t('leadClaim')}</>;
 }
 
+const EMAIL_TAB: Record<string, string> = {
+  'email.queued': 'queued',
+  'email.sent': 'sent',
+  'email.cancelled': 'cancelled',
+  'email.blocked': 'blocked',
+  'email.failed': 'failed',
+};
+
+/** An email's status (BF-052), linking to the message (content, decisions, history); contacts logged by hand. */
+function EmailLine({ activity }: ActivityRendererProps) {
+  const t = useTranslations('business.activity');
+  const channel = useTranslations('outbound.manual.channels');
+  const messageId = text(activity.data.messageId);
+  const line = (() => {
+    switch (activity.type) {
+      case 'email.queued':
+        return t('emailQueued');
+      case 'email.sent':
+        return t('emailSent');
+      case 'email.cancelled':
+        return t('emailCancelled');
+      case 'email.blocked':
+        return t('emailBlocked', { reasons: list(activity.data.reasons).join(', ') || '—' });
+      case 'email.failed':
+        return activity.data.final === true ? t('emailFailedFinal') : t('emailFailed');
+      default:
+        return t('contactLogged', { channel: channel(text(activity.data.channel) as 'email') });
+    }
+  })();
+  return (
+    <>
+      {line}
+      {messageId ? (
+        <>
+          {' '}
+          <Link
+            className="text-primary underline-offset-2 hover:underline"
+            href={`/outreach/outbox?status=${EMAIL_TAB[activity.type] ?? 'queued'}&open=${messageId}`}
+          >
+            {t('openEmail')}
+          </Link>
+        </>
+      ) : null}
+    </>
+  );
+}
+
 function Updated({ activity }: ActivityRendererProps) {
   const t = useTranslations('business.activity');
   return <>{t('updated', { count: list(activity.data.fields).length })}</>;
@@ -122,6 +175,12 @@ export function registerDefaultActivityRenderers(): void {
     { id: 'score.updated', icon: GaugeIcon, component: ScoreUpdated },
     { id: 'lead.captured', icon: HandshakeIcon, component: LeadLine },
     { id: 'lead.opted_out', icon: BanIcon, component: LeadLine },
+    { id: 'email.queued', icon: ClockIcon, component: EmailLine },
+    { id: 'email.sent', icon: SendIcon, component: EmailLine },
+    { id: 'email.cancelled', icon: UndoIcon, component: EmailLine },
+    { id: 'email.blocked', icon: BanIcon, component: EmailLine },
+    { id: 'email.failed', icon: TriangleAlertIcon, component: EmailLine },
+    { id: 'contact.logged', icon: PhoneIcon, component: EmailLine },
   ];
   for (const [order, entry] of entries.entries()) activityRenderers.register({ ...entry, order });
 }

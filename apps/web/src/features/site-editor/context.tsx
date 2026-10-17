@@ -64,6 +64,21 @@ export interface SiteEditorActions {
   /** The site the issues' paths point into: as the canvas shows it (the page on screen as edited). */
   readonly issuesSite: SiteSpec;
   readonly showIssue: (issue: Issue) => void;
+  /** What the chat panel (BF-047) needs from the editor. */
+  readonly chat: SiteEditorChat;
+}
+
+/** The editor as the chat panel sees it (BF-047): the version it edits, and how to preview and adopt versions. */
+export interface SiteEditorChat {
+  readonly siteId: string;
+  readonly baseVersionId: string;
+  readonly baseSpec: SiteSpec;
+  /** Unsaved edits: a proposal cannot be applied until they are saved. */
+  readonly dirty: boolean;
+  /** Shows a proposed site read-only on the canvas (null: back to editing). */
+  readonly preview: (spec: SiteSpec | null, label?: string) => void;
+  /** Loads a version as the editor's base (after a proposal was applied or undone). */
+  readonly adopt: (versionId: string) => Promise<void>;
 }
 
 const SiteEditorActionsContext = React.createContext<SiteEditorActions | null>(null);

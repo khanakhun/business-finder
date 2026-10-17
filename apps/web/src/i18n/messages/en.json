@@ -2191,7 +2191,8 @@
     "panels": {
       "site": "Site",
       "pages": "Pages",
-      "issues": "Issues"
+      "issues": "Issues",
+      "chat": "Chat"
     },
     "ops": {
       "addPage": "Add a page",
@@ -3100,6 +3101,70 @@
       "noJobs": "No generation yet.",
       "quality": "Quality {score}",
       "openJob": "Open"
+    }
+  },
+  "siteChat": {
+    "readOnly": "You can read this site; editing with the assistant needs permission to generate sites.",
+    "newThread": "New chat",
+    "empty": "Ask for a change: “make the hero shorter”, “add a breakfast menu page”, “use a calmer palette”.",
+    "thinking": "Working…",
+    "failed": "The assistant could not answer. Try again.",
+    "placeholder": "Describe a change…",
+    "send": "Send",
+    "loadingProposal": "Loading the proposal…",
+    "context": {
+      "block": "Editing: {page} › {block} ({locale})",
+      "page": "Editing: {page} ({locale})"
+    },
+    "suggestions": {
+      "shorter": "Make it shorter",
+      "premium": "A more premium tone",
+      "split": "Try a split layout",
+      "tropical": "More tropical photos",
+      "fewerPhotos": "Keep the best 6 photos",
+      "clearer": "Make it clearer",
+      "prices": "Show the prices we have",
+      "breakfast": "Add our breakfast items",
+      "realReviews": "Invite real reviews instead",
+      "whatsapp": "Add a WhatsApp button",
+      "hours": "Show the opening hours",
+      "warmer": "Make the site warmer",
+      "calmerPalette": "Use a calmer palette",
+      "translateEn": "Write the missing English texts",
+      "menuPage": "Add a menu page"
+    },
+    "proposal": {
+      "label": "Proposed change",
+      "failed": "That did not work.",
+      "previewFailed": "This proposal cannot be shown on the current version.",
+      "previewBanner": "Previewing the proposed change",
+      "preview": "Preview",
+      "before": "Show before",
+      "apply": "Apply",
+      "discard": "Discard",
+      "undo": "Undo",
+      "undone": "Change undone",
+      "applied": "Applied as version {version}",
+      "version": "Version {version}",
+      "saveFirst": "Save your edits before applying a proposal.",
+      "olderVersion": "Made on an older version",
+      "facts": "Facts to confirm (only the ones you tick are kept)",
+      "status": {
+        "proposed": "Proposed",
+        "applied": "Applied",
+        "discarded": "Discarded",
+        "superseded": "Superseded",
+        "failed": "Failed"
+      },
+      "changes": {
+        "pageAdded": "New page {page}",
+        "pageRemoved": "Page {page} removed",
+        "blockAdded": "New {type} section on {page}",
+        "blockRemoved": "{type} section removed from {page}",
+        "blockMoved": "{type} section moved on {page}",
+        "blockChanged": "{type} on {page}: {fields}",
+        "section": "Site {section} changed"
+      }
     }
   }
 }

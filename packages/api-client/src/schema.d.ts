@@ -705,6 +705,126 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/compliance/dsr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace’s data-subject requests, newest first */
+        get: operations["listDsrRequests"];
+        put?: never;
+        /** Record a data-subject request (deadline: one month) */
+        post: operations["createDsrRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One data-subject request with its trail */
+        get: operations["getDsrRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}/discover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Find what every module holds about the person (redacted summaries) */
+        post: operations["discoverDsrRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Carry the request out (export, erase, object, restrict or rectify) and complete it */
+        post: operations["executeDsrRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}/export.zip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download an access request’s export (audited) */
+        get: operations["downloadDsrExport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject a request (with the reason given to the person) */
+        post: operations["rejectDsrRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/dsr/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record how the person’s identity was verified (then the request can be carried out) */
+        post: operations["verifyDsrRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/compliance/evaluate": {
         parameters: {
             query?: never;
@@ -870,6 +990,40 @@ export type paths = {
         get: operations["listCompliancePolicyVersions"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/retention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The retention policies and the latest runs */
+        get: operations["getRetentionOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/compliance/retention/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Count what the retention policies would remove now (nothing is changed) */
+        post: operations["dryRunRetention"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2059,6 +2213,23 @@ export type paths = {
         get: operations["getLeadChallenge"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/public/sites/dsr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A data-subject request from a preview’s privacy page (anonymous; always "received") */
+        post: operations["submitPublicDsr"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3722,7 +3893,7 @@ export type components = {
         CheckSuppressionRequest: {
             keys: {
                 /** @enum {string} */
-                scope: "email" | "domain" | "phone" | "business" | "org_business";
+                scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
                 value: string;
             }[];
         };
@@ -3731,7 +3902,7 @@ export type components = {
                 /** @enum {string} */
                 reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
                 /** @enum {string} */
-                scope: "email" | "domain" | "phone" | "business" | "org_business";
+                scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
                 value: string;
             }[];
         };
@@ -3993,6 +4164,12 @@ export type components = {
             /** @description First characters of the key, e.g. `bf_Ab12`. */
             start: string | null;
         };
+        CreateDsrRequest: {
+            notes?: string;
+            subject: components["schemas"]["DataSubject"];
+            /** @enum {string} */
+            type: "access" | "erasure" | "objection" | "rectification" | "restriction";
+        };
         CreateGenerationBatchRequest: {
             items: {
                 briefOverrides?: components["schemas"]["BriefOverrides"];
@@ -4106,7 +4283,7 @@ export type components = {
              */
             reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
             /** @enum {string} */
-            scope: "email" | "domain" | "phone" | "business" | "org_business";
+            scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
             value: string;
         };
         CrmState: {
@@ -4143,7 +4320,7 @@ export type components = {
             /** @enum {string} */
             reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
             /** @enum {string} */
-            scope: "email" | "domain" | "phone" | "business" | "org_business";
+            scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
             /** @enum {string} */
             source: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
             value: string;
@@ -4151,6 +4328,17 @@ export type components = {
         CurrentSuppressionPage: {
             items: components["schemas"]["CurrentSuppression"][];
             nextCursor: string | null;
+        };
+        DataSubject: {
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId?: string;
+            /** Format: email */
+            email?: string;
+            name?: string;
+            phone?: string;
         };
         DiscoveryIntent: {
             /** @default [] */
@@ -4320,6 +4508,61 @@ export type components = {
             /** @constant */
             type: "BBox";
         };
+        DsrDiscovery: {
+            providers: {
+                categories: string[];
+                id: string;
+                manualReview: boolean;
+                records: number;
+                sample: string[];
+            }[];
+        };
+        DsrRequest: {
+            actions: {
+                /** Format: date-time */
+                at: string;
+                by: string | null;
+                detail: {
+                    [key: string]: unknown;
+                };
+                kind: string;
+            }[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            dueAt: string;
+            exportReady: boolean;
+            handledBy: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            receivedAt: string;
+            /** @enum {string} */
+            source: "admin" | "public";
+            /** @enum {string} */
+            status: "received" | "verifying" | "in_progress" | "completed" | "rejected";
+            subject: {
+                businessId?: string;
+                email?: string;
+                name?: string;
+                phone?: string;
+            } | null;
+            /** @enum {string} */
+            type: "access" | "erasure" | "objection" | "rectification" | "restriction";
+            /** Format: date-time */
+            updatedAt: string;
+            verification: {
+                /** Format: date-time */
+                at: string;
+                by: string | null;
+                /** @enum {string} */
+                method: "email_reply" | "known_contact" | "id_document" | "other";
+                notes: string;
+            } | null;
+        };
+        DsrRequestList: {
+            items: components["schemas"]["DsrRequest"][];
+        };
         EffectiveCompliancePolicy: {
             autoSendEnabled: boolean;
             /** @enum {string} */
@@ -4473,6 +4716,14 @@ export type components = {
             sourceRef: "google_places" | "gmaps_scraper" | "manual";
             /** @description A paraphrase of at most 20 words, not a quote. */
             text: string;
+        };
+        ExecuteDsrRequest: {
+            /**
+             * @default anonymize
+             * @enum {string}
+             */
+            mode: "delete" | "anonymize";
+            notes?: string;
         };
         ExtendPreviewRequest: {
             days: number;
@@ -4914,7 +5165,7 @@ export type components = {
              * @default email
              * @enum {string}
              */
-            scope: "email" | "domain" | "phone" | "business" | "org_business";
+            scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
         };
         ImportSuppressionsResult: {
             added: number;
@@ -5220,7 +5471,7 @@ export type components = {
             /** @description Message key the dashboard translates, e.g. `notifications.types.member_joined.title`. */
             titleKey: string;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPage: {
             items: components["schemas"]["Notification"][];
@@ -5232,7 +5483,7 @@ export type components = {
             email: boolean;
             inApp: boolean;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "dsr_due" | "member_joined" | "system_test";
         };
         NotificationPreferences: {
             items: components["schemas"]["NotificationPreference"][];
@@ -5524,6 +5775,15 @@ export type components = {
                 performance: number | null;
                 seo: number | null;
             };
+        };
+        PublicDsrIntake: {
+            /** Format: email */
+            email: string;
+            message?: string;
+            name?: string;
+            siteToken: string;
+            /** @enum {string} */
+            type: "access" | "erasure" | "objection" | "rectification" | "restriction";
         };
         PublicLeadRequest: {
             altcha?: string;
@@ -5842,6 +6102,9 @@ export type components = {
             usage: "display" | "internal";
             value: string;
         };
+        RejectDsrRequest: {
+            reason: string;
+        };
         ReorderGenerationJobsRequest: {
             /** Format: uuid */
             batchId: string;
@@ -5867,6 +6130,33 @@ export type components = {
              * @description Which of the two businesses survives a merge (default: A).
              */
             survivorId?: string;
+        };
+        RetentionOverview: {
+            policies: components["schemas"]["RetentionPolicy"][];
+            runs: components["schemas"]["RetentionRun"][];
+        };
+        RetentionPolicy: {
+            /** @enum {string} */
+            action: "delete" | "anonymize" | "truncate_payload";
+            description: string;
+            entity: string;
+            id: string;
+            retentionDays: number;
+        };
+        RetentionRun: {
+            dryRun: boolean;
+            finishedAt: string | null;
+            /** Format: uuid */
+            id: string;
+            results: {
+                count: number;
+                durationMs: number;
+                error: string | null;
+                policy: string;
+            }[];
+            /** Format: date-time */
+            startedAt: string;
+            triggeredBy: string | null;
         };
         RetryGenerationJobRequest: {
             /** @enum {string} */
@@ -7023,7 +7313,7 @@ export type components = {
             /** @enum {string} */
             reason: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
             /** @enum {string} */
-            scope: "email" | "domain" | "phone" | "business" | "org_business";
+            scope: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
             /** @enum {string} */
             source: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
             value: string;
@@ -7220,6 +7510,11 @@ export type components = {
             retention: string;
             safeguards: string;
             title: string;
+        };
+        VerifyDsrRequest: {
+            /** @enum {string} */
+            method: "email_reply" | "known_contact" | "id_document" | "other";
+            notes: string;
         };
         VisionGrade: {
             criteria: {
@@ -10980,6 +11275,561 @@ export interface operations {
             };
         };
     };
+    listDsrRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequestList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDsrRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequest"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequest"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    discoverDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrDiscovery"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    executeDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExecuteDsrRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequest"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    downloadDsrExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    rejectDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectDsrRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequest"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    verifyDsrRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyDsrRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DsrRequest"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     evaluateCompliance: {
         parameters: {
             query?: never;
@@ -11650,6 +12500,100 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getRetentionOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionOverview"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    dryRunRetention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetentionRun"];
                 };
             };
             /** @description Problem details (RFC 9457) */
@@ -17211,6 +18155,73 @@ export interface operations {
             };
         };
     };
+    submitPublicDsr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicDsrIntake"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     submitSiteLead: {
         parameters: {
             query?: never;
@@ -21420,7 +22431,7 @@ export interface operations {
                 from?: string;
                 q?: string;
                 reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
-                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
                 source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
                 to?: string;
                 view?: "current" | "log";
@@ -21708,7 +22719,7 @@ export interface operations {
                 from?: string;
                 q?: string;
                 reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
-                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
                 source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
                 to?: string;
                 view?: "current" | "log";
@@ -21849,7 +22860,7 @@ export interface operations {
                 from?: string;
                 q?: string;
                 reason?: "unsubscribe" | "opt_out" | "complaint" | "hard_bounce" | "manual" | "dsr_objection" | "no_solicitation" | "legal";
-                scope?: "email" | "domain" | "phone" | "business" | "org_business";
+                scope?: "email" | "domain" | "phone" | "business" | "org_business" | "email_hash";
                 source?: "link" | "one_click" | "reply" | "site_form" | "api" | "import" | "admin" | "system";
                 to?: string;
                 view?: "current" | "log";

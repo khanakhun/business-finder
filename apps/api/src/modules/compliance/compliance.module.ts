@@ -2,21 +2,29 @@ import { createHmac } from 'node:crypto';
 import type { ApiEnv } from '@bf/config';
 import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
+import { InMemoryObjectStorage } from '../platform/storage/object-storage.ts';
+import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
+import { RealtimeModule } from '../realtime/index.ts';
 import { CompliancePolicies } from './application/compliance.policies.ts';
 import { ComplianceService } from './application/compliance.service.ts';
 import { ComplianceSubscribers } from './application/compliance.subscribers.ts';
+import { DSR_EXPORT_STORAGE, DsrReminderSchedule, DsrService } from './application/dsr.service.ts';
+import { PersonalDataRegistry } from './application/personal-data.ts';
 import {
   COMPLIANCE_INPUTS,
   COMPLIANCE_TELEMETRY,
   DECISION_REPOSITORY,
+  DSR_REPOSITORY,
   LAWFUL_BASIS_REPOSITORY,
   POLICY_REPOSITORY,
   RECIPIENT_TYPE_RESOLVER,
+  RETENTION_RUNS,
   SUPPRESSION_REPOSITORY,
   UNSUBSCRIBE_SETTINGS,
   UNSUBSCRIBE_TOKEN_REPOSITORY,
   type UnsubscribeSettings,
 } from './application/ports.ts';
+import { RetentionRegistry, RetentionRunner, RetentionSchedule } from './application/retention.ts';
 import { SuppressionAdmin } from './application/suppression-admin.ts';
 import { UnsubscribeService } from './application/unsubscribe.service.ts';
 import { ComplianceEmailSuppression } from './infrastructure/compliance-email-suppression.ts';
@@ -27,10 +35,20 @@ import {
   DrizzleSuppressionRepository,
 } from './infrastructure/drizzle-compliance.repositories.ts';
 import { DrizzleComplianceInputs } from './infrastructure/drizzle-compliance-inputs.ts';
+import {
+  DrizzleDsrRepository,
+  DrizzleRetentionRunRepository,
+} from './infrastructure/drizzle-dsr.repositories.ts';
 import { DrizzleUnsubscribeTokenRepository } from './infrastructure/drizzle-unsubscribe-tokens.repository.ts';
 import { FrRegistryRecipientType } from './infrastructure/fr-registry-recipient-type.ts';
 import { PROMETHEUS_COMPLIANCE_TELEMETRY } from './infrastructure/metrics.ts';
+import {
+  ComplianceDataRegistrations,
+  ComplianceSuppressionData,
+  UnsubscribeTokenData,
+} from './infrastructure/personal-data/compliance-data.ts';
 import { ComplianceController } from './interface/http/compliance.controller.ts';
+import { DsrController } from './interface/http/dsr.controller.ts';
 import { CompliancePoliciesController } from './interface/http/policies.controller.ts';
 import {
   PublicUnsubscribeController,
@@ -51,6 +69,7 @@ export class ComplianceModule {
     if (!module) {
       module = {
         module: ComplianceModule,
+        imports: [RealtimeModule.forRoot(mode)],
         controllers:
           mode === 'worker'
             ? []
@@ -59,6 +78,7 @@ export class ComplianceModule {
                 CompliancePoliciesController,
                 PublicUnsubscribeController,
                 UnsubscribePageController,
+                DsrController,
               ],
         providers: [
           { provide: POLICY_REPOSITORY, useClass: DrizzlePolicyRepository },
@@ -84,12 +104,38 @@ export class ComplianceModule {
           },
           UnsubscribeService,
           SuppressionAdmin,
+          { provide: DSR_REPOSITORY, useClass: DrizzleDsrRepository },
+          { provide: RETENTION_RUNS, useClass: DrizzleRetentionRunRepository },
+          {
+            provide: DSR_EXPORT_STORAGE,
+            inject: [APP_ENV],
+            // Private bucket; the export is also encrypted with the workspace's envelope key.
+            useFactory: (appEnv: AppEnv) =>
+              mode === 'openapi'
+                ? new InMemoryObjectStorage()
+                : new S3ObjectStorage(appEnv as ApiEnv, (appEnv as ApiEnv).S3_BUCKET_ARTIFACTS),
+          },
+          PersonalDataRegistry,
+          RetentionRegistry,
+          RetentionRunner,
+          DsrService,
+          ComplianceSuppressionData,
+          UnsubscribeTokenData,
+          ComplianceDataRegistrations,
+          ...(mode === 'worker' ? [RetentionSchedule, DsrReminderSchedule] : []),
           CompliancePolicies,
           ComplianceService,
           ComplianceSubscribers,
           ComplianceEmailSuppression,
         ],
-        exports: [ComplianceService, ComplianceEmailSuppression, UnsubscribeService],
+        exports: [
+          ComplianceService,
+          ComplianceEmailSuppression,
+          UnsubscribeService,
+          PersonalDataRegistry,
+          RetentionRegistry,
+          DsrService,
+        ],
       };
       ComplianceModule.built.set(mode, module);
     }

@@ -76,7 +76,9 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
       const path = req.url ?? '';
       if (
         sitesDomain &&
-        (path.startsWith('/v1/public/sites/leads') || path.startsWith('/v1/public/sites/altcha-challenge'))
+        (path.startsWith('/v1/public/sites/leads') ||
+          path.startsWith('/v1/public/sites/dsr') ||
+          path.startsWith('/v1/public/sites/altcha-challenge'))
       ) {
         callback(null, {
           origin: siteOrigin(req.headers.origin, sitesDomain) !== null,
@@ -113,6 +115,10 @@ export function configureHttp(app: INestApplication, env: AppEnv): void {
   const leadJson = json({ limit: '16kb' });
   const leadForm = urlencoded({ extended: false, limit: '16kb' });
   app.use('/v1/public/sites/leads', (req: Request, res: Response, next: NextFunction) =>
+    leadJson(req, res, (error?: unknown) => (error ? next(error) : leadForm(req, res, next))),
+  );
+  // The privacy page's rights form (BF-055): the same small JSON or form bodies.
+  app.use('/v1/public/sites/dsr', (req: Request, res: Response, next: NextFunction) =>
     leadJson(req, res, (error?: unknown) => (error ? next(error) : leadForm(req, res, next))),
   );
   // Site specs are larger than Nest's 100 kB JSON default: the sites routes take a whole spec (the use case refuses

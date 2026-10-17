@@ -230,3 +230,52 @@ export const unsubscribeTokens = pgTable(
     index('ix_unsubscribe_tokens__expires').on(table.expiresAt),
   ],
 );
+
+/**
+ * Data-subject requests (BF-055): the subject's identifiers are envelope-encrypted (and keyed-hashed for matching);
+ * the trail of actions is append-only by convention (the use cases only push to it). An access export is an encrypted
+ * object in private storage (`export_key`), deleted 30 days after completion.
+ */
+export const dsrRequests = pgTable(
+  'dsr_requests',
+  {
+    id: id(),
+    organizationId: uuid()
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    type: text().$type<'access' | 'erasure' | 'objection' | 'rectification' | 'restriction'>().notNull(),
+    status: text().$type<'received' | 'verifying' | 'in_progress' | 'completed' | 'rejected'>().notNull(),
+    source: text().$type<'admin' | 'public'>().notNull(),
+    /** Null once the request's own copy of the identifiers is erased (after completion of an erasure). */
+    subjectSealed: text(),
+    subjectHash: text(),
+    receivedAt: tz().notNull(),
+    dueAt: tz().notNull(),
+    verification: jsonb().$type<{ method: string; notes: string; at: string; by: string | null }>(),
+    actions: jsonb()
+      .$type<{ at: string; kind: string; by: string | null; detail: Record<string, unknown> }[]>()
+      .notNull()
+      .default([]),
+    exportKey: text(),
+    handledBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    remindedAt: jsonb().$type<string[]>().notNull().default([]),
+    ...timestamps(),
+  },
+  (table) => [
+    index('ix_dsr_requests__org_status').on(table.organizationId, table.status),
+    index('ix_dsr_requests__due').on(table.dueAt),
+  ],
+);
+
+/** One run of the retention engine (BF-055): per-policy counts, durations and errors; dry runs only count. */
+export const retentionRuns = pgTable('retention_runs', {
+  id: id(),
+  dryRun: boolean().notNull(),
+  startedAt: tz().notNull().defaultNow(),
+  finishedAt: tz(),
+  results: jsonb()
+    .$type<{ policy: string; count: number; durationMs: number; error: string | null }[]>()
+    .notNull()
+    .default([]),
+  triggeredBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+});

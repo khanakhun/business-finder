@@ -638,6 +638,10 @@
         "title": "Boîte d’envoi à reconnecter : {mailbox}",
         "body": "Les envois depuis cette boîte sont arrêtés : {reason}."
       },
+      "dsr_due": {
+        "title": "Une demande sur les données arrive à échéance {when}",
+        "body": "Une demande ({type}) doit recevoir une réponse avant son échéance."
+      },
       "member_joined": {
         "title": "{name} a rejoint l’espace de travail",
         "body": "Cette personne a accepté son invitation."
@@ -669,6 +673,7 @@
         "discovery_completed": "Découverte terminée",
         "mailbox_paused": "Boîte d’envoi en pause",
         "mailbox_error": "Une boîte d’envoi est à reconnecter",
+        "dsr_due": "Une demande sur les données arrive à échéance",
         "member_joined": "Nouveaux membres",
         "system_test": "Notifications de test",
         "site_needs_review": "Sites à revoir",

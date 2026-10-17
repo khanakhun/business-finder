@@ -222,7 +222,15 @@ export type PolicyOverrideResult = z.infer<typeof PolicyOverrideResultSchema>;
 
 // ── Suppression ──────────────────────────────────────────────────────────────────────────────────────────────────
 
-export const SUPPRESSION_SCOPES = ['email', 'domain', 'phone', 'business', 'org_business'] as const;
+/** `email_hash`: a keyed hash kept instead of an erased address (BF-055), so the person is still never contacted. */
+export const SUPPRESSION_SCOPES = [
+  'email',
+  'domain',
+  'phone',
+  'business',
+  'org_business',
+  'email_hash',
+] as const;
 export const SuppressionScopeSchema = z.enum(SUPPRESSION_SCOPES);
 export type SuppressionScope = z.infer<typeof SuppressionScopeSchema>;
 

@@ -87,6 +87,7 @@ export function LeadPageView(props: LeadPageProps) {
             </p>
           ) : null}
           <p className="bf-muted text-sm">{business}</p>
+          <Rights {...props} />
         </article>
       ) : null}
     </main>
@@ -238,6 +239,61 @@ function OptOut(props: LeadPageProps) {
           />
         </form>
       ) : null}
+    </section>
+  );
+}
+
+const DSR_TYPES = ['access', 'erasure', 'objection', 'rectification', 'restriction'] as const;
+
+/** "Exercise your rights" (BF-055): a plain form to the API; works without JavaScript. */
+function Rights(props: LeadPageProps) {
+  const { strings: s, agency } = props;
+  if (!props.endpoints || !props.hidden.siteToken) return null;
+  if (props.sent === 'dsr')
+    return (
+      <section className="space-y-2 pt-6" role="status">
+        <h2 className="bf-h3">{s.rightsTitle}</h2>
+        <p>{s.rightsSent(agency)}</p>
+      </section>
+    );
+  const action = props.endpoints.submit.replace(/\/leads$/, '/dsr');
+  return (
+    <section className="space-y-4 pt-6">
+      <h2 className="bf-h3">{s.rightsTitle}</h2>
+      <p>{s.rightsIntro(agency)}</p>
+      <form method="post" action={action} className="grid gap-4">
+        <input type="hidden" name="siteToken" value={props.hidden.siteToken} />
+        <Field id="dsr-type" label={s.rightsType}>
+          <select id="dsr-type" name="type" className="bf-input" defaultValue="access">
+            {DSR_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {s.rightsTypes[type]}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field id="dsr-email" label={s.email}>
+          <input
+            id="dsr-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className="bf-input"
+          />
+        </Field>
+        <Field id="dsr-name" label={s.name} optional={s.optional}>
+          <input id="dsr-name" name="name" autoComplete="name" maxLength={200} className="bf-input" />
+        </Field>
+        <Field id="dsr-message" label={s.message} optional={s.optional}>
+          <textarea id="dsr-message" name="message" rows={3} maxLength={2000} className="bf-input" />
+        </Field>
+        <div>
+          <button type="submit" className="bf-btn bf-btn-primary">
+            {s.rightsSend}
+          </button>
+        </div>
+      </form>
     </section>
   );
 }

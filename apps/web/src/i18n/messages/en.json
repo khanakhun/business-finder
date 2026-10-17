@@ -638,6 +638,10 @@
         "title": "Mailbox needs reconnecting: {mailbox}",
         "body": "Sending from it stopped: {reason}."
       },
+      "dsr_due": {
+        "title": "A data request is due {when}",
+        "body": "A {type} request must be answered by its deadline."
+      },
       "member_joined": {
         "title": "{name} joined the workspace",
         "body": "They accepted their invitation."
@@ -669,6 +673,7 @@
         "discovery_completed": "Discovery finished",
         "mailbox_paused": "Mailbox paused",
         "mailbox_error": "A mailbox needs reconnecting",
+        "dsr_due": "A data request is due soon",
         "member_joined": "New members",
         "system_test": "Test notifications",
         "site_needs_review": "Sites to review",

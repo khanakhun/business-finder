@@ -33,11 +33,57 @@ export interface LeadStrings {
   readonly privacyTitle: (agency: string) => string;
   readonly privacyBody: (agency: string) => readonly string[];
   readonly backToPreview: string;
+  readonly rightsTitle: string;
+  readonly rightsIntro: (agency: string) => string;
+  readonly rightsType: string;
+  readonly rightsTypes: {
+    access: string;
+    erasure: string;
+    objection: string;
+    rectification: string;
+    restriction: string;
+  };
+  readonly rightsSend: string;
+  readonly rightsSent: (agency: string) => string;
   readonly contactNotice: (agency: string, business: string) => string;
   readonly failed: string;
 }
 
+const RIGHTS_EN = {
+  rightsTitle: 'Exercise your rights',
+  rightsIntro: (agency: string) =>
+    `Ask ${agency} for a copy of the data about you, its correction or deletion, or to stop using it. ${agency} answers within one month after checking it is you.`,
+  rightsType: 'Your request',
+  rightsTypes: {
+    access: 'A copy of my data',
+    erasure: 'Delete my data',
+    objection: 'Stop using my data for prospecting',
+    rectification: 'Correct my data',
+    restriction: 'Limit how my data is used',
+  },
+  rightsSend: 'Send my request',
+  rightsSent: (agency: string) => `Your request was sent. ${agency} will contact you to confirm it is you.`,
+};
+
+const RIGHTS_FR = {
+  rightsTitle: 'Exercer vos droits',
+  rightsIntro: (agency: string) =>
+    `Demandez à ${agency} une copie de vos données, leur correction ou leur suppression, ou l’arrêt de leur utilisation. ${agency} répond dans un délai d’un mois après avoir vérifié votre identité.`,
+  rightsType: 'Votre demande',
+  rightsTypes: {
+    access: 'Une copie de mes données',
+    erasure: 'Supprimer mes données',
+    objection: 'Ne plus utiliser mes données pour la prospection',
+    rectification: 'Corriger mes données',
+    restriction: 'Limiter l’utilisation de mes données',
+  },
+  rightsSend: 'Envoyer ma demande',
+  rightsSent: (agency: string) =>
+    `Votre demande a été envoyée. ${agency} vous contactera pour vérifier votre identité.`,
+};
+
 const EN: LeadStrings = {
+  ...RIGHTS_EN,
   claimTitle: (business) => `Is ${business} your business?`,
   claimIntro: (agency, business) =>
     `${agency} made this preview website for ${business}. Leave your details and ${agency} will get back to you — there is no commitment.`,
@@ -81,6 +127,7 @@ const EN: LeadStrings = {
 };
 
 const FR: LeadStrings = {
+  ...RIGHTS_FR,
   claimTitle: (business) => `${business}, c’est votre entreprise ?`,
   claimIntro: (agency, business) =>
     `${agency} a réalisé cet aperçu de site pour ${business}. Laissez vos coordonnées et ${agency} vous recontacte — sans engagement.`,

@@ -18,6 +18,8 @@ export const NOTIFICATION_TYPES = {
   mailbox_paused: { inApp: true, email: true },
   /** A mailbox lost its connection (revoked consent, failed authentication) (BF-050). */
   mailbox_error: { inApp: true, email: true },
+  /** A data-subject request is due soon (BF-055). */
+  dsr_due: { inApp: true, email: true },
   member_joined: { inApp: true, email: false },
   /** Development and E2E only (`POST /v1/notifications/test`). */
   system_test: { inApp: true, email: false },

@@ -19,6 +19,8 @@ import {
   OWNER_SITE_IMAGES,
   WORDMARK_MAKER,
 } from './application/asset-sourcing.ts';
+import { GoLiveService } from './application/go-live/go-live.service.ts';
+import { GO_LIVE_REPOSITORY } from './application/go-live/ports.ts';
 import {
   ASSET_PROCESSING_QUEUE,
   ASSET_SOURCING_QUEUE,
@@ -94,6 +96,7 @@ import {
   SitesExpiryScheduler,
   SitesViewsFlushScheduler,
 } from './infrastructure/bullmq-site-jobs.ts';
+import { DrizzleGoLiveRepository } from './infrastructure/drizzle-go-live.repository.ts';
 import { DrizzleSiteAssetsRepository } from './infrastructure/drizzle-site-assets.repository.ts';
 import { DrizzleSiteThumbnailsRepository } from './infrastructure/drizzle-site-thumbnails.repository.ts';
 import { DrizzleSiteViewsRepository } from './infrastructure/drizzle-site-views.repository.ts';
@@ -108,6 +111,7 @@ import {
   S3UploadSigner,
 } from './infrastructure/site-asset-storage.ts';
 import { ValkeySiteViewCounter } from './infrastructure/valkey-site-views.ts';
+import { GoLiveController, PublicContactRoutingController } from './interface/http/go-live.controller.ts';
 import { PublicSiteViewsController } from './interface/http/public-site-views.controller.ts';
 import { SiteAssetsController } from './interface/http/site-assets.controller.ts';
 import { SitesController } from './interface/http/sites.controller.ts';
@@ -158,7 +162,16 @@ export class SitesModule {
     return {
       module: SitesModule,
       controllers:
-        mode === 'worker' ? [] : [SitesController, SiteAssetsController, PublicSiteViewsController],
+        mode === 'worker'
+          ? []
+          : [
+              SitesController,
+              SiteAssetsController,
+              PublicSiteViewsController,
+              // BF-062: going live.
+              GoLiveController,
+              PublicContactRoutingController,
+            ],
       providers: [
         { provide: SITES_REPOSITORY, useClass: DrizzleSitesRepository },
         { provide: SITE_ASSETS_REPOSITORY, useClass: DrizzleSiteAssetsRepository },
@@ -307,6 +320,8 @@ export class SitesModule {
         StockAndAiImages,
         { provide: SITE_INSIGHTS, useClass: SiteInsightsReader },
         SiteCommands,
+        { provide: GO_LIVE_REPOSITORY, useClass: DrizzleGoLiveRepository },
+        GoLiveService,
         SiteQueries,
         SiteAssetCommands,
         SiteThumbnailCommands,

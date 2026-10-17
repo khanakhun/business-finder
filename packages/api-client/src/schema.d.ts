@@ -2956,6 +2956,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/public/sites/contact-routing/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a contact routing address (same answer shape for unknown or expired tokens) */
+        post: operations["confirmSiteContactRouting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/public/sites/dsr": {
         parameters: {
             query?: never;
@@ -3907,6 +3924,24 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/contact-routing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Where the live contact form is delivered */
+        get: operations["getSiteContactRouting"];
+        /** Set the delivery address: a confirmation link is emailed to it */
+        put: operations["setSiteContactRouting"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/diff": {
         parameters: {
             query?: never;
@@ -3917,6 +3952,58 @@ export type paths = {
         /** What changed between two versions of the site */
         get: operations["diffSiteVersions"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/go-live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a version live (422 with the failing checks; a deal override needs settings:manage) */
+        post: operations["publishSiteLive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/go-live/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The go-live checks of a version (the current one by default) */
+        get: operations["getGoLiveReadiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/legal-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The legal profile the legal notice and privacy pages are generated from */
+        get: operations["getSiteLegalProfile"];
+        /** Save the legal profile (each save is a new version; privacy and content confirmations included) */
+        put: operations["saveSiteLegalProfile"];
         post?: never;
         delete?: never;
         options?: never;
@@ -5493,6 +5580,9 @@ export type components = {
             /** @enum {string} */
             method: "claim_form" | "email" | "call" | "other";
         };
+        ConfirmContactRoutingRequest: {
+            token: string;
+        };
         ConnectSmtpMailboxRequest: {
             /** @default true */
             appendToSent: boolean;
@@ -5552,6 +5642,9 @@ export type components = {
         };
         ContactList: {
             items: components["schemas"]["Contact"][];
+        };
+        ContactRoutingConfirmResult: {
+            confirmed: boolean;
         };
         CorrectTriageRequest: {
             /** @enum {string} */
@@ -6838,6 +6931,21 @@ export type components = {
             parentId: string | null;
             /** @enum {string} */
             source: "osm" | "overture" | "census" | "pdok" | "custom" | "nominatim" | "google";
+        };
+        GoLiveReadiness: {
+            checks: {
+                fix: string | null;
+                /** @enum {string} */
+                id: "deal" | "assets" | "legal" | "privacy" | "routing" | "content" | "quality" | "confirmation" | "seo";
+                message: string;
+                /** @enum {string} */
+                status: "pass" | "warn" | "fail";
+            }[];
+            ready: boolean;
+            /** Format: uuid */
+            siteId: string;
+            /** Format: uuid */
+            versionId: string;
         };
         IdentityConfig: {
             googleEnabled: boolean;
@@ -8139,6 +8247,17 @@ export type components = {
             pageKind: "contact" | "home" | "footer" | "legal" | "other";
             pageUrl: string | null;
         };
+        PublishLiveRequest: {
+            overrideReason?: string;
+            /** Format: uuid */
+            versionId: string;
+        };
+        PublishLiveResult: {
+            hostname: string;
+            /** Format: uuid */
+            publicationId: string;
+            readiness: components["schemas"]["GoLiveReadiness"];
+        };
         PublishPreviewRequest: {
             /** @default 30 */
             expiresInDays: number;
@@ -8757,6 +8876,28 @@ export type components = {
                 };
             }[];
         };
+        SaveSiteLegalProfileRequest: {
+            /** @default false */
+            acknowledgePrivacy: boolean;
+            address: string;
+            businessLegalName: string;
+            /** @default null */
+            contentConfirmedBy: string | null;
+            /** @default null */
+            dpoContact: string | null;
+            /** Format: email */
+            email: string;
+            /** @default null */
+            legalForm: string | null;
+            /** @default null */
+            phone: string | null;
+            /** @default null */
+            publicationDirector: string | null;
+            /** @default null */
+            registration: string | null;
+            /** @default null */
+            vatNumber: string | null;
+        };
         ScoreContribution: {
             contribution: number;
             /** @enum {string} */
@@ -9287,6 +9428,12 @@ export type components = {
                 }[];
             }[];
         };
+        SetContactRoutingRequest: {
+            /** @default null */
+            cc: string | null;
+            /** Format: email */
+            email: string;
+        };
         SetKillSwitchRequest: {
             active: boolean;
             reason: string;
@@ -9573,6 +9720,12 @@ export type components = {
         SiteChatThreadList: {
             items: components["schemas"]["SiteChatThread"][];
         };
+        SiteContactRouting: {
+            cc: string | null;
+            pendingEmail: string | null;
+            recipientEmail: string | null;
+            verifiedAt: string | null;
+        };
         SiteDetail: {
             /**
              * Format: uuid
@@ -9673,6 +9826,26 @@ export type components = {
             items: components["schemas"]["SiteLead"][];
             nextCursor: string | null;
             totalEstimate?: number;
+        };
+        SiteLegalProfile: {
+            address: string;
+            businessLegalName: string;
+            contentConfirmedAt: string | null;
+            contentConfirmedBy: string | null;
+            dpoContact: string | null;
+            email: string;
+            legalForm: string | null;
+            phone: string | null;
+            privacyAcknowledgedAt: string | null;
+            publicationDirector: string | null;
+            registration: string | null;
+            /** Format: date-time */
+            updatedAt: string;
+            vatNumber: string | null;
+            version: number;
+        };
+        SiteLegalProfileResult: {
+            profile: components["schemas"]["SiteLegalProfile"] | null;
         };
         SitePage: {
             items: components["schemas"]["SiteSummary"][];
@@ -24211,6 +24384,66 @@ export interface operations {
             };
         };
     };
+    confirmSiteContactRouting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmContactRoutingRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactRoutingConfirmResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     submitPublicDsr: {
         parameters: {
             query?: never;
@@ -28973,6 +29206,144 @@ export interface operations {
             };
         };
     };
+    getSiteContactRouting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteContactRouting"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    setSiteContactRouting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetContactRoutingRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteContactRouting"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     diffSiteVersions: {
         parameters: {
             query: {
@@ -28994,6 +29365,311 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SiteVersionDiff"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    publishSiteLive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishLiveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishLiveResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getGoLiveReadiness: {
+        parameters: {
+            query?: {
+                versionId?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoLiveReadiness"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getSiteLegalProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteLegalProfileResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    saveSiteLegalProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSiteLegalProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteLegalProfile"];
                 };
             };
             /** @description Problem details (RFC 9457) */

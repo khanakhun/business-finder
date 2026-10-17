@@ -60,6 +60,8 @@ const ANONYMOUS = [
   'UnsubscribePageController.show',
   'UnsubscribePageController.confirm',
   'SystemController.info',
+  // BF-062: the contact routing confirmation link (the emailed token is the proof; same answer when unknown).
+  'PublicContactRoutingController.confirm',
 ];
 
 describe('route access policies (AGENTS.md §8)', () => {

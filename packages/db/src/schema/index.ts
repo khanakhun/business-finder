@@ -11,6 +11,7 @@ export * from './drafting.ts';
 export * from './enrichment.ts';
 export * from './generation.ts';
 export * from './geo.ts';
+export * from './go-live.ts';
 export * from './inbound.ts';
 export * from './leads.ts';
 export * from './mailboxes.ts';

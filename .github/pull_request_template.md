@@ -17,6 +17,7 @@ Closes #<issue>
 ### Migrations
 - [ ] None
 - [ ] Forward-only, safe on populated tables (indexes CONCURRENTLY in their own migration)
+- [ ] Expand/contract: nothing the previous release uses is dropped, renamed, retyped or made NOT NULL (a contract step is its own later release, marked `-- bf:contract`)
 
 ### Checklist
 - [ ] Acceptance criteria met (ticket checkboxes ticked)

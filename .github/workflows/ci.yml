@@ -200,6 +200,8 @@ jobs:
           cache-key: db
       - name: Migration journal consistent and no unmigrated schema changes
         run: pnpm db:check
+      - name: Migrations are expand-only (BF-061 expand/contract)
+        run: pnpm check:migrations
 
   boundaries:
     name: boundaries

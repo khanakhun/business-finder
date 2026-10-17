@@ -73,3 +73,43 @@ export interface FactsStore {
   ): Promise<Record<string, string>>;
 }
 export const FACTS_STORE = Symbol('FactsStore');
+
+export interface ReconcileCount {
+  readonly organizationId: string;
+  readonly metric: 'emails_sent' | 'leads' | 'jobs_finished';
+  readonly facts: number;
+  readonly source: number;
+}
+
+export interface CohortRow {
+  readonly week: string;
+  readonly contacted: number;
+  readonly replied: number;
+  readonly positive: number;
+  readonly meetings: number;
+  readonly won: number;
+}
+
+export interface DailyTrendRow {
+  readonly day: string;
+  readonly eventType: string;
+  readonly facts: number;
+  readonly units: number;
+  readonly costUsd: number;
+}
+
+/** Upkeep of the facts: partitions, polled sources' watermarks, the daily rollup, reconciliation counts. */
+export interface FactsMaintenance {
+  /** Runs `work` when no other worker holds `name` (a transaction-scoped advisory lock); false when skipped. */
+  exclusively(name: string, work: () => Promise<void>): Promise<boolean>;
+  ensurePartitions(monthsAhead: number): Promise<void>;
+  watermark(source: string): Promise<Date | null>;
+  setWatermark(source: string, at: Date): Promise<void>;
+  /** Rebuilds the daily rollup for the days of facts ingested since `since`; returns the days rebuilt. */
+  refreshDaily(since: Date): Promise<number>;
+  reconcileCounts(from: Date, to: Date): Promise<ReconcileCount[]>;
+  cohorts(organizationId: string, from: Date, to: Date, timeZone: string): Promise<CohortRow[]>;
+  /** Daily additive totals from the rollup. */
+  daily(organizationId: string, from: string, to: string): Promise<DailyTrendRow[]>;
+}
+export const FACTS_MAINTENANCE = Symbol('FactsMaintenance');

@@ -3,7 +3,9 @@ import type { AppMode } from '../platform/config/app-env.ts';
 import { AnalyticsQueries } from './application/analytics.queries.ts';
 import { AnalyticsBackfill } from './application/backfill.ts';
 import { FactIngestor } from './application/fact-ingestor.ts';
-import { FACTS_STORE } from './application/ports.ts';
+import { FACTS_MAINTENANCE, FACTS_STORE } from './application/ports.ts';
+import { AnalyticsReconcile } from './application/reconcile.ts';
+import { AnalyticsRefresh } from './application/refresh.ts';
 import { DrizzleFactsStore } from './infrastructure/drizzle-facts.store.ts';
 import { AnalyticsController } from './interface/http/analytics.controller.ts';
 
@@ -22,10 +24,14 @@ export class AnalyticsModule {
       module: AnalyticsModule,
       controllers: mode === 'worker' ? [] : [AnalyticsController],
       providers: [
-        { provide: FACTS_STORE, useClass: DrizzleFactsStore },
+        DrizzleFactsStore,
+        { provide: FACTS_STORE, useExisting: DrizzleFactsStore },
+        { provide: FACTS_MAINTENANCE, useExisting: DrizzleFactsStore },
         AnalyticsQueries,
         AnalyticsBackfill,
         FactIngestor,
+        // The 15-minute refresh and the nightly reconciliation run in the worker.
+        ...(mode === 'worker' ? [AnalyticsRefresh, AnalyticsReconcile] : []),
       ],
       exports: [AnalyticsBackfill],
     };

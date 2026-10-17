@@ -18,6 +18,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/analytics/cohorts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Businesses by week of first contact, and what they did since */
+        get: operations["getAnalyticsCohorts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/analytics/export.csv": {
         parameters: {
             query?: never;
@@ -29,6 +46,23 @@ export type paths = {
         put?: never;
         /** The same query as CSV (audited) */
         post: operations["exportAnalytics"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/analytics/funnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The funnel from discovered to won over a period, optionally by one dimension */
+        get: operations["getAnalyticsFunnel"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -61,6 +95,23 @@ export type paths = {
         };
         /** Every metric and dimension, with how it is calculated */
         get: operations["getAnalyticsRegistry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/analytics/trends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily totals from the rollup (refreshed every 15 minutes) */
+        get: operations["getAnalyticsTrends"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4343,6 +4394,32 @@ export type components = {
                 outputTokens: number;
             };
         };
+        AnalyticsCohorts: {
+            freshness: {
+                lagSeconds: number | null;
+                watermark: string | null;
+            };
+            weeks: {
+                contacted: number;
+                meetings: number;
+                positive: number;
+                replied: number;
+                week: string;
+                won: number;
+            }[];
+        };
+        AnalyticsFunnel: {
+            freshness: {
+                lagSeconds: number | null;
+                watermark: string | null;
+            };
+            segments: {
+                counts: number[];
+                label: string | null;
+                segment: string | null;
+            }[];
+            steps: ("businesses_discovered" | "businesses_qualified" | "previews_published" | "businesses_contacted" | "businesses_replied" | "businesses_positive" | "meetings" | "won")[];
+        };
         AnalyticsQuery: {
             /** @default [] */
             dimensions: string[];
@@ -4379,6 +4456,19 @@ export type components = {
                 [key: string]: string | number | null;
             }[];
             truncated: boolean;
+        };
+        AnalyticsTrends: {
+            days: {
+                businessesDiscovered: number;
+                day: string;
+                emailsSent: number;
+                jobsFinished: number;
+                leads: number;
+                pageViews: number;
+                previewsPublished: number;
+                spendUsd: number;
+            }[];
+            refreshedAt: string | null;
         };
         AnalyzePastedReviewsRequest: {
             reviews: {
@@ -9901,6 +9991,76 @@ export interface operations {
             };
         };
     };
+    getAnalyticsCohorts: {
+        parameters: {
+            query: {
+                dimension?: string;
+                from: string;
+                timeZone?: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsCohorts"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     exportAnalytics: {
         parameters: {
             query?: never;
@@ -9920,6 +10080,76 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getAnalyticsFunnel: {
+        parameters: {
+            query: {
+                dimension?: string;
+                from: string;
+                timeZone?: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsFunnel"];
+                };
             };
             /** @description Problem details (RFC 9457) */
             400: {
@@ -10066,6 +10296,76 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getAnalyticsTrends: {
+        parameters: {
+            query: {
+                dimension?: string;
+                from: string;
+                timeZone?: string;
+                to: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsTrends"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -90,3 +90,83 @@ export const AnalyticsResultSchema = z
   })
   .meta({ id: 'AnalyticsResult' });
 export type AnalyticsResult = z.infer<typeof AnalyticsResultSchema>;
+
+// ── Prebuilt views ──────────────────────────────────────────────────────────────────────────────────────────────
+
+/** The funnel's steps, in order (each a registry metric). */
+export const FUNNEL_STEPS = [
+  'businesses_discovered',
+  'businesses_qualified',
+  'previews_published',
+  'businesses_contacted',
+  'businesses_replied',
+  'businesses_positive',
+  'meetings',
+  'won',
+] as const;
+
+export const AnalyticsPeriodQuerySchema = z
+  .object({
+    from: IsoDateTimeSchema,
+    to: IsoDateTimeSchema,
+    /** One registry dimension to segment by (the funnel). */
+    dimension: Name.optional(),
+    timeZone: z.string().max(60).optional(),
+  })
+  .meta({ id: 'AnalyticsPeriodQuery' });
+export type AnalyticsPeriodQuery = z.input<typeof AnalyticsPeriodQuerySchema>;
+
+export const AnalyticsFunnelSchema = z
+  .object({
+    steps: z.array(z.enum(FUNNEL_STEPS)),
+    /** One row per segment (a single row `{ segment: null }` without a dimension). */
+    segments: z.array(
+      z.object({
+        segment: z.string().nullable(),
+        label: z.string().nullable(),
+        counts: z.array(z.number()),
+      }),
+    ),
+    freshness: AnalyticsFreshnessSchema,
+  })
+  .meta({ id: 'AnalyticsFunnel' });
+export type AnalyticsFunnel = z.infer<typeof AnalyticsFunnelSchema>;
+
+export const AnalyticsCohortsSchema = z
+  .object({
+    /** By week of first contact (Monday, in the workspace's time zone): what those businesses did since. */
+    weeks: z.array(
+      z.object({
+        week: z.string(),
+        contacted: z.number(),
+        replied: z.number(),
+        positive: z.number(),
+        meetings: z.number(),
+        won: z.number(),
+      }),
+    ),
+    freshness: AnalyticsFreshnessSchema,
+  })
+  .meta({ id: 'AnalyticsCohorts' });
+export type AnalyticsCohorts = z.infer<typeof AnalyticsCohortsSchema>;
+
+export const AnalyticsTrendsSchema = z
+  .object({
+    /** Daily totals from the rollup (UTC days): additive measures only. */
+    days: z.array(
+      z.object({
+        day: z.string(),
+        businessesDiscovered: z.number(),
+        emailsSent: z.number(),
+        leads: z.number(),
+        pageViews: z.number(),
+        previewsPublished: z.number(),
+        jobsFinished: z.number(),
+        spendUsd: z.number(),
+      }),
+    ),
+    /** The rollup's last refresh. */
+    refreshedAt: IsoDateTimeSchema.nullable(),
+  })
+  .meta({ id: 'AnalyticsTrends' });
+export type AnalyticsTrends = z.infer<typeof AnalyticsTrendsSchema>;

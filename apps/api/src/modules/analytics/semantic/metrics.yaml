@@ -11,6 +11,14 @@
     en: Businesses added to the workspace (discovery, search, import or by hand).
     fr: Entreprises ajoutées à l’espace de travail (découverte, recherche, import ou à la main).
 
+- id: businesses_qualified
+  format: count
+  sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type = 'pipeline_changed' AND f.outcome = 'qualified')
+  label: { en: Businesses qualified, fr: Entreprises qualifiées }
+  description:
+    en: Distinct businesses moved to qualified (by a person or automatically when first contacted).
+    fr: Entreprises distinctes passées à qualifiée (par un membre, ou automatiquement au premier contact).
+
 - id: businesses_contacted
   format: count
   sql: count(DISTINCT f.business_id) FILTER (WHERE f.event_type IN ('email_sent', 'manual_contact'))

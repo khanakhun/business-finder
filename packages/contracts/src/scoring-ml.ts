@@ -332,3 +332,11 @@ export const ModelMonitoringSchema = z
   })
   .meta({ id: 'ModelMonitoring' });
 export type ModelMonitoring = z.infer<typeof ModelMonitoringSchema>;
+
+export const ModelImportanceSchema = z
+  .object({
+    /** Logistic regression: the coefficient per standardized feature (summed over its columns); [] otherwise. */
+    items: z.array(z.object({ feature: z.string(), weight: z.number() })),
+  })
+  .meta({ id: 'ModelImportance' });
+export type ModelImportance = z.infer<typeof ModelImportanceSchema>;

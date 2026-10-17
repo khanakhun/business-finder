@@ -20,6 +20,7 @@ import type { BusinessTabProps } from '@/features/business/tabs/registry.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useBusinessScores, useRecomputeBusinessScores, useScoringProfiles } from './api.ts';
+import { useBusinessShadowScores } from './models/api.ts';
 import { OFFER_ICON, ScoreBadge } from './score-badge.tsx';
 import { useValueLabel } from './value-labels.ts';
 import { Waterfall, waterfallSteps } from './waterfall.tsx';
@@ -248,6 +249,52 @@ export function ScoresTab({ business }: BusinessTabProps) {
       {items.map((score) => (
         <ScoreCard key={score.profileId} score={score} profile={byId.get(score.profileId)} locale={locale} />
       ))}
+      <ShadowScores businessId={business.id} names={new Map([...byId].map(([id, p]) => [id, p.name]))} />
     </div>
+  );
+}
+
+/** BF-059: a model running in shadow beside a profile, labelled as such (it changes nothing). */
+function ShadowScores({
+  businessId,
+  names,
+}: {
+  readonly businessId: string;
+  readonly names: ReadonlyMap<string, string>;
+}) {
+  const t = useTranslations('scoring.tab');
+  const locale = useLocale() === 'fr' ? 'fr' : 'en';
+  const format = useFormatter();
+  const canManage = usePermission('scoring:manage');
+  const shadows = useBusinessShadowScores(businessId, canManage);
+  if (!canManage || !shadows.data?.length) return null;
+  return (
+    <section className="space-y-2 rounded-lg border border-dashed p-4 text-sm" aria-label={t('shadowTitle')}>
+      {shadows.data.map((shadow) => (
+        <div key={shadow.profileId} className="space-y-1">
+          <p className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline">{t('shadowBadge')}</Badge>
+            <span className="font-medium">
+              {t('shadowLine', {
+                profile: names.get(shadow.profileId) ?? '',
+                version: shadow.modelVersion ?? 0,
+                score: shadow.score,
+                tier: shadow.tier,
+                probability: format.number(shadow.probability, {
+                  style: 'percent',
+                  maximumFractionDigits: 0,
+                }),
+              })}
+            </span>
+          </p>
+          <ul className="list-disc pl-5 text-muted-foreground">
+            {shadow.reasons.slice(0, 3).map((reason) => (
+              <li key={`${reason.feature}-${reason.direction}`}>{reason.text[locale]}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <p className="text-xs text-muted-foreground">{t('shadowHint')}</p>
+    </section>
   );
 }

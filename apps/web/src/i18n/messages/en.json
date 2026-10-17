@@ -1710,7 +1710,11 @@
       "emptyDescription": "Scores appear once the business is tracked and enriched. Recompute to score it now.",
       "adjustBounds": "Limited to 0–100",
       "adjustCapped": "Capped by a rule",
-      "adjustExcluded": "Excluded by a rule"
+      "adjustExcluded": "Excluded by a rule",
+      "shadowTitle": "Shadow scores",
+      "shadowBadge": "Shadow",
+      "shadowLine": "Model v{version} beside {profile}: {score} ({tier}), {probability} chance",
+      "shadowHint": "A model on trial: it changes no tier, sort or automation until it is promoted."
     },
     "primary": {
       "label": "Profile behind the score column",
@@ -4657,6 +4661,108 @@
       "byFeature": "Spend by feature",
       "empty": "No spend recorded in this period.",
       "summary": "Spend by AI task or data provider."
+    }
+  },
+  "scoringModels": {
+    "title": "Models trained on your outcomes",
+    "description": "Once enough contacts have an outcome, train a model on what actually worked, try it in shadow beside a profile, and promote it only if it does better.",
+    "offer": "Offer",
+    "buildDataset": "Build a dataset",
+    "datasetBuilt": "Dataset built.",
+    "failed": "That did not work.",
+    "contacts": "{n} of {required} contacts with an outcome",
+    "positives": "{n} of {required} positive outcomes",
+    "readinessHint": "A contact counts once its {horizon}-day window has passed or it already succeeded; {censored} contacts are still within their window.",
+    "datasets": "Datasets",
+    "noDatasets": "No dataset yet.",
+    "datasetCounts": "{rows} contacts, {positives} positive",
+    "train": "Train a model",
+    "trainingQueued": "Training started: this takes a few minutes.",
+    "runs": "Training runs",
+    "noRuns": "No training yet.",
+    "runStatus": {
+      "queued": "Queued",
+      "running": "Training",
+      "succeeded": "Done",
+      "failed": "Failed"
+    },
+    "noModels": "No model trained yet.",
+    "status": {
+      "trained": "Trained",
+      "shadow": "In shadow",
+      "active": "Active",
+      "retired": "Retired",
+      "rejected": "Rejected"
+    },
+    "card": {
+      "title": "Version {version} · {kind}",
+      "logreg": "Logistic regression",
+      "hgb": "Gradient boosting",
+      "metrics": "Metrics on the most recent contacts",
+      "metric": "Metric",
+      "model": "Model",
+      "rules": "Rule score",
+      "metrics_rocAuc": "ROC-AUC (ranking)",
+      "metrics_prAuc": "PR-AUC",
+      "metrics_brier": "Brier score (lower is better)",
+      "metrics_liftTop10": "Lift in the top 10%",
+      "metrics_liftTop20": "Lift in the top 20%",
+      "spearman": "Rank agreement with the rule score: {value}",
+      "calibration": "Calibration",
+      "calibrationSummary": "Observed success rate against predicted probability; the dashed line is perfect calibration.",
+      "observed": "Observed",
+      "lift": "Lift",
+      "liftSummary": "How much more often the top 10% and 20% succeed than average, model against rule score.",
+      "noDrivers": "This kind of model has no simple per-feature explanation.",
+      "drivers": "What drives it",
+      "driversHint": "Coefficients on standardized features: a positive one raises the chance of success."
+    },
+    "drift": {
+      "title": "Drift and accuracy",
+      "checkNow": "Check now",
+      "alerts": "{count, plural, one {# alert raised.} other {# alerts raised.}}",
+      "noAlerts": "No drift found.",
+      "failed": "The check did not work.",
+      "never": "Not checked yet (monthly, or now).",
+      "checked": "Checked {when}.",
+      "stable": "Stable: no feature shifted and accuracy held.",
+      "auc": "ROC-AUC on new contacts: {now} (at training: {before}, {n} contacts).",
+      "top": "(key feature)",
+      "notEnoughRecent": "Not enough recent businesses to measure drift."
+    },
+    "shadow": {
+      "title": "Shadow mode",
+      "profile": "Run beside profile",
+      "none": "Not in shadow",
+      "hint": "In shadow the model scores every business without changing tiers, sorting or automation.",
+      "started": "Shadow started: scores are being computed.",
+      "stopped": "Shadow stopped.",
+      "failed": "That did not work."
+    },
+    "comparison": {
+      "summary": "Since {since}: {contacts} contacts with an outcome, {positives} positive.",
+      "topRates": "Top 20% success: profile {active}, model {shadow} (lift {lift}).",
+      "criteriaPositives": "At least {min} positive outcomes",
+      "criteriaLift": "The model's top 20% converts at least {min}× better",
+      "criteriaIntervals": "The difference holds at 90% confidence",
+      "promote": "Promote the model",
+      "override": "Promote anyway…",
+      "overrideTitle": "Promote without meeting the criteria?",
+      "overrideHint": "The evidence is not conclusive yet. Say why you promote anyway: the reason is recorded.",
+      "reason": "Reason",
+      "cancel": "Cancel",
+      "overrideConfirm": "Promote",
+      "promoted": "Model promoted: the profile is being recomputed.",
+      "failed": "The promotion did not work."
+    },
+    "promotions": {
+      "title": "Promotions",
+      "line": "{profile}: version {from} → {to}, {when}",
+      "overridden": "override: {reason}",
+      "rolledBack": "rolled back",
+      "rollback": "Roll back",
+      "done": "Rolled back to the previous version.",
+      "failed": "The rollback did not work."
     }
   }
 }

@@ -1346,6 +1346,8 @@ export {
   MlTrainRequestSchema,
   type MlTrainResult,
   MlTrainResultSchema,
+  type ModelImportance,
+  ModelImportanceSchema,
   type ModelMonitoring,
   ModelMonitoringSchema,
   type ModelPromotion,

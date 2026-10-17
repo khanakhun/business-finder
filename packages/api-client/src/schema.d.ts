@@ -3234,6 +3234,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/scoring/ml/models/{id}/importance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What drives a model: its coefficient per feature (logistic regression) */
+        get: operations["getScoringModelImportance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/scoring/ml/models/{id}/monitoring": {
         parameters: {
             query?: never;
@@ -7512,6 +7529,12 @@ export type components = {
         };
         MlTrainingRunList: {
             items: components["schemas"]["MlTrainingRun"][];
+        };
+        ModelImportance: {
+            items: {
+                feature: string;
+                weight: number;
+            }[];
         };
         ModelMonitoring: {
             alerts: string[];
@@ -25499,6 +25522,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MlModel"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getScoringModelImportance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelImportance"];
                 };
             };
             /** @description Problem details (RFC 9457) */

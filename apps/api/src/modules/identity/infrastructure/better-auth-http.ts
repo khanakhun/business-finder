@@ -30,6 +30,9 @@ export const ALLOWED_AUTH_PATHS: readonly (string | RegExp)[] = [
   '/change-password',
   '/update-user',
   /^\/two-factor\/[a-z-]+$/,
+  // The client portal's sign-in (BF-062): links are only sent to portal-only accounts (packages/auth).
+  '/sign-in/magic-link',
+  '/magic-link/verify',
   '/organization/create',
   '/organization/check-slug',
   '/organization/list',

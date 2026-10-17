@@ -93,6 +93,20 @@ describe('route access policies (AGENTS.md §8)', () => {
     const orgless = routes
       .filter((r) => r.policy?.kind === 'authenticated' && !r.policy.orgRequired)
       .map((r) => `${r.controller}.${r.handler}`);
-    expect(orgless).toEqual(['MeController.me']);
+    // The client portal (BF-062): a business owner has no workspace; each handler checks their site grant.
+    expect(orgless.sort()).toEqual(
+      [
+        'MeController.me',
+        'ClientPortalController.sites',
+        'ClientPortalController.site',
+        'ClientPortalController.stats',
+        'ClientPortalController.leads',
+        'ClientPortalController.upload',
+        'ClientPortalController.changeRequests',
+        'ClientPortalController.createChangeRequest',
+        'ClientPortalController.approvals',
+        'ClientPortalController.decide',
+      ].sort(),
+    );
   });
 });

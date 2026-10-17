@@ -17,6 +17,7 @@ export * from './leads.ts';
 export * from './mailboxes.ts';
 export * from './outbound.ts';
 export * from './platform.ts';
+export * from './portal.ts';
 export * from './realtime.ts';
 export * from './reviews.ts';
 export * from './scoring.ts';

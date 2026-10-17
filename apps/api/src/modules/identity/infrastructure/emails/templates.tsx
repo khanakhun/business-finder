@@ -110,6 +110,18 @@ export function Invitation(props: {
   );
 }
 
+export function MagicLink({ locale, url }: { locale: Locale; url: string }) {
+  const t = MESSAGES[locale].magicLink;
+  return (
+    <Layout locale={locale} preview={t.heading}>
+      <Heading as="h1">{t.heading}</Heading>
+      <Text>{t.body}</Text>
+      <Cta href={url} label={t.cta} />
+      <Text style={{ color: muted }}>{MESSAGES[locale].ignore}</Text>
+    </Layout>
+  );
+}
+
 export function TwoFactorEnabled({ locale, name }: { locale: Locale; name: string }) {
   const t = MESSAGES[locale].twoFactor;
   return (

@@ -10,6 +10,7 @@ import type { SystemMailer } from '../application/ports.ts';
 import { MESSAGES } from './emails/messages.ts';
 import {
   Invitation,
+  MagicLink,
   NotificationEmail,
   ResetPassword,
   TwoFactorEnabled,
@@ -80,6 +81,10 @@ export class SmtpSystemMailer implements SystemMailer, OnModuleDestroy {
       MESSAGES[locale].twoFactor.subject,
       TwoFactorEnabled({ locale, name }),
     );
+  }
+
+  sendMagicLink({ to, url, locale }: Parameters<SystemMailer['sendMagicLink']>[0]) {
+    return this.send('magic-link', to, MESSAGES[locale].magicLink.subject, MagicLink({ locale, url }));
   }
 
   sendNotification({ to, locale, title, body, url }: Parameters<SystemMailer['sendNotification']>[0]) {

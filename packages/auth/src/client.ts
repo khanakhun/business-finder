@@ -1,7 +1,12 @@
 // Typed Better Auth client for the dashboard (apps/web). It talks to the API's /api/auth/* with cookies; the
 // server instance (server.ts) is imported for types only, so none of it reaches the browser bundle.
 import { apiKeyClient } from '@better-auth/api-key/client';
-import { inferAdditionalFields, organizationClient, twoFactorClient } from 'better-auth/client/plugins';
+import {
+  inferAdditionalFields,
+  magicLinkClient,
+  organizationClient,
+  twoFactorClient,
+} from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 import { AUTH_BASE_PATH } from './constants.ts';
 import { ac, roles } from './roles.ts';
@@ -19,6 +24,7 @@ export function createBfAuthClient(apiUrl: string, options: { onTwoFactorRedirec
         options.onTwoFactorRedirect ? { onTwoFactorRedirect: options.onTwoFactorRedirect } : {},
       ),
       apiKeyClient(),
+      magicLinkClient(),
     ],
   });
 }

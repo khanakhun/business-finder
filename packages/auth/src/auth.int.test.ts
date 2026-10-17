@@ -28,6 +28,7 @@ function makeAuth(signup: SignupPolicy) {
     sendPasswordReset: async ({ to, url }) => void sent.push({ kind: 'reset', to, url }),
     sendInvitation: async ({ to, url }) => void sent.push({ kind: 'invite', to, url }),
     sendTwoFactorEnabled: async ({ to }) => void sent.push({ kind: '2fa', to }),
+    sendMagicLink: async ({ to }) => void sent.push({ kind: 'magic', to }),
   };
   const auth = createAuth({
     db,

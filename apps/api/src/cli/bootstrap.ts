@@ -79,6 +79,7 @@ function captureResetLinks(env: ApiEnv, db: DbClient): { auth: Auth; links: Map<
       sendVerificationEmail: ignore,
       sendInvitation: ignore,
       sendTwoFactorEnabled: ignore,
+      sendMagicLink: ignore,
     },
     breachedPasswordCheck: false,
     rateLimit: false,

@@ -1,7 +1,7 @@
 import type { SystemMailer } from '../src/modules/identity/application/ports.ts';
 
 export interface SentMail {
-  readonly kind: 'verify' | 'reset' | 'invite' | 'two-factor' | 'notification';
+  readonly kind: 'verify' | 'reset' | 'invite' | 'two-factor' | 'magic-link' | 'notification';
   readonly subject?: string;
   readonly to: string;
   readonly url?: string;
@@ -26,6 +26,10 @@ export class FakeMailer implements SystemMailer {
 
   async sendTwoFactorEnabled({ to, locale }: Parameters<SystemMailer['sendTwoFactorEnabled']>[0]) {
     this.sent.push({ kind: 'two-factor', to, locale });
+  }
+
+  async sendMagicLink({ to, url, locale }: Parameters<SystemMailer['sendMagicLink']>[0]) {
+    this.sent.push({ kind: 'magic-link', to, url, locale });
   }
 
   async sendNotification({ to, locale, title, url }: Parameters<SystemMailer['sendNotification']>[0]) {

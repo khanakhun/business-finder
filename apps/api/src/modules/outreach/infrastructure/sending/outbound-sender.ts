@@ -83,6 +83,14 @@ export class OutboundSender {
         new Date(this.clock.now().getTime() + 60 * MIN),
         'mailbox unavailable',
       );
+    // BF-056: the domain's authentication regressed (no owner override): the message waits for the fix.
+    if (this.readiness && !(await this.readiness.isReady(mailbox.organizationId, mailbox.id, mailbox.email)))
+      return this.requeue(
+        message,
+        lease,
+        new Date(this.clock.now().getTime() + 60 * MIN),
+        'domain authentication failing',
+      );
 
     // 1. Reconcile a previous attempt before anything else.
     if (message.attempts > 0) {

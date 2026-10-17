@@ -225,6 +225,18 @@ export class SiteCommands {
 
   /** Publishes a version as the site's preview (replacing the active one), valid for `expiresInDays`. */
   @Transactional()
+  /** The quality gates' report on a generated version (BF-045), set once; a second report is ignored. */
+  async recordQuality(
+    actor: SiteActor,
+    siteId: string,
+    versionId: string,
+    report: Record<string, unknown>,
+  ): Promise<boolean> {
+    const site = await this.repository.site(actor.organizationId, siteId);
+    if (!site) throw new NotFoundError('Site', siteId);
+    return this.repository.setVersionQuality(site.id, versionId, report);
+  }
+
   async publishPreview(
     actor: SiteActor,
     siteId: string,

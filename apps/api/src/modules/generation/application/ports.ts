@@ -7,6 +7,7 @@ import type {
   GenerationBatchStatus,
   GenerationJobStatus,
   GenerationSettings,
+  QualityReport,
 } from '@bf/contracts';
 import type { Logger } from '@bf/observability';
 
@@ -76,15 +77,21 @@ export interface QualityResult {
   readonly outcome: 'pass' | 'repair' | 'needs_review';
   readonly score: number;
   readonly issues: readonly unknown[];
+  /** The candidate after safe auto-fixes (the version to create), when it differs from the input. */
+  readonly spec?: unknown;
+  /** The full report (BF-045), stored once on the version. */
+  readonly report?: QualityReport;
 }
 
-/** The quality gates of a result (BF-045); here the schema validator only. */
+/** The quality gates of a result (BF-045). */
 export interface QualityPipeline {
   evaluate(input: {
     readonly job: StoredJob;
     readonly spec: unknown;
     readonly repairsLeft: number;
     readonly supportsRepair: boolean;
+    /** The attempt whose result this is (its workspace bundle holds the job's registry snapshot). */
+    readonly attemptId?: string;
   }): Promise<QualityResult>;
 }
 export const QUALITY_PIPELINE = Symbol('QualityPipeline');
@@ -262,6 +269,11 @@ export interface GenerationRepository {
     sha256: string;
     bytes: number;
   }): Promise<void>;
+  /**
+   * The storage key of an attempt's artifact of a kind — its workspace bundle: the job's registry snapshot. Bundles
+   * are content-addressed, so an attempt that reused its job's bundle has no row of its own: the job's latest then.
+   */
+  artifactKey(jobId: string, attemptId: string, kind: string): Promise<string | undefined>;
   deleteEventsBefore(before: Date, limit: number): Promise<number>;
   /** Tracked businesses of the workspace among `ids`, with their names. */
   trackedBusinesses(organizationId: string, ids: readonly string[]): Promise<Map<string, string>>;
@@ -358,6 +370,13 @@ export interface SiteHandOff {
     readonly jobId: string;
     readonly changeSummary: string;
   }): Promise<{ readonly siteId: string; readonly versionId: string }>;
+  /** Stores the quality report on the version (set once; BF-045). */
+  recordQuality(input: {
+    readonly organizationId: string;
+    readonly siteId: string;
+    readonly versionId: string;
+    readonly report: QualityReport;
+  }): Promise<void>;
   publishPreview(input: {
     readonly organizationId: string;
     readonly userId: string | null;

@@ -19,7 +19,7 @@ export class InMemoryGenerationRepository implements GenerationRepository {
   readonly jobRows = new Map<string, StoredJob>();
   readonly attemptRows = new Map<string, StoredAttempt>();
   readonly eventRows: { jobId: string; seq: number; type: string; payload: unknown; createdAt: Date }[] = [];
-  readonly artifacts: { jobId: string; kind: string; storageKey: string }[] = [];
+  readonly artifacts: { jobId: string; attemptId: string | null; kind: string; storageKey: string }[] = [];
   readonly names = new Map<string, string>();
 
   async insertBatch(batch: Parameters<GenerationRepository['insertBatch']>[0]) {
@@ -173,6 +173,10 @@ export class InMemoryGenerationRepository implements GenerationRepository {
   }
   async insertArtifact(artifact: Parameters<GenerationRepository['insertArtifact']>[0]) {
     this.artifacts.push(artifact);
+  }
+  async artifactKey(jobId: string, attemptId: string, kind: string) {
+    const rows = this.artifacts.filter((a) => a.jobId === jobId && a.kind === kind);
+    return (rows.filter((a) => a.attemptId === attemptId).at(-1) ?? rows.at(-1))?.storageKey;
   }
   async deleteEventsBefore() {
     return 0;

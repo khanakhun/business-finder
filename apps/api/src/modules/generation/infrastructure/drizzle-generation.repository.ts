@@ -336,6 +336,16 @@ export class DrizzleGenerationRepository implements GenerationRepository {
       .onConflictDoNothing({ target: generationArtifacts.storageKey });
   }
 
+  async artifactKey(jobId: string, attemptId: string, kind: string) {
+    const rows = await this.x
+      .select({ key: generationArtifacts.storageKey, attemptId: generationArtifacts.attemptId })
+      .from(generationArtifacts)
+      .where(and(eq(generationArtifacts.jobId, jobId), eq(generationArtifacts.kind, kind as 'site_spec')))
+      .orderBy(desc(generationArtifacts.createdAt))
+      .limit(20);
+    return (rows.find((row) => row.attemptId === attemptId) ?? rows[0])?.key;
+  }
+
   async deleteEventsBefore(before: Date, limit: number) {
     const rows = await this.x.execute<{ id: number }>(sql`
       DELETE FROM ${generationEvents} WHERE ${generationEvents.id} IN (

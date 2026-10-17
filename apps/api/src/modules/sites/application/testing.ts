@@ -130,6 +130,13 @@ export class InMemorySitesRepository implements SitesRepository {
     return stored;
   }
 
+  async setVersionQuality(siteId: string, versionId: string, quality: Record<string, unknown>) {
+    const version = this.versionRows.get(versionId);
+    if (!version || version.siteId !== siteId || version.quality) return false;
+    this.versionRows.set(versionId, { ...version, quality });
+    return true;
+  }
+
   async setCurrentVersion(siteId: string, versionId: string, defaultLocale: string, expected: string | null) {
     const row = this.siteRows.get(siteId);
     if (!row || row.currentVersionId !== expected) return false;

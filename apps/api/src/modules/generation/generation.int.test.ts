@@ -170,9 +170,9 @@ describe('generation batches', () => {
   }, 60_000);
 
   it('repairs an invalid result, and leaves a persistently failing one failed with its code', async () => {
-    const invalid = await business('Atelier [invalid]');
-    const failing = await business('Garage [fail:POLICY_VIOLATION]');
-    const flaky = await business('Boutique [fail-once:TIMEOUT]');
+    const invalid = await business('Atelier (invalid)');
+    const failing = await business('Garage (fail:POLICY_VIOLATION)');
+    const flaky = await business('Boutique (fail-once:TIMEOUT)');
     const { body } = await member
       .post('/v1/generation-batches', {
         items: [invalid, failing, flaky].map((businessId) => ({ businessId, engine: 'fake' })),
@@ -180,26 +180,26 @@ describe('generation batches', () => {
       .expect(201);
     const done = await batchDone(body.id, 60_000);
     const byName = new Map((done.jobs as { businessName: string }[]).map((job) => [job.businessName, job]));
-    expect(byName.get('Atelier [invalid]')).toMatchObject({ status: 'succeeded', attemptCount: 2 });
+    expect(byName.get('Atelier (invalid)')).toMatchObject({ status: 'succeeded', attemptCount: 2 });
     const repaired = await db
       .select({ mode: generationAttempts.mode })
       .from(generationAttempts)
       .innerJoin(generationJobs, eq(generationJobs.id, generationAttempts.jobId))
       .where(eq(generationJobs.batchId, body.id));
     expect(repaired.map((attempt) => attempt.mode)).toContain('repair');
-    expect(byName.get('Garage [fail:POLICY_VIOLATION]')).toMatchObject({
+    expect(byName.get('Garage (fail:POLICY_VIOLATION)')).toMatchObject({
       status: 'failed',
       errorCode: 'POLICY_VIOLATION',
       attemptCount: 1,
     });
-    expect(byName.get('Boutique [fail-once:TIMEOUT]')).toMatchObject({
+    expect(byName.get('Boutique (fail-once:TIMEOUT)')).toMatchObject({
       status: 'succeeded',
       attemptCount: 2,
     });
     expect(done.status).toBe('completed_with_issues');
 
     // A person retries the failed one (a new attempt).
-    const failed = byName.get('Garage [fail:POLICY_VIOLATION]') as unknown as { id: string };
+    const failed = byName.get('Garage (fail:POLICY_VIOLATION)') as unknown as { id: string };
     const { body: retried } = await member.post(`/v1/generation-jobs/${failed.id}/retry`, {}).expect(200);
     expect(retried.status).toBe('queued');
   }, 90_000);
@@ -266,7 +266,7 @@ describe('generation batches', () => {
   }, 150_000);
 
   it('cancels a waiting job at once and a running one within seconds', async () => {
-    const slow = await business('Lent [slow]');
+    const slow = await business('Lent (slow)');
     const waiting = await business('Attente');
     const { body } = await member
       .post('/v1/generation-batches', {
@@ -328,7 +328,7 @@ describe('generation batches', () => {
   }, 60_000);
 
   it('streams a job’s events live then ends, and replays after Last-Event-ID without gaps or duplicates', async () => {
-    const id = await business('Flux [slow]');
+    const id = await business('Flux (slow)');
     const { body } = await member
       .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'fake' }] })
       .expect(201);

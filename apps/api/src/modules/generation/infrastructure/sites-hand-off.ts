@@ -7,7 +7,10 @@ import type { SiteHandOff } from '../application/ports.ts';
 
 export class SitesModuleHandOff implements SiteHandOff {
   constructor(
-    private readonly commands: Pick<SiteCommands, 'create' | 'createVersion' | 'publishPreview'>,
+    private readonly commands: Pick<
+      SiteCommands,
+      'create' | 'createVersion' | 'publishPreview' | 'recordQuality'
+    >,
     private readonly queries: Pick<SiteQueries, 'get'>,
   ) {}
 
@@ -27,6 +30,15 @@ export class SitesModuleHandOff implements SiteHandOff {
       { type: 'generation_job', id: input.jobId },
     );
     return { siteId, versionId: version.id };
+  }
+
+  async recordQuality(input: Parameters<SiteHandOff['recordQuality']>[0]) {
+    await this.commands.recordQuality(
+      { organizationId: input.organizationId, userId: null },
+      input.siteId,
+      input.versionId,
+      input.report as unknown as Record<string, unknown>,
+    );
   }
 
   async publishPreview(input: Parameters<SiteHandOff['publishPreview']>[0]) {

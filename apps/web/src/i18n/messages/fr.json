@@ -633,6 +633,10 @@
         "title": "Boîte d’envoi en pause : {mailbox}",
         "body": "Les envois sont suspendus pour protéger la délivrabilité."
       },
+      "mailbox_error": {
+        "title": "Boîte d’envoi à reconnecter : {mailbox}",
+        "body": "Les envois depuis cette boîte sont arrêtés : {reason}."
+      },
       "member_joined": {
         "title": "{name} a rejoint l’espace de travail",
         "body": "Cette personne a accepté son invitation."
@@ -663,6 +667,7 @@
         "batch_completed": "Génération de sites terminée",
         "discovery_completed": "Découverte terminée",
         "mailbox_paused": "Boîte d’envoi en pause",
+        "mailbox_error": "Une boîte d’envoi est à reconnecter",
         "member_joined": "Nouveaux membres",
         "system_test": "Notifications de test",
         "site_needs_review": "Sites à revoir",

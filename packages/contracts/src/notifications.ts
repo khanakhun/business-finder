@@ -16,6 +16,8 @@ export const NOTIFICATION_TYPES = {
   site_needs_review: { inApp: true, email: false },
   discovery_completed: { inApp: true, email: false },
   mailbox_paused: { inApp: true, email: true },
+  /** A mailbox lost its connection (revoked consent, failed authentication) (BF-050). */
+  mailbox_error: { inApp: true, email: true },
   member_joined: { inApp: true, email: false },
   /** Development and E2E only (`POST /v1/notifications/test`). */
   system_test: { inApp: true, email: false },

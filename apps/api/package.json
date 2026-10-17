@@ -78,6 +78,7 @@
     "drizzle-orm": "catalog:",
     "express": "catalog:",
     "helmet": "catalog:",
+    "imapflow": "catalog:",
     "ioredis": "catalog:",
     "libphonenumber-js": "catalog:",
     "nodemailer": "catalog:",

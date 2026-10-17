@@ -288,6 +288,13 @@
       "when": 1792232577134,
       "tag": "0040_business_recipient_types",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792233577150,
+      "tag": "0041_mailboxes",
+      "breakpoints": true
     }
   ]
 }

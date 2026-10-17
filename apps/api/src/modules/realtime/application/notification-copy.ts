@@ -26,6 +26,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Mailbox paused: {mailbox}',
       body: 'Sending stopped to protect deliverability.',
     },
+    mailbox_error: {
+      title: 'Mailbox needs reconnecting: {mailbox}',
+      body: 'Sending from it stopped: {reason}.',
+    },
     member_joined: { title: '{name} joined the workspace', body: 'They accepted their invitation.' },
     system_test: { title: 'Test notification', body: 'Notifications work.' },
   },
@@ -51,6 +55,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
     mailbox_paused: {
       title: 'Boîte d’envoi en pause : {mailbox}',
       body: 'Les envois sont suspendus pour protéger la délivrabilité.',
+    },
+    mailbox_error: {
+      title: 'Boîte d’envoi à reconnecter : {mailbox}',
+      body: 'Les envois depuis cette boîte sont arrêtés : {reason}.',
     },
     member_joined: {
       title: '{name} a rejoint l’espace de travail',

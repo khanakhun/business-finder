@@ -202,6 +202,13 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `EMAIL_VERIFY_PER_MAIL_SERVER_PER_MINUTE` | App-specific | api, worker | no | `6` |  | Mailbox checks per mail server per minute, all workspaces together (one workspace gets half); politeness. |
 | `EMAIL_VERIFY_CONCURRENCY` | App-specific | api, worker | no | `4` |  | SMTP mailbox checks (Reacher) running at once per worker process. |
 | `ENRICHMENT_REFRESH_HOUR_UTC` | App-specific | api, worker | no | `3` |  | Hour (UTC) of the nightly refresh of stale enrichment. |
+| `MAILBOX_MAX_DAILY_CAP_GMAIL` | App-specific | api, worker | no | `500` |  | Highest daily cap a Gmail/Workspace mailbox may be set to. |
+| `MAILBOX_MAX_DAILY_CAP_GRAPH` | App-specific | api, worker | no | `500` |  | Highest daily cap a Microsoft 365 mailbox may be set to. |
+| `MAILBOX_MAX_DAILY_CAP_SMTP` | App-specific | api, worker | no | `300` |  | Highest daily cap an SMTP/IMAP mailbox may be set to. |
+| `OUTREACH_WORKSPACE_DAILY_CAP` | App-specific | api, worker | no | `300` |  | Messages a workspace may send per day across all its mailboxes. |
+| `OUTREACH_DOMAIN_HOURLY_LIMIT` | App-specific | api, worker | no | `3` |  | Messages per hour to one recipient domain, per workspace. |
+| `MAILBOX_SMTP_INSECURE_HOSTS` | App-specific | api, worker | no |  |  | Comma-separated SMTP/IMAP hosts allowed without TLS (Mailpit in development and E2E). Ignored in production. |
+| `MAILBOX_HEALTH_SEED_ADDRESS` | App-specific | api, worker | no |  |  | Address the optional weekly send test goes to; unset, the weekly test is off. |
 | `API_PORT` | App-specific | api | no | `4000` |  | HTTP port of apps/api. Set by infra:up from BF_PORT_OFFSET. |
 | `WORKER_METRICS_PORT` | App-specific | worker | no | `9464` |  | Prometheus metrics port of the worker process. |
 | `WORKER_SHUTDOWN_TIMEOUT_MS` | App-specific | worker | no | `30000` |  | On SIGTERM, how long the worker waits for active jobs before exiting. |

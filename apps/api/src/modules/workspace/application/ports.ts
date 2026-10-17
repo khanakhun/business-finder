@@ -43,8 +43,15 @@ export interface OrgSettingsRepository {
 }
 export const ORG_SETTINGS_REPOSITORY = Symbol('OrgSettingsRepository');
 
+/**
+ * A vault entry: a registry secret, or one scoped to a resource another module owns (`mailbox:<uuid>`, BF-050) —
+ * scoped entries never appear in the workspace's secrets list.
+ */
+export type ScopedSecretRef = `mailbox:${string}`;
+export type VaultKey = SecretName | ScopedSecretRef;
+
 export interface SecretMetadata {
-  readonly name: SecretName;
+  readonly name: VaultKey;
   readonly keyVersion: number;
   readonly last4: string | null;
   readonly updatedAt: Date;
@@ -58,19 +65,19 @@ export interface SecretRecord extends SecretMetadata, SealedSecret {
 
 /** Port: `secrets`. Every method is scoped by organization except the rotation scan. */
 export interface SecretsRepository {
-  find(organizationId: string, name: SecretName): Promise<SecretRecord | undefined>;
+  find(organizationId: string, name: VaultKey): Promise<SecretRecord | undefined>;
   list(organizationId: string): Promise<SecretMetadata[]>;
   upsert(input: {
     readonly organizationId: string;
-    readonly name: SecretName;
+    readonly name: VaultKey;
     readonly sealed: SealedSecret;
     readonly keyVersion: number;
     readonly last4: string | null;
     readonly createdBy: string | null;
   }): Promise<SecretMetadata>;
-  delete(organizationId: string, name: SecretName): Promise<boolean>;
+  delete(organizationId: string, name: VaultKey): Promise<boolean>;
   /** Outside any ambient transaction: called fire-and-forget after reads. */
-  touch(organizationId: string, name: SecretName, at: Date): Promise<void>;
+  touch(organizationId: string, name: VaultKey, at: Date): Promise<void>;
   /** Rows wrapped by another master key version, oldest id first, after `afterId`. */
   listForRotation(currentVersion: number, limit: number, afterId?: string): Promise<SecretRecord[]>;
   /**

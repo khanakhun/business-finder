@@ -9,3 +9,8 @@ useDefault = true
 description = "Prose matched by generic-api-key (e.g. 'S3-compatible storage' in docs), not credentials."
 regexTarget = "secret"
 regexes = ['''^S3-compatible$''']
+
+[[allowlists]]
+description = "The redaction test's fake AWS key (sequential letters, an example shape, never a credential; BF-043)."
+regexTarget = "secret"
+regexes = ['''^AKIAABCDEFGHIJKLMNOP$''']

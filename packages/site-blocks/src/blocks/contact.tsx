@@ -86,7 +86,10 @@ export function Contact({ block, ctx, tone }: BlockProps<'contact'>) {
   const contactForm = form ? (
     <ContactForm
       formId={derivedId(block.id, 'form')}
-      action={ctx.options.preview ? undefined : ctx.options.contactFormAction}
+      action={ctx.options.preview ? ctx.options.previewLeadForm?.action : ctx.options.contactFormAction}
+      {...(ctx.options.preview && ctx.options.previewLeadForm
+        ? { hidden: ctx.options.previewLeadForm.hidden, notice: ctx.options.previewLeadForm.notice }
+        : {})}
       strings={ctx.strings.form}
       className={cx(variant === 'split' && 'bf-card !h-auto')}
     />

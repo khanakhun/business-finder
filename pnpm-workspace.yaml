@@ -118,7 +118,6 @@ catalog:
   auth: 1.7.8
   nodemailer: 10.1.1
   ai: 7.0.135
-  altcha: 3.2.4
   altcha-lib: 2.5.0
   libphonenumber-js: 1.13.15
   tldts: 7.4.18

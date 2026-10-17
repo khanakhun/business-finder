@@ -15,11 +15,17 @@ export function ContactForm({
   action,
   strings,
   className,
+  hidden,
+  notice,
 }: {
   formId: string;
   action?: string | undefined;
   strings: UiStrings['form'];
   className?: string | undefined;
+  /** Fields the server needs and people do not see (a preview's lead form, BF-048). */
+  hidden?: Readonly<Record<string, string>> | undefined;
+  /** Shown above the fields (a preview: "messages go to the agency, not to the business"). */
+  notice?: string | undefined;
 }) {
   const [state, setState] = useState<State>('idle');
   const field = (name: string) => `${formId}-${name}`;
@@ -55,6 +61,24 @@ export function ContactForm({
       className={className}
       aria-describedby={message ? field('status') : undefined}
     >
+      {notice ? (
+        <p id={field('notice')} className="bf-muted mb-4 text-sm">
+          {notice}
+        </p>
+      ) : null}
+      {Object.entries(hidden ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      {hidden ? (
+        // A honeypot: hidden from people (and from assistive technology), filled by naive bots.
+        <div
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}
+        >
+          <label htmlFor={field('hp')}>Leave empty</label>
+          <input id={field('hp')} name="hp" tabIndex={-1} autoComplete="off" />
+        </div>
+      ) : null}
       <fieldset
         disabled={!action || state === 'sending' || state === 'sent'}
         className="grid gap-5 sm:grid-cols-2"
@@ -109,7 +133,7 @@ export function ContactForm({
             rows={5}
             className="bf-input"
             required
-            maxLength={4000}
+            maxLength={2000}
           />
         </div>
         <div className="sm:col-span-2">

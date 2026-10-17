@@ -8690,15 +8690,14 @@ export type components = {
             missing: {
                 [key: string]: number;
             };
-            /** @default null */
-            model: {
+            model?: {
                 /** Format: uuid */
                 modelId: string;
                 tiers: {
                     A: number;
                     B: number;
                 };
-            } | null;
+            };
             /**
              * @default weighted_sum
              * @constant
@@ -9738,15 +9737,14 @@ export type components = {
             missing: {
                 [key: string]: number;
             };
-            /** @default null */
-            model: {
+            model?: {
                 /** Format: uuid */
                 modelId: string;
                 tiers: {
                     A: number;
                     B: number;
                 };
-            } | null;
+            };
             /**
              * @default weighted_sum
              * @constant

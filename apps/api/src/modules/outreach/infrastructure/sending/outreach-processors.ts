@@ -3,6 +3,7 @@ import {
   type OrgId,
   OutreachBulkDraftJob,
   OutreachSendJob,
+  OutreachSyncJob,
   OutreachTickJob,
 } from '@bf/contracts';
 import { type JobContext, QUEUES, TypedProducer } from '@bf/queue';
@@ -13,6 +14,13 @@ import type { z } from 'zod';
 import { CLOCK } from '../../../platform/clock/clock.module.ts';
 import { LOGGER, type Logger } from '../../../platform/logging/logger.ts';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
+import {
+  INBOUND_QUEUES,
+  INBOUND_REPOSITORY,
+  type InboundQueues,
+  type InboundRepository,
+} from '../../application/inbound/ports.ts';
+import { MailboxSync } from '../../application/inbound/sync.ts';
 import { BulkOutreach } from '../../application/outbound/bulk.ts';
 import {
   BULK_REPOSITORY,
@@ -83,6 +91,8 @@ export class OutreachTickProcessor extends TypedProcessor<
   constructor(
     @Inject(OUTBOUND_REPOSITORY) private readonly messages: OutboundRepository,
     @Inject(BULK_REPOSITORY) private readonly bulk: BulkRepository,
+    @Inject(INBOUND_REPOSITORY) private readonly inbound: InboundRepository,
+    @Inject(INBOUND_QUEUES) private readonly inboundQueues: InboundQueues,
     @Inject(CLOCK) private readonly clock: Clock,
     @InjectQueue(QUEUES.outreachSend.name) sendQueue: Queue,
   ) {
@@ -105,6 +115,10 @@ export class OutreachTickProcessor extends TypedProcessor<
     }
     outboundMetrics.stuck().set(await this.messages.countStuck(new Date(now.getTime() - STUCK_AFTER_MS)));
     outboundMetrics.approvalsPending().set(await this.bulk.countPendingApprovals());
+    // Replies (BF-054): mailboxes whose next poll is due.
+    const minute = now.toISOString().slice(0, 16);
+    for (const mailbox of await this.inbound.dueMailboxes(now, 200))
+      await this.inboundQueues.sync(mailbox.organizationId, mailbox.id, `sync:${mailbox.id}:${minute}`);
     if (claimed + released.length + retried > 0)
       context.logger.info({ claimed, released: released.length, retried }, 'outreach tick');
     return { claimed, released: released.length, retried };
@@ -153,5 +167,22 @@ export class OutreachBulkProcessor extends TypedProcessor<
   async handle(payload: z.output<typeof OutreachBulkDraftJob.schema>, context: JobContext) {
     const outcome = await this.bulk.draftOne(payload.runId, payload.businessId, context.logger);
     return { outcome };
+  }
+}
+
+@Processor(QUEUES.outreachSync.name, { concurrency: QUEUES.outreachSync.concurrency })
+export class OutreachSyncProcessor extends TypedProcessor<
+  typeof OutreachSyncJob,
+  { readonly ingested: number; readonly ignored: number }
+> {
+  protected readonly definition = OutreachSyncJob;
+
+  constructor(private readonly sync: MailboxSync) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof OutreachSyncJob.schema>, context: JobContext) {
+    if (!payload.orgId) return { ingested: 0, ignored: 0 };
+    return this.sync.sync(payload.orgId, payload.mailboxId, context.logger);
   }
 }

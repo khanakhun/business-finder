@@ -1178,7 +1178,8 @@
           "reacher": "Reacher (serveur de messagerie)",
           "zerobounce": "ZeroBounce",
           "dns": "DNS seulement",
-          "classification": "l’adresse elle-même"
+          "classification": "l’adresse elle-même",
+          "bounce": "un e-mail revenu en erreur"
         },
         "mailbox": {
           "safe": "La boîte existe",

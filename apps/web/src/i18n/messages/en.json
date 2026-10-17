@@ -1178,7 +1178,8 @@
           "reacher": "Reacher (mail server check)",
           "zerobounce": "ZeroBounce",
           "dns": "DNS only",
-          "classification": "the address itself"
+          "classification": "the address itself",
+          "bounce": "a bounced email"
         },
         "mailbox": {
           "safe": "The mailbox exists",

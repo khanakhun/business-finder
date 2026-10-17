@@ -18,6 +18,13 @@ export const outreachEnv = z.object({
     .max(600)
     .default(10)
     .describe('Seconds a sent email waits in the queue so the sender can undo it (BF-052).'),
+  OUTREACH_SYNC_POLL_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(30)
+    .max(3600)
+    .default(120)
+    .describe('Seconds between two polls of a mailbox for replies (BF-054); push notifications come on top.'),
   MAILBOX_SMTP_INSECURE_HOSTS: z
     .string()
     .default('localhost,127.0.0.1,::1,mailpit')

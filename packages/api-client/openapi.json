@@ -7257,7 +7257,8 @@
               "reacher",
               "zerobounce",
               "dns",
-              "classification"
+              "classification",
+              "bounce"
             ],
             "type": "string"
           },

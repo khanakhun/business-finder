@@ -208,6 +208,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `OUTREACH_WORKSPACE_DAILY_CAP` | App-specific | api, worker | no | `300` |  | Messages a workspace may send per day across all its mailboxes. |
 | `OUTREACH_DOMAIN_HOURLY_LIMIT` | App-specific | api, worker | no | `3` |  | Messages per hour to one recipient domain, per workspace. |
 | `OUTREACH_UNDO_WINDOW_SECONDS` | App-specific | api, worker | no | `10` |  | Seconds a sent email waits in the queue so the sender can undo it (BF-052). |
+| `OUTREACH_SYNC_POLL_SECONDS` | App-specific | api, worker | no | `120` |  | Seconds between two polls of a mailbox for replies (BF-054); push notifications come on top. |
 | `MAILBOX_SMTP_INSECURE_HOSTS` | App-specific | api, worker | no |  |  | Comma-separated SMTP/IMAP hosts allowed without TLS (Mailpit in development and E2E). Ignored in production. |
 | `MAILBOX_HEALTH_SEED_ADDRESS` | App-specific | api, worker | no |  |  | Address the optional weekly send test goes to; unset, the weekly test is off. |
 | `GOOGLE_OAUTH_CLIENT_ID` | App-specific | api, worker | no |  |  | OAuth client of the Google Cloud project (type Web, user type Internal to the Workspace) for Gmail mailboxes. |

@@ -2,6 +2,7 @@ import { createHmac } from 'node:crypto';
 import type { ApiEnv } from '@bf/config';
 import type { Clock } from '@bf/contracts';
 import { type DynamicModule, Module } from '@nestjs/common';
+import { BusinessGraphModule } from '../business-graph/index.ts';
 import { ComplianceModule } from '../compliance/index.ts';
 import { CrmModule } from '../crm/index.ts';
 import { GenerationModule } from '../generation/index.ts';
@@ -11,6 +12,16 @@ import { RealtimeModule } from '../realtime/index.ts';
 import { DraftsService } from './application/drafting/drafts.service.ts';
 import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
 import { TemplatesService } from './application/drafting/templates.service.ts';
+import { ReplyIngestion } from './application/inbound/ingest.ts';
+import {
+  HTML_SANITIZER,
+  INBOUND_QUEUES,
+  INBOUND_REPOSITORY,
+  INBOUND_SETTINGS,
+  type InboundSettings,
+  MAIL_PARSER,
+} from './application/inbound/ports.ts';
+import { MailboxSync } from './application/inbound/sync.ts';
 import { MailboxCapacity } from './application/mailbox/mailbox-capacity.ts';
 import { MailboxCredentialStore } from './application/mailbox/mailbox-credentials.ts';
 import { MailboxHealthSweep } from './application/mailbox/mailbox-health.ts';
@@ -50,6 +61,14 @@ import {
 import { DrizzleDraftContext } from './infrastructure/drafting/drizzle-draft-context.ts';
 import { DrizzleDraftRepository } from './infrastructure/drafting/drizzle-drafts.repository.ts';
 import { DrizzleTemplateRepository } from './infrastructure/drafting/drizzle-templates.repository.ts';
+import {
+  BullmqInboundQueues,
+  OPENAPI_INBOUND_QUEUES,
+} from './infrastructure/inbound/bullmq-inbound-queues.ts';
+import { DrizzleInboundRepository } from './infrastructure/inbound/drizzle-inbound.repository.ts';
+import { SanitizeHtmlSanitizer } from './infrastructure/inbound/html-sanitizer.ts';
+import { InboundPersonalData } from './infrastructure/inbound/inbound-personal-data.ts';
+import { MailparserAdapter } from './infrastructure/inbound/mail-parser.ts';
 import { DrizzleMailboxesRepository } from './infrastructure/mailboxes/drizzle-mailboxes.repository.ts';
 import { GoogleOAuthClient } from './infrastructure/mailboxes/oauth/google.oauth.ts';
 import { MicrosoftOAuthClient } from './infrastructure/mailboxes/oauth/microsoft.oauth.ts';
@@ -68,6 +87,7 @@ import {
   OUTREACH_TICK_AUTOSTART,
   OutreachBulkProcessor,
   OutreachSendProcessor,
+  OutreachSyncProcessor,
   OutreachTickProcessor,
   OutreachTickScheduler,
 } from './infrastructure/sending/outreach-processors.ts';
@@ -100,6 +120,7 @@ export class OutreachModule {
         ComplianceModule.forRoot(mode),
         GenerationModule.forRoot(mode),
         CrmModule.forRoot(mode),
+        BusinessGraphModule.forRoot(mode),
       ],
       controllers:
         mode === 'worker'
@@ -222,6 +243,24 @@ export class OutreachModule {
           ? { provide: BULK_QUEUE, useValue: OPENAPI_BULK_QUEUE }
           : { provide: BULK_QUEUE, useClass: BullmqBulkQueue },
         BulkOutreach,
+        // BF-054: replies.
+        { provide: INBOUND_REPOSITORY, useClass: DrizzleInboundRepository },
+        { provide: MAIL_PARSER, useClass: MailparserAdapter },
+        { provide: HTML_SANITIZER, useClass: SanitizeHtmlSanitizer },
+        mode === 'openapi'
+          ? { provide: INBOUND_QUEUES, useValue: OPENAPI_INBOUND_QUEUES }
+          : { provide: INBOUND_QUEUES, useClass: BullmqInboundQueues },
+        {
+          provide: INBOUND_SETTINGS,
+          inject: [APP_ENV],
+          useFactory: (appEnv: AppEnv): InboundSettings => ({
+            pollSeconds: (appEnv as ApiEnv).OUTREACH_SYNC_POLL_SECONDS,
+            unsubscribeMailto: null,
+          }),
+        },
+        ReplyIngestion,
+        MailboxSync,
+        InboundPersonalData,
         OutboundCommands,
         OutboundQueries,
         ManualContactLogs,
@@ -234,6 +273,7 @@ export class OutreachModule {
               OutreachTickProcessor,
               OutreachSendProcessor,
               OutreachBulkProcessor,
+              OutreachSyncProcessor,
               OutreachTickScheduler,
               { provide: OUTREACH_TICK_AUTOSTART, useValue: true },
             ]

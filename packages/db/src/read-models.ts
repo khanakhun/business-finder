@@ -24,6 +24,8 @@ export const rendererPublishedSites = pgView('renderer_published_sites', {
   expiresAt: timestamp({ withTimezone: true }),
   noindex: boolean().notNull(),
   previewBanner: boolean().notNull(),
+  /** BF-062: the hostname this one redirects to (a `www` to its apex, the site's own hostname to its domain). */
+  redirectTo: text(),
 }).existing();
 
 /** The images the renderer may serve: ready assets of sites with an active publication. */

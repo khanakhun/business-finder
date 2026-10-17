@@ -43,3 +43,45 @@ export interface GoLiveRepository {
   confirm(tokenHash: string, now: Date): Promise<ContactRoutingRecord | undefined>;
 }
 export const GO_LIVE_REPOSITORY = Symbol('GoLiveRepository');
+
+// ── Custom domains ──────────────────────────────────────────────────────────────────────────────────────────────
+
+export interface DomainRecord {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly siteId: string;
+  readonly hostname: string;
+  readonly kind: 'apex' | 'subdomain' | 'www';
+  readonly redirectTo: string | null;
+  readonly verificationToken: string;
+  readonly status: import('@bf/contracts').SiteDomainStatus;
+  readonly dnsReport: import('@bf/contracts').SiteDomain['report'];
+  readonly attempts: number;
+  readonly lastCheckedAt: Date | null;
+  readonly createdAt: Date;
+}
+
+export interface DomainRepository {
+  forSite(organizationId: string, siteId: string): Promise<DomainRecord[]>;
+  byHostname(hostname: string): Promise<DomainRecord | undefined>;
+  insert(
+    rows: readonly Omit<DomainRecord, 'status' | 'dnsReport' | 'attempts' | 'lastCheckedAt' | 'createdAt'>[],
+  ): Promise<void>;
+  update(
+    id: string,
+    patch: Partial<Pick<DomainRecord, 'status' | 'dnsReport' | 'attempts' | 'lastCheckedAt'>> & {
+      nextCheckAt?: Date;
+    },
+  ): Promise<void>;
+  /** Claims due checks (skipping rows another worker holds) and moves their next check out of the way. */
+  claimDue(now: Date, limit: number): Promise<DomainRecord[]>;
+}
+export const DOMAIN_REPOSITORY = Symbol('DomainRepository');
+
+export interface DnsResolver {
+  answers(
+    hostname: string,
+    txtName: string,
+  ): Promise<import('../../domain/domain-verification.ts').DnsAnswers>;
+}
+export const DNS_RESOLVER = Symbol('SitesDnsResolver');

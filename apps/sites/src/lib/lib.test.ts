@@ -49,6 +49,9 @@ describe('siteHostname', () => {
     ['salon-k3x9p2.sites.example', 'salon-k3x9p2.sites.example'],
     ['Salon-K3X9P2.Sites.Example:3110', 'salon-k3x9p2.sites.example'],
     ['salon-k3x9p2.sites.example.', 'salon-k3x9p2.sites.example'],
+    // BF-062: a custom domain outside the sites domain is a site name too (only published names resolve).
+    ['salon.other.example', 'salon.other.example'],
+    ['evilsites.example', 'evilsites.example'],
   ])('reads %s as %s', (host, hostname) => {
     expect(siteHostname(host, 'sites.example')).toBe(hostname);
   });
@@ -58,8 +61,6 @@ describe('siteHostname', () => {
     '',
     'sites.example',
     'a.b.sites.example',
-    'salon.other.example',
-    'evilsites.example',
     '-salon.sites.example',
     'sal_on.sites.example',
     '127.0.0.1:3100',

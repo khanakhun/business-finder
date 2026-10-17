@@ -22,6 +22,22 @@ export const sitesApiEnv = z.object({
     .describe(
       'Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host.',
     ),
+  // BF-062: custom domains of live sites.
+  SITES_INGRESS_IPS: z
+    .string()
+    .default('')
+    .describe(
+      "Comma-separated public IPs of the sites ingress: what an apex domain's A/AAAA records must point to (custom domains).",
+    ),
+  DOMAIN_ASK_TOKEN: secret(
+    z
+      .string()
+      .min(32)
+      .optional()
+      .describe(
+        "Token in Caddy's on-demand TLS `ask` URL (?token=), ≥ 32 chars: certificates are issued only for verified domains. Unset: every ask is refused.",
+      ),
+  ),
   LEADS_RETENTION_DAYS: z.coerce
     .number()
     .int()

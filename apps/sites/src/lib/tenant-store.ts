@@ -25,6 +25,8 @@ export interface Tenant {
   readonly spec: SiteSpec | null;
   /** Responsive sources of the site's processed images, by public URL. */
   readonly images: Readonly<Record<string, string>>;
+  /** BF-062: the hostname this one redirects to (301): a `www` to its apex, the site's own name to its domain. */
+  readonly redirectTo?: string | null;
 }
 
 /** The site cannot be served now: the database is unreachable, or its spec is newer than this renderer. */

@@ -129,6 +129,8 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `SITES_INTERNAL_URL` | Sites | api, worker | no | `http://127.0.0.1:3100` |  | Internal URL of apps/sites; the API asks it to refresh a site after a publication changes. |
 | `SITES_REVALIDATE_SECRET` | Sites | api, worker, sites | no |  | yes | Shared secret signing revalidation calls to apps/sites, ≥ 32 chars. Unset: no revalidation (refused in production). |
 | `SITES_ASSETS_BASE_URL` | Sites | api, worker, sites | no | `https://assets.sites.localhost` |  | Public base URL of site images (CDN in front of the sites bucket); its host is the only asset host. |
+| `SITES_INGRESS_IPS` | Sites | api, worker | no | `` |  | Comma-separated public IPs of the sites ingress: what an apex domain's A/AAAA records must point to (custom domains). |
+| `DOMAIN_ASK_TOKEN` | Sites | api, worker | no |  | yes | Token in Caddy's on-demand TLS `ask` URL (?token=), ≥ 32 chars: certificates are issued only for verified domains. Unset: every ask is refused. |
 | `LEADS_RETENTION_DAYS` | Sites | api, worker | no | `730` |  | Days a preview lead (claim, contact request, opt-out) is kept (BF-048; 24 months by default). |
 | `LEADS_SPAM_RETENTION_DAYS` | Sites | api, worker | no | `30` |  | Days a lead marked as spam is kept (BF-048). |
 | `SITE_CHAT_RETENTION_DAYS` | Sites | api, worker | no | `180` |  | Days a site chat thread (messages and proposals) is kept after its last message (BF-047). |

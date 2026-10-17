@@ -306,6 +306,49 @@ export class SiteCommands {
     return publication;
   }
 
+  /**
+   * Serves the site's live version at another hostname too (BF-062: a verified custom domain); false when the site
+   * is not live. The renderer redirects the site's own hostname there (view).
+   */
+  @Transactional()
+  async attachLiveHostname(organizationId: string, siteId: string, hostname: string): Promise<boolean> {
+    const site = await this.lock({ organizationId, userId: null }, siteId);
+    const active = await this.repository.activePublications(site.id);
+    const live = active.find((publication) => publication.environment === 'live');
+    if (!live) return false;
+    if (active.some((publication) => publication.hostname === hostname)) return true;
+    const publication = await this.repository.insertPublication({
+      siteId: site.id,
+      versionId: live.versionId,
+      environment: 'live',
+      hostname,
+      publishedBy: null,
+      publishedAt: this.clock.now(),
+      expiresAt: null,
+    });
+    await this.events.record(SitePublished, {
+      orgId: organizationId,
+      payload: { ...this.publicationPayload(site, publication), expiresAt: null },
+    });
+    return true;
+  }
+
+  /** Stops serving a hostname (BF-062: a removed domain); its certificate is left to expire. */
+  @Transactional()
+  async detachHostname(organizationId: string, siteId: string, hostname: string): Promise<void> {
+    const site = await this.lock({ organizationId, userId: null }, siteId);
+    const now = this.clock.now();
+    for (const publication of (await this.repository.activePublications(site.id)).filter(
+      (p) => p.hostname === hostname,
+    )) {
+      await this.repository.endPublication(publication.id, 'unpublished', now);
+      await this.events.record(SiteUnpublished, {
+        orgId: organizationId,
+        payload: this.publicationPayload(site, { ...publication, status: 'unpublished' }),
+      });
+    }
+  }
+
   /** Moves the active preview's expiry later (from its current expiry, at most 90 days ahead). */
   @Transactional()
   async extendPreview(actor: SiteActor, siteId: string, days: number): Promise<StoredPublication> {

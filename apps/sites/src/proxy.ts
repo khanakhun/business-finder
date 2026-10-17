@@ -2,7 +2,7 @@ import { embedOrigins, hotlinkOrigins } from '@bf/site-blocks';
 import { type NextRequest, NextResponse } from 'next/server';
 import { buildSiteCsp } from './lib/csp.ts';
 import { sitesEnvironment } from './lib/env.ts';
-import { siteHostname, underSitesDomain } from './lib/host.ts';
+import { internalHost, siteHostname, underSitesDomain } from './lib/host.ts';
 import { leadPageOf } from './lib/lead-pages.ts';
 import { livePageOf } from './lib/live-paths.ts';
 import { localeOfPath, resolveRoute } from './lib/locale-routing.ts';
@@ -33,7 +33,12 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const hostname = siteHostname(request.headers.get('host'), env.SITES_BASE_DOMAIN);
   // The internal routes answer only on the internal address (the API, the container's health check): under the sites
   // domain (any name, a valid site label or not) they are site paths like any other, whatever proxy sits in front.
-  if (INTERNAL.has(pathname) && !underSitesDomain(request.headers.get('host'), env.SITES_BASE_DOMAIN))
+  // BF-062: custom domains are public names outside the sites domain: only the internal address reaches these routes.
+  if (
+    INTERNAL.has(pathname) &&
+    !underSitesDomain(request.headers.get('host'), env.SITES_BASE_DOMAIN) &&
+    internalHost(request.headers.get('host'))
+  )
     return NextResponse.next({ request: { headers: requestHeaders } });
   const robots = { 'X-Robots-Tag': 'noindex, nofollow' };
   const rewrite = (path: string, extra: Record<string, string> = {}) => {
@@ -51,6 +56,11 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     throw error;
   }
   if (!hostname || !tenant) return rewrite(UNKNOWN_PATH);
+  // BF-062: a `www` name to its apex, the site's own hostname to its custom domain (permanent).
+  if (tenant.redirectTo && tenant.redirectTo !== hostname) {
+    const target = new URL(`${pathname}${request.nextUrl.search}`, `https://${tenant.redirectTo}`);
+    return NextResponse.redirect(target, 301);
+  }
   if (tenant.status !== 'active' || !tenant.spec) return rewrite(GONE_PATH);
   const spec = tenant.spec;
   if (!SITE_FILES.has(pathname)) {

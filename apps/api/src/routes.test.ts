@@ -62,6 +62,8 @@ const ANONYMOUS = [
   'SystemController.info',
   // BF-062: the contact routing confirmation link (the emailed token is the proof; same answer when unknown).
   'PublicContactRoutingController.confirm',
+  // BF-062: Caddy's on-demand TLS ask (a shared token in the URL; verified domains only; never routed publicly).
+  'InternalDomainsController.allow',
 ];
 
 describe('route access policies (AGENTS.md §8)', () => {

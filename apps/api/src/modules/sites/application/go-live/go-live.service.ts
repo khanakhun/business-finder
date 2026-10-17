@@ -26,6 +26,7 @@ import { AuditLogger, WorkspaceDefaults } from '../../../workspace/index.ts';
 import { evaluateReadiness } from '../../domain/go-live-readiness.ts';
 import { SITE_HOSTING, SITES_REPOSITORY, type SiteHosting, type SitesRepository } from '../ports.ts';
 import { type SiteActor, SiteCommands } from '../sites.commands.ts';
+import { DomainsService } from './domains.service.ts';
 import { GO_LIVE_REPOSITORY, type GoLiveRepository } from './ports.ts';
 
 // Going live (BF-062): the readiness checks, the legal profile the legal pages are generated from, the contact
@@ -51,6 +52,7 @@ export class GoLiveService {
     @Inject(APP_ENV) private readonly env: AppEnv,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly commands: SiteCommands,
+    private readonly domains: DomainsService,
     private readonly workspace: WorkspaceDefaults,
     private readonly audit: AuditLogger,
   ) {}
@@ -232,6 +234,8 @@ export class GoLiveService {
         { details: { reason: 'NOT_READY' } },
       );
     const publication = await this.commands.publishLive(actor, siteId, request.versionId);
+    // Verified custom domains are served at once.
+    await this.domains.activateForSite(actor.organizationId, siteId);
     await this.audit.record({
       action: 'sites.published_live',
       organizationId: actor.organizationId,

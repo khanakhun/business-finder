@@ -10,6 +10,7 @@ import { generationEnv } from '../fragments/generation.ts';
 import { geoEnv } from '../fragments/geo.ts';
 import { intelEnv } from '../fragments/intel.ts';
 import { mailEnv } from '../fragments/mail.ts';
+import { outreachEnv } from '../fragments/outreach.ts';
 import { providersEnv } from '../fragments/providers.ts';
 import { resolutionEnv } from '../fragments/resolution.ts';
 import { s3Env } from '../fragments/s3.ts';
@@ -35,6 +36,7 @@ const backendShape = {
   ...enrichmentEnv.shape,
   ...authEnv.shape,
   ...mailEnv.shape,
+  ...outreachEnv.shape,
   ...intelEnv.shape,
   ...sitesApiEnv.shape,
   ...featureFlagsEnv.shape,

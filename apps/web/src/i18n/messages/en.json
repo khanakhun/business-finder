@@ -633,6 +633,10 @@
         "title": "Mailbox paused: {mailbox}",
         "body": "Sending stopped to protect deliverability."
       },
+      "mailbox_error": {
+        "title": "Mailbox needs reconnecting: {mailbox}",
+        "body": "Sending from it stopped: {reason}."
+      },
       "member_joined": {
         "title": "{name} joined the workspace",
         "body": "They accepted their invitation."

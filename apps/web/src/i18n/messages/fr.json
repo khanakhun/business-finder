@@ -633,6 +633,10 @@
         "title": "Boîte d’envoi en pause : {mailbox}",
         "body": "Les envois sont suspendus pour protéger la délivrabilité."
       },
+      "mailbox_error": {
+        "title": "Boîte d’envoi à reconnecter : {mailbox}",
+        "body": "Les envois depuis cette boîte sont arrêtés : {reason}."
+      },
       "member_joined": {
         "title": "{name} a rejoint l’espace de travail",
         "body": "Cette personne a accepté son invitation."

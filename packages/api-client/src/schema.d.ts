@@ -1719,6 +1719,94 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/mailboxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The workspace’s mailboxes with today’s cap and usage */
+        get: operations["listMailboxes"];
+        put?: never;
+        /** Connect an SMTP + IMAP mailbox (tested live before it is saved; the password goes to the vault) */
+        post: operations["connectSmtpMailbox"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mailboxes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One mailbox: status, cap, usage (30 days + ramp plan), next window, health and its trail */
+        get: operations["getMailbox"];
+        put?: never;
+        post?: never;
+        /** Disconnect a mailbox (credentials purged from the vault; its history is kept) */
+        delete: operations["disconnectMailbox"];
+        options?: never;
+        head?: never;
+        /** Change a mailbox’s name, signature, languages, reply-to (owner) or caps, ramp and window (admins) */
+        patch: operations["updateMailbox"];
+        trace?: never;
+    };
+    "/v1/mailboxes/{id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause sending from a mailbox */
+        post: operations["pauseMailbox"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mailboxes/{id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume a paused mailbox (after a passing health check) */
+        post: operations["resumeMailbox"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mailboxes/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a test message from the mailbox to your own address */
+        post: operations["testMailbox"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/me": {
         parameters: {
             query?: never;
@@ -3653,6 +3741,29 @@ export type components = {
             /** @enum {string} */
             method: "claim_form" | "email" | "call" | "other";
         };
+        ConnectSmtpMailboxRequest: {
+            /** @default true */
+            appendToSent: boolean;
+            displayName: string;
+            /** Format: email */
+            email: string;
+            imap?: {
+                host: string;
+                port: number;
+                /** @enum {string} */
+                security: "starttls" | "tls";
+            };
+            password: string;
+            /** @default false */
+            shared: boolean;
+            smtp: {
+                host: string;
+                port: number;
+                /** @enum {string} */
+                security: "starttls" | "tls";
+            };
+            username: string;
+        };
         Contact: {
             confidence: number;
             /** Format: date-time */
@@ -4726,6 +4837,106 @@ export type components = {
             notice: ("geocoder_unavailable" | "geocoder_quota") | null;
             query: string;
         };
+        Mailbox: {
+            /** Format: date-time */
+            createdAt: string;
+            dailyCap: number;
+            displayName: string;
+            /** Format: email */
+            email: string;
+            health: components["schemas"]["MailboxHealth"];
+            /** Format: uuid */
+            id: string;
+            lastError: {
+                /** Format: date-time */
+                at: string;
+                /** @enum {string} */
+                code: "auth_failed" | "consent_revoked" | "unreachable" | "quota_exceeded" | "rate_limited" | "tls_required" | "rejected" | "unknown";
+                message: string;
+            } | null;
+            locales: ("fr" | "en")[];
+            minIntervalSec: number;
+            nextWindowAt: string | null;
+            ownerUserId: string | null;
+            /** @enum {string} */
+            provider: "gmail" | "graph" | "smtp_imap";
+            ramp: components["schemas"]["MailboxRamp"];
+            replyTo: string | null;
+            signatureMd: string;
+            /** @enum {string} */
+            status: "connected" | "warming" | "active" | "paused" | "error";
+            statusReason: string | null;
+            today: {
+                bounced: number;
+                day: string;
+                effectiveCap: number;
+                failed: number;
+                reserved: number;
+                sent: number;
+            };
+            /** Format: date-time */
+            updatedAt: string;
+            window: components["schemas"]["SendWindow"];
+        };
+        MailboxDetail: {
+            events: {
+                actorUserId: string | null;
+                /** Format: date-time */
+                createdAt: string;
+                detail: {
+                    [key: string]: unknown;
+                };
+                fromStatus: ("connected" | "warming" | "active" | "paused" | "error") | null;
+                /** Format: uuid */
+                id: string;
+                kind: string;
+                toStatus: ("connected" | "warming" | "active" | "paused" | "error") | null;
+            }[];
+            mailbox: components["schemas"]["Mailbox"];
+            usage: {
+                bounced: number;
+                complaints: number;
+                day: string;
+                failed: number;
+                planned: number;
+                replies: number;
+                sent: number;
+            }[];
+        };
+        MailboxHealth: {
+            checkedAt: string | null;
+            dns: {
+                [key: string]: string;
+            } | null;
+            quotaOk: boolean | null;
+            reachable: boolean | null;
+            sendTestOk: boolean | null;
+            tokenOk: boolean | null;
+        };
+        MailboxList: {
+            items: components["schemas"]["Mailbox"][];
+        };
+        MailboxRamp: {
+            /** @default true */
+            enabled: boolean;
+            /** @default 2 */
+            everyDays: number;
+            /** @default 5 */
+            increment: number;
+            /** @default 50 */
+            maxCap: number;
+            /** @default 10 */
+            startCap: number;
+            /** @default null */
+            startedAt: string | null;
+        };
+        MailboxTestResult: {
+            error: string | null;
+            ok: boolean;
+            rfc822MessageId: string | null;
+            /** Format: email */
+            to: string;
+        };
         MatchScore: {
             features: {
                 contribution: number;
@@ -4832,7 +5043,7 @@ export type components = {
             /** @description Message key the dashboard translates, e.g. `notifications.types.member_joined.title`. */
             titleKey: string;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "member_joined" | "system_test";
         };
         NotificationPage: {
             items: components["schemas"]["Notification"][];
@@ -4844,7 +5055,7 @@ export type components = {
             email: boolean;
             inApp: boolean;
             /** @enum {string} */
-            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "member_joined" | "system_test";
+            type: "reply_received" | "lead_captured" | "lead_opted_out" | "batch_completed" | "site_needs_review" | "discovery_completed" | "mailbox_paused" | "mailbox_error" | "member_joined" | "system_test";
         };
         NotificationPreferences: {
             items: components["schemas"]["NotificationPreference"][];
@@ -4925,6 +5136,9 @@ export type components = {
             intent: components["schemas"]["SearchIntent"];
             /** @description The confidently resolved location, if any. */
             resolvedArea: components["schemas"]["AreaCandidate"] | null;
+        };
+        PauseMailboxRequest: {
+            reason?: string;
         };
         /** @description Ids of the enqueued jobs. */
         PingJobsAccepted: {
@@ -6000,6 +6214,34 @@ export type components = {
             /** Format: uuid */
             threadId?: string;
         };
+        SendWindow: {
+            /**
+             * @default [
+             *       "mon",
+             *       "tue",
+             *       "wed",
+             *       "thu",
+             *       "fri"
+             *     ]
+             */
+            days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            /** @default 17:30 */
+            end: string;
+            /** @default [] */
+            holidayCalendars: ("FR" | "BL" | "MF" | "US")[];
+            /**
+             * @description IANA time zone, e.g. America/St_Barthelemy.
+             * @default America/St_Barthelemy
+             */
+            mailboxTimezone: string;
+            /** @default 08:30 */
+            start: string;
+            /**
+             * @default recipient
+             * @enum {string}
+             */
+            timezoneMode: "recipient" | "mailbox";
+        };
         SetPrimaryScoringProfileRequest: {
             /** Format: uuid */
             profileId: string;
@@ -6705,6 +6947,16 @@ export type components = {
             note?: string;
             /** @enum {string} */
             status?: "new" | "in_progress" | "qualified" | "discarded";
+        };
+        UpdateMailboxRequest: {
+            dailyCap?: number;
+            displayName?: string;
+            locales?: ("fr" | "en")[];
+            minIntervalSec?: number;
+            ramp?: components["schemas"]["MailboxRamp"];
+            replyTo?: string | null;
+            signatureMd?: string;
+            window?: components["schemas"]["SendWindow"];
         };
         UpdateNotificationPreferencesRequest: {
             items: components["schemas"]["NotificationPreference"][];
@@ -15159,6 +15411,530 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listMailboxes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MailboxList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    connectSmtpMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectSmtpMailboxRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mailbox"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MailboxDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    disconnectMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMailboxRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mailbox"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    pauseMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PauseMailboxRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mailbox"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    resumeMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mailbox"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    testMailbox: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MailboxTestResult"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

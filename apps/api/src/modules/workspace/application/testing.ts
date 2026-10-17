@@ -1,6 +1,5 @@
 // In-memory adapters for unit-testing workspace use cases (the Drizzle adapters are covered by workspace.int.test.ts).
 
-import type { SecretName } from '@bf/contracts';
 import { newId } from '@bf/contracts';
 import { DEFAULT_SETTINGS } from './mappers.ts';
 import type {
@@ -16,6 +15,7 @@ import type {
   SecretMetadata,
   SecretRecord,
   SecretsRepository,
+  VaultKey,
 } from './ports.ts';
 
 export class InMemoryOrgSettings implements OrgSettingsRepository {
@@ -40,9 +40,9 @@ export class InMemoryOrgSettings implements OrgSettingsRepository {
 
 export class InMemorySecrets implements SecretsRepository {
   rows: SecretRecord[] = [];
-  touches: Array<{ organizationId: string; name: SecretName; at: Date }> = [];
+  touches: Array<{ organizationId: string; name: VaultKey; at: Date }> = [];
 
-  async find(organizationId: string, name: SecretName) {
+  async find(organizationId: string, name: VaultKey) {
     return this.rows.find((row) => row.organizationId === organizationId && row.name === name);
   }
 
@@ -66,13 +66,13 @@ export class InMemorySecrets implements SecretsRepository {
     return row;
   }
 
-  async delete(organizationId: string, name: SecretName) {
+  async delete(organizationId: string, name: VaultKey) {
     const before = this.rows.length;
     this.rows = this.rows.filter((row) => !(row.organizationId === organizationId && row.name === name));
     return this.rows.length < before;
   }
 
-  async touch(organizationId: string, name: SecretName, at: Date) {
+  async touch(organizationId: string, name: VaultKey, at: Date) {
     this.touches.push({ organizationId, name, at });
   }
 

@@ -3509,6 +3509,108 @@
         ],
         "type": "object"
       },
+      "ConnectSmtpMailboxRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "appendToSent": {
+            "default": true,
+            "type": "boolean"
+          },
+          "displayName": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          },
+          "imap": {
+            "additionalProperties": false,
+            "properties": {
+              "host": {
+                "maxLength": 253,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9.-]+$",
+                "type": "string"
+              },
+              "port": {
+                "maximum": 65535,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "security": {
+                "enum": [
+                  "starttls",
+                  "tls"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "host",
+              "port",
+              "security"
+            ],
+            "type": "object"
+          },
+          "password": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "shared": {
+            "default": false,
+            "type": "boolean"
+          },
+          "smtp": {
+            "additionalProperties": false,
+            "properties": {
+              "host": {
+                "maxLength": 253,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9.-]+$",
+                "type": "string"
+              },
+              "port": {
+                "maximum": 65535,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "security": {
+                "enum": [
+                  "starttls",
+                  "tls"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "host",
+              "port",
+              "security"
+            ],
+            "type": "object"
+          },
+          "username": {
+            "maxLength": 254,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "displayName",
+          "smtp",
+          "username",
+          "password",
+          "appendToSent",
+          "shared"
+        ],
+        "type": "object"
+      },
       "Contact": {
         "additionalProperties": false,
         "properties": {
@@ -9097,6 +9199,548 @@
         ],
         "type": "object"
       },
+      "Mailbox": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "dailyCap": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          },
+          "health": {
+            "$ref": "#/components/schemas/MailboxHealth"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "lastError": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "at": {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  "code": {
+                    "enum": [
+                      "auth_failed",
+                      "consent_revoked",
+                      "unreachable",
+                      "quota_exceeded",
+                      "rate_limited",
+                      "tls_required",
+                      "rejected",
+                      "unknown"
+                    ],
+                    "type": "string"
+                  },
+                  "message": {
+                    "maxLength": 300,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message",
+                  "at"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locales": {
+            "items": {
+              "enum": [
+                "fr",
+                "en"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "minIntervalSec": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "nextWindowAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider": {
+            "enum": [
+              "gmail",
+              "graph",
+              "smtp_imap"
+            ],
+            "type": "string"
+          },
+          "ramp": {
+            "$ref": "#/components/schemas/MailboxRamp"
+          },
+          "replyTo": {
+            "anyOf": [
+              {
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signatureMd": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "connected",
+              "warming",
+              "active",
+              "paused",
+              "error"
+            ],
+            "type": "string"
+          },
+          "statusReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "today": {
+            "additionalProperties": false,
+            "properties": {
+              "bounced": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "day": {
+                "type": "string"
+              },
+              "effectiveCap": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "failed": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "reserved": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "sent": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "day",
+              "effectiveCap",
+              "sent",
+              "failed",
+              "bounced",
+              "reserved"
+            ],
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "window": {
+            "$ref": "#/components/schemas/SendWindow"
+          }
+        },
+        "required": [
+          "id",
+          "ownerUserId",
+          "provider",
+          "email",
+          "displayName",
+          "status",
+          "statusReason",
+          "dailyCap",
+          "ramp",
+          "window",
+          "minIntervalSec",
+          "locales",
+          "signatureMd",
+          "replyTo",
+          "health",
+          "lastError",
+          "today",
+          "nextWindowAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "MailboxDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "actorUserId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string"
+                },
+                "detail": {
+                  "additionalProperties": {},
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                },
+                "fromStatus": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "connected",
+                        "warming",
+                        "active",
+                        "paused",
+                        "error"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "id": {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "toStatus": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "connected",
+                        "warming",
+                        "active",
+                        "paused",
+                        "error"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "fromStatus",
+                "toStatus",
+                "detail",
+                "actorUserId",
+                "createdAt"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "mailbox": {
+            "$ref": "#/components/schemas/Mailbox"
+          },
+          "usage": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "bounced": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "complaints": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "day": {
+                  "type": "string"
+                },
+                "failed": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "planned": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "replies": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                },
+                "sent": {
+                  "maximum": 9007199254740991,
+                  "minimum": -9007199254740991,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "day",
+                "planned",
+                "sent",
+                "failed",
+                "bounced",
+                "complaints",
+                "replies"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "mailbox",
+          "usage",
+          "events"
+        ],
+        "type": "object"
+      },
+      "MailboxHealth": {
+        "additionalProperties": false,
+        "properties": {
+          "checkedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dns": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quotaOk": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "reachable": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "sendTestOk": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "tokenOk": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "checkedAt",
+          "tokenOk",
+          "reachable",
+          "quotaOk",
+          "sendTestOk",
+          "dns"
+        ],
+        "type": "object"
+      },
+      "MailboxList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Mailbox"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "MailboxRamp": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "everyDays": {
+            "default": 2,
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "increment": {
+            "default": 5,
+            "maximum": 200,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxCap": {
+            "default": 50,
+            "maximum": 2000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startCap": {
+            "default": 10,
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "enabled",
+          "startCap",
+          "increment",
+          "everyDays",
+          "maxCap",
+          "startedAt"
+        ],
+        "type": "object"
+      },
+      "MailboxTestResult": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "rfc822MessageId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to": {
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "to",
+          "rfc822MessageId",
+          "error"
+        ],
+        "type": "object"
+      },
       "MatchScore": {
         "additionalProperties": false,
         "properties": {
@@ -9565,6 +10209,7 @@
               "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
+              "mailbox_error",
               "member_joined",
               "system_test"
             ],
@@ -9636,6 +10281,7 @@
               "site_needs_review",
               "discovery_completed",
               "mailbox_paused",
+              "mailbox_error",
               "member_joined",
               "system_test"
             ],
@@ -10040,6 +10686,16 @@
           "resolvedArea",
           "alternatives"
         ],
+        "type": "object"
+      },
+      "PauseMailboxRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 300,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "PingJobsAccepted": {
@@ -15588,6 +16244,83 @@
         ],
         "type": "object"
       },
+      "SendWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "default": [
+              "mon",
+              "tue",
+              "wed",
+              "thu",
+              "fri"
+            ],
+            "items": {
+              "enum": [
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+              ],
+              "type": "string"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "type": "array"
+          },
+          "end": {
+            "default": "17:30",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "type": "string"
+          },
+          "holidayCalendars": {
+            "default": [],
+            "items": {
+              "enum": [
+                "FR",
+                "BL",
+                "MF",
+                "US"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": "array"
+          },
+          "mailboxTimezone": {
+            "default": "America/St_Barthelemy",
+            "description": "IANA time zone, e.g. America/St_Barthelemy.",
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "start": {
+            "default": "08:30",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "type": "string"
+          },
+          "timezoneMode": {
+            "default": "recipient",
+            "enum": [
+              "recipient",
+              "mailbox"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "days",
+          "start",
+          "end",
+          "timezoneMode",
+          "mailboxTimezone",
+          "holidayCalendars"
+        ],
+        "type": "object"
+      },
       "SenderDefaults": {
         "additionalProperties": false,
         "properties": {
@@ -19077,6 +19810,62 @@
         },
         "type": "object"
       },
+      "UpdateMailboxRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "dailyCap": {
+            "maximum": 2000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "displayName": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "locales": {
+            "items": {
+              "enum": [
+                "fr",
+                "en"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array"
+          },
+          "minIntervalSec": {
+            "maximum": 3600,
+            "minimum": 30,
+            "type": "integer"
+          },
+          "ramp": {
+            "$ref": "#/components/schemas/MailboxRamp"
+          },
+          "replyTo": {
+            "anyOf": [
+              {
+                "format": "email",
+                "maxLength": 254,
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signatureMd": {
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "window": {
+            "$ref": "#/components/schemas/SendWindow"
+          }
+        },
+        "type": "object"
+      },
       "UpdateNotificationPreferencesRequest": {
         "additionalProperties": false,
         "properties": {
@@ -19084,7 +19873,7 @@
             "items": {
               "$ref": "#/components/schemas/NotificationPreference"
             },
-            "maxItems": 9,
+            "maxItems": 10,
             "minItems": 1,
             "type": "array"
           }
@@ -32623,6 +33412,633 @@
         "summary": "Remove up to 1,000 businesses from a list (idempotent)",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/v1/mailboxes": {
+      "get": {
+        "operationId": "listMailboxes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailboxList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace’s mailboxes with today’s cap and usage",
+        "tags": [
+          "mailboxes"
+        ]
+      },
+      "post": {
+        "operationId": "connectSmtpMailbox",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectSmtpMailboxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mailbox"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Connect an SMTP + IMAP mailbox (tested live before it is saved; the password goes to the vault)",
+        "tags": [
+          "mailboxes"
+        ]
+      }
+    },
+    "/v1/mailboxes/{id}": {
+      "delete": {
+        "operationId": "disconnectMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Disconnect a mailbox (credentials purged from the vault; its history is kept)",
+        "tags": [
+          "mailboxes"
+        ]
+      },
+      "get": {
+        "operationId": "getMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailboxDetail"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "One mailbox: status, cap, usage (30 days + ramp plan), next window, health and its trail",
+        "tags": [
+          "mailboxes"
+        ]
+      },
+      "patch": {
+        "operationId": "updateMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMailboxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mailbox"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Change a mailbox’s name, signature, languages, reply-to (owner) or caps, ramp and window (admins)",
+        "tags": [
+          "mailboxes"
+        ]
+      }
+    },
+    "/v1/mailboxes/{id}/pause": {
+      "post": {
+        "operationId": "pauseMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PauseMailboxRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mailbox"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Pause sending from a mailbox",
+        "tags": [
+          "mailboxes"
+        ]
+      }
+    },
+    "/v1/mailboxes/{id}/resume": {
+      "post": {
+        "operationId": "resumeMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mailbox"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Resume a paused mailbox (after a passing health check)",
+        "tags": [
+          "mailboxes"
+        ]
+      }
+    },
+    "/v1/mailboxes/{id}/test": {
+      "post": {
+        "operationId": "testMailbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MailboxTestResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Send a test message from the mailbox to your own address",
+        "tags": [
+          "mailboxes"
         ]
       }
     },

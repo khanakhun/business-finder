@@ -8,6 +8,7 @@ import { GenerationModule } from './modules/generation/index.ts';
 import { GeoModule } from './modules/geo/index.ts';
 import { IdentityModule } from './modules/identity/identity.module.ts';
 import { LeadsModule } from './modules/leads/index.ts';
+import { OutreachModule } from './modules/outreach/index.ts';
 import { AiModule } from './modules/platform/ai/ai.module.ts';
 import type { AppEnv, AppMode } from './modules/platform/config/app-env.ts';
 import { EventsModule } from './modules/platform/events/events.module.ts';
@@ -56,6 +57,7 @@ export class AppModule {
         SiteChatModule.forRoot(mode),
         LeadsModule.forRoot(mode),
         ComplianceModule.forRoot(mode),
+        OutreachModule.forRoot(mode),
         // Before BusinessGraphModule: Express matches routes in registration order, and the listing's
         // `GET /businesses/facets` (search) must win over `GET /businesses/:id` (business graph).
         SearchModule.forRoot(mode),

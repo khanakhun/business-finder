@@ -31,6 +31,12 @@ export const MESSAGES = {
       cta: 'Accept invitation',
       expiry: 'The invitation expires in 7 days.',
     },
+    magicLink: {
+      subject: 'Your website portal sign-in link',
+      heading: 'Sign in to your website portal',
+      body: 'Use this button to sign in. The link works once and expires in 15 minutes.',
+      cta: 'Sign in',
+    },
     twoFactor: {
       subject: 'Two-factor authentication is on',
       heading: 'Two-factor authentication enabled',
@@ -72,6 +78,12 @@ export const MESSAGES = {
         `${inviter} vous invite à rejoindre ${org} en tant que ${role}.`,
       cta: "Accepter l'invitation",
       expiry: "L'invitation expire dans 7 jours.",
+    },
+    magicLink: {
+      subject: 'Votre lien de connexion à l’espace de votre site',
+      heading: 'Connexion à l’espace de votre site',
+      body: 'Utilisez ce bouton pour vous connecter. Le lien ne sert qu’une fois et expire dans 15 minutes.',
+      cta: 'Se connecter',
     },
     twoFactor: {
       subject: "L'authentification à deux facteurs est activée",

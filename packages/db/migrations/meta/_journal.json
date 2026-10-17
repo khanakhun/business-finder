@@ -463,6 +463,13 @@
       "when": 1792257978471,
       "tag": "0065_site_domains",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1792259043804,
+      "tag": "0066_client_portal",
+      "breakpoints": true
     }
   ]
 }

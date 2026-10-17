@@ -6,8 +6,9 @@ import type { DbClient } from '@bf/db';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
-import { haveIBeenPwned, organization, twoFactor } from 'better-auth/plugins';
+import { haveIBeenPwned, magicLink, organization, twoFactor } from 'better-auth/plugins';
 import { API_KEY_PREFIX, AUTH_BASE_PATH, MIN_PASSWORD_LENGTH } from './constants.ts';
+import { portalSignInAllowed } from './portal-store.ts';
 import { ac, roles } from './roles.ts';
 import { defaultOrganizationId } from './session-defaults.ts';
 import type { SignupPolicy } from './signup.ts';
@@ -28,6 +29,8 @@ export interface AuthMailer {
     locale: Locale;
   }): Promise<void>;
   sendTwoFactorEnabled(input: { to: string; name: string; locale: Locale }): Promise<void>;
+  /** The client portal's sign-in link (BF-062). */
+  sendMagicLink(input: { to: string; url: string; locale: Locale }): Promise<void>;
 }
 
 /** Identity events raised inside Better Auth; the API records them in its outbox (BF-012). */
@@ -96,7 +99,8 @@ export function createAuth(options: CreateAuthOptions) {
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
-        if (ctx.path !== '/sign-in/email' || !options.signInThrottle) return;
+        if ((ctx.path !== '/sign-in/email' && ctx.path !== '/sign-in/magic-link') || !options.signInThrottle)
+          return;
         const email = typeof ctx.body?.email === 'string' ? ctx.body.email.trim().toLowerCase() : '';
         if (email && !(await options.signInThrottle(email))) {
           throw new APIError('TOO_MANY_REQUESTS', { message: 'Too many sign-in attempts. Try again later.' });
@@ -166,6 +170,7 @@ export function createAuth(options: CreateAuthOptions) {
         '/sign-up/email': { window: 60, max: 5 },
         '/request-password-reset': { window: 60, max: 5 },
         '/two-factor/*': { window: 60, max: 10 },
+        '/sign-in/magic-link': { window: 60, max: 5 },
       },
     },
     advanced: {
@@ -255,6 +260,15 @@ export function createAuth(options: CreateAuthOptions) {
         },
       }),
       twoFactor({ issuer: 'Business Finder' }),
+      // The client portal (BF-062). The answer is the same whether or not a link was sent (no account probing).
+      magicLink({
+        expiresIn: 15 * 60,
+        storeToken: 'hashed',
+        sendMagicLink: async ({ email, url, metadata }) => {
+          if (!(await portalSignInAllowed(options.db, email))) return;
+          await mailer.sendMagicLink({ to: email, url, locale: metadata?.locale === 'en' ? 'en' : 'fr' });
+        },
+      }),
       apiKey({
         references: 'organization',
         defaultPrefix: API_KEY_PREFIX,

@@ -3,6 +3,7 @@ import type { ApiEnv } from '@bf/config';
 import type { DbClient } from '@bf/db';
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { Redis } from 'ioredis';
+import { CrmModule } from '../crm/index.ts';
 import { AI_BUDGET_GUARD, AI_GATEWAY } from '../platform/ai/ai.module.ts';
 import { LlmCallRepository } from '../platform/ai/llm-call.repository.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
@@ -10,6 +11,7 @@ import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { IntelClient } from '../platform/intel/intel-client.ts';
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
 import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
+import { OBJECT_PRESIGNER, S3Presigner } from '../platform/storage/s3-presigner.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { SecretResolver } from '../workspace/index.ts';
 import {
@@ -19,6 +21,8 @@ import {
   OWNER_SITE_IMAGES,
   WORDMARK_MAKER,
 } from './application/asset-sourcing.ts';
+import { PortalService } from './application/client-portal/portal.service.ts';
+import { PORTAL_REPOSITORY } from './application/client-portal/ports.ts';
 import { DOMAIN_SWEEP_AUTOSTART, DomainsService } from './application/go-live/domains.service.ts';
 import { GoLiveService } from './application/go-live/go-live.service.ts';
 import { DNS_RESOLVER, DOMAIN_REPOSITORY, GO_LIVE_REPOSITORY } from './application/go-live/ports.ts';
@@ -99,6 +103,7 @@ import {
 } from './infrastructure/bullmq-site-jobs.ts';
 import { DrizzleDomainRepository } from './infrastructure/drizzle-domain.repository.ts';
 import { DrizzleGoLiveRepository } from './infrastructure/drizzle-go-live.repository.ts';
+import { DrizzlePortalRepository } from './infrastructure/drizzle-portal.repository.ts';
 import { DrizzleSiteAssetsRepository } from './infrastructure/drizzle-site-assets.repository.ts';
 import { DrizzleSiteThumbnailsRepository } from './infrastructure/drizzle-site-thumbnails.repository.ts';
 import { DrizzleSiteViewsRepository } from './infrastructure/drizzle-site-views.repository.ts';
@@ -116,6 +121,7 @@ import {
 import { ValkeySiteViewCounter } from './infrastructure/valkey-site-views.ts';
 import { InternalDomainsController, SiteDomainsController } from './interface/http/domains.controller.ts';
 import { GoLiveController, PublicContactRoutingController } from './interface/http/go-live.controller.ts';
+import { ClientPortalController, SitePortalController } from './interface/http/portal.controller.ts';
 import { PublicSiteViewsController } from './interface/http/public-site-views.controller.ts';
 import { SiteAssetsController } from './interface/http/site-assets.controller.ts';
 import { SitesController } from './interface/http/sites.controller.ts';
@@ -165,6 +171,8 @@ export class SitesModule {
   private static build(mode: AppMode): DynamicModule {
     return {
       module: SitesModule,
+      // The client portal's change requests and approvals become tasks for the agency (BF-062).
+      imports: [CrmModule.forRoot(mode)],
       controllers:
         mode === 'worker'
           ? []
@@ -177,6 +185,8 @@ export class SitesModule {
               PublicContactRoutingController,
               SiteDomainsController,
               InternalDomainsController,
+              SitePortalController,
+              ClientPortalController,
             ],
       providers: [
         { provide: SITES_REPOSITORY, useClass: DrizzleSitesRepository },
@@ -332,6 +342,13 @@ export class SitesModule {
         { provide: DNS_RESOLVER, useClass: NodeDnsResolver },
         { provide: DOMAIN_SWEEP_AUTOSTART, useValue: mode === 'worker' },
         DomainsService,
+        { provide: PORTAL_REPOSITORY, useClass: DrizzlePortalRepository },
+        {
+          provide: OBJECT_PRESIGNER,
+          inject: [APP_ENV],
+          useFactory: (env: AppEnv) => new S3Presigner(env as ApiEnv),
+        },
+        PortalService,
         SiteQueries,
         SiteAssetCommands,
         SiteThumbnailCommands,

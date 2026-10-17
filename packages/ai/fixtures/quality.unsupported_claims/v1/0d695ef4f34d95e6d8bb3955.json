@@ -1,0 +1,121 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Sourire Caraïbe",
+      "category": "Cabinet dentaire"
+    },
+    "facts": [
+      {
+        "id": "fact_name_6e36e3aba10d",
+        "kind": "name",
+        "value": "Sourire Caraïbe"
+      },
+      {
+        "id": "fact_address_8c1cde0f1b39",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_4547fc75f7eb",
+        "kind": "phone",
+        "value": "+590 590 00 03 20"
+      },
+      {
+        "id": "fact_year_founded_41f8a7e38f4e",
+        "kind": "year_founded",
+        "value": "2017"
+      },
+      {
+        "id": "fact_service_f1c19f8b9c20",
+        "kind": "service",
+        "value": "Orthodontie, implants, blanchiment"
+      },
+      {
+        "id": "fact_hours_e0d954caa177",
+        "kind": "hours",
+        "value": "mon–fri 08:30–18:00"
+      },
+      {
+        "id": "fact_payment_method_ba65fede51a2",
+        "kind": "payment_method",
+        "value": "Carte bancaire, tiers payant"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Sourire Caraïbe, cabinet dentaire à Saint-Jean"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Orthodontie, implants et blanchiment depuis 2017, avec une approche douce. Plus de 3 000 patients nous font confiance."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Tiers payant accepté. Blanchiment à 199 EUR."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Prenez rendez-vous du lundi au vendredi."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Dentiste à Saint-Jean : orthodontie, implants, blanchiment. Cabinet certifié ISO 9001."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "depuis 2017",
+        "status": "supported",
+        "factIds": ["fact_year_founded_41f8a7e38f4e"],
+        "reason": "Stated by fact fact_year_founded_41f8a7e38f4e."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Plus de 3 000 patients nous font confiance",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact gives a patient count."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Tiers payant accepté",
+        "status": "supported",
+        "factIds": ["fact_payment_method_ba65fede51a2"],
+        "reason": "Stated by fact fact_payment_method_ba65fede51a2."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Blanchiment à 199 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No price fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "du lundi au vendredi",
+        "status": "supported",
+        "factIds": ["fact_hours_e0d954caa177"],
+        "reason": "Stated by fact fact_hours_e0d954caa177."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "Cabinet certifié ISO 9001",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      }
+    ],
+    "warnings": []
+  }
+}

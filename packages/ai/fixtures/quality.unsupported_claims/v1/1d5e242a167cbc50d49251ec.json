@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Palm Villa Rentals",
+      "category": "Villa rental agency"
+    },
+    "facts": [
+      {
+        "id": "fact_name_dfda32c22a63",
+        "kind": "name",
+        "value": "Palm Villa Rentals"
+      },
+      {
+        "id": "fact_address_069b255fbf82",
+        "kind": "address",
+        "value": "Jolly Harbour, Antigua"
+      },
+      {
+        "id": "fact_phone_f7051abc559d",
+        "kind": "phone",
+        "value": "+1 268 000 0414"
+      },
+      {
+        "id": "fact_email_902a7d03b749",
+        "kind": "email",
+        "value": "hello@palmvillas.example"
+      },
+      {
+        "id": "fact_service_5b78af0df582",
+        "kind": "service",
+        "value": "Villa rentals"
+      },
+      {
+        "id": "fact_area_served_1dc6f4979357",
+        "kind": "area_served",
+        "value": "Antigua and Barbuda"
+      },
+      {
+        "id": "fact_team_member_302a5c289cdc",
+        "kind": "team_member",
+        "value": "Grace Thomas — Owner"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Palm Villa Rentals, Antigua"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Owned by Grace Thomas, we rent villas across Antigua and Barbuda. Founded in 2001, over 1,000 five-star reviews."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Your perfect getaway, free airport transfers."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Get in touch, we are happy to help."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Villa rentals in Antigua, steps from Jolly Harbour beach."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Grace Thomas",
+        "status": "supported",
+        "factIds": ["fact_team_member_302a5c289cdc"],
+        "reason": "Stated by fact fact_team_member_302a5c289cdc."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Antigua and Barbuda",
+        "status": "supported",
+        "factIds": ["fact_area_served_1dc6f4979357"],
+        "reason": "Stated by fact fact_area_served_1dc6f4979357."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Founded in 2001",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "over 1,000 five-star reviews",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No review fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Your perfect getaway",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "free airport transfers",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No service fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "we are happy to help",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "steps from Jolly Harbour beach",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Chez Marius",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_c88a66118375",
+        "kind": "name",
+        "value": "Chez Marius"
+      },
+      {
+        "id": "fact_address_d5fd6ba75c12",
+        "kind": "address",
+        "value": "12 quai du Port, 13002 Marseille"
+      },
+      {
+        "id": "fact_phone_dbc6a65dd896",
+        "kind": "phone",
+        "value": "+33 4 00 00 03 15"
+      },
+      {
+        "id": "fact_year_founded_d669adb349fc",
+        "kind": "year_founded",
+        "value": "2008"
+      },
+      {
+        "id": "fact_service_1b69acda60d0",
+        "kind": "service",
+        "value": "Bouillabaisse et cuisine provençale"
+      },
+      {
+        "id": "fact_hours_daa7340a375d",
+        "kind": "hours",
+        "value": "tue–sat 12:00–14:00, 19:30–22:30"
+      },
+      {
+        "id": "fact_award_d9d4678e0b49",
+        "kind": "award",
+        "value": "Bib Gourmand 2022"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Chez Marius, bouillabaisse au Vieux-Port"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 1962, Chez Marius sert la bouillabaisse la plus réputée de Marseille dans une ambiance familiale."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Bib Gourmand 2022, fermé dimanche et lundi. Poissons livrés chaque matin par nos pêcheurs partenaires."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Réservez votre table, on vous attend."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Restaurant provençal à Marseille, Bib Gourmand, bouillabaisse, menu à partir de 29 EUR."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 1962",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The year_founded fact says 2008."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "la plus réputée de Marseille",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "une ambiance familiale",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Bib Gourmand 2022",
+        "status": "supported",
+        "factIds": ["fact_award_d9d4678e0b49"],
+        "reason": "Stated by fact fact_award_d9d4678e0b49."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "fermé dimanche et lundi",
+        "status": "supported",
+        "factIds": ["fact_hours_daa7340a375d"],
+        "reason": "Stated by fact fact_hours_daa7340a375d."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "livrés chaque matin par nos pêcheurs partenaires",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about sourcing."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "on vous attend",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "menu à partir de 29 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No price fact."
+      }
+    ],
+    "warnings": []
+  }
+}

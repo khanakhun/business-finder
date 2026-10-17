@@ -1,0 +1,145 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Quincaillerie du Port",
+      "category": "Quincaillerie"
+    },
+    "facts": [
+      {
+        "id": "fact_name_e034e7d69db2",
+        "kind": "name",
+        "value": "Quincaillerie du Port"
+      },
+      {
+        "id": "fact_address_71d230046f18",
+        "kind": "address",
+        "value": "Gustavia, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_169720b55e66",
+        "kind": "phone",
+        "value": "+590 590 00 05 12"
+      },
+      {
+        "id": "fact_year_founded_3920b5d8d343",
+        "kind": "year_founded",
+        "value": "1989"
+      },
+      {
+        "id": "fact_service_d224e1b12545",
+        "kind": "service",
+        "value": "Outillage, peinture, accastillage"
+      },
+      {
+        "id": "fact_hours_55e4941a9fa9",
+        "kind": "hours",
+        "value": "mon–sat 07:00–17:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Quincaillerie du Port, depuis 1989"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Quincaillerie du Port, since 1989"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Outillage, peinture et accastillage, avec des conseils utiles."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Tools, paint and boat fittings, with helpful advice."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert du lundi au samedi de 7h à 17h."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Open Monday to Saturday, 7am to 5pm."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Passez nous voir."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Drop by."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 1989",
+        "status": "supported",
+        "factIds": ["fact_year_founded_3920b5d8d343"],
+        "reason": "Stated by fact fact_year_founded_3920b5d8d343."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 1989",
+        "status": "supported",
+        "factIds": ["fact_year_founded_3920b5d8d343"],
+        "reason": "Stated by fact fact_year_founded_3920b5d8d343."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "des conseils utiles",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "helpful advice",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert du lundi au samedi de 7h à 17h",
+        "status": "supported",
+        "factIds": ["fact_hours_55e4941a9fa9"],
+        "reason": "Stated by fact fact_hours_55e4941a9fa9."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Open Monday to Saturday, 7am to 5pm",
+        "status": "supported",
+        "factIds": ["fact_hours_55e4941a9fa9"],
+        "reason": "Stated by fact fact_hours_55e4941a9fa9."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Passez nous voir",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Drop by",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

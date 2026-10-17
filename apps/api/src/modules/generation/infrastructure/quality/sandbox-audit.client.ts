@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import { RUNNER_PROTOCOL, type RunnerFrame } from '@bf/contracts/runner';
 import type { SandboxRunSpec } from '@bf/contracts/sandbox';
-import type { AuditReport } from '@bf/sitekit';
+import { parseSite } from '@bf/site-schema';
+import { ASSET_MAP, type AuditReport, referencedAssetUrls } from '@bf/sitekit';
 import type { SandboxProvider } from '../../application/sandbox.ports.ts';
 import { ArtifactCollector } from '../engines/sandboxed/run-pieces.ts';
 import { packBundle } from '../workspace/tar.ts';
@@ -22,6 +23,9 @@ export interface AuditSandboxSettings {
   readonly wallTimeSec: number;
 }
 
+/** The audit's report, with the critic's screenshots (by workspace file). */
+export type AuditRun = AuditReport & { readonly images: ReadonlyMap<string, Buffer> };
+
 export class AuditError extends Error {
   constructor(message: string) {
     super(message);
@@ -29,20 +33,49 @@ export class AuditError extends Error {
   }
 }
 
+/** Our asset CDN's files, read from storage (never over the network): what the rendered pages request. */
+export interface AuditAssets {
+  readonly hosts: readonly string[];
+  fetch(url: string): Promise<Buffer | undefined>;
+}
+
+/** At most this many asset files, and bytes, are copied into an audit's workspace. */
+const MAX_ASSETS = 300;
+const MAX_ASSET_BYTES = 48 * 1024 * 1024;
+
 export class SandboxAuditClient {
-  private readonly cache = new Map<string, Promise<AuditReport>>();
+  private readonly cache = new Map<string, Promise<AuditRun>>();
 
   constructor(
     private readonly sandbox: SandboxProvider,
     private readonly settings: AuditSandboxSettings,
+    private readonly assets?: AuditAssets,
   ) {}
+
+  /** The site's assets copied into the workspace, with the URL → file map the audit's browser answers from. */
+  private async withAssets(workspace: Map<string, Buffer>, spec: unknown): Promise<void> {
+    if (!this.assets) return;
+    const parsed = parseSite(spec);
+    if (!parsed.spec) return;
+    const map: Record<string, string> = {};
+    let bytes = 0;
+    for (const url of referencedAssetUrls(parsed.spec, this.assets.hosts).slice(0, MAX_ASSETS)) {
+      const body = await this.assets.fetch(url).catch(() => undefined);
+      if (!body || bytes + body.length > MAX_ASSET_BYTES) continue;
+      bytes += body.length;
+      const file = `.sitekit/asset-cache/${createHash('sha256').update(url).digest('hex').slice(0, 32)}`;
+      workspace.set(file, body);
+      map[url] = file;
+    }
+    workspace.set(ASSET_MAP, Buffer.from(JSON.stringify(map)));
+  }
 
   /** The audit of `spec` in the job's workspace (its files, with site.json replaced by the candidate). */
   audit(
     files: ReadonlyMap<string, Buffer>,
     spec: unknown,
     labels: { readonly jobId: string; readonly organizationId: string },
-  ): Promise<AuditReport> {
+  ): Promise<AuditRun> {
     const site = Buffer.from(JSON.stringify(spec));
     const key = createHash('sha256').update(site).digest('hex');
     let pending = this.cache.get(key);
@@ -61,9 +94,10 @@ export class SandboxAuditClient {
     site: Buffer,
     labels: { readonly jobId: string; readonly organizationId: string },
     key: string,
-  ): Promise<AuditReport> {
+  ): Promise<AuditRun> {
     const workspace = new Map(files);
     workspace.set('site.json', site);
+    await this.withAssets(workspace, JSON.parse(site.toString('utf8')) as unknown);
     const spec: SandboxRunSpec = {
       image: this.settings.image,
       cpus: this.settings.cpus,
@@ -84,11 +118,11 @@ export class SandboxAuditClient {
       {
         protocol: RUNNER_PROTOCOL,
         runId: `audit:${key.slice(0, 32)}`,
-        command: ['sitekit', 'audit', '--json', '--out', REPORT],
+        command: ['sitekit', 'audit', '--screenshots', '--json', '--out', REPORT],
         wallTimeSec: this.settings.wallTimeSec,
         // The audit is the run; no further check.
         checkCommand: ['true'],
-        collect: [REPORT],
+        collect: [REPORT, '.sitekit/audit/*.png'],
       },
       packBundle(workspace),
       controller.signal,
@@ -102,6 +136,12 @@ export class SandboxAuditClient {
       throw new AuditError(
         `sitekit audit did not complete (${exit?.reason ?? 'no exit'}): ${stderr.slice(-3).join(' | ').slice(0, 400)}`,
       );
-    return JSON.parse(body.toString('utf8')) as AuditReport;
+    const report = JSON.parse(body.toString('utf8')) as AuditReport;
+    const images = new Map<string, Buffer>();
+    for (const shot of report.screenshots ?? []) {
+      const png = collector.get(shot.file);
+      if (png) images.set(shot.file, png);
+    }
+    return { ...report, images };
   }
 }

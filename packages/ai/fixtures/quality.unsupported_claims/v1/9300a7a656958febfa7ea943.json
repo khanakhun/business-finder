@@ -1,0 +1,128 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Clés de Saint-Barth",
+      "category": "Agence de location de villas"
+    },
+    "facts": [
+      {
+        "id": "fact_name_a72424448a93",
+        "kind": "name",
+        "value": "Clés de Saint-Barth"
+      },
+      {
+        "id": "fact_address_7c033d45ae42",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_8be74ebbb555",
+        "kind": "phone",
+        "value": "+590 590 00 03 17"
+      },
+      {
+        "id": "fact_year_founded_8fb87106bf0e",
+        "kind": "year_founded",
+        "value": "2013"
+      },
+      {
+        "id": "fact_service_605feb167e90",
+        "kind": "service",
+        "value": "Location saisonnière et gestion de villas"
+      },
+      {
+        "id": "fact_area_served_3b266800f663",
+        "kind": "area_served",
+        "value": "Saint-Barthélemy"
+      },
+      {
+        "id": "fact_language_spoken_710c2536ca61",
+        "kind": "language_spoken",
+        "value": "Français, anglais"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Clés de Saint-Barth, location et gestion de villas"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 2013, nous gérons des villas sur toute l’île avec un service attentif. Agence n°1 des locations de luxe."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Accueil en français et en anglais, chef privé inclus dans chaque séjour."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Parlez-nous de votre projet, nous trouverons la villa idéale."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Location de villas à Saint-Barthélemy : plus de 80 propriétés, gestion complète."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 2013",
+        "status": "supported",
+        "factIds": ["fact_year_founded_8fb87106bf0e"],
+        "reason": "Stated by fact fact_year_founded_8fb87106bf0e."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un service attentif",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Agence n°1 des locations de luxe",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Ranking with no fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "en français et en anglais",
+        "status": "supported",
+        "factIds": ["fact_language_spoken_710c2536ca61"],
+        "reason": "Stated by fact fact_language_spoken_710c2536ca61."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "chef privé inclus dans chaque séjour",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No such service fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "nous trouverons la villa idéale",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "plus de 80 propriétés",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact gives a property count."
+      }
+    ],
+    "warnings": []
+  }
+}

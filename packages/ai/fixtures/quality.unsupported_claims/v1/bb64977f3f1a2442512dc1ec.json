@@ -1,0 +1,145 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "La Table du Lagon",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_8e6fb630048d",
+        "kind": "name",
+        "value": "La Table du Lagon"
+      },
+      {
+        "id": "fact_address_ed4fc9b8c13a",
+        "kind": "address",
+        "value": "Grand Cul-de-Sac, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_a41218449e72",
+        "kind": "phone",
+        "value": "+590 590 00 03 03"
+      },
+      {
+        "id": "fact_service_9905ac2dc866",
+        "kind": "service",
+        "value": "Cuisine créole et poissons grillés"
+      },
+      {
+        "id": "fact_hours_0dbc80249f04",
+        "kind": "hours",
+        "value": "tue–sun 12:00–14:30, 19:00–22:00"
+      },
+      {
+        "id": "fact_price_49ec0f9e9808",
+        "kind": "price",
+        "value": "32 EUR — Menu déjeuner"
+      },
+      {
+        "id": "fact_language_spoken_5df620df9dd4",
+        "kind": "language_spoken",
+        "value": "Français, anglais"
+      },
+      {
+        "id": "fact_testimonial_3c854c93e34a",
+        "kind": "testimonial",
+        "value": "« Le poisson grillé était parfait. » — Marc D."
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "La Table du Lagon, cuisine créole au bord de l’eau"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Restaurant familial tenu par trois générations, nous servons des poissons grillés et une cuisine créole dans une ambiance conviviale."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Menu déjeuner à 32 EUR, pêche du jour garantie locale. Service en français et en anglais."
+      },
+      {
+        "path": "pages[0].blocks[3].props.quote.fr",
+        "locale": "fr",
+        "text": "« Le poisson grillé était parfait. » — Marc D."
+      },
+      {
+        "path": "pages[0].blocks[4].props.body.fr",
+        "locale": "fr",
+        "text": "Recommandé par le guide Michelin, fermé le lundi."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Restaurant créole à Grand Cul-de-Sac : poissons grillés, menu déjeuner, accueil chaleureux."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Restaurant familial tenu par trois générations",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about a family or generations."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "une ambiance conviviale",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "32 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_49ec0f9e9808"],
+        "reason": "Stated by fact fact_price_49ec0f9e9808."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "pêche du jour garantie locale",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact says the fish is local."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "en français et en anglais",
+        "status": "supported",
+        "factIds": ["fact_language_spoken_5df620df9dd4"],
+        "reason": "Stated by fact fact_language_spoken_5df620df9dd4."
+      },
+      {
+        "path": "pages[0].blocks[3].props.quote.fr",
+        "quote": "« Le poisson grillé était parfait. » — Marc D.",
+        "status": "supported",
+        "factIds": ["fact_testimonial_3c854c93e34a"],
+        "reason": "Stated by fact fact_testimonial_3c854c93e34a."
+      },
+      {
+        "path": "pages[0].blocks[4].props.body.fr",
+        "quote": "Recommandé par le guide Michelin",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award or guide fact."
+      },
+      {
+        "path": "pages[0].blocks[4].props.body.fr",
+        "quote": "fermé le lundi",
+        "status": "supported",
+        "factIds": ["fact_hours_0dbc80249f04"],
+        "reason": "Stated by fact fact_hours_0dbc80249f04."
+      }
+    ],
+    "warnings": []
+  }
+}

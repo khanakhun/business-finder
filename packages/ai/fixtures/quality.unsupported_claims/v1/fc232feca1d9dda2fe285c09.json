@@ -1,0 +1,152 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Garage Caraïbes Auto",
+      "category": "Garage automobile"
+    },
+    "facts": [
+      {
+        "id": "fact_name_a40beb5f5f56",
+        "kind": "name",
+        "value": "Garage Caraïbes Auto"
+      },
+      {
+        "id": "fact_address_36cff0fa7a72",
+        "kind": "address",
+        "value": "Public, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_f4a42debc886",
+        "kind": "phone",
+        "value": "+590 590 00 05 09"
+      },
+      {
+        "id": "fact_year_founded_c34cf087e6df",
+        "kind": "year_founded",
+        "value": "2008"
+      },
+      {
+        "id": "fact_service_e2bffcf04c77",
+        "kind": "service",
+        "value": "Entretien, pneus, diagnostic"
+      },
+      {
+        "id": "fact_hours_efb65e897941",
+        "kind": "hours",
+        "value": "mon–fri 07:30–17:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Garage Caraïbes Auto, depuis 2008"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Garage Caraïbes Auto, since 2008"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Entretien, pneus et diagnostic, un travail soigné. Agréé toutes marques."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Servicing, tyres and diagnostics, careful work. Approved for all brands."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Véhicule de prêt gratuit, du lundi au vendredi."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Free loan car, Monday to Friday."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Demandez un devis."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Ask for a quote."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2008",
+        "status": "supported",
+        "factIds": ["fact_year_founded_c34cf087e6df"],
+        "reason": "Stated by fact fact_year_founded_c34cf087e6df."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2008",
+        "status": "supported",
+        "factIds": ["fact_year_founded_c34cf087e6df"],
+        "reason": "Stated by fact fact_year_founded_c34cf087e6df."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un travail soigné",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Agréé toutes marques",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No approval fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Approved for all brands",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No approval fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Véhicule de prêt gratuit",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No such service fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "du lundi au vendredi",
+        "status": "supported",
+        "factIds": ["fact_hours_efb65e897941"],
+        "reason": "Stated by fact fact_hours_efb65e897941."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Free loan car",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No such service fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Monday to Friday",
+        "status": "supported",
+        "factIds": ["fact_hours_efb65e897941"],
+        "reason": "Stated by fact fact_hours_efb65e897941."
+      }
+    ],
+    "warnings": []
+  }
+}

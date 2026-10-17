@@ -1,0 +1,114 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Lorient Hardware Supply",
+      "category": "Hardware store"
+    },
+    "facts": [
+      {
+        "id": "fact_name_78cb8e0087b7",
+        "kind": "name",
+        "value": "Lorient Hardware Supply"
+      },
+      {
+        "id": "fact_address_8d0f73465b4f",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_fb7e27138f27",
+        "kind": "phone",
+        "value": "+590 590 00 04 12"
+      },
+      {
+        "id": "fact_year_founded_72800379aea8",
+        "kind": "year_founded",
+        "value": "1996"
+      },
+      {
+        "id": "fact_service_800d15ddaf6d",
+        "kind": "service",
+        "value": "Tools, paint, plumbing, electrical"
+      },
+      {
+        "id": "fact_hours_c31cbf2a3502",
+        "kind": "hours",
+        "value": "mon–sat 07:00–17:00"
+      },
+      {
+        "id": "fact_amenity_d81e88589433",
+        "kind": "amenity",
+        "value": "Customer parking"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Lorient Hardware Supply, since 1996"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Tools, paint, plumbing and electrical supplies with helpful advice and customer parking."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Open Monday to Saturday, 7am to 5pm."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Drop by with your project."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Hardware store in Lorient, Saint-Barthélemy: tools, paint, plumbing, electrical."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 1996",
+        "status": "supported",
+        "factIds": ["fact_year_founded_72800379aea8"],
+        "reason": "Stated by fact fact_year_founded_72800379aea8."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "helpful advice",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "customer parking",
+        "status": "supported",
+        "factIds": ["fact_amenity_d81e88589433"],
+        "reason": "Stated by fact fact_amenity_d81e88589433."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Open Monday to Saturday, 7am to 5pm",
+        "status": "supported",
+        "factIds": ["fact_hours_c31cbf2a3502"],
+        "reason": "Stated by fact fact_hours_c31cbf2a3502."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Drop by",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

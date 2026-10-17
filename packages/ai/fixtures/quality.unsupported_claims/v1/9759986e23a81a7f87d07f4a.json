@@ -1,0 +1,116 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Saline Surf & Sail",
+      "category": "Water sports"
+    },
+    "facts": [
+      {
+        "id": "fact_name_b13d024c92bf",
+        "kind": "name",
+        "value": "Saline Surf & Sail"
+      },
+      {
+        "id": "fact_address_d7ca5329d8be",
+        "kind": "address",
+        "value": "Grande Saline, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_a86d6b4d2643",
+        "kind": "phone",
+        "value": "+590 590 00 04 15"
+      },
+      {
+        "id": "fact_service_2b2fbcf5d602",
+        "kind": "service",
+        "value": "Surf lessons, paddleboard hire, sailing trips"
+      },
+      {
+        "id": "fact_price_91934c01398a",
+        "kind": "price",
+        "value": "70 EUR — Surf lesson 90 min"
+      },
+      {
+        "id": "fact_hours_1aa22f3a3059",
+        "kind": "hours",
+        "value": "mon–sun 08:00–18:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Saline Surf & Sail"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Surf lessons at 70 EUR, paddleboard hire and sailing trips, every day from 8am. Instructors certified by the ISA."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Stand up on your first lesson or your money back. Good vibes only."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Join us on the water."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Surf and sail in Grande Saline, the island’s first surf school."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "70 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_91934c01398a"],
+        "reason": "Stated by fact fact_price_91934c01398a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "every day from 8am",
+        "status": "supported",
+        "factIds": ["fact_hours_1aa22f3a3059"],
+        "reason": "Stated by fact fact_hours_1aa22f3a3059."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Instructors certified by the ISA",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Stand up on your first lesson or your money back",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Join us on the water",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "the island’s first surf school",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No history fact."
+      }
+    ],
+    "warnings": []
+  }
+}

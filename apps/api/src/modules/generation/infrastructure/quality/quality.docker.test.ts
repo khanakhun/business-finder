@@ -36,6 +36,13 @@ describe.runIf(Boolean(image))('quality audits in the sandbox', () => {
       expect(finding.scores.accessibility).toBeGreaterThan(80);
     }
     expect(report.durationMs).toBeLessThan(180_000);
+    // The critic's screenshots came back with the report.
+    expect(report.screenshots?.map((shot) => `${shot.page}:${shot.viewport}`).slice(0, 2)).toEqual([
+      'home:desktop',
+      'home:mobile',
+    ]);
+    for (const shot of report.screenshots ?? [])
+      expect(report.images.get(shot.file)?.subarray(1, 4).toString()).toBe('PNG');
   }, 300_000);
 
   it('scores the starter site through the full pipeline', async () => {

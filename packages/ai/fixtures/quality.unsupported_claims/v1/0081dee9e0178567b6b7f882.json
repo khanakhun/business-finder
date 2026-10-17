@@ -1,0 +1,199 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Villas Soleil Levant",
+      "category": "Agence de location de villas"
+    },
+    "facts": [
+      {
+        "id": "fact_name_c83a599ffc82",
+        "kind": "name",
+        "value": "Villas Soleil Levant"
+      },
+      {
+        "id": "fact_address_45be16090ead",
+        "kind": "address",
+        "value": "Pointe Milou, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_98085d452c55",
+        "kind": "phone",
+        "value": "+590 590 00 05 05"
+      },
+      {
+        "id": "fact_email_bf01d9b68ed2",
+        "kind": "email",
+        "value": "contact@soleillevant.example"
+      },
+      {
+        "id": "fact_service_89d1f9801eda",
+        "kind": "service",
+        "value": "Location de villas, conciergerie"
+      },
+      {
+        "id": "fact_area_served_2199ee94c9f0",
+        "kind": "area_served",
+        "value": "Saint-Barthélemy"
+      },
+      {
+        "id": "fact_language_spoken_c635342b11fd",
+        "kind": "language_spoken",
+        "value": "Français, anglais, espagnol"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Villas Soleil Levant, vos vacances de rêve"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Villas Soleil Levant, your dream holiday"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Conciergerie en français, anglais et espagnol. Plus de 150 villas, toutes à moins de 10 minutes des plages."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Concierge in French, English and Spanish. Over 150 villas, all within 10 minutes of the beaches."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Depuis 1999, un service attentionné partout sur Saint-Barthélemy."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Since 1999, attentive service all over Saint-Barthélemy."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Contactez-nous, nous sommes à votre écoute."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Contact us, we are here for you."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "vos vacances de rêve",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "en français, anglais et espagnol",
+        "status": "supported",
+        "factIds": ["fact_language_spoken_c635342b11fd"],
+        "reason": "Stated by fact fact_language_spoken_c635342b11fd."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Plus de 150 villas",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "toutes à moins de 10 minutes des plages",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "in French, English and Spanish",
+        "status": "supported",
+        "factIds": ["fact_language_spoken_c635342b11fd"],
+        "reason": "Stated by fact fact_language_spoken_c635342b11fd."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Over 150 villas",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "all within 10 minutes of the beaches",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Depuis 1999",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "un service attentionné",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Saint-Barthélemy",
+        "status": "supported",
+        "factIds": ["fact_area_served_2199ee94c9f0"],
+        "reason": "Stated by fact fact_area_served_2199ee94c9f0."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Since 1999",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "attentive service",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Saint-Barthélemy",
+        "status": "supported",
+        "factIds": ["fact_area_served_2199ee94c9f0"],
+        "reason": "Stated by fact fact_area_served_2199ee94c9f0."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "nous sommes à votre écoute",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "we are here for you",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

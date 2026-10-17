@@ -57,6 +57,9 @@ export const generationEnv = z.object({
   GENERATION_QUALITY_AUDITS: booleanFlag(false).describe(
     'Run the render-based quality gates (BF-045: axe-core accessibility, Lighthouse) in a no-network sandbox; needs SANDBOX_ENABLED. On in production.',
   ),
+  GENERATION_QUALITY_AI_GATES: booleanFlag(false).describe(
+    'Run the AI quality gates (BF-045: unsupported claims; the visual critic with the audits): model calls billed to the workspace. On in production.',
+  ),
   GENERATION_QUALITY_AUDIT_WALL_TIME_SEC: z.coerce
     .number()
     .int()

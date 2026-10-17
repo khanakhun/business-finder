@@ -1,6 +1,7 @@
 import type { QualityIssue } from '@bf/contracts';
-import type { AuditReport, AxeFinding, LighthouseFinding } from '@bf/sitekit';
+import type { AxeFinding, LighthouseFinding } from '@bf/sitekit';
 import type { GateContext, GateOutcome, QualityGate } from './gates.ts';
+import type { AuditRun } from './sandbox-audit.client.ts';
 
 // The render-based gates (BF-045): accessibility from axe-core (every page × locale, mobile and desktop) and
 // performance from Lighthouse (home and the heaviest inner page, both presets), both on one sandboxed audit. Each
@@ -8,7 +9,7 @@ import type { GateContext, GateOutcome, QualityGate } from './gates.ts';
 // heavy images) or the platform (renderer, fonts, CSS, scripts: no repair, an alert).
 
 /** The audit of the candidate (the pipeline provides it, memoized per candidate). */
-export type AuditContext = GateContext & { readonly audit: () => Promise<AuditReport> };
+export type AuditContext = GateContext & { readonly audit: () => Promise<AuditRun> };
 
 /** axe rules an engine fixes by editing the site (texts, headings, palette, alt text). */
 const CONTENT_RULES = new Set([

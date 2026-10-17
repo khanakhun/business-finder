@@ -51,7 +51,7 @@ function pipeline(audit: () => Promise<AuditReport>) {
         calls++;
         expect(files.has('facts.json')).toBe(true);
         expect(spec).toBeDefined();
-        return audit();
+        return { ...(await audit()), images: new Map() };
       },
     },
   });

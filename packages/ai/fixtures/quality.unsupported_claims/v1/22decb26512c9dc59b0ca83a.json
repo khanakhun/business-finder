@@ -1,0 +1,187 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Villa Elegance",
+      "category": "Location de villas"
+    },
+    "facts": [
+      {
+        "id": "fact_name_1e4a65710ed6",
+        "kind": "name",
+        "value": "Villa Elegance"
+      },
+      {
+        "id": "fact_address_9d8905ceae76",
+        "kind": "address",
+        "value": "Les Trois-Îlets, 97229 Martinique"
+      },
+      {
+        "id": "fact_phone_015b2791cf64",
+        "kind": "phone",
+        "value": "+596 596 00 05 14"
+      },
+      {
+        "id": "fact_service_b4b6ee955008",
+        "kind": "service",
+        "value": "Location de villas avec piscine"
+      },
+      {
+        "id": "fact_area_served_9bbfade2082c",
+        "kind": "area_served",
+        "value": "Martinique"
+      },
+      {
+        "id": "fact_team_member_c6482b7ffd92",
+        "kind": "team_member",
+        "value": "Claire Dorval — Gérante"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Villa Elegance, villas en Martinique"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Villa Elegance, villas in Martinique"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Gérée par Claire Dorval, depuis 2007. Plus de 60 villas, un accompagnement sur mesure."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Managed by Claire Dorval, since 2007. Over 60 villas, tailored support."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Annulation gratuite, à 3 minutes de la plage."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Free cancellation, 3 minutes from the beach."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Écrivez-nous."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Write to us."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "Martinique",
+        "status": "supported",
+        "factIds": ["fact_area_served_9bbfade2082c"],
+        "reason": "Stated by fact fact_area_served_9bbfade2082c."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "Martinique",
+        "status": "supported",
+        "factIds": ["fact_area_served_9bbfade2082c"],
+        "reason": "Stated by fact fact_area_served_9bbfade2082c."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Claire Dorval",
+        "status": "supported",
+        "factIds": ["fact_team_member_c6482b7ffd92"],
+        "reason": "Stated by fact fact_team_member_c6482b7ffd92."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "depuis 2007",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Plus de 60 villas",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un accompagnement sur mesure",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Claire Dorval",
+        "status": "supported",
+        "factIds": ["fact_team_member_c6482b7ffd92"],
+        "reason": "Stated by fact fact_team_member_c6482b7ffd92."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "since 2007",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Over 60 villas",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No count fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "tailored support",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Annulation gratuite",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No policy fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "à 3 minutes de la plage",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Free cancellation",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No policy fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "3 minutes from the beach",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      }
+    ],
+    "warnings": []
+  }
+}

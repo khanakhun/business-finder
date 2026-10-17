@@ -2,8 +2,10 @@
 
 export { type AgentToolFactory, createSitekitAgentTools } from './agent-tools.ts';
 export {
+  ASSET_MAP,
   type AuditReport,
   type AxeFinding,
+  type CriticShot,
   type LighthouseAudit,
   type LighthouseFinding,
   lighthousePages,
@@ -40,7 +42,13 @@ export {
   readFacts,
   UnknownBlockError,
 } from './lib/readers.ts';
-export { RENDER_DIR, type RenderedPage, type RenderResult, renderSite } from './lib/render.ts';
+export {
+  RENDER_DIR,
+  type RenderedPage,
+  type RenderResult,
+  referencedAssetUrls,
+  renderSite,
+} from './lib/render.ts';
 export {
   type ScreenshotRequest,
   type Shooter,

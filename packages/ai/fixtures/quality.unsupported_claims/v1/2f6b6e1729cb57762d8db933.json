@@ -1,0 +1,135 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Anse Villas",
+      "category": "Agence immobilière"
+    },
+    "facts": [
+      {
+        "id": "fact_name_5aba5848ba04",
+        "kind": "name",
+        "value": "Anse Villas"
+      },
+      {
+        "id": "fact_address_dc915e28b3ff",
+        "kind": "address",
+        "value": "Gustavia, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_f26a3b45ad9d",
+        "kind": "phone",
+        "value": "+590 590 00 03 29"
+      },
+      {
+        "id": "fact_email_495c3c790828",
+        "kind": "email",
+        "value": "info@ansevillas.example"
+      },
+      {
+        "id": "fact_service_ffdaebea3d8a",
+        "kind": "service",
+        "value": "Location de villas avec piscine"
+      },
+      {
+        "id": "fact_area_served_c75c8667a23c",
+        "kind": "area_served",
+        "value": "Saint-Barthélemy"
+      },
+      {
+        "id": "fact_team_member_9770ce2a6ce9",
+        "kind": "team_member",
+        "value": "Paul Ravel — Fondateur"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Anse Villas, villas avec piscine à Saint-Barthélemy"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Fondée par Paul Ravel en 2005, Anse Villas sélectionne des villas avec piscine toutes vue mer, pour des vacances inoubliables."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Annulation gratuite jusqu’à 48 h, réponse en moins d’une heure."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Écrivez-nous, nous sommes à votre disposition."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Location de villas avec piscine à Saint-Barthélemy, notée 4,9/5 par nos clients."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Paul Ravel",
+        "status": "supported",
+        "factIds": ["fact_team_member_9770ce2a6ce9"],
+        "reason": "Stated by fact fact_team_member_9770ce2a6ce9."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "en 2005",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "toutes vue mer",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about views."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "des vacances inoubliables",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Annulation gratuite jusqu’à 48 h",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No policy fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "réponse en moins d’une heure",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about response time."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "nous sommes à votre disposition",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "notée 4,9/5 par nos clients",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No rating fact."
+      }
+    ],
+    "warnings": []
+  }
+}

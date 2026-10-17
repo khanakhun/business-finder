@@ -1,0 +1,128 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Bayside Brasserie",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_6dbf07798b2f",
+        "kind": "name",
+        "value": "Bayside Brasserie"
+      },
+      {
+        "id": "fact_address_d4abb3c51339",
+        "kind": "address",
+        "value": "14 Kings Road, Brighton BN1 2FA"
+      },
+      {
+        "id": "fact_phone_d78041414edc",
+        "kind": "phone",
+        "value": "+44 1273 000 413"
+      },
+      {
+        "id": "fact_year_founded_d48241217cbb",
+        "kind": "year_founded",
+        "value": "2012"
+      },
+      {
+        "id": "fact_service_768db49c5250",
+        "kind": "service",
+        "value": "Modern British brasserie"
+      },
+      {
+        "id": "fact_hours_22b0619a9d39",
+        "kind": "hours",
+        "value": "mon–sun 12:00–22:00"
+      },
+      {
+        "id": "fact_price_92a26975da4c",
+        "kind": "price",
+        "value": "24 GBP — Two-course lunch"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Bayside Brasserie, Brighton seafront"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Since 2012, modern British cooking with a warm welcome. Winner of Brighton Restaurant of the Year."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Two-course lunch 24 GBP, all produce from Sussex farms. Open every day."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book online, see you soon."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Brasserie on Brighton seafront, 30 seconds from the pier."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Since 2012",
+        "status": "supported",
+        "factIds": ["fact_year_founded_d48241217cbb"],
+        "reason": "Stated by fact fact_year_founded_d48241217cbb."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "a warm welcome",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Winner of Brighton Restaurant of the Year",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "24 GBP",
+        "status": "supported",
+        "factIds": ["fact_price_92a26975da4c"],
+        "reason": "Stated by fact fact_price_92a26975da4c."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "all produce from Sussex farms",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Open every day",
+        "status": "supported",
+        "factIds": ["fact_hours_22b0619a9d39"],
+        "reason": "Stated by fact fact_hours_22b0619a9d39."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "30 seconds from the pier",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No distance fact."
+      }
+    ],
+    "warnings": []
+  }
+}

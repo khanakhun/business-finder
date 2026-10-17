@@ -1,0 +1,173 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Gym Saint-Jean",
+      "category": "Salle de sport"
+    },
+    "facts": [
+      {
+        "id": "fact_name_e7280e3a9fa2",
+        "kind": "name",
+        "value": "Gym Saint-Jean"
+      },
+      {
+        "id": "fact_address_b8525a6777b4",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_7de4e70585c4",
+        "kind": "phone",
+        "value": "+590 590 00 05 07"
+      },
+      {
+        "id": "fact_service_c94839702329",
+        "kind": "service",
+        "value": "Musculation, cardio, cours collectifs"
+      },
+      {
+        "id": "fact_price_a106743640fc",
+        "kind": "price",
+        "value": "80 EUR — Abonnement mensuel"
+      },
+      {
+        "id": "fact_hours_f92ec4c52d5a",
+        "kind": "hours",
+        "value": "mon–sat 06:00–21:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Gym Saint-Jean"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Gym Saint-Jean"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Abonnement à 80 EUR par mois, ouvert du lundi au samedi. Ouvert le dimanche."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Membership 80 EUR a month, open Monday to Saturday. Open on Sundays."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Coachs diplômés d’État, une ambiance motivante."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "State-certified coaches, a motivating atmosphere."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Salle de sport à Saint-Jean, la mieux équipée de l’île."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Gym in Saint-Jean, the best equipped on the island."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "80 EUR par mois",
+        "status": "supported",
+        "factIds": ["fact_price_a106743640fc"],
+        "reason": "Stated by fact fact_price_a106743640fc."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "ouvert du lundi au samedi",
+        "status": "supported",
+        "factIds": ["fact_hours_f92ec4c52d5a"],
+        "reason": "Stated by fact fact_hours_f92ec4c52d5a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Ouvert le dimanche",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–sat."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "80 EUR a month",
+        "status": "supported",
+        "factIds": ["fact_price_a106743640fc"],
+        "reason": "Stated by fact fact_price_a106743640fc."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "open Monday to Saturday",
+        "status": "supported",
+        "factIds": ["fact_hours_f92ec4c52d5a"],
+        "reason": "Stated by fact fact_hours_f92ec4c52d5a."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Open on Sundays",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–sat."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Coachs diplômés d’État",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "une ambiance motivante",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "State-certified coaches",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "a motivating atmosphere",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "la mieux équipée de l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "the best equipped on the island",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      }
+    ],
+    "warnings": []
+  }
+}

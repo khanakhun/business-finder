@@ -1,0 +1,121 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Studio Pilates Colombier",
+      "category": "Studio de Pilates"
+    },
+    "facts": [
+      {
+        "id": "fact_name_ec4caf48be0d",
+        "kind": "name",
+        "value": "Studio Pilates Colombier"
+      },
+      {
+        "id": "fact_address_89eca29a80d8",
+        "kind": "address",
+        "value": "Colombier, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_a1d280e31aa8",
+        "kind": "phone",
+        "value": "+590 590 00 03 19"
+      },
+      {
+        "id": "fact_service_0ea9aafb79cd",
+        "kind": "service",
+        "value": "Pilates reformer et cours collectifs"
+      },
+      {
+        "id": "fact_price_3c2e882e1cda",
+        "kind": "price",
+        "value": "35 EUR — Cours collectif"
+      },
+      {
+        "id": "fact_team_member_f8c669490de4",
+        "kind": "team_member",
+        "value": "Nora Vidal — Instructrice certifiée"
+      },
+      {
+        "id": "fact_hours_8ce0d8220c02",
+        "kind": "hours",
+        "value": "mon–fri 07:00–19:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Studio Pilates Colombier"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Nora Vidal, instructrice certifiée, vous guide en reformer et en cours collectifs à 35 EUR, dans un espace lumineux et calme."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Cours également le samedi matin. Résultats visibles en 10 séances."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Prenez un moment pour vous et réservez un cours d’essai."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Pilates reformer à Colombier, le premier studio de l’île."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Nora Vidal",
+        "status": "supported",
+        "factIds": ["fact_team_member_f8c669490de4"],
+        "reason": "Stated by fact fact_team_member_f8c669490de4."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "35 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_3c2e882e1cda"],
+        "reason": "Stated by fact fact_price_3c2e882e1cda."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Cours également le samedi matin",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–fri."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Résultats visibles en 10 séances",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Prenez un moment pour vous",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "le premier studio de l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about being first."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Marée Bleue Charters",
+      "category": "Location de bateaux"
+    },
+    "facts": [
+      {
+        "id": "fact_name_b67131e9bfa2",
+        "kind": "name",
+        "value": "Marée Bleue Charters"
+      },
+      {
+        "id": "fact_address_1b568f5b882f",
+        "kind": "address",
+        "value": "Quai du Port, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_e69756911a01",
+        "kind": "phone",
+        "value": "+590 590 00 03 06"
+      },
+      {
+        "id": "fact_service_c6428a0fcad3",
+        "kind": "service",
+        "value": "Sorties à la journée et coucher de soleil"
+      },
+      {
+        "id": "fact_price_2993c54ec8cb",
+        "kind": "price",
+        "value": "650 EUR — Journée privative (jusqu’à 8 personnes)"
+      },
+      {
+        "id": "fact_team_member_a21842eeb968",
+        "kind": "team_member",
+        "value": "Capitaine Léo Baptiste"
+      },
+      {
+        "id": "fact_payment_method_8111b6e62a86",
+        "kind": "payment_method",
+        "value": "Carte bancaire, virement"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Marée Bleue Charters, l’île vue de la mer"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Avec le capitaine Léo Baptiste, plus de 15 ans d’expérience, partez pour une journée privative à 590 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Sorties à la journée et au coucher du soleil, dauphins garantis. Paiement par carte ou virement."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Réservez votre sortie, l’aventure vous attend."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Location de bateau à Gustavia : journée privative 650 EUR, coucher de soleil, le seul charter éco-responsable de l’île."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "l’île vue de la mer",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "capitaine Léo Baptiste",
+        "status": "supported",
+        "factIds": ["fact_team_member_a21842eeb968"],
+        "reason": "Stated by fact fact_team_member_a21842eeb968."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "plus de 15 ans d’expérience",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about experience."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "590 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The price fact says 650 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "dauphins garantis",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact guarantees sightings."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "par carte ou virement",
+        "status": "supported",
+        "factIds": ["fact_payment_method_8111b6e62a86"],
+        "reason": "Stated by fact fact_payment_method_8111b6e62a86."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "l’aventure vous attend",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "650 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_2993c54ec8cb"],
+        "reason": "Stated by fact fact_price_2993c54ec8cb."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "le seul charter éco-responsable de l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Exclusivity claim with no fact."
+      }
+    ],
+    "warnings": []
+  }
+}

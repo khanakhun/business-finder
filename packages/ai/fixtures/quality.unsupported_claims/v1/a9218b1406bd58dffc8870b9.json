@@ -1,0 +1,143 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Boulangerie des Flamands",
+      "category": "Boulangerie"
+    },
+    "facts": [
+      {
+        "id": "fact_name_d71b07a78bc9",
+        "kind": "name",
+        "value": "Boulangerie des Flamands"
+      },
+      {
+        "id": "fact_address_ac9824b9d4ab",
+        "kind": "address",
+        "value": "Anse des Flamands, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_a457a3673953",
+        "kind": "phone",
+        "value": "+590 590 00 05 04"
+      },
+      {
+        "id": "fact_service_8e179f879da3",
+        "kind": "service",
+        "value": "Pains, viennoiseries"
+      },
+      {
+        "id": "fact_hours_a2e5e9f5f4cd",
+        "kind": "hours",
+        "value": "mon–sat 06:00–13:00"
+      },
+      {
+        "id": "fact_year_founded_a1c10b799079",
+        "kind": "year_founded",
+        "value": "2014"
+      },
+      {
+        "id": "fact_price_6ed79cd806ee",
+        "kind": "price",
+        "value": "1,30 EUR — Baguette"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Boulangerie des Flamands, depuis 2014"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Boulangerie des Flamands, since 2014"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Pains et viennoiseries faits avec soin. Baguette 1,30 EUR."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Breads and pastries made with care. Baguette 1,30 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert du lundi au samedi de 6h à 13h."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Open Monday to Saturday, 6am to 1pm."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "À bientôt !"
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "See you soon!"
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2014",
+        "status": "supported",
+        "factIds": ["fact_year_founded_a1c10b799079"],
+        "reason": "Stated by fact fact_year_founded_a1c10b799079."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2014",
+        "status": "supported",
+        "factIds": ["fact_year_founded_a1c10b799079"],
+        "reason": "Stated by fact fact_year_founded_a1c10b799079."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "1,30 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_6ed79cd806ee"],
+        "reason": "Stated by fact fact_price_6ed79cd806ee."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "made with care",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "1,30 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_6ed79cd806ee"],
+        "reason": "Stated by fact fact_price_6ed79cd806ee."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert du lundi au samedi de 6h à 13h",
+        "status": "supported",
+        "factIds": ["fact_hours_a2e5e9f5f4cd"],
+        "reason": "Stated by fact fact_hours_a2e5e9f5f4cd."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Open Monday to Saturday, 6am to 1pm",
+        "status": "supported",
+        "factIds": ["fact_hours_a2e5e9f5f4cd"],
+        "reason": "Stated by fact fact_hours_a2e5e9f5f4cd."
+      }
+    ],
+    "warnings": []
+  }
+}

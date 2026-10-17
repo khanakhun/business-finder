@@ -58,6 +58,8 @@ export const QualityGateResultSchema = z
     durationMs: z.number().int().nonnegative(),
     costUsd: z.number().nonnegative(),
     issues: z.array(QualityIssueSchema).max(500),
+    /** The visual critic's rubric: criterion → 1–5. */
+    rubric: z.record(z.string().max(40), z.number().min(1).max(5)).optional(),
     /** Model and prompt versions of an AI gate (reproducibility). */
     model: z.string().max(80).optional(),
     promptVersion: z.number().int().positive().optional(),

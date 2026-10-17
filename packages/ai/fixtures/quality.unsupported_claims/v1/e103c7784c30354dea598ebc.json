@@ -1,0 +1,123 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Brûlerie du Carénage",
+      "category": "Café-torréfacteur"
+    },
+    "facts": [
+      {
+        "id": "fact_name_9c48feae12bf",
+        "kind": "name",
+        "value": "Brûlerie du Carénage"
+      },
+      {
+        "id": "fact_address_7ca0ae8eb730",
+        "kind": "address",
+        "value": "Rue du Carénage, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_da4fec0616c7",
+        "kind": "phone",
+        "value": "+590 590 00 03 27"
+      },
+      {
+        "id": "fact_year_founded_850ac16a66f6",
+        "kind": "year_founded",
+        "value": "2020"
+      },
+      {
+        "id": "fact_service_4c24303385c0",
+        "kind": "service",
+        "value": "Torréfaction, café à emporter, grains en vente"
+      },
+      {
+        "id": "fact_hours_888ba1b49267",
+        "kind": "hours",
+        "value": "mon–fri 07:00–16:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Brûlerie du Carénage, torréfacteur à Gustavia"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Nous torréfions nos cafés sur place depuis 2020 : des arômes à découvrir en tasse ou en grains. Cafés issus exclusivement du commerce équitable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert le week-end, expresso à 1,50 EUR."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Passez prendre un café."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Torréfacteur à Gustavia : café à emporter, grains en vente, du lundi au vendredi."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "depuis 2020",
+        "status": "supported",
+        "factIds": ["fact_year_founded_850ac16a66f6"],
+        "reason": "Stated by fact fact_year_founded_850ac16a66f6."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "des arômes à découvrir",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Cafés issus exclusivement du commerce équitable",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert le week-end",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–fri."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "expresso à 1,50 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No price fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "Passez prendre un café",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "du lundi au vendredi",
+        "status": "supported",
+        "factIds": ["fact_hours_888ba1b49267"],
+        "reason": "Stated by fact fact_hours_888ba1b49267."
+      }
+    ],
+    "warnings": []
+  }
+}

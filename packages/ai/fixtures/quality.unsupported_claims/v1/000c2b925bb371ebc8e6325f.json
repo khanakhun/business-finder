@@ -1,0 +1,216 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "La Case à Poissons",
+      "category": "Restaurant"
+    },
+    "facts": [
+      {
+        "id": "fact_name_c7501a6aa71d",
+        "kind": "name",
+        "value": "La Case à Poissons"
+      },
+      {
+        "id": "fact_address_09553cae4ccb",
+        "kind": "address",
+        "value": "Corossol, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_c69f58184007",
+        "kind": "phone",
+        "value": "+590 590 00 05 03"
+      },
+      {
+        "id": "fact_service_a4255de4c111",
+        "kind": "service",
+        "value": "Poissons grillés, langouste"
+      },
+      {
+        "id": "fact_hours_0f80926e1912",
+        "kind": "hours",
+        "value": "wed–sun 12:00–15:00, 19:00–22:00"
+      },
+      {
+        "id": "fact_price_e845d2d46114",
+        "kind": "price",
+        "value": "45 EUR — Langouste grillée"
+      },
+      {
+        "id": "fact_year_founded_0516e4503db8",
+        "kind": "year_founded",
+        "value": "2010"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "La Case à Poissons, depuis 2010 à Corossol"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "La Case à Poissons, in Corossol since 2010"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Langouste grillée 45 EUR, pêchée le matin même, dans une ambiance conviviale."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Grilled lobster 45 EUR, caught the same morning, in a convivial atmosphere."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Restaurant familial, fermé lundi et mardi."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Family-run restaurant, closed Monday and Tuesday."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Réservez, on vous attend."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book a table, we are waiting for you."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Restaurant de poissons à Corossol, recommandé par le Gault & Millau."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Fish restaurant in Corossol, recommended by Gault & Millau."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2010",
+        "status": "supported",
+        "factIds": ["fact_year_founded_0516e4503db8"],
+        "reason": "Stated by fact fact_year_founded_0516e4503db8."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2010",
+        "status": "supported",
+        "factIds": ["fact_year_founded_0516e4503db8"],
+        "reason": "Stated by fact fact_year_founded_0516e4503db8."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "45 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_e845d2d46114"],
+        "reason": "Stated by fact fact_price_e845d2d46114."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "pêchée le matin même",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "une ambiance conviviale",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "45 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_e845d2d46114"],
+        "reason": "Stated by fact fact_price_e845d2d46114."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "caught the same morning",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No sourcing fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "a convivial atmosphere",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Restaurant familial",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No family fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "fermé lundi et mardi",
+        "status": "supported",
+        "factIds": ["fact_hours_0f80926e1912"],
+        "reason": "Stated by fact fact_hours_0f80926e1912."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Family-run restaurant",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No family fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "closed Monday and Tuesday",
+        "status": "supported",
+        "factIds": ["fact_hours_0f80926e1912"],
+        "reason": "Stated by fact fact_hours_0f80926e1912."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "on vous attend",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "we are waiting for you",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "recommandé par le Gault & Millau",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No guide fact."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "quote": "recommended by Gault & Millau",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No guide fact."
+      }
+    ],
+    "warnings": []
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Salon Marguerite",
+      "category": "Salon de coiffure"
+    },
+    "facts": [
+      {
+        "id": "fact_name_e809c028963d",
+        "kind": "name",
+        "value": "Salon Marguerite"
+      },
+      {
+        "id": "fact_address_2e9e45f5a3d3",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_5fc56319f1c9",
+        "kind": "phone",
+        "value": "+590 590 00 05 01"
+      },
+      {
+        "id": "fact_year_founded_a5e1ccacde08",
+        "kind": "year_founded",
+        "value": "2012"
+      },
+      {
+        "id": "fact_price_1a9ce04376df",
+        "kind": "price",
+        "value": "50 EUR — Coupe femme"
+      },
+      {
+        "id": "fact_hours_1d83fb87bcb7",
+        "kind": "hours",
+        "value": "tue–sat 09:00–18:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Salon Marguerite, coiffure à Saint-Jean depuis 2012"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Salon Marguerite, hairdressing in Saint-Jean since 2012"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Élu meilleur salon de Saint-Barth, Marguerite vous reçoit dans une ambiance douce. Coupe femme 50 EUR."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Voted best salon in St Barths, Marguerite welcomes you in a soothing atmosphere. Women’s cut 50 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Produits 100 % naturels, du mardi au samedi."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "100 % natural products, Tuesday to Saturday."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Prenez rendez-vous, à bientôt."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Book now, see you soon."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "depuis 2012",
+        "status": "supported",
+        "factIds": ["fact_year_founded_a5e1ccacde08"],
+        "reason": "Stated by fact fact_year_founded_a5e1ccacde08."
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "since 2012",
+        "status": "supported",
+        "factIds": ["fact_year_founded_a5e1ccacde08"],
+        "reason": "Stated by fact fact_year_founded_a5e1ccacde08."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Élu meilleur salon de Saint-Barth",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "50 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_1a9ce04376df"],
+        "reason": "Stated by fact fact_price_1a9ce04376df."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Voted best salon in St Barths",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No award fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "50 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_1a9ce04376df"],
+        "reason": "Stated by fact fact_price_1a9ce04376df."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "100 % naturels",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "du mardi au samedi",
+        "status": "supported",
+        "factIds": ["fact_hours_1d83fb87bcb7"],
+        "reason": "Stated by fact fact_hours_1d83fb87bcb7."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "100 % natural products",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No product fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Tuesday to Saturday",
+        "status": "supported",
+        "factIds": ["fact_hours_1d83fb87bcb7"],
+        "reason": "Stated by fact fact_hours_1d83fb87bcb7."
+      }
+    ],
+    "warnings": []
+  }
+}

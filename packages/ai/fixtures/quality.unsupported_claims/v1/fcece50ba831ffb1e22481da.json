@@ -1,0 +1,116 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Flamands Fitness Club",
+      "category": "Gym"
+    },
+    "facts": [
+      {
+        "id": "fact_name_22392e284b1d",
+        "kind": "name",
+        "value": "Flamands Fitness Club"
+      },
+      {
+        "id": "fact_address_b40e72125573",
+        "kind": "address",
+        "value": "Anse des Flamands, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_252c0cd65663",
+        "kind": "phone",
+        "value": "+590 590 00 04 07"
+      },
+      {
+        "id": "fact_service_8da362f06505",
+        "kind": "service",
+        "value": "Weights, cardio, group classes"
+      },
+      {
+        "id": "fact_price_aa046a09db5b",
+        "kind": "price",
+        "value": "95 EUR — Monthly membership"
+      },
+      {
+        "id": "fact_hours_c6b11b4ad482",
+        "kind": "hours",
+        "value": "mon–sun 06:00–22:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Flamands Fitness Club, open every day"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Weights, cardio and group classes for 95 EUR a month. The largest gym on the island, open 24 hours."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Train with confidence alongside certified personal trainers."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Start today."
+      },
+      {
+        "path": "pages[1].seo.description.en",
+        "locale": "en",
+        "text": "Gym in Anse des Flamands: weights, cardio, group classes, monthly membership."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "quote": "open every day",
+        "status": "supported",
+        "factIds": ["fact_hours_c6b11b4ad482"],
+        "reason": "Stated by fact fact_hours_c6b11b4ad482."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "95 EUR a month",
+        "status": "supported",
+        "factIds": ["fact_price_aa046a09db5b"],
+        "reason": "Stated by fact fact_price_aa046a09db5b."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "The largest gym on the island",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "open 24 hours",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says 06:00–22:00."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "certified personal trainers",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No certification fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Start today",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

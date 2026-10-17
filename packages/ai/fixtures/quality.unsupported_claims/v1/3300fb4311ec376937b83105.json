@@ -1,0 +1,166 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Blue Horizon Charters",
+      "category": "Location de bateaux"
+    },
+    "facts": [
+      {
+        "id": "fact_name_8d82e39402a5",
+        "kind": "name",
+        "value": "Blue Horizon Charters"
+      },
+      {
+        "id": "fact_address_8fe214c6b6e0",
+        "kind": "address",
+        "value": "Gustavia, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_c3c34889abd6",
+        "kind": "phone",
+        "value": "+590 590 00 05 06"
+      },
+      {
+        "id": "fact_service_50f615dff2e5",
+        "kind": "service",
+        "value": "Journées en mer, snorkeling"
+      },
+      {
+        "id": "fact_price_3b73b62f820f",
+        "kind": "price",
+        "value": "700 EUR — Journée privative"
+      },
+      {
+        "id": "fact_team_member_41d0d3bb5418",
+        "kind": "team_member",
+        "value": "Capitaine Yann Gréaux"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Blue Horizon Charters, journées en mer"
+      },
+      {
+        "path": "pages[0].blocks[0].props.title.en",
+        "locale": "en",
+        "text": "Blue Horizon Charters, days at sea"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Journée privative à 600 EUR avec le capitaine Yann Gréaux. Tortues garanties."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "locale": "en",
+        "text": "Private day for 600 EUR with Captain Yann Gréaux. Turtles guaranteed."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Des souvenirs inoubliables, déjeuner inclus."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "locale": "en",
+        "text": "Unforgettable memories, lunch included."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Embarquez !"
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "locale": "en",
+        "text": "Come aboard!"
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "600 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The price fact says 700 EUR."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "capitaine Yann Gréaux",
+        "status": "supported",
+        "factIds": ["fact_team_member_41d0d3bb5418"],
+        "reason": "Stated by fact fact_team_member_41d0d3bb5418."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Tortues garanties",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "600 EUR",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The price fact says 700 EUR."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Captain Yann Gréaux",
+        "status": "supported",
+        "factIds": ["fact_team_member_41d0d3bb5418"],
+        "reason": "Stated by fact fact_team_member_41d0d3bb5418."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.en",
+        "quote": "Turtles guaranteed",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Des souvenirs inoubliables",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "déjeuner inclus",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No lunch fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "Unforgettable memories",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.en",
+        "quote": "lunch included",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No lunch fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.en",
+        "quote": "Come aboard",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

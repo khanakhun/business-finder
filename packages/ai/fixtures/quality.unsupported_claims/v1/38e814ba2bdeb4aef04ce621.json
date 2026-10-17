@@ -1,0 +1,114 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Café des Alizés",
+      "category": "Café"
+    },
+    "facts": [
+      {
+        "id": "fact_name_6eb32e3ba6b6",
+        "kind": "name",
+        "value": "Café des Alizés"
+      },
+      {
+        "id": "fact_address_51be9bc11ef0",
+        "kind": "address",
+        "value": "Lorient, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_2f5ee1a044fc",
+        "kind": "phone",
+        "value": "+590 590 00 03 14"
+      },
+      {
+        "id": "fact_service_a11afbfb3a68",
+        "kind": "service",
+        "value": "Café, jus frais, petits déjeuners"
+      },
+      {
+        "id": "fact_hours_d6451f7a284c",
+        "kind": "hours",
+        "value": "mon–sat 06:30–14:00"
+      },
+      {
+        "id": "fact_amenity_9823bee87b89",
+        "kind": "amenity",
+        "value": "Terrasse ombragée"
+      },
+      {
+        "id": "fact_payment_method_605588f816f0",
+        "kind": "payment_method",
+        "value": "Carte bancaire sans contact"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Café des Alizés, petits déjeuners à Lorient"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Café, jus frais et petits déjeuners sur notre terrasse ombragée, pour un réveil en douceur."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert du lundi au samedi de 6h30 à 14h. Paiement sans contact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "À très vite sur la terrasse."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Café à Lorient : petits déjeuners, jus frais, terrasse ombragée."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "terrasse ombragée",
+        "status": "supported",
+        "factIds": ["fact_amenity_9823bee87b89"],
+        "reason": "Stated by fact fact_amenity_9823bee87b89."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "un réveil en douceur",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert du lundi au samedi de 6h30 à 14h",
+        "status": "supported",
+        "factIds": ["fact_hours_d6451f7a284c"],
+        "reason": "Stated by fact fact_hours_d6451f7a284c."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Paiement sans contact",
+        "status": "supported",
+        "factIds": ["fact_payment_method_605588f816f0"],
+        "reason": "Stated by fact fact_payment_method_605588f816f0."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "À très vite",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

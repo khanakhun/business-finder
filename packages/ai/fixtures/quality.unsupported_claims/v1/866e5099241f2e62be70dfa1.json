@@ -1,0 +1,123 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Barbier du Port",
+      "category": "Barbier"
+    },
+    "facts": [
+      {
+        "id": "fact_name_b07b9d4573ae",
+        "kind": "name",
+        "value": "Barbier du Port"
+      },
+      {
+        "id": "fact_address_507f39063091",
+        "kind": "address",
+        "value": "Quai de la République, 97133 Gustavia"
+      },
+      {
+        "id": "fact_phone_c54086b3e9f4",
+        "kind": "phone",
+        "value": "+590 590 00 03 13"
+      },
+      {
+        "id": "fact_price_9428c501b4eb",
+        "kind": "price",
+        "value": "30 EUR — Coupe homme"
+      },
+      {
+        "id": "fact_price_7f5c0f62134d",
+        "kind": "price",
+        "value": "20 EUR — Taille de barbe"
+      },
+      {
+        "id": "fact_hours_2018e3bd6ab9",
+        "kind": "hours",
+        "value": "mon–sat 09:00–19:00"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Barbier du Port, le style au masculin"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Coupe homme 30 EUR, taille de barbe 20 EUR. Rasage à l’ancienne offert pour toute première visite."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Barbier depuis trois générations, un accueil chaleureux et des produits fabriqués en France."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Sans rendez-vous, du lundi au samedi."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Barbier à Gustavia : coupe homme, taille de barbe, un moment pour soi."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "le style au masculin",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "30 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_9428c501b4eb"],
+        "reason": "Stated by fact fact_price_9428c501b4eb."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "20 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_7f5c0f62134d"],
+        "reason": "Stated by fact fact_price_7f5c0f62134d."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Rasage à l’ancienne offert pour toute première visite",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No such offer fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Barbier depuis trois générations",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about family or history."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "fabriqués en France",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No origin fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "du lundi au samedi",
+        "status": "supported",
+        "factIds": ["fact_hours_2018e3bd6ab9"],
+        "reason": "Stated by fact fact_hours_2018e3bd6ab9."
+      }
+    ],
+    "warnings": []
+  }
+}

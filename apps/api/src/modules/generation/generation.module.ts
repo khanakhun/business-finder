@@ -82,7 +82,7 @@ import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
 import { pagePlans } from './infrastructure/page-plans.ts';
 import { FullQualityPipeline } from './infrastructure/quality/full-quality.pipeline.ts';
-import { SandboxAuditClient } from './infrastructure/quality/sandbox-audit.client.ts';
+import { type AuditAssets, SandboxAuditClient } from './infrastructure/quality/sandbox-audit.client.ts';
 import { HttpDockerApi } from './infrastructure/sandbox/docker-engine.ts';
 import { DockerSandboxProvider } from './infrastructure/sandbox/docker-sandbox.ts';
 import { SandboxJanitor } from './infrastructure/sandbox/janitor.ts';
@@ -111,6 +111,23 @@ import {
   GenerationQualityProcessor,
   GenerationReaperProcessor,
 } from './interface/processors/generation.processors.ts';
+
+/**
+ * The site's public assets for the no-network audit (BF-045): our CDN's files, read from the sites bucket behind it
+ * (the key is the URL's path under SITES_ASSETS_BASE_URL), never fetched over the network.
+ */
+function siteAssets(env: ApiEnv): AuditAssets {
+  const base = env.SITES_ASSETS_BASE_URL.replace(/\/+$/, '');
+  const storage = new S3ObjectStorage(env, env.S3_BUCKET_SITES);
+  return {
+    hosts: [new URL(base).hostname],
+    async fetch(url) {
+      if (!url.startsWith(`${base}/`)) return undefined;
+      const key = decodeURIComponent(url.slice(base.length + 1).split(/[?#]/)[0] ?? '');
+      return (await storage.get(key))?.body;
+    },
+  };
+}
 
 /** The engines registered here: blocks (BF-041), the coding agents in sandboxes (BF-044), the fake one in tests. */
 function engines(
@@ -287,12 +304,13 @@ export class GenerationModule {
         },
         {
           provide: QUALITY_PIPELINE,
-          inject: [APP_ENV, GENERATION_ARTIFACTS, GENERATION_REPOSITORY, SANDBOX_PROVIDER],
+          inject: [APP_ENV, GENERATION_ARTIFACTS, GENERATION_REPOSITORY, SANDBOX_PROVIDER, AI_GATEWAY],
           useFactory: (
             appEnv: AppEnv,
             artifacts: ArtifactStore,
             repository: GenerationRepository,
             sandbox: SandboxProvider,
+            gateway: AiGateway,
           ) => {
             const env = appEnv as ApiEnv;
             if (env.GENERATION_QUALITY_AUDITS && !env.SANDBOX_ENABLED)
@@ -304,15 +322,20 @@ export class GenerationModule {
               repository,
               assetHosts: [new URL(env.SITES_ASSETS_BASE_URL).hostname],
               hotlinkHosts: HOTLINK_HOSTS,
+              ...(env.GENERATION_QUALITY_AI_GATES ? { gateway } : {}),
               ...(env.GENERATION_QUALITY_AUDITS
                 ? {
-                    audits: new SandboxAuditClient(sandbox, {
-                      image: env.SANDBOX_RUNNER_IMAGE,
-                      cpus: env.SANDBOX_CPUS,
-                      memoryMb: env.SANDBOX_MEMORY_MB,
-                      pidsLimit: env.SANDBOX_PIDS_LIMIT,
-                      wallTimeSec: env.GENERATION_QUALITY_AUDIT_WALL_TIME_SEC,
-                    }),
+                    audits: new SandboxAuditClient(
+                      sandbox,
+                      {
+                        image: env.SANDBOX_RUNNER_IMAGE,
+                        cpus: env.SANDBOX_CPUS,
+                        memoryMb: env.SANDBOX_MEMORY_MB,
+                        pidsLimit: env.SANDBOX_PIDS_LIMIT,
+                        wallTimeSec: env.GENERATION_QUALITY_AUDIT_WALL_TIME_SEC,
+                      },
+                      siteAssets(env),
+                    ),
                   }
                 : {}),
             });

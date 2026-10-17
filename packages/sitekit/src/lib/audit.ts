@@ -1,6 +1,7 @@
 import { createServer } from 'node:net';
 import { staticPath } from '@bf/site-blocks/static';
 import type { SiteLocale, SiteSpec } from '@bf/site-schema';
+import type { Route } from 'playwright';
 import { serveFolder, VIEWPORTS, type Viewport } from './screenshot.ts';
 import type { Workspace } from './workspace.ts';
 
@@ -47,9 +48,17 @@ export interface LighthouseFinding {
   readonly failing: readonly LighthouseAudit[];
 }
 
+/** A screenshot for the visual critic: what was shot, and the workspace file. */
+export interface CriticShot {
+  readonly page: string;
+  readonly viewport: 'desktop' | 'mobile';
+  readonly file: string;
+}
+
 export interface AuditReport {
   readonly axe: readonly AxeFinding[];
   readonly lighthouse: readonly LighthouseFinding[];
+  readonly screenshots?: readonly CriticShot[];
   readonly pages: readonly string[];
   readonly durationMs: number;
 }
@@ -59,7 +68,28 @@ export interface AuditOptions {
   readonly viewports?: readonly Viewport[];
   readonly axe?: boolean;
   readonly lighthouse?: boolean;
+  /** The visual critic's screenshots in this folder: home at desktop and mobile, the heaviest inner page at desktop. */
+  readonly screenshotsDir?: string;
 }
+
+/** The critic's views: desktop 1280 px wide, mobile 390 px at 2×; long pages cut at a few screens. */
+const CRITIC_VIEWS = {
+  desktop: { viewport: { width: 1280, height: 800 }, scale: 1, maxHeight: 2400 },
+  mobile: { viewport: { width: 390, height: 844 }, scale: 2, maxHeight: 1300 },
+} as const;
+
+/** The worker's copies of the site's assets (the sandbox has no network): `{ url: workspace file }`. */
+export const ASSET_MAP = '.sitekit/asset-map.json';
+
+const MEDIA: Record<string, string> = {
+  '.webp': 'image/webp',
+  '.avif': 'image/avif',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.gif': 'image/gif',
+};
 
 /** A free loopback port (Chromium's remote debugging, which Lighthouse drives). */
 async function freePort(): Promise<number> {
@@ -131,8 +161,24 @@ export async function audit(
       throw new Error(`There is no page "${pageId}". Pages: ${spec.pages.map((p) => p.id).join(', ')}.`);
     return `${server.origin}/${staticPath(spec, page, locale).replace(/index\.html$/, '')}`;
   };
+  const assets = (await workspace.readJson(ASSET_MAP).catch(() => ({}))) as Record<string, string>;
+  /** Loopback answers; mapped assets from their local copy; everything else is refused (nothing leaves). */
+  const route = async (request: Route) => {
+    const url = request.request().url();
+    if (url.startsWith(`${server.origin}/`)) return request.continue();
+    const file = assets[url];
+    if (typeof file === 'string') {
+      const extension = new URL(url).pathname.match(/\.[a-z0-9]+$/i)?.[0]?.toLowerCase() ?? '';
+      return request.fulfill({
+        path: await workspace.resolve(file),
+        contentType: MEDIA[extension] ?? 'application/octet-stream',
+      });
+    }
+    return request.abort('blockedbyclient');
+  };
   const axe: AxeFinding[] = [];
   const lighthouse: LighthouseFinding[] = [];
+  const screenshots: CriticShot[] = [];
   try {
     if (options.axe !== false) {
       const { AxeBuilder } = await import('@axe-core/playwright');
@@ -145,11 +191,7 @@ export async function audit(
               locale,
               serviceWorkers: 'block',
             });
-            await context.route('**/*', (route) =>
-              route.request().url().startsWith(`${server.origin}/`)
-                ? route.continue()
-                : route.abort('blockedbyclient'),
-            );
+            await context.route('**/*', route);
             const tab = await context.newPage();
             await tab.goto(urlOf(pageId, locale), { waitUntil: 'load' });
             const result = await new AxeBuilder({ page: tab })
@@ -214,9 +256,58 @@ export async function audit(
           });
         }
     }
+    if (options.screenshotsDir) {
+      const [home, inner] = lighthousePages(spec);
+      const requests = [
+        ...(home
+          ? ([
+              { page: home, viewport: 'desktop' },
+              { page: home, viewport: 'mobile' },
+            ] as const)
+          : []),
+        ...(inner && inner !== home ? ([{ page: inner, viewport: 'desktop' }] as const) : []),
+      ];
+      for (const request of requests) {
+        const view = CRITIC_VIEWS[request.viewport];
+        const locale = spec.locales[0] as SiteLocale;
+        const context = await browser.newContext({
+          viewport: view.viewport,
+          deviceScaleFactor: view.scale,
+          reducedMotion: 'reduce',
+          locale,
+          serviceWorkers: 'block',
+        });
+        await context.route('**/*', route);
+        const tab = await context.newPage();
+        await tab.goto(urlOf(request.page, locale), { waitUntil: 'load' });
+        await tab.evaluate(() => document.fonts.ready);
+        const height = Math.min(
+          view.maxHeight,
+          await tab.evaluate(() => document.documentElement.scrollHeight),
+        );
+        const file = `${options.screenshotsDir}/${request.page}.${request.viewport}.png`;
+        await workspace.writeText(file, '');
+        await tab.screenshot({
+          path: await workspace.resolve(file),
+          // The page's top, a few screens long (a clip beyond the viewport needs fullPage).
+          fullPage: true,
+          clip: { x: 0, y: 0, width: view.viewport.width, height },
+          animations: 'disabled',
+          caret: 'hide',
+        });
+        screenshots.push({ page: request.page, viewport: request.viewport, file });
+        await context.close();
+      }
+    }
   } finally {
     await browser.close();
     await server.close();
   }
-  return { axe, lighthouse, pages, durationMs: Math.round(performance.now() - started) };
+  return {
+    axe,
+    lighthouse,
+    ...(options.screenshotsDir ? { screenshots } : {}),
+    pages,
+    durationMs: Math.round(performance.now() - started),
+  };
 }

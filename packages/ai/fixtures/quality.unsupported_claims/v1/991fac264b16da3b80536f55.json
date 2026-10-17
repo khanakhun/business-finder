@@ -1,0 +1,147 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Le Petit Grain",
+      "category": "Café"
+    },
+    "facts": [
+      {
+        "id": "fact_name_646b09f908aa",
+        "kind": "name",
+        "value": "Le Petit Grain"
+      },
+      {
+        "id": "fact_address_a92e6875b132",
+        "kind": "address",
+        "value": "Plage de Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_d9e59bab4c39",
+        "kind": "phone",
+        "value": "+590 590 00 03 02"
+      },
+      {
+        "id": "fact_email_2835ffaa39b9",
+        "kind": "email",
+        "value": "bonjour@lepetitgrain.example"
+      },
+      {
+        "id": "fact_service_c78ab183c310",
+        "kind": "service",
+        "value": "Café de spécialité et pâtisseries maison"
+      },
+      {
+        "id": "fact_hours_e88a0930dcf9",
+        "kind": "hours",
+        "value": "mon–sun 07:00–15:00"
+      },
+      {
+        "id": "fact_amenity_b828589fa6db",
+        "kind": "amenity",
+        "value": "Wi-Fi gratuit"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Le Petit Grain, le café de Saint-Jean"
+      },
+      {
+        "path": "pages[0].blocks[0].props.subtitle.fr",
+        "locale": "fr",
+        "text": "Ouvert tous les jours dès 7h pour un moment de douceur face à la plage."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Nos grains sont torréfiés sur place chaque matin et nos pâtisseries sont faites maison. Depuis 1998, les habitués se retrouvent ici autour d’un bon café."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Wi-Fi gratuit pour travailler ou flâner, et la meilleure vue de l’île sur la baie."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "Passez nous voir, nous vous attendons avec le sourire."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Café de spécialité à Saint-Jean : expresso, pâtisseries maison, plus de 300 avis cinq étoiles."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.subtitle.fr",
+        "quote": "Ouvert tous les jours dès 7h",
+        "status": "supported",
+        "factIds": ["fact_hours_e88a0930dcf9"],
+        "reason": "Stated by fact fact_hours_e88a0930dcf9."
+      },
+      {
+        "path": "pages[0].blocks[0].props.subtitle.fr",
+        "quote": "un moment de douceur",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "torréfiés sur place chaque matin",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact mentions on-site roasting."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Depuis 1998",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No year_founded fact."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "d’un bon café",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Wi-Fi gratuit",
+        "status": "supported",
+        "factIds": ["fact_amenity_b828589fa6db"],
+        "reason": "Stated by fact fact_amenity_b828589fa6db."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "la meilleure vue de l’île",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Superlative with no supporting fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "quote": "nous vous attendons avec le sourire",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "plus de 300 avis cinq étoiles",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact gives a review count."
+      }
+    ],
+    "warnings": []
+  }
+}

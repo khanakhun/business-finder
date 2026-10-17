@@ -1,0 +1,142 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Cabinet Dentaire Flamands",
+      "category": "Dentiste"
+    },
+    "facts": [
+      {
+        "id": "fact_name_4c99134fa8c5",
+        "kind": "name",
+        "value": "Cabinet Dentaire Flamands"
+      },
+      {
+        "id": "fact_address_4ec725309eb5",
+        "kind": "address",
+        "value": "Anse des Flamands, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_0c3e326fc3f6",
+        "kind": "phone",
+        "value": "+590 590 00 03 08"
+      },
+      {
+        "id": "fact_service_2a1ad6b28661",
+        "kind": "service",
+        "value": "Soins dentaires, détartrage, prothèses"
+      },
+      {
+        "id": "fact_hours_a010348c90a7",
+        "kind": "hours",
+        "value": "mon–fri 08:00–17:00"
+      },
+      {
+        "id": "fact_team_member_ebc3cb67869b",
+        "kind": "team_member",
+        "value": "Dr Inès Caradec — Chirurgien-dentiste"
+      },
+      {
+        "id": "fact_language_spoken_0dfeda1a3221",
+        "kind": "language_spoken",
+        "value": "Français, anglais"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Cabinet Dentaire Flamands"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Le Dr Inès Caradec vous reçoit du lundi au vendredi pour soins, détartrage et prothèses, avec une écoute attentive."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Plus de 20 ans d’expérience et un équipement dernier cri pour des soins sans douleur garantis."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.fr",
+        "locale": "fr",
+        "text": "Consultations en français et en anglais. Urgences prises le samedi."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Dentiste à Anse des Flamands : soins, détartrage, prothèses. Prenez soin de votre sourire."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "Dr Inès Caradec",
+        "status": "supported",
+        "factIds": ["fact_team_member_ebc3cb67869b"],
+        "reason": "Stated by fact fact_team_member_ebc3cb67869b."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "du lundi au vendredi",
+        "status": "supported",
+        "factIds": ["fact_hours_a010348c90a7"],
+        "reason": "Stated by fact fact_hours_a010348c90a7."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "une écoute attentive",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Plus de 20 ans d’expérience",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "No fact about years of experience."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "un équipement dernier cri",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Equipment claim with no fact."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "sans douleur garantis",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "Guarantee with no fact."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.fr",
+        "quote": "en français et en anglais",
+        "status": "supported",
+        "factIds": ["fact_language_spoken_0dfeda1a3221"],
+        "reason": "Stated by fact fact_language_spoken_0dfeda1a3221."
+      },
+      {
+        "path": "pages[0].blocks[3].props.body.fr",
+        "quote": "Urgences prises le samedi",
+        "status": "unsupported",
+        "factIds": [],
+        "reason": "The hours fact says mon–fri only."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "quote": "Prenez soin de votre sourire",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      }
+    ],
+    "warnings": []
+  }
+}

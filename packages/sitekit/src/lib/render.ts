@@ -104,3 +104,24 @@ export async function renderSite(
   );
   return { outDir, pages, index, fonts: Boolean(fonts) };
 }
+
+/**
+ * The asset URLs the rendered pages request on the given hosts (`src`, `srcset`, `href`, CSS `url()`), every page and
+ * locale, without a browser (BF-045: the quality sandbox has no network, so the worker brings these files along).
+ */
+export function referencedAssetUrls(spec: SiteSpec, hosts: readonly string[]): string[] {
+  const urls = new Set<string>();
+  for (const locale of spec.locales)
+    for (const page of spec.pages) {
+      const { html } = renderStaticPage(spec, page.id, locale, { css: '', stylesheetHref: '/styles.css' });
+      for (const match of html.matchAll(/https?:\/\/[^\s"'<>),]+/g)) {
+        const url = match[0].replace(/&amp;/g, '&');
+        try {
+          if (hosts.includes(new URL(url).hostname)) urls.add(url);
+        } catch {
+          // Not a URL after all.
+        }
+      }
+    }
+  return [...urls].sort();
+}

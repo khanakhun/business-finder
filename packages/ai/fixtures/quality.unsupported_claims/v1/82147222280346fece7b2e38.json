@@ -1,0 +1,114 @@
+{
+  "task": "quality.unsupported_claims",
+  "promptVersion": 1,
+  "input": {
+    "business": {
+      "name": "Fournil de Saint-Jean",
+      "category": "Boulangerie"
+    },
+    "facts": [
+      {
+        "id": "fact_name_f8824890c4b7",
+        "kind": "name",
+        "value": "Fournil de Saint-Jean"
+      },
+      {
+        "id": "fact_address_1e517ed7462f",
+        "kind": "address",
+        "value": "Saint-Jean, 97133 Saint-Barthélemy"
+      },
+      {
+        "id": "fact_phone_760570c66654",
+        "kind": "phone",
+        "value": "+590 590 00 03 28"
+      },
+      {
+        "id": "fact_service_8e9b2a46d4a5",
+        "kind": "service",
+        "value": "Pains, viennoiseries, sandwichs"
+      },
+      {
+        "id": "fact_hours_83901f9e1452",
+        "kind": "hours",
+        "value": "mon–sun 06:00–14:00"
+      },
+      {
+        "id": "fact_price_50946246a024",
+        "kind": "price",
+        "value": "1,40 EUR — Baguette tradition"
+      },
+      {
+        "id": "fact_payment_method_6113266a3957",
+        "kind": "payment_method",
+        "value": "Carte bancaire, espèces"
+      }
+    ],
+    "texts": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "locale": "fr",
+        "text": "Fournil de Saint-Jean, boulangerie ouverte 7j/7"
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "locale": "fr",
+        "text": "Pains, viennoiseries et sandwichs pour bien commencer la journée. Baguette tradition à 1,40 EUR."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "locale": "fr",
+        "text": "Ouvert tous les jours de 6h à 14h, carte bancaire et espèces acceptées."
+      },
+      {
+        "path": "pages[0].blocks[3].props.cta.fr",
+        "locale": "fr",
+        "text": "À bientôt au fournil."
+      },
+      {
+        "path": "pages[1].seo.description.fr",
+        "locale": "fr",
+        "text": "Boulangerie à Saint-Jean : pains, viennoiseries, sandwichs, ouverte tous les jours."
+      }
+    ]
+  },
+  "output": {
+    "claims": [
+      {
+        "path": "pages[0].blocks[0].props.title.fr",
+        "quote": "ouverte 7j/7",
+        "status": "supported",
+        "factIds": ["fact_hours_83901f9e1452"],
+        "reason": "Stated by fact fact_hours_83901f9e1452."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "bien commencer la journée",
+        "status": "generic",
+        "factIds": [],
+        "reason": "Marketing language, nothing checkable."
+      },
+      {
+        "path": "pages[0].blocks[1].props.body.fr",
+        "quote": "1,40 EUR",
+        "status": "supported",
+        "factIds": ["fact_price_50946246a024"],
+        "reason": "Stated by fact fact_price_50946246a024."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "Ouvert tous les jours de 6h à 14h",
+        "status": "supported",
+        "factIds": ["fact_hours_83901f9e1452"],
+        "reason": "Stated by fact fact_hours_83901f9e1452."
+      },
+      {
+        "path": "pages[0].blocks[2].props.body.fr",
+        "quote": "carte bancaire et espèces acceptées",
+        "status": "supported",
+        "factIds": ["fact_payment_method_6113266a3957"],
+        "reason": "Stated by fact fact_payment_method_6113266a3957."
+      }
+    ],
+    "warnings": []
+  }
+}

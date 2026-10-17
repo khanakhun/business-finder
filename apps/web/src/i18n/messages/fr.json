@@ -3734,7 +3734,7 @@
       "executeTitle": "Traiter",
       "discover": "Trouver ses données",
       "discovered": "Recherche effectuée.",
-      "records": "{count, plural, =0 {rien} one {# élément} other {# éléments}}",
+      "records": "{count, plural, =0 {aucun élément} one {# élément} other {# éléments}}",
       "manualReview": "à revoir à la main",
       "mode": "Mode d’effacement",
       "anonymize": "Anonymiser (garder les enregistrements)",
@@ -3780,7 +3780,7 @@
       "noRuns": "Aucune exécution : l’exécution quotidienne démarre dans le worker.",
       "dry": "simulation (rien n’a changé)",
       "real": "exécution quotidienne",
-      "rows": "{count, plural, =0 {rien} one {# ligne} other {# lignes}}"
+      "rows": "{count, plural, =0 {aucune ligne} one {# ligne} other {# lignes}}"
     },
     "dataMap": "Registre des traitements (cartographie des données)"
   }

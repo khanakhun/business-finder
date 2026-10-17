@@ -12,6 +12,7 @@ export function SettingsNav() {
   const pathname = usePathname();
   const canManageMembers = usePermission('members:manage');
   const canManageSettings = usePermission('settings:manage');
+  const canSend = usePermission('outreach:send');
   const items = [
     { href: '/settings', label: t('general'), show: true },
     { href: '/settings/account', label: t('account'), show: true },
@@ -27,6 +28,8 @@ export function SettingsNav() {
     { href: '/settings/scoring', label: t('scoring'), show: true },
     // Everyone sees the generation settings; `settings:manage` changes them (BF-046).
     { href: '/settings/generation', label: t('generation'), show: true },
+    // Members connect their own mailboxes; admins manage shared ones and the caps (BF-050).
+    { href: '/settings/mailboxes', label: t('mailboxes'), show: canSend },
     // Everyone reads the compliance policies; `compliance:manage` reviews and overrides them (BF-049).
     { href: '/settings/compliance', label: t('compliance'), show: true },
   ].filter((item) => item.show);

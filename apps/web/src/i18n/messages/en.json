@@ -235,7 +235,8 @@
     "taxonomy": "Categories",
     "scoring": "Scoring",
     "generation": "Generation",
-    "compliance": "Compliance"
+    "compliance": "Compliance",
+    "mailboxes": "Mailboxes"
   },
   "account": {
     "title": "Account",
@@ -3409,6 +3410,186 @@
         "enqueue": "Queued",
         "send": "Send",
         "manual_log": "Manual log"
+      }
+    }
+  },
+  "mailboxes": {
+    "title": "Mailboxes",
+    "description": "The mailboxes outreach sends from: their daily cap and ramp-up, sending windows and health.",
+    "loadError": "Could not load the mailboxes.",
+    "emptyTitle": "No mailbox yet",
+    "emptyBody": "Connect your Google, Microsoft or SMTP mailbox to start sending.",
+    "noWarmupNetworks": "Capacity grows gradually with real sending only — no warm-up networks.",
+    "open": "Open {email}",
+    "nextWindow": "Next sending window: {when}",
+    "notSending": "Not sending",
+    "connect": {
+      "google": "Connect Google",
+      "microsoft": "Connect Microsoft 365",
+      "smtp": "Connect SMTP/IMAP",
+      "shared": "Shared mailbox (no personal owner)",
+      "notConfigured": "Google and Microsoft connections are not configured on this deployment; SMTP/IMAP works everywhere."
+    },
+    "oauth": {
+      "connected": "Mailbox connected.",
+      "startFailed": "Could not start the connection.",
+      "reasons": {
+        "denied": "You declined the access request.",
+        "provider_error": "The provider reported an error.",
+        "invalid_request": "The provider's answer was incomplete.",
+        "expired": "The connection took too long or was already used. Try again.",
+        "not_configured": "This provider is not configured.",
+        "no_offline_access": "The provider did not grant offline access. Try again and accept every permission.",
+        "wrong_account": "You signed in with another account than this mailbox's.",
+        "already_connected": "This mailbox is already connected.",
+        "exchange_failed": "The connection could not be completed. Try again."
+      }
+    },
+    "status": {
+      "connected": "Connected",
+      "warming": "Warming up",
+      "active": "Active",
+      "paused": "Paused",
+      "error": "Needs attention"
+    },
+    "errors": {
+      "auth_failed": "The provider refused the credentials: reconnect the mailbox.",
+      "consent_revoked": "Access was revoked: reconnect the mailbox.",
+      "unreachable": "The provider could not be reached; sending resumes when it is back.",
+      "quota_exceeded": "The provider's daily quota is used up; resume tomorrow.",
+      "rate_limited": "The provider asked to slow down; sends are spaced out.",
+      "tls_required": "A secure (TLS) connection is required: check the port and security setting.",
+      "rejected": "The provider rejected a message.",
+      "unknown": "The last provider call failed."
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "window": {
+      "title": "Sending window",
+      "days": "Days",
+      "start": "From",
+      "end": "Until",
+      "clock": "Whose clock",
+      "recipient": "The recipient's",
+      "mailbox": "The mailbox's",
+      "zone": "Mailbox time zone",
+      "holidays": "No sending on public holidays of",
+      "calendar": {
+        "FR": "France",
+        "BL": "Saint-Barthélemy",
+        "MF": "Saint-Martin",
+        "US": "United States"
+      },
+      "previewRecipient": "Recipients get messages on {days} between {start} and {end} in their own time zone ({zone} when unknown).",
+      "previewMailbox": "Messages go out on {days} between {start} and {end}, {zone} time."
+    },
+    "chart": {
+      "title": "Planned vs sent",
+      "summary": "Daily sends over the last 30 days and the ramp plan for the next 14.",
+      "sent": "Sent",
+      "bounced": "Bounced",
+      "planned": "Planned"
+    },
+    "smtp": {
+      "title": "Connect an SMTP/IMAP mailbox",
+      "description": "The connection is tested before it is saved. The password is stored encrypted and never shown again.",
+      "preset": "Provider",
+      "presets": {
+        "ovh": "OVHcloud",
+        "gandi": "Gandi",
+        "infomaniak": "Infomaniak",
+        "zoho": "Zoho Mail (EU)",
+        "fastmail": "Fastmail",
+        "icloud": "iCloud Mail",
+        "mailpit": "Mailpit (development)",
+        "custom": "Other"
+      },
+      "email": "Address",
+      "displayName": "Sender name",
+      "username": "Username",
+      "password": "Password or app password",
+      "smtpServer": "Outgoing (SMTP)",
+      "imapServer": "Incoming (IMAP)",
+      "noImap": "No IMAP: replies are not synced and no copy is kept in Sent.",
+      "appendToSent": "Keep a copy in the Sent folder",
+      "shared": "Shared mailbox (no personal owner)",
+      "appPasswordHint": "Use an app password when your provider offers one.",
+      "host": "Host",
+      "port": "Port",
+      "security": "Security",
+      "tls": "TLS",
+      "starttls": "STARTTLS",
+      "cancel": "Cancel",
+      "connect": "Test and connect",
+      "testing": "Testing…",
+      "connected": "Mailbox connected.",
+      "failed": "Could not connect."
+    },
+    "detail": {
+      "title": "Mailbox",
+      "hint": "Status, capacity, window, signature and history of this mailbox.",
+      "failed": "That did not work.",
+      "saved": "Saved.",
+      "testSent": "Test sent to {to}.",
+      "testFailed": "The test failed: {error}",
+      "provider": {
+        "gmail": "Google",
+        "graph": "Microsoft 365",
+        "smtp_imap": "SMTP/IMAP"
+      },
+      "shared": "Shared",
+      "resume": "Resume",
+      "resumed": "Mailbox resumed.",
+      "pause": "Pause",
+      "paused": "Mailbox paused.",
+      "test": "Send a test to me",
+      "reconnect": "Reconnect",
+      "disconnect": "Disconnect",
+      "disconnected": "Mailbox disconnected.",
+      "today": "Today",
+      "usage": "{sent} of {cap}",
+      "nextWindow": "Next window",
+      "health": "Health",
+      "healthy": "Healthy",
+      "unhealthy": "Problem",
+      "notChecked": "Not checked yet",
+      "displayName": "Sender name",
+      "replyTo": "Reply-to (optional)",
+      "languages": "Languages it writes in",
+      "locale": {
+        "en": "English",
+        "fr": "French"
+      },
+      "capacity": "Capacity",
+      "adminsOnly": "Only admins change caps, the ramp and the window.",
+      "dailyCap": "Daily cap",
+      "minInterval": "Seconds between sends",
+      "rampEnabled": "Ramp up gradually",
+      "ramp": {
+        "startCap": "Start at",
+        "increment": "Add",
+        "everyDays": "Every (days)",
+        "maxCap": "Up to"
+      },
+      "signature": "Signature (Markdown)",
+      "preview": "Preview",
+      "save": "Save",
+      "trail": "History",
+      "event": {
+        "connected": "Connected",
+        "status_changed": "Status changed",
+        "settings_changed": "Settings changed",
+        "error": "Provider error",
+        "test_sent": "Test sent",
+        "disconnected": "Disconnected",
+        "reconnected": "Reconnected"
       }
     }
   }

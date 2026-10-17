@@ -235,7 +235,8 @@
     "taxonomy": "Catégories",
     "scoring": "Scoring",
     "generation": "Génération",
-    "compliance": "Conformité"
+    "compliance": "Conformité",
+    "mailboxes": "Boîtes d’envoi"
   },
   "account": {
     "title": "Compte",
@@ -3409,6 +3410,186 @@
         "enqueue": "En file",
         "send": "Envoi",
         "manual_log": "Journal manuel"
+      }
+    }
+  },
+  "mailboxes": {
+    "title": "Boîtes d’envoi",
+    "description": "Les boîtes depuis lesquelles partent les prospections : plafond quotidien et montée en charge, plages d’envoi et santé.",
+    "loadError": "Impossible de charger les boîtes d’envoi.",
+    "emptyTitle": "Aucune boîte d’envoi",
+    "emptyBody": "Connectez votre boîte Google, Microsoft ou SMTP pour commencer à envoyer.",
+    "noWarmupNetworks": "La capacité augmente progressivement, uniquement avec de vrais envois — aucun réseau de « warm-up ».",
+    "open": "Ouvrir {email}",
+    "nextWindow": "Prochaine plage d’envoi : {when}",
+    "notSending": "Envois arrêtés",
+    "connect": {
+      "google": "Connecter Google",
+      "microsoft": "Connecter Microsoft 365",
+      "smtp": "Connecter en SMTP/IMAP",
+      "shared": "Boîte partagée (sans propriétaire)",
+      "notConfigured": "Les connexions Google et Microsoft ne sont pas configurées sur ce déploiement ; le SMTP/IMAP fonctionne partout."
+    },
+    "oauth": {
+      "connected": "Boîte connectée.",
+      "startFailed": "Impossible de lancer la connexion.",
+      "reasons": {
+        "denied": "Vous avez refusé la demande d’accès.",
+        "provider_error": "Le fournisseur a signalé une erreur.",
+        "invalid_request": "La réponse du fournisseur était incomplète.",
+        "expired": "La connexion a pris trop de temps ou a déjà été utilisée. Réessayez.",
+        "not_configured": "Ce fournisseur n’est pas configuré.",
+        "no_offline_access": "Le fournisseur n’a pas accordé l’accès hors connexion. Réessayez en acceptant toutes les autorisations.",
+        "wrong_account": "Vous vous êtes connecté avec un autre compte que celui de cette boîte.",
+        "already_connected": "Cette boîte est déjà connectée.",
+        "exchange_failed": "La connexion n’a pas pu aboutir. Réessayez."
+      }
+    },
+    "status": {
+      "connected": "Connectée",
+      "warming": "Montée en charge",
+      "active": "Active",
+      "paused": "En pause",
+      "error": "À vérifier"
+    },
+    "errors": {
+      "auth_failed": "Le fournisseur a refusé les identifiants : reconnectez la boîte.",
+      "consent_revoked": "L’accès a été révoqué : reconnectez la boîte.",
+      "unreachable": "Le fournisseur est injoignable ; les envois reprendront à son retour.",
+      "quota_exceeded": "Le quota quotidien du fournisseur est atteint ; reprenez demain.",
+      "rate_limited": "Le fournisseur demande de ralentir ; les envois sont espacés.",
+      "tls_required": "Une connexion sécurisée (TLS) est requise : vérifiez le port et la sécurité.",
+      "rejected": "Le fournisseur a refusé un message.",
+      "unknown": "Le dernier appel au fournisseur a échoué."
+    },
+    "days": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "window": {
+      "title": "Plage d’envoi",
+      "days": "Jours",
+      "start": "De",
+      "end": "À",
+      "clock": "Heure de référence",
+      "recipient": "Celle du destinataire",
+      "mailbox": "Celle de la boîte",
+      "zone": "Fuseau de la boîte",
+      "holidays": "Pas d’envoi les jours fériés de",
+      "calendar": {
+        "FR": "France",
+        "BL": "Saint-Barthélemy",
+        "MF": "Saint-Martin",
+        "US": "États-Unis"
+      },
+      "previewRecipient": "Les destinataires reçoivent les messages les {days} entre {start} et {end}, à leur heure ({zone} si inconnue).",
+      "previewMailbox": "Les messages partent les {days} entre {start} et {end}, heure de {zone}."
+    },
+    "chart": {
+      "title": "Prévu et envoyé",
+      "summary": "Envois quotidiens des 30 derniers jours et plan de montée en charge des 14 prochains.",
+      "sent": "Envoyés",
+      "bounced": "Rejetés",
+      "planned": "Prévus"
+    },
+    "smtp": {
+      "title": "Connecter une boîte SMTP/IMAP",
+      "description": "La connexion est testée avant l’enregistrement. Le mot de passe est chiffré et n’est plus jamais affiché.",
+      "preset": "Fournisseur",
+      "presets": {
+        "ovh": "OVHcloud",
+        "gandi": "Gandi",
+        "infomaniak": "Infomaniak",
+        "zoho": "Zoho Mail (UE)",
+        "fastmail": "Fastmail",
+        "icloud": "iCloud Mail",
+        "mailpit": "Mailpit (développement)",
+        "custom": "Autre"
+      },
+      "email": "Adresse",
+      "displayName": "Nom de l’expéditeur",
+      "username": "Identifiant",
+      "password": "Mot de passe ou mot de passe d’application",
+      "smtpServer": "Sortant (SMTP)",
+      "imapServer": "Entrant (IMAP)",
+      "noImap": "Sans IMAP : les réponses ne sont pas synchronisées et aucune copie n’est gardée dans Envoyés.",
+      "appendToSent": "Garder une copie dans Envoyés",
+      "shared": "Boîte partagée (sans propriétaire)",
+      "appPasswordHint": "Utilisez un mot de passe d’application si votre fournisseur en propose.",
+      "host": "Serveur",
+      "port": "Port",
+      "security": "Sécurité",
+      "tls": "TLS",
+      "starttls": "STARTTLS",
+      "cancel": "Annuler",
+      "connect": "Tester et connecter",
+      "testing": "Test en cours…",
+      "connected": "Boîte connectée.",
+      "failed": "Connexion impossible."
+    },
+    "detail": {
+      "title": "Boîte d’envoi",
+      "hint": "Statut, capacité, plage, signature et historique de cette boîte.",
+      "failed": "L’opération a échoué.",
+      "saved": "Enregistré.",
+      "testSent": "Test envoyé à {to}.",
+      "testFailed": "Le test a échoué : {error}",
+      "provider": {
+        "gmail": "Google",
+        "graph": "Microsoft 365",
+        "smtp_imap": "SMTP/IMAP"
+      },
+      "shared": "Partagée",
+      "resume": "Reprendre",
+      "resumed": "Boîte relancée.",
+      "pause": "Mettre en pause",
+      "paused": "Boîte en pause.",
+      "test": "M’envoyer un test",
+      "reconnect": "Reconnecter",
+      "disconnect": "Déconnecter",
+      "disconnected": "Boîte déconnectée.",
+      "today": "Aujourd’hui",
+      "usage": "{sent} sur {cap}",
+      "nextWindow": "Prochaine plage",
+      "health": "Santé",
+      "healthy": "Bonne",
+      "unhealthy": "Problème",
+      "notChecked": "Pas encore vérifiée",
+      "displayName": "Nom de l’expéditeur",
+      "replyTo": "Adresse de réponse (facultative)",
+      "languages": "Langues d’écriture",
+      "locale": {
+        "en": "Anglais",
+        "fr": "Français"
+      },
+      "capacity": "Capacité",
+      "adminsOnly": "Seuls les administrateurs modifient les plafonds, la montée en charge et la plage.",
+      "dailyCap": "Plafond quotidien",
+      "minInterval": "Secondes entre deux envois",
+      "rampEnabled": "Monter en charge progressivement",
+      "ramp": {
+        "startCap": "Commencer à",
+        "increment": "Ajouter",
+        "everyDays": "Tous les (jours)",
+        "maxCap": "Jusqu’à"
+      },
+      "signature": "Signature (Markdown)",
+      "preview": "Aperçu",
+      "save": "Enregistrer",
+      "trail": "Historique",
+      "event": {
+        "connected": "Connectée",
+        "status_changed": "Changement de statut",
+        "settings_changed": "Réglages modifiés",
+        "error": "Erreur du fournisseur",
+        "test_sent": "Test envoyé",
+        "disconnected": "Déconnectée",
+        "reconnected": "Reconnectée"
       }
     }
   }

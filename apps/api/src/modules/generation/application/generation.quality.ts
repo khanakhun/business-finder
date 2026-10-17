@@ -99,7 +99,9 @@ export class GenerationQuality {
     const [seq] = await this.repository.appendEvents(job.id, attemptId, [verdict]);
     // Live clients see it before the status that follows.
     if (seq !== undefined)
-      await this.stream?.publish(job.id, [{ seq, event: verdict }]).catch(() => undefined);
+      await this.stream
+        ?.publish(job.id, [{ seq, event: verdict, attempt: attempt.attemptNo }])
+        .catch(() => undefined);
 
     if (result.outcome === 'repair') {
       // The repair attempt reads what to fix (BF-041): the issues, next to the spec they are about.

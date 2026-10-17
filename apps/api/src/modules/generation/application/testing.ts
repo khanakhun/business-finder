@@ -18,7 +18,14 @@ export class InMemoryGenerationRepository implements GenerationRepository {
   readonly batchRows = new Map<string, StoredBatch>();
   readonly jobRows = new Map<string, StoredJob>();
   readonly attemptRows = new Map<string, StoredAttempt>();
-  readonly eventRows: { jobId: string; seq: number; type: string; payload: unknown; createdAt: Date }[] = [];
+  readonly eventRows: {
+    jobId: string;
+    seq: number;
+    type: string;
+    payload: unknown;
+    attemptNo: number | null;
+    createdAt: Date;
+  }[] = [];
   readonly artifacts: { jobId: string; attemptId: string | null; kind: string; storageKey: string }[] = [];
   readonly names = new Map<string, string>();
 
@@ -156,7 +163,7 @@ export class InMemoryGenerationRepository implements GenerationRepository {
   async staleAttempts(before: Date) {
     return [...this.attemptRows.values()].filter((a) => a.status === 'running' && a.heartbeatAt < before);
   }
-  async appendEvents(jobId: string, _attemptId: string | null, events: readonly EngineEvent[]) {
+  async appendEvents(jobId: string, attemptId: string | null, events: readonly EngineEvent[]) {
     const start = this.eventRows.filter((e) => e.jobId === jobId).length + 1;
     for (const [index, event] of events.entries())
       this.eventRows.push({
@@ -164,6 +171,7 @@ export class InMemoryGenerationRepository implements GenerationRepository {
         seq: start + index,
         type: event.type,
         payload: event,
+        attemptNo: (attemptId ? this.attemptRows.get(attemptId)?.attemptNo : undefined) ?? null,
         createdAt: new Date(),
       });
     return events.map((_, index) => start + index);

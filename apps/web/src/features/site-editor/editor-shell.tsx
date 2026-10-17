@@ -144,7 +144,11 @@ export function SiteEditor({
   const [base, setBase] = React.useState<Base>(() => baseOf(initialVersion));
   // The site with the edits of pages already left and the site-level changes (from `base.spec`), with their history.
   const [site, setSiteState] = React.useState<SiteChanges>(() => startChanges(base.spec));
-  const [pageId, setPageId] = React.useState(base.spec.pages[0]?.id ?? '');
+  // `?page=<id>` opens that page (a quality issue's link from the job console, BF-046); the editor is client-only.
+  const [pageId, setPageId] = React.useState(() => {
+    const asked = new URLSearchParams(window.location.search).get('page');
+    return base.spec.pages.find((page) => page.id === asked)?.id ?? base.spec.pages[0]?.id ?? '';
+  });
   const [locale, setLocale] = React.useState<SiteLocale>(base.spec.defaultLocale);
   // The canvas's latest content (Puck's onChange), and what Puck was mounted with.
   const [data, setDataState] = React.useState<EditorData>(() => specPageToPuckData(base.spec, pageId));

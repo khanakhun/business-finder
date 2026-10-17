@@ -86,7 +86,8 @@ export class GenerationReview {
   private async log(job: StoredJob, message: string): Promise<void> {
     const event = { type: 'log' as const, level: 'info' as const, message: message.slice(0, 2000) };
     const [seq] = await this.repository.appendEvents(job.id, null, [event]);
-    if (seq !== undefined) await this.stream?.publish(job.id, [{ seq, event }]).catch(() => undefined);
+    if (seq !== undefined)
+      await this.stream?.publish(job.id, [{ seq, event, attempt: null }]).catch(() => undefined);
   }
 
   /** Publishes the reviewed version anyway; refused when its schema or facts failed, or without a report. */

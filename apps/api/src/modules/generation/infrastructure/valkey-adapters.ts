@@ -78,9 +78,13 @@ export class ValkeyCancelSignals implements CancelSignals {
 export class ValkeyEventStream implements EventStream {
   constructor(private readonly valkey: Pick<Redis, 'xadd' | 'expire'>) {}
 
-  async publish(jobId: string, entries: readonly { seq: number; event: EngineEvent }[]): Promise<void> {
+  async publish(
+    jobId: string,
+    entries: readonly { seq: number; event: EngineEvent; attempt: number | null }[],
+  ): Promise<void> {
     const key = `gen:job:${jobId}`;
-    for (const { seq, event } of entries)
+    const at = new Date().toISOString();
+    for (const { seq, event, attempt } of entries)
       await this.valkey.xadd(
         key,
         'MAXLEN',
@@ -89,6 +93,10 @@ export class ValkeyEventStream implements EventStream {
         '*',
         'seq',
         String(seq),
+        'attempt',
+        attempt === null ? '' : String(attempt),
+        'at',
+        at,
         'event',
         JSON.stringify(event),
       );

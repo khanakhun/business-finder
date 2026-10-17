@@ -321,9 +321,11 @@ export class DrizzleGenerationRepository implements GenerationRepository {
         seq: generationEvents.seq,
         type: generationEvents.type,
         payload: generationEvents.payload,
+        attemptNo: generationAttempts.attemptNo,
         createdAt: generationEvents.createdAt,
       })
       .from(generationEvents)
+      .leftJoin(generationAttempts, eq(generationAttempts.id, generationEvents.attemptId))
       .where(and(eq(generationEvents.jobId, jobId), gt(generationEvents.seq, afterSeq)))
       .orderBy(asc(generationEvents.seq))
       .limit(limit);

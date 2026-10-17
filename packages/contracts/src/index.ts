@@ -464,6 +464,8 @@ export {
   GenerationReaperJob,
   type GenerationSettings,
   GenerationSettingsSchema,
+  type GenerationStreamEvent,
+  GenerationStreamEventSchema,
   type RegenerateSiteRequest,
   RegenerateSiteRequestSchema,
   type ReorderGenerationJobsRequest,

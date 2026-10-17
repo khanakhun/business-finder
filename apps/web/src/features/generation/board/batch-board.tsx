@@ -6,16 +6,19 @@ import { Button } from '@bf/ui/components/button';
 import { ErrorState } from '@bf/ui/components/error-state';
 import { PageHeader } from '@bf/ui/components/page-header';
 import { Progress } from '@bf/ui/components/progress';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@bf/ui/components/sheet';
 import { Skeleton } from '@bf/ui/components/skeleton';
 import { TooltipProvider } from '@bf/ui/components/tooltip';
 import { CopyPlusIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
+import { parseAsString, useQueryState } from 'nuqs';
 import * as React from 'react';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
 import { usePermission } from '@/lib/session.tsx';
 import { getToast } from '@/lib/toast.tsx';
 import { useBatch, useEngines, useJobActions } from '../api.ts';
+import { JobConsole } from '../console/job-console.tsx';
 import { move } from '../reorder.ts';
 import { SortableList } from '../sortable-list.tsx';
 import { progressTitle, statusChanges } from './announce.ts';
@@ -35,6 +38,8 @@ export function BatchBoard({ batchId }: { readonly batchId: string }) {
   const engines = useEngines();
   const actions = useJobActions(batchId);
   const canGenerate = usePermission('sites:generate');
+  // The console of one job, as a drawer (`?job=`; notifications link here).
+  const [openJob, setOpenJob] = useQueryState('job', parseAsString);
   const now = useNow(batch.data ? !batch.data.finishedAt : false);
   const announcement = useAnnouncements(batch.data?.jobs ?? []);
   const total = batch.data?.jobs.length ?? 0;
@@ -111,9 +116,17 @@ export function BatchBoard({ batchId }: { readonly batchId: string }) {
             now={now}
             canStartNext={canGenerate && queued.length > 1 && queued[0]?.id !== job.id}
             onStartNext={() => startNext(job.id)}
+            onOpenConsole={() => void setOpenJob(job.id)}
           />
         )}
       />
+      <Sheet open={openJob !== null} onOpenChange={(open) => (open ? undefined : void setOpenJob(null))}>
+        <SheetContent side="right" className="w-full overflow-y-auto p-4 sm:max-w-3xl">
+          <SheetTitle className="sr-only">{t('console')}</SheetTitle>
+          <SheetDescription className="sr-only">{t('consoleHint')}</SheetDescription>
+          {openJob ? <JobConsole jobId={openJob} compact /> : null}
+        </SheetContent>
+      </Sheet>
     </TooltipProvider>
   );
 }

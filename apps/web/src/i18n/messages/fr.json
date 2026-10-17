@@ -2819,6 +2819,148 @@
         "reasonHint": "Au moins {min} caractères ; conservé dans le journal d'audit.",
         "close": "Fermer",
         "confirm": "Publier"
+      },
+      "console": "Console de la tâche",
+      "consoleHint": "L'activité en direct et le rapport de qualité de la tâche",
+      "openConsole": "Console"
+    },
+    "console": {
+      "title": "Console de la tâche",
+      "loadError": "La tâche n'a pas pu être chargée.",
+      "toBatch": "Retour au lot",
+      "openPreview": "Ouvrir l'aperçu",
+      "attempts": "Tentatives",
+      "attemptSummary": "n° {attempt} {engine} · {mode} · {status} · {cost}",
+      "mode": {
+        "create": "création",
+        "repair": "réparation"
+      },
+      "attemptStatus": {
+        "running": "en cours",
+        "succeeded": "terminée",
+        "failed": "échec",
+        "cancelled": "annulée"
+      },
+      "tabs": {
+        "activity": "Activité",
+        "quality": "Qualité"
+      },
+      "filter": "Afficher",
+      "filters": {
+        "all": "Tout",
+        "tools": "Outils",
+        "logs": "Journaux",
+        "errors": "Problèmes"
+      },
+      "search": "Rechercher dans l'activité",
+      "usage": "{cost} sur {budget} · {tokens} jetons",
+      "stream": {
+        "connecting": "Connexion…",
+        "live": "En direct",
+        "reconnecting": "Reconnexion…",
+        "ended": "Terminé"
+      },
+      "activity": "Activité",
+      "loading": "Chargement de l'activité…",
+      "empty": "Aucune activité pour le moment.",
+      "review": "Relecture",
+      "attempt": "Tentative {attempt}",
+      "jumpToLatest": "Aller au plus récent",
+      "events": {
+        "phase": {
+          "preparing": "Préparation de l'espace de travail",
+          "running": "Exécution",
+          "validating": "Vérification du site"
+        },
+        "usage": "{tokens} jetons · {cost}",
+        "artifact": {
+          "site_spec": "Site enregistré",
+          "screenshot": "Capture d'écran prise"
+        },
+        "errors": {
+          "TIMEOUT": "L'exécution a dépassé sa limite de temps.",
+          "ENGINE_BUDGET_EXCEEDED": "L'exécution a atteint son budget.",
+          "BUDGET_EXCEEDED": "L'exécution a atteint son budget.",
+          "ENGINE_INCOMPLETE": "Le moteur s'est arrêté avant de finir le site.",
+          "ENGINE_INVALID_OUTPUT": "Le site produit par le moteur n'est pas valide.",
+          "INVALID_OUTPUT": "Le site produit par le moteur n'est pas valide.",
+          "ENGINE_ERROR": "Le moteur a échoué.",
+          "PROVIDER_ERROR": "Le fournisseur du modèle a renvoyé une erreur.",
+          "ENGINE_UNAVAILABLE": "Le moteur n'est pas disponible pour le moment.",
+          "ENGINE_VERSION_UNSUPPORTED": "La version du moteur n'est pas prise en charge.",
+          "SANDBOX_UNAVAILABLE": "Aucun bac à sable n'était disponible.",
+          "SANDBOX_TIMEOUT": "Le bac à sable a manqué de temps.",
+          "SANDBOX_OOM": "Le bac à sable a manqué de mémoire.",
+          "SANDBOX_CRASHED": "Le bac à sable s'est arrêté de façon inattendue.",
+          "SANDBOX_PROTOCOL_ERROR": "Le bac à sable a envoyé un message illisible.",
+          "INVALID_BRIEF": "Le brief n'a pas pu être construit.",
+          "HEARTBEAT_LOST": "Le serveur qui l'exécutait ne répond plus.",
+          "CANCELLED": "Annulé."
+        },
+        "retryable": "Elle sera relancée.",
+        "notRetryable": "Elle ne sera pas relancée.",
+        "done": "Site prêt"
+      },
+      "quality": {
+        "error": "Le rapport de qualité n'a pas pu être chargé.",
+        "none": "Pas encore de rapport de qualité : il est écrit une fois le site vérifié.",
+        "decision": {
+          "pass": "Réussi",
+          "repair": "Envoyé en réparation",
+          "needs_review": "À relire"
+        },
+        "infraError": "Un contrôle n'a pas pu s'exécuter",
+        "gatesTitle": "Contrôles",
+        "gate": "Contrôle",
+        "result": "Résultat",
+        "score": "Score",
+        "issueCount": "Problèmes",
+        "time": "Durée",
+        "gates": {
+          "schema": "Schéma",
+          "facts": "Faits",
+          "claims": "Affirmations",
+          "copy": "Textes",
+          "autofix": "Corrections auto",
+          "a11y": "Accessibilité",
+          "performance": "Performance",
+          "visual": "Visuel"
+        },
+        "status": {
+          "pass": "Réussi",
+          "fail": "Échec",
+          "skipped": "Ignoré",
+          "error": "Non exécuté"
+        },
+        "issuesTitle": "{count, plural, one {# problème} other {# problèmes}}",
+        "siteWide": "Tout le site",
+        "pageBlock": "Page {page} › section {block}",
+        "page": "Page {page}",
+        "openInEditor": "Ouvrir dans l'éditeur",
+        "severity": {
+          "error": "Erreur",
+          "warning": "Avertissement",
+          "info": "Remarque"
+        },
+        "rubricTitle": "Revue visuelle",
+        "criterion": "Critère",
+        "rubricScore": "Score",
+        "criteria": {
+          "hierarchy": "Hiérarchie",
+          "typography": "Typographie",
+          "spacing": "Espacement",
+          "imagery": "Images",
+          "color": "Couleurs",
+          "cta": "Appels à l'action",
+          "mobile": "Mobile",
+          "brand_fit": "Adéquation à la marque",
+          "originality": "Originalité"
+        },
+        "screenshotsTitle": "Captures d'écran",
+        "screenshot": "{page}, {viewport}",
+        "autoFixesTitle": "{count, plural, one {# correction automatique} other {# corrections automatiques}}",
+        "screenshotMissing": "Capture indisponible",
+        "enlarge": "Agrandir {label}"
       }
     }
   }

@@ -64,6 +64,13 @@ export const EngineEventSchema = z
   .meta({ id: 'EngineEvent' });
 export type EngineEvent = z.infer<typeof EngineEventSchema>;
 
+/** One event of a job's SSE stream (BF-046): the engine event, its attempt (null: not an attempt's) and time. */
+export const GenerationStreamEventSchema = z.intersection(
+  EngineEventSchema,
+  z.object({ attempt: z.number().int().positive().nullable(), at: z.iso.datetime() }),
+);
+export type GenerationStreamEvent = z.infer<typeof GenerationStreamEventSchema>;
+
 export const GENERATION_JOB_STATUSES = [
   'queued',
   'preparing',

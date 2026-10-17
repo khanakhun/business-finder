@@ -99,7 +99,11 @@ export class GenerationController {
       subscribe: async (push) => {
         stop = await this.tail.follow(job.id, (entry) => {
           if (entry.kind === 'event')
-            push({ id: String(entry.seq), event: entry.event.type, data: entry.event });
+            push({
+              id: String(entry.seq),
+              event: entry.event.type,
+              data: { ...entry.event, attempt: entry.attempt, at: entry.at },
+            });
           else {
             push({ event: 'job', data: { status: entry.status } });
             // A settled job has nothing more to say: the stream ends (the client stops reconnecting).
@@ -113,7 +117,11 @@ export class GenerationController {
         const replayed = events.map((event) => ({
           id: String(event.seq),
           event: event.type,
-          data: event.payload,
+          data: {
+            ...(event.payload as Record<string, unknown>),
+            attempt: event.attemptNo,
+            at: event.createdAt.toISOString(),
+          },
         }));
         // Already settled: the replay is the whole story. The status is read again here, after the live
         // subscription started: a job that settled since the first read sent its last status before we listened.

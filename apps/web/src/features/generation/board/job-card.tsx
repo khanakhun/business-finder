@@ -20,6 +20,7 @@ import {
   PencilIcon,
   RotateCcwIcon,
   SkipForwardIcon,
+  TerminalSquareIcon,
   XIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -49,6 +50,7 @@ export function JobCard({
   actions,
   canStartNext,
   onStartNext,
+  onOpenConsole,
   now,
 }: {
   readonly job: GenerationJob;
@@ -56,6 +58,7 @@ export function JobCard({
   readonly actions: ReturnType<typeof useJobActions>;
   readonly canStartNext: boolean;
   readonly onStartNext: () => void;
+  readonly onOpenConsole: () => void;
   readonly now: number;
 }) {
   const t = useTranslations('generation.board');
@@ -238,6 +241,10 @@ export function JobCard({
             {t('accept')}
           </Button>
         ) : null}
+        <Button type="button" size="sm" variant="ghost" onClick={onOpenConsole}>
+          <TerminalSquareIcon aria-hidden />
+          {t('openConsole')}
+        </Button>
         {settled && job.siteId ? (
           <Button asChild size="sm" variant="ghost">
             <Link href={`/sites/${job.siteId}/edit`}>

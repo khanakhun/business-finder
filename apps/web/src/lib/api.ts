@@ -69,6 +69,16 @@ export const queryKeys = {
     board: (filters: Readonly<Record<string, string>>) => ['crm', 'board', filters] as const,
     tasks: (filters: Readonly<Record<string, string>>) => ['crm', 'tasks', filters] as const,
   }),
+  generation: defineQueryKeys('generation', {
+    engines: () => ['generation', 'engines'] as const,
+    batches: (filters: Readonly<Record<string, string>>) => ['generation', 'batches', filters] as const,
+    batch: (id: string) => ['generation', 'batch', id] as const,
+    job: (id: string) => ['generation', 'job', id] as const,
+    brief: (businessId: string) => ['generation', 'brief', businessId] as const,
+    quality: (jobId: string) => ['generation', 'quality', jobId] as const,
+    selection: (ids: readonly string[]) => ['generation', 'selection', ids] as const,
+    businessSite: (businessId: string) => ['generation', 'business-site', businessId] as const,
+  }),
   workspace: defineQueryKeys('workspace', {
     settings: () => ['workspace', 'settings'] as const,
     logo: () => ['workspace', 'logo'] as const,

@@ -32,7 +32,7 @@ describe('quick actions', () => {
       ['business.call', true, 'tel:+33199002700'],
       ['business.whatsapp', true, 'https://wa.me/33199002700'],
       ['enrichment.enrich', true, null],
-      ['sites.generate', false, null],
+      ['sites.generate', true, '/generation/new?ids=0192a1b2-0000-7000-8000-000000000001'],
       ['outreach.send-email', false, null],
     ]);
     const viewer = quickActionsFor({

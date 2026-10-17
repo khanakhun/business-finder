@@ -890,13 +890,13 @@
       "enroll": "Email or enroll",
       "forbidden": "You don't have permission",
       "selectFirst": "Select businesses first",
-      "comingSites": "Available with site generation",
       "comingOutreach": "Available with outreach",
       "done": "{count, plural, one {Done for # business} other {Done for # businesses}}",
       "partial": "{done} done, {failed} not changed",
       "exporting": "Your export is downloading",
       "tooMany": "Export up to 200 selected rows, or clear the selection to export all results",
-      "enrich": "Enrich"
+      "enrich": "Enrich",
+      "tooManySites": "Create sites for up to 50 businesses at a time"
     },
     "lists": {
       "title": "Lists",
@@ -1037,7 +1037,6 @@
       "generateSite": "Generate site",
       "sendEmail": "Send email",
       "doNotContact": "Marked do not contact",
-      "comingSites": "Available with site generation",
       "comingOutreach": "Available with outreach"
     },
     "status": {
@@ -2633,6 +2632,194 @@
       "redo": "Redo",
       "help": "Show these shortcuts",
       "close": "Close a dialog or panel"
+    }
+  },
+  "generation": {
+    "order": {
+      "picked": "Picked up {name}",
+      "over": "Over position {position}",
+      "dropped": "{name} moved to position {position}",
+      "cancelled": "Move cancelled",
+      "up": "Move {name} up",
+      "down": "Move {name} down"
+    },
+    "engines": {
+      "autoHint": "The best available engine for each business",
+      "why": {
+        "off": "Not enabled on this deployment",
+        "unavailable": "Not available for this workspace (model key or settings)"
+      },
+      "hint": "~{cost} · ~{minutes} min · {running} running · {queued} waiting",
+      "name": {
+        "auto": "Auto",
+        "blocks": "Blocks",
+        "claude-agent-sdk": "Claude Agent SDK",
+        "claude-code": "Claude Code",
+        "codex": "Codex",
+        "fake": "Fake (tests)"
+      }
+    },
+    "brief": {
+      "error": "The brief could not be loaded.",
+      "plan": "Pages",
+      "pages": {
+        "home": "Home",
+        "menu": "Menu",
+        "services": "Services",
+        "products": "Products",
+        "about": "About",
+        "contact": "Contact",
+        "booking": "Booking",
+        "gallery": "Gallery"
+      },
+      "style": "Style",
+      "styles": {
+        "luxe": "Luxe",
+        "modern": "Modern",
+        "warm": "Warm",
+        "minimal": "Minimal",
+        "coastal": "Coastal"
+      },
+      "palette": "Palette",
+      "locales": "Languages",
+      "sellingPoints": "Selling points",
+      "evidence": "{count, plural, one {Based on # fact} other {Based on # facts}}",
+      "warningsLabel": "What is missing",
+      "warnings": {
+        "no_display_phone": "No phone number that can be shown on the site",
+        "no_display_email": "No email address that can be shown on the site",
+        "no_contact_channel": "No way to contact the business can be shown",
+        "no_hours": "No opening hours known",
+        "no_large_image": "Few good images: stock or AI images will be used",
+        "single_locale": "Only one language can be written well",
+        "no_services": "No services or products known",
+        "no_owner_site_facts": "Nothing from the business's own website",
+        "few_facts": "Few facts known: the site will stay simple"
+      },
+      "overrides": "Adjustments",
+      "fromBrief": "From the brief ({value})",
+      "instructions": "Extra instructions",
+      "instructionsHint": "E.g. put the terrace forward; no prices"
+    },
+    "assign": {
+      "open": "Assign engines…",
+      "label": "Pattern",
+      "placeholder": "2 claude-code + 2 codex + rest blocks",
+      "help": "By position: counts and engines separated by + or commas; “rest” for the others.",
+      "invalid": "This pattern cannot be read.",
+      "apply": "Apply"
+    },
+    "estimate": {
+      "title": "Estimate",
+      "cost": "Typical cost",
+      "eta": "Typical time",
+      "minutes": "{minutes, plural, one {~# minute} other {~# minutes}}",
+      "queued": "{count, plural, one {# job is already waiting for these engines: it may take longer.} other {# jobs are already waiting for these engines: it may take longer.}}",
+      "note": "Typical figures; repairs and queues can add to them."
+    },
+    "create": {
+      "title": "Create sites",
+      "forbidden": "You don't have permission to generate sites.",
+      "empty": "No businesses selected",
+      "emptyHint": "Select businesses in the search results, then choose Create sites.",
+      "toSearch": "Go to search",
+      "loadError": "The selected businesses could not be loaded.",
+      "submitError": "The batch could not be created.",
+      "description": "{count, plural, one {# business, in this order} other {# businesses, in this order}}",
+      "order": "Order (first starts first)",
+      "applyAll": "Apply to all…",
+      "orderHint": "Drag a row, or use the arrows, to change which starts first.",
+      "runMode": "Run mode",
+      "mode": {
+        "sequential": "One by one, in this order",
+        "parallel": "In parallel"
+      },
+      "upTo": "up to",
+      "limitsHint": "Engine and workspace limits still apply: items wait for a free slot.",
+      "settings": "Settings",
+      "autoPublish": "Publish a preview when ready",
+      "name": "Batch name",
+      "namePlaceholder": "Generated from the date",
+      "budget": "Budget per site (USD, optional)",
+      "budgetPlaceholder": "Engine default",
+      "blocked": "Some engines chosen are not available: pick another one.",
+      "submit": "{count, plural, one {Create # site} other {Create # sites}}",
+      "regenerate": "New version of v{version}",
+      "newSite": "New site",
+      "engineFor": "Engine for {name}",
+      "remove": "Remove {name}",
+      "brief": "Brief",
+      "overridden": "Adjusted"
+    },
+    "status": {
+      "queued": "Queued",
+      "preparing": "Preparing",
+      "running": "Running",
+      "validating": "Checking",
+      "repairing": "Repairing",
+      "succeeded": "Ready",
+      "needs_review": "Needs review",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "batchStatus": {
+      "queued": "Queued",
+      "running": "Running",
+      "completed": "Completed",
+      "completed_with_issues": "Completed with issues",
+      "cancelled": "Cancelled"
+    },
+    "board": {
+      "title": "Batch",
+      "loadError": "The batch could not be loaded.",
+      "actionFailed": "That did not work. Try again.",
+      "reorderHint": "Drag a waiting job, or use the arrows, to change what starts next.",
+      "jobs": "Jobs, in priority order",
+      "mode": "{parallel, plural, =0 {In parallel} =1 {One by one} other {Up to # at a time}}",
+      "duplicate": "Duplicate",
+      "cancelBatch": "Cancel batch",
+      "summary": "Batch summary",
+      "progress": "{done} of {total} done",
+      "batchCost": "Cost {cost}",
+      "elapsed": "Elapsed",
+      "counts": "Jobs per status",
+      "announce": "{name}: {status}",
+      "copied": "Preview link copied",
+      "copyFailed": "The link could not be copied",
+      "quality": "Quality {score}",
+      "steps": "Progress",
+      "result": "Result",
+      "attempts": "Attempts",
+      "cost": "Cost",
+      "budgetUsed": "Budget used",
+      "openPreview": "Open preview",
+      "copy": "Copy link",
+      "startNext": "Start next",
+      "changeEngine": "Engine for {name}",
+      "cancel": "Cancel",
+      "retry": "Retry",
+      "retryWith": "Retry with",
+      "sameEngine": "{engine} (same engine)",
+      "accept": "Accept anyway",
+      "openEditor": "Open editor",
+      "cancelDialog": {
+        "title": "Cancel the site for {name}?",
+        "description": "The run stops within a few seconds. You can retry it later.",
+        "keep": "Keep it running",
+        "confirm": "Cancel it"
+      },
+      "acceptDialog": {
+        "title": "Publish the site for {name} anyway?",
+        "description": "The quality checks asked for a review. Publishing it records who did and why.",
+        "score": "Quality score {score}.",
+        "issues": "{count, plural, =0 {No issues.} one {# issue.} other {# issues.}}",
+        "blocked": "It cannot be published: the {gates} checks did not pass.",
+        "noReport": "It cannot be published: there is no quality report.",
+        "reason": "Why publish it",
+        "reasonHint": "At least {min} characters; kept in the audit log.",
+        "close": "Close",
+        "confirm": "Publish"
+      }
     }
   }
 }

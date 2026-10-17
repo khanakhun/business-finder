@@ -6,6 +6,8 @@ import { type BulkAction, registerBulkAction } from './registry.ts';
 
 export const ADD_TO_LIST_DIALOG = 'search.add-to-list';
 export const MAX_EXPORT_IDS = 200;
+/** A generation batch holds at most 50 items (BF-039). */
+export const MAX_SITE_IDS = 50;
 
 const actions: BulkAction[] = [
   {
@@ -38,8 +40,13 @@ const actions: BulkAction[] = [
     icon: 'layout-template',
     permission: 'sites:generate',
     order: 50,
-    disabledReason: () => 'search.bulk.comingSites',
-    run: async () => null,
+    disabledReason: (context) =>
+      context.selection.ids.length > MAX_SITE_IDS ? 'search.bulk.tooManySites' : null,
+    // The create flow (BF-046) with the selection, in the listing's order.
+    run: async (context, ui) => {
+      ui.navigate(`/generation/new?ids=${context.selection.ids.join(',')}`);
+      return null;
+    },
   },
   {
     id: 'outreach.enroll',

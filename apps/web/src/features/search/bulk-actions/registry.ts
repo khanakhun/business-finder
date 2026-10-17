@@ -47,6 +47,8 @@ export interface BulkActionUi {
   dialog<T>(id: string, props?: Record<string, unknown>): Promise<T | null>;
   /** Starts a file download from an API path with query parameters. */
   download(path: string, query: Readonly<Record<string, string | string[]>>): void;
+  /** Goes to a dashboard page (e.g. the create-sites flow with the selection). */
+  navigate(href: string): void;
 }
 
 const registry = new Map<string, BulkAction>();

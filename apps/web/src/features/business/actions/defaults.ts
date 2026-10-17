@@ -73,7 +73,8 @@ export function registerDefaultQuickActions(): void {
     icon: LayoutTemplateIcon,
     order: 50,
     permission: 'sites:generate',
-    disabledReason: () => 'business.actions.comingSites',
+    // The create flow with this one business (BF-046).
+    href: ({ business }) => `/generation/new?ids=${business.id}`,
   });
   quickActions.register({
     id: 'outreach.send-email',

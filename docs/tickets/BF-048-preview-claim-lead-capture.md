@@ -143,11 +143,11 @@ apps/web/src/features/leads/{leads-inbox.tsx, lead-drawer.tsx, nav-badge.tsx}
 - **Abuse:** scripted burst submissions are throttled; honeypot and too-fast submissions are flagged.
 
 ## Acceptance criteria
-- [ ] Public leads API (claim, contact, opt-out) with signed tokens, validation, idempotency, CORS and rate limits.
-- [ ] Privacy-friendly anti-spam (honeypot, timing, self-hosted proof-of-work, heuristics), no third-party scripts.
-- [ ] Renderer claim, opt-out and privacy pages (localized, no-JS capable); preview contact forms clearly routed to the agency.
-- [ ] Automation: pipeline status, task, notifications, conversion event with attribution; opt-out sets do-not-contact and can unpublish.
-- [ ] Leads inbox with realtime, filters, actions, export (audited); retention configured.
+- [x] Public leads API (claim, contact, opt-out) with signed tokens, validation, idempotency, CORS and rate limits.
+- [x] Privacy-friendly anti-spam (honeypot, timing, self-hosted proof-of-work, heuristics), no third-party scripts.
+- [x] Renderer claim, opt-out and privacy pages (localized, no-JS capable); preview contact forms clearly routed to the agency.
+- [x] Automation: pipeline status, task, notifications, conversion event with attribution; opt-out sets do-not-contact and can unpublish.
+- [x] Leads inbox with realtime, filters, actions, export (audited); retention configured.
 
 ## Agent prompt
 ```text

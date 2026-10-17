@@ -1,5 +1,6 @@
 import { type DbClient, getExecutor } from '@bf/db';
 import {
+  businessContacts,
   businesses,
   emailThreads,
   inboundMessages,
@@ -8,11 +9,29 @@ import {
   outboundMessages,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, count, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  lte,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type {
   InboundRecord,
   InboundRepository,
+  InboxFilter,
   OutboundRef,
   SyncState,
 } from '../../application/inbound/ports.ts';
@@ -35,6 +54,117 @@ export class DrizzleInboundRepository implements InboundRepository {
 
   private get x() {
     return getExecutor(this.db);
+  }
+
+  private threadQuery(where: SQL | undefined, limit: number) {
+    return this.x
+      .select({
+        threadId: emailThreads.id,
+        businessId: emailThreads.businessId,
+        businessName: businesses.displayName,
+        contactEmail: businessContacts.value,
+        mailboxId: emailThreads.mailboxId,
+        mailboxEmail: mailboxes.email,
+        subject: emailThreads.subjectRoot,
+        lastInboundAt: emailThreads.lastInboundAt,
+        lastMessageAt: emailThreads.lastMessageAt,
+        unreadCount: emailThreads.unreadCount,
+        latestClass: emailThreads.latestTriageClass,
+      })
+      .from(emailThreads)
+      .innerJoin(businesses, eq(businesses.id, emailThreads.businessId))
+      .leftJoin(mailboxes, eq(mailboxes.id, emailThreads.mailboxId))
+      .leftJoin(businessContacts, eq(businessContacts.id, emailThreads.contactId))
+      .where(where)
+      .orderBy(desc(emailThreads.lastInboundAt), desc(emailThreads.id))
+      .limit(limit);
+  }
+
+  async threads(organizationId: string, filter: InboxFilter) {
+    const inThread = (condition: SQL) =>
+      sql`exists (select 1 from ${inboundMessages} where ${inboundMessages.threadId} = ${emailThreads.id} and ${condition})`;
+    const conditions = [
+      eq(emailThreads.organizationId, organizationId),
+      isNotNull(emailThreads.lastInboundAt),
+      filter.triageClass ? eq(emailThreads.latestTriageClass, filter.triageClass) : undefined,
+      filter.mailboxId ? eq(emailThreads.mailboxId, filter.mailboxId) : undefined,
+      filter.unread ? gt(emailThreads.unreadCount, 0) : undefined,
+      filter.needsHuman
+        ? inThread(
+            sql`${inboundMessages.triageStatus} = 'needs_human' and ${inboundMessages.status} <> 'handled'`,
+          )
+        : undefined,
+      filter.assignedTo ? inThread(sql`${inboundMessages.assignedTo} = ${filter.assignedTo}`) : undefined,
+      filter.status ? inThread(sql`${inboundMessages.status} = ${filter.status}`) : undefined,
+      filter.q
+        ? or(ilike(businesses.displayName, `%${filter.q}%`), ilike(emailThreads.subjectRoot, `%${filter.q}%`))
+        : undefined,
+      filter.before
+        ? or(
+            lt(emailThreads.lastInboundAt, filter.before.at),
+            and(eq(emailThreads.lastInboundAt, filter.before.at), lt(emailThreads.id, filter.before.id)),
+          )
+        : undefined,
+    ];
+    return this.threadQuery(and(...conditions), filter.limit);
+  }
+
+  async thread(organizationId: string, threadId: string) {
+    const [row] = await this.threadQuery(
+      and(eq(emailThreads.organizationId, organizationId), eq(emailThreads.id, threadId)),
+      1,
+    );
+    return row;
+  }
+
+  async latestInbound(threadIds: readonly string[]) {
+    if (threadIds.length === 0) return new Map<string, InboundRecord>();
+    const rows = await this.x
+      .selectDistinctOn([inboundMessages.threadId])
+      .from(inboundMessages)
+      .where(inArray(inboundMessages.threadId, [...threadIds]))
+      .orderBy(inboundMessages.threadId, desc(inboundMessages.receivedAt));
+    return new Map(rows.map((row) => [row.threadId, row as InboundRecord]));
+  }
+
+  async needsHumanThreads(threadIds: readonly string[]) {
+    if (threadIds.length === 0) return new Set<string>();
+    const rows = await this.x
+      .selectDistinct({ threadId: inboundMessages.threadId })
+      .from(inboundMessages)
+      .where(
+        and(
+          inArray(inboundMessages.threadId, [...threadIds]),
+          eq(inboundMessages.triageStatus, 'needs_human'),
+          ne(inboundMessages.status, 'handled'),
+        ),
+      );
+    return new Set(rows.map((row) => row.threadId));
+  }
+
+  async inboundOfThread(organizationId: string, threadId: string) {
+    return (await this.x
+      .select()
+      .from(inboundMessages)
+      .where(and(eq(inboundMessages.organizationId, organizationId), eq(inboundMessages.threadId, threadId)))
+      .orderBy(inboundMessages.receivedAt)) as InboundRecord[];
+  }
+
+  async unreadTotal(organizationId: string) {
+    const [row] = await this.x
+      .select({ n: sql<number>`coalesce(sum(${emailThreads.unreadCount}), 0)` })
+      .from(emailThreads)
+      .where(eq(emailThreads.organizationId, organizationId));
+    return Number(row?.n ?? 0);
+  }
+
+  async recountUnread(threadId: string) {
+    await this.x
+      .update(emailThreads)
+      .set({
+        unreadCount: sql`(select count(*) from ${inboundMessages} where ${inboundMessages.threadId} = ${threadId} and ${inboundMessages.status} = 'new')`,
+      })
+      .where(eq(emailThreads.id, threadId));
   }
 
   async outboundByMessageIds(organizationId: string, messageIds: readonly string[]): Promise<OutboundRef[]> {

@@ -1682,6 +1682,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Threads with replies: by triage class, mailbox, unread, needs a person, assigned to me, newest first */
+        get: operations["listInboxThreads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/inbox/messages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark a reply read or handled, snooze it, or assign it */
+        patch: operations["updateInboundMessage"];
+        trace?: never;
+    };
+    "/v1/inbox/messages/{id}/suggest-reply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draft a reply to this message (AI, grounded; edit it, then send it in the thread) */
+        post: operations["suggestReply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/inbox/messages/{id}/triage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Correct a reply’s class: kept as feedback, and the safe actions run again */
+        post: operations["correctReplyTriage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/inbox/threads/{threadId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A thread: our messages and the replies in order, with their triage */
+        get: operations["getInboxThread"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/invitations": {
         parameters: {
             query?: never;
@@ -4557,6 +4642,11 @@ export type components = {
         ContactList: {
             items: components["schemas"]["Contact"][];
         };
+        CorrectTriageRequest: {
+            /** @enum {string} */
+            class: "interested" | "question" | "not_now" | "referral" | "unsubscribe" | "negative" | "auto_reply";
+            note?: string;
+        };
         CreateApiKeyRequest: {
             /** @description Omit for a key that does not expire. */
             expiresInDays?: number;
@@ -5765,6 +5855,126 @@ export type components = {
             sample: string[];
             valid: number;
         };
+        InboundMessage: {
+            assignedTo: string | null;
+            attachments: {
+                contentType: string;
+                filename: string | null;
+                size: number;
+            }[];
+            autoReplyUntil: string | null;
+            bodyHtml: string | null;
+            bodyText: string;
+            correctedClass: ("interested" | "question" | "not_now" | "referral" | "unsubscribe" | "negative" | "auto_reply") | null;
+            dsn: {
+                action: string;
+                diagnostic: string | null;
+                permanent: boolean;
+                recipient: string | null;
+                status: string | null;
+            } | null;
+            fromEmail: string;
+            fromName: string | null;
+            hasRemoteImages: boolean;
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "human" | "auto_reply" | "bounce" | "unsubscribe_mailto";
+            /** Format: uuid */
+            mailboxId: string;
+            outboundMessageId: string | null;
+            /** Format: date-time */
+            receivedAt: string;
+            snippet: string;
+            snoozedUntil: string | null;
+            /** @enum {string} */
+            status: "new" | "read" | "handled" | "snoozed";
+            subject: string;
+            /** Format: uuid */
+            threadId: string;
+            triage: components["schemas"]["ReplyTriage"] | null;
+            /** @enum {string} */
+            triageStatus: "pending" | "done" | "needs_human" | "corrected";
+        };
+        InboxThread: {
+            assignedTo: string | null;
+            /**
+             * Format: uuid
+             * @description BusinessId (UUID)
+             */
+            businessId: string;
+            businessName: string;
+            contactEmail: string | null;
+            lastInboundAt: string | null;
+            /** Format: date-time */
+            lastMessageAt: string;
+            latestClass: ("interested" | "question" | "not_now" | "referral" | "unsubscribe" | "negative" | "auto_reply") | null;
+            latestKind: ("human" | "auto_reply" | "bounce" | "unsubscribe_mailto") | null;
+            mailboxEmail: string | null;
+            mailboxId: string | null;
+            needsHuman: boolean;
+            snippet: string;
+            /** @enum {string} */
+            status: "new" | "read" | "handled" | "snoozed";
+            subject: string;
+            /** Format: uuid */
+            threadId: string;
+            unreadCount: number;
+        };
+        InboxThreadDetail: {
+            entries: ({
+                /** @constant */
+                direction: "outbound";
+                message: {
+                    attempts: number;
+                    blockedReasons: string[];
+                    bodyText: string;
+                    /**
+                     * Format: uuid
+                     * @description BusinessId (UUID)
+                     */
+                    businessId: string;
+                    businessName: string;
+                    contactId: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** Format: uuid */
+                    id: string;
+                    lastError: {
+                        /** Format: date-time */
+                        at: string;
+                        code: string;
+                        message: string;
+                        retryable: boolean;
+                    } | null;
+                    /** @enum {string} */
+                    locale: "en" | "fr";
+                    mailboxEmail: string | null;
+                    mailboxId: string | null;
+                    /** @enum {string} */
+                    offer: "new_website" | "website_redesign" | "ai_receptionist" | "booking_system" | "local_seo";
+                    /** @enum {string} */
+                    purpose: "first_touch" | "follow_up" | "breakup" | "reply";
+                    recipient: string;
+                    /** Format: date-time */
+                    scheduledAt: string;
+                    sentAt: string | null;
+                    /** @enum {string} */
+                    status: "draft" | "pending_approval" | "queued" | "sending" | "sent" | "failed" | "blocked" | "cancelled" | "bounced" | "replied";
+                    subject: string;
+                };
+            } | {
+                /** @constant */
+                direction: "inbound";
+                message: components["schemas"]["InboundMessage"];
+            })[];
+            thread: components["schemas"]["InboxThread"];
+        };
+        InboxThreadList: {
+            items: components["schemas"]["InboxThread"][];
+            nextCursor: string | null;
+            unread: number;
+        };
         Invitation: {
             /** Format: date-time */
             createdAt: string;
@@ -6884,6 +7094,29 @@ export type components = {
         ReplayEventRequest: {
             /** @description Subscriber id, e.g. `workspace.audit-identity`. */
             subscriberId: string;
+        };
+        ReplyTriage: {
+            /** @enum {string} */
+            class: "interested" | "question" | "not_now" | "referral" | "unsubscribe" | "negative" | "auto_reply";
+            confidence: number;
+            entities: {
+                followUpOn: string | null;
+                meetingRequest: boolean;
+                phone: string | null;
+                preferredTime: string | null;
+                priceQuestion: boolean;
+                referral: {
+                    email: string | null;
+                    name: string | null;
+                    role: string | null;
+                } | null;
+            };
+            injectionSuspected: boolean;
+            language: string;
+            model: string;
+            promptVersion: string;
+            suggestedNextAction: string;
+            summary: string;
         };
         RescheduleMessageRequest: {
             /** Format: date-time */
@@ -8112,6 +8345,11 @@ export type components = {
                 [key: string]: number;
             };
         };
+        SuggestReplyRequest: {
+            instructions?: string;
+            /** @enum {string} */
+            locale?: "en" | "fr";
+        };
         SuppressionEntry: {
             /** @enum {string} */
             action: "add" | "revoke";
@@ -8238,6 +8476,12 @@ export type components = {
             priority?: number;
         };
         UpdateGenerationSettingsRequest: components["schemas"]["GenerationWorkspaceSettings"];
+        UpdateInboundRequest: {
+            assignedTo?: string | null;
+            snoozedUntil?: string | null;
+            /** @enum {string} */
+            status?: "new" | "read" | "handled" | "snoozed";
+        };
         UpdateLeadRequest: {
             handledBy?: string | null;
             note?: string;
@@ -16331,6 +16575,379 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IdentityConfig"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listInboxThreads: {
+        parameters: {
+            query?: {
+                assignedToMe?: string;
+                class?: "interested" | "question" | "not_now" | "referral" | "unsubscribe" | "negative" | "auto_reply";
+                cursor?: string;
+                limit?: number;
+                mailboxId?: string;
+                needsHuman?: string;
+                q?: string;
+                status?: "new" | "read" | "handled" | "snoozed";
+                unread?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxThreadList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    updateInboundMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInboundRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundMessage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    suggestReply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestReplyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailDraft"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    correctReplyTriage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectTriageRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboundMessage"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getInboxThread: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                threadId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxThreadDetail"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
             /** @description Problem details (RFC 9457) */

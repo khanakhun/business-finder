@@ -1,8 +1,15 @@
 import type { OutboundStatus } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
-import { businesses, emailThreads, mailboxes, manualContactLogs, outboundMessages } from '@bf/db/schema';
+import {
+  businesses,
+  emailThreads,
+  inboundMessages,
+  mailboxes,
+  manualContactLogs,
+  outboundMessages,
+} from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, count, desc, eq, gte, inArray, isNull, lt, lte, or, type SQL, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNull, lt, lte, ne, or, type SQL, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type {
   ManualLogRecord,
@@ -138,6 +145,19 @@ export class DrizzleOutboundRepository implements OutboundRepository {
     ).map(toListRow);
   }
 
+  async forThread(organizationId: string, threadId: string) {
+    return (
+      await this.listQuery(
+        and(
+          eq(outboundMessages.organizationId, organizationId),
+          eq(outboundMessages.threadId, threadId),
+          inArray(outboundMessages.status, ['queued', 'sending', 'sent', 'replied', 'bounced', 'failed']),
+        ),
+        100,
+      )
+    ).map(toListRow);
+  }
+
   async insertThread(row: Parameters<OutboundRepository['insertThread']>[0]) {
     const [stored] = await this.x.insert(emailThreads).values(row).returning();
     if (!stored) throw new Error('email thread not stored');
@@ -158,7 +178,8 @@ export class DrizzleOutboundRepository implements OutboundRepository {
           eq(emailThreads.organizationId, organizationId),
           eq(emailThreads.businessId, businessId),
           contactId ? eq(emailThreads.contactId, contactId) : isNull(emailThreads.contactId),
-          eq(emailThreads.status, 'open'),
+          // BF-054: a thread with a reply is still the conversation a reply or follow-up continues.
+          ne(emailThreads.status, 'closed'),
         ),
       )
       .orderBy(desc(emailThreads.lastMessageAt))
@@ -174,6 +195,18 @@ export class DrizzleOutboundRepository implements OutboundRepository {
       .orderBy(desc(outboundMessages.sentAt))
       .limit(1);
     return row as OutboundRecord | undefined;
+  }
+
+  async latestInbound(threadId: string) {
+    const [row] = await this.x
+      .select({ rfc822MessageId: inboundMessages.rfc822MessageId, receivedAt: inboundMessages.receivedAt })
+      .from(inboundMessages)
+      .where(and(eq(inboundMessages.threadId, threadId), eq(inboundMessages.kind, 'human')))
+      .orderBy(desc(inboundMessages.receivedAt))
+      .limit(1);
+    return row?.rfc822MessageId
+      ? { rfc822MessageId: row.rfc822MessageId, receivedAt: row.receivedAt }
+      : undefined;
   }
 
   async touchThread(threadId: string, at: Date, providerThreadId: string | null) {

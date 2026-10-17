@@ -12,6 +12,7 @@ import { RealtimeModule } from '../realtime/index.ts';
 import { DraftsService } from './application/drafting/drafts.service.ts';
 import { DRAFT_CONTEXT, DRAFT_REPOSITORY, TEMPLATE_REPOSITORY } from './application/drafting/ports.ts';
 import { TemplatesService } from './application/drafting/templates.service.ts';
+import { InboxService } from './application/inbound/inbox.ts';
 import { ReplyIngestion } from './application/inbound/ingest.ts';
 import {
   HTML_SANITIZER,
@@ -96,6 +97,7 @@ import {
 } from './infrastructure/sending/outreach-processors.ts';
 import { BulkController } from './interface/http/bulk.controller.ts';
 import { DraftsController } from './interface/http/drafts.controller.ts';
+import { InboxController } from './interface/http/inbox.controller.ts';
 import { MailboxOAuthController } from './interface/http/mailbox-oauth.controller.ts';
 import { MailboxesController } from './interface/http/mailboxes.controller.ts';
 import { MessagesController } from './interface/http/messages.controller.ts';
@@ -135,6 +137,7 @@ export class OutreachModule {
               DraftsController,
               MessagesController,
               BulkController,
+              InboxController,
             ],
       providers: [
         { provide: MAILBOX_REPOSITORY, useClass: DrizzleMailboxesRepository },
@@ -265,6 +268,7 @@ export class OutreachModule {
         MailboxSync,
         ReplyTriageService,
         ReplyActions,
+        InboxService,
         InboundPersonalData,
         OutboundCommands,
         OutboundQueries,

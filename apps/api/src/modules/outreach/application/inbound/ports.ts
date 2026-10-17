@@ -114,7 +114,44 @@ export interface SyncState {
   readonly consecutiveErrors: number;
 }
 
+export interface InboxThreadRow {
+  readonly threadId: string;
+  readonly businessId: string;
+  readonly businessName: string;
+  readonly contactEmail: string | null;
+  readonly mailboxId: string | null;
+  readonly mailboxEmail: string | null;
+  readonly subject: string;
+  readonly lastInboundAt: Date | null;
+  readonly lastMessageAt: Date;
+  readonly unreadCount: number;
+  readonly latestClass: string | null;
+}
+
+export interface InboxFilter {
+  readonly triageClass?: string | undefined;
+  readonly mailboxId?: string | undefined;
+  readonly unread?: boolean | undefined;
+  readonly needsHuman?: boolean | undefined;
+  readonly assignedTo?: string | undefined;
+  readonly status?: string | undefined;
+  readonly q?: string | undefined;
+  readonly before?: { readonly at: Date; readonly id: string } | undefined;
+  readonly limit: number;
+}
+
 export interface InboundRepository {
+  // Inbox (read model)
+  threads(organizationId: string, filter: InboxFilter): Promise<InboxThreadRow[]>;
+  thread(organizationId: string, threadId: string): Promise<InboxThreadRow | undefined>;
+  /** The latest inbound message of each thread. */
+  latestInbound(threadIds: readonly string[]): Promise<Map<string, InboundRecord>>;
+  /** Threads with an inbound message that needs a person (and is not handled). */
+  needsHumanThreads(threadIds: readonly string[]): Promise<Set<string>>;
+  inboundOfThread(organizationId: string, threadId: string): Promise<InboundRecord[]>;
+  unreadTotal(organizationId: string): Promise<number>;
+  /** The thread's unread count recomputed from its messages' statuses. */
+  recountUnread(threadId: string): Promise<void>;
   /** Our outbound messages among these Message-IDs (normalized, lower case), in the workspace. */
   outboundByMessageIds(organizationId: string, messageIds: readonly string[]): Promise<OutboundRef[]>;
   /** Threads of the workspace with these provider thread ids. */

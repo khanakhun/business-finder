@@ -69,6 +69,14 @@ export class OutboundQueries {
     return (await this.messages.forBusiness(organizationId, businessId, 50)).map(summary);
   }
 
+  /** A thread's messages that left (or are leaving), with their text: the inbox shows them beside the replies. */
+  async forThread(organizationId: string, threadId: string) {
+    return (await this.messages.forThread(organizationId, threadId)).map((row) => ({
+      ...summary(row),
+      bodyText: row.bodyText,
+    }));
+  }
+
   async get(organizationId: string, id: string): Promise<OutboundMessage> {
     const row = await this.messages.listRow(organizationId, id);
     if (!row) throw new NotFoundError('OutboundMessage', id);

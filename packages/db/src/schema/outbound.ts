@@ -189,9 +189,15 @@ export const manualContactLogs = pgTable(
     summary: text().notNull(),
     outcome: text(),
     createdBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    /** BF-057: the call list's offline queue resubmits; the same outcome is logged once. */
+    idempotencyKey: text(),
+    /** BF-057: the call's length (the app's timer) and a call-back date. */
+    durationSec: integer(),
+    callbackAt: tz(),
     createdAt: tz().notNull().defaultNow(),
   },
   (table) => [
+    uniqueIndex('uq_manual_contact_logs__org_idempotency').on(table.organizationId, table.idempotencyKey),
     index('ix_manual_contact_logs__org_business').on(table.organizationId, table.businessId, table.createdAt),
   ],
 );

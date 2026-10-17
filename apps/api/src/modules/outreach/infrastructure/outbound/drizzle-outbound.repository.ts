@@ -319,4 +319,14 @@ export class DrizzleOutboundRepository implements OutboundRepository {
       .orderBy(desc(manualContactLogs.createdAt))
       .limit(limit)) as ManualLogRecord[];
   }
+
+  async manualLogByKey(organizationId: string, key: string) {
+    const [row] = await this.x
+      .select()
+      .from(manualContactLogs)
+      .where(
+        and(eq(manualContactLogs.organizationId, organizationId), eq(manualContactLogs.idempotencyKey, key)),
+      );
+    return row as ManualLogRecord | undefined;
+  }
 }

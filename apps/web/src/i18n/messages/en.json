@@ -670,6 +670,10 @@
       "deliverability_digest": {
         "title": "Deliverability this week: {sent} emails, {bounceRate} bounced",
         "body": "{summary}"
+      },
+      "scoring_drift": {
+        "title": "Scoring model {model} needs attention",
+        "body": "{summary} Retraining is recommended."
       }
     },
     "preferences": {
@@ -692,7 +696,8 @@
         "site_needs_review": "Sites to review",
         "lead_opted_out": "Opt-outs from previews",
         "sequence_paused": "Follow-ups paused",
-        "deliverability_digest": "Weekly deliverability summary"
+        "deliverability_digest": "Weekly deliverability summary",
+        "scoring_drift": "A scoring model drifted or lost accuracy"
       }
     }
   },

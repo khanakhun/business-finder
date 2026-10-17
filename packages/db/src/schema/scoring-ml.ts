@@ -7,6 +7,8 @@ import type {
   MlMetrics,
   MlModelKind,
   MlModelStatus,
+  ModelMonitoring,
+  ProspectiveComparison,
   ScoreContribution,
   ScoreReason,
 } from '@bf/contracts';
@@ -166,4 +168,52 @@ export const businessScoreShadows = pgTable(
     ),
     index('ix_business_score_shadows__model').on(table.modelId, table.computedAt),
   ],
+);
+
+/**
+ * Promotions of models to their profile (BF-059): the criteria as checked, or the owner's override reason; a
+ * rollback reactivates `from_version` and stamps `rolled_back_at`.
+ */
+export const scoringModelPromotions = pgTable(
+  'scoring_model_promotions',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    profileId: uuid().notNull(),
+    modelId: uuid()
+      .notNull()
+      .references(() => scoringModels.id, { onDelete: 'cascade' }),
+    fromVersion: integer().notNull(),
+    toVersion: integer().notNull(),
+    eligible: boolean().notNull(),
+    overrideReason: text(),
+    comparison: jsonb().$type<ProspectiveComparison>(),
+    promotedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    promotedAt: tz().notNull().defaultNow(),
+    rolledBackBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    rolledBackAt: tz(),
+  },
+  (table) => [
+    index('ix_scoring_model_promotions__profile').on(table.organizationId, table.profileId, table.promotedAt),
+  ],
+);
+
+/** Drift and decay checks of a model (BF-059): monthly and on demand. */
+export const scoringModelMonitoring = pgTable(
+  'scoring_model_monitoring',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    modelId: uuid()
+      .notNull()
+      .references(() => scoringModels.id, { onDelete: 'cascade' }),
+    at: tz().notNull().defaultNow(),
+    featurePsi: jsonb().$type<ModelMonitoring['featurePsi']>().notNull(),
+    scorePsi: doublePrecision(),
+    auc: doublePrecision(),
+    validationAuc: doublePrecision(),
+    recentContacts: integer().notNull(),
+    alerts: jsonb().$type<string[]>().notNull(),
+  },
+  (table) => [index('ix_scoring_model_monitoring__model').on(table.modelId, table.at)],
 );

@@ -27,7 +27,7 @@ export interface ModelScore extends ScoreResult {
 
 // DECISION(BF-059): a business is scored for the decision ahead — a first email for the profile's offer, without a
 // preview yet (whether a preview exists is not in the feature vector); the language is unknown.
-const decisionContext = (offer: string) => ({
+export const decisionContext = (offer: string) => ({
   ctx_offer: offer,
   ctx_channel: 'email',
   ctx_locale: null,

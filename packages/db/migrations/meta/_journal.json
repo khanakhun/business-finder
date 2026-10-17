@@ -435,6 +435,13 @@
       "when": 1792255342843,
       "tag": "0061_scoring_shadows",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1792255969355,
+      "tag": "0062_scoring_promotions",
+      "breakpoints": true
     }
   ]
 }

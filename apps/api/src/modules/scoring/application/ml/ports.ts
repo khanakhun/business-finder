@@ -6,6 +6,9 @@ import type {
   MlTrainingRun,
   MlTrainRequest,
   MlTrainResult,
+  ModelMonitoring,
+  ModelPromotion,
+  ProspectiveComparison,
   ScoreContribution,
   ScoreReason,
 } from '@bf/contracts';
@@ -77,6 +80,8 @@ export interface ModelRegistry {
   insertModel(row: Omit<MlModelRecord, 'trainedAt' | 'promotedAt' | 'promotedBy'>): Promise<MlModelRecord>;
   model(organizationId: string, id: string): Promise<MlModelRecord | undefined>;
   models(organizationId: string): Promise<MlModelRecord[]>;
+  /** Active and shadow models of every workspace (the monthly monitoring sweep). */
+  monitored(): Promise<{ organizationId: string; id: string }[]>;
   setStatus(
     organizationId: string,
     id: string,
@@ -146,3 +151,41 @@ export interface ShadowRepository {
   latest(organizationId: string, businessId: string): Promise<ShadowScoreRow[]>;
 }
 export const SHADOW_REPOSITORY = Symbol('ShadowRepository');
+
+/** What each ranking said about a contact at its time `t0`. */
+export interface ScoresAtContact {
+  readonly businessId: string;
+  readonly activeScore: number | null;
+  readonly activeTier: string | null;
+  readonly shadowProbability: number | null;
+  readonly shadowTier: string | null;
+}
+
+export interface PromotionRecord extends Omit<ModelPromotion, 'promotedAt' | 'rolledBackAt'> {
+  readonly organizationId: string;
+  readonly promotedAt: Date;
+  readonly rolledBackAt: Date | null;
+}
+
+/** Promotions, monitoring and the reads they need. */
+export interface ModelLifecycleRepository {
+  scoresAt(
+    organizationId: string,
+    profileId: string,
+    modelId: string,
+    contacts: readonly { businessId: string; t0: Date }[],
+  ): Promise<ScoresAtContact[]>;
+  /** The latest shadow probabilities of the model for the workspace (one per business). */
+  shadowProbabilities(organizationId: string, modelId: string): Promise<number[]>;
+  /** Feature vectors computed since a date for profiles of the offer (latest per business). */
+  recentVectors(organizationId: string, offer: string, since: Date): Promise<FeatureVector[]>;
+  insertPromotion(row: Omit<PromotionRecord, 'promotedAt' | 'rolledBackAt'>): Promise<void>;
+  latestPromotion(organizationId: string, profileId: string): Promise<PromotionRecord | undefined>;
+  promotions(organizationId: string): Promise<PromotionRecord[]>;
+  markRolledBack(id: string, by: string | null, at: Date): Promise<void>;
+  insertMonitoring(organizationId: string, row: Omit<ModelMonitoring, 'at'>): Promise<void>;
+  latestMonitoring(organizationId: string, modelId: string): Promise<ModelMonitoring | undefined>;
+}
+export const MODEL_LIFECYCLE = Symbol('ModelLifecycleRepository');
+
+export type { ProspectiveComparison };

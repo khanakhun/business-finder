@@ -2,7 +2,7 @@ import type { FeatureVector } from '@bf/contracts';
 import { type DbClient, getExecutor } from '@bf/db';
 import { mlDatasets, mlTrainingRuns, scoringModels } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../../platform/db/db.module.ts';
 import type {
   ContactRow,
@@ -198,6 +198,13 @@ export class DrizzleMlRepository implements MlRepository, ModelRegistry {
       .orderBy(desc(scoringModels.trainedAt))
       .limit(100);
     return rows.map(modelRecord);
+  }
+
+  async monitored() {
+    return getExecutor(this.db)
+      .select({ organizationId: scoringModels.organizationId, id: scoringModels.id })
+      .from(scoringModels)
+      .where(inArray(scoringModels.status, ['active', 'shadow']));
   }
 
   async setStatus(

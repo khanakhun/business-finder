@@ -185,3 +185,18 @@ export const offerRelevance = pgTable(
   },
   (table) => [uniqueIndex('offer_relevance_key').on(table.offer, table.taxonomyPrefix)],
 );
+
+/**
+ * Whether a business is a legal person or a sole trader (BF-049), from a company registry (FR: recherche-entreprises),
+ * cached 90 days (30 when not found). The NL/BE/GB rules depend on it.
+ */
+export const businessRecipientTypes = pgTable('business_recipient_types', {
+  businessId: uuid()
+    .primaryKey()
+    .references(() => businesses.id, { onDelete: 'cascade' }),
+  recipientType: text().$type<'legal_person' | 'sole_trader' | 'public_body' | 'unknown'>().notNull(),
+  legalFormCode: text(),
+  registryId: text(),
+  source: text().notNull(),
+  fetchedAt: tz().notNull(),
+});

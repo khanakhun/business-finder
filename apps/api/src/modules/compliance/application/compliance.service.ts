@@ -12,7 +12,7 @@ import {
   type SuppressionSource,
   ValidationError,
 } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
@@ -22,7 +22,9 @@ import { normalizeKey } from '../domain/normalizers.ts';
 import { type EvaluablePolicy, evaluatePolicy, type PolicySet } from '../domain/policy-evaluator.ts';
 import {
   COMPLIANCE_INPUTS,
+  COMPLIANCE_TELEMETRY,
   type ComplianceInputs,
+  type ComplianceTelemetry,
   DECISION_REPOSITORY,
   type DecisionRepository,
   POLICY_REPOSITORY,
@@ -60,6 +62,7 @@ export class ComplianceService {
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly events: EventRecorder,
     private readonly audit: AuditLogger,
+    @Optional() @Inject(COMPLIANCE_TELEMETRY) private readonly telemetry?: ComplianceTelemetry,
   ) {}
 
   /** The policies that apply: per candidate jurisdiction, its seed and the workspace's override. */
@@ -104,8 +107,10 @@ export class ComplianceService {
     channel: OutreachChannel,
     context: EvaluateContext,
   ): Promise<ComplianceDecision> {
+    const started = performance.now();
     const gathered = await this.inputs.gather({ ...target, channel, purpose: context.purpose });
     const hits = await this.suppressions.find(target.organizationId, gathered.suppressionKeys);
+    for (const hit of hits) this.telemetry?.suppressed(hit.scope);
     const inputs: EvaluationInputs = {
       ...gathered.inputs,
       jurisdictions: gathered.jurisdictions,
@@ -141,7 +146,19 @@ export class ComplianceService {
       evaluatedAt: now.toISOString(),
       validUntil: validUntil?.toISOString() ?? null,
     };
-    if (context.stage === 'preview') return decision;
+    const observe = () =>
+      this.telemetry?.decided({
+        stage: context.stage,
+        channel,
+        decision: result.decision,
+        jurisdictions: gathered.jurisdictions,
+        reason: result.reasons[0]?.code ?? 'none',
+        seconds: (performance.now() - started) / 1000,
+      });
+    if (context.stage === 'preview') {
+      observe();
+      return decision;
+    }
     const stored = await this.decisions.insert({
       organizationId: target.organizationId,
       businessId: target.businessId,
@@ -159,6 +176,7 @@ export class ComplianceService {
       lawfulBasisId: gathered.lawfulBasisId,
       validUntil,
     });
+    observe();
     return { ...decision, id: stored.id, evaluatedAt: stored.evaluatedAt.toISOString() };
   }
 

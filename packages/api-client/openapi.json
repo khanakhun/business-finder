@@ -3148,6 +3148,349 @@
         ],
         "type": "object"
       },
+      "CompliancePolicyOverrideResult": {
+        "additionalProperties": false,
+        "properties": {
+          "impact": {
+            "additionalProperties": false,
+            "properties": {
+              "combinations": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              "stricter": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "combinations",
+              "stricter"
+            ],
+            "type": "object"
+          },
+          "override": {
+            "$ref": "#/components/schemas/CompliancePolicyVersion"
+          }
+        },
+        "required": [
+          "override",
+          "impact"
+        ],
+        "type": "object"
+      },
+      "CompliancePolicyVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "phone",
+              "whatsapp",
+              "sms",
+              "letter"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "jurisdiction": {
+            "pattern": "^([A-Z]{2}|\\*)$",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "seed",
+              "override"
+            ],
+            "type": "string"
+          },
+          "needsLegalReview": {
+            "type": "boolean"
+          },
+          "policy": {
+            "additionalProperties": false,
+            "properties": {
+              "default": {
+                "enum": [
+                  "allowed",
+                  "allowed_with_conditions",
+                  "manual_only",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              "defaultExplain": {
+                "additionalProperties": false,
+                "properties": {
+                  "en": {
+                    "maxLength": 600,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 600,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "en",
+                  "fr"
+                ],
+                "type": "object"
+              },
+              "requiredElements": {
+                "items": {
+                  "enum": [
+                    "sender_identity",
+                    "postal_address",
+                    "opt_out_link",
+                    "unsubscribe_headers",
+                    "source_disclosure",
+                    "relevance",
+                    "recipient_language",
+                    "honest_subject",
+                    "identify_on_call",
+                    "stop_on_request"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "rules": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "decision": {
+                      "enum": [
+                        "allowed",
+                        "allowed_with_conditions",
+                        "manual_only",
+                        "blocked"
+                      ],
+                      "type": "string"
+                    },
+                    "explain": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "en": {
+                          "maxLength": 600,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "fr": {
+                          "maxLength": 600,
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "en",
+                        "fr"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "pattern": "^[a-z0-9_.-]{1,60}$",
+                      "type": "string"
+                    },
+                    "when": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "addressType": {
+                          "items": {
+                            "enum": [
+                              "generic",
+                              "department",
+                              "personal",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "designatedForSolicitation": {
+                          "items": {
+                            "enum": [
+                              "yes",
+                              "no",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "previousContact": {
+                          "items": {
+                            "enum": [
+                              "none",
+                              "replied",
+                              "bounced"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "publishedContext": {
+                          "items": {
+                            "enum": [
+                              "own_contact_page",
+                              "own_site_other",
+                              "directory",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "recipientType": {
+                          "items": {
+                            "enum": [
+                              "legal_person",
+                              "sole_trader",
+                              "public_body",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "relevance": {
+                          "items": {
+                            "enum": [
+                              "relevant",
+                              "not_relevant",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "when",
+                    "decision",
+                    "explain"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 40,
+                "type": "array"
+              }
+            },
+            "required": [
+              "default",
+              "defaultExplain",
+              "rules",
+              "requiredElements"
+            ],
+            "type": "object"
+          },
+          "reviewNotes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviewedBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "url": {
+                  "format": "uri",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "url"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "version": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "jurisdiction",
+          "channel",
+          "version",
+          "kind",
+          "policy",
+          "sources",
+          "needsLegalReview",
+          "reviewedBy",
+          "reviewedAt",
+          "reviewNotes",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "CompliancePolicyVersionList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CompliancePolicyVersion"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
       "ConfirmAssetOwnershipRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3391,6 +3734,225 @@
         "required": [
           "name",
           "permissions"
+        ],
+        "type": "object"
+      },
+      "CreateCompliancePolicyOverrideRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "phone",
+              "whatsapp",
+              "sms",
+              "letter"
+            ],
+            "type": "string"
+          },
+          "jurisdiction": {
+            "pattern": "^([A-Z]{2}|\\*)$",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 600,
+            "type": "string"
+          },
+          "policy": {
+            "additionalProperties": false,
+            "properties": {
+              "default": {
+                "enum": [
+                  "allowed",
+                  "allowed_with_conditions",
+                  "manual_only",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              "defaultExplain": {
+                "additionalProperties": false,
+                "properties": {
+                  "en": {
+                    "maxLength": 600,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "fr": {
+                    "maxLength": 600,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "en",
+                  "fr"
+                ],
+                "type": "object"
+              },
+              "requiredElements": {
+                "items": {
+                  "enum": [
+                    "sender_identity",
+                    "postal_address",
+                    "opt_out_link",
+                    "unsubscribe_headers",
+                    "source_disclosure",
+                    "relevance",
+                    "recipient_language",
+                    "honest_subject",
+                    "identify_on_call",
+                    "stop_on_request"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              "rules": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "decision": {
+                      "enum": [
+                        "allowed",
+                        "allowed_with_conditions",
+                        "manual_only",
+                        "blocked"
+                      ],
+                      "type": "string"
+                    },
+                    "explain": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "en": {
+                          "maxLength": 600,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "fr": {
+                          "maxLength": 600,
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "en",
+                        "fr"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "pattern": "^[a-z0-9_.-]{1,60}$",
+                      "type": "string"
+                    },
+                    "when": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "addressType": {
+                          "items": {
+                            "enum": [
+                              "generic",
+                              "department",
+                              "personal",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "designatedForSolicitation": {
+                          "items": {
+                            "enum": [
+                              "yes",
+                              "no",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "previousContact": {
+                          "items": {
+                            "enum": [
+                              "none",
+                              "replied",
+                              "bounced"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "publishedContext": {
+                          "items": {
+                            "enum": [
+                              "own_contact_page",
+                              "own_site_other",
+                              "directory",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "recipientType": {
+                          "items": {
+                            "enum": [
+                              "legal_person",
+                              "sole_trader",
+                              "public_body",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "relevance": {
+                          "items": {
+                            "enum": [
+                              "relevant",
+                              "not_relevant",
+                              "unknown"
+                            ],
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "when",
+                    "decision",
+                    "explain"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 40,
+                "type": "array"
+              }
+            },
+            "required": [
+              "default",
+              "defaultExplain",
+              "rules",
+              "requiredElements"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "jurisdiction",
+          "channel",
+          "policy"
         ],
         "type": "object"
       },
@@ -5049,6 +5611,64 @@
             "type": "object"
           }
         ]
+      },
+      "EffectiveCompliancePolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "autoSendEnabled": {
+            "type": "boolean"
+          },
+          "channel": {
+            "enum": [
+              "email",
+              "phone",
+              "whatsapp",
+              "sms",
+              "letter"
+            ],
+            "type": "string"
+          },
+          "jurisdiction": {
+            "pattern": "^([A-Z]{2}|\\*)$",
+            "type": "string"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompliancePolicyVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seed": {
+            "$ref": "#/components/schemas/CompliancePolicyVersion"
+          }
+        },
+        "required": [
+          "jurisdiction",
+          "channel",
+          "seed",
+          "override",
+          "autoSendEnabled"
+        ],
+        "type": "object"
+      },
+      "EffectiveCompliancePolicyList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EffectiveCompliancePolicy"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
       },
       "EmailVerificationDetails": {
         "additionalProperties": false,
@@ -8256,6 +8876,123 @@
         "required": [
           "lat",
           "lng"
+        ],
+        "type": "object"
+      },
+      "LawfulBasisList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LawfulBasisRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "LawfulBasisRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "approvedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approvedBy": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "balancingTest": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "dataCategories": {
+            "type": "string"
+          },
+          "documentMd": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "legitimate_interest_assessment",
+              "consent",
+              "other"
+            ],
+            "type": "string"
+          },
+          "necessity": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "retention": {
+            "type": "string"
+          },
+          "safeguards": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "approved",
+              "retired"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "version": {
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "purpose",
+          "dataCategories",
+          "necessity",
+          "balancingTest",
+          "safeguards",
+          "retention",
+          "documentMd",
+          "version",
+          "status",
+          "approvedBy",
+          "approvedAt",
+          "createdAt",
+          "updatedAt"
         ],
         "type": "object"
       },
@@ -12016,6 +12753,36 @@
         },
         "required": [
           "action"
+        ],
+        "type": "object"
+      },
+      "ReviewCompliancePolicyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmed": {
+            "const": true,
+            "type": "boolean"
+          },
+          "enableAutoSend": {
+            "default": false,
+            "type": "boolean"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "reviewerName": {
+            "maxLength": 120,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reviewerName",
+          "notes",
+          "confirmed",
+          "enableAutoSend"
         ],
         "type": "object"
       },
@@ -18684,6 +19451,66 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UpsertLawfulBasisRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "balancingTest": {
+            "maxLength": 6000,
+            "type": "string"
+          },
+          "dataCategories": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "documentMd": {
+            "default": "",
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "kind": {
+            "default": "legitimate_interest_assessment",
+            "enum": [
+              "legitimate_interest_assessment",
+              "consent",
+              "other"
+            ],
+            "type": "string"
+          },
+          "necessity": {
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "retention": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "safeguards": {
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "purpose",
+          "dataCategories",
+          "necessity",
+          "balancingTest",
+          "safeguards",
+          "retention",
+          "documentMd"
+        ],
         "type": "object"
       },
       "VisionGrade": {
@@ -25874,6 +26701,757 @@
           }
         },
         "summary": "Preview the compliance decision for a business, contact, channel and offer (not persisted)",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/lawful-basis": {
+      "get": {
+        "operationId": "listLawfulBasis",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The workspace’s lawful-basis records (legitimate-interest assessments…)",
+        "tags": [
+          "compliance"
+        ]
+      },
+      "post": {
+        "operationId": "createLawfulBasis",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertLawfulBasisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisRecord"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A new draft lawful-basis record",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/lawful-basis/from-template": {
+      "post": {
+        "operationId": "createLawfulBasisFromTemplate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisRecord"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A new draft legitimate-interest assessment from the template (in the caller’s language)",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/lawful-basis/{id}": {
+      "patch": {
+        "operationId": "updateLawfulBasis",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertLawfulBasisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisRecord"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Edit a draft lawful-basis record",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/lawful-basis/{id}/approve": {
+      "post": {
+        "operationId": "approveLawfulBasis",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisRecord"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Approve a lawful-basis record (audited)",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/lawful-basis/{id}/retire": {
+      "post": {
+        "operationId": "retireLawfulBasis",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LawfulBasisRecord"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Retire a lawful-basis record (audited)",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/overrides": {
+      "post": {
+        "operationId": "createCompliancePolicyOverride",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompliancePolicyOverrideRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePolicyOverrideResult"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A stricter-only override of a policy for the workspace, with its impact",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/policies": {
+      "get": {
+        "operationId": "listCompliancePolicies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EffectiveCompliancePolicyList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The effective policy per jurisdiction and channel, with its review status and override",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/policies/{id}/review": {
+      "post": {
+        "operationId": "reviewCompliancePolicy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCompliancePolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePolicyVersion"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Record a legal review of a seeded policy (and, for owners who may, turn on automatic sending)",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/v1/compliance/policies/{jurisdiction}/{channel}/versions": {
+      "get": {
+        "operationId": "listCompliancePolicyVersions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jurisdiction",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "channel",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompliancePolicyVersionList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The versions of a jurisdiction and channel’s policy (seeds and the workspace’s overrides)",
         "tags": [
           "compliance"
         ]

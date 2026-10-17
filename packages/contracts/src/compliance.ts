@@ -211,6 +211,15 @@ export const CreatePolicyOverrideRequestSchema = z
   .meta({ id: 'CreateCompliancePolicyOverrideRequest' });
 export type CreatePolicyOverrideRequest = z.infer<typeof CreatePolicyOverrideRequestSchema>;
 
+export const PolicyOverrideResultSchema = z
+  .object({
+    override: PolicyVersionSchema,
+    /** Of every combination of conditions, how many the override makes stricter. */
+    impact: z.object({ combinations: z.number().int(), stricter: z.number().int() }),
+  })
+  .meta({ id: 'CompliancePolicyOverrideResult' });
+export type PolicyOverrideResult = z.infer<typeof PolicyOverrideResultSchema>;
+
 // ── Suppression ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 export const SUPPRESSION_SCOPES = ['email', 'domain', 'phone', 'business', 'org_business'] as const;

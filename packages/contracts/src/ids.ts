@@ -35,3 +35,10 @@ export const SiteId = idSchema('SiteId');
 export type SiteId = Id<'SiteId'>;
 export const EventId = idSchema('EventId');
 export type EventId = Id<'EventId'>;
+
+/**
+ * A persisted compliance decision (BF-049). Branded: the outbound message constructor (BF-052) requires one, so a
+ * message cannot be queued without the gate having decided.
+ */
+export const ComplianceDecisionId = idSchema('ComplianceDecisionId');
+export type ComplianceDecisionId = Id<'ComplianceDecisionId'>;

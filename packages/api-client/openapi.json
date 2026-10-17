@@ -18448,7 +18448,8 @@
               "banner",
               "claim_page",
               "contact_block",
-              "opt_out_link"
+              "opt_out_link",
+              "live_site"
             ],
             "type": "string"
           },
@@ -26374,7 +26375,8 @@
               "banner",
               "claim_page",
               "contact_block",
-              "opt_out_link"
+              "opt_out_link",
+              "live_site"
             ],
             "type": "string"
           },
@@ -43745,7 +43747,8 @@
                 "banner",
                 "claim_page",
                 "contact_block",
-                "opt_out_link"
+                "opt_out_link",
+                "live_site"
               ],
               "type": "string"
             }
@@ -43982,7 +43985,8 @@
                 "banner",
                 "claim_page",
                 "contact_block",
-                "opt_out_link"
+                "opt_out_link",
+                "live_site"
               ],
               "type": "string"
             }

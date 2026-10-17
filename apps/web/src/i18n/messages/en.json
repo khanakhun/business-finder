@@ -4777,7 +4777,8 @@
       "legal": "Legal",
       "routing": "Contact form",
       "domains": "Domains",
-      "publish": "Publish"
+      "publish": "Publish",
+      "handover": "Handover"
     },
     "continue": "Continue to publish",
     "readyTitle": "Ready to go live",
@@ -4894,6 +4895,111 @@
       "confirmed": "Thank you, the address is confirmed. Contact requests from the website will now reach it.",
       "invalid": "This link is invalid or has expired. Ask for a new confirmation link.",
       "error": "Something went wrong. Please try again."
+    },
+    "handover": {
+      "portalTitle": "Client portal",
+      "portalHelp": "Invite the business owner: they sign in with a link sent by email and see this site's visits and contact requests, can ask for changes and approve new versions. Nothing else in the workspace is visible to them.",
+      "email": "Owner's email",
+      "language": "Language",
+      "invite": "Invite",
+      "invited": "Invitation sent to {email}",
+      "failed": "The action failed",
+      "noGrants": "No one has access to the portal yet.",
+      "joined": "Joined {date}",
+      "invitedOn": "Invited {date}",
+      "revoke": "Remove access",
+      "revoked": "Access removed",
+      "approvalsTitle": "Approval",
+      "approvalsHelp": "Ask the client to approve the current version. Publish it as the preview first: the client looks at it there.",
+      "note": "Note for the client (optional)",
+      "ask": "Ask for approval",
+      "asked": "Approval requested",
+      "version": "Version {n}",
+      "status": {
+        "pending": "Waiting",
+        "approved": "Approved",
+        "changes_requested": "Changes asked",
+        "withdrawn": "Withdrawn"
+      },
+      "changesTitle": "Change requests",
+      "noChanges": "No change request yet.",
+      "screenshot": "Screenshot {n}"
+    }
+  },
+  "portal": {
+    "title": "Your website",
+    "sitesTitle": "Your websites",
+    "loadError": "Could not load your website",
+    "emptyTitle": "No website yet",
+    "emptyBody": "When your agency gives you access to a website, it appears here.",
+    "live": "Online",
+    "notLive": "Not online yet",
+    "notLiveYet": "This website is not online yet.",
+    "pendingApprovals": "{count, plural, one {# version to approve} other {# versions to approve}}",
+    "opensNewTab": "(opens in a new tab)",
+    "back": "All your websites",
+    "signOut": "Sign out",
+    "signOutFailed": "Could not sign out",
+    "tabs": {
+      "overview": "Overview",
+      "leads": "Contact requests",
+      "changes": "Ask for changes",
+      "approvals": "Approvals"
+    },
+    "overview": {
+      "views": "Page views ({days} days)",
+      "visitors": "Visitors ({days} days)",
+      "leads": "Contact requests ({days} days)",
+      "daily": "Page views per day",
+      "noViews": "No visits recorded yet.",
+      "byLanguage": "Visits by language"
+    },
+    "leads": {
+      "emptyTitle": "No contact request yet",
+      "emptyBody": "Messages sent from your website's contact form appear here.",
+      "anonymous": "No name given"
+    },
+    "changes": {
+      "help": "Describe what you would like changed. Your agency receives it as a task.",
+      "message": "What should change?",
+      "page": "Which page? (optional)",
+      "screenshots": "Screenshots (optional)",
+      "screenshotsHelp": "Up to 3 images (PNG, JPEG or WebP), 5 MB each.",
+      "filesRefused": "Some files were left out: use up to 3 PNG, JPEG or WebP images of 5 MB at most.",
+      "submit": "Send the request",
+      "sent": "Request sent to your agency",
+      "failed": "Could not send the request",
+      "sentTitle": "Your requests",
+      "none": "You have not sent any request yet.",
+      "withScreenshots": "{count, plural, one {# screenshot} other {# screenshots}}"
+    },
+    "approvals": {
+      "none": "No version is waiting for your approval.",
+      "version": "Version {n}",
+      "status": {
+        "pending": "Waiting for you",
+        "approved": "Approved",
+        "changes_requested": "Changes asked",
+        "withdrawn": "Withdrawn"
+      },
+      "look": "Look at this version",
+      "noPreview": "The preview is not available right now; your agency will send it again.",
+      "yourComment": "Your comment: {comment}",
+      "comment": "Comment (required to ask for changes)",
+      "approve": "Approve",
+      "requestChanges": "Ask for changes",
+      "approvedToast": "Version approved",
+      "changesToast": "Your changes were sent",
+      "failed": "Could not record your decision"
+    },
+    "signIn": {
+      "title": "Sign in to your website portal",
+      "help": "Enter the email address your agency invited. We will email you a sign-in link.",
+      "email": "Email address",
+      "submit": "Email me a sign-in link",
+      "sent": "If {email} has access, a sign-in link is on its way. It works once and expires in 15 minutes.",
+      "error": "Something went wrong. Please try again in a minute.",
+      "linkFailed": "This sign-in link is invalid or has expired. Ask for a new one below."
     }
   }
 }

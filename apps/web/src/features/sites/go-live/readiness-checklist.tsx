@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 
 // The go-live checklist (BF-062): each check passes, warns or fails, with the step or page that fixes it.
 
-export type GoLiveStep = 'readiness' | 'legal' | 'routing' | 'domains' | 'publish';
+export type GoLiveStep = 'readiness' | 'legal' | 'routing' | 'domains' | 'publish' | 'handover';
 
 const ICON = {
   pass: <CheckCircle2Icon aria-hidden className="size-4 text-emerald-600" />,

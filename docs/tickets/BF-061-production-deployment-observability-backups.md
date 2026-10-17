@@ -138,10 +138,15 @@ docs/runbooks/{production.md, slos.md, deploy.md, rollback.md, restore.md, …}
 
 ## Acceptance criteria
 - [ ] Signed, tagged releases deployed by digest with manual approval, side-by-side rollout, smoke tests and auto-rollback.
+  (Built, except signing: cosign waits for BF-060. Not yet run against a server.)
 - [ ] Postgres PITR with monitored backups and an automated monthly restore drill meeting RPO ≤ 5 min / RTO ≤ 2 h.
+  (Built and rehearsed locally — 15 s RTO on a posix repository; the first CI drill needs the backup bucket.)
 - [ ] Metrics, logs and traces stack with dashboards and alert rules as code; Sentry releases; Langfuse cost views.
-- [ ] SLOs with burn-rate alerts; external uptime probes.
+  (Stack, 9 dashboards and 52 rules done; Langfuse Cloud as before. Sentry is not installed anywhere: follow-up.)
+- [x] SLOs with burn-rate alerts; external uptime probes.
+  (External probes are documented in slos.md; they are configured on the hosted checker, outside the repository.)
 - [ ] Runbooks for deploy, rollback, restore, incidents and capacity; game-day report.
+  (Runbooks done; the game day has the local restore rehearsal, the rest waits for a staging clone.)
 
 ## Agent prompt
 ```text

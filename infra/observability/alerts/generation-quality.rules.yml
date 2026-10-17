@@ -14,7 +14,9 @@ groups:
         for: 15m
         labels:
           severity: page
+          owner: generation
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#generationqualityplatformregression
           summary: Platform-caused quality failures spiked
           description: More than three times the usual hourly rate of platform-tagged issues (performance or accessibility).
           runbook: docs/runbooks/generation-quality.md#platform-regression
@@ -26,7 +28,9 @@ groups:
         for: 30m
         labels:
           severity: warn
+          owner: generation
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#generationqualitygateserroring
           summary: Over 10% of quality gate runs fail to run
           runbook: docs/runbooks/generation-quality.md#gates-erroring
       - alert: GenerationNeedsReviewSpike
@@ -37,6 +41,8 @@ groups:
         for: 1h
         labels:
           severity: warn
+          owner: generation
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#generationneedsreviewspike
           summary: Over 30% of generated versions need a review
           runbook: docs/runbooks/generation-quality.md#needs-review

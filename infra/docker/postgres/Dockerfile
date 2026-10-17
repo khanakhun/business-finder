@@ -38,8 +38,10 @@ RUN apk add --no-cache --virtual .build-deps build-base \
 # pgBackRest's runtime libraries, the binary, and the backup service's scheduler (bf-pgbackrest).
 RUN apk add --no-cache lz4-libs zstd-libs libxml2 yaml libbz2 zlib libssl3 jq
 COPY --from=pgbackrest /usr/local/bin/pgbackrest /usr/local/bin/pgbackrest
-COPY --chmod=0755 pgbackrest/bf-pgbackrest.sh /usr/local/bin/bf-pgbackrest
-COPY --chmod=0755 pgbackrest/pgbackrest-spool.sh /usr/local/bin/pgbackrest-spool
+# Plain COPY + chmod: the integration tests build this image with Docker's classic builder (no --chmod).
+COPY pgbackrest/bf-pgbackrest.sh /usr/local/bin/bf-pgbackrest
+COPY pgbackrest/pgbackrest-spool.sh /usr/local/bin/pgbackrest-spool
+RUN chmod 0755 /usr/local/bin/bf-pgbackrest /usr/local/bin/pgbackrest-spool
 # Named volumes mounted here start with these owners: the WAL spool (written by archive_command, emptied by the
 # pgbackrest service) and node_exporter's textfile directory.
 RUN install -d -o postgres -g postgres -m 0700 /wal-spool \

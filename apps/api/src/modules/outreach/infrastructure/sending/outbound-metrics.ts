@@ -13,7 +13,8 @@ export const outboundMetrics = {
     metrics.histogram({
       name: 'bf_outreach_queue_seconds',
       help: 'Seconds between a message being due and its send attempt',
-      buckets: [1, 5, 30, 60, 300, 900, 3600, 4 * 3600, 24 * 3600],
+      // 600: the send-pipeline SLO (99% of due messages attempted within 10 minutes, BF-061).
+      buckets: [1, 5, 30, 60, 300, 600, 900, 3600, 4 * 3600, 24 * 3600],
     }),
   latency: () =>
     metrics.histogram({

@@ -1,0 +1,235 @@
+# Platform alerts (BF-061). Every alert: `severity` (page — act now, any hour; warn — today; ticket — this week),
+# `owner` (who acts), and a `runbook_url` (docs/runbooks/alerts.md, one section per alert). Routing:
+# infra/observability/alertmanager/alertmanager.yml.
+groups:
+  - name: availability
+    rules:
+      - alert: PublicSurfaceDown
+        # The synthetic probes (blackbox, through DNS and TLS): the dashboard, the API, the canary preview, the
+        # unsubscribe host.
+        expr: probe_success{job="blackbox-http"} == 0
+        for: 2m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: '{{ $labels.probe }} is down ({{ $labels.instance }})'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#publicsurfacedown
+      - alert: ApiErrorRateHigh
+        expr: |
+          sum(rate(bf_http_requests_total{job="api",status="5xx"}[5m]))
+            / clamp_min(sum(rate(bf_http_requests_total{job="api"}[5m])), 1e-9) > 0.02
+          and sum(rate(bf_http_requests_total{job="api"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: Over 2% of API requests fail with a 5xx
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#apierrorratehigh
+      - alert: ScrapeTargetDown
+        expr: up{job!~"blackbox.*"} == 0
+        for: 5m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: 'Prometheus cannot scrape {{ $labels.job }} ({{ $labels.instance }})'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#scrapetargetdown
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 2m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: Postgres does not answer the exporter
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#postgresdown
+      - alert: ValkeyDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: Valkey does not answer the exporter
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#valkeydown
+      - alert: CertificateExpiringSoon
+        expr: (min by (instance) (probe_ssl_earliest_cert_expiry) - time()) < 14 * 86400
+        for: 1h
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: 'The certificate of {{ $labels.instance }} expires in under 14 days'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#certificateexpiringsoon
+
+  - name: queues
+    rules:
+      - alert: CriticalQueueBacklog
+        # The send pipeline and the event deliveries must not wait: messages miss their slot, automations stall.
+        expr: max by (queue) (bf_queue_oldest_waiting_age_seconds{queue=~"outreach-send|outreach-tick|events"}) > 600
+        for: 5m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: 'The {{ $labels.queue }} queue has a job waiting for over 10 minutes'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#criticalqueuebacklog
+      - alert: QueueBacklog
+        expr: max by (queue) (bf_queue_oldest_waiting_age_seconds{queue!~"outreach-send|outreach-tick|events"}) > 1800
+        for: 15m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: 'The {{ $labels.queue }} queue has a job waiting for over 30 minutes'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#queuebacklog
+      - alert: FailedJobsSpike
+        expr: sum by (queue) (increase(bf_jobs_processed_total{outcome="failed"}[15m])) > 20
+        for: 5m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: '{{ $value | humanize }} jobs of {{ $labels.queue }} failed in 15 minutes'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#failedjobsspike
+      - alert: OutboxBacklog
+        expr: max(bf_outbox_pending_events) > 500
+        for: 10m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: '{{ $value | humanize }} domain events are waiting in the outbox'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#outboxbacklog
+
+  - name: generation
+    rules:
+      - alert: GenerationFailureRateHigh
+        expr: |
+          sum(increase(bf_generation_jobs_total{outcome="failed"}[1h]))
+            / clamp_min(sum(increase(bf_generation_jobs_total[1h])), 1e-9) > 0.3
+          and sum(increase(bf_generation_jobs_total[1h])) >= 5
+        for: 10m
+        labels:
+          severity: warn
+          owner: generation
+        annotations:
+          summary: Over 30% of generation jobs failed in the last hour
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#generationfailureratehigh
+      - alert: SandboxesSaturated
+        # Attempts waited for a sandbox slot in every 5-minute window for 30 minutes: every slot is held — busy or
+        # stuck runs.
+        expr: min_over_time((sum(rate(bf_generation_lease_waits_total[5m])) > bool 0)[30m:5m]) == 1
+        labels:
+          severity: warn
+          owner: generation
+        annotations:
+          summary: Every sandbox slot has been taken for 30 minutes
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#sandboxessaturated
+
+  - name: outreach-safety
+    rules:
+      - alert: MailboxBounceRateHigh
+        expr: max by (mailbox) (bf_outreach_mailbox_bounce_rate) > 0.05
+        for: 30m
+        labels:
+          severity: warn
+          owner: outreach
+        annotations:
+          summary: 'Mailbox {{ $labels.mailbox }} bounces over 5% of its last 50 sends'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#mailboxbounceratehigh
+      - alert: SendWithoutComplianceDecision
+        # Must never happen (check constraints forbid it): a migration or a manual fix weakened the compliance gate.
+        expr: max by (kind) (bf_compliance_sends_without_decision) > 0
+        labels:
+          severity: page
+          owner: compliance
+        annotations:
+          summary: 'Prospect contacts ({{ $labels.kind }}) exist without a compliance decision'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#sendwithoutcompliancedecision
+
+  - name: costs
+    rules:
+      - alert: AiSpendNearBudget
+        expr: max by (organization) (bf_ai_spend_month_usd) / scalar(max(bf_ai_budget_month_usd{level="hard"})) > 0.8
+        for: 15m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: 'A workspace has used {{ $value | humanizePercentage }} of its monthly AI budget'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#aispendnearbudget
+
+  - name: host
+    rules:
+      - alert: DiskFillingUp
+        expr: |
+          1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/run.*|/boot.*"}
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/run.*|/boot.*"} > 0.8
+        for: 15m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: '{{ $labels.mountpoint }} is {{ $value | humanizePercentage }} full'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#diskfillingup
+      - alert: DiskAlmostFull
+        expr: |
+          1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/run.*|/boot.*"}
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs",mountpoint!~"/run.*|/boot.*"} > 0.9
+        for: 5m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: '{{ $labels.mountpoint }} is {{ $value | humanizePercentage }} full'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#diskalmostfull
+
+  - name: backups
+    rules:
+      - alert: BackupTooOld
+        expr: time() - max(bf_backup_last_success_timestamp_seconds{repo="1",type="full"}) > 26 * 3600
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: No full backup in the last 26 hours
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#backuptooold
+      - alert: WalArchivingLagging
+        expr: max(bf_wal_spool_files) > 0 and (time() - max(bf_wal_last_push_timestamp_seconds)) > 900
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: WAL has not reached the backup repository for 15 minutes (RPO at risk)
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#walarchivinglagging
+      - alert: BackupStanzaUnhealthy
+        expr: max(bf_backup_stanza_ok) == 0
+        for: 30m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: pgBackRest reports the stanza unhealthy
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#backupstanzaunhealthy
+      - alert: BackupMonitoringSilent
+        # The pgbackrest service writes its metrics every 5 minutes; silence means it stopped (and so did backups).
+        expr: (time() - max(bf_pgbackrest_metrics_timestamp_seconds)) > 1800 or absent(bf_pgbackrest_metrics_timestamp_seconds)
+        for: 10m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: The backup service has not reported for 30 minutes
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#backupmonitoringsilent
+      - alert: RestoreDrillStale
+        expr: time() - max(bf_restore_drill_last_success_timestamp_seconds) > 35 * 86400
+        for: 1h
+        labels:
+          severity: ticket
+          owner: ops
+        annotations:
+          summary: No successful restore drill for 35 days
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#restoredrillstale

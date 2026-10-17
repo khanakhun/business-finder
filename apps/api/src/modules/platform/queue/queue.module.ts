@@ -7,6 +7,7 @@ import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_ENV, type AppEnv, type AppMode } from '../config/app-env.ts';
 import { requireOperator } from '../security/require-operator.middleware.ts';
 import { QueueErrorLogger } from './queue-error-logger.ts';
+import { QueueMetricsSampler } from './queue-metrics.ts';
 
 export const BULL_BOARD_ROUTE = '/admin/queues';
 
@@ -51,7 +52,8 @@ export class QueueModule {
       module: QueueModule,
       global: true,
       imports,
-      providers: [QueueErrorLogger],
+      // The backlog gauges are sampled by the worker (BF-061).
+      providers: mode === 'worker' ? [QueueErrorLogger, QueueMetricsSampler] : [QueueErrorLogger],
       exports: [BullModule],
     };
   }

@@ -102,6 +102,7 @@ import { DrizzleBulkRepository } from './infrastructure/outbound/drizzle-bulk.re
 import { DrizzleOutboundRepository } from './infrastructure/outbound/drizzle-outbound.repository.ts';
 import { HmacOutreachTokens } from './infrastructure/outbound/hmac-outreach-tokens.ts';
 import { OutboundPersonalData } from './infrastructure/outbound/outbound-personal-data.ts';
+import { DecisionAuditSampler } from './infrastructure/sending/decision-audit-metrics.ts';
 import { OutboundSender } from './infrastructure/sending/outbound-sender.ts';
 import {
   OUTREACH_TICK_AUTOSTART,
@@ -330,6 +331,8 @@ export class OutreachModule {
         OutboundSubscribers,
         ...(mode === 'worker'
           ? [
+              // BF-061: the compliance audit as a metric.
+              DecisionAuditSampler,
               MailboxHealthSweep,
               OutboundSender,
               OutreachTickProcessor,

@@ -1,0 +1,20 @@
+# blackbox_exporter (BF-061): HTTP probes of the public surfaces (through DNS and TLS, as a visitor) — availability,
+# latency and certificate expiry (probe_ssl_earliest_cert_expiry).
+modules:
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      valid_status_codes: [200]
+      follow_redirects: false
+      preferred_ip_protocol: ip4
+  # The unsubscribe host answers a bad token with a page (4xx), never a 5xx.
+  http_page:
+    prober: http
+    timeout: 10s
+    http:
+      method: GET
+      valid_status_codes: [200, 400, 404, 410]
+      follow_redirects: false
+      preferred_ip_protocol: ip4

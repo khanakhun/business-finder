@@ -8,6 +8,9 @@
 3. Merging the release PR tags `vX.Y.Z` and creates the GitHub Release. The same workflow then pins that commit's
    images: CI already built them for the commit (sha tag, SBOM, provenance); it resolves each application image's
    digest, tags it `vX.Y.Z` too, and attaches **`release.env`** (`BF_<NAME>_IMAGE=ghcr.io/…@sha256:…`).
+Repository setting (once): Settings → Actions → General → *Allow GitHub Actions to create and approve pull
+requests*, so release-please can open its PR.
+
 4. A hotfix: tag a commit of `main` by hand (`git tag v1.4.1 <sha> && git push origin v1.4.1`); the pinning runs on
    the pushed tag.
 

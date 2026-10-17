@@ -1,0 +1,84 @@
+# Prometheus (BF-061): scrapes every service on the compose networks, evaluates the alert and SLO rules in
+# ../alerts (mounted at /etc/prometheus/rules), sends alerts to Alertmanager. 30 days of data (command line).
+# Services are found by Docker DNS (dns_sd_configs): during a side-by-side rollout both API replicas are scraped.
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    environment: production
+
+rule_files:
+  - /etc/prometheus/rules/*.rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [alertmanager:9093]
+
+scrape_configs:
+  - job_name: api
+    dns_sd_configs:
+      - names: [api]
+        type: A
+        port: 4000
+        refresh_interval: 15s
+
+  - job_name: worker
+    dns_sd_configs:
+      - names: [worker]
+        type: A
+        port: 9464
+        refresh_interval: 30s
+
+  - job_name: intel
+    dns_sd_configs:
+      - names: [intel]
+        type: A
+        port: 8000
+        refresh_interval: 30s
+
+  - job_name: caddy
+    static_configs:
+      - targets: [caddy:2020]
+
+  - job_name: node
+    static_configs:
+      - targets: [node-exporter:9100]
+
+  - job_name: cadvisor
+    scrape_interval: 60s
+    static_configs:
+      - targets: [cadvisor:8080]
+    metric_relabel_configs:
+      # Container series only for the stacks' services (not every cgroup on the host).
+      - source_labels: [container_label_com_docker_compose_service]
+        regex: ''
+        action: drop
+
+  - job_name: postgres
+    static_configs:
+      - targets: [postgres-exporter:9187]
+
+  - job_name: valkey
+    static_configs:
+      - targets: [valkey-exporter:9121]
+
+  # Synthetic probes from inside (the external uptime service probes from outside: docs/runbooks/slos.md). The
+  # targets are templated at start-up from BASE_DOMAIN / CANARY_URL (see the compose file).
+  - job_name: blackbox-http
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    file_sd_configs:
+      - files: [/prometheus/generated/probes.yml]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: observability
+    static_configs:
+      - targets: [localhost:9090, alertmanager:9093, loki:3100, tempo:3200, alloy:12345, grafana:3000]

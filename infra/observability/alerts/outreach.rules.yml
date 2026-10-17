@@ -13,7 +13,9 @@ groups:
         for: 5m
         labels:
           severity: page
+          owner: outreach
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#outreachsendfailurerate
           summary: Over 5% of outbound emails fail
           description: Check the outbox's Failed tab (last error per message) and the mailboxes' health.
       - alert: OutreachSendStuck
@@ -23,7 +25,9 @@ groups:
         for: 5m
         labels:
           severity: page
+          owner: outreach
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#outreachsendstuck
           summary: Outbound emails are stuck in sending
           description: Messages are still sending more than 10 minutes after their lease ended. Check that the worker runs and the outreach-tick queue drains.
       - alert: OutreachMailboxAutoPaused
@@ -31,7 +35,9 @@ groups:
         expr: sum by (reason) (increase(bf_outreach_mailbox_paused_total[10m])) > 0
         labels:
           severity: warn
+          owner: outreach
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#outreachmailboxautopaused
           summary: A mailbox was paused by a deliverability rule ({{ $labels.reason }})
           description: Look at Outreach → Deliverability for the mailbox's health; resume only after fixing the cause.
       - alert: OutreachKillSwitchActive
@@ -39,6 +45,8 @@ groups:
         expr: max(bf_outreach_kill_switch_active) > 0
         labels:
           severity: warn
+          owner: outreach
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#outreachkillswitchactive
           summary: A workspace's kill switch is on (all sending stopped)
           description: The audit log says who turned it on and why.

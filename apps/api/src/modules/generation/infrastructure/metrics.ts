@@ -29,6 +29,15 @@ export const queueWaitSeconds = () =>
     buckets: [0.1, 1, 5, 15, 60, 300, 900, 3600],
   });
 
+/** BF-061: from creation to a terminal state (the generation SLO: 95% within 30 minutes). */
+export const jobSeconds = () =>
+  metrics.histogram({
+    name: 'bf_generation_job_seconds',
+    help: 'Time from a job being created to it settling, by engine and outcome',
+    labelNames: ['engine', 'outcome'],
+    buckets: [60, 300, 600, 900, 1800, 3600, 7200],
+  });
+
 export const jobCostUsd = () =>
   metrics.histogram({
     name: 'bf_generation_job_cost_usd',
@@ -57,6 +66,11 @@ export const PROMETHEUS_TELEMETRY: GenerationTelemetry = {
   settled: (job: StoredJob, outcome: GenerationJobStatus) => {
     jobsTotal().inc({ engine: job.engineCurrent, outcome });
     jobCostUsd().observe({ engine: job.engineCurrent }, job.costUsd);
+    const end = job.finishedAt ?? new Date();
+    jobSeconds().observe(
+      { engine: job.engineCurrent, outcome },
+      Math.max(0, (end.getTime() - job.createdAt.getTime()) / 1000),
+    );
   },
 };
 

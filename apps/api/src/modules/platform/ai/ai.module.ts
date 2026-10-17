@@ -17,6 +17,7 @@ import { EventRecorder } from '../events/event-recorder.ts';
 import { LOGGER } from '../logging/logger.ts';
 import { VALKEY } from '../valkey/valkey.module.ts';
 import { LedgerBudgetGuard, softBudgetNotifier, valkeyAiCache, vaultKeyResolver } from './ai-adapters.ts';
+import { AiSpendSampler } from './ai-spend-metrics.ts';
 import { LlmCallRepository } from './llm-call.repository.ts';
 import { AiUsageController } from './usage.controller.ts';
 
@@ -41,6 +42,8 @@ export class AiModule {
       controllers: mode === 'worker' ? [] : [AiUsageController],
       providers: [
         LlmCallRepository,
+        // BF-061: spend against the budget, sampled by the worker.
+        ...(mode === 'worker' ? [AiSpendSampler] : []),
         { provide: AI_MODEL_FACTORY, useValue: providerModels },
         {
           provide: AI_BUDGET_GUARD,

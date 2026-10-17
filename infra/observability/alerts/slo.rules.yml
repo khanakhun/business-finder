@@ -1,0 +1,115 @@
+# SLOs (BF-061, docs/runbooks/slos.md): error ratios recorded per window, and multi-window burn-rate alerts (Google
+# SRE workbook): page when the budget burns 14.4× too fast (1 h and 5 min windows: 2% of a 30-day budget in an hour),
+# ticket when 6× (6 h and 30 min). Error budgets: API 0.5%, renderer 0.1%, send pipeline 1%, generation 5%.
+groups:
+  - name: slo-recording
+    interval: 1m
+    rules:
+      # API availability (99.5%): 5xx responses over all responses.
+      - record: slo:api_errors:ratio_rate5m
+        expr: sum(rate(bf_http_requests_total{job="api",status="5xx"}[5m])) / clamp_min(sum(rate(bf_http_requests_total{job="api"}[5m])), 1e-9)
+      - record: slo:api_errors:ratio_rate30m
+        expr: sum(rate(bf_http_requests_total{job="api",status="5xx"}[30m])) / clamp_min(sum(rate(bf_http_requests_total{job="api"}[30m])), 1e-9)
+      - record: slo:api_errors:ratio_rate1h
+        expr: sum(rate(bf_http_requests_total{job="api",status="5xx"}[1h])) / clamp_min(sum(rate(bf_http_requests_total{job="api"}[1h])), 1e-9)
+      - record: slo:api_errors:ratio_rate6h
+        expr: sum(rate(bf_http_requests_total{job="api",status="5xx"}[6h])) / clamp_min(sum(rate(bf_http_requests_total{job="api"}[6h])), 1e-9)
+
+      # Renderer availability (99.9%), synthetic: failed probes of the canary preview.
+      - record: slo:renderer_errors:ratio_rate5m
+        expr: 1 - avg(avg_over_time(probe_success{probe="canary"}[5m]))
+      - record: slo:renderer_errors:ratio_rate30m
+        expr: 1 - avg(avg_over_time(probe_success{probe="canary"}[30m]))
+      - record: slo:renderer_errors:ratio_rate1h
+        expr: 1 - avg(avg_over_time(probe_success{probe="canary"}[1h]))
+      - record: slo:renderer_errors:ratio_rate6h
+        expr: 1 - avg(avg_over_time(probe_success{probe="canary"}[6h]))
+      # Renderer latency (P95 < 300 ms), synthetic.
+      - record: slo:renderer_latency_seconds:p95_1h
+        expr: max(quantile_over_time(0.95, probe_duration_seconds{probe="canary"}[1h]))
+
+      # Send pipeline (99% of due messages attempted within 10 minutes of their slot).
+      - record: slo:send_late:ratio_rate30m
+        expr: |
+          1 - sum(rate(bf_outreach_queue_seconds_bucket{le="600"}[30m]))
+            / clamp_min(sum(rate(bf_outreach_queue_seconds_count[30m])), 1e-9)
+      - record: slo:send_late:ratio_rate6h
+        expr: |
+          1 - sum(rate(bf_outreach_queue_seconds_bucket{le="600"}[6h]))
+            / clamp_min(sum(rate(bf_outreach_queue_seconds_count[6h])), 1e-9)
+
+      # Generation (95% of jobs settle within 30 minutes of creation).
+      - record: slo:generation_slow:ratio_rate6h
+        expr: |
+          1 - sum(rate(bf_generation_job_seconds_bucket{le="1800"}[6h]))
+            / clamp_min(sum(rate(bf_generation_job_seconds_count[6h])), 1e-9)
+      - record: slo:generation_slow:ratio_rate3d
+        expr: |
+          1 - sum(rate(bf_generation_job_seconds_bucket{le="1800"}[3d]))
+            / clamp_min(sum(rate(bf_generation_job_seconds_count[3d])), 1e-9)
+
+  - name: slo-burn
+    rules:
+      - alert: ApiErrorBudgetBurnFast
+        expr: slo:api_errors:ratio_rate1h > 14.4 * 0.005 and slo:api_errors:ratio_rate5m > 14.4 * 0.005
+        for: 2m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: The API burns its 30-day error budget 14× too fast
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#apierrorbudgetburnfast
+      - alert: ApiErrorBudgetBurnSlow
+        expr: slo:api_errors:ratio_rate6h > 6 * 0.005 and slo:api_errors:ratio_rate30m > 6 * 0.005
+        for: 15m
+        labels:
+          severity: ticket
+          owner: ops
+        annotations:
+          summary: The API burns its 30-day error budget 6× too fast
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#apierrorbudgetburnslow
+      - alert: RendererErrorBudgetBurnFast
+        expr: slo:renderer_errors:ratio_rate1h > 14.4 * 0.001 and slo:renderer_errors:ratio_rate5m > 14.4 * 0.001
+        for: 2m
+        labels:
+          severity: page
+          owner: ops
+        annotations:
+          summary: The site renderer burns its error budget 14× too fast
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#renderererrorbudgetburnfast
+      - alert: RendererErrorBudgetBurnSlow
+        expr: slo:renderer_errors:ratio_rate6h > 6 * 0.001 and slo:renderer_errors:ratio_rate30m > 6 * 0.001
+        for: 15m
+        labels:
+          severity: ticket
+          owner: ops
+        annotations:
+          summary: The site renderer burns its error budget 6× too fast
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#renderererrorbudgetburnslow
+      - alert: RendererSlow
+        expr: slo:renderer_latency_seconds:p95_1h > 0.3
+        for: 30m
+        labels:
+          severity: warn
+          owner: ops
+        annotations:
+          summary: 'The canary preview P95 is {{ $value | humanizeDuration }} (SLO: 300 ms)'
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#rendererslow
+      - alert: SendPipelineSlow
+        expr: slo:send_late:ratio_rate6h > 6 * 0.01 and slo:send_late:ratio_rate30m > 6 * 0.01
+        for: 15m
+        labels:
+          severity: warn
+          owner: outreach
+        annotations:
+          summary: Over 6% of due messages wait more than 10 minutes (SLO 1%)
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#sendpipelineslow
+      - alert: GenerationSlow
+        expr: slo:generation_slow:ratio_rate3d > 0.05 and slo:generation_slow:ratio_rate6h > 0.05
+        for: 1h
+        labels:
+          severity: ticket
+          owner: generation
+        annotations:
+          summary: More than 5% of generation jobs take over 30 minutes
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#generationslow

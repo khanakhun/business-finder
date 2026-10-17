@@ -42,7 +42,9 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
     NPM_CONFIG_FUND=false
 
+# The base's Debian packages are upgraded at build time: security fixes land without waiting for a new Node image.
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends tini ripgrep git jq zstd ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
@@ -57,7 +59,10 @@ RUN npm install --no-audit --no-save "playwright@${PLAYWRIGHT_VERSION}" \
  && npm cache clean --force \
  && node -e "const fs=require('fs');const p=require('playwright').chromium.executablePath();fs.writeFileSync('/opt/sitekit/chromium-version',p.split('/').find(s=>s.startsWith('chromium'))||'chromium')" \
  && printf '#!/bin/sh\nexec node /opt/sitekit/sitekit.mjs "$@"\n' > /usr/local/bin/sitekit \
- && chmod 0755 /usr/local/bin/sitekit
+ && chmod 0755 /usr/local/bin/sitekit \
+ # The package managers are build tools: not in the sandbox (less to patch, nothing for an agent to install with).
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /root/.npm
 
 COPY --from=build /repo/services/agent-runner/dist/ /opt/runner/
 

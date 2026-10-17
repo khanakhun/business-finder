@@ -2,7 +2,7 @@
 // container, and `sitekit check` says done. The workspace goes in on stdin (no bind mount: works with a Docker that
 // cannot read the host's /tmp). Usage: node services/agent-runner/scripts/smoke.ts [image]
 import { spawn } from 'node:child_process';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { encodeRunnerStdin, parseRunnerFrame, type RunnerFrame } from '@bf/contracts/runner';
@@ -14,11 +14,11 @@ const fixture = fileURLToPath(
 );
 
 function files(dir: string, out = new Map<string, Buffer>()): Map<string, Buffer> {
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (name === '.sitekit') continue;
-    if (statSync(path).isDirectory()) files(path, out);
-    else out.set(relative(fixture, path), readFileSync(path));
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === '.sitekit') continue;
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) files(path, out);
+    else if (entry.isFile()) out.set(relative(fixture, path), readFileSync(path));
   }
   return out;
 }

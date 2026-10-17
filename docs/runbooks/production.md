@@ -2,7 +2,8 @@
 
 Production has the same shape as staging (ADR-0014: one VPS, Docker Compose, Caddy, GHCR images), so set it up with
 [staging-setup.md](staging-setup.md) §1–§5 and these differences. Day-to-day operation: [deploy.md](deploy.md),
-[rollback.md](rollback.md), [restore.md](restore.md) (backups, PITR, the restore drill, Valkey loss).
+[rollback.md](rollback.md), [restore.md](restore.md) (backups, PITR, the restore drill, Valkey loss),
+[observability.md](observability.md), [slos.md](slos.md), [alerts.md](alerts.md), [game-day.md](game-day.md).
 
 ## 1. Topology
 

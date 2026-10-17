@@ -1,0 +1,265 @@
+# Observability stack for production (BF-061, docs/runbooks/observability.md): Prometheus (metrics, alert and SLO
+# rules), Alertmanager (e-mail + chat), Grafana (dashboards as code, at grafana.{BASE_DOMAIN} through Caddy), Loki
+# (logs), Tempo (traces), Alloy (container logs → Loki; OTLP → tail sampling → Tempo), and the exporters (host,
+# containers, Postgres, Valkey, synthetic probes).
+#
+# Its own compose project (`bf-obs`), next to the application's (`bf`): it joins the application's networks (edge
+# for the services and Caddy, data for the Postgres and Valkey exporters) and reads the backup metrics volume. Its
+# lifecycle is its own — application deploys never restart it. Installed in /opt/bf/observability with this
+# repository's infra/observability next to it:
+#   docker compose -p bf-obs -f docker-compose.observability.yml --env-file ../.env up -d
+#
+# Secrets (files, mode 600, in /opt/bf/observability/secrets): grafana_admin_password, alert_smtp_password,
+# alert_webhook_url, pg_monitor_password. Settings from /opt/bf/.env: BASE_DOMAIN, POSTGRES_DB, ALERT_EMAIL_TO,
+# ALERT_EMAIL_FROM, ALERT_SMTP_SMARTHOST, ALERT_SMTP_USERNAME, and optionally CANARY_URL (a preview kept for the
+# renderer SLO).
+name: bf-obs
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+x-base: &base
+  restart: unless-stopped
+  logging: *logging
+  security_opt: ['no-new-privileges:true']
+
+services:
+  prometheus:
+    <<: *base
+    image: prom/prometheus:v3.13.4
+    user: '65534:65534'
+    # The probe targets come from the environment: written next to the config, then Prometheus starts.
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        mkdir -p /prometheus/generated
+        {
+          echo "- targets: ['https://app.$${BASE_DOMAIN}/health/ready']"
+          echo "  labels: { probe: app }"
+          echo "- targets: ['https://api.$${BASE_DOMAIN}/health/ready']"
+          echo "  labels: { probe: api }"
+          echo "- targets: ['https://u.$${BASE_DOMAIN}/u/bf-probe-invalid-token']"
+          echo "  labels: { probe: unsubscribe, __param_module: http_page }"
+          if [ -n "$${CANARY_URL}" ]; then
+            echo "- targets: ['$${CANARY_URL}']"
+            echo "  labels: { probe: canary }"
+          fi
+        } > /prometheus/generated/probes.yml
+        exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus \
+          --storage.tsdb.retention.time=30d --web.enable-lifecycle
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:?}
+      CANARY_URL: ${CANARY_URL:-}
+    volumes:
+      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../observability/alerts:/etc/prometheus/rules:ro
+      # The generated probe list lives in the data volume (the config directory is read-only).
+      - prometheus-data:/prometheus
+    networks: [obs, bf-edge]
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 1G }
+
+  alertmanager:
+    <<: *base
+    image: prom/alertmanager:v0.34.1
+    # Addresses into the committed config at start-up (secrets stay files).
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        sed -e "s|__ALERT_EMAIL_TO__|$${ALERT_EMAIL_TO}|g" -e "s|__ALERT_EMAIL_FROM__|$${ALERT_EMAIL_FROM}|g" \
+          -e "s|__ALERT_SMTP_SMARTHOST__|$${ALERT_SMTP_SMARTHOST}|g" \
+          -e "s|__ALERT_SMTP_USERNAME__|$${ALERT_SMTP_USERNAME}|g" \
+          /etc/alertmanager/alertmanager.yml > /alertmanager/alertmanager.yml
+        exec /bin/alertmanager --config.file=/alertmanager/alertmanager.yml --storage.path=/alertmanager
+    environment:
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:?}
+      ALERT_EMAIL_FROM: ${ALERT_EMAIL_FROM:?}
+      ALERT_SMTP_SMARTHOST: ${ALERT_SMTP_SMARTHOST:?}
+      ALERT_SMTP_USERNAME: ${ALERT_SMTP_USERNAME:?}
+    volumes:
+      - ../observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./secrets/alert_smtp_password:/run/secrets/alert_smtp_password:ro
+      - ./secrets/alert_webhook_url:/run/secrets/alert_webhook_url:ro
+      - alertmanager-data:/alertmanager
+    networks: [obs, egress]
+    deploy:
+      resources:
+        limits: { cpus: '0.25', memory: 128M }
+
+  grafana:
+    <<: *base
+    image: grafana/grafana:13.2.3
+    environment:
+      GF_SERVER_ROOT_URL: https://grafana.${BASE_DOMAIN:?}
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_SECURITY_COOKIE_SECURE: 'true'
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_AUTH_ANONYMOUS_ENABLED: 'false'
+      GF_ANALYTICS_REPORTING_ENABLED: 'false'
+      GF_ANALYTICS_CHECK_FOR_UPDATES: 'false'
+      GF_NEWS_NEWS_FEED_ENABLED: 'false'
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/dashboards:/var/lib/grafana/dashboards:ro
+      - ./secrets/grafana_admin_password:/run/secrets/grafana_admin_password:ro
+      - grafana-data:/var/lib/grafana
+    # bf-edge: Caddy proxies grafana.{BASE_DOMAIN} to it.
+    networks: [obs, bf-edge]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 512M }
+
+  loki:
+    <<: *base
+    image: grafana/loki:3.7.8
+    command: [-config.file=/etc/loki/loki.yaml]
+    volumes:
+      - ../observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/loki
+    networks: [obs]
+    deploy:
+      resources:
+        limits: { cpus: '1', memory: 1G }
+
+  tempo:
+    <<: *base
+    image: grafana/tempo:3.1.0
+    command: [-config.file=/etc/tempo.yaml]
+    volumes:
+      - ../observability/tempo/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    networks: [obs]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 1G }
+
+  alloy:
+    <<: *base
+    image: grafana/alloy:v1.20.1
+    command: [run, --server.http.listen-addr=0.0.0.0:12345, --storage.path=/var/lib/alloy, /etc/alloy/config.alloy]
+    volumes:
+      - ../observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy
+    # bf-edge: the applications export OTLP to alloy:4318 (OTEL_EXPORTER_OTLP_ENDPOINT).
+    networks: [obs, bf-edge, obs-docker]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 512M }
+
+  # The Docker API for Alloy's log collection, read-only: listing containers and reading their logs, nothing else.
+  obs-socket-proxy:
+    <<: *base
+    image: wollomatic/socket-proxy:1.13.1
+    command:
+      - -loglevel=warn
+      - -listenip=0.0.0.0
+      - -allowfrom=alloy
+      - -allowGET=^/v1\.[0-9]+/(version|containers/json|containers/[a-zA-Z0-9_.-]+/(json|logs))$
+      - -allowHEAD=^/_ping$
+      - -watchdoginterval=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [obs-docker]
+    deploy:
+      resources:
+        limits: { cpus: '0.1', memory: 32M }
+
+  node-exporter:
+    <<: *base
+    image: prom/node-exporter:v1.12.1
+    command:
+      - --path.rootfs=/host
+      - --collector.textfile.directory=/textfile
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+      # The pgbackrest service's metrics (backup ages, WAL push, the restore drill): docs/runbooks/restore.md §2.
+      - bf-metrics-textfile:/textfile:ro
+    networks: [obs]
+    deploy:
+      resources:
+        limits: { cpus: '0.2', memory: 64M }
+
+  cadvisor:
+    <<: *base
+    image: ghcr.io/google/cadvisor:v0.60.6
+    # Container series are filtered to the compose services by Prometheus (metric_relabel_configs).
+    command: [--docker_only=true, --housekeeping_interval=30s]
+    privileged: true
+    devices: [/dev/kmsg]
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks: [obs]
+    deploy:
+      resources:
+        limits: { cpus: '0.3', memory: 256M }
+
+  # A read-only monitoring role (pg_monitor): docs/runbooks/observability.md §2 creates it.
+  postgres-exporter:
+    <<: *base
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    environment:
+      DATA_SOURCE_URI: postgres:5432/${POSTGRES_DB:?}?sslmode=disable
+      DATA_SOURCE_USER: bf_monitor
+      DATA_SOURCE_PASS_FILE: /run/secrets/pg_monitor_password
+    volumes:
+      - ./secrets/pg_monitor_password:/run/secrets/pg_monitor_password:ro
+    networks: [obs, bf-data]
+    deploy:
+      resources:
+        limits: { cpus: '0.2', memory: 64M }
+
+  valkey-exporter:
+    <<: *base
+    image: oliver006/redis_exporter:v1.93.0
+    environment:
+      REDIS_ADDR: redis://valkey:6379
+    networks: [obs, bf-data]
+    deploy:
+      resources:
+        limits: { cpus: '0.1', memory: 64M }
+
+  blackbox-exporter:
+    <<: *base
+    image: prom/blackbox-exporter:v0.28.0
+    command: [--config.file=/etc/blackbox/blackbox.yml]
+    volumes:
+      - ../observability/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+    # Probes go out to the public names, as a visitor would.
+    networks: [obs, egress]
+    deploy:
+      resources:
+        limits: { cpus: '0.1', memory: 64M }
+
+networks:
+  obs:
+    internal: true
+  # The way out (Alertmanager's SMTP and webhook, the probes).
+  egress: {}
+  obs-docker:
+    internal: true
+  bf-edge:
+    external: true
+    name: bf_edge
+  bf-data:
+    external: true
+    name: bf_data
+
+volumes:
+  prometheus-data: {}
+  alertmanager-data: {}
+  grafana-data: {}
+  loki-data: {}
+  tempo-data: {}
+  alloy-data: {}
+  bf-metrics-textfile:
+    external: true
+    name: bf_metrics-textfile

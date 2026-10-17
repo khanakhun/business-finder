@@ -1,0 +1,105 @@
+// Grafana Alloy (BF-061): container logs → Loki, OTLP traces → Tempo. Metrics are scraped by Prometheus itself.
+
+// ── Logs ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+// The Docker API through a read-only socket proxy (containers and their logs, nothing else).
+discovery.docker "containers" {
+  host = "tcp://obs-socket-proxy:2375"
+}
+
+discovery.relabel "containers" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "project"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "tcp://obs-socket-proxy:2375"
+  targets       = discovery.docker.containers.targets
+  relabel_rules = discovery.relabel.containers.rules
+  forward_to    = [loki.process.redact.receiver]
+}
+
+// Defence in depth: the applications' loggers redact secrets and personal data already (pino/structlog redaction,
+// BF-005); e-mail addresses and bearer tokens that slip through (a provider's error text) are masked here.
+loki.process "redact" {
+  stage.replace {
+    expression = "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})"
+    replace    = "<email>"
+  }
+  stage.replace {
+    expression = "(?i)bearer\\s+([A-Za-z0-9._~+/=-]{8,})"
+    replace    = "<redacted>"
+  }
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// ── Traces ───────────────────────────────────────────────────────────────────────────────────────────────────────
+// The applications export OTLP here (OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318).
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  output {
+    traces = [otelcol.processor.tail_sampling.default.input]
+  }
+}
+
+// The applications export every span; whole traces are kept when any span failed, else 10% of them.
+otelcol.processor.tail_sampling "default" {
+  decision_wait = "10s"
+
+  policy {
+    name = "errors"
+    type = "status_code"
+    status_code {
+      status_codes = ["ERROR"]
+    }
+  }
+  policy {
+    name = "sample"
+    type = "probabilistic"
+    probabilistic {
+      sampling_percentage = 10
+    }
+  }
+
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
+  }
+}

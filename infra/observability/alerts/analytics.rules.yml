@@ -10,7 +10,9 @@ groups:
         for: 10m
         labels:
           severity: ticket
+          owner: analytics
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#analyticsfactsdrift
           summary: Analytics facts drift from their source tables
           description: Check the worker's "analytics facts drift" logs for the workspace and metric, then run `pnpm analytics:backfill --since <date> --org <id>`.
       - alert: AnalyticsIngestLagging
@@ -20,7 +22,9 @@ groups:
         for: 15m
         labels:
           severity: ticket
+          owner: analytics
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#analyticsingestlagging
           summary: Analytics facts lag their events by more than two minutes
           description: The outbox relay or the analytics subscribers fall behind. Check the worker and the outbox backlog.
       - alert: AnalyticsRefreshStale
@@ -29,6 +33,8 @@ groups:
         for: 15m
         labels:
           severity: ticket
+          owner: analytics
         annotations:
+          runbook_url: https://github.com/khanakhun/business-finder/blob/main/docs/runbooks/alerts.md#analyticsrefreshstale
           summary: The analytics refresh has not run for an hour
           description: Spend and daily trends are stale, and the next months' partitions may be missing. Check the worker logs for "analytics refresh failed".

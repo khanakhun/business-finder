@@ -30,6 +30,9 @@
 			}
 		}
 	}
+	# BF-061: request metrics (per server, not per host: preview hostnames would explode the series), served to
+	# Prometheus on the internal :2020 listener below.
+	metrics
 	servers {
 		timeouts {
 			read_header 10s
@@ -134,7 +137,8 @@ api.{$BASE_DOMAIN} {
 	import security_headers
 	import access_log
 	# BF-062: internal routes (Caddy's own ask) are reached on the internal network only, never from the internet.
-	@internal path /v1/internal/*
+	# BF-061: the API's /metrics is for Prometheus on the internal network too.
+	@internal path /v1/internal/* /metrics
 	respond @internal 404
 	# Never compress the realtime stream: compression buffers events (SSE, /v1/realtime).
 	@compressible not header Accept text/event-stream*
@@ -147,6 +151,15 @@ api.{$BASE_DOMAIN} {
 		# Stream responses as they are written (SSE).
 		flush_interval -1
 	}
+}
+
+# BF-061: Grafana (the observability stack, infra/compose/docker-compose.observability.yml). Grafana's own login; when
+# the stack is not running this host answers 502.
+grafana.{$BASE_DOMAIN} {
+	import tls_{$CADDY_TLS:acme}
+	import security_headers
+	import access_log
+	reverse_proxy grafana:3000
 }
 
 # Unsubscribe links (BF-055): the short host in every message footer and the RFC 8058 one-click target. Only those
@@ -211,4 +224,10 @@ https:// {
 	reverse_proxy {
 		import sites_upstreams
 	}
+}
+
+# BF-061: Caddy's own metrics for Prometheus — plain HTTP on :2020, a port Docker does not publish: reachable from the
+# compose networks only.
+http://:2020 {
+	metrics /metrics
 }

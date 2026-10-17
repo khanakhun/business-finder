@@ -22303,47 +22303,39 @@
             "type": "object"
           },
           "model": {
-            "anyOf": [
-              {
+            "additionalProperties": false,
+            "properties": {
+              "modelId": {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              "tiers": {
                 "additionalProperties": false,
                 "properties": {
-                  "modelId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
+                  "A": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 1,
+                    "type": "number"
                   },
-                  "tiers": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "A": {
-                        "exclusiveMinimum": 0,
-                        "maximum": 1,
-                        "type": "number"
-                      },
-                      "B": {
-                        "exclusiveMaximum": 1,
-                        "minimum": 0,
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "A",
-                      "B"
-                    ],
-                    "type": "object"
+                  "B": {
+                    "exclusiveMaximum": 1,
+                    "minimum": 0,
+                    "type": "number"
                   }
                 },
                 "required": [
-                  "modelId",
-                  "tiers"
+                  "A",
+                  "B"
                 ],
                 "type": "object"
-              },
-              {
-                "type": "null"
               }
+            },
+            "required": [
+              "modelId",
+              "tiers"
             ],
-            "default": null
+            "type": "object"
           },
           "normalization": {
             "const": "weighted_sum",
@@ -22576,7 +22568,6 @@
         },
         "required": [
           "kind",
-          "model",
           "offer",
           "weights",
           "transforms",
@@ -27250,47 +27241,39 @@
             "type": "object"
           },
           "model": {
-            "anyOf": [
-              {
+            "additionalProperties": false,
+            "properties": {
+              "modelId": {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              "tiers": {
                 "additionalProperties": false,
                 "properties": {
-                  "modelId": {
-                    "format": "uuid",
-                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
-                    "type": "string"
+                  "A": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 1,
+                    "type": "number"
                   },
-                  "tiers": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "A": {
-                        "exclusiveMinimum": 0,
-                        "maximum": 1,
-                        "type": "number"
-                      },
-                      "B": {
-                        "exclusiveMaximum": 1,
-                        "minimum": 0,
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "A",
-                      "B"
-                    ],
-                    "type": "object"
+                  "B": {
+                    "exclusiveMaximum": 1,
+                    "minimum": 0,
+                    "type": "number"
                   }
                 },
                 "required": [
-                  "modelId",
-                  "tiers"
+                  "A",
+                  "B"
                 ],
                 "type": "object"
-              },
-              {
-                "type": "null"
               }
+            },
+            "required": [
+              "modelId",
+              "tiers"
             ],
-            "default": null
+            "type": "object"
           },
           "normalization": {
             "const": "weighted_sum",
@@ -27523,7 +27506,6 @@
         },
         "required": [
           "kind",
-          "model",
           "offer",
           "weights",
           "transforms",

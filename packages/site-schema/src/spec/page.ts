@@ -16,6 +16,8 @@ export const RESERVED_SLUGS: readonly string[] = [
   'claim',
   'opt-out',
   'privacy',
+  // BF-062: a live site's legal notice.
+  'legal',
 ];
 
 export const PageSchema = z

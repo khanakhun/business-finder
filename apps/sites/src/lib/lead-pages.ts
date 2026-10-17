@@ -33,7 +33,7 @@ export async function leadFormFields(input: {
   readonly siteId: string;
   readonly secret: string;
   readonly kind: 'claim_interest' | 'contact_request' | 'opt_out';
-  readonly source: 'banner' | 'claim_page' | 'contact_block' | 'opt_out_link';
+  readonly source: 'banner' | 'claim_page' | 'contact_block' | 'opt_out_link' | 'live_site';
   readonly locale: string;
   readonly next: string;
   readonly campaign?: string | undefined;

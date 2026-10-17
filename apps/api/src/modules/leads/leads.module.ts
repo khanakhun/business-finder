@@ -9,13 +9,20 @@ import { SitesModule } from '../sites/index.ts';
 import { LeadAutomation } from './application/lead-automation.ts';
 import { LeadsInbox } from './application/leads.inbox.ts';
 import { LEADS_RETENTION } from './application/leads.retention.ts';
-import { LEAD_GUARD, LEAD_TOKEN_SECRET, LEADS_REPOSITORY, PROOF_OF_WORK } from './application/ports.ts';
+import {
+  LEAD_GUARD,
+  LEAD_TOKEN_SECRET,
+  LEADS_REPOSITORY,
+  LIVE_LEAD_DELIVERY,
+  PROOF_OF_WORK,
+} from './application/ports.ts';
 import { PublicDsrIntake } from './application/public-dsr-intake.ts';
 import { PublicLeads } from './application/public-leads.ts';
 import { UnsubscribeEffects } from './application/unsubscribe-effects.ts';
 import { AltchaProofOfWork } from './infrastructure/altcha-proof-of-work.ts';
 import { DrizzleLeadsRepository } from './infrastructure/drizzle-leads.repository.ts';
 import { LeadPersonalData } from './infrastructure/lead-personal-data.ts';
+import { SystemMailerLiveLeadDelivery } from './infrastructure/live-lead-delivery.ts';
 import { ValkeyLeadGuard } from './infrastructure/valkey-lead-guard.ts';
 import { LeadsController } from './interface/http/leads.controller.ts';
 import { PublicDsrController } from './interface/http/public-dsr.controller.ts';
@@ -41,6 +48,8 @@ export class LeadsModule {
       controllers: mode === 'worker' ? [] : [PublicLeadsController, PublicDsrController, LeadsController],
       providers: [
         { provide: LEADS_REPOSITORY, useClass: DrizzleLeadsRepository },
+        // BF-062: live sites' contact messages go to the business.
+        { provide: LIVE_LEAD_DELIVERY, useClass: SystemMailerLiveLeadDelivery },
         { provide: LEAD_GUARD, useClass: ValkeyLeadGuard },
         {
           // The renderer's shared secret (BF-036): unset, lead capture is off (like view counting).

@@ -39,3 +39,22 @@ export const rendererSiteAssets = pgView('renderer_site_assets', {
   focalPoint: jsonb().$type<{ x: number; y: number }>(),
   dominantColors: jsonb().$type<string[]>(),
 }).existing();
+
+/** BF-062: a live site's legal profile and its host (the agency), for the legal notice and privacy pages. */
+export const rendererSiteLegal = pgView('renderer_site_legal', {
+  siteId: uuid().notNull(),
+  businessLegalName: text().notNull(),
+  legalForm: text(),
+  registration: text(),
+  vatNumber: text(),
+  address: text().notNull(),
+  phone: text(),
+  email: text().notNull(),
+  publicationDirector: text(),
+  dpoContact: text(),
+  hostName: text().notNull(),
+  hostAddress: text(),
+  hostUrl: text(),
+  version: integer().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).notNull(),
+}).existing();

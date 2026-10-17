@@ -5,6 +5,7 @@ import { HOTLINK_HOSTS } from '@bf/site-schema';
 import { type DynamicModule, Module } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { AI_BUDGET_GUARD, AI_GATEWAY } from '../platform/ai/ai.module.ts';
+import { vaultKeyResolver } from '../platform/ai/ai-adapters.ts';
 import { APP_ENV, type AppEnv, type AppMode } from '../platform/config/app-env.ts';
 import { DB_CLIENT } from '../platform/db/db.module.ts';
 import { InMemoryObjectStorage, type ObjectStorage } from '../platform/storage/object-storage.ts';
@@ -12,6 +13,7 @@ import { S3ObjectStorage } from '../platform/storage/s3-object-storage.ts';
 import { VALKEY } from '../platform/valkey/valkey.module.ts';
 import { RealtimeModule, RealtimePublisher } from '../realtime/index.ts';
 import { SiteAssetCommands, SiteCommands, SiteQueries, SitesModule } from '../sites/index.ts';
+import { SecretResolver } from '../workspace/index.ts';
 import { BriefService, PAGE_PLAN_TEMPLATES } from './application/brief.service.ts';
 import {
   BRIEF_SOURCES_READER,
@@ -52,7 +54,7 @@ import {
   WORKSPACE_BUDGET,
   WORKSPACE_PREPARER,
 } from './application/ports.ts';
-import { SANDBOX_JANITOR, SANDBOX_PROVIDER } from './application/sandbox.ports.ts';
+import { SANDBOX_JANITOR, SANDBOX_PROVIDER, type SandboxProvider } from './application/sandbox.ports.ts';
 import { SiteFactExtraction } from './application/site-facts.extraction.ts';
 import { JobTransitions, SETTLED_HOOK } from './application/transitions.ts';
 import {
@@ -75,6 +77,8 @@ import {
 } from './infrastructure/drizzle-facts.repository.ts';
 import { DrizzleGenerationRepository } from './infrastructure/drizzle-generation.repository.ts';
 import { BlocksEngine } from './infrastructure/engines/blocks/blocks.engine.ts';
+import { ClaudeCodeEngine } from './infrastructure/engines/claude-code/claude-code.engine.ts';
+import type { SandboxedEngineDeps } from './infrastructure/engines/sandboxed/sandboxed-agent.engine.ts';
 import { JobEventTail } from './infrastructure/job-event-tail.ts';
 import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
@@ -108,11 +112,39 @@ import {
   GenerationReaperProcessor,
 } from './interface/processors/generation.processors.ts';
 
-/** The engines registered here: the fake one in development and tests (real engines arrive with BF-041/BF-044). */
-function engines(env: ApiEnv, deps: { gateway: AiGateway; artifacts: ArtifactStore }): AgentEngine[] {
+/** The engines registered here: blocks (BF-041), the coding agents in sandboxes (BF-044), the fake one in tests. */
+function engines(
+  env: ApiEnv,
+  deps: { gateway: AiGateway; artifacts: ArtifactStore; sandbox: SandboxProvider; secrets: SecretResolver },
+): AgentEngine[] {
   const registered: AgentEngine[] = [];
   // The blocks engine (BF-041): in-process, model calls through the AI gateway.
   if (env.GENERATION_BLOCKS_ENGINE) registered.push(new BlocksEngine(deps.gateway, deps.artifacts));
+  // The coding agents (BF-044): each run in a sandbox with the workspace's own key.
+  const keys = vaultKeyResolver(deps.secrets);
+  const sandboxed = (model: string): SandboxedEngineDeps => ({
+    sandbox: deps.sandbox,
+    artifacts: deps.artifacts,
+    keys: { resolve: (organizationId) => keys.resolve(organizationId, 'anthropic') },
+    settings: {
+      enabled: env.SANDBOX_ENABLED,
+      image: env.SANDBOX_RUNNER_IMAGE,
+      cpus: env.SANDBOX_CPUS,
+      memoryMb: env.SANDBOX_MEMORY_MB,
+      pidsLimit: env.SANDBOX_PIDS_LIMIT,
+      wallTimeSec: env.GENERATION_AGENT_WALL_TIME_SEC,
+      maxTurns: env.GENERATION_AGENT_MAX_TURNS,
+      budgetMargin: env.GENERATION_AGENT_BUDGET_MARGIN,
+      model,
+    },
+  });
+  if (env.GENERATION_CLAUDE_CODE_ENGINE)
+    registered.push(
+      new ClaudeCodeEngine(sandboxed(env.AI_MODEL_AGENT), {
+        pricing: env.AI_PRICING,
+        sitekit: env.GENERATION_CLAUDE_CODE_SITEKIT,
+      }),
+    );
   if (env.GENERATION_FAKE_ENGINE) {
     if (env.NODE_ENV === 'production') throw new Error('GENERATION_FAKE_ENGINE is refused in production');
     registered.push(
@@ -164,9 +196,14 @@ export class GenerationModule {
         BriefService,
         {
           provide: ENGINE_REGISTRY,
-          inject: [APP_ENV, AI_GATEWAY, GENERATION_ARTIFACTS],
-          useFactory: (env: AppEnv, gateway: AiGateway, artifacts: ArtifactStore) =>
-            new StaticEngineRegistry(engines(env as ApiEnv, { gateway, artifacts })),
+          inject: [APP_ENV, AI_GATEWAY, GENERATION_ARTIFACTS, SANDBOX_PROVIDER, SecretResolver],
+          useFactory: (
+            env: AppEnv,
+            gateway: AiGateway,
+            artifacts: ArtifactStore,
+            sandbox: SandboxProvider,
+            secrets: SecretResolver,
+          ) => new StaticEngineRegistry(engines(env as ApiEnv, { gateway, artifacts, sandbox, secrets })),
         },
         {
           provide: GENERATION_SETTINGS,

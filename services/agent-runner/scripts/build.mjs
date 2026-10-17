@@ -22,5 +22,6 @@ await build({
   logLevel: 'warning',
 });
 cpSync(join(root, 'fake-agent/fake-agent.mjs'), join(dist, 'fake-agent.mjs'));
+cpSync(join(root, 'fake-agent/fake-claude.mjs'), join(dist, 'fake-claude.mjs'));
 cpSync(join(root, 'home'), join(dist, 'home'), { recursive: true });
 console.log(`agent-runner build: ${dist}`);

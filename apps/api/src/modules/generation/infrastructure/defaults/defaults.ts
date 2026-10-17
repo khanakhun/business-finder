@@ -84,7 +84,9 @@ export class DefaultGenerationSettings implements GenerationSettingsReader {
 
   async resolve(): Promise<GenerationSettings> {
     const registered = this.engines();
-    const order: EngineId[] = ['blocks', 'claude-agent-sdk', 'claude-code', 'codex', 'fake'];
+    // DECISION(BF-044): the coding agents first, then `blocks` as the fallback (ADR-0010: "default fallback
+    // blocks"): a job only fails over to engines after its own, so a coding agent's job ends on blocks.
+    const order: EngineId[] = ['claude-agent-sdk', 'claude-code', 'codex', 'blocks', 'fake'];
     return {
       allowedEngines: registered.length > 0 ? [...registered] : ['blocks'],
       defaultEngine: 'auto',

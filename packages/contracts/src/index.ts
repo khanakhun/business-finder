@@ -416,6 +416,11 @@ export {
   UpdateOrgBusinessFactRequestSchema,
 } from './facts.ts';
 export {
+  type EngineFinalReport,
+  EngineFinalReportSchema,
+  engineFinalReportJsonSchema,
+} from './final-report.ts';
+export {
   type CreateGenerationBatchRequest,
   CreateGenerationBatchRequestSchema,
   ENGINE_IDS,

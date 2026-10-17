@@ -5,7 +5,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { queuePriority } from '../domain/batch.ts';
 import { canStart, overBudget } from '../domain/budget-policy.ts';
-import { decideAfterFailure } from '../domain/failover-policy.ts';
+import { decideAfterFailure, INVALID_OUTPUT_CODES } from '../domain/failover-policy.ts';
 import {
   type AgentEngine,
   type ArtifactStore,
@@ -441,7 +441,7 @@ export class GenerationRunner {
       maxAttemptsPerEngine: current.maxAttemptsPerEngine,
       failoverChain: current.failoverChain,
       available,
-      invalidOutputs: attempts.filter((a) => a.exitReason === 'INVALID_OUTPUT').length,
+      invalidOutputs: attempts.filter((a) => INVALID_OUTPUT_CODES.has(a.exitReason ?? '')).length,
     });
     logger.info({ jobId: job.id, code: failure.code, decision: decision.action }, decision.reason);
     // A job that could not even start (no attempt) goes straight from queued to failed.

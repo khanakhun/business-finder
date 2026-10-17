@@ -159,6 +159,11 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `MAPS_SCRAPER_URL` | App-specific | api, worker | no |  |  | Self-hosted gosom/google-maps-scraper web API (only used with FEATURE_MAPS_SCRAPER). |
 | `MAPS_SCRAPER_MAX_TIME_SECONDS` | App-specific | api, worker | no | `300` |  | Time budget of one scraper job (the scraper needs at least 3 minutes). |
 | `GENERATION_BLOCKS_ENGINE` | App-specific | api, worker | no | `true` |  | Register the blocks engine (BF-041), the default: sites composed in-process by the AI gateway (needs model keys). |
+| `GENERATION_CLAUDE_CODE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the Claude Code engine (BF-044): `claude -p` in a sandbox; needs SANDBOX_ENABLED and an Anthropic key per workspace. |
+| `GENERATION_CLAUDE_CODE_SITEKIT` | App-specific | api, worker | no | `bash` |  | How Claude Code reaches sitekit: `Bash(sitekit *)` only (bash) or the `sitekit mcp` server with no shell (mcp). |
+| `GENERATION_AGENT_WALL_TIME_SEC` | App-specific | api, worker | no | `900` |  | Wall time of one coding-agent run in its sandbox (BF-044). |
+| `GENERATION_AGENT_MAX_TURNS` | App-specific | api, worker | no | `60` |  | Turns a coding agent may take in one run (BF-044). |
+| `GENERATION_AGENT_BUDGET_MARGIN` | App-specific | api, worker | no | `0.15` |  | Share of an attempt's budget kept back from the agent's own limit (it can overshoot by a turn). |
 | `GENERATION_FAKE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the scripted fake engine (development, tests and E2E only; refused in production). |
 | `GENERATION_MAX_SANDBOXES` | App-specific | api, worker | no | `4` |  | Sandboxed engine runs at once across the deployment (Claude Code, Codex, …). |
 | `GENERATION_FAKE_DURATION_MS` | App-specific | api, worker | no | `1500` |  | The fake engine's run time (tests set it short, load tests realistic). |

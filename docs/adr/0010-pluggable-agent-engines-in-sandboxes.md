@@ -64,3 +64,36 @@ The user wants to select several businesses and have sites generated automatical
   corepack removed from the runtime; every tmpfs `noexec`. The security suite
   (`services/agent-runner/security-tests`) checks identity, filesystem, capabilities, process limits, network,
   egress and the socket proxy's rules in CI.
+
+## Addendum (BF-044 part 1, 2026-10-17): the coding-agent engines' common run and Claude Code's flags
+
+- **Accepting a result.** A sandboxed engine accepts a site only when the agent ended cleanly, the supervisor's
+  `sitekit check` reported `done: true`, **and** our own validation passed outside the sandbox. That validation is
+  sitekit's validator with strict facts against the registry in the bundle the worker built (never the agent's copy
+  of `facts.json`, which is not even collected), plus copy-lint errors. The agent's final report is logged, never
+  trusted.
+- **Errors.** `ENGINE_INCOMPLETE` (retried), `ENGINE_INVALID_OUTPUT` (retried once, then failover), and two codes
+  that skip retries and fail over at once: `ENGINE_BUDGET_EXCEEDED` and `ENGINE_VERSION_UNSUPPORTED` (the
+  supervisor's `versions` frame is checked against the range the parser was written for).
+- **Default failover order.** The coding agents first, `blocks` last, so a coding agent's job ends on blocks (this
+  ADR's "default fallback blocks").
+- **Budget.** The agent gets the attempt's budget minus a margin (15%) as its own limit. The worker also prices the
+  stream's tokens as they come (`AI_PRICING`) and stops the sandbox when spend reaches the attempt's budget.
+- **Claude Code flags, verified on 2.1.288** (`claude --help` in the runner image; the CLI reference, headless and
+  settings docs):
+  - Non-bare `-p` with `--output-format stream-json --verbose`, `--permission-mode dontAsk` and
+    `--permission-prompts none`.
+  - `--tools Read,Edit,Write,Glob,Grep,Bash`. `--bare` caps the built-in tools at Bash/Edit/Read, and `--tools`
+    cannot widen that.
+  - `--allowedTools …,Bash(sitekit *)` (a prefix rule on the command as written) and
+    `--disallowedTools WebFetch,WebSearch,Task,Skill,NotebookEdit`.
+  - `--setting-sources=` and `--strict-mcp-config`.
+  - `--append-system-prompt-file` with our rules, which are also the workspace's `AGENTS.md`.
+  - `--json-schema` with the final report schema inline (the flag does not take a file).
+  - `--max-turns`, `--max-budget-usd` and `--no-session-persistence`.
+  - Env: telemetry, updates and memory off, and `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1`, so sitekit never sees the key.
+  - The sitekit-over-MCP variant (`--mcp-config` with `sitekit mcp`, no Bash at all) is behind
+    `GENERATION_CLAUDE_CODE_SITEKIT=mcp`. The default (`bash`) is provisional until the benchmark runs with keys.
+- **Codex's own sandbox does not run in ours.** Its bubblewrap sandbox cannot create user namespaces under Docker's
+  default seccomp profile, and the Landlock fallback panics in 0.160.0 (observed in the runner image). Part 2 decides
+  between Codex's documented flag for externally sandboxed environments and a custom seccomp profile, with evidence.

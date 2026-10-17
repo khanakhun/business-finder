@@ -247,3 +247,88 @@ export const ShadowScoreSchema = z
   })
   .meta({ id: 'ShadowScore' });
 export type ShadowScore = z.infer<typeof ShadowScoreSchema>;
+
+// ── Prospective comparison, promotion, monitoring ───────────────────────────────────────────────────────────────
+
+const TopK = z.object({ n: z.number().int(), positives: z.number().int(), rate: z.number().nullable() });
+
+export const ProspectiveComparisonSchema = z
+  .object({
+    profileId: z.uuid(),
+    modelId: z.uuid(),
+    /** Contacts made since the shadow started, with an outcome known. */
+    since: IsoDateTimeSchema,
+    contacts: z.number().int(),
+    positives: z.number().int(),
+    /** The top 20% of those contacts by each ranking, and how many converted. */
+    active: TopK,
+    shadow: TopK,
+    lift: z.number().nullable(),
+    spearman: z.number().nullable(),
+    /** Active tier → shadow tier → contacts. */
+    tierMatrix: z.record(z.string(), z.record(z.string(), z.number().int())),
+    criteria: z.object({ minPositives: z.number().int(), minLift: z.number(), interval: z.number() }),
+    enoughPositives: z.boolean(),
+    liftMet: z.boolean(),
+    intervalsSeparate: z.boolean(),
+    eligible: z.boolean(),
+  })
+  .meta({ id: 'ProspectiveComparison' });
+export type ProspectiveComparison = z.infer<typeof ProspectiveComparisonSchema>;
+
+export const PromoteModelRequestSchema = z
+  .object({
+    profileId: z.uuid(),
+    modelId: z.uuid(),
+    /** Required when the criteria are not met: why promote anyway (recorded). */
+    overrideReason: z.string().trim().min(10).max(500).optional(),
+    /** Tiers by calibrated probability (default: the shadow scores' 80th and 50th percentiles). */
+    tiers: z
+      .object({ A: z.number().gt(0).max(1), B: z.number().min(0).lt(1) })
+      .refine((tiers) => tiers.A > tiers.B, { message: 'Tier A must start above tier B' })
+      .optional(),
+  })
+  .meta({ id: 'PromoteModelRequest' });
+export type PromoteModelRequest = z.input<typeof PromoteModelRequestSchema>;
+
+export const RollbackModelRequestSchema = z
+  .object({ profileId: z.uuid() })
+  .meta({ id: 'RollbackModelRequest' });
+export type RollbackModelRequest = z.input<typeof RollbackModelRequestSchema>;
+
+export const ModelPromotionSchema = z
+  .object({
+    id: z.uuid(),
+    profileId: z.uuid(),
+    modelId: z.uuid(),
+    fromVersion: z.number().int(),
+    toVersion: z.number().int(),
+    eligible: z.boolean(),
+    overrideReason: z.string().nullable(),
+    comparison: ProspectiveComparisonSchema.nullable(),
+    promotedBy: z.uuid().nullable(),
+    promotedAt: IsoDateTimeSchema,
+    rolledBackAt: IsoDateTimeSchema.nullable(),
+  })
+  .meta({ id: 'ModelPromotion' });
+export type ModelPromotion = z.infer<typeof ModelPromotionSchema>;
+
+export const PSI_ALERT_THRESHOLD = 0.25;
+export const AUC_DROP_ALERT = 0.05;
+
+export const ModelMonitoringSchema = z
+  .object({
+    modelId: z.uuid(),
+    at: IsoDateTimeSchema,
+    /** PSI per feature, training vs the last 30 days (highest first). */
+    featurePsi: z.array(z.object({ feature: z.string(), psi: z.number(), top: z.boolean() })),
+    /** PSI of the model's probabilities, training vs recent businesses. */
+    scorePsi: z.number().nullable(),
+    /** ROC-AUC on contacts labelled since training, and the validation AUC it is compared with. */
+    auc: z.number().nullable(),
+    validationAuc: z.number().nullable(),
+    recentContacts: z.number().int(),
+    alerts: z.array(z.string()),
+  })
+  .meta({ id: 'ModelMonitoring' });
+export type ModelMonitoring = z.infer<typeof ModelMonitoringSchema>;

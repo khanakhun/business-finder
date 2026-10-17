@@ -20,6 +20,8 @@ export const NOTIFICATION_TYPES = {
   sequence_paused: { inApp: true, email: false },
   /** The weekly deliverability summary for owners (BF-056); a person may turn its email off. */
   deliverability_digest: { inApp: true, email: true },
+  /** BF-059: an outcome model drifted or decayed: retraining is recommended. */
+  scoring_drift: { inApp: true, email: true },
   /** A mailbox lost its connection (revoked consent, failed authentication) (BF-050). */
   mailbox_error: { inApp: true, email: true },
   /** A data-subject request is due soon (BF-055). */

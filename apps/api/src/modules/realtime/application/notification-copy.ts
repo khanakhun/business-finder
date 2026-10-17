@@ -34,6 +34,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
       title: 'Deliverability this week: {sent} emails, {bounceRate} bounced',
       body: '{summary}',
     },
+    scoring_drift: {
+      title: 'Scoring model {model} needs attention',
+      body: '{summary} Retraining is recommended.',
+    },
     mailbox_error: {
       title: 'Mailbox needs reconnecting: {mailbox}',
       body: 'Sending from it stopped: {reason}.',
@@ -71,6 +75,10 @@ const COPY: Record<Locale, Record<NotificationType, Copy>> = {
     deliverability_digest: {
       title: 'Délivrabilité de la semaine : {sent} e-mails, {bounceRate} en erreur',
       body: '{summary}',
+    },
+    scoring_drift: {
+      title: 'Le modèle de score {model} demande votre attention',
+      body: '{summary} Un réentraînement est recommandé.',
     },
     mailbox_paused: {
       title: 'Boîte d’envoi en pause : {mailbox}',

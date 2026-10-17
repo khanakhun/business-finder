@@ -9,15 +9,19 @@ import { BuiltinProfilesSeeder } from './application/builtin-profiles.seeder.ts'
 import { DatasetBuilder } from './application/ml/dataset-builder.ts';
 import { ModelScoring } from './application/ml/model-scoring.ts';
 import { ModelTrainer } from './application/ml/model-trainer.ts';
+import { ModelMonitor } from './application/ml/monitor.ts';
 import {
   ML_REPOSITORY,
   ML_STORAGE,
+  MODEL_LIFECYCLE,
   MODEL_REGISTRY,
   MODEL_RUNTIME,
   MODEL_TRAINER_PORT,
   SHADOW_REPOSITORY,
   TRAINING_QUEUE,
 } from './application/ml/ports.ts';
+import { PromotionService } from './application/ml/promotion.service.ts';
+import { ProspectiveComparisonService } from './application/ml/prospective.ts';
 import { ShadowService } from './application/ml/shadow.service.ts';
 import {
   FACTS_ASSEMBLER,
@@ -39,6 +43,7 @@ import { BullmqScoringQueue, OPENAPI_SCORING_QUEUE } from './infrastructure/bull
 import { DrizzleScoringRepository } from './infrastructure/drizzle-scoring.repository.ts';
 import { SqlFactsAssembler } from './infrastructure/facts-assembler.sql.ts';
 import { BullmqTrainingQueue } from './infrastructure/ml/bullmq-training-queue.ts';
+import { DrizzleLifecycleRepository } from './infrastructure/ml/drizzle-lifecycle.repository.ts';
 import { DrizzleMlRepository } from './infrastructure/ml/drizzle-ml.repository.ts';
 import { DrizzleShadowRepository } from './infrastructure/ml/drizzle-shadow.repository.ts';
 import { IntelModelTrainer } from './infrastructure/ml/intel-model-trainer.ts';
@@ -115,6 +120,12 @@ export class ScoringModule {
         { provide: MODEL_RUNTIME, useClass: OnnxModelRuntime },
         ModelScoring,
         ShadowService,
+        { provide: MODEL_LIFECYCLE, useClass: DrizzleLifecycleRepository },
+        ProspectiveComparisonService,
+        PromotionService,
+        ModelMonitor,
+        // The monthly drift and decay sweep runs in the worker.
+        { provide: 'ML_MONITOR_AUTOSTART', useValue: mode === 'worker' },
         {
           provide: ML_STORAGE,
           inject: [APP_ENV],

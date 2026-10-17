@@ -192,6 +192,50 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
 
+  # --- profile: generation (BF-043) -------------------------------------------------------------------
+  # Sandboxes run on the internal `<project>-sandbox` network (no route out) and reach model APIs only through the egress
+  # proxy. Locally the worker uses the Docker socket directly; the socket proxy here is the production one, for the
+  # security suite (services/agent-runner/security-tests).
+  egress-proxy:
+    profiles: [generation]
+    build:
+      context: ../..
+      dockerfile: services/egress-proxy/Dockerfile
+    image: bf-egress-proxy:dev
+    environment:
+      EGRESS_PROFILE: ${EGRESS_PROFILE:-models}
+    networks: [sandbox, default]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  docker-socket-proxy:
+    image: wollomatic/socket-proxy:1.13.1
+    profiles: [generation]
+    # Root without capabilities: reads the socket as its owner, nothing else (read-only root, no new privileges).
+    user: '0:0'
+    command: &socket-proxy-rules
+      - -loglevel=info
+      - -listenip=0.0.0.0
+      - -allowfrom=0.0.0.0/0
+      - -allowHEAD=^/_ping$
+      - -allowGET=^/(v1\.[0-9]+/)?(_ping|version|containers/json|containers/[a-zA-Z0-9_.-]+/json|images/.+/json)$
+      - -allowPOST=^/(v1\.[0-9]+/)?containers/(create|[a-zA-Z0-9_.-]+/(attach|start|wait|kill))$
+      - -allowDELETE=^/(v1\.[0-9]+/)?containers/[a-zA-Z0-9_.-]+$
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [docker-api]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+networks:
+  sandbox:
+    name: ${COMPOSE_PROJECT_NAME:-bf}-sandbox
+    internal: true
+  docker-api:
+    internal: true
+
 volumes:
   postgres-data:
   valkey-data:

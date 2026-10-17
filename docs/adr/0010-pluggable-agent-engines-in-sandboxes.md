@@ -42,3 +42,25 @@ The user wants to select several businesses and have sites generated automatical
 - Claude Code headless / Agent SDK CLI: https://code.claude.com/docs/en/headless
 - Claude Agent SDK overview: https://code.claude.com/docs/en/agent-sdk/overview
 - Codex non-interactive mode: https://developers.openai.com/codex/noninteractive
+
+## Addendum (BF-043, 2026-10-17): sandbox network, egress and Docker access as built
+
+- **Socket proxy verbs.** The worker reaches Docker through `wollomatic/socket-proxy` (1.13.1), which allows exactly
+  what a run needs: `POST containers/create`, `containers/{id}/attach|start|wait|kill`, `DELETE containers/{id}`,
+  `GET containers/json`, `containers/{id}/json`, `images/{ref}/json`, `_ping`, `version`. Everything else (exec, info,
+  volumes, image pulls, networks) is refused. The proxy cannot inspect request bodies: a compromised worker could
+  still create a privileged container. A narrow "sandbox broker" that builds the container config itself is the
+  BF-060 follow-up.
+- **Egress.** Sandboxes sit on the internal network `bf-sandbox` (no route out). The only way out is an in-house
+  CONNECT proxy (`services/egress-proxy`): HTTPS `CONNECT` to port 443 of allowlisted hostnames only (profile
+  `models`: `api.anthropic.com`, `api.openai.com`; `models_assets` adds the stock CDNs), the name resolved by the
+  proxy and the tunnel opened to a public address only (no private, loopback, link-local or metadata address — no DNS
+  rebinding), IP literals and plain HTTP refused, every refusal logged and counted (`sandbox_egress_denied_total{host}`).
+  Considered: Stripe's smokescreen (the right model, but no maintained image to pin) and Squid (`CONNECT`-only ACLs
+  work, but per-host denial metrics need a log pipeline). A 150-line proxy with a test suite was simpler to own.
+- **Inter-container traffic.** Sandboxes expose no ports; they could reach each other on `bf-sandbox`. A network per
+  run is optional hardening, evaluated in BF-060.
+- **Runner image.** Same digest-pinned Node base as the API; Claude Code and Codex CLIs pinned by build args; npm and
+  corepack removed from the runtime; every tmpfs `noexec`. The security suite
+  (`services/agent-runner/security-tests`) checks identity, filesystem, capabilities, process limits, network,
+  egress and the socket proxy's rules in CI.

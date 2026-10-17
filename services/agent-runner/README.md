@@ -41,5 +41,11 @@ capabilities, `no-new-privileges`, pids/memory/CPU limits; see `scripts/smoke.ts
 - `pnpm --filter @bf/agent-runner test` — the supervisor with real processes (frames, redaction, wall time,
   abort, artifacts, bundle safety, stdin framing).
 
-CI (`runner` job): build, SBOM (syft), vulnerability scan (grype, fails on a critical with a fix available), smoke.
+- `pnpm egress:build` + `pnpm runner:security` — the security suite (18 checks on real containers): non-root,
+  read-only root, `noexec` workspace, no capabilities, no new privileges, process limit, no network by default, no
+  direct route out of the sandbox network, the egress proxy's refusals (other hosts, IP literals/metadata) and its
+  allowlisted path, the socket proxy's allowed and refused calls.
+
+CI (`runner` job): build, SBOM (syft), vulnerability scan (grype, fails on a critical with a fix available), smoke,
+the security suite and the Docker provider's tests. Sizing: `docs/runbooks/agent-runner-sizing.md`.
 On `main`, the image is published to GHCR by digest with the other images.

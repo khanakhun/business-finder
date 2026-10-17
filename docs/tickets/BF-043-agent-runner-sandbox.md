@@ -144,11 +144,11 @@ infra/compose/{egress-proxy/*, docker-socket-proxy/*}
   - `docker inspect` of the container shows no secret values.
 
 ## Acceptance criteria
-- [ ] Pinned, scanned runner image with Claude Code CLI, Codex CLI, sitekit and Chromium; smoke test in CI.
-- [ ] Supervisor with versioned framed I/O (stdin workspace, stdout frames/artifacts), wall time, redaction.
-- [ ] `SandboxProvider` port + hardened `DockerSandboxProvider` with typed errors and guaranteed cleanup.
-- [ ] Egress allowlist proxy, internal-only sandbox network, Docker socket proxy; compose updated (local + prod).
-- [ ] Janitor, metrics, sizing documentation; security suite passes.
+- [x] Pinned, scanned runner image with Claude Code CLI, Codex CLI, sitekit and Chromium; smoke test in CI.
+- [x] Supervisor with versioned framed I/O (stdin workspace, stdout frames/artifacts), wall time, redaction.
+- [x] `SandboxProvider` port + hardened `DockerSandboxProvider` with typed errors and guaranteed cleanup.
+- [x] Egress allowlist proxy, internal-only sandbox network, Docker socket proxy; compose updated (local + prod).
+- [x] Janitor, metrics, sizing documentation; security suite passes.
 
 ## Agent prompt
 ```text

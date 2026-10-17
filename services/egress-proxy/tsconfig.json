@@ -1,0 +1,4 @@
+{
+  "extends": "@bf/tsconfig/library.json",
+  "include": ["src", "scripts", "*.config.ts"]
+}

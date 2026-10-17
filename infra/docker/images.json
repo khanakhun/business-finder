@@ -40,6 +40,11 @@
       "name": "backup",
       "dockerfile": "infra/docker/backup/Dockerfile",
       "context": "infra/docker/backup"
+    },
+    {
+      "name": "egress-proxy",
+      "dockerfile": "services/egress-proxy/Dockerfile",
+      "context": "."
     }
   ]
 }

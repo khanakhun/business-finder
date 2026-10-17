@@ -52,7 +52,7 @@ import {
   WORKSPACE_BUDGET,
   WORKSPACE_PREPARER,
 } from './application/ports.ts';
-import { SANDBOX_PROVIDER } from './application/sandbox.ports.ts';
+import { SANDBOX_JANITOR, SANDBOX_PROVIDER } from './application/sandbox.ports.ts';
 import { SiteFactExtraction } from './application/site-facts.extraction.ts';
 import { JobTransitions, SETTLED_HOOK } from './application/transitions.ts';
 import {
@@ -80,6 +80,7 @@ import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastruc
 import { pagePlans } from './infrastructure/page-plans.ts';
 import { HttpDockerApi } from './infrastructure/sandbox/docker-engine.ts';
 import { DockerSandboxProvider } from './infrastructure/sandbox/docker-sandbox.ts';
+import { SandboxJanitor } from './infrastructure/sandbox/janitor.ts';
 import {
   DrizzleSiteFactExtractions,
   DrizzleSitePages,
@@ -267,6 +268,14 @@ export class GenerationModule {
               },
             ]),
         { provide: GENERATION_TELEMETRY, useValue: PROMETHEUS_TELEMETRY },
+        {
+          provide: SANDBOX_JANITOR,
+          inject: [APP_ENV],
+          useFactory: (env: AppEnv) =>
+            (env as ApiEnv).SANDBOX_ENABLED
+              ? new SandboxJanitor(new HttpDockerApi((env as ApiEnv).SANDBOX_DOCKER_HOST))
+              : null,
+        },
         // Sandboxes (BF-043) for the CLI engines (BF-044): the Docker Engine API through the socket proxy.
         {
           provide: SANDBOX_PROVIDER,

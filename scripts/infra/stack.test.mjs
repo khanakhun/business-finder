@@ -92,6 +92,20 @@ describe('servicesFor / portsFor', () => {
 });
 
 describe('derivedEnv', () => {
+  it('points sandboxes at the stack network and the egress proxy with the generation profile (BF-043)', () => {
+    const plain = derivedEnv({ ports: computePorts(0), env: {}, projectName: 'bf', offset: 0 });
+    assert.equal(plain.SANDBOX_NETWORK, undefined);
+    const withGeneration = derivedEnv({
+      ports: computePorts(0),
+      env: {},
+      projectName: 'bf_x',
+      offset: 0,
+      profiles: ['generation'],
+    });
+    assert.equal(withGeneration.SANDBOX_NETWORK, 'bf_x-sandbox');
+    assert.equal(withGeneration.SANDBOX_EGRESS_PROXY_URL, 'http://egress-proxy:4750');
+  });
+
   const env = derivedEnv({ ports: computePorts(20), env: {}, projectName: 'bf_x', offset: 20 });
 
   it('builds connection URLs from the offset ports', () => {

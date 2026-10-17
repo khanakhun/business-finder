@@ -35,6 +35,8 @@ export const GENERATED_BY_INFRA: ReadonlySet<string> = new Set([
   'API_PORT',
   'INTEL_PORT',
   'WORKER_METRICS_PORT',
+  'SANDBOX_NETWORK',
+  'SANDBOX_EGRESS_PROXY_URL',
 ]);
 
 const GROUPS: ReadonlyArray<readonly [string, EnvSchema]> = [

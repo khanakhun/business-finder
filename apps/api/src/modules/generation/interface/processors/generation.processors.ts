@@ -1,11 +1,12 @@
 import { GENERATION_RUN_JOBS, GenerationQualityJob, GenerationReaperJob } from '@bf/contracts';
 import { type JobContext, QUEUES } from '@bf/queue';
 import { Processor } from '@nestjs/bullmq';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { z } from 'zod';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
 import { GenerationQuality } from '../../application/generation.quality.ts';
 import { GenerationRunner } from '../../application/generation.runner.ts';
+import { SANDBOX_JANITOR, type SandboxSweeper } from '../../application/sandbox.ports.ts';
 
 // One processor per engine queue (the same runner: Template Method), the quality step and the reaper (BF-039).
 
@@ -85,17 +86,29 @@ export class GenerationQualityProcessor extends TypedProcessor<
 @Processor(QUEUES.generationReaper.name, { concurrency: QUEUES.generationReaper.concurrency })
 export class GenerationReaperProcessor extends TypedProcessor<
   typeof GenerationReaperJob,
-  { readonly reaped: number; readonly events: number }
+  { readonly reaped: number; readonly events: number; readonly sandboxes: number }
 > {
   protected readonly definition = GenerationReaperJob;
 
-  constructor(private readonly quality: GenerationQuality) {
+  constructor(
+    private readonly quality: GenerationQuality,
+    @Optional() @Inject(SANDBOX_JANITOR) private readonly janitor?: SandboxSweeper | null,
+  ) {
     super();
   }
 
   async handle(_payload: z.output<typeof GenerationReaperJob.schema>, context: JobContext) {
     const result = await this.quality.reap(context.logger);
     if (result.reaped > 0) context.logger.warn(result, 'generation attempts reaped');
-    return result;
+    // Every fifth minute (the reaper runs each minute): stale sandbox containers (BF-043).
+    let sandboxes = 0;
+    if (this.janitor && new Date().getUTCMinutes() % 5 === 0) {
+      sandboxes = await this.janitor.sweep(new Date()).catch((error: unknown) => {
+        context.logger.error({ err: error }, 'sandbox janitor failed');
+        return 0;
+      });
+      if (sandboxes > 0) context.logger.warn({ sandboxes }, 'stale sandboxes removed');
+    }
+    return { ...result, sandboxes };
   }
 }

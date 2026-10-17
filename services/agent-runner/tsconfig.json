@@ -1,4 +1,4 @@
 {
   "extends": "@bf/tsconfig/library.json",
-  "include": ["src", "scripts", "fake-agent", "*.config.ts"]
+  "include": ["src", "scripts", "security-tests", "fake-agent", "*.config.ts"]
 }

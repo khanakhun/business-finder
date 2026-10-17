@@ -8,5 +8,6 @@ export type {
   QualityPipeline,
   WorkspacePreparer,
 } from './application/ports.ts';
+export { SANDBOX_PROVIDER, type SandboxProvider } from './application/sandbox.ports.ts';
 export { SiteFactExtraction } from './application/site-facts.extraction.ts';
 export { GenerationModule } from './generation.module.ts';

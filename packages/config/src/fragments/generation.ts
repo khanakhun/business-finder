@@ -20,6 +20,9 @@ export const generationEnv = z.object({
     .max(600_000)
     .default(1_500)
     .describe("The fake engine's run time (tests set it short, load tests realistic)."),
+  SANDBOX_ENABLED: booleanFlag(false).describe(
+    'Sandboxed engines run on this deployment (BF-043): the worker checks the runner image at start (readiness) and the janitor removes stale sandboxes.',
+  ),
   SANDBOX_DOCKER_HOST: z
     .string()
     .regex(/^(unix:\/\/\/|tcp:\/\/|https?:\/\/)\S+$/)

@@ -144,3 +144,16 @@ The user wants to select several businesses and have sites generated automatical
 - **Benchmark.** `pnpm generation:bench` runs each engine on the same synthetic businesses with real models and
   sandboxes. It needs keys and has not been run. Defaults (Bash vs MCP sitekit for Claude Code, fresh vs resumed
   repair) and the typical cost and duration stay provisional until it is.
+
+## Addendum (BF-045 part 2, 2026-10-17): the quality sandbox profile
+
+- The render-based quality gates (axe-core accessibility, Lighthouse) run `sitekit audit` in the same runner image,
+  with the **quality** profile: egress `none` (no network at all), no model key, the candidate site in the job's
+  workspace, `checkCommand: ['true']`, and the report collected as an artifact (`.sitekit/audit.json`).
+- The page is served on 127.0.0.1 inside the sandbox. Chromium is Playwright's (pinned with the image), and
+  Lighthouse 13.5.0 drives it over a loopback remote-debugging port. Lighthouse and `@axe-core/playwright` 4.13.0 are
+  installed next to sitekit, outside its bundle.
+- One audit serves both gates and runs once, on the final candidate (after the safe auto-fixes). It takes about 30 s
+  for a 3-page, 2-locale site in a 2-CPU sandbox.
+- `GENERATION_QUALITY_AUDITS` turns it on and needs `SANDBOX_ENABLED`: the API refuses to start with one and not the
+  other.

@@ -50,6 +50,9 @@ export function targetOf(spec: unknown, path: readonly (string | number)[]): Qua
   };
 }
 
+/** The colour the validator suggests for a low-contrast palette entry (`…; try #1f3a5c.`). */
+const SUGGESTED = /try (#[0-9a-f]{6})\b/i;
+
 const fromIssue = (gate: QualityGateId, spec: unknown, issue: Issue): QualityIssue => ({
   gate,
   code: issue.code,
@@ -57,7 +60,8 @@ const fromIssue = (gate: QualityGateId, spec: unknown, issue: Issue): QualityIss
   message: issue.message.slice(0, 600),
   target: targetOf(spec, issue.path),
   repairable: true,
-  autoFixable: false,
+  // A palette colour with too little contrast, and a nearest colour that has enough: a safe nudge.
+  autoFixable: issue.code === 'contrast_low' && SUGGESTED.test(issue.message),
 });
 
 const outcome = (issues: QualityIssue[], score?: number): GateOutcome => ({
@@ -173,8 +177,8 @@ function trimmed(spec: unknown, issue: LintIssue): string | undefined {
 }
 
 /**
- * The auto-fixer (BF-045, Command): typography and whitespace on the texts an engine writes, SEO texts at most 10%
- * over trimmed at a word boundary. Returns the fixed spec and each fix; the caller re-runs the gates once on it.
+ * The auto-fixer (BF-045, Command): low-contrast palette colours nudged to the validator's suggestion, typography and
+ * whitespace on the texts an engine writes, SEO texts at most 10% over trimmed at a word boundary. Returns the fixed spec and each fix; the caller re-runs the gates once on it.
  */
 export function autoFix(
   spec: unknown,
@@ -185,6 +189,18 @@ export function autoFix(
   const fixed = structuredClone(parsed.spec) as SiteSpec;
   const writable = copyPaths(fixed);
   const fixes: QualityAutoFix[] = [];
+  // Palette nudges: each low-contrast colour moved to the nearest one with enough contrast (the validator's own).
+  for (const issue of validateSite(fixed, {
+    assetHosts: [...ctx.assetHosts],
+    hotlinkHosts: [...ctx.hotlinkHosts],
+    mode: 'published',
+  })) {
+    const color = issue.code === 'contrast_low' ? SUGGESTED.exec(issue.message)?.[1] : undefined;
+    const target = color ? textAt(fixed, issue.path) : undefined;
+    if (!color || !target || target.value === color) continue;
+    target.parent[target.key] = color;
+    fixes.push({ rule: 'contrast_low', path: pathString(issue.path), before: target.value, after: color });
+  }
   for (const issue of lintCopy(fixed, { config: ctx.config, facts: ctx.facts })) {
     const target = textAt(fixed, issue.path);
     if (!target) continue;

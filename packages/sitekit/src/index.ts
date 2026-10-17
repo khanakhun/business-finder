@@ -1,6 +1,13 @@
 // @bf/sitekit (BF-042): the site toolbelt generation agents use — as a library, a CLI and an MCP server.
 
 export { type AgentToolFactory, createSitekitAgentTools } from './agent-tools.ts';
+export {
+  type AuditReport,
+  type AxeFinding,
+  type LighthouseAudit,
+  type LighthouseFinding,
+  lighthousePages,
+} from './lib/audit.ts';
 export { type CheckItem, type CheckReport, check, SHOTS_DIR } from './lib/check.ts';
 export {
   CONFIG_FILE,

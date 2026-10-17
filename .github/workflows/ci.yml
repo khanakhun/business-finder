@@ -382,6 +382,10 @@ jobs:
         run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/engines/sandboxed/agents.docker.test.ts
         env:
           DOCKER_SANDBOX_IMAGE: bf-agent-runner:ci
+      - name: Quality audits in the image (sitekit audit with axe-core and Lighthouse, offline; BF-045)
+        run: pnpm --filter @bf/api exec vitest run src/modules/generation/infrastructure/quality/quality.docker.test.ts
+        env:
+          DOCKER_SANDBOX_IMAGE: bf-agent-runner:ci
 
   security:
     name: security

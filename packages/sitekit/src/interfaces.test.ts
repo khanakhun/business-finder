@@ -120,12 +120,12 @@ describe('MCP server and Agent SDK tools', () => {
     return { workspace, client, close: () => Promise.all([client.close(), server.close()]) };
   }
 
-  it('exposes the ten tools with annotations and no generic write or shell tool', async () => {
+  it('exposes the eleven tools with annotations and no generic write or shell tool', async () => {
     const { client, close } = await connect(copy('salon'));
     try {
       const { tools } = await client.listTools();
       expect(tools.map((tool) => tool.name).sort()).toEqual(SITEKIT_TOOLS.map((tool) => tool.name).sort());
-      expect(tools).toHaveLength(10);
+      expect(tools).toHaveLength(11);
       expect(tools.find((tool) => tool.name === 'get_facts')?.annotations?.readOnlyHint).toBe(true);
       expect(tools.some((tool) => /write_file|shell|exec|bash/.test(tool.name))).toBe(false);
     } finally {
@@ -170,7 +170,7 @@ describe('MCP server and Agent SDK tools', () => {
       made.push(entry);
       return entry;
     });
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(11);
     const validate = made.find((tool) => tool.name === 'validate_site');
     const result = (await validate?.handler({}, {})) as { content: { text: string }[]; isError: boolean };
     expect(JSON.parse(result.content[0]?.text ?? '{}').errors).toBe(0);

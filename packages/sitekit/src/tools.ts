@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { applyAndValidate, OperationError, SiteLocaleSchema, type SiteSpec } from '@bf/site-schema';
 import { z } from 'zod';
+import { audit } from './lib/audit.ts';
 import { check } from './lib/check.ts';
 import { loadConfig } from './lib/config.ts';
 import { applyLintFixes, lintCopy } from './lib/lint.ts';
@@ -193,6 +194,39 @@ export const SITEKIT_TOOLS = [
         ...(args.locales ? { locales: args.locales } : {}),
       });
       return { data: result, isError: false };
+    },
+  }),
+  define({
+    name: 'audit_site',
+    title: 'Audit the site',
+    description:
+      'Render the site and audit it: axe-core accessibility on every page and locale (mobile and desktop) and Lighthouse on home and the heaviest inner page (performance, accessibility, best practices, SEO). Slow: run it when the site is otherwise done.',
+    inputSchema: {
+      pages: z.array(z.string().max(32)).max(8).optional(),
+      viewports: z
+        .array(z.enum(['mobile', 'desktop']))
+        .max(2)
+        .optional(),
+      axe: z.boolean().default(true),
+      lighthouse: z.boolean().default(true),
+    },
+    annotations: { readOnlyHint: false, idempotentHint: true },
+    async run({ workspace }, args) {
+      const { spec } = await loaded(workspace);
+      if (!spec)
+        return {
+          data: { message: 'site.json is not a valid SiteSpec: run validate_site first.' },
+          isError: true,
+        };
+      const site = spec as SiteSpec;
+      await renderSite(workspace, site);
+      const report = await audit(workspace, site, RENDER_DIR, {
+        ...(args.pages ? { pages: args.pages } : {}),
+        ...(args.viewports ? { viewports: args.viewports } : {}),
+        axe: args.axe,
+        lighthouse: args.lighthouse,
+      });
+      return { data: report, isError: false };
     },
   }),
   define({

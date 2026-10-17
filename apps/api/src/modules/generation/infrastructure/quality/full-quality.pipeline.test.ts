@@ -152,4 +152,20 @@ describe('FullQualityPipeline', () => {
     expect((await evaluate(spec, p, 0)).outcome).toBe('needs_review');
     expect(calls).toBe(first);
   });
+
+  it('nudges a palette colour with too little contrast to the validator’s suggestion, then passes', async () => {
+    const spec = structuredClone(workspace.starter) as unknown as {
+      theme: { palette: Record<string, string> };
+    };
+    spec.theme.palette.text = '#d8d8d8';
+    const result = await evaluate(spec);
+    expect(result.report?.autoFixes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ rule: 'contrast_low', path: 'theme.palette.text', before: '#d8d8d8' }),
+      ]),
+    );
+    const fixed = result.spec as { theme: { palette: Record<string, string> } };
+    expect(fixed.theme.palette.text).not.toBe('#d8d8d8');
+    expect(result.outcome).toBe('pass');
+  });
 });

@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { SiteSpec } from '@bf/site-schema';
 import { afterAll, describe, expect, it } from 'vitest';
+import { audit, lighthousePages } from './audit.ts';
 import { check } from './check.ts';
 import { loadConfig } from './config.ts';
 import { renderSite } from './render.ts';
@@ -47,6 +48,18 @@ describe.runIf(browser)('screenshots in Chromium', () => {
         readFileSync(join(dir, shot.file)).equals(readFileSync(join(dir, second[index]?.file as string))),
       ).toBe(true);
   }, 60_000);
+
+  it('audits with axe-core and Lighthouse on the loopback render (BF-045)', async () => {
+    const { workspace, spec } = await salon();
+    await renderSite(workspace, spec);
+    const report = await audit(workspace, spec, '.sitekit/render', { viewports: ['mobile'] });
+    expect(report.pages).toEqual(spec.pages.map((page) => page.id));
+    expect(report.lighthouse.map((finding) => `${finding.page}:${finding.preset}`)).toEqual(
+      lighthousePages(spec).flatMap((page) => [`${page}:mobile`, `${page}:desktop`]),
+    );
+    for (const finding of report.lighthouse) expect(finding.scores.accessibility).toBeGreaterThan(80);
+    expect(report.axe.every((finding) => finding.viewport === 'mobile')).toBe(true);
+  }, 180_000);
 
   it('finishes check within its budget', async () => {
     const { workspace } = await salon();

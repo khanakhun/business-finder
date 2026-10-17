@@ -82,6 +82,7 @@ import { RealtimeLiveUpdates } from './infrastructure/live-updates.ts';
 import { PROMETHEUS_SANDBOX_TELEMETRY, PROMETHEUS_TELEMETRY } from './infrastructure/metrics.ts';
 import { pagePlans } from './infrastructure/page-plans.ts';
 import { FullQualityPipeline } from './infrastructure/quality/full-quality.pipeline.ts';
+import { SandboxAuditClient } from './infrastructure/quality/sandbox-audit.client.ts';
 import { HttpDockerApi } from './infrastructure/sandbox/docker-engine.ts';
 import { DockerSandboxProvider } from './infrastructure/sandbox/docker-sandbox.ts';
 import { SandboxJanitor } from './infrastructure/sandbox/janitor.ts';
@@ -286,14 +287,36 @@ export class GenerationModule {
         },
         {
           provide: QUALITY_PIPELINE,
-          inject: [APP_ENV, GENERATION_ARTIFACTS, GENERATION_REPOSITORY],
-          useFactory: (env: AppEnv, artifacts: ArtifactStore, repository: GenerationRepository) =>
-            new FullQualityPipeline({
+          inject: [APP_ENV, GENERATION_ARTIFACTS, GENERATION_REPOSITORY, SANDBOX_PROVIDER],
+          useFactory: (
+            appEnv: AppEnv,
+            artifacts: ArtifactStore,
+            repository: GenerationRepository,
+            sandbox: SandboxProvider,
+          ) => {
+            const env = appEnv as ApiEnv;
+            if (env.GENERATION_QUALITY_AUDITS && !env.SANDBOX_ENABLED)
+              throw new Error(
+                'GENERATION_QUALITY_AUDITS needs SANDBOX_ENABLED (the audits run in a sandbox)',
+              );
+            return new FullQualityPipeline({
               artifacts,
               repository,
-              assetHosts: [new URL((env as ApiEnv).SITES_ASSETS_BASE_URL).hostname],
+              assetHosts: [new URL(env.SITES_ASSETS_BASE_URL).hostname],
               hotlinkHosts: HOTLINK_HOSTS,
-            }),
+              ...(env.GENERATION_QUALITY_AUDITS
+                ? {
+                    audits: new SandboxAuditClient(sandbox, {
+                      image: env.SANDBOX_RUNNER_IMAGE,
+                      cpus: env.SANDBOX_CPUS,
+                      memoryMb: env.SANDBOX_MEMORY_MB,
+                      pidsLimit: env.SANDBOX_PIDS_LIMIT,
+                      wallTimeSec: env.GENERATION_QUALITY_AUDIT_WALL_TIME_SEC,
+                    }),
+                  }
+                : {}),
+            });
+          },
         },
         { provide: WORKSPACE_BUDGET, useExisting: AI_BUDGET_GUARD },
         {

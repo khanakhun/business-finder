@@ -11,6 +11,15 @@ export const FATAL_CODES = new Set([
   'ENGINE_UNAVAILABLE',
 ]);
 
+/**
+ * Fatal for this engine only (BF-044): no retry on it, straight to the next engine of the chain (a cheaper one when
+ * its budget ran out, another one when its CLI version is not supported).
+ */
+export const ENGINE_FATAL_CODES = new Set(['ENGINE_BUDGET_EXCEEDED', 'ENGINE_VERSION_UNSUPPORTED']);
+
+/** An invalid result: retried once on the engine, then another engine. */
+export const INVALID_OUTPUT_CODES = new Set(['INVALID_OUTPUT', 'ENGINE_INVALID_OUTPUT']);
+
 /** Failures worth another try: time-outs, provider 5xx, a crashed sandbox, an invalid output (once). */
 export const RETRYABLE_CODES = new Set([
   'TIMEOUT',
@@ -25,6 +34,9 @@ export const RETRYABLE_CODES = new Set([
   'HEARTBEAT_LOST',
   'INVALID_OUTPUT',
   'ENGINE_ERROR',
+  // A coding agent that stopped before `sitekit check` passed, or whose result failed validation (BF-044).
+  'ENGINE_INCOMPLETE',
+  'ENGINE_INVALID_OUTPUT',
 ]);
 
 export interface AttemptFailure {
@@ -52,10 +64,18 @@ export function decideAfterFailure(
     readonly invalidOutputs: number;
   },
 ): FailoverDecision {
-  const fatal = FATAL_CODES.has(failure.code) || (!failure.retryable && !RETRYABLE_CODES.has(failure.code));
+  const engineFatal = ENGINE_FATAL_CODES.has(failure.code);
+  const fatal =
+    FATAL_CODES.has(failure.code) ||
+    (!engineFatal && !failure.retryable && !RETRYABLE_CODES.has(failure.code));
   if (fatal) return { action: 'fail', code: failure.code, reason: `${failure.code} is not retryable` };
-  const invalidTwice = failure.code === 'INVALID_OUTPUT' && job.invalidOutputs >= 2;
-  if (!invalidTwice && job.engineAttempts < job.maxAttemptsPerEngine && job.available.has(job.engine))
+  const invalidTwice = INVALID_OUTPUT_CODES.has(failure.code) && job.invalidOutputs >= 2;
+  if (
+    !engineFatal &&
+    !invalidTwice &&
+    job.engineAttempts < job.maxAttemptsPerEngine &&
+    job.available.has(job.engine)
+  )
     return {
       action: 'retry',
       engine: job.engine,

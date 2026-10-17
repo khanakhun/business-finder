@@ -6,6 +6,37 @@ export const generationEnv = z.object({
   GENERATION_BLOCKS_ENGINE: booleanFlag(true).describe(
     'Register the blocks engine (BF-041), the default: sites composed in-process by the AI gateway (needs model keys).',
   ),
+  GENERATION_CLAUDE_CODE_ENGINE: booleanFlag(false).describe(
+    'Register the Claude Code engine (BF-044): `claude -p` in a sandbox; needs SANDBOX_ENABLED and an Anthropic key per workspace.',
+  ),
+  GENERATION_CLAUDE_CODE_SITEKIT: z
+    .enum(['bash', 'mcp'])
+    .default('bash')
+    .describe(
+      'How Claude Code reaches sitekit: `Bash(sitekit *)` only (bash) or the `sitekit mcp` server with no shell (mcp).',
+    ),
+  GENERATION_AGENT_WALL_TIME_SEC: z.coerce
+    .number()
+    .int()
+    .min(60)
+    .max(3600)
+    .default(900)
+    .describe('Wall time of one coding-agent run in its sandbox (BF-044).'),
+  GENERATION_AGENT_MAX_TURNS: z.coerce
+    .number()
+    .int()
+    .min(5)
+    .max(300)
+    .default(60)
+    .describe('Turns a coding agent may take in one run (BF-044).'),
+  GENERATION_AGENT_BUDGET_MARGIN: z.coerce
+    .number()
+    .min(0)
+    .max(0.5)
+    .default(0.15)
+    .describe(
+      "Share of an attempt's budget kept back from the agent's own limit (it can overshoot by a turn).",
+    ),
   GENERATION_FAKE_ENGINE: booleanFlag(false).describe(
     'Register the scripted fake engine (development, tests and E2E only; refused in production).',
   ),

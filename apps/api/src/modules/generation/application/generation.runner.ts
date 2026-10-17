@@ -5,7 +5,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import { CLOCK } from '../../platform/clock/clock.module.ts';
 import { queuePriority } from '../domain/batch.ts';
 import { canStart, overBudget } from '../domain/budget-policy.ts';
-import { decideAfterFailure } from '../domain/failover-policy.ts';
+import { decideAfterFailure, INVALID_OUTPUT_CODES } from '../domain/failover-policy.ts';
 import {
   type AgentEngine,
   type ArtifactStore,
@@ -224,16 +224,29 @@ export class GenerationRunner {
       }
     }
     const buffer: EngineEvent[] = [];
-    const flush = async () => {
-      if (buffer.length === 0) return;
-      const batch = buffer.splice(0);
-      const seqs = await this.repository.appendEvents(job.id, attemptId, batch);
-      await this.stream
-        .publish(
-          job.id,
-          batch.map((event, index) => ({ seq: seqs[index] ?? 0, event })),
-        )
-        .catch(() => undefined);
+    // One flush at a time (the timer's, a full buffer's and the final one), in order: concurrent appends would race
+    // for the same sequence numbers and drop a batch. A batch that fails goes back to the front for the next flush.
+    let flushing: Promise<void> = Promise.resolve();
+    const flush = () => {
+      const run = flushing.then(async () => {
+        if (buffer.length === 0) return;
+        const batch = buffer.splice(0);
+        let seqs: number[];
+        try {
+          seqs = await this.repository.appendEvents(job.id, attemptId, batch);
+        } catch (error) {
+          buffer.unshift(...batch);
+          throw error;
+        }
+        await this.stream
+          .publish(
+            job.id,
+            batch.map((event, index) => ({ seq: seqs[index] ?? 0, event })),
+          )
+          .catch(() => undefined);
+      });
+      flushing = run.catch(() => undefined);
+      return run;
     };
     const flusher = setInterval(
       () => void flush().catch((error: unknown) => logger.warn({ err: error }, 'event flush failed')),
@@ -293,7 +306,8 @@ export class GenerationRunner {
           organizationId: job.organizationId,
           workspace: { bundleRef: prepared.bundleRef },
           brief: prepared.summary,
-          budgetUsd: job.budgetUsd,
+          // What is left of the job's budget after its earlier attempts (BF-044: an agent's own limit).
+          budgetUsd: Math.max(0, job.budgetUsd - job.costUsd),
           deadlineAt,
           locales: settings.locales,
           ...(previous?.specRef ? { repair: { baseSpecRef: previous.specRef, issues: repairIssues } } : {}),
@@ -375,7 +389,10 @@ export class GenerationRunner {
       clearInterval(heartbeat);
       clearTimeout(deadline);
       cancel.stop();
-      await flush().catch((error: unknown) => logger.warn({ err: error }, 'event flush failed'));
+      // The last events (`done`, the error) must land before the job moves on: one retry after a failure.
+      await flush()
+        .catch(() => flush())
+        .catch((error: unknown) => logger.warn({ err: error }, 'event flush failed'));
     }
     const attempt = await this.repository.attemptById(attemptId);
     if (!failure && specRef && attempt) {
@@ -441,7 +458,7 @@ export class GenerationRunner {
       maxAttemptsPerEngine: current.maxAttemptsPerEngine,
       failoverChain: current.failoverChain,
       available,
-      invalidOutputs: attempts.filter((a) => a.exitReason === 'INVALID_OUTPUT').length,
+      invalidOutputs: attempts.filter((a) => INVALID_OUTPUT_CODES.has(a.exitReason ?? '')).length,
     });
     logger.info({ jobId: job.id, code: failure.code, decision: decision.action }, decision.reason);
     // A job that could not even start (no attempt) goes straight from queued to failed.

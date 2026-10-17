@@ -21,6 +21,7 @@ export interface EngineRunContext {
   readonly organizationId: string;
   readonly workspace: { readonly bundleRef: string; readonly path?: string };
   readonly brief: WorkspaceSummary;
+  /** What is left of the job's budget for this attempt. */
   readonly budgetUsd: number;
   readonly deadlineAt: Date;
   readonly locales: readonly string[];

@@ -81,8 +81,44 @@ describe('failover policy', () => {
     ).toMatchObject({
       action: 'failover',
     });
+    expect(
+      decideAfterFailure({ code: 'ENGINE_INVALID_OUTPUT', retryable: true }, { ...job, invalidOutputs: 1 }),
+    ).toMatchObject({ action: 'retry' });
+    expect(
+      decideAfterFailure({ code: 'ENGINE_INVALID_OUTPUT', retryable: true }, { ...job, invalidOutputs: 2 }),
+    ).toMatchObject({ action: 'failover', engine: 'codex' });
     expect(chainAfter(['a', 'b', 'c'] as never, 'b' as never)).toEqual(['c']);
     expect(chainAfter(['a'] as never, 'z' as never)).toEqual(['a']);
+  });
+});
+
+describe('failover policy for coding agents (BF-044)', () => {
+  const job = {
+    engine: 'claude-code' as const,
+    engineAttempts: 1,
+    maxAttemptsPerEngine: 3,
+    failoverChain: ['claude-code', 'codex', 'blocks'] as const,
+    available: new Set(['claude-code', 'codex', 'blocks'] as const),
+    invalidOutputs: 0,
+  };
+
+  it('moves an engine-fatal failure to the next engine without retrying, even when marked not retryable', () => {
+    for (const code of ['ENGINE_BUDGET_EXCEEDED', 'ENGINE_VERSION_UNSUPPORTED'])
+      for (const retryable of [true, false])
+        expect(decideAfterFailure({ code, retryable }, job)).toMatchObject({
+          action: 'failover',
+          engine: 'codex',
+        });
+    expect(
+      decideAfterFailure({ code: 'ENGINE_BUDGET_EXCEEDED', retryable: false }, { ...job, failoverChain: [] }),
+    ).toMatchObject({ action: 'fail', code: 'ENGINE_BUDGET_EXCEEDED' });
+  });
+
+  it('retries an incomplete run on the same engine', () => {
+    expect(decideAfterFailure({ code: 'ENGINE_INCOMPLETE', retryable: true }, job)).toMatchObject({
+      action: 'retry',
+      engine: 'claude-code',
+    });
   });
 });
 

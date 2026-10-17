@@ -144,9 +144,15 @@ services:
     <<: *app
     image: ${IMAGE_REGISTRY:?}/bf-api:${IMAGE_TAG:?}
     command: [worker]
+    # docker-api: sandboxes through the socket proxy (BF-043); the worker never mounts the Docker socket.
+    networks: [edge, data, sites-api, docker-api]
     environment:
       <<: *app-env
       WORKER_METRICS_PORT: '9464'
+      SANDBOX_DOCKER_HOST: tcp://docker-socket-proxy:2375
+      SANDBOX_RUNNER_IMAGE: ${IMAGE_REGISTRY:?}/bf-agent-runner:${IMAGE_TAG:?}
+      SANDBOX_NETWORK: bf-sandbox
+      SANDBOX_EGRESS_PROXY_URL: http://egress-proxy:4750
     healthcheck:
       test: [CMD, node, -e, "fetch('http://127.0.0.1:9464/metrics').then((r)=>process.exit(r.ok?0:1),()=>process.exit(1))"]
       interval: 15s
@@ -296,6 +302,41 @@ services:
       - path: reacher.env
         required: false
 
+  # Sandboxes (BF-043): the worker reaches Docker only through this proxy, which allows the container calls a run
+  # needs (create, attach, start, wait, kill, inspect, remove) and image inspection — nothing else.
+  docker-socket-proxy:
+    <<: *hardened
+    image: wollomatic/socket-proxy:1.13.1
+    # Root without capabilities: reads the socket as its owner, nothing else.
+    user: '0:0'
+    read_only: true
+    command:
+      - -loglevel=info
+      - -listenip=0.0.0.0
+      - -allowfrom=worker
+      - -allowHEAD=^/_ping$
+      - -allowGET=^/(v1\.[0-9]+/)?(_ping|version|containers/json|containers/[a-zA-Z0-9_.-]+/json|images/.+/json)$
+      - -allowPOST=^/(v1\.[0-9]+/)?containers/(create|[a-zA-Z0-9_.-]+/(attach|start|wait|kill))$
+      - -allowDELETE=^/(v1\.[0-9]+/)?containers/[a-zA-Z0-9_.-]+$
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [docker-api]
+    deploy:
+      resources:
+        limits: { cpus: '0.25', memory: 64M }
+
+  # The only way out of the sandbox network: HTTPS CONNECT to the model APIs (EGRESS_PROFILE), nothing else.
+  egress-proxy:
+    <<: *hardened
+    image: ${IMAGE_REGISTRY:?}/bf-egress-proxy:${IMAGE_TAG:?}
+    read_only: true
+    environment:
+      EGRESS_PROFILE: ${EGRESS_PROFILE:-models}
+    networks: [bf-sandbox, edge]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 128M }
+
 networks:
   # Outbound access (providers, models, object storage) and Caddy's upstreams.
   edge:
@@ -314,6 +355,13 @@ networks:
   sites-edge:
     internal: true
   sites-api:
+    internal: true
+  # The worker and the Docker socket proxy only.
+  docker-api:
+    internal: true
+  # Sandboxes (named: the worker attaches them by name) and the egress proxy; no route out.
+  bf-sandbox:
+    name: bf-sandbox
     internal: true
 
 volumes:

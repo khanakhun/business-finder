@@ -161,6 +161,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `GENERATION_FAKE_ENGINE` | App-specific | api, worker | no | `false` |  | Register the scripted fake engine (development, tests and E2E only; refused in production). |
 | `GENERATION_MAX_SANDBOXES` | App-specific | api, worker | no | `4` |  | Sandboxed engine runs at once across the deployment (Claude Code, Codex, …). |
 | `GENERATION_FAKE_DURATION_MS` | App-specific | api, worker | no | `1500` |  | The fake engine's run time (tests set it short, load tests realistic). |
+| `SANDBOX_ENABLED` | App-specific | api, worker | no | `false` |  | Sandboxed engines run on this deployment (BF-043): the worker checks the runner image at start (readiness) and the janitor removes stale sandboxes. |
 | `SANDBOX_DOCKER_HOST` | App-specific | api, worker | no | `unix:///var/run/docker.sock` |  | Docker Engine API the worker starts sandboxes through (BF-043): the socket proxy in production (tcp://docker-socket-proxy:2375), never the raw socket. |
 | `SANDBOX_RUNNER_IMAGE` | App-specific | api, worker | no | `bf-agent-runner:dev` |  | The agent runner image, pinned by digest in production (ghcr.io/…/bf-agent-runner@sha256:…). |
 | `SANDBOX_NETWORK` | App-specific | api, worker | no | `none` |  | The internal sandbox network (`bf-sandbox`); `none` runs sandboxes without any network. |

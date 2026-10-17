@@ -1702,6 +1702,33 @@ importers:
         specifier: 'catalog:'
         version: 5.0.4(@opentelemetry/api@1.9.1)(@types/node@24.19.2)(@vitest/coverage-v8@5.0.4)(happy-dom@21.0.1)(msw@3.0.2(@types/node@24.19.2)(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
 
+  services/egress-proxy:
+    devDependencies:
+      '@bf/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+      '@bf/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.5.15
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.2
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 5.0.4(vitest@5.0.4)
+      esbuild:
+        specifier: 'catalog:'
+        version: 0.28.2
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.4(@opentelemetry/api@1.9.1)(@types/node@24.19.2)(@vitest/coverage-v8@5.0.4)(happy-dom@21.0.1)(msw@3.0.2(@types/node@24.19.2)(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)))(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
   services/intel: {}
 
 packages:

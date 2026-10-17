@@ -34,3 +34,9 @@ export interface SandboxTelemetry {
   finished(outcome: 'completed' | 'failed' | 'aborted' | SandboxErrorCode, seconds: number): void;
   frameError(): void;
 }
+
+/** Removes sandboxes left behind by crashed workers (BF-043); null when sandboxes are not enabled here. */
+export interface SandboxSweeper {
+  sweep(now: Date): Promise<number>;
+}
+export const SANDBOX_JANITOR = Symbol('SandboxJanitor');

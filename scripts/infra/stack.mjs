@@ -48,6 +48,8 @@ export const PROFILE_SERVICES = Object.freeze({
   observability: ['otel-collector', 'jaeger'],
   apps: ['intel'],
   sites: ['sites'],
+  // Sandboxes for the coding-agent engines (BF-043): the egress proxy and the Docker socket proxy.
+  generation: ['egress-proxy', 'docker-socket-proxy'],
 });
 
 export const MAX_OFFSET = 70;
@@ -119,6 +121,10 @@ export function derivedEnv({ ports, env, projectName, offset, profiles = [] }) {
     S3_ACCESS_KEY_ID: env.S3_ACCESS_KEY_ID || 'bf_local_only',
     S3_SECRET_ACCESS_KEY: env.S3_SECRET_ACCESS_KEY || 'bf_local_only_secret',
     SMTP_URL: `smtp://127.0.0.1:${ports.BF_SMTP_PORT}`,
+    // Sandboxes join the stack's internal network and leave it only through the egress proxy (BF-043).
+    ...(profiles.includes('generation')
+      ? { SANDBOX_NETWORK: `${projectName}-sandbox`, SANDBOX_EGRESS_PROXY_URL: 'http://egress-proxy:4750' }
+      : {}),
     // Only when the collector runs; otherwise apps would retry exporting to a closed port.
     ...(profiles.includes('observability')
       ? { OTEL_EXPORTER_OTLP_ENDPOINT: `http://127.0.0.1:${ports.BF_OTLP_HTTP_PORT}` }

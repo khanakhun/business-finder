@@ -4923,7 +4923,19 @@
       },
       "changesTitle": "Change requests",
       "noChanges": "No change request yet.",
-      "screenshot": "Screenshot {n}"
+      "screenshot": "Screenshot {n}",
+      "exportTitle": "Static export",
+      "exportHelp": "A zip of the current version as static files (every page and language, styles, fonts and the site's images) with a README, for an archive or a client who moves. The download link works for 24 hours.",
+      "export": "Export the site",
+      "exportStarted": "Export started",
+      "exportStatus": {
+        "queued": "Waiting",
+        "running": "In progress",
+        "succeeded": "Ready",
+        "failed": "Failed"
+      },
+      "download": "Download the zip",
+      "linkExpired": "Link expired: export again"
     }
   },
   "portal": {

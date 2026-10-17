@@ -24,6 +24,13 @@ import {
 import { PortalService } from './application/client-portal/portal.service.ts';
 import { PORTAL_REPOSITORY } from './application/client-portal/ports.ts';
 import { DOMAIN_SWEEP_AUTOSTART, DomainsService } from './application/go-live/domains.service.ts';
+import {
+  EXPORT_REPOSITORY,
+  SITE_EXPORT_QUEUE,
+  SITE_EXPORT_STORAGE,
+  SiteExportService,
+  STATIC_EXPORTER,
+} from './application/go-live/export.service.ts';
 import { GoLiveService } from './application/go-live/go-live.service.ts';
 import { DNS_RESOLVER, DOMAIN_REPOSITORY, GO_LIVE_REPOSITORY } from './application/go-live/ports.ts';
 import {
@@ -84,6 +91,7 @@ import {
   PexelsProvider,
   UnsplashProvider,
 } from './infrastructure/assets/stock.adapters.ts';
+import { BullmqSiteExportQueue, OPENAPI_EXPORT_QUEUE } from './infrastructure/bullmq-export-queue.ts';
 import {
   BullmqAssetProcessingQueue,
   BullmqAssetSourcingQueue,
@@ -102,12 +110,14 @@ import {
   SitesViewsFlushScheduler,
 } from './infrastructure/bullmq-site-jobs.ts';
 import { DrizzleDomainRepository } from './infrastructure/drizzle-domain.repository.ts';
+import { DrizzleExportRepository } from './infrastructure/drizzle-export.repository.ts';
 import { DrizzleGoLiveRepository } from './infrastructure/drizzle-go-live.repository.ts';
 import { DrizzlePortalRepository } from './infrastructure/drizzle-portal.repository.ts';
 import { DrizzleSiteAssetsRepository } from './infrastructure/drizzle-site-assets.repository.ts';
 import { DrizzleSiteThumbnailsRepository } from './infrastructure/drizzle-site-thumbnails.repository.ts';
 import { DrizzleSiteViewsRepository } from './infrastructure/drizzle-site-views.repository.ts';
 import { DrizzleSitesRepository } from './infrastructure/drizzle-sites.repository.ts';
+import { SitekitStaticExporter } from './infrastructure/export/static-export.ts';
 import { FakeSiteScreenshotter, IntelSiteScreenshotter } from './infrastructure/intel-site-screenshotter.ts';
 import { NodeDnsResolver } from './infrastructure/node-dns-resolver.ts';
 import { RendererRevalidator } from './infrastructure/renderer-revalidator.ts';
@@ -131,6 +141,7 @@ import {
   SitesAssetGenerateProcessor,
   SitesAssetProcessProcessor,
   SitesExpireProcessor,
+  SitesExportProcessor,
   SitesRevalidateProcessor,
   SitesScreenshotProcessor,
   SitesViewsFlushProcessor,
@@ -349,6 +360,21 @@ export class SitesModule {
           useFactory: (env: AppEnv) => new S3Presigner(env as ApiEnv),
         },
         PortalService,
+        // BF-062: static exports (the worker renders and zips; the API only enqueues).
+        { provide: EXPORT_REPOSITORY, useClass: DrizzleExportRepository },
+        { provide: STATIC_EXPORTER, useClass: SitekitStaticExporter },
+        mode === 'openapi'
+          ? { provide: SITE_EXPORT_QUEUE, useValue: OPENAPI_EXPORT_QUEUE }
+          : { provide: SITE_EXPORT_QUEUE, useClass: BullmqSiteExportQueue },
+        mode === 'openapi'
+          ? { provide: SITE_EXPORT_STORAGE, useValue: new InMemoryObjectStorage() }
+          : {
+              provide: SITE_EXPORT_STORAGE,
+              inject: [APP_ENV],
+              useFactory: (env: AppEnv) =>
+                new S3ObjectStorage(env as ApiEnv, (env as ApiEnv).S3_BUCKET_ARTIFACTS),
+            },
+        SiteExportService,
         SiteQueries,
         SiteAssetCommands,
         SiteThumbnailCommands,
@@ -370,6 +396,7 @@ export class SitesModule {
               SitesAssetAnalyzeProcessor,
               SitesAssetGenerateProcessor,
               SitesScreenshotProcessor,
+              SitesExportProcessor,
               SitesViewsFlushProcessor,
               SitesViewsFlushScheduler,
               { provide: SITES_VIEWS_AUTOSTART, useValue: true },

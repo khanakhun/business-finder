@@ -139,6 +139,7 @@ export const queryKeys = {
     grants: (siteId: string) => ['goLive', 'grants', siteId] as const,
     approvals: (siteId: string) => ['goLive', 'approvals', siteId] as const,
     changeRequests: (siteId: string) => ['goLive', 'change-requests', siteId] as const,
+    exports: (siteId: string) => ['goLive', 'exports', siteId] as const,
   }),
   portal: defineQueryKeys('portal', {
     sites: () => ['portal', 'sites'] as const,

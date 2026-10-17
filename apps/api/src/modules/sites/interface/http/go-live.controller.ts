@@ -3,9 +3,11 @@ import {
   GoLiveReadinessSchema,
   PublishLiveRequestSchema,
   PublishLiveResultSchema,
+  RequestSiteExportSchema,
   SaveSiteLegalProfileRequestSchema,
   SetContactRoutingRequestSchema,
   SiteContactRoutingSchema,
+  SiteExportSchema,
   SiteLegalProfileSchema,
 } from '@bf/contracts';
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
@@ -17,6 +19,7 @@ import { AllowAnonymous, Ctx, RequirePermission } from '../../../platform/securi
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
+import { SiteExportService } from '../../application/go-live/export.service.ts';
 import { type GoLiveActor, GoLiveService } from '../../application/go-live/go-live.service.ts';
 import { actorOf } from './sites.controller.ts';
 
@@ -25,6 +28,8 @@ class RoutingBody extends zodDto(SetContactRoutingRequestSchema) {}
 class PublishLiveBody extends zodDto(PublishLiveRequestSchema) {}
 class ConfirmBody extends zodDto(ConfirmContactRoutingRequestSchema) {}
 class ReadinessQuery extends zodDto(z.object({ versionId: z.uuid().optional() })) {}
+class ExportBody extends zodDto(RequestSiteExportSchema) {}
+const SiteExportListSchema = z.object({ items: z.array(SiteExportSchema) }).meta({ id: 'SiteExportList' });
 
 const LegalProfileResultSchema = z
   .object({ profile: SiteLegalProfileSchema.nullable() })
@@ -41,6 +46,7 @@ export class GoLiveController {
   constructor(
     private readonly goLive: GoLiveService,
     private readonly members: MemberDirectory,
+    private readonly exports: SiteExportService,
   ) {}
 
   private async actor(auth: AuthContext): Promise<GoLiveActor> {
@@ -86,6 +92,33 @@ export class GoLiveController {
     @Body() body: PublishLiveBody,
   ) {
     return this.goLive.publishLive(await this.actor(auth), id, body);
+  }
+
+  @Post(':id/export')
+  @HttpCode(202)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @RequirePermission('sites:publish')
+  @ApiRoute({
+    summary: 'Export a version as static files (a zip; the current version by default)',
+    operationId: 'exportSite',
+    body: ExportBody,
+    response: { status: 202, schema: SiteExportSchema },
+    errors: [400, 401, 403, 404],
+  })
+  exportSite(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string, @Body() body: ExportBody) {
+    return this.exports.request(actorOf(auth), id, body);
+  }
+
+  @Get(':id/exports')
+  @RequirePermission('sites:publish')
+  @ApiRoute({
+    summary: 'The site’s exports, with a download link for 24 hours after each finished',
+    operationId: 'listSiteExports',
+    response: { status: 200, schema: SiteExportListSchema },
+    errors: [401, 403, 404],
+  })
+  async listExports(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+    return { items: await this.exports.list(actorOf(auth), id) };
   }
 
   @Get(':id/legal-profile')

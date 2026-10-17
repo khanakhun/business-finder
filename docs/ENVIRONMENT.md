@@ -138,6 +138,7 @@ Read only by `scripts/infra.mjs` and Docker Compose (not by apps):
 | `FEATURE_MAPS_SCRAPER` | Feature flags | api, worker | no | `false` |  | Enable the self-hosted Google Maps scraper provider. |
 | `FEATURE_CODING_ENGINES` | Feature flags | api, worker | no | `true` |  | Enable coding-agent site generation engines. |
 | `FEATURE_AUTO_SEND` | Feature flags | api, worker | no | `false` |  | Allow sequences to send without per-message approval. |
+| `FEATURE_SELF_SERVE_SIGNUP` | Feature flags | api, worker | no | `false` |  | Public self-serve sign-up (BF-062). In production SIGNUP_MODE=open is refused at boot unless this is true; see docs/product/saas-readiness.md. |
 | `FAKE_DISCOVERY_PROVIDER` | Feature flags | api, worker | no | `false` |  | Register the fixture discovery provider (tests and E2E only; refused in production). |
 | `FAKE_DISCOVERY_SYNTHETIC` | Feature flags | api, worker | no | `false` |  | The fixture discovery provider generates grid records instead of fixtures (benchmarks, tiling tests). |
 | `FAKE_SITE_INTEL` | Feature flags | api, worker | no | `false` |  | Website crawls answer from a built-in fake instead of services/intel (tests and E2E only; refused in production). |

@@ -4,6 +4,7 @@ import {
   SitesAssetGenerateJob,
   SitesAssetProcessJob,
   SitesExpireJob,
+  SitesExportJob,
   SitesRevalidateJob,
   SitesScreenshotJob,
   SitesViewsFlushJob,
@@ -13,6 +14,7 @@ import { Processor } from '@nestjs/bullmq';
 import type { z } from 'zod';
 import { TypedProcessor } from '../../../platform/queue/typed-processor.ts';
 import { AssetSourcing } from '../../application/asset-sourcing.ts';
+import { SiteExportService } from '../../application/go-live/export.service.ts';
 import { SiteAssetCommands } from '../../application/site-assets.ts';
 import { SiteThumbnailCommands } from '../../application/site-thumbnails.ts';
 import { SiteViewsFlusher } from '../../application/site-views.ts';
@@ -194,5 +196,24 @@ export class SitesViewsFlushProcessor extends TypedProcessor<
     const result = await this.flusher.flush();
     if (result.days > 0 || result.events > 0) context.logger.info(result, 'site views flushed');
     return result;
+  }
+}
+
+/** Static exports (BF-062): render, zip, upload; a failure is recorded on the export, never retried. */
+@Processor(QUEUES.sitesExport.name, { concurrency: QUEUES.sitesExport.concurrency })
+export class SitesExportProcessor extends TypedProcessor<
+  typeof SitesExportJob,
+  { readonly outcome: string }
+> {
+  protected readonly definition = SitesExportJob;
+
+  constructor(private readonly exports: SiteExportService) {
+    super();
+  }
+
+  async handle(payload: z.output<typeof SitesExportJob.schema>, context: JobContext) {
+    const outcome = await this.exports.run(payload.exportId, context.signal);
+    context.logger.info({ exportId: payload.exportId, outcome }, 'site export');
+    return { outcome };
   }
 }

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { RunnerFrame } from '@bf/contracts/runner';
@@ -20,11 +20,11 @@ const fixture = fileURLToPath(
 function bundle(): Uint8Array {
   const files = new Map<string, Buffer>();
   const walk = (dir: string) => {
-    for (const name of readdirSync(dir)) {
-      if (name === '.sitekit') continue;
-      const path = join(dir, name);
-      if (statSync(path).isDirectory()) walk(path);
-      else files.set(relative(fixture, path), readFileSync(path));
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === '.sitekit') continue;
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile()) files.set(relative(fixture, path), readFileSync(path));
     }
   };
   walk(fixture);

@@ -32,11 +32,13 @@ import {
   FilesIcon,
   HistoryIcon,
   KeyboardIcon,
+  MessageSquareIcon,
   SettingsIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
+import { SiteChatPanel } from '@/features/site-chat/chat-panel.tsx';
 import { publicEnv } from '@/lib/public-env.ts';
 import { getToast } from '@/lib/toast.tsx';
 import { applyPuckDataToSpec, itemToBlock } from './adapters/puck-to-ops.ts';
@@ -89,6 +91,8 @@ interface Viewing {
   readonly versionNumber: number;
   readonly spec: SiteSpec;
   readonly pageId: string;
+  /** Shown instead of "Viewing version N" (a chat proposal's preview, BF-047). */
+  readonly label?: string;
 }
 
 type VersionRef = Pick<SiteVersionSummary, 'id' | 'versionNumber'>;
@@ -619,6 +623,31 @@ export function SiteEditor({
       const page = typeof issue.path[1] === 'number' ? working.pages[issue.path[1]] : undefined;
       if (issue.path[0] === 'pages' && page && page.id !== pageId) switchPage(page.id);
     },
+    chat: {
+      siteId,
+      baseVersionId: base.versionId,
+      baseSpec: base.spec,
+      dirty,
+      preview: (spec: SiteSpec | null, label?: string) => {
+        if (!spec) {
+          setViewing(null);
+          return;
+        }
+        flushFields();
+        setViewing({
+          versionId: `preview:${base.versionId}`,
+          versionNumber: base.versionNumber,
+          spec,
+          pageId: spec.pages.some((page) => page.id === pageId) ? pageId : (spec.pages[0]?.id ?? pageId),
+          ...(label ? { label } : {}),
+        });
+      },
+      adopt: async (versionId: string) => {
+        const version = await fetchVersion(siteId, versionId);
+        setViewing(null);
+        replaceBase(version);
+      },
+    },
   };
   const errors = issues.filter((issue) => issue.severity === 'error').length;
   const publishBlock = dirty ? 'unsaved' : errors > 0 || base.errors > 0 ? 'errors' : null;
@@ -739,11 +768,13 @@ export function SiteEditor({
               className="flex flex-wrap items-center gap-2 border-b bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:bg-amber-950 dark:text-amber-50"
               role="status"
             >
-              <span className="font-medium">{t('versions.viewing', { version: viewing.versionNumber })}</span>
+              <span className="font-medium">
+                {viewing.label ?? t('versions.viewing', { version: viewing.versionNumber })}
+              </span>
               <Button size="sm" variant="outline" onClick={leaveView}>
                 {t('versions.backToEditing')}
               </Button>
-              {canEdit && viewing.versionId !== base.versionId ? (
+              {canEdit && !viewing.label && viewing.versionId !== base.versionId ? (
                 <Button
                   size="sm"
                   onClick={() =>
@@ -785,6 +816,13 @@ export function SiteEditor({
                   label: t('panels.issues'),
                   icon: <CircleAlertIcon />,
                   render: () => <IssuesPanel />,
+                },
+                {
+                  // BF-047: the edit agent, docked in the editor.
+                  name: 'chat',
+                  label: t('panels.chat'),
+                  icon: <MessageSquareIcon />,
+                  render: () => <SiteChatPanel />,
                 },
               ]}
               {...(!readOnly

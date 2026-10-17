@@ -144,10 +144,10 @@ apps/web/src/features/site-chat/{chat-panel.tsx, proposal-card.tsx, context-chip
 - **Evals:** report attached (success, minimality, refusals, cost, latency).
 
 ## Acceptance criteria
-- [ ] Streaming chat with a tool-using edit agent grounded in the site, facts and catalog; selection-aware.
-- [ ] Proposals validated (schema, strict facts, copy lint) with a visual before/after preview; apply creates a version; undo works.
-- [ ] User-asserted facts only with explicit confirmation; refusals with alternatives for unsafe requests.
-- [ ] Translate/rewrite entry points used by the editor; rebase/supersede on outdated bases.
+- [x] Streaming chat with a tool-using edit agent grounded in the site, facts and catalog; selection-aware.
+- [x] Proposals validated (schema, strict facts, copy lint) with a visual before/after preview; apply creates a version; undo works.
+- [x] User-asserted facts only with explicit confirmation; refusals with alternatives for unsafe requests.
+- [x] Translate/rewrite entry points used by the editor; rebase/supersede on outdated bases.
 - [ ] Evals meet targets; cost and latency within budgets; retention configured.
 
 ## Agent prompt

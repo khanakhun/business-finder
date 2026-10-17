@@ -883,8 +883,8 @@
         "none": "Sans note",
         "lt3": "Moins de 3",
         "3to4": "3 à 4",
-        "4to4.5": "4 à 4,5",
-        "gte4.5": "4,5 et plus"
+        "4to4_5": "4 à 4,5",
+        "gte4_5": "4,5 et plus"
       },
       "clear": "Effacer les filtres",
       "count": "{count}"

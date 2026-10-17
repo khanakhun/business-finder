@@ -154,7 +154,10 @@ export function Facets({
           return (
             <Row
               key={band.value}
-              label={t(`ratingBands.${band.value as 'none' | 'lt3' | '3to4' | '4to4.5' | 'gte4.5'}`)}
+              // Message keys cannot contain dots: `4to4.5` → `4to4_5`.
+              label={t(
+                `ratingBands.${band.value.replace('.', '_') as 'none' | 'lt3' | '3to4' | '4to4_5' | 'gte4_5'}`,
+              )}
               count={band.count}
               active={active}
               onClick={

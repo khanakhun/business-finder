@@ -883,8 +883,8 @@
         "none": "No rating",
         "lt3": "Below 3",
         "3to4": "3 to 4",
-        "4to4.5": "4 to 4.5",
-        "gte4.5": "4.5 and up"
+        "4to4_5": "4 to 4.5",
+        "gte4_5": "4.5 and up"
       },
       "clear": "Clear filters",
       "count": "{count}"

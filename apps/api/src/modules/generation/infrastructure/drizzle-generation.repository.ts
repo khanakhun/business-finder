@@ -389,7 +389,7 @@ export class DrizzleGenerationRepository implements GenerationRepository {
   async deleteEventsBefore(before: Date, limit: number) {
     const rows = await this.x.execute<{ id: number }>(sql`
       DELETE FROM ${generationEvents} WHERE ${generationEvents.id} IN (
-        SELECT ${generationEvents.id} FROM ${generationEvents} WHERE ${generationEvents.createdAt} < ${before} LIMIT ${limit}
+        SELECT ${generationEvents.id} FROM ${generationEvents} WHERE ${generationEvents.createdAt} < ${before.toISOString()} LIMIT ${limit}
       ) RETURNING ${generationEvents.id}`);
     return rows.length;
   }

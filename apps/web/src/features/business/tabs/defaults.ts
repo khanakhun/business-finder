@@ -82,6 +82,16 @@ export function registerDefaultTabs(): void {
     }),
   });
   businessTabs.register({
+    // BF-057.
+    id: 'call',
+    labelKey: 'business.tabs.call',
+    order: 29.6,
+    permission: 'outreach:send',
+    component: dynamic(() => import('@/features/assist/call-tab.tsx').then((m) => m.CallTab), {
+      loading: TabSkeleton,
+    }),
+  });
+  businessTabs.register({
     id: 'activity',
     labelKey: 'business.tabs.activity',
     order: 30,

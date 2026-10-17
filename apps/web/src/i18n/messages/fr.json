@@ -30,7 +30,8 @@
     "compliance": "Conformité",
     "outbox": "Boîte d’envoi",
     "approvals": "Validations",
-    "deliverability": "Délivrabilité"
+    "deliverability": "Délivrabilité",
+    "calls": "Appels"
   },
   "topbar": {
     "workspace": "Mon espace",
@@ -1064,7 +1065,8 @@
       "scores": "Scores",
       "sites": "Sites",
       "compliance": "Conformité",
-      "sequences": "Séquences"
+      "sequences": "Séquences",
+      "call": "Appel"
     },
     "actions": {
       "label": "Actions rapides",
@@ -4408,6 +4410,123 @@
     "banner": {
       "active": "Tous les envois sont arrêtés (arrêt d’urgence) : {reason}",
       "open": "Délivrabilité"
+    }
+  },
+  "assist": {
+    "call": "Appel {number}",
+    "loadError": "Les détails de l’appel n’ont pas pu être chargés.",
+    "doNotContact": "Cette entreprise est marquée « ne pas contacter » : aucun appel ni message.",
+    "noPhone": "Aucun numéro de téléphone connu pour cette entreprise.",
+    "phoneBlocked": "Appeler cette entreprise n’est pas autorisé (voir les raisons ci-dessus).",
+    "endCall": "Terminer l’appel ({duration})",
+    "logOutcome": "Consigner un résultat",
+    "openPreview": "Ouvrir le site d’aperçu",
+    "history": "Appels et messages",
+    "noHistory": "Aucun appel ni message n’a encore été consigné.",
+    "channels": {
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "whatsapp": "WhatsApp",
+      "letter": "Courrier",
+      "in_person": "En personne"
+    },
+    "decision": {
+      "allowed": "Autorisé",
+      "allowed_with_conditions": "Autorisé sous conditions",
+      "manual_only": "Manuellement uniquement",
+      "blocked": "Non autorisé"
+    },
+    "bestTime": {
+      "now": "Bon moment pour appeler",
+      "unknown": "Aucun bon moment trouvé dans la semaine à venir.",
+      "rush": "Heures d’affluence en ce moment.",
+      "closed": "Fermé en ce moment.",
+      "next": "Prochain bon moment : {there}",
+      "yours": "({here} votre heure)"
+    },
+    "outcomes": {
+      "no_answer": "Pas de réponse",
+      "voicemail": "Message vocal laissé",
+      "interested": "Échange : intéressé",
+      "not_interested": "Échange : pas intéressé",
+      "call_back": "Échange : rappeler plus tard",
+      "info_email": "Échange : envoyer des infos par e-mail",
+      "info_whatsapp": "Échange : envoyer des infos par WhatsApp",
+      "wrong_number": "Mauvais numéro",
+      "do_not_call": "Ne plus appeler"
+    },
+    "outcome": {
+      "title": "Comment s’est passé l’appel avec {business} ?",
+      "duration": "Durée de l’appel : {duration}",
+      "hint": "Consignez ce qui s’est passé pendant l’appel.",
+      "what": "Résultat",
+      "callbackAt": "Rappeler le",
+      "doNotContact": "Marquer aussi l’entreprise « ne pas contacter » (ni e-mails ni messages)",
+      "minutes": "Durée (minutes)",
+      "notes": "Notes",
+      "cancel": "Annuler",
+      "save": "Enregistrer le résultat",
+      "queued": "Enregistré hors ligne : il sera envoyé dès que vous serez de nouveau en ligne.",
+      "logged": "Résultat consigné.",
+      "failed": "Le résultat n’a pas pu être consigné."
+    },
+    "script": {
+      "title": "Script d’appel",
+      "offer": "Offre",
+      "language": "Langue",
+      "auto": "La langue de l’entreprise",
+      "regenerate": "Réécrire",
+      "writing": "Rédaction du script…",
+      "failed": "Le script n’a pas pu être rédigé.",
+      "retry": "Réessayer",
+      "cached": "Script enregistré. Réécrivez-le pour en obtenir un nouveau.",
+      "opener": "Accroche",
+      "observations": "Ce que nous avons remarqué",
+      "preview": "Le site d’aperçu",
+      "questions": "Questions à poser",
+      "objections": "S’ils disent…",
+      "nextStep": "Prochaine étape",
+      "reminders": "À retenir"
+    },
+    "whatsapp": {
+      "action": "WhatsApp",
+      "noNumber": "Aucun numéro WhatsApp ou de téléphone connu.",
+      "blocked": "Les messages WhatsApp à cette entreprise ne sont pas autorisés.",
+      "title": "Message WhatsApp à {business}",
+      "hint": "Rédigez un message court, ouvrez-le dans WhatsApp, envoyez-le vous-même, puis confirmez ici.",
+      "channel": "WhatsApp",
+      "doNotContact": "Cette entreprise est marquée « ne pas contacter ».",
+      "number": "Numéro WhatsApp : {number}",
+      "usePhone": "{number} est sur WhatsApp",
+      "message": "Message",
+      "count": "{count} caractères sur 600",
+      "write": "Rédiger le message",
+      "writing": "Rédaction du message…",
+      "replies": "L’application ne lit pas les réponses WhatsApp : consignez-les ici comme résultats.",
+      "open": "Ouvrir WhatsApp",
+      "sent": "Je l’ai envoyé",
+      "logged": "Message consigné.",
+      "queued": "Enregistré hors ligne : il sera consigné dès que vous serez de nouveau en ligne.",
+      "failed": "Cela n’a pas fonctionné."
+    },
+    "list": {
+      "title": "Appels",
+      "description": "Les appels du jour, et les entreprises à appeler maintenant.",
+      "tier": "Niveau {tier}",
+      "showScript": "Afficher le script",
+      "hideScript": "Masquer le script",
+      "waitingOnline": "{count, plural, =0 {Envoi des résultats enregistrés hors ligne…} one {Envoi de # résultat enregistré hors ligne…} other {Envoi de # résultats enregistrés hors ligne…}}",
+      "offline": "{count, plural, =0 {Vous êtes hors ligne : les résultats seront enregistrés et envoyés plus tard.} one {Vous êtes hors ligne : # résultat attend d’être envoyé.} other {Vous êtes hors ligne : # résultats attendent d’être envoyés.}}",
+      "synced": "{count, plural, one {# résultat enregistré envoyé.} other {# résultats enregistrés envoyés.}}",
+      "loadError": "La liste des appels n’a pas pu être chargée.",
+      "emptyTitle": "Personne à appeler pour le moment",
+      "emptyBody": "Les tâches d’appel dues aujourd’hui et les entreprises de niveau A ou B avec un numéro de téléphone apparaissent ici au bon moment pour appeler.",
+      "refresh": "Actualiser",
+      "tasks": "{count, plural, =0 {Appels du jour} one {Appel du jour (#)} other {Appels du jour (#)}}",
+      "noTasks": "Aucune tâche d’appel due aujourd’hui.",
+      "suggestions": "Bon moment pour appeler",
+      "suggestionsHint": "Entreprises de niveau A et B avec un numéro de téléphone, non contactées depuis 14 jours, ouvertes en ce moment.",
+      "noSuggestions": "Aucune suggestion pour le moment."
     }
   }
 }

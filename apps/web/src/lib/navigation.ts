@@ -12,6 +12,7 @@ import {
   type LucideIcon,
   MailIcon,
   MailsIcon,
+  PhoneIcon,
   SearchIcon,
   SendIcon,
   SettingsIcon,
@@ -30,6 +31,7 @@ export type NavKey =
   | 'sites'
   | 'generation'
   | 'leads'
+  | 'calls'
   | 'inbox'
   | 'outbox'
   | 'approvals'
@@ -78,6 +80,7 @@ export const NAVIGATION: readonly NavGroup[] = [
   {
     key: 'outreach',
     items: [
+      { key: 'calls', href: '/calls', icon: PhoneIcon },
       { key: 'inbox', href: '/outreach/inbox', icon: InboxIcon },
       { key: 'outbox', href: '/outreach/outbox', icon: SendIcon },
       { key: 'approvals', href: '/outreach/approvals', icon: CheckCheckIcon },

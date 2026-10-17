@@ -101,6 +101,12 @@ export const queryKeys = {
     bulkRuns: () => ['outreach', 'bulk-runs'] as const,
     bulkRun: (id: string) => ['outreach', 'bulk-run', id] as const,
   }),
+  assist: defineQueryKeys('assist', {
+    workspace: (businessId: string) => ['assist', 'workspace', businessId] as const,
+    script: (businessId: string, offer: string, locale: string) =>
+      ['assist', 'script', businessId, offer, locale] as const,
+    calls: () => ['assist', 'calls'] as const,
+  }),
   deliverability: defineQueryKeys('deliverability', {
     overview: () => ['deliverability', 'overview'] as const,
     readiness: () => ['deliverability', 'readiness'] as const,

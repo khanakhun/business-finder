@@ -3165,6 +3165,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v1/scoring/ml/businesses/{id}/shadow-scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A business’s latest shadow scores (labelled shadow in the Scores tab) */
+        get: operations["getBusinessShadowScores"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/scoring/ml/datasets": {
         parameters: {
             query?: never;
@@ -3227,6 +3244,24 @@ export type paths = {
         /** Labelled contacts and positives so far, against the minimum to train a model */
         get: operations["getScoringMlReadiness"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/scoring/ml/shadow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The models running in shadow, per profile */
+        get: operations["listScoringShadowModels"];
+        /** Run a model in shadow beside a profile (null withdraws it); the profile is recomputed */
+        put: operations["setScoringShadowModel"];
         post?: never;
         delete?: never;
         options?: never;
@@ -8648,13 +8683,22 @@ export type components = {
             gates: components["schemas"]["ScoringGate"][];
             /**
              * @default rules
-             * @constant
+             * @enum {string}
              */
-            kind: "rules";
+            kind: "rules" | "model";
             /** @default {} */
             missing: {
                 [key: string]: number;
             };
+            /** @default null */
+            model: {
+                /** Format: uuid */
+                modelId: string;
+                tiers: {
+                    A: number;
+                    B: number;
+                };
+            } | null;
             /**
              * @default weighted_sum
              * @constant
@@ -9067,6 +9111,47 @@ export type components = {
         SetPrimaryScoringProfileRequest: {
             /** Format: uuid */
             profileId: string;
+        };
+        SetShadowModelRequest: {
+            modelId: string | null;
+            /** Format: uuid */
+            profileId: string;
+        };
+        ShadowAssignment: {
+            /** Format: uuid */
+            modelId: string;
+            /** Format: uuid */
+            profileId: string;
+            /** Format: date-time */
+            startedAt: string;
+        };
+        ShadowAssignmentList: {
+            items: components["schemas"]["ShadowAssignment"][];
+        };
+        ShadowScore: {
+            /** Format: date-time */
+            computedAt: string;
+            /** Format: uuid */
+            modelId: string;
+            modelVersion: number | null;
+            probability: number;
+            /** Format: uuid */
+            profileId: string;
+            reasons: {
+                contribution: number;
+                /** @enum {string} */
+                direction: "positive" | "negative";
+                feature: string;
+                text: {
+                    en: string;
+                    fr: string;
+                };
+            }[];
+            score: number;
+            tier: string;
+        };
+        ShadowScoreList: {
+            items: components["schemas"]["ShadowScore"][];
         };
         SiteAsset: {
             alt: {
@@ -9646,13 +9731,22 @@ export type components = {
             gates: components["schemas"]["ScoringGate"][];
             /**
              * @default rules
-             * @constant
+             * @enum {string}
              */
-            kind: "rules";
+            kind: "rules" | "model";
             /** @default {} */
             missing: {
                 [key: string]: number;
             };
+            /** @default null */
+            model: {
+                /** Format: uuid */
+                modelId: string;
+                tiers: {
+                    A: number;
+                    B: number;
+                };
+            } | null;
             /**
              * @default weighted_sum
              * @constant
@@ -25015,6 +25109,55 @@ export interface operations {
             };
         };
     };
+    getBusinessShadowScores: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShadowScoreList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     listScoringMlDatasets: {
         parameters: {
             query?: never;
@@ -25276,6 +25419,140 @@ export interface operations {
             };
             /** @description Problem details (RFC 9457) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listScoringShadowModels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShadowAssignmentList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    setScoringShadowModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetShadowModelRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShadowAssignmentList"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Problem details (RFC 9457) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

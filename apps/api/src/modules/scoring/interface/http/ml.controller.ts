@@ -5,9 +5,12 @@ import {
   MlReadinessQuerySchema,
   MlReadinessSchema,
   MlTrainingRunSchema,
+  SetShadowModelRequestSchema,
+  ShadowAssignmentSchema,
+  ShadowScoreSchema,
   StartMlTrainingRequestSchema,
 } from '@bf/contracts';
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { z } from 'zod';
@@ -17,16 +20,22 @@ import { ApiRoute } from '../../../platform/validation/api-route.decorator.ts';
 import { zodDto } from '../../../platform/validation/zod-dto.ts';
 import { DatasetBuilder, type MlActor } from '../../application/ml/dataset-builder.ts';
 import { ModelTrainer } from '../../application/ml/model-trainer.ts';
+import { ShadowService } from '../../application/ml/shadow.service.ts';
 
 class ReadinessQuery extends zodDto(MlReadinessQuerySchema) {}
 class BuildBody extends zodDto(BuildMlDatasetRequestSchema) {}
 class TrainBody extends zodDto(StartMlTrainingRequestSchema) {}
+class ShadowBody extends zodDto(SetShadowModelRequestSchema) {}
 
 const MlDatasetListSchema = z.object({ items: z.array(MlDatasetSchema) }).meta({ id: 'MlDatasetList' });
 const MlTrainingRunListSchema = z
   .object({ items: z.array(MlTrainingRunSchema) })
   .meta({ id: 'MlTrainingRunList' });
 const MlModelListSchema = z.object({ items: z.array(MlModelSchema) }).meta({ id: 'MlModelList' });
+const ShadowAssignmentListSchema = z
+  .object({ items: z.array(ShadowAssignmentSchema) })
+  .meta({ id: 'ShadowAssignmentList' });
+const ShadowScoreListSchema = z.object({ items: z.array(ShadowScoreSchema) }).meta({ id: 'ShadowScoreList' });
 
 function actorOf(auth: AuthContext): MlActor {
   if (!auth.orgId) throw new Error('Scoring route reached without an active workspace');
@@ -43,6 +52,7 @@ export class ScoringMlController {
   constructor(
     private readonly datasets: DatasetBuilder,
     private readonly trainer: ModelTrainer,
+    private readonly shadows: ShadowService,
   ) {}
 
   @Get('readiness')
@@ -132,5 +142,42 @@ export class ScoringMlController {
   })
   model(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
     return this.trainer.model(actorOf(auth).organizationId, id);
+  }
+
+  @Get('shadow')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'The models running in shadow, per profile',
+    operationId: 'listScoringShadowModels',
+    response: { status: 200, schema: ShadowAssignmentListSchema },
+    errors: [401, 403],
+  })
+  async shadowList(@Ctx() auth: AuthContext) {
+    return { items: await this.shadows.list(actorOf(auth).organizationId) };
+  }
+
+  @Put('shadow')
+  @RequirePermission('scoring:manage')
+  @ApiRoute({
+    summary: 'Run a model in shadow beside a profile (null withdraws it); the profile is recomputed',
+    operationId: 'setScoringShadowModel',
+    body: ShadowBody,
+    response: { status: 200, schema: ShadowAssignmentListSchema },
+    errors: [400, 401, 403, 404, 409],
+  })
+  async setShadow(@Ctx() auth: AuthContext, @Body() body: ShadowBody) {
+    return { items: await this.shadows.set(actorOf(auth), body) };
+  }
+
+  @Get('businesses/:id/shadow-scores')
+  @RequirePermission('business:read')
+  @ApiRoute({
+    summary: 'A business’s latest shadow scores (labelled shadow in the Scores tab)',
+    operationId: 'getBusinessShadowScores',
+    response: { status: 200, schema: ShadowScoreListSchema },
+    errors: [401, 403],
+  })
+  async businessShadows(@Ctx() auth: AuthContext, @Param('id', ParseUUIDPipe) id: string) {
+    return { items: await this.shadows.forBusiness(actorOf(auth).organizationId, id) };
   }
 }

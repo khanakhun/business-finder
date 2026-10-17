@@ -1,11 +1,14 @@
 import { createHash } from 'node:crypto';
 import { FEATURE_SET_VERSION, type FeatureVector, SCORING_SCORES_UPDATED, ScoreUpdated } from '@bf/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Transactional } from '../../platform/db/transactional.ts';
 import { EventRecorder } from '../../platform/events/event-recorder.ts';
+import { LOGGER, type Logger } from '../../platform/logging/logger.ts';
 import { RealtimePublisher } from '../../realtime/index.ts';
 import { scoreBusiness } from '../domain/engine.ts';
 import { BUILTIN_PRIMARY_PROFILE_ID } from './builtin-profiles.seeder.ts';
+import { ModelScoring } from './ml/model-scoring.ts';
+import { MODEL_REGISTRY, type ModelRegistry, SHADOW_REPOSITORY, type ShadowRepository } from './ml/ports.ts';
 import {
   type ActiveProfile,
   FACTS_ASSEMBLER,
@@ -24,6 +27,9 @@ const profileOffer = (offers: ReadonlyMap<string, ActiveProfile['offer']>, profi
   if (!offer) throw new Error(`Scored profile ${profileId} is not among the active profiles`);
   return offer;
 };
+
+/** Tiers of a shadow model's scores (no profile chose them yet): by calibrated probability. */
+const SHADOW_TIERS = { A: 0.2, B: 0.08 } as const;
 
 /** Businesses assembled and written per batch (≤ 3 fact queries and one write transaction each). */
 export const SCORING_BATCH = 500;
@@ -56,6 +62,11 @@ export class ScoringService {
     @Inject(FACTS_ASSEMBLER) private readonly assembler: FactsAssembler,
     private readonly events: EventRecorder,
     private readonly realtime: RealtimePublisher,
+    // BF-059: outcome-trained models (optional: unit tests build the rules engine alone).
+    @Optional() private readonly modelScoring?: ModelScoring,
+    @Optional() @Inject(MODEL_REGISTRY) private readonly models?: ModelRegistry,
+    @Optional() @Inject(SHADOW_REPOSITORY) private readonly shadows?: ShadowRepository,
+    @Optional() @Inject(LOGGER) private readonly logger?: Logger,
   ) {}
 
   /** The workspace's primary profile (its own choice, else the built-in new-website profile). */
@@ -125,12 +136,14 @@ export class ScoringService {
         };
       }),
     );
+    const final = await this.withModels(organizationId, scored);
     const outcome = await this.commit(
       organizationId,
       facts.map((f) => f.businessId),
-      scored,
+      final,
       options.force ?? false,
     );
+    await this.shadowScores(organizationId, final, computedAt);
     // After the commit (`compute` is never called inside an outer transaction): pages showing these businesses
     // refetch their scores (best effort, like all realtime).
     if (options.notify !== false && outcome.businesses.size > 0) {
@@ -151,6 +164,110 @@ export class ScoringService {
       }
     }
     return { scored: scored.length, written: outcome.written, unchanged: outcome.unchanged };
+  }
+
+  /**
+   * A model profile (BF-059): its model scores instead of the rules (same features, gates and reason texts).
+   * Without its model (deleted, artifacts unreadable), the rules score stands, and the failure is logged.
+   */
+  private async withModels(
+    organizationId: string,
+    scored: readonly { readonly profile: ActiveProfile; readonly write: ScoreWrite }[],
+  ) {
+    const byProfile = new Map<string, number[]>();
+    scored.forEach(({ profile }, index) => {
+      if (profile.config.kind !== 'model' || !profile.config.model) return;
+      byProfile.set(profile.id, [...(byProfile.get(profile.id) ?? []), index]);
+    });
+    if (byProfile.size === 0 || !this.modelScoring || !this.models) return scored;
+    const out = [...scored];
+    for (const indexes of byProfile.values()) {
+      const first = scored[indexes[0] ?? 0];
+      const settings = first?.profile.config.model;
+      if (!first || !settings) continue;
+      try {
+        const model = await this.models.model(organizationId, settings.modelId);
+        if (!model) throw new Error(`model ${settings.modelId} not found`);
+        const results = await this.modelScoring.score(
+          model,
+          first.profile.config,
+          indexes.map((i) => scored[i]?.write.features ?? {}),
+          settings.tiers,
+        );
+        indexes.forEach((i, k) => {
+          const item = scored[i];
+          const result = results[k];
+          if (!item || !result) return;
+          const { probability: _probability, ...score } = result;
+          out[i] = { profile: item.profile, write: { ...item.write, ...score } };
+        });
+      } catch (error) {
+        this.logger?.error(
+          { err: error, profileId: first.profile.id, modelId: settings.modelId },
+          'model scoring failed: the rules score stands',
+        );
+      }
+    }
+    return out;
+  }
+
+  /** Shadow models (BF-059): scored alongside and stored apart; they never change tiers, sorting or automation. */
+  private async shadowScores(
+    organizationId: string,
+    scored: readonly { readonly profile: ActiveProfile; readonly write: ScoreWrite }[],
+    computedAt: Date,
+  ): Promise<void> {
+    if (!this.modelScoring || !this.models || !this.shadows || scored.length === 0) return;
+    const assignments = await this.shadows.assignments(organizationId);
+    for (const [profileId, assignment] of assignments) {
+      const items = scored.filter(({ profile }) => profile.id === profileId);
+      const first = items[0];
+      if (!first) continue;
+      try {
+        const model = await this.models.model(organizationId, assignment.modelId);
+        if (!model) continue;
+        const latest = await this.shadows.latestHashes(
+          organizationId,
+          profileId,
+          items.map(({ write }) => write.businessId),
+        );
+        const changed = items.filter(({ write }) => {
+          const seen = latest.get(write.businessId);
+          return seen?.factsHash !== write.factsHash || seen.modelId !== model.id;
+        });
+        const results = await this.modelScoring.score(
+          model,
+          first.profile.config,
+          changed.map(({ write }) => write.features),
+          SHADOW_TIERS,
+        );
+        await this.shadows.insert(
+          changed.flatMap(({ write }, k) => {
+            const result = results[k];
+            return result
+              ? [
+                  {
+                    organizationId,
+                    businessId: write.businessId,
+                    profileId,
+                    modelId: model.id,
+                    probability: result.probability,
+                    score: result.score,
+                    tier: result.tier,
+                    contributions: result.contributions,
+                    reasons: result.reasons,
+                    factsHash: write.factsHash,
+                    computedAt,
+                  },
+                ]
+              : [];
+          }),
+        );
+      } catch (error) {
+        // A shadow never stops scoring.
+        this.logger?.warn({ err: error, profileId, modelId: assignment.modelId }, 'shadow scoring failed');
+      }
+    }
   }
 
   /**

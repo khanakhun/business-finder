@@ -16,6 +16,7 @@ import type { GateDraft } from './gates.ts';
 
 const base: ScoringProfileConfig = {
   kind: 'rules',
+  model: null,
   offer: 'new_website',
   weights: { has_phone: 30, has_website: -20, rating_avg: 10 },
   transforms: { rating_avg: { kind: 'linear', min: 1, max: 5 } },

@@ -85,6 +85,7 @@
     "libphonenumber-js": "catalog:",
     "mailparser": "catalog:",
     "nodemailer": "catalog:",
+    "onnxruntime-node": "catalog:",
     "opentype.js": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

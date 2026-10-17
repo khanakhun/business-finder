@@ -7,6 +7,8 @@ import type {
   MlMetrics,
   MlModelKind,
   MlModelStatus,
+  ScoreContribution,
+  ScoreReason,
 } from '@bf/contracts';
 import { sql } from 'drizzle-orm';
 import {
@@ -17,6 +19,8 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -114,4 +118,52 @@ export const mlTrainingRuns = pgTable(
     finishedAt: tz(),
   },
   (table) => [index('ix_ml_training_runs__org_created').on(table.organizationId, table.createdAt)],
+);
+
+/** The model a profile runs in shadow for a workspace (BF-059): scored alongside, affecting nothing. */
+export const scoringShadowAssignments = pgTable(
+  'scoring_shadow_assignments',
+  {
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    profileId: uuid().notNull(),
+    modelId: uuid()
+      .notNull()
+      .references(() => scoringModels.id, { onDelete: 'cascade' }),
+    startedBy: uuid().references(() => user.id, { onDelete: 'set null' }),
+    startedAt: tz().notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.profileId] })],
+);
+
+/**
+ * Shadow scores (BF-059), append-only like `business_score_history`: one row per new feature vector and model, so
+ * the prospective comparison can read the shadow score a business had when it was contacted.
+ */
+export const businessScoreShadows = pgTable(
+  'business_score_shadows',
+  {
+    id: id(),
+    organizationId: orgId().references(() => organization.id, { onDelete: 'cascade' }),
+    businessId: uuid().notNull(),
+    profileId: uuid().notNull(),
+    modelId: uuid()
+      .notNull()
+      .references(() => scoringModels.id, { onDelete: 'cascade' }),
+    probability: doublePrecision().notNull(),
+    score: smallint().notNull(),
+    tier: text().notNull(),
+    contributions: jsonb().$type<ScoreContribution[]>().notNull(),
+    reasons: jsonb().$type<ScoreReason[]>().notNull(),
+    factsHash: text().notNull(),
+    computedAt: tz().notNull(),
+  },
+  (table) => [
+    index('ix_business_score_shadows__latest').on(
+      table.organizationId,
+      table.businessId,
+      table.profileId,
+      table.computedAt.desc(),
+    ),
+    index('ix_business_score_shadows__model').on(table.modelId, table.computedAt),
+  ],
 );

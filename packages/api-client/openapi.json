@@ -21779,8 +21779,11 @@
             "type": "array"
           },
           "kind": {
-            "const": "rules",
             "default": "rules",
+            "enum": [
+              "rules",
+              "model"
+            ],
             "type": "string"
           },
           "missing": {
@@ -21840,6 +21843,49 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "modelId": {
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "type": "string"
+                  },
+                  "tiers": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "A": {
+                        "exclusiveMinimum": 0,
+                        "maximum": 1,
+                        "type": "number"
+                      },
+                      "B": {
+                        "exclusiveMaximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "A",
+                      "B"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "modelId",
+                  "tiers"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           },
           "normalization": {
             "const": "weighted_sum",
@@ -22072,6 +22118,7 @@
         },
         "required": [
           "kind",
+          "model",
           "offer",
           "weights",
           "transforms",
@@ -23770,6 +23817,187 @@
         },
         "required": [
           "profileId"
+        ],
+        "type": "object"
+      },
+      "SetShadowModelRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "modelId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profileId",
+          "modelId"
+        ],
+        "type": "object"
+      },
+      "ShadowAssignment": {
+        "additionalProperties": false,
+        "properties": {
+          "modelId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profileId",
+          "modelId",
+          "startedAt"
+        ],
+        "type": "object"
+      },
+      "ShadowAssignmentList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ShadowAssignment"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "ShadowScore": {
+        "additionalProperties": false,
+        "properties": {
+          "computedAt": {
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string"
+          },
+          "modelId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "modelVersion": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "probability": {
+            "type": "number"
+          },
+          "profileId": {
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "contribution": {
+                  "type": "number"
+                },
+                "direction": {
+                  "enum": [
+                    "positive",
+                    "negative"
+                  ],
+                  "type": "string"
+                },
+                "feature": {
+                  "type": "string"
+                },
+                "text": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "en": {
+                      "type": "string"
+                    },
+                    "fr": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "en",
+                    "fr"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "feature",
+                "direction",
+                "contribution",
+                "text"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "score": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer"
+          },
+          "tier": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "profileId",
+          "modelId",
+          "modelVersion",
+          "probability",
+          "score",
+          "tier",
+          "reasons",
+          "computedAt"
+        ],
+        "type": "object"
+      },
+      "ShadowScoreList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ShadowScore"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
         ],
         "type": "object"
       },
@@ -26498,8 +26726,11 @@
             "type": "array"
           },
           "kind": {
-            "const": "rules",
             "default": "rules",
+            "enum": [
+              "rules",
+              "model"
+            ],
             "type": "string"
           },
           "missing": {
@@ -26559,6 +26790,49 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "modelId": {
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "type": "string"
+                  },
+                  "tiers": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "A": {
+                        "exclusiveMinimum": 0,
+                        "maximum": 1,
+                        "type": "number"
+                      },
+                      "B": {
+                        "exclusiveMaximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "A",
+                      "B"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "modelId",
+                  "tiers"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           },
           "normalization": {
             "const": "weighted_sum",
@@ -26791,6 +27065,7 @@
         },
         "required": [
           "kind",
+          "model",
           "offer",
           "weights",
           "transforms",
@@ -49423,6 +49698,67 @@
         ]
       }
     },
+    "/v1/scoring/ml/businesses/{id}/shadow-scores": {
+      "get": {
+        "operationId": "getBusinessShadowScores",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowScoreList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "A business’s latest shadow scores (labelled shadow in the Scores tab)",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
     "/v1/scoring/ml/datasets": {
       "get": {
         "operationId": "listScoringMlDatasets",
@@ -49762,6 +50098,158 @@
           }
         },
         "summary": "Labelled contacts and positives so far, against the minimum to train a model",
+        "tags": [
+          "scoring"
+        ]
+      }
+    },
+    "/v1/scoring/ml/shadow": {
+      "get": {
+        "operationId": "listScoringShadowModels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowAssignmentList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "The models running in shadow, per profile",
+        "tags": [
+          "scoring"
+        ]
+      },
+      "put": {
+        "operationId": "setScoringShadowModel",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetShadowModelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowAssignmentList"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Problem details (RFC 9457)"
+          }
+        },
+        "summary": "Run a model in shadow beside a profile (null withdraws it); the profile is recomputed",
         "tags": [
           "scoring"
         ]

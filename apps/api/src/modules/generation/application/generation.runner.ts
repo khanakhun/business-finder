@@ -224,16 +224,29 @@ export class GenerationRunner {
       }
     }
     const buffer: EngineEvent[] = [];
-    const flush = async () => {
-      if (buffer.length === 0) return;
-      const batch = buffer.splice(0);
-      const seqs = await this.repository.appendEvents(job.id, attemptId, batch);
-      await this.stream
-        .publish(
-          job.id,
-          batch.map((event, index) => ({ seq: seqs[index] ?? 0, event })),
-        )
-        .catch(() => undefined);
+    // One flush at a time (the timer's, a full buffer's and the final one), in order: concurrent appends would race
+    // for the same sequence numbers and drop a batch. A batch that fails goes back to the front for the next flush.
+    let flushing: Promise<void> = Promise.resolve();
+    const flush = () => {
+      const run = flushing.then(async () => {
+        if (buffer.length === 0) return;
+        const batch = buffer.splice(0);
+        let seqs: number[];
+        try {
+          seqs = await this.repository.appendEvents(job.id, attemptId, batch);
+        } catch (error) {
+          buffer.unshift(...batch);
+          throw error;
+        }
+        await this.stream
+          .publish(
+            job.id,
+            batch.map((event, index) => ({ seq: seqs[index] ?? 0, event })),
+          )
+          .catch(() => undefined);
+      });
+      flushing = run.catch(() => undefined);
+      return run;
     };
     const flusher = setInterval(
       () => void flush().catch((error: unknown) => logger.warn({ err: error }, 'event flush failed')),
@@ -376,7 +389,10 @@ export class GenerationRunner {
       clearInterval(heartbeat);
       clearTimeout(deadline);
       cancel.stop();
-      await flush().catch((error: unknown) => logger.warn({ err: error }, 'event flush failed'));
+      // The last events (`done`, the error) must land before the job moves on: one retry after a failure.
+      await flush()
+        .catch(() => flush())
+        .catch((error: unknown) => logger.warn({ err: error }, 'event flush failed'));
     }
     const attempt = await this.repository.attemptById(attemptId);
     if (!failure && specRef && attempt) {

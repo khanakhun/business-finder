@@ -178,14 +178,20 @@ async function business(name: string) {
   return row.id;
 }
 
-async function settle(batchId: string) {
+/**
+ * The job once it reaches `expected` (or the last status seen at the deadline). A failover passes through `failed`
+ * on its way back to `queued`, so a first terminal status is not the end.
+ */
+async function settle(batchId: string, expected: string) {
   const deadline = Date.now() + 90_000;
+  let job: typeof generationJobs.$inferSelect | undefined;
   while (Date.now() < deadline) {
-    const [job] = await db.select().from(generationJobs).where(eq(generationJobs.batchId, batchId));
-    if (job && ['succeeded', 'needs_review', 'failed', 'cancelled'].includes(job.status)) return job;
+    [job] = await db.select().from(generationJobs).where(eq(generationJobs.batchId, batchId));
+    if (job?.status === expected) return job;
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
-  throw new Error('the job did not settle');
+  if (!job) throw new Error('no job');
+  return job;
 }
 
 describe('Claude Code engine through the orchestrator (BF-044)', () => {
@@ -195,7 +201,7 @@ describe('Claude Code engine through the orchestrator (BF-044)', () => {
       .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'claude-code' }] })
       .set('Idempotency-Key', 'batch-claude-1')
       .expect(201);
-    const job = await settle(body.id);
+    const job = await settle(body.id, 'succeeded');
     expect(job).toMatchObject({ status: 'succeeded', engineCurrent: 'claude-code' });
     const input = sandbox.inputs.at(-1);
     expect(input?.command[0]).toBe('claude');
@@ -219,7 +225,7 @@ describe('Claude Code engine through the orchestrator (BF-044)', () => {
       .post('/v1/generation-batches', { items: [{ businessId: id, engine: 'claude-code' }] })
       .set('Idempotency-Key', 'batch-claude-2')
       .expect(201);
-    const job = await settle(body.id);
+    const job = await settle(body.id, 'succeeded');
     const attempts = await db
       .select({ engine: generationAttempts.engine, exitReason: generationAttempts.exitReason })
       .from(generationAttempts)

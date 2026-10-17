@@ -1287,7 +1287,13 @@
       "emailFailed": "L’envoi d’un e-mail a échoué et sera retenté",
       "emailFailedFinal": "Un e-mail n’a pas pu être envoyé",
       "contactLogged": "Contact consigné ({channel})",
-      "openEmail": "Ouvrir l’e-mail"
+      "openEmail": "Ouvrir l’e-mail",
+      "replyReceived": "A répondu à un e-mail",
+      "replyAuto": "A envoyé une réponse automatique",
+      "replyTriaged": "Réponse lue comme « {class} »",
+      "replyCorrected": "Réponse corrigée en « {class} »",
+      "emailBounced": "Un e-mail est revenu en erreur ({status})",
+      "openThread": "Ouvrir la conversation"
     },
     "duplicates": {
       "label": "Doublons possibles",
@@ -4073,6 +4079,80 @@
       "body": "Message",
       "save": "Enregistrer",
       "saved": "E-mail mis à jour."
+    }
+  },
+  "inbox": {
+    "title": "Boîte de réception",
+    "description": "Uniquement les réponses à vos campagnes : le reste de vos boîtes mail n’est jamais lu dans l’application.",
+    "search": "Rechercher des entreprises et des objets",
+    "class": "Classe",
+    "allClasses": "Toutes les classes",
+    "mailbox": "Boîte mail",
+    "allMailboxes": "Toutes les boîtes mail",
+    "unread": "Non lues",
+    "needsHuman": "À traiter par vous",
+    "mine": "Attribuées à moi",
+    "threads": "Conversations",
+    "loadError": "La boîte de réception n’a pas pu être chargée.",
+    "emptyTitle": "Aucune réponse pour l’instant",
+    "emptyBody": "Les réponses à vos e-mails apparaissent ici en quelques minutes.",
+    "pickTitle": "Choisissez une conversation",
+    "pickBody": "Sélectionnez une conversation à gauche (j et k parcourent la liste).",
+    "keys": "Raccourcis : j/k naviguer · e traité · a m’attribuer · s reporter d’un jour",
+    "failed": "Cela n’a pas fonctionné.",
+    "handled": "Marquée comme traitée.",
+    "assigned": "Conversation attribuée à vous.",
+    "snoozed": "Reportée à demain.",
+    "assignMe": "M’attribuer",
+    "snooze": "Reporter",
+    "markHandled": "Marquer comme traité",
+    "weWrote": "Nous avons écrit · {when}",
+    "theyWrote": "{who} a écrit · {when}",
+    "classes": {
+      "interested": "Intéressé",
+      "question": "Question",
+      "not_now": "Pas maintenant",
+      "referral": "Recommandation",
+      "unsubscribe": "Désinscription",
+      "negative": "Pas intéressé",
+      "auto_reply": "Réponse automatique"
+    },
+    "triage": {
+      "pending": "Lecture en cours",
+      "confidence": "{value} % de certitude",
+      "needsHuman": "À traiter par vous",
+      "injection": "Contenu suspect",
+      "correctedBadge": "Corrigée",
+      "correct": "Corriger la classe",
+      "corrected": "Classe corrigée. Les actions de suivi ont été mises à jour.",
+      "failed": "La classe n’a pas pu être modifiée.",
+      "phone": "Téléphone : {value}",
+      "preferredTime": "Meilleur moment : {value}",
+      "followUpOn": "Relancer le {value}",
+      "referral": "Recommandation : {value}",
+      "priceQuestion": "Demande le prix",
+      "meetingRequest": "Souhaite un rendez-vous",
+      "next": "Prochaine étape : {value}",
+      "unsubscribed": "Demande d’arrêt reçue : l’adresse est exclue des envois.",
+      "kinds": {
+        "human": "Réponse",
+        "auto_reply": "Réponse automatique",
+        "bounce": "Retour en erreur",
+        "unsubscribe_mailto": "Désinscription par e-mail"
+      }
+    },
+    "message": {
+      "showImages": "Afficher les images",
+      "frame": "Contenu du message"
+    },
+    "reply": {
+      "title": "Votre réponse",
+      "suggest": "Suggérer une réponse",
+      "writing": "Rédaction…",
+      "body": "Réponse",
+      "save": "Enregistrer",
+      "saved": "Réponse enregistrée.",
+      "failed": "La réponse n’a pas pu être rédigée."
     }
   }
 }

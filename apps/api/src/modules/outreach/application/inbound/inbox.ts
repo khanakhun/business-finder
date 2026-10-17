@@ -47,6 +47,7 @@ const view = (row: InboundRecord): InboundMessage => ({
   kind: row.kind,
   dsn: row.dsn,
   autoReplyUntil: row.autoReplyUntil,
+  unsubscribeDetected: row.unsubscribeDetected,
   triage: row.triage,
   triageStatus: row.triageStatus,
   correctedClass: row.correctedClass,

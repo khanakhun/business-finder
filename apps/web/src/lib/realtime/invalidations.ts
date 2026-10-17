@@ -12,6 +12,7 @@ export const REALTIME_EVENTS = {
   scoringScoresUpdated: 'scoring.scores.updated',
   scoringRecomputeProgressed: 'scoring.recompute.progressed',
   outreachMessageStatus: 'outreach.message.status',
+  outreachInboxChanged: 'outreach.inbox.changed',
 } as const;
 
 const FINISHED_RUN = new Set(['completed', 'partially_completed', 'failed', 'cancelled']);
@@ -61,6 +62,11 @@ export const realtimeInvalidations: Readonly<Record<string, (event: RealtimeEven
         ...(businessId ? [['outreach', 'history', businessId]] : []),
       ];
     },
+    // A reply arrived or changed (BF-054): the inbox list and that thread.
+    [REALTIME_EVENTS.outreachInboxChanged]: (event) => [
+      ['inbox', 'list'],
+      ['inbox', 'thread', event.entityId],
+    ],
   };
 
 /** Sent by the server when the client may have missed events (slow connection, retention): refetch everything. */

@@ -89,6 +89,8 @@ export const InboundMessageSchema = z
     kind: InboundKindSchema,
     dsn: DsnSchema.nullable(),
     autoReplyUntil: z.iso.date().nullable(),
+    /** The deterministic detector found an unsubscribe request (the address was suppressed at once). */
+    unsubscribeDetected: z.boolean(),
     triage: TriageSchema.nullable(),
     triageStatus: z.enum(TRIAGE_STATUSES),
     correctedClass: TriageClassSchema.nullable(),

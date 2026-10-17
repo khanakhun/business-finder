@@ -2843,7 +2843,9 @@
       },
       "tabs": {
         "activity": "Activity",
-        "quality": "Quality"
+        "quality": "Quality",
+        "brief": "Brief",
+        "artifacts": "Artifacts"
       },
       "filter": "Show",
       "filters": {
@@ -2961,6 +2963,78 @@
         "autoFixesTitle": "{count, plural, one {# automatic fix} other {# automatic fixes}}",
         "screenshotMissing": "Screenshot unavailable",
         "enlarge": "Enlarge {label}"
+      },
+      "brief": {
+        "none": "No workspace yet: the brief is written when the job starts.",
+        "bundle": "From attempt {attempt}'s workspace ({hash}, {when})",
+        "summary": "Brief",
+        "name": "Name",
+        "category": "Category",
+        "place": "Place",
+        "offer": "Offer",
+        "pages": "Pages",
+        "design": "Design",
+        "locales": "Languages",
+        "tone": "Tone",
+        "instructions": "Instructions",
+        "facts": "{count, plural, one {# fact it could state} other {# facts it could state}}",
+        "kind": "Kind",
+        "value": "Value",
+        "shown": "Use",
+        "source": "Source",
+        "display": "Shown on the site",
+        "internal": "Internal only",
+        "assets": "{count, plural, =0 {Images} one {# image it could use} other {# images it could use}}",
+        "noAssets": "No images were given: stock or AI images may be used."
+      },
+      "artifacts": {
+        "error": "The artifacts could not be loaded.",
+        "none": "No artifacts stored yet.",
+        "kind": "File",
+        "attempt": "Attempt",
+        "size": "Size",
+        "hash": "SHA-256",
+        "created": "Stored",
+        "download": "Download",
+        "downloadOne": "Download {kind} of attempt {attempt}",
+        "downloadFailed": "The download failed.",
+        "kinds": {
+          "workspace_bundle": "Workspace bundle",
+          "site_spec": "Site (site.json)",
+          "screenshot": "Screenshot",
+          "transcript": "Transcript",
+          "log_bundle": "Logs"
+        }
+      }
+    },
+    "home": {
+      "title": "Generation",
+      "description": "Preview sites being built, waiting for review, and the engines that build them.",
+      "create": "Create sites",
+      "batches": "Batches",
+      "statusFilter": "Batch status",
+      "allStatuses": "All statuses",
+      "loadError": "The batches could not be loaded.",
+      "empty": "No batches yet",
+      "emptyHint": "Select businesses in the search results, then choose Create sites.",
+      "toSearch": "Go to search",
+      "more": "Show more",
+      "progress": "{done} of {total} done",
+      "engines": {
+        "title": "Engines",
+        "error": "The engines could not be loaded.",
+        "available": "available",
+        "unavailable": "not available",
+        "load": "{running} running · {queued} waiting",
+        "typical": "~{cost} · ~{minutes} min · up to {parallel} at once"
+      },
+      "review": {
+        "title": "Needs review",
+        "error": "The review queue could not be loaded.",
+        "empty": "Nothing waits for review.",
+        "score": "Quality {score}",
+        "open": "Review",
+        "more": "Show more"
       }
     }
   }

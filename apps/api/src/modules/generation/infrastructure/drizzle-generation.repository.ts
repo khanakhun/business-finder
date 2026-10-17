@@ -10,11 +10,12 @@ import {
   orgBusinesses,
 } from '@bf/db/schema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, gt, inArray, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { DB_CLIENT } from '../../platform/db/db.module.ts';
 import type {
   GenerationRepository,
   JobChanges,
+  StoredArtifact,
   StoredAttempt,
   StoredBatch,
   StoredJob,
@@ -141,6 +142,43 @@ export class DrizzleGenerationRepository implements GenerationRepository {
     return (await this.jobQuery()
       .where(eq(generationJobs.batchId, batchId))
       .orderBy(asc(generationJobs.priority), asc(generationJobs.position))) as StoredJob[];
+  }
+
+  async listJobs(organizationId: string, filter: Parameters<GenerationRepository['listJobs']>[1]) {
+    const { after } = filter;
+    return (await this.jobQuery()
+      .where(
+        and(
+          eq(generationJobs.organizationId, organizationId),
+          filter.status ? eq(generationJobs.status, filter.status) : undefined,
+          filter.businessId ? eq(generationJobs.businessId, filter.businessId) : undefined,
+          after
+            ? or(
+                lt(generationJobs.createdAt, after.createdAt),
+                and(eq(generationJobs.createdAt, after.createdAt), lt(generationJobs.id, after.id)),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(desc(generationJobs.createdAt), desc(generationJobs.id))
+      .limit(filter.limit)) as StoredJob[];
+  }
+
+  async jobArtifacts(jobId: string): Promise<StoredArtifact[]> {
+    return this.x
+      .select({
+        id: generationArtifacts.id,
+        kind: generationArtifacts.kind,
+        attemptNo: generationAttempts.attemptNo,
+        storageKey: generationArtifacts.storageKey,
+        sha256: generationArtifacts.sha256,
+        bytes: generationArtifacts.bytes,
+        createdAt: generationArtifacts.createdAt,
+      })
+      .from(generationArtifacts)
+      .leftJoin(generationAttempts, eq(generationAttempts.id, generationArtifacts.attemptId))
+      .where(eq(generationArtifacts.jobId, jobId))
+      .orderBy(desc(generationArtifacts.createdAt));
   }
 
   async job(organizationId: string, jobId: string) {

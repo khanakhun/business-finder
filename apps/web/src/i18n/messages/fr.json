@@ -2843,7 +2843,9 @@
       },
       "tabs": {
         "activity": "Activité",
-        "quality": "Qualité"
+        "quality": "Qualité",
+        "brief": "Brief",
+        "artifacts": "Fichiers"
       },
       "filter": "Afficher",
       "filters": {
@@ -2961,6 +2963,78 @@
         "autoFixesTitle": "{count, plural, one {# correction automatique} other {# corrections automatiques}}",
         "screenshotMissing": "Capture indisponible",
         "enlarge": "Agrandir {label}"
+      },
+      "brief": {
+        "none": "Pas encore d'espace de travail : le brief est écrit au démarrage de la tâche.",
+        "bundle": "Espace de travail de la tentative {attempt} ({hash}, {when})",
+        "summary": "Brief",
+        "name": "Nom",
+        "category": "Catégorie",
+        "place": "Lieu",
+        "offer": "Offre",
+        "pages": "Pages",
+        "design": "Design",
+        "locales": "Langues",
+        "tone": "Ton",
+        "instructions": "Instructions",
+        "facts": "{count, plural, one {# information utilisable} other {# informations utilisables}}",
+        "kind": "Type",
+        "value": "Valeur",
+        "shown": "Usage",
+        "source": "Source",
+        "display": "Affichée sur le site",
+        "internal": "Interne uniquement",
+        "assets": "{count, plural, =0 {Images} one {# image utilisable} other {# images utilisables}}",
+        "noAssets": "Aucune image fournie : des images de banque ou d'IA peuvent être utilisées."
+      },
+      "artifacts": {
+        "error": "Les fichiers n'ont pas pu être chargés.",
+        "none": "Aucun fichier enregistré pour le moment.",
+        "kind": "Fichier",
+        "attempt": "Tentative",
+        "size": "Taille",
+        "hash": "SHA-256",
+        "created": "Enregistré",
+        "download": "Télécharger",
+        "downloadOne": "Télécharger {kind} de la tentative {attempt}",
+        "downloadFailed": "Le téléchargement a échoué.",
+        "kinds": {
+          "workspace_bundle": "Paquet de travail",
+          "site_spec": "Site (site.json)",
+          "screenshot": "Capture d'écran",
+          "transcript": "Transcription",
+          "log_bundle": "Journaux"
+        }
+      }
+    },
+    "home": {
+      "title": "Génération",
+      "description": "Les sites d'aperçu en cours, ceux à relire, et les moteurs qui les construisent.",
+      "create": "Créer des sites",
+      "batches": "Lots",
+      "statusFilter": "Statut du lot",
+      "allStatuses": "Tous les statuts",
+      "loadError": "Les lots n'ont pas pu être chargés.",
+      "empty": "Aucun lot pour le moment",
+      "emptyHint": "Sélectionnez des entreprises dans les résultats de recherche, puis choisissez Créer des sites.",
+      "toSearch": "Aller à la recherche",
+      "more": "Voir plus",
+      "progress": "{done} sur {total} terminées",
+      "engines": {
+        "title": "Moteurs",
+        "error": "Les moteurs n'ont pas pu être chargés.",
+        "available": "disponible",
+        "unavailable": "indisponible",
+        "load": "{running} en cours · {queued} en attente",
+        "typical": "~{cost} · ~{minutes} min · jusqu'à {parallel} à la fois"
+      },
+      "review": {
+        "title": "À relire",
+        "error": "La file de relecture n'a pas pu être chargée.",
+        "empty": "Rien n'attend de relecture.",
+        "score": "Qualité {score}",
+        "open": "Relire",
+        "more": "Voir plus"
       }
     }
   }

@@ -10,15 +10,18 @@ import Link from 'next/link';
 import { useFormatter, useTranslations } from 'next-intl';
 import { parseAsStringLiteral, useQueryState } from 'nuqs';
 import { toProblemLike, useErrorLabels } from '@/components/states/problem.ts';
+import { usePermission } from '@/lib/session.tsx';
 import { useJob } from '../api.ts';
 import { ActivityTab } from './activity-tab.tsx';
+import { ArtifactsTab } from './artifacts-tab.tsx';
+import { BriefTab } from './brief-tab.tsx';
 import { QualityTab } from './quality-tab.tsx';
 import { useJobEvents } from './use-job-events.ts';
 
 // The job console (BF-046): a job's live activity (SSE with resume) and its quality report. A page of its own
 // (/generation/jobs/[jobId], linked from notifications) and a drawer on the batch board (`compact`).
 
-const TABS = ['activity', 'quality'] as const;
+const TABS = ['activity', 'quality', 'brief', 'artifacts'] as const;
 
 export function JobConsole({
   jobId,
@@ -33,6 +36,7 @@ export function JobConsole({
   const errorLabels = useErrorLabels();
   const format = useFormatter();
   const job = useJob(jobId);
+  const isAdmin = usePermission('sites:admin');
   const stream = useJobEvents(jobId);
   const [tab, setTab] = useQueryState('tab', parseAsStringLiteral(TABS).withDefault('activity'));
   if (job.isError) {
@@ -95,7 +99,7 @@ export function JobConsole({
       </header>
       <Tabs value={tab} onValueChange={(value) => void setTab(value as (typeof TABS)[number])}>
         <TabsList>
-          {TABS.map((value) => (
+          {TABS.filter((value) => value !== 'artifacts' || isAdmin).map((value) => (
             <TabsTrigger key={value} value={value}>
               {t(`tabs.${value}`)}
             </TabsTrigger>
@@ -107,6 +111,14 @@ export function JobConsole({
         <TabsContent value="quality" className="pt-3">
           <QualityTab jobId={jobId} siteId={data.siteId} />
         </TabsContent>
+        <TabsContent value="brief" className="pt-3">
+          <BriefTab jobId={jobId} />
+        </TabsContent>
+        {isAdmin ? (
+          <TabsContent value="artifacts" className="pt-3">
+            <ArtifactsTab jobId={jobId} />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );

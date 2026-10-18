@@ -11,5 +11,8 @@ export default getRequestConfig(async () => {
     locale,
     messages: (await import(`./messages/${locale}.json`)).default,
     timeZone: 'America/St_Barthelemy',
+    // The reference time of relative dates ("3 minutes ago"), passed on to the client provider: without it every
+    // relativeTime() call warns (ENVIRONMENT_FALLBACK) and server and client can render different words.
+    now: new Date(),
   };
 });

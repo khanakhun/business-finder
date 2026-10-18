@@ -281,7 +281,14 @@ describe('IngestBatchCommand', () => {
       record({ providerRef: 'boom' }),
       record({ providerRef: 'g-2' }),
     ]);
-    expect(result.counts).toEqual({ created: 1, merged: 0, possible_duplicate: 0, unchanged: 1, failed: 2 });
+    expect(result.counts).toEqual({
+      created: 1,
+      merged: 0,
+      possible_duplicate: 0,
+      unchanged: 1,
+      skipped_closed: 0,
+      failed: 2,
+    });
     expect(result.results[1]).toEqual({ outcome: 'failed', providerRef: 'bad', code: 'VALIDATION_FAILED' });
     expect(result.results[2]).toEqual({ outcome: 'failed', providerRef: 'boom', code: 'INTERNAL' });
   });

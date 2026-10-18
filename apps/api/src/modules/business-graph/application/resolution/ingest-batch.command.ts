@@ -38,12 +38,13 @@ export class IngestBatchCommand {
         merged: 0,
         possible_duplicate: 0,
         unchanged: 0,
+        skipped_closed: 0,
         failed: 0,
       };
       const results: Array<IngestBatchResult['results'][number]> = [];
       for (const record of records) {
         try {
-          const result = await this.ingest.execute(record, options);
+          const result: IngestResult = await this.ingest.execute(record, options);
           counts[result.outcome]++;
           results.push(result);
         } catch (error) {

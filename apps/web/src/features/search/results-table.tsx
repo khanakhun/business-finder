@@ -52,6 +52,7 @@ export function ResultsTable(props: ResultsTableProps) {
   const t = useTranslations('search.table');
   const status = useTranslations('search.status');
   const via = useTranslations('search.addedVia');
+  const operating = useTranslations('business.operating');
   const enrichment = useTranslations('enrichment.listing');
   const format = useFormatter();
   const { labels } = useCategories();
@@ -85,8 +86,15 @@ export function ResultsTable(props: ResultsTableProps) {
         id: 'name',
         header: t('name'),
         cell: ({ row }) => (
-          <div className="min-w-48">
+          <div className="flex min-w-48 flex-wrap items-center gap-1.5">
             <span className="font-medium">{row.original.displayName}</span>
+            {/* Permanently closed businesses are not listed (BF-016); a temporary closure is worth seeing. */}
+            {row.original.operatingStatus === 'closed_temporarily' ||
+            row.original.operatingStatus === 'closed_permanently' ? (
+              <Badge variant="outline" className="text-amber-700 dark:text-amber-400">
+                {operating(row.original.operatingStatus)}
+              </Badge>
+            ) : null}
           </div>
         ),
       },
@@ -188,7 +196,7 @@ export function ResultsTable(props: ResultsTableProps) {
       },
       { id: 'addedVia', header: t('addedVia'), cell: ({ row }) => via(row.original.addedVia) },
     ],
-    [t, status, via, enrichment, format, labels, primary?.offer],
+    [t, status, via, operating, enrichment, format, labels, primary?.offer],
   );
 
   return (

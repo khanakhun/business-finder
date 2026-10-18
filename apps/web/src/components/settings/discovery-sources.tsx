@@ -137,6 +137,11 @@ export function DiscoverySources() {
               );
             })}
           </ol>
+          <GoogleDetailLevel
+            value={discovery.googleFieldTier}
+            pending={save.isPending}
+            onChange={(googleFieldTier) => save.mutate({ googleFieldTier })}
+          />
           <OvertureRelease
             value={discovery.overtureRelease}
             pending={save.isPending}
@@ -147,6 +152,50 @@ export function DiscoverySources() {
         </div>
       )}
     </SettingsSection>
+  );
+}
+
+/**
+ * How much Google Places returns per business (and so its price per call): Pro has names, addresses and categories;
+ * Enterprise adds the website, phone, rating and opening hours — what the scoring and the generated sites rely on.
+ * `essentials` is served as Pro (discovery needs names), so it is not offered.
+ */
+function GoogleDetailLevel({
+  value,
+  pending,
+  onChange,
+}: {
+  readonly value: OrgSettings['discovery']['googleFieldTier'];
+  readonly pending: boolean;
+  readonly onChange: (tier: 'pro' | 'enterprise') => void;
+}) {
+  const t = useTranslations('integrations.discovery.googleTier');
+  const current = value === 'enterprise' ? 'enterprise' : 'pro';
+  return (
+    <fieldset className="grid gap-2" disabled={pending}>
+      <legend className="mb-1 text-sm font-medium">{t('title')}</legend>
+      <p className="text-sm text-muted-foreground">{t('hint')}</p>
+      {(['pro', 'enterprise'] as const).map((tier) => (
+        <label
+          key={tier}
+          htmlFor={`google-tier-${tier}`}
+          className="flex cursor-pointer items-start gap-3 rounded-md border p-3 has-[:checked]:border-primary"
+        >
+          <input
+            id={`google-tier-${tier}`}
+            type="radio"
+            name="google-tier"
+            className="mt-1"
+            checked={current === tier}
+            onChange={() => onChange(tier)}
+          />
+          <span className="grid gap-0.5">
+            <span className="text-sm font-medium">{t(`${tier}.label`)}</span>
+            <span className="text-sm text-muted-foreground">{t(`${tier}.description`)}</span>
+          </span>
+        </label>
+      ))}
+    </fieldset>
   );
 }
 

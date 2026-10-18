@@ -26,6 +26,7 @@
     "analytics:backfill": "node --import @swc-node/register/esm-register src/cli/analytics-backfill.ts",
     "geo:import": "node --import @swc-node/register/esm-register src/cli/geo-import.ts",
     "search:bench-seed": "node --import @swc-node/register/esm-register src/cli/search-bench-seed.ts",
+    "duplicates:resolve": "node --import @swc-node/register/esm-register src/cli/duplicates-resolve.ts",
     "search:reindex": "node --import @swc-node/register/esm-register --import ./src/instrumentation.ts src/cli/search-reindex.ts",
     "compliance:seeds": "node src/cli/compliance-seeds.ts"
   },

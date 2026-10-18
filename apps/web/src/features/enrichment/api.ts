@@ -1,6 +1,5 @@
 'use client';
 
-import { ApiError } from '@bf/api-client';
 import type {
   BulkEnrichResponse,
   BusinessEnrichment,
@@ -29,15 +28,12 @@ export function useBusinessEnrichment(id: string) {
 export function useWebsite(id: string) {
   return useQuery({
     queryKey: queryKeys.business.website(id),
-    queryFn: async (): Promise<WebsiteSnapshot | null> => {
-      try {
-        return (await apiClient().GET('/v1/businesses/{id}/website', { params: { path: { id } } }))
-          .data as WebsiteSnapshot;
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 404) return null;
-        throw error;
-      }
-    },
+    queryFn: async (): Promise<WebsiteSnapshot | null> =>
+      (
+        (await apiClient().GET('/v1/businesses/{id}/website', { params: { path: { id } } })).data as {
+          snapshot: WebsiteSnapshot | null;
+        }
+      ).snapshot,
   });
 }
 

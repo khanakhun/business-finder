@@ -461,6 +461,18 @@
         "confirm": "Accepter",
         "loadFailed": "Impossible de charger l’état du scraper.",
         "retry": "Réessayer"
+      },
+      "googleTier": {
+        "title": "Niveau de détail Google Places",
+        "hint": "Quantité d’informations renvoyées par Google pour chaque entreprise trouvée. Google facture chaque recherche selon le niveau choisi ; les nouvelles recherches l’utilisent, et les résultats antérieurs sont mis à jour lorsque vous relancez une recherche sur la même zone.",
+        "pro": {
+          "label": "Pro — environ 32 $ pour 1 000 recherches",
+          "description": "Nom, adresse, localisation, catégorie, statut d’activité et lien Google Maps. Sans site web, téléphone, note ni horaires d’ouverture."
+        },
+        "enterprise": {
+          "label": "Enterprise — environ 35 $ pour 1 000 recherches (recommandé)",
+          "description": "Tout ce qu’inclut Pro, plus le site web, les numéros de téléphone, la note et le nombre d’avis, les horaires d’ouverture et le niveau de prix : les données sur lesquelles reposent le scoring, la prospection et les sites générés."
+        }
       }
     },
     "emailVerification": {

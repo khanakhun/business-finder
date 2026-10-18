@@ -31318,6 +31318,25 @@
         ],
         "type": "object"
       },
+      "WebsiteSnapshotResult": {
+        "additionalProperties": false,
+        "properties": {
+          "snapshot": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WebsiteSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "snapshot"
+        ],
+        "type": "object"
+      },
       "WhatsAppDraft": {
         "additionalProperties": false,
         "properties": {
@@ -37056,7 +37075,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WebsiteSnapshot"
+                  "$ref": "#/components/schemas/WebsiteSnapshotResult"
                 }
               }
             },
@@ -37103,7 +37122,7 @@
             "description": "Problem details (RFC 9457)"
           }
         },
-        "summary": "What the business website showed at its latest crawl (404 until crawled)",
+        "summary": "What the business website showed at its latest crawl (snapshot null until crawled)",
         "tags": [
           "enrichment"
         ]

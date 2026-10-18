@@ -559,7 +559,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** What the business website showed at its latest crawl (404 until crawled) */
+        /** What the business website showed at its latest crawl (snapshot null until crawled) */
         get: operations["getBusinessWebsite"];
         put?: never;
         post?: never;
@@ -11084,6 +11084,9 @@ export type components = {
             };
             url: string;
         };
+        WebsiteSnapshotResult: {
+            snapshot: components["schemas"]["WebsiteSnapshot"] | null;
+        };
         WhatsAppDraft: {
             e164: string;
             text: string;
@@ -14006,7 +14009,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["WebsiteSnapshot"];
+                    "application/json": components["schemas"]["WebsiteSnapshotResult"];
                 };
             };
             /** @description Problem details (RFC 9457) */

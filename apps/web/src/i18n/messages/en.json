@@ -461,6 +461,18 @@
         "confirm": "Acknowledge",
         "loadFailed": "The scraper status could not be loaded.",
         "retry": "Retry"
+      },
+      "googleTier": {
+        "title": "Google Places detail level",
+        "hint": "How much Google returns for each business found. Google bills each search at the level you choose; new searches use it, earlier results are updated when you search the same area again.",
+        "pro": {
+          "label": "Pro — about $32 per 1,000 searches",
+          "description": "Name, address, location, category, business status and the Google Maps link. No website, phone, rating or opening hours."
+        },
+        "enterprise": {
+          "label": "Enterprise — about $35 per 1,000 searches (recommended)",
+          "description": "Everything in Pro plus the website, phone numbers, rating and review count, opening hours and price level: what scoring, outreach and the generated sites rely on."
+        }
       }
     },
     "emailVerification": {

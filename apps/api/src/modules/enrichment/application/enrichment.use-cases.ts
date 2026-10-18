@@ -358,10 +358,11 @@ export class EnrichmentQueries {
     };
   }
 
-  async website(organizationId: string, businessId: string): Promise<WebsiteSnapshot> {
+  /** The latest crawl, or null before the first one (an untracked business is still a 404). */
+  async website(organizationId: string, businessId: string): Promise<WebsiteSnapshot | null> {
     await this.assertTracked(organizationId, businessId);
     const snapshot = await this.snapshots.latest(businessId);
-    if (!snapshot) throw new NotFoundError('WebsiteSnapshot', businessId);
+    if (!snapshot) return null;
     const intel = snapshot.intel;
     const marker = await this.markers.find(businessId);
     return {

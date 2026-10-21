@@ -1,7 +1,20 @@
 import { coreEnv, dbEnv, loadEnvOrExit } from '@bf/config';
 import { z } from 'zod';
 
-const cliEnv = z.object({ NODE_ENV: coreEnv.shape.NODE_ENV, DATABASE_URL: dbEnv.shape.DATABASE_URL });
+const cliEnv = z.object({
+  NODE_ENV: coreEnv.shape.NODE_ENV,
+  DATABASE_URL: dbEnv.shape.DATABASE_URL,
+  SEED_WORKSPACE_NAME: z
+    .string()
+    .trim()
+    .min(1)
+    .default('Hunzokutz')
+    .describe('Workspace created by the team seed.'),
+  SEED_WORKSPACE_MEMBERS: z
+    .string()
+    .optional()
+    .describe('Team seed people: `email:role,email:role` (owner|admin|member|viewer). Unset: no team seed.'),
+});
 
 /** DATABASE_URL (from .env / .env.generated / real env) for the db CLIs; exits with a report if missing. */
 export function loadCliEnv() {

@@ -1,7 +1,9 @@
 // pnpm db:seed [--only <module>[,<module>]] [--env dev|test|staging]
+// The `team` module runs when SEED_WORKSPACE_MEMBERS is set (see seed/modules/team.ts).
 import { closeDb, createDb } from '../client.ts';
 import { SEED_MODULES } from '../seed/modules/index.ts';
-import { runSeeds, type SeedEnvironment } from '../seed/runner.ts';
+import { parseTeamMembers, TeamSeedConfigError, teamSeedModule } from '../seed/modules/team.ts';
+import { runSeeds, type SeedEnvironment, type SeedModule } from '../seed/runner.ts';
 import { flagValues, loadCliEnv } from './env.ts';
 
 const ENVIRONMENTS: Record<string, SeedEnvironment> = {
@@ -21,9 +23,21 @@ const only = flagValues(args, '--only')
   .flatMap((v) => v.split(','))
   .filter(Boolean);
 
+let modules: readonly SeedModule[] = SEED_MODULES;
+if (env.SEED_WORKSPACE_MEMBERS) {
+  try {
+    const members = parseTeamMembers(env.SEED_WORKSPACE_MEMBERS);
+    modules = [...SEED_MODULES, teamSeedModule({ workspace: env.SEED_WORKSPACE_NAME, members })];
+  } catch (error) {
+    if (!(error instanceof TeamSeedConfigError)) throw error;
+    console.error(`SEED_WORKSPACE_MEMBERS: ${error.message}`);
+    process.exit(1);
+  }
+}
+
 const db = createDb({ url: env.DATABASE_URL, max: 1, applicationName: 'bf-seed' });
 try {
-  const ran = await runSeeds(db, SEED_MODULES, {
+  const ran = await runSeeds(db, modules, {
     environment,
     ...(only.length > 0 ? { only } : {}),
     log: console.log,

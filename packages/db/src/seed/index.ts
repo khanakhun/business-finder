@@ -8,6 +8,14 @@ export {
   type TaxonomySeedResult,
   taxonomySeedModule,
 } from './modules/taxonomy.ts';
+export {
+  parseTeamMembers,
+  seedTeam,
+  type TeamSeed,
+  TeamSeedConfigError,
+  type TeamSeedMember,
+  teamSeedModule,
+} from './modules/team.ts';
 export { runSeeds, type SeedEnvironment, type SeedModule } from './runner.ts';
 export {
   loadTaxonomy,

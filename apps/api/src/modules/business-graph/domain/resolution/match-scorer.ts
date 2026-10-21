@@ -32,6 +32,7 @@ export interface MatchWeights {
   readonly phoneConflict: number;
   readonly websiteConflict: number;
   readonly sameProvider: number;
+  readonly colocated: number;
 }
 
 export const DEFAULT_MATCH_WEIGHTS: MatchWeights = {
@@ -45,6 +46,10 @@ export const DEFAULT_MATCH_WEIGHTS: MatchWeights = {
   websiteConflict: -0.1,
   // A provider rarely lists one place twice: a second Google place nearby is usually a neighbour.
   sameProvider: -0.2,
+  // The same name at the same spot (within 25 m) is the same place even when neither record has a phone or a
+  // website to compare: without this, two sources' records of one business scored at most 0.80 and stayed apart.
+  // A conflicting phone or website still keeps the pair below a match.
+  colocated: 0.15,
 };
 
 /** 1 within 25 m, falling linearly to 0 at 500 m. */
@@ -101,6 +106,7 @@ export function scoreMatch(
     const meters = distanceMeters(source.location, candidate.location);
     const decay = distanceDecay(meters);
     add('distance', meters, weights.distance * decay, `${Math.round(meters)} m apart`);
+    if (name >= 0.95 && decay === 1) add('colocated', 1, weights.colocated, 'same name at the same spot');
   }
 
   const sourcePhones = source.phones.map((p) => p.e164);

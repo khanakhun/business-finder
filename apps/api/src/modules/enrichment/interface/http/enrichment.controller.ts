@@ -33,6 +33,7 @@ import {
 import { ApiProduces, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
+import { z } from 'zod';
 import { Ctx, RequirePermission } from '../../../platform/security/auth.decorators.ts';
 import type { AuthContext } from '../../../platform/security/auth-context.ts';
 import { ARTIFACT_STORAGE, type ObjectStorage } from '../../../platform/storage/object-storage.ts';
@@ -72,6 +73,11 @@ function workspaceOf(auth: AuthContext): string {
 }
 
 /** Enrichment of one business (BF-027): start, status, website facts and screenshots. */
+// "Not crawled yet" is a normal state, not an error: 200 with a null snapshot (no 404 in every browser console).
+const WebsiteSnapshotResultSchema = z
+  .object({ snapshot: WebsiteSnapshotSchema.nullable() })
+  .meta({ id: 'WebsiteSnapshotResult' });
+
 @ApiTags('enrichment')
 @Controller('businesses')
 export class BusinessEnrichmentController {
@@ -137,16 +143,16 @@ export class BusinessEnrichmentController {
   @Get(':id/website')
   @RequirePermission('business:read')
   @ApiRoute({
-    summary: 'What the business website showed at its latest crawl (404 until crawled)',
+    summary: 'What the business website showed at its latest crawl (snapshot null until crawled)',
     operationId: 'getBusinessWebsite',
-    response: { status: 200, schema: WebsiteSnapshotSchema },
+    response: { status: 200, schema: WebsiteSnapshotResultSchema },
     errors: [401, 403, 404],
   })
-  website(
+  async website(
     @Ctx() auth: AuthContext,
     @Param('id', ParseUUIDPipe) businessId: string,
-  ): Promise<WebsiteSnapshot> {
-    return this.queries.website(workspaceOf(auth), businessId);
+  ): Promise<{ snapshot: WebsiteSnapshot | null }> {
+    return { snapshot: await this.queries.website(workspaceOf(auth), businessId) };
   }
 
   @Get(':id/website-audit')

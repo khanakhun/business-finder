@@ -198,7 +198,7 @@ describe('manual enrichment', () => {
     const order = executed.filter((e) => e.businessId === id).map((e) => e.step);
     expect(order.indexOf('vision_audit')).toBeGreaterThan(order.indexOf('psi'));
 
-    const website = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body;
+    const website = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.snapshot;
     expect(website.reachability).toBe('ok');
     expect(website.contacts.emails[0].email).toBe('hello@salon-ondine-enrich.com');
     expect(website.booking.providers[0].name).toBe('Planity');
@@ -277,7 +277,7 @@ describe('manual enrichment', () => {
       psi: ['done', null],
       vision_audit: ['skipped', 'dependency_skipped'],
     });
-    await owner.get(`/v1/businesses/${id}/website`).expect(404);
+    expect((await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.snapshot).toBeNull();
   });
 
   it('cancels a running run', async () => {
@@ -355,9 +355,9 @@ describe('manual enrichment', () => {
     // The site calls itself "Named On The Site"; the name entered by hand stays.
     const detail = (await owner.get(`/v1/businesses/${id}`).expect(200)).body;
     expect(detail.displayName).toBe('Chez Manuel');
-    expect((await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.contacts.emails[0].email).toBe(
-      'hello@named.chez-manuel-enrich.com',
-    );
+    expect(
+      (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.snapshot.contacts.emails[0].email,
+    ).toBe('hello@named.chez-manuel-enrich.com');
   });
 
   it('keeps a no-solicitation statement after crawls that no longer see it', async () => {
@@ -367,7 +367,7 @@ describe('manual enrichment', () => {
       .send({ steps: ['site_intel'] })
       .expect(201);
     await settled(owner, id);
-    const seen = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body;
+    const seen = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.snapshot;
     expect(seen.noSolicitationMarker).toMatchObject({ phrases: ['no solicitation'] });
     // The site goes down, then comes back without the statement: the marker stays.
     for (const site of ['https://down.salon-quiet-enrich.com/', 'https://www.salon-quiet-enrich.com/']) {
@@ -377,7 +377,7 @@ describe('manual enrichment', () => {
         .send({ steps: ['site_intel'], force: true })
         .expect(201);
       await settled(owner, id);
-      const later = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body;
+      const later = (await owner.get(`/v1/businesses/${id}/website`).expect(200)).body.snapshot;
       expect(later.noSolicitation.detected).toBe(false);
       expect(later.noSolicitationMarker).toMatchObject({ phrases: ['no solicitation'] });
     }

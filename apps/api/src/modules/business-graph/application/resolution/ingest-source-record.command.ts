@@ -48,16 +48,36 @@ export interface IngestOptions {
    * record already linked elsewhere stays there (moving it is a manual split).
    */
   readonly targetBusinessId?: string;
+  /**
+   * Discovery (BF-016): a new place its source reports permanently closed is kept as a record but not
+   * added as a business. Other paths (manual adds, website crawls) always link.
+   */
+  readonly skipClosed?: boolean;
 }
 
-export interface IngestResult {
-  readonly outcome: Exclude<IngestOutcome, 'failed'>;
+export type IngestResult = LinkedIngestResult | SkippedIngestResult;
+
+export interface LinkedIngestResult {
+  readonly outcome: Exclude<IngestOutcome, 'failed' | 'skipped_closed'>;
   readonly businessId: string;
   readonly sourceId: string;
   /** Score of the matched business, when merged by matching. */
   readonly score?: MatchScore;
   readonly possibleDuplicates: readonly string[];
   /** Golden fields the ingestion changed on an existing business (empty when unchanged or created). */
+  readonly changedFields?: readonly string[];
+}
+
+/**
+ * A new place its source reports permanently closed: no business is created for it (nothing to sell to), but the
+ * record is kept, so the place becomes a business if a later fetch reports it open again. A closed record that
+ * matches an existing business still updates it (marked closed, hidden from search).
+ */
+export interface SkippedIngestResult {
+  readonly outcome: 'skipped_closed';
+  readonly businessId: null;
+  readonly sourceId: string;
+  readonly possibleDuplicates: readonly string[];
   readonly changedFields?: readonly string[];
 }
 
@@ -119,6 +139,11 @@ export class IngestSourceRecordCommand {
     };
   }
 
+  execute(
+    input: SourceRecordInput,
+    options?: IngestOptions & { skipClosed?: false },
+  ): Promise<LinkedIngestResult>;
+  execute(input: SourceRecordInput, options: IngestOptions): Promise<IngestResult>;
   async execute(input: SourceRecordInput, options: IngestOptions = {}): Promise<IngestResult> {
     const started = performance.now();
     const parsed = SourceRecordSchema.safeParse(input);
@@ -258,8 +283,15 @@ export class IngestSourceRecordCommand {
     }));
     const decision = decideMatch(scored, record.provider, this.thresholds);
 
+    if (
+      decision.kind === 'create' &&
+      options.skipClosed &&
+      normalized.operatingStatus === 'closed_permanently'
+    ) {
+      return { outcome: 'skipped_closed', businessId: null, sourceId: stored.id, possibleDuplicates: [] };
+    }
     let businessId: string;
-    let outcome: IngestResult['outcome'];
+    let outcome: LinkedIngestResult['outcome'];
     if (decision.kind === 'match') {
       outcome = 'merged';
       businessId = await this.lockLive(decision.businessId);

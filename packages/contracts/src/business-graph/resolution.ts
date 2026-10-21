@@ -15,6 +15,7 @@ export const MATCH_FEATURES = [
   'phoneConflict',
   'websiteConflict',
   'sameProvider',
+  'colocated',
 ] as const;
 export const MatchFeatureSchema = z.enum(MATCH_FEATURES);
 export type MatchFeature = z.infer<typeof MatchFeatureSchema>;

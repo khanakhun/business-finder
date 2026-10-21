@@ -204,9 +204,10 @@ export class RunOrchestrator {
     if (!run || !task) return;
     const records = await this.runs.pendingRecords(taskId);
     if (records) {
-      const result = await this.ingestBatch.execute(records);
+      const result = await this.ingestBatch.execute(records, { skipClosed: true });
       for (const outcome of result.results) {
-        if (outcome.outcome === 'failed') continue;
+        // Failed records, and new places their source reports permanently closed (not added: BF-016).
+        if (outcome.outcome === 'failed' || outcome.businessId === null) continue;
         const { created } = await this.orgBusinesses.track({
           organizationId: run.organizationId,
           businessId: outcome.businessId,

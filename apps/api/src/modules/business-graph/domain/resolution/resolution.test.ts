@@ -124,6 +124,7 @@ describe('scoreMatch', () => {
     expect(score.features.map((f) => f.feature)).toEqual([
       'name',
       'distance',
+      'colocated',
       'phone',
       'category',
       'address',

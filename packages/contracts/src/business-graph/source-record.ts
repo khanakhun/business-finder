@@ -77,6 +77,14 @@ export const SourceRecordSchema = z
 export type SourceRecord = z.output<typeof SourceRecordSchema>;
 export type SourceRecordInput = z.input<typeof SourceRecordSchema>;
 
-export const INGEST_OUTCOMES = ['created', 'merged', 'possible_duplicate', 'unchanged', 'failed'] as const;
+/** `skipped_closed`: a new place its source reports permanently closed is stored as a record, not as a business. */
+export const INGEST_OUTCOMES = [
+  'created',
+  'merged',
+  'possible_duplicate',
+  'unchanged',
+  'skipped_closed',
+  'failed',
+] as const;
 export const IngestOutcomeSchema = z.enum(INGEST_OUTCOMES);
 export type IngestOutcome = z.infer<typeof IngestOutcomeSchema>;
